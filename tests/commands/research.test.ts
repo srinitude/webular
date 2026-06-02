@@ -3,6 +3,9 @@
 import { describe, expect, test } from 'bun:test'
 
 const ROOT = new URL('../../', import.meta.url).pathname
+// Live DDG search is blocked from CI datacenter IPs; this runs locally (real)
+// and skips in CI. The missing-arg contract still runs in CI.
+const SKIP_LIVE = !!process.env.CI
 
 async function runResearch(args: string[]): Promise<{ code: number; out: string; err: string }> {
   const proc = Bun.spawn(['bun', `${ROOT}src/commands/research.ts`, ...args], {
@@ -17,7 +20,7 @@ async function runResearch(args: string[]): Promise<{ code: number; out: string;
 }
 
 describe('webular research — multi-step research loop (real network)', () => {
-  test('returns JSON report for a real topic with --depth 2', async () => {
+  test.skipIf(SKIP_LIVE)('returns JSON report for a real topic with --depth 2', async () => {
     const { code, out } = await runResearch([
       '--topic',
       'bun javascript runtime',
