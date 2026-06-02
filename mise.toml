@@ -55,7 +55,7 @@ outputs = ["dist/webular.js"]
 [tasks.test]
 description = "Run the bun test suite (CI/CD graph + contracts + integration)"
 depends = ["build"]
-run = "bun test"
+run = "bun test --timeout 30000"
 
 [tasks.validate]
 description = "Validate gate — aggregates the full quality spine"

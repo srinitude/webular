@@ -1,6 +1,6 @@
 // BFS crawler: same-host, deduped, bounded by limit and depth (FOSS: p-limit).
 import pLimit from 'p-limit'
-import { fetchText } from '../core/http.ts'
+import { fetchTextWithinHost } from '../core/http.ts'
 import { extractLinks, htmlToArticle } from './html.ts'
 
 export interface PageInfo {
@@ -21,15 +21,16 @@ interface QueueItem {
 
 interface CrawlCtx {
   root: string
+  host: string
   depth: number
   seen: Set<string>
   queue: QueueItem[]
   results: PageInfo[]
 }
 
-function sameHost(base: string, candidate: string): boolean {
+function sameHost(host: string, candidate: string): boolean {
   try {
-    return new URL(candidate).hostname === new URL(base).hostname
+    return new URL(candidate).hostname === host
   } catch {
     return false
   }
@@ -37,7 +38,7 @@ function sameHost(base: string, candidate: string): boolean {
 
 function enqueue(html: string, item: QueueItem, ctx: CrawlCtx): void {
   for (const link of extractLinks(html, item.url)) {
-    if (ctx.seen.has(link) || !sameHost(ctx.root, link)) continue
+    if (ctx.seen.has(link) || !sameHost(ctx.host, link)) continue
     ctx.seen.add(link)
     ctx.queue.push({ url: link, d: item.d + 1 })
   }
@@ -45,17 +46,19 @@ function enqueue(html: string, item: QueueItem, ctx: CrawlCtx): void {
 
 async function crawlOne(item: QueueItem, ctx: CrawlCtx): Promise<void> {
   try {
-    const html = await fetchText(item.url)
+    const html = await fetchTextWithinHost(item.url, ctx.host)
     ctx.results.push({ url: item.url, title: htmlToArticle(html).title })
     if (item.d < ctx.depth) enqueue(html, item, ctx)
   } catch {
-    /* skip unreachable pages */
+    /* skip unreachable or off-scope pages */
   }
 }
 
 export async function bfsCrawl(root: string, opts: CrawlOptions): Promise<PageInfo[]> {
+  const host = new URL(root).hostname
   const ctx: CrawlCtx = {
     root,
+    host,
     depth: opts.depth,
     seen: new Set([root]),
     queue: [{ url: root, d: 0 }],

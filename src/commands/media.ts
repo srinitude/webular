@@ -17,16 +17,19 @@ async function main(): Promise<number> {
     download: { type: 'boolean', default: false },
     screenshot: { type: 'boolean', default: false },
     pdf: { type: 'boolean', default: false },
+    'max-bytes': { type: 'string' },
   })
   const url = values.url as string | undefined
   if (!url) {
     logErr('media: missing --url <url>')
     return 2
   }
+  const mb = values['max-bytes'] as string | undefined
   const inputData = {
     url,
     action: resolveAction(values),
     dest: values.output as string | undefined,
+    maxBytes: mb ? Number.parseInt(mb, 10) : undefined,
   }
   return runWorkflow('media', mediaWorkflow, inputData, { json: Boolean(values.json) })
 }

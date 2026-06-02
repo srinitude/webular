@@ -34,12 +34,19 @@ async function main(): Promise<number> {
     logErr('batch: missing URLs (pass --urls <url,...> or --input <file>)')
     return 2
   }
+  if (urls.length > 1000) {
+    logErr('batch: too many URLs (max 1000)')
+    return 2
+  }
   const op = (values.op as string) ?? 'scrape'
   if (op !== 'scrape') {
     logErr(`batch: unknown op "${op}" (only "scrape" is supported)`)
     return 2
   }
-  const concurrency = Math.max(1, Number.parseInt(String(values.concurrency ?? '4'), 10) || 4)
+  const concurrency = Math.min(
+    32,
+    Math.max(1, Number.parseInt(String(values.concurrency ?? '4'), 10) || 4),
+  )
   const opts = { json: Boolean(values.json), output: values.output as string | undefined }
   return runWorkflow('batch', batchWorkflow, { op, urls, concurrency }, opts)
 }

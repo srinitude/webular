@@ -47,15 +47,30 @@ URLs is the **product**, not a defect.
 *untrusted* flags/URLs to it, run it in a sandbox (container, seccomp, a
 dedicated output dir, network egress controls) and validate the flags you pass.
 
-## Recommended hardening (defense-in-depth follow-ups)
+## Hardening applied (defense-in-depth, follow-up round)
 
-Low-priority given the threat model above; tracked for future work:
+The actionable MEDIUM findings have since been addressed:
 
-- Pin GitHub Actions to commit SHAs (`actions/checkout`, `jdx/mise-action`).
-- `agent-browser`: switch `runBatch` to structured argv / JSON-batch form
-  (inputs are already `z.string().url()`-validated, so risk is low today).
-- `crawl`: revalidate redirect targets against the same-host scope.
-- `download` / `batch`: enforce a max-bytes cap and concurrency/URL ceilings.
+- **CI supply chain** — `actions/checkout` and `jdx/mise-action` are pinned to
+  full commit SHAs (with `# vN` comments) in `.github/workflows/ci.yml`.
+- **agent-browser argument injection** — `runBatch` now sends **structured
+  argv** via agent-browser's JSON stdin batch (`[["open", url], …]`), so URL /
+  path values stay atomic (no re-tokenization).
+- **crawl redirect SSRF** — scoped crawls use `fetchTextWithinHost` (manual
+  `redirect: 'manual'`, revalidating each hop's host against the root).
+- **download DoS** — `downloadToFile` rejects oversized `Content-Length`,
+  streams to disk with a byte cap (`--max-bytes`), and uses a random temp name.
+- **batch resource exhaustion** — concurrency clamped to ≤32 and URL count
+  capped at 1000 (rejected at both the CLI and the zod schema).
+
+## Opt-in sandbox mode (for untrusted-automation embedders)
+
+The "unrestricted path" class can be locked down without changing default UX:
+set **`WEBULAR_SANDBOX=1`** (optionally `WEBULAR_OUTPUT_DIR`) and all `-o`,
+`parse --file`, `monitor --db`, and `media` destination paths are confined to
+the base directory — absolute paths, `..` traversal, and symlink targets are
+rejected (`src/core/safepath.ts`). Off by default, so normal CLI use is
+unaffected.
 
 ## Re-running the audit
 

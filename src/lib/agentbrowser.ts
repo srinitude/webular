@@ -1,5 +1,6 @@
 // FOSS browser-automation adapter: drives the agent-browser CLI (vercel-labs,
-// native Rust) via its batch mode. Stateless: open -> actions -> close per call.
+// native Rust) via its JSON stdin batch mode. Commands are structured argv
+// arrays (e.g. ['open', url]) — values stay atomic, so no argument injection.
 import { existsSync } from 'node:fs'
 
 export interface BatchResult {
@@ -19,8 +20,9 @@ export function available(): boolean {
   )
 }
 
-export async function runBatch(commands: string[]): Promise<BatchResult> {
-  const proc = Bun.spawn([binPath(), 'batch', '--bail', ...commands], {
+export async function runBatch(commands: string[][]): Promise<BatchResult> {
+  const proc = Bun.spawn([binPath(), 'batch', '--bail'], {
+    stdin: new TextEncoder().encode(JSON.stringify(commands)),
     stdout: 'pipe',
     stderr: 'pipe',
   })

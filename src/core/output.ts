@@ -1,5 +1,6 @@
 // clig.dev output discipline: machine data to stdout, logs to stderr,
 // optional file sink via -o, structured JSON via --json.
+import { safePath } from './safepath.ts'
 
 export function logErr(msg: string): void {
   process.stderr.write(`${msg}\n`)
@@ -19,7 +20,7 @@ export async function emit(
 ): Promise<void> {
   const text = opts.json ? JSON.stringify(data, null, 2) : render(data)
   if (opts.output) {
-    await Bun.write(opts.output, text)
+    await Bun.write(safePath(opts.output), text)
     return
   }
   process.stdout.write(`${text}\n`)

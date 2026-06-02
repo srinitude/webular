@@ -7,8 +7,8 @@ import { scrapeWorkflow } from './scrape.ts'
 
 export const batchInput = z.object({
   op: z.enum(['scrape']).default('scrape'),
-  urls: z.array(z.string().url()),
-  concurrency: z.number().int().positive().default(4),
+  urls: z.array(z.string().url()).max(1000),
+  concurrency: z.number().int().positive().max(32).default(4),
 })
 
 const resultItem = z.object({

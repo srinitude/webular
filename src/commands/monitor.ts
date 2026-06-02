@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { parseFlags } from '../core/args.ts'
 import { emit, logErr } from '../core/output.ts'
+import { safePath } from '../core/safepath.ts'
 import { monitorWorkflow } from '../workflows/monitor.ts'
 
 interface WorkflowOutcome {
@@ -28,7 +29,7 @@ async function main(): Promise<number> {
     logErr('monitor: missing <url> (pass --url <url> or a positional URL)')
     return 2
   }
-  const dbPath = resolveDbPath(values.db)
+  const dbPath = safePath(resolveDbPath(values.db))
   const run = await monitorWorkflow.createRun({ runId: crypto.randomUUID() })
   const outcome = (await run.start({ inputData: { url, dbPath } })) as WorkflowOutcome
   if (outcome.status !== 'success') {

@@ -20,9 +20,9 @@ const actStep = createStep({
   inputSchema: actInput,
   outputSchema: actOutput,
   execute: async ({ inputData }) => {
-    const cmds = [`open ${inputData.url}`, 'snapshot']
-    if (inputData.screenshot) cmds.push(`screenshot ${inputData.screenshot}`)
-    cmds.push('close')
+    const cmds: string[][] = [['open', inputData.url], ['snapshot']]
+    if (inputData.screenshot) cmds.push(['screenshot', inputData.screenshot])
+    cmds.push(['close'])
     const res = await runBatch(cmds)
     if (res.code !== 0) throw new Error(`agent-browser failed: ${res.stderr.trim()}`)
     return { url: inputData.url, snapshot: res.stdout.trim(), screenshot: inputData.screenshot }
