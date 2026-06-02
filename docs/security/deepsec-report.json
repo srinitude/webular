@@ -1,50 +1,71 @@
 {
   "projectId": "webular",
-  "generatedAt": "2026-06-02T08:45:22.392Z",
+  "generatedAt": "2026-06-02T18:58:16.264Z",
   "runId": null,
   "summary": {
-    "filesAnalyzed": 33,
-    "totalFindings": 26,
-    "critical": 0,
+    "filesAnalyzed": 34,
+    "totalFindings": 8,
+    "critical": 1,
     "high": 0,
-    "medium": 22,
+    "medium": 6,
     "highBug": 0,
-    "bug": 4
+    "bug": 1
   },
   "files": [
     {
       "filePath": ".github/workflows/ci.yml",
-      "findings": [
-        {
-          "severity": "MEDIUM",
-          "vulnSlug": "other-ci-supply-chain",
-          "title": "GitHub Actions are not pinned to immutable commits",
-          "description": "The workflow executes actions via mutable major-version refs: actions/checkout@v4 and jdx/mise-action@v2. If one of those action tags is retargeted or the upstream action is compromised, arbitrary code can run in CI with the repository contents and the read-scoped GITHUB_TOKEN available to the job. The explicit contents: read permission reduces impact but does not prevent source or CI-environment exfiltration or build tampering.",
-          "lineNumbers": [23, 24],
-          "recommendation": "Pin third-party and first-party actions to full commit SHAs, and use Dependabot/Renovate or a similar process to review and update those SHAs intentionally.",
-          "confidence": "high",
-          "producedByRunId": "20260602083655-bbeec4b1774b6d65"
-        }
-      ],
+      "findings": [],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:41:12.378Z",
-          "durationMs": 78278.33333333333,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:56:21.982Z",
+          "durationMs": 83790.66666666667,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a54c-7b22-96e3-9db886249aa4",
-          "findingCount": 1,
+          "agentSessionId": "019e89ad-d5e6-7c01-bb03-e0dbe22fac9a",
+          "findingCount": 0,
           "numTurns": 0.3333333333333333,
           "phase": "process",
-          "costUsd": 0.27180766666666667,
+          "costUsd": 0.263754,
           "usage": {
-            "inputTokens": 26689.666666666668,
-            "outputTokens": 3039,
-            "cacheReadInputTokens": 94378.66666666667,
+            "inputTokens": 21132.666666666668,
+            "outputTokens": 3344,
+            "cacheReadInputTokens": 115541.33333333333,
+            "cacheCreationInputTokens": 0
+          },
+          "refusal": {
+            "refused": false,
+            "skipped": [],
+            "raw": "{\"refused\": false, \"skipped\": []}"
+          }
+        }
+      ]
+    },
+    {
+      "filePath": "bin/webular.ts",
+      "findings": [],
+      "analysisHistory": [
+        {
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:57:43.743Z",
+          "durationMs": 109286.33333333333,
+          "agentType": "codex",
+          "model": "gpt-5.5",
+          "modelConfig": {
+            "model": "gpt-5.5"
+          },
+          "agentSessionId": "019e89ad-d5ea-7a70-a35b-f1a334dc2f04",
+          "findingCount": 0,
+          "numTurns": 0.3333333333333333,
+          "phase": "process",
+          "costUsd": 0.39406199999999997,
+          "usage": {
+            "inputTokens": 29515.333333333332,
+            "outputTokens": 4501.333333333333,
+            "cacheReadInputTokens": 222890.66666666666,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -56,59 +77,27 @@
       ]
     },
     {
-      "filePath": "bin/webular.ts",
-      "findings": [],
-      "analysisHistory": [
-        {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:38:17.480Z",
-          "durationMs": 72632,
-          "agentType": "codex",
-          "model": "gpt-5.5",
-          "modelConfig": {
-            "model": "gpt-5.5"
-          },
-          "agentSessionId": "019e877a-a698-7f03-a868-eb319bfeeb01",
-          "findingCount": 0,
-          "numTurns": 1,
-          "phase": "process",
-          "costUsd": 0.352237,
-          "usage": {
-            "inputTokens": 49715,
-            "outputTokens": 2457,
-            "cacheReadInputTokens": 59904,
-            "cacheCreationInputTokens": 0
-          },
-          "refusal": {
-            "refused": false,
-            "skipped": [],
-            "raw": "{\"refused\":false,\"reason\":null,\"skipped\":[]}"
-          }
-        }
-      ]
-    },
-    {
       "filePath": "src/cli/commands.ts",
       "findings": [],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:42:36.252Z",
-          "durationMs": 65740.2,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:57:32.311Z",
+          "durationMs": 79105,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a6b7-7e80-a16e-53dca4d4e79e",
+          "agentSessionId": "019e89ad-d5d0-7c03-94b8-7b9f265bb421",
           "findingCount": 0,
-          "numTurns": 0.2,
+          "numTurns": 0.25,
           "phase": "process",
-          "costUsd": 0.26074579999999997,
+          "costUsd": 0.28013275,
           "usage": {
-            "inputTokens": 23714.2,
-            "outputTokens": 2624.6,
-            "cacheReadInputTokens": 126873.6,
+            "inputTokens": 27833.25,
+            "outputTokens": 2456.75,
+            "cacheReadInputTokens": 134528,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -124,23 +113,23 @@
       "findings": [],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:42:36.410Z",
-          "durationMs": 65740.2,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:57:32.375Z",
+          "durationMs": 79105,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a6b7-7e80-a16e-53dca4d4e79e",
+          "agentSessionId": "019e89ad-d5d0-7c03-94b8-7b9f265bb421",
           "findingCount": 0,
-          "numTurns": 0.2,
+          "numTurns": 0.25,
           "phase": "process",
-          "costUsd": 0.26074579999999997,
+          "costUsd": 0.28013275,
           "usage": {
-            "inputTokens": 23714.2,
-            "outputTokens": 2624.6,
-            "cacheReadInputTokens": 126873.6,
+            "inputTokens": 27833.25,
+            "outputTokens": 2456.75,
+            "cacheReadInputTokens": 134528,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -156,23 +145,23 @@
       "findings": [],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:42:36.477Z",
-          "durationMs": 65740.2,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:57:32.430Z",
+          "durationMs": 79105,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a6b7-7e80-a16e-53dca4d4e79e",
+          "agentSessionId": "019e89ad-d5d0-7c03-94b8-7b9f265bb421",
           "findingCount": 0,
-          "numTurns": 0.2,
+          "numTurns": 0.25,
           "phase": "process",
-          "costUsd": 0.26074579999999997,
+          "costUsd": 0.28013275,
           "usage": {
-            "inputTokens": 23714.2,
-            "outputTokens": 2624.6,
-            "cacheReadInputTokens": 126873.6,
+            "inputTokens": 27833.25,
+            "outputTokens": 2456.75,
+            "cacheReadInputTokens": 134528,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -185,37 +174,26 @@
     },
     {
       "filePath": "src/cli/run.ts",
-      "findings": [
-        {
-          "severity": "MEDIUM",
-          "vulnSlug": "path-traversal",
-          "title": "Unrestricted output path can overwrite arbitrary local files",
-          "description": "runWorkflow accepts opts.output and forwards it directly to emit. The imported emit implementation writes that path with Bun.write without constraining it to an approved directory, rejecting absolute paths or '..' traversal, or preventing overwrite/symlink targets. For runWorkflow-backed commands, an automating caller that passes attacker-controlled flags could let the attacker choose '-o/--output' and write workflow output, often including attacker-controlled remote page content, to any file writable by the invoking user.",
-          "lineNumbers": [17, 25],
-          "recommendation": "Resolve output paths against an explicit safe output directory, reject absolute paths and parent-directory traversal unless explicitly trusted, and consider fail-if-exists semantics or a separate --force flag to avoid clobbering existing files.",
-          "confidence": "high",
-          "producedByRunId": "20260602083655-bbeec4b1774b6d65"
-        }
-      ],
+      "findings": [],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:42:35.699Z",
-          "durationMs": 65740.2,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:57:32.175Z",
+          "durationMs": 79105,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a6b7-7e80-a16e-53dca4d4e79e",
-          "findingCount": 1,
-          "numTurns": 0.2,
+          "agentSessionId": "019e89ad-d5d0-7c03-94b8-7b9f265bb421",
+          "findingCount": 0,
+          "numTurns": 0.25,
           "phase": "process",
-          "costUsd": 0.26074579999999997,
+          "costUsd": 0.28013275,
           "usage": {
-            "inputTokens": 23714.2,
-            "outputTokens": 2624.6,
-            "cacheReadInputTokens": 126873.6,
+            "inputTokens": 27833.25,
+            "outputTokens": 2456.75,
+            "cacheReadInputTokens": 134528,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -228,37 +206,26 @@
     },
     {
       "filePath": "src/commands/answer.ts",
-      "findings": [
-        {
-          "severity": "MEDIUM",
-          "vulnSlug": "path-traversal",
-          "title": "Unrestricted --output can overwrite arbitrary files",
-          "description": "`values.output` is passed directly to `emit`, whose shared sink calls `Bun.write(opts.output, text)` without path validation, base-directory enforcement, symlink checks, or no-clobber behavior. If an integration exposes CLI flags to an attacker, `--output` can be set to an absolute path or `../` traversal path to overwrite files writable by the webular process.",
-          "lineNumbers": [32, 34],
-          "recommendation": "For untrusted automation, canonicalize output paths against an allowed output directory, reject absolute paths and `..` traversal, and consider exclusive/no-clobber writes unless overwrite is explicitly requested.",
-          "confidence": "high",
-          "producedByRunId": "20260602083655-bbeec4b1774b6d65"
-        }
-      ],
+      "findings": [],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:43:06.119Z",
-          "durationMs": 71413,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:55:01.844Z",
+          "durationMs": 32222.6,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a4b6-7be0-a4a4-2767dacde4d5",
-          "findingCount": 1,
+          "agentSessionId": "019e89ad-d5b0-76f1-bff6-11ae70068912",
+          "findingCount": 0,
           "numTurns": 0.2,
           "phase": "process",
-          "costUsd": 0.22095820000000002,
+          "costUsd": 0.0973828,
           "usage": {
-            "inputTokens": 19228.6,
-            "outputTokens": 3160.4,
-            "cacheReadInputTokens": 60006.4,
+            "inputTokens": 10774,
+            "outputTokens": 1187.6,
+            "cacheReadInputTokens": 15769.6,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -271,37 +238,26 @@
     },
     {
       "filePath": "src/commands/audit.ts",
-      "findings": [
-        {
-          "severity": "MEDIUM",
-          "vulnSlug": "path-traversal",
-          "title": "Unrestricted --output can overwrite arbitrary files",
-          "description": "`values.output` is passed directly to `emit`, whose shared sink calls `Bun.write(opts.output, text)` without path validation, base-directory enforcement, symlink checks, or no-clobber behavior. If an integration exposes CLI flags to an attacker, `--output` can be set to an absolute path or `../` traversal path to overwrite files writable by the webular process.",
-          "lineNumbers": [24, 26],
-          "recommendation": "For untrusted automation, canonicalize output paths against an allowed output directory, reject absolute paths and `..` traversal, and consider exclusive/no-clobber writes unless overwrite is explicitly requested.",
-          "confidence": "high",
-          "producedByRunId": "20260602083655-bbeec4b1774b6d65"
-        }
-      ],
+      "findings": [],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:43:06.255Z",
-          "durationMs": 71413,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:55:01.930Z",
+          "durationMs": 32222.6,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a4b6-7be0-a4a4-2767dacde4d5",
-          "findingCount": 1,
+          "agentSessionId": "019e89ad-d5b0-76f1-bff6-11ae70068912",
+          "findingCount": 0,
           "numTurns": 0.2,
           "phase": "process",
-          "costUsd": 0.22095820000000002,
+          "costUsd": 0.0973828,
           "usage": {
-            "inputTokens": 19228.6,
-            "outputTokens": 3160.4,
-            "cacheReadInputTokens": 60006.4,
+            "inputTokens": 10774,
+            "outputTokens": 1187.6,
+            "cacheReadInputTokens": 15769.6,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -314,37 +270,26 @@
     },
     {
       "filePath": "src/commands/diagram.ts",
-      "findings": [
-        {
-          "severity": "MEDIUM",
-          "vulnSlug": "path-traversal",
-          "title": "Unrestricted --output can overwrite arbitrary files",
-          "description": "`values.output` is passed directly to `emit`, whose shared sink calls `Bun.write(opts.output, text)` without path validation, base-directory enforcement, symlink checks, or no-clobber behavior. If an integration exposes CLI flags to an attacker, `--output` can be set to an absolute path or `../` traversal path to overwrite files writable by the webular process.",
-          "lineNumbers": [29, 31],
-          "recommendation": "For untrusted automation, canonicalize output paths against an allowed output directory, reject absolute paths and `..` traversal, and consider exclusive/no-clobber writes unless overwrite is explicitly requested.",
-          "confidence": "high",
-          "producedByRunId": "20260602083655-bbeec4b1774b6d65"
-        }
-      ],
+      "findings": [],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:43:06.337Z",
-          "durationMs": 71413,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:55:01.988Z",
+          "durationMs": 32222.6,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a4b6-7be0-a4a4-2767dacde4d5",
-          "findingCount": 1,
+          "agentSessionId": "019e89ad-d5b0-76f1-bff6-11ae70068912",
+          "findingCount": 0,
           "numTurns": 0.2,
           "phase": "process",
-          "costUsd": 0.22095820000000002,
+          "costUsd": 0.0973828,
           "usage": {
-            "inputTokens": 19228.6,
-            "outputTokens": 3160.4,
-            "cacheReadInputTokens": 60006.4,
+            "inputTokens": 10774,
+            "outputTokens": 1187.6,
+            "cacheReadInputTokens": 15769.6,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -357,37 +302,26 @@
     },
     {
       "filePath": "src/commands/doctor.ts",
-      "findings": [
-        {
-          "severity": "MEDIUM",
-          "vulnSlug": "path-traversal",
-          "title": "Unrestricted --output can overwrite arbitrary files",
-          "description": "`values.output` is passed directly to `emit`, whose shared sink calls `Bun.write(opts.output, text)` without path validation, base-directory enforcement, symlink checks, or no-clobber behavior. If an integration exposes CLI flags to an attacker, `--output` can be set to an absolute path or `../` traversal path to overwrite files writable by the webular process.",
-          "lineNumbers": [21, 23],
-          "recommendation": "For untrusted automation, canonicalize output paths against an allowed output directory, reject absolute paths and `..` traversal, and consider exclusive/no-clobber writes unless overwrite is explicitly requested.",
-          "confidence": "high",
-          "producedByRunId": "20260602083655-bbeec4b1774b6d65"
-        }
-      ],
+      "findings": [],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:43:06.440Z",
-          "durationMs": 71413,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:55:02.044Z",
+          "durationMs": 32222.6,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a4b6-7be0-a4a4-2767dacde4d5",
-          "findingCount": 1,
+          "agentSessionId": "019e89ad-d5b0-76f1-bff6-11ae70068912",
+          "findingCount": 0,
           "numTurns": 0.2,
           "phase": "process",
-          "costUsd": 0.22095820000000002,
+          "costUsd": 0.0973828,
           "usage": {
-            "inputTokens": 19228.6,
-            "outputTokens": 3160.4,
-            "cacheReadInputTokens": 60006.4,
+            "inputTokens": 10774,
+            "outputTokens": 1187.6,
+            "cacheReadInputTokens": 15769.6,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -402,35 +336,45 @@
       "filePath": "src/commands/map.ts",
       "findings": [
         {
-          "severity": "MEDIUM",
-          "vulnSlug": "path-traversal",
-          "title": "Untrusted --output path can overwrite arbitrary files",
-          "description": "Under the stated automation trust boundary, this command accepts attacker-controlled CLI flags and passes values.output directly to emit. parseFlags exposes --output/-o as a common string option, and src/core/output.ts writes it with Bun.write without normalization, containment checks, symlink protection, or overwrite controls. An attacker who can influence the map command arguments can choose an absolute or traversal path and cause the command output to overwrite files writable by the invoking user.",
-          "lineNumbers": [31, 33],
-          "recommendation": "Centralize output path validation in emit or the CLI parser. Resolve paths with realpath/normalize, require them to stay inside an explicit output directory, reject absolute paths or traversal when input is untrusted, and use no-overwrite/no-follow semantics unless overwrite is explicitly intended.",
+          "severity": "CRITICAL",
+          "vulnSlug": "ssrf",
+          "title": "Sitemap discovery can follow attacker-controlled off-host sitemap URLs",
+          "description": "The command accepts a caller-controlled URL, builds inputData from it, and starts mapWorkflow. In the imported workflow, fetchSitemapLinks constructs a Sitemapper instance for `${site}/sitemap.xml` and calls mapper.fetch(). Sitemapper recursively fetches `<sitemap><loc>` entries from a sitemap index without revalidating that those child sitemap URLs remain on the root host. A hostile site can return a sitemap index whose child loc points to an internal service such as localhost or a cloud metadata IP, causing the CLI host to make an off-scope request. This is not the intended initial user-supplied URL fetch; it is a remote-content-controlled scope escape.",
+          "lineNumbers": [18, 24, 25, 26],
+          "recommendation": "Do sitemap discovery through a repo-controlled fetch path that validates every sitemap index loc against the original hostname before fetching it. Prefer fetchTextWithinHost-style manual redirect handling, reject private/internal address ranges where appropriate, and filter returned sitemap links to the intended scope.",
           "confidence": "high",
-          "producedByRunId": "20260602083655-bbeec4b1774b6d65"
+          "producedByRunId": "20260602185202-dbaf422c9cc44784"
+        },
+        {
+          "severity": "MEDIUM",
+          "vulnSlug": "other-resource-exhaustion",
+          "title": "Sitemap path bypasses the capped fetch helper",
+          "description": "The map command passes the URL and optional limit into mapWorkflow, but the imported workflow fetches and parses the complete sitemap through Sitemapper before applying the result limit. That dependency buffers sitemap responses and performs synchronous gzip decompression/XML parsing without the 25 MB streamed cap used by fetchText. A hostile sitemap can therefore consume excessive memory or CPU before the command ever slices to the requested limit.",
+          "lineNumbers": [23, 24, 25, 26],
+          "recommendation": "Replace or wrap Sitemapper with capped streaming fetch/decompression and bounded XML parsing. Enforce byte, entry-count, sitemap-index-count, and recursion-depth limits before parsing or recursing, and apply the user limit during collection rather than only after all sitemap data is loaded.",
+          "confidence": "high",
+          "producedByRunId": "20260602185202-dbaf422c9cc44784"
         }
       ],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:40:48.773Z",
-          "durationMs": 42441.6,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:57:15.134Z",
+          "durationMs": 60675.6,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a69e-7fd0-bc66-5a02ff5e88f4",
-          "findingCount": 1,
+          "agentSessionId": "019e89ad-d536-7682-ab83-c6e7cefc9437",
+          "findingCount": 2,
           "numTurns": 0.2,
           "phase": "process",
-          "costUsd": 0.1331868,
+          "costUsd": 0.2034834,
           "usage": {
-            "inputTokens": 12467.2,
-            "outputTokens": 1902.6,
-            "cacheReadInputTokens": 27545.6,
+            "inputTokens": 15997.8,
+            "outputTokens": 2406.4,
+            "cacheReadInputTokens": 102604.8,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -446,23 +390,23 @@
       "findings": [],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:44:09.829Z",
-          "durationMs": 141327.66666666666,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:57:07.762Z",
+          "durationMs": 97953.66666666667,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a69d-73b3-acf1-66d8dfdf2902",
+          "agentSessionId": "019e89ad-d5eb-79c1-9c78-ac3eea6713b4",
           "findingCount": 0,
           "numTurns": 0.3333333333333333,
           "phase": "process",
-          "costUsd": 0.7882790000000001,
+          "costUsd": 0.2618766666666667,
           "usage": {
-            "inputTokens": 60373.666666666664,
-            "outputTokens": 5456,
-            "cacheReadInputTokens": 645461.3333333334,
+            "inputTokens": 22793.333333333332,
+            "outputTokens": 3906.3333333333335,
+            "cacheReadInputTokens": 61440,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -478,34 +422,44 @@
       "findings": [
         {
           "severity": "MEDIUM",
-          "vulnSlug": "path-traversal",
-          "title": "Untrusted media output path can overwrite arbitrary files",
-          "description": "The command accepts --url and --output from CLI flags, places them into inputData, and runs mediaWorkflow. Downstream, download mode fetches bytes from the supplied URL and writes them to the supplied dest with Bun.write without resolving the path, constraining it to a safe output directory, rejecting absolute or parent-directory paths, checking symlinks, or preventing overwrite. In the stated threat model where an automation layer may pass untrusted flag strings to this CLI, an attacker can choose both a remote payload URL and an output path such as an absolute path or ../ traversal path, causing file creation or overwrite as the invoking user.",
-          "lineNumbers": [21, 29, 31],
-          "recommendation": "For untrusted callers, resolve dest against an allowlisted output directory, reject absolute paths and paths escaping that directory, avoid following symlinks, and create files with exclusive/no-overwrite semantics. Keep arbitrary output paths only behind an explicitly trusted local-CLI mode.",
+          "vulnSlug": "other-sandbox-bypass",
+          "title": "Sandboxed media downloads can write outside WEBULAR_OUTPUT_DIR when -o is omitted",
+          "description": "The command forwards dest as an optional value from --output. When an untrusted automation caller omits -o, src/workflows/media.ts only calls safePath when inputData.dest is present, then downloadToFile falls back to tempPath(), which writes under the OS temp directory via tmpdir(). With WEBULAR_SANDBOX=1, this lets attacker-controlled response bytes be written outside the configured sandbox base. The destination is random rather than attacker-chosen, so this is not arbitrary overwrite, but it violates the documented sandbox boundary.",
+          "lineNumbers": [31, 34],
+          "recommendation": "When WEBULAR_SANDBOX=1, require an explicit output path or generate the default media download path inside WEBULAR_OUTPUT_DIR and pass it through safePath before writing. Add a sandbox test for media download without -o.",
           "confidence": "high",
-          "producedByRunId": "20260602083655-bbeec4b1774b6d65"
+          "producedByRunId": "20260602185202-dbaf422c9cc44784"
+        },
+        {
+          "severity": "MEDIUM",
+          "vulnSlug": "other-resource-exhaustion",
+          "title": "Browser screenshot/PDF capture lacks output size and timeout enforcement",
+          "description": "The command allows screenshot/PDF actions for attacker-influenced URLs and forwards execution to the media workflow. Downstream, browserCapture invokes agent-browser without a timeout or byte cap and then reads the entire generated file with Bun.file(dest).arrayBuffer() just to calculate its size. A hostile page can hang capture or generate a very large screenshot/PDF, consuming worker time, disk, and memory despite the --max-bytes guard existing for downloads.",
+          "lineNumbers": [18, 19, 30, 34],
+          "recommendation": "Apply an explicit timeout to browser capture, enforce a maximum output size for screenshot/PDF actions, and use file stat/Blob size instead of arrayBuffer() for byte counting. Delete over-limit outputs before returning.",
+          "confidence": "medium",
+          "producedByRunId": "20260602185202-dbaf422c9cc44784"
         }
       ],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:44:09.848Z",
-          "durationMs": 141327.66666666666,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:57:07.874Z",
+          "durationMs": 97953.66666666667,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a69d-73b3-acf1-66d8dfdf2902",
-          "findingCount": 1,
+          "agentSessionId": "019e89ad-d5eb-79c1-9c78-ac3eea6713b4",
+          "findingCount": 2,
           "numTurns": 0.3333333333333333,
           "phase": "process",
-          "costUsd": 0.7882790000000001,
+          "costUsd": 0.2618766666666667,
           "usage": {
-            "inputTokens": 60373.666666666664,
-            "outputTokens": 5456,
-            "cacheReadInputTokens": 645461.3333333334,
+            "inputTokens": 22793.333333333332,
+            "outputTokens": 3906.3333333333335,
+            "cacheReadInputTokens": 61440,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -520,45 +474,35 @@
       "filePath": "src/commands/monitor.ts",
       "findings": [
         {
-          "severity": "MEDIUM",
-          "vulnSlug": "path-traversal",
-          "title": "Unrestricted monitor database path can write outside the intended cache",
-          "description": "`resolveDbPath` accepts `--db` or `WEBULAR_DB` verbatim, and `main` passes that value into the monitor workflow. The imported snapshot store opens `new Database(dbPath, { create: true })` and creates/writes the snapshots table without canonicalizing the path or restricting it to a cache directory. Under the stated threat model where an automating caller may pass attacker-controlled flags, this lets an attacker create or modify SQLite database files at arbitrary writable paths and potentially corrupt existing SQLite files under the invoking user's privileges.",
-          "lineNumbers": [15, 16, 17, 31, 33],
-          "recommendation": "Resolve monitor database paths under a dedicated app cache directory by default, reject absolute paths and parent-directory traversal for untrusted callers, and use explicit opt-in for user-selected external DB paths.",
+          "severity": "BUG",
+          "vulnSlug": "other-logic-bug",
+          "title": "Sandboxed monitor mode rejects its default database path",
+          "description": "When no --db flag or WEBULAR_DB environment variable is supplied, resolveDbPath returns join(tmpdir(), 'webular-monitor.db'), which is an absolute path. main immediately passes that value to safePath. In WEBULAR_SANDBOX=1 mode, safePath rejects absolute paths, so the monitor command fails closed by default instead of using a sandbox-contained database. This is not a security bypass, but it breaks the intended sandboxed automation path unless callers know to provide a relative database path.",
+          "lineNumbers": [19, 32],
+          "recommendation": "Use a relative default database path when sandboxing is enabled, or explicitly place the default under WEBULAR_OUTPUT_DIR before applying safePath.",
           "confidence": "high",
-          "producedByRunId": "20260602083655-bbeec4b1774b6d65"
-        },
-        {
-          "severity": "MEDIUM",
-          "vulnSlug": "path-traversal",
-          "title": "Unrestricted --output can overwrite arbitrary files",
-          "description": "`values.output` is passed directly to `emit`, whose shared sink calls `Bun.write(opts.output, text)` without path validation, base-directory enforcement, symlink checks, or no-clobber behavior. If an integration exposes CLI flags to an attacker, `--output` can be set to an absolute path or `../` traversal path to overwrite files writable by the webular process.",
-          "lineNumbers": [38, 40],
-          "recommendation": "For untrusted automation, canonicalize output paths against an allowed output directory, reject absolute paths and `..` traversal, and consider exclusive/no-clobber writes unless overwrite is explicitly requested.",
-          "confidence": "high",
-          "producedByRunId": "20260602083655-bbeec4b1774b6d65"
+          "producedByRunId": "20260602185202-dbaf422c9cc44784"
         }
       ],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:43:05.447Z",
-          "durationMs": 71413,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:55:01.723Z",
+          "durationMs": 32222.6,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a4b6-7be0-a4a4-2767dacde4d5",
-          "findingCount": 2,
+          "agentSessionId": "019e89ad-d5b0-76f1-bff6-11ae70068912",
+          "findingCount": 1,
           "numTurns": 0.2,
           "phase": "process",
-          "costUsd": 0.22095820000000002,
+          "costUsd": 0.0973828,
           "usage": {
-            "inputTokens": 19228.6,
-            "outputTokens": 3160.4,
-            "cacheReadInputTokens": 60006.4,
+            "inputTokens": 10774,
+            "outputTokens": 1187.6,
+            "cacheReadInputTokens": 15769.6,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -571,47 +515,26 @@
     },
     {
       "filePath": "src/commands/parse.ts",
-      "findings": [
-        {
-          "severity": "MEDIUM",
-          "vulnSlug": "path-traversal",
-          "title": "Untrusted --file path allows arbitrary local file read",
-          "description": "parse.ts accepts --file or a positional path and passes it unchanged into parseWorkflow. The workflow only validates that file is a non-empty string, then parseDocument reads it through Bun.file for text, HTML, DOCX, or PDF parsing. Under the stated automation trust boundary, an attacker who controls the file argument can use absolute paths or traversal to read any file accessible to the invoking user, with contents returned on stdout or written via --output.",
-          "lineNumbers": [14, 15, 21],
-          "recommendation": "Constrain parse inputs to a configured input directory or caller-provided allowlist. Resolve the path before reading, enforce realpath containment, reject traversal and unexpected symlinks, and consider extension, size, and file type validation before parsing.",
-          "confidence": "high",
-          "producedByRunId": "20260602083655-bbeec4b1774b6d65"
-        },
-        {
-          "severity": "MEDIUM",
-          "vulnSlug": "path-traversal",
-          "title": "Untrusted --output path can overwrite arbitrary files",
-          "description": "The parse command passes values.output directly to emit. parseFlags exposes --output/-o as a common string option, and src/core/output.ts writes it with Bun.write without normalization, containment checks, symlink protection, or overwrite controls. An attacker who can influence parse command arguments can choose an arbitrary writable path and overwrite files with parsed document output.",
-          "lineNumbers": [26, 28],
-          "recommendation": "Centralize output path validation in emit or the CLI parser. Resolve paths with realpath/normalize, require them to stay inside an explicit output directory, reject absolute paths or traversal when input is untrusted, and use no-overwrite/no-follow semantics unless overwrite is explicitly intended.",
-          "confidence": "high",
-          "producedByRunId": "20260602083655-bbeec4b1774b6d65"
-        }
-      ],
+      "findings": [],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:40:49.208Z",
-          "durationMs": 42441.6,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:57:15.181Z",
+          "durationMs": 60675.6,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a69e-7fd0-bc66-5a02ff5e88f4",
-          "findingCount": 2,
+          "agentSessionId": "019e89ad-d536-7682-ab83-c6e7cefc9437",
+          "findingCount": 0,
           "numTurns": 0.2,
           "phase": "process",
-          "costUsd": 0.1331868,
+          "costUsd": 0.2034834,
           "usage": {
-            "inputTokens": 12467.2,
-            "outputTokens": 1902.6,
-            "cacheReadInputTokens": 27545.6,
+            "inputTokens": 15997.8,
+            "outputTokens": 2406.4,
+            "cacheReadInputTokens": 102604.8,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -624,37 +547,26 @@
     },
     {
       "filePath": "src/commands/research.ts",
-      "findings": [
-        {
-          "severity": "MEDIUM",
-          "vulnSlug": "path-traversal",
-          "title": "Untrusted --output path can overwrite arbitrary files",
-          "description": "research.ts accepts common CLI flags and passes values.output directly to emit. parseFlags exposes --output/-o as a common string option, and src/core/output.ts writes it with Bun.write without normalization, containment checks, symlink protection, or overwrite controls. Under the stated automation trust boundary, an attacker who can influence research command arguments can choose an absolute or traversal path and overwrite files writable by the invoking user.",
-          "lineNumbers": [32, 34],
-          "recommendation": "Centralize output path validation in emit or the CLI parser. Resolve paths with realpath/normalize, require them to stay inside an explicit output directory, reject absolute paths or traversal when input is untrusted, and use no-overwrite/no-follow semantics unless overwrite is explicitly intended.",
-          "confidence": "high",
-          "producedByRunId": "20260602083655-bbeec4b1774b6d65"
-        }
-      ],
+      "findings": [],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:40:49.548Z",
-          "durationMs": 42441.6,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:57:15.225Z",
+          "durationMs": 60675.6,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a69e-7fd0-bc66-5a02ff5e88f4",
-          "findingCount": 1,
+          "agentSessionId": "019e89ad-d536-7682-ab83-c6e7cefc9437",
+          "findingCount": 0,
           "numTurns": 0.2,
           "phase": "process",
-          "costUsd": 0.1331868,
+          "costUsd": 0.2034834,
           "usage": {
-            "inputTokens": 12467.2,
-            "outputTokens": 1902.6,
-            "cacheReadInputTokens": 27545.6,
+            "inputTokens": 15997.8,
+            "outputTokens": 2406.4,
+            "cacheReadInputTokens": 102604.8,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -667,37 +579,26 @@
     },
     {
       "filePath": "src/commands/scrape.ts",
-      "findings": [
-        {
-          "severity": "MEDIUM",
-          "vulnSlug": "path-traversal",
-          "title": "Untrusted --output path can overwrite arbitrary files",
-          "description": "scrape.ts accepts common CLI flags and passes values.output directly to emit. parseFlags exposes --output/-o as a common string option, and src/core/output.ts writes it with Bun.write without normalization, containment checks, symlink protection, or overwrite controls. Because scrape output can be influenced by fetched remote content, an attacker who controls both the URL and output path in an automation context can write attacker-shaped data to arbitrary files writable by the invoking user.",
-          "lineNumbers": [26, 28],
-          "recommendation": "Centralize output path validation in emit or the CLI parser. Resolve paths with realpath/normalize, require them to stay inside an explicit output directory, reject absolute paths or traversal when input is untrusted, and use no-overwrite/no-follow semantics unless overwrite is explicitly intended.",
-          "confidence": "high",
-          "producedByRunId": "20260602083655-bbeec4b1774b6d65"
-        }
-      ],
+      "findings": [],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:40:49.931Z",
-          "durationMs": 42441.6,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:57:15.275Z",
+          "durationMs": 60675.6,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a69e-7fd0-bc66-5a02ff5e88f4",
-          "findingCount": 1,
+          "agentSessionId": "019e89ad-d536-7682-ab83-c6e7cefc9437",
+          "findingCount": 0,
           "numTurns": 0.2,
           "phase": "process",
-          "costUsd": 0.1331868,
+          "costUsd": 0.2034834,
           "usage": {
-            "inputTokens": 12467.2,
-            "outputTokens": 1902.6,
-            "cacheReadInputTokens": 27545.6,
+            "inputTokens": 15997.8,
+            "outputTokens": 2406.4,
+            "cacheReadInputTokens": 102604.8,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -710,37 +611,26 @@
     },
     {
       "filePath": "src/commands/search.ts",
-      "findings": [
-        {
-          "severity": "MEDIUM",
-          "vulnSlug": "path-traversal",
-          "title": "Untrusted --output path can overwrite arbitrary files",
-          "description": "search.ts accepts common CLI flags and passes values.output directly to emit. parseFlags exposes --output/-o as a common string option, and src/core/output.ts writes it with Bun.write without normalization, containment checks, symlink protection, or overwrite controls. Under the stated automation trust boundary, an attacker who can influence search command arguments can choose an absolute or traversal path and overwrite files writable by the invoking user.",
-          "lineNumbers": [30, 32],
-          "recommendation": "Centralize output path validation in emit or the CLI parser. Resolve paths with realpath/normalize, require them to stay inside an explicit output directory, reject absolute paths or traversal when input is untrusted, and use no-overwrite/no-follow semantics unless overwrite is explicitly intended.",
-          "confidence": "high",
-          "producedByRunId": "20260602083655-bbeec4b1774b6d65"
-        }
-      ],
+      "findings": [],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:40:50.374Z",
-          "durationMs": 42441.6,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:57:15.317Z",
+          "durationMs": 60675.6,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a69e-7fd0-bc66-5a02ff5e88f4",
-          "findingCount": 1,
+          "agentSessionId": "019e89ad-d536-7682-ab83-c6e7cefc9437",
+          "findingCount": 0,
           "numTurns": 0.2,
           "phase": "process",
-          "costUsd": 0.1331868,
+          "costUsd": 0.2034834,
           "usage": {
-            "inputTokens": 12467.2,
-            "outputTokens": 1902.6,
-            "cacheReadInputTokens": 27545.6,
+            "inputTokens": 15997.8,
+            "outputTokens": 2406.4,
+            "cacheReadInputTokens": 102604.8,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -756,23 +646,23 @@
       "findings": [],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:44:09.807Z",
-          "durationMs": 141327.66666666666,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:57:07.660Z",
+          "durationMs": 97953.66666666667,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a69d-73b3-acf1-66d8dfdf2902",
+          "agentSessionId": "019e89ad-d5eb-79c1-9c78-ac3eea6713b4",
           "findingCount": 0,
           "numTurns": 0.3333333333333333,
           "phase": "process",
-          "costUsd": 0.7882790000000001,
+          "costUsd": 0.2618766666666667,
           "usage": {
-            "inputTokens": 60373.666666666664,
-            "outputTokens": 5456,
-            "cacheReadInputTokens": 645461.3333333334,
+            "inputTokens": 22793.333333333332,
+            "outputTokens": 3906.3333333333335,
+            "cacheReadInputTokens": 61440,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -785,37 +675,58 @@
     },
     {
       "filePath": "src/core/http.ts",
-      "findings": [
-        {
-          "severity": "MEDIUM",
-          "vulnSlug": "ssrf",
-          "title": "Redirect following can bypass crawl same-host scope",
-          "description": "httpGet always sets redirect: 'follow' and then fetches the caller-supplied URL. In the crawl flow, links are checked with sameHost before fetch, but the final redirected URL is never revalidated. A malicious same-host page can enqueue a same-host redirect URL that points to an internal or otherwise off-scope service, causing the crawler to fetch it despite the same-host boundary.",
-          "lineNumbers": [14, 18],
-          "recommendation": "Do not force automatic redirects for scoped crawls. Use manual redirect handling for callers that impose URL boundaries, resolve each Location header, and revalidate scheme, hostname, and optionally port/origin before following each hop.",
-          "confidence": "high",
-          "producedByRunId": "20260602083655-bbeec4b1774b6d65"
-        }
-      ],
+      "findings": [],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:42:36.571Z",
-          "durationMs": 65740.2,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:57:43.491Z",
+          "durationMs": 109286.33333333333,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a6b7-7e80-a16e-53dca4d4e79e",
-          "findingCount": 1,
-          "numTurns": 0.2,
+          "agentSessionId": "019e89ad-d5ea-7a70-a35b-f1a334dc2f04",
+          "findingCount": 0,
+          "numTurns": 0.3333333333333333,
           "phase": "process",
-          "costUsd": 0.26074579999999997,
+          "costUsd": 0.39406199999999997,
           "usage": {
-            "inputTokens": 23714.2,
-            "outputTokens": 2624.6,
-            "cacheReadInputTokens": 126873.6,
+            "inputTokens": 29515.333333333332,
+            "outputTokens": 4501.333333333333,
+            "cacheReadInputTokens": 222890.66666666666,
+            "cacheCreationInputTokens": 0
+          },
+          "refusal": {
+            "refused": false,
+            "skipped": [],
+            "raw": "{\"refused\":false,\"skipped\":[]}"
+          }
+        }
+      ]
+    },
+    {
+      "filePath": "src/core/safepath.ts",
+      "findings": [],
+      "analysisHistory": [
+        {
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:57:43.612Z",
+          "durationMs": 109286.33333333333,
+          "agentType": "codex",
+          "model": "gpt-5.5",
+          "modelConfig": {
+            "model": "gpt-5.5"
+          },
+          "agentSessionId": "019e89ad-d5ea-7a70-a35b-f1a334dc2f04",
+          "findingCount": 0,
+          "numTurns": 0.3333333333333333,
+          "phase": "process",
+          "costUsd": 0.39406199999999997,
+          "usage": {
+            "inputTokens": 29515.333333333332,
+            "outputTokens": 4501.333333333333,
+            "cacheReadInputTokens": 222890.66666666666,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -831,34 +742,44 @@
       "findings": [
         {
           "severity": "MEDIUM",
-          "vulnSlug": "other-argument-injection",
-          "title": "agent-browser batch commands are forwarded as reparsed strings",
-          "description": "runBatch passes caller-supplied command strings directly to `agent-browser batch`. The relevant workflows build those strings with interpolated URL and destination values, such as `open ${url}` and `screenshot ${dest}`. Because agent-browser batch argument mode reparses each string as a command, a hostile value containing whitespace or option-looking tokens can alter the browser command's arguments instead of being treated as one atomic URL/path. This is not shell RCE because Bun.spawn uses argv array form, but it is still argument injection into a privileged browser automation tool.",
-          "lineNumbers": [23],
-          "recommendation": "Change runBatch to accept structured argv arrays and invoke agent-browser's JSON batch form, for example `['open', url]` and `['screenshot', dest]`, or otherwise quote/escape arguments with agent-browser's documented parser and reject control characters and option-leading path values.",
+          "vulnSlug": "path-traversal",
+          "title": "agent-browser screenshot path bypasses opt-in sandboxing",
+          "description": "runBatch forwards structured commands directly to agent-browser via JSON stdin. That prevents shell/argument injection, but file-writing browser commands still trust their path arguments. The traced act flow takes --screenshot from src/commands/act.ts without safePath, adds ['screenshot', inputData.screenshot] in src/workflows/act.ts, and reaches this sink unchanged. With WEBULAR_SANDBOX=1, an untrusted automation caller can still supply an absolute or ../ screenshot path and cause agent-browser to write outside WEBULAR_OUTPUT_DIR, bypassing the project’s documented sandbox confinement.",
+          "lineNumbers": [24, 25],
+          "recommendation": "Apply safePath to act screenshot destinations before building the batch command, and add a sandbox regression test for act --screenshot. Consider central validation in runBatch for file-writing commands so future agent-browser callers cannot bypass confinement.",
+          "confidence": "high",
+          "producedByRunId": "20260602185202-dbaf422c9cc44784"
+        },
+        {
+          "severity": "MEDIUM",
+          "vulnSlug": "other-resource-exhaustion",
+          "title": "Unbounded agent-browser output can exhaust memory or hang the CLI",
+          "description": "runBatch reads the child process stdout and stderr fully into strings with Response(...).text() and awaits proc.exited without any timeout or output cap. act always requests a browser snapshot, and attacker-controlled web content can produce very large browser/snapshot output or stall browser automation, causing the local CLI process to consume unbounded memory or remain blocked.",
+          "lineNumbers": [24, 29, 30, 31],
+          "recommendation": "Read subprocess streams with explicit byte caps, fail closed on oversized output, and run agent-browser with a timeout/abort path. If large snapshots are expected, stream to a capped temp file instead of buffering whole stdout/stderr in memory.",
           "confidence": "medium",
-          "producedByRunId": "20260602083655-bbeec4b1774b6d65"
+          "producedByRunId": "20260602185202-dbaf422c9cc44784"
         }
       ],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:44:54.925Z",
-          "durationMs": 93811.6,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:58:08.937Z",
+          "durationMs": 69465.4,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a6a0-7452-8c3b-c599dc826fa1",
-          "findingCount": 1,
+          "agentSessionId": "019e89ad-d69e-7b92-845e-89fc9a64f05f",
+          "findingCount": 2,
           "numTurns": 0.2,
           "phase": "process",
-          "costUsd": 0.3451672,
+          "costUsd": 0.2124876,
           "usage": {
-            "inputTokens": 23904.4,
-            "outputTokens": 4089.4,
-            "cacheReadInputTokens": 205926.4,
+            "inputTokens": 18293.6,
+            "outputTokens": 1989.4,
+            "cacheReadInputTokens": 122675.2,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -874,23 +795,23 @@
       "findings": [],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:44:54.949Z",
-          "durationMs": 93811.6,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:58:09.034Z",
+          "durationMs": 69465.4,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a6a0-7452-8c3b-c599dc826fa1",
+          "agentSessionId": "019e89ad-d69e-7b92-845e-89fc9a64f05f",
           "findingCount": 0,
           "numTurns": 0.2,
           "phase": "process",
-          "costUsd": 0.3451672,
+          "costUsd": 0.2124876,
           "usage": {
-            "inputTokens": 23904.4,
-            "outputTokens": 4089.4,
-            "cacheReadInputTokens": 205926.4,
+            "inputTokens": 18293.6,
+            "outputTokens": 1989.4,
+            "cacheReadInputTokens": 122675.2,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -903,47 +824,26 @@
     },
     {
       "filePath": "src/lib/download.ts",
-      "findings": [
-        {
-          "severity": "MEDIUM",
-          "vulnSlug": "path-traversal",
-          "title": "Download output path can overwrite arbitrary writable files",
-          "description": "downloadToFile writes attacker-controlled response bytes to `dest` verbatim when provided, and the fallback temp filename is predictable because it is based on Date.now and a URL-derived basename. If an automation layer accepts untrusted output paths, an attacker can write or overwrite files under the invoking user's privileges; with the default path, a local attacker can also attempt a symlink race in the shared temp directory.",
-          "lineNumbers": [16, 22, 24],
-          "recommendation": "For untrusted callers, restrict output to an approved directory after path normalization, reject absolute/traversal paths, and use randomly-created exclusive temp files or directories instead of predictable names.",
-          "confidence": "high",
-          "producedByRunId": "20260602083655-bbeec4b1774b6d65"
-        },
-        {
-          "severity": "MEDIUM",
-          "vulnSlug": "other-denial-of-service",
-          "title": "Downloads are fully buffered without a size limit",
-          "description": "downloadToFile calls `res.arrayBuffer()` before writing and does not enforce a maximum Content-Length or streamed byte cap. A malicious URL can return an arbitrarily large response and exhaust memory, disk, or the automation worker running this CLI.",
-          "lineNumbers": [23, 24],
-          "recommendation": "Stream the response to disk with backpressure and enforce a configurable maximum byte count before and during the download.",
-          "confidence": "high",
-          "producedByRunId": "20260602083655-bbeec4b1774b6d65"
-        }
-      ],
+      "findings": [],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:44:54.996Z",
-          "durationMs": 93811.6,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:58:09.136Z",
+          "durationMs": 69465.4,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a6a0-7452-8c3b-c599dc826fa1",
-          "findingCount": 2,
+          "agentSessionId": "019e89ad-d69e-7b92-845e-89fc9a64f05f",
+          "findingCount": 0,
           "numTurns": 0.2,
           "phase": "process",
-          "costUsd": 0.3451672,
+          "costUsd": 0.2124876,
           "usage": {
-            "inputTokens": 23904.4,
-            "outputTokens": 4089.4,
-            "cacheReadInputTokens": 205926.4,
+            "inputTokens": 18293.6,
+            "outputTokens": 1989.4,
+            "cacheReadInputTokens": 122675.2,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -959,23 +859,23 @@
       "findings": [],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:44:55.019Z",
-          "durationMs": 93811.6,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:58:09.376Z",
+          "durationMs": 69465.4,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a6a0-7452-8c3b-c599dc826fa1",
+          "agentSessionId": "019e89ad-d69e-7b92-845e-89fc9a64f05f",
           "findingCount": 0,
           "numTurns": 0.2,
           "phase": "process",
-          "costUsd": 0.3451672,
+          "costUsd": 0.2124876,
           "usage": {
-            "inputTokens": 23904.4,
-            "outputTokens": 4089.4,
-            "cacheReadInputTokens": 205926.4,
+            "inputTokens": 18293.6,
+            "outputTokens": 1989.4,
+            "cacheReadInputTokens": 122675.2,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -988,47 +888,26 @@
     },
     {
       "filePath": "src/lib/snapshot.ts",
-      "findings": [
-        {
-          "severity": "MEDIUM",
-          "vulnSlug": "path-traversal",
-          "title": "Monitor database path is used as an unrestricted SQLite write target",
-          "description": "compareAndStore opens the caller-controlled dbPath with `new Database(dbPath, { create: true })` and then creates or updates the snapshots table. Through `monitor --db` or WEBULAR_DB, an untrusted automation caller can cause the process to create files in arbitrary writable locations or modify an existing SQLite database under the invoking user's privileges.",
-          "lineNumbers": [25, 26, 41, 50],
-          "recommendation": "Resolve dbPath against an approved application data directory for untrusted automation, reject absolute paths and `..` traversal unless explicitly enabled for trusted local use, and avoid following symlinks where possible.",
-          "confidence": "high",
-          "producedByRunId": "20260602083655-bbeec4b1774b6d65"
-        },
-        {
-          "severity": "BUG",
-          "vulnSlug": "other-race-condition",
-          "title": "Snapshot compare and update is not atomic",
-          "description": "compareAndStore performs SELECT, then INSERT or UPDATE as separate statements without a transaction. Concurrent monitor runs for the same URL can both observe no row and race on the primary-key insert, or both diff against the same stale row and lose an intermediate snapshot update.",
-          "lineNumbers": [39, 41, 50],
-          "recommendation": "Wrap the read/compare/write sequence in a transaction, preferably `BEGIN IMMEDIATE`, and use an atomic upsert or optimistic `WHERE hash = ?` update to detect concurrent changes.",
-          "confidence": "high",
-          "producedByRunId": "20260602083655-bbeec4b1774b6d65"
-        }
-      ],
+      "findings": [],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:44:54.972Z",
-          "durationMs": 93811.6,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:58:09.239Z",
+          "durationMs": 69465.4,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a6a0-7452-8c3b-c599dc826fa1",
-          "findingCount": 2,
+          "agentSessionId": "019e89ad-d69e-7b92-845e-89fc9a64f05f",
+          "findingCount": 0,
           "numTurns": 0.2,
           "phase": "process",
-          "costUsd": 0.3451672,
+          "costUsd": 0.2124876,
           "usage": {
-            "inputTokens": 23904.4,
-            "outputTokens": 4089.4,
-            "cacheReadInputTokens": 205926.4,
+            "inputTokens": 18293.6,
+            "outputTokens": 1989.4,
+            "cacheReadInputTokens": 122675.2,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -1044,29 +923,29 @@
       "findings": [],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:41:12.793Z",
-          "durationMs": 78278.33333333333,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:56:22.089Z",
+          "durationMs": 83790.66666666667,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a54c-7b22-96e3-9db886249aa4",
+          "agentSessionId": "019e89ad-d5e6-7c01-bb03-e0dbe22fac9a",
           "findingCount": 0,
           "numTurns": 0.3333333333333333,
           "phase": "process",
-          "costUsd": 0.27180766666666667,
+          "costUsd": 0.263754,
           "usage": {
-            "inputTokens": 26689.666666666668,
-            "outputTokens": 3039,
-            "cacheReadInputTokens": 94378.66666666667,
+            "inputTokens": 21132.666666666668,
+            "outputTokens": 3344,
+            "cacheReadInputTokens": 115541.33333333333,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
             "refused": false,
             "skipped": [],
-            "raw": "{\"refused\":false,\"skipped\":[]}"
+            "raw": "{\"refused\": false, \"skipped\": []}"
           }
         }
       ]
@@ -1076,29 +955,29 @@
       "findings": [],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:41:11.945Z",
-          "durationMs": 78278.33333333333,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:56:21.801Z",
+          "durationMs": 83790.66666666667,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a54c-7b22-96e3-9db886249aa4",
+          "agentSessionId": "019e89ad-d5e6-7c01-bb03-e0dbe22fac9a",
           "findingCount": 0,
           "numTurns": 0.3333333333333333,
           "phase": "process",
-          "costUsd": 0.27180766666666667,
+          "costUsd": 0.263754,
           "usage": {
-            "inputTokens": 26689.666666666668,
-            "outputTokens": 3039,
-            "cacheReadInputTokens": 94378.66666666667,
+            "inputTokens": 21132.666666666668,
+            "outputTokens": 3344,
+            "cacheReadInputTokens": 115541.33333333333,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
             "refused": false,
             "skipped": [],
-            "raw": "{\"refused\":false,\"skipped\":[]}"
+            "raw": "{\"refused\": false, \"skipped\": []}"
           }
         }
       ]
@@ -1108,23 +987,23 @@
       "findings": [],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:41:59.814Z",
-          "durationMs": 58994.4,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:57:12.044Z",
+          "durationMs": 60130,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a742-7d92-be45-cf196c2ec2e2",
+          "agentSessionId": "019e89ad-d742-7832-9dbb-fd323731a8fb",
           "findingCount": 0,
           "numTurns": 0.2,
           "phase": "process",
-          "costUsd": 0.23509259999999998,
+          "costUsd": 0.2314826,
           "usage": {
-            "inputTokens": 24351.4,
-            "outputTokens": 2586.6,
-            "cacheReadInputTokens": 71475.2,
+            "inputTokens": 19536.2,
+            "outputTokens": 2500.8,
+            "cacheReadInputTokens": 117555.2,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -1137,37 +1016,26 @@
     },
     {
       "filePath": "src/workflows/batch.ts",
-      "findings": [
-        {
-          "severity": "MEDIUM",
-          "vulnSlug": "other-resource-exhaustion",
-          "title": "Unbounded batch size and concurrency can exhaust local resources",
-          "description": "The workflow accepts an unbounded URL array and any positive integer concurrency, then constructs a Promise for every URL and runs up to `inputData.concurrency` scrapes in parallel. In the repo threat model where an automating caller may pass attacker-controlled flags or input files to the CLI, a very large URL list or concurrency value can exhaust memory, sockets, file descriptors, or outbound bandwidth.",
-          "lineNumbers": [8, 10, 11, 49, 50],
-          "recommendation": "Set conservative maximums for URL count and concurrency, reject excessive values at schema/CLI parsing time, and consider streaming large input files instead of materializing all work in one `Promise.all`.",
-          "confidence": "medium",
-          "producedByRunId": "20260602083655-bbeec4b1774b6d65"
-        }
-      ],
+      "findings": [],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:42:00.526Z",
-          "durationMs": 58994.4,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:57:12.178Z",
+          "durationMs": 60130,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a742-7d92-be45-cf196c2ec2e2",
-          "findingCount": 1,
+          "agentSessionId": "019e89ad-d742-7832-9dbb-fd323731a8fb",
+          "findingCount": 0,
           "numTurns": 0.2,
           "phase": "process",
-          "costUsd": 0.23509259999999998,
+          "costUsd": 0.2314826,
           "usage": {
-            "inputTokens": 24351.4,
-            "outputTokens": 2586.6,
-            "cacheReadInputTokens": 71475.2,
+            "inputTokens": 19536.2,
+            "outputTokens": 2500.8,
+            "cacheReadInputTokens": 117555.2,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -1180,47 +1048,26 @@
     },
     {
       "filePath": "src/workflows/diagram.ts",
-      "findings": [
-        {
-          "severity": "BUG",
-          "vulnSlug": "other-error-handling",
-          "title": "Diagram render reports success even when mmdc fails",
-          "description": "The render workflow spawns `bunx mmdc` for each `.mmd` file, awaits `proc.exited`, but never checks the exit code before adding the diagram to the `rendered` result. A failed render can therefore be reported as successful, leaving missing or stale SVG output and hiding tool failures from callers.",
-          "lineNumbers": [52, 53, 54],
-          "recommendation": "Capture stderr/stdout as needed, check the exit code from `proc.exited`, throw on nonzero, and only append to `rendered` after a successful render.",
-          "confidence": "high",
-          "producedByRunId": "20260602083655-bbeec4b1774b6d65"
-        },
-        {
-          "severity": "BUG",
-          "vulnSlug": "other-portability",
-          "title": "Hard-coded diagrams path breaks non-local installs",
-          "description": "`DIAGRAMS_DIR` is fixed to `/Users/kiren/dev/webular/docs/diagrams`. The default list/render behavior will fail or point at the wrong location when the package is installed or run from any other checkout path.",
-          "lineNumbers": [9, 30, 45],
-          "recommendation": "Resolve the diagrams directory relative to the module or project root, for example via `import.meta.url`, `WEBULAR_HOME`, or the mise config root.",
-          "confidence": "high",
-          "producedByRunId": "20260602083655-bbeec4b1774b6d65"
-        }
-      ],
+      "findings": [],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:42:00.424Z",
-          "durationMs": 58994.4,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:57:12.085Z",
+          "durationMs": 60130,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a742-7d92-be45-cf196c2ec2e2",
-          "findingCount": 2,
+          "agentSessionId": "019e89ad-d742-7832-9dbb-fd323731a8fb",
+          "findingCount": 0,
           "numTurns": 0.2,
           "phase": "process",
-          "costUsd": 0.23509259999999998,
+          "costUsd": 0.2314826,
           "usage": {
-            "inputTokens": 24351.4,
-            "outputTokens": 2586.6,
-            "cacheReadInputTokens": 71475.2,
+            "inputTokens": 19536.2,
+            "outputTokens": 2500.8,
+            "cacheReadInputTokens": 117555.2,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -1236,34 +1083,34 @@
       "findings": [
         {
           "severity": "MEDIUM",
-          "vulnSlug": "path-traversal",
-          "title": "Unvalidated media destination allows arbitrary file overwrite",
-          "description": "`dest` is accepted as an arbitrary string and passed directly to the download path or browser capture path. For downloads, the imported helper writes attacker-chosen URL bytes to that path; for screenshot/PDF capture, the same unvalidated path is passed to `agent-browser` and then read back with `Bun.file(dest)`. There is no normalization, base-directory restriction, traversal rejection, symlink protection, or overwrite guard. If an automation wrapper passes attacker-controlled `-o/--output`, the attacker can overwrite any file writable by the invoking user.",
-          "lineNumbers": [8, 11, 39, 43],
-          "recommendation": "Resolve destinations under an explicit safe output directory, reject absolute paths and `..` traversal, avoid following unsafe symlinks, and use exclusive-create semantics unless the user explicitly opts into overwrite.",
-          "confidence": "high",
-          "producedByRunId": "20260602083655-bbeec4b1774b6d65"
+          "vulnSlug": "other-resource-exhaustion",
+          "title": "Browser capture ignores byte limits and buffers output in memory",
+          "description": "`mediaInput` accepts `maxBytes`, but the limit is only passed to `downloadToFile` for `action === 'download'`. For `screenshot` and `pdf`, the workflow calls `browserCapture` without the limit; `browserCapture` runs `agent-browser` against the user-controlled URL and destination, then reads the entire generated file with `Bun.file(dest).arrayBuffer()` just to count bytes. A hostile page rendered as PDF, or another very large capture, can force the CLI or an automation worker to write a large file and then allocate the full file in memory even when `--max-bytes` was supplied.",
+          "lineNumbers": [13, 30, 41, 44],
+          "recommendation": "Apply the byte limit to screenshot/PDF captures as well. Capture to a temporary file, use filesystem stat instead of `arrayBuffer()` to count bytes, delete oversized output, and only rename/move it to the requested destination after it passes the limit. Add capture timeouts or size constraints where `agent-browser` supports them.",
+          "confidence": "medium",
+          "producedByRunId": "20260602185202-dbaf422c9cc44784"
         }
       ],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:42:00.648Z",
-          "durationMs": 58994.4,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:57:12.229Z",
+          "durationMs": 60130,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a742-7d92-be45-cf196c2ec2e2",
+          "agentSessionId": "019e89ad-d742-7832-9dbb-fd323731a8fb",
           "findingCount": 1,
           "numTurns": 0.2,
           "phase": "process",
-          "costUsd": 0.23509259999999998,
+          "costUsd": 0.2314826,
           "usage": {
-            "inputTokens": 24351.4,
-            "outputTokens": 2586.6,
-            "cacheReadInputTokens": 71475.2,
+            "inputTokens": 19536.2,
+            "outputTokens": 2500.8,
+            "cacheReadInputTokens": 117555.2,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
@@ -1279,66 +1126,55 @@
       "findings": [],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:38:33.421Z",
-          "durationMs": 86828,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:53:51.979Z",
+          "durationMs": 88075,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a68c-7f71-aa9e-a7c6378b14e6",
+          "agentSessionId": "019e89ad-d69e-79f3-8e78-46c21dd80705",
           "findingCount": 0,
           "numTurns": 1,
           "phase": "process",
-          "costUsd": 0.354811,
+          "costUsd": 0.549202,
           "usage": {
-            "inputTokens": 44997,
-            "outputTokens": 3295,
-            "cacheReadInputTokens": 61952,
+            "inputTokens": 77950,
+            "outputTokens": 2866,
+            "cacheReadInputTokens": 146944,
             "cacheCreationInputTokens": 0
           },
           "refusal": {
             "refused": false,
             "skipped": [],
-            "raw": "{\"refused\":false,\"skipped\":[]}"
+            "raw": "{\"refused\":false,\"reason\":null,\"skipped\":[]}"
           }
         }
       ]
     },
     {
       "filePath": "src/workflows/tasks.ts",
-      "findings": [
-        {
-          "severity": "BUG",
-          "vulnSlug": "other-error-handling",
-          "title": "Task listing ignores mise failures",
-          "description": "The workflow reads stdout from `mise tasks ls`, awaits process exit, and then returns parsed task names without checking whether `mise` exited successfully. If `mise` is missing, misconfigured, or run in an invalid cwd, callers can receive a successful empty or partial task list instead of an error.",
-          "lineNumbers": [19, 24, 25, 30],
-          "recommendation": "Read stderr, check the exit code returned by `proc.exited`, and throw or return a failed workflow result when `mise` exits nonzero.",
-          "confidence": "high",
-          "producedByRunId": "20260602083655-bbeec4b1774b6d65"
-        }
-      ],
+      "findings": [],
       "analysisHistory": [
         {
-          "runId": "20260602083655-bbeec4b1774b6d65",
-          "investigatedAt": "2026-06-02T08:42:00.483Z",
-          "durationMs": 58994.4,
+          "runId": "20260602185202-dbaf422c9cc44784",
+          "investigatedAt": "2026-06-02T18:57:12.131Z",
+          "durationMs": 60130,
           "agentType": "codex",
           "model": "gpt-5.5",
           "modelConfig": {
             "model": "gpt-5.5"
           },
-          "agentSessionId": "019e877a-a742-7d92-be45-cf196c2ec2e2",
-          "findingCount": 1,
+          "agentSessionId": "019e89ad-d742-7832-9dbb-fd323731a8fb",
+          "findingCount": 0,
           "numTurns": 0.2,
           "phase": "process",
-          "costUsd": 0.23509259999999998,
+          "costUsd": 0.2314826,
           "usage": {
-            "inputTokens": 24351.4,
-            "outputTokens": 2586.6,
-            "cacheReadInputTokens": 71475.2,
+            "inputTokens": 19536.2,
+            "outputTokens": 2500.8,
+            "cacheReadInputTokens": 117555.2,
             "cacheCreationInputTokens": 0
           },
           "refusal": {

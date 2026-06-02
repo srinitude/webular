@@ -1,9 +1,9 @@
-// MAP workflow: discover all URLs for a domain via sitemap or link extraction.
-// Uses sitemapper (FOSS) for sitemaps; falls back to fetchText + extractLinks.
+// MAP workflow: discover URLs for a domain via its sitemap or page links.
+// The sitemap fetch is host-scoped + byte-capped (fetchTextWithinHost) and does
+// NOT follow off-host sitemap-index entries — no SSRF, no uncapped fetch.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
-import Sitemapper from 'sitemapper'
 import { z } from 'zod'
-import { fetchText } from '../core/http.ts'
+import { fetchTextWithinHost } from '../core/http.ts'
 import { extractLinks } from '../lib/html.ts'
 
 export const mapInput = z.object({
@@ -17,18 +17,27 @@ export const mapOutput = z.object({
   links: z.array(z.string()),
 })
 
-async function fetchSitemapLinks(site: string, timeoutMs: number): Promise<string[]> {
-  const mapper = new Sitemapper({ url: `${site}/sitemap.xml`, timeout: timeoutMs })
+function sameHost(host: string, candidate: string): boolean {
   try {
-    const { sites } = await mapper.fetch()
-    return Array.isArray(sites) ? (sites as string[]) : []
+    return new URL(candidate).hostname === host
+  } catch {
+    return false
+  }
+}
+
+async function fetchSitemapLinks(site: string): Promise<string[]> {
+  const host = new URL(site).hostname
+  try {
+    const xml = await fetchTextWithinHost(`${site}/sitemap.xml`, host, { timeoutMs: 15_000 })
+    const locs = [...xml.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/g)].map((m) => m[1] ?? '')
+    return locs.filter((u) => sameHost(host, u))
   } catch {
     return []
   }
 }
 
 async function fetchPageLinks(site: string): Promise<string[]> {
-  const html = await fetchText(site)
+  const html = await fetchTextWithinHost(site, new URL(site).hostname)
   return extractLinks(html, site)
 }
 
@@ -38,10 +47,8 @@ const discoverStep = createStep({
   outputSchema: mapOutput,
   execute: async ({ inputData }) => {
     const { url, limit = 1000 } = inputData
-    let links = await fetchSitemapLinks(url, 15_000)
-    if (links.length === 0) {
-      links = await fetchPageLinks(url)
-    }
+    const fromSitemap = await fetchSitemapLinks(url)
+    const links = fromSitemap.length > 0 ? fromSitemap : await fetchPageLinks(url)
     const deduped = [...new Set(links)].slice(0, limit)
     return { url, count: deduped.length, links: deduped }
   },

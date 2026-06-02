@@ -25,6 +25,7 @@ export async function runBatch(commands: string[][]): Promise<BatchResult> {
     stdin: new TextEncoder().encode(JSON.stringify(commands)),
     stdout: 'pipe',
     stderr: 'pipe',
+    timeout: 60_000,
   })
   const stdout = await new Response(proc.stdout).text()
   const stderr = await new Response(proc.stderr).text()

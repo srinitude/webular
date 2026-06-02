@@ -57,7 +57,6 @@
     "linkedom": "^0.18.12",
     "mammoth": "^1.12.0",
     "p-limit": "^7.3.0",
-    "sitemapper": "^4.1.6",
     "turndown": "^7.2.4",
     "unpdf": "^1.6.2",
     "zod": "latest"

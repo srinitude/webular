@@ -2,9 +2,11 @@
 // agent-browser. Non-model Mastra workflow composed of FOSS tools only.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { z } from 'zod'
-import { safePath } from '../core/safepath.ts'
+import { safePath, sandboxEnabled } from '../core/safepath.ts'
 import { runBatch } from '../lib/agentbrowser.ts'
 import { downloadToFile } from '../lib/download.ts'
+
+const MAX_CAPTURE_BYTES = 50 * 1024 * 1024
 
 export const mediaInput = z.object({
   url: z.string().url(),
@@ -27,7 +29,9 @@ async function browserCapture(
 ): Promise<number> {
   const res = await runBatch([['open', url], [action, dest], ['close']])
   if (res.code !== 0) throw new Error(`agent-browser ${action} failed: ${res.stderr.trim()}`)
-  return (await Bun.file(dest).arrayBuffer()).byteLength
+  const size = Bun.file(dest).size
+  if (size > MAX_CAPTURE_BYTES) throw new Error(`capture exceeded ${MAX_CAPTURE_BYTES} bytes`)
+  return size
 }
 
 const mediaStep = createStep({
@@ -36,6 +40,8 @@ const mediaStep = createStep({
   outputSchema: mediaOutput,
   execute: async ({ inputData }) => {
     const { url, action, maxBytes } = inputData
+    if (sandboxEnabled() && !inputData.dest)
+      throw new Error('media: -o is required when WEBULAR_SANDBOX=1')
     const dest = inputData.dest ? safePath(inputData.dest) : undefined
     if (action === 'download') {
       return { ...(await downloadToFile(url, dest, maxBytes)), action }

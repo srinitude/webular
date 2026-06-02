@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { parseFlags } from '../core/args.ts'
 import { emit, logErr } from '../core/output.ts'
-import { safePath } from '../core/safepath.ts'
+import { safePath, sandboxEnabled } from '../core/safepath.ts'
 import { monitorWorkflow } from '../workflows/monitor.ts'
 
 interface WorkflowOutcome {
@@ -16,6 +16,7 @@ interface WorkflowOutcome {
 function resolveDbPath(flagValue: unknown): string {
   if (typeof flagValue === 'string' && flagValue.length > 0) return flagValue
   if (process.env.WEBULAR_DB) return process.env.WEBULAR_DB
+  if (sandboxEnabled()) return 'webular-monitor.db'
   return join(tmpdir(), 'webular-monitor.db')
 }
 

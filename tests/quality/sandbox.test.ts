@@ -26,6 +26,7 @@ async function scrape(args: string[]): Promise<{ code: number; err: string }> {
 describe('WEBULAR_SANDBOX confines output paths (opt-in hardening)', () => {
   afterAll(async () => {
     await rm(`${ROOT}${OUT}`, { force: true })
+    await rm(`${ROOT}webular-monitor.db`, { force: true })
   })
 
   test('rejects an absolute -o path', async () => {
@@ -71,5 +72,16 @@ describe('WEBULAR_SANDBOX confines output paths (opt-in hardening)', () => {
     await rm(target, { recursive: true, force: true })
     expect(code).not.toBe(0)
     expect(err.toLowerCase()).toContain('sandbox')
+  }, 30_000)
+
+  test('sandboxed monitor accepts its default database path', async () => {
+    const proc = Bun.spawn(
+      ['bun', `${ROOT}src/commands/monitor.ts`, '--url', 'https://example.com', '--json'],
+      { cwd: ROOT, stdout: 'pipe', stderr: 'pipe', env: { ...process.env, WEBULAR_SANDBOX: '1' } },
+    )
+    const out = await new Response(proc.stdout).text()
+    const code = await proc.exited
+    expect(code).toBe(0)
+    expect(out).toContain('changeStatus')
   }, 30_000)
 })

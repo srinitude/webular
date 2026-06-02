@@ -2,6 +2,7 @@
 // snapshot [-> screenshot] -> close), composed as a Mastra non-model workflow.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { z } from 'zod'
+import { safePath } from '../core/safepath.ts'
 import { runBatch } from '../lib/agentbrowser.ts'
 
 export const actInput = z.object({
@@ -21,7 +22,7 @@ const actStep = createStep({
   outputSchema: actOutput,
   execute: async ({ inputData }) => {
     const cmds: string[][] = [['open', inputData.url], ['snapshot']]
-    if (inputData.screenshot) cmds.push(['screenshot', inputData.screenshot])
+    if (inputData.screenshot) cmds.push(['screenshot', safePath(inputData.screenshot)])
     cmds.push(['close'])
     const res = await runBatch(cmds)
     if (res.code !== 0) throw new Error(`agent-browser failed: ${res.stderr.trim()}`)
