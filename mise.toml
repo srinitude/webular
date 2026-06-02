@@ -1,0 +1,17 @@
+# webular — toolchain pinning (BOOTSTRAP).
+#
+# IMPORTANT (TDD ordering): the [tasks] dependency graph is intentionally
+# NOT defined here yet. Per project rules, the mise task graph is authored
+# only AFTER the mermaid diagrams in docs/diagrams/ are generated, which are
+# in turn based on the synthesized research in research/INVENTORY.md.
+#
+# This file currently pins only the toolchain so `mise install` is
+# deterministic across local + CI environments.
+
+min_version = "2026.5.18"
+
+[tools]
+bun = "1.3.14"
+
+[env]
+WEBULAR_HOME = "{{config_root}}"

@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+/bin/webular
+*.tsbuildinfo
+
+# Bun
+.bun/
+
+# Logs
+*.log
+
+# Env / secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# mise local overrides
+mise.local.toml
+.mise.local.toml
+
+# Coverage
+coverage/
+
+# OS
+.DS_Store

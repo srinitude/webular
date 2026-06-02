@@ -1,0 +1,63 @@
+{
+  "name": "webular",
+  "version": "0.0.0",
+  "description": "Universal web research CLI — scrape, crawl, map, extract, search, summarize and gather context by composing free & open-source libraries into Mastra workflows/tools, orchestrated through a deterministic mise task graph.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "author": "Kiren Srinivasan <kiren@fantasymetals.com>",
+  "homepage": "https://github.com/srinitude/webular",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/srinitude/webular.git"
+  },
+  "bugs": {
+    "url": "https://github.com/srinitude/webular/issues"
+  },
+  "keywords": [
+    "web",
+    "scraping",
+    "scrape",
+    "crawler",
+    "crawl",
+    "map",
+    "extract",
+    "search",
+    "research",
+    "summarize",
+    "context",
+    "cli",
+    "mastra",
+    "bun"
+  ],
+  "bin": {
+    "webular": "./bin/webular.ts"
+  },
+  "files": [
+    "bin",
+    "src",
+    "tasks",
+    "mise.toml",
+    "docs/diagrams",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "bun": "latest"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@mastra/core": "latest",
+    "@mastra/loggers": "latest",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "latest",
+    "@mermaid-js/mermaid-cli": "latest",
+    "@types/bun": "latest",
+    "deepsec": "latest",
+    "opensrc": "latest",
+    "typescript": "6.0.3"
+  }
+}
