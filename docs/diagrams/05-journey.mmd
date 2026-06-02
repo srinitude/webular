@@ -1,0 +1,20 @@
+%% webular — User journey: research a topic from a cold install.
+journey
+    title webular — research a topic from zero
+    section Install and verify
+      bun add -g webular: 5: User
+      webular doctor: 4: User
+      webular tasks: 3: User
+    section Discover
+      webular map a-site: 4: User
+      webular search a-topic: 5: User
+    section Gather
+      webular scrape a-url: 5: User
+      webular crawl a-site: 3: User
+      webular extract with-schema: 4: User
+    section Synthesize
+      webular summarize: 5: User
+      webular research a-topic: 5: User
+    section Deliver
+      write report via -o: 5: User
+      webular monitor a-url: 4: User

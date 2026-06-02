@@ -1,0 +1,29 @@
+%% webular — Invocation/run lifecycle (sync + async jobs).
+%% Covers crawl/research/monitor async polling and cancellation.
+stateDiagram-v2
+    [*] --> Parsed
+    Parsed --> Rejected: invalid args
+    Parsed --> Routed: valid args
+    Routed --> Building: mise resolves depends chain
+    Building --> Failed: build or lint error
+    Building --> Running: toolchain ready
+    Running --> Streaming: emit progress (SSE)
+    Streaming --> Running
+    Running --> Polling: async job submitted
+    Polling --> Running: not done yet
+    Running --> Completed: result ready
+    Running --> Failed: runtime error
+    Running --> Cancelled: SIGINT / AbortSignal
+    Completed --> [*]
+    Failed --> [*]
+    Cancelled --> [*]
+    Rejected --> [*]
+
+    note right of Routed
+      CLI never runs logic directly.
+      mise owns the dependency graph.
+    end note
+    note right of Polling
+      crawl / research / monitor
+      jobs poll until terminal.
+    end note

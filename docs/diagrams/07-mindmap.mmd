@@ -1,0 +1,67 @@
+%% webular — Capability taxonomy: 12 domains mapped to FOSS building blocks.
+mindmap
+  root((webular))
+    SEARCH
+      web SearXNG/DDG
+      news RSS/GDELT
+      image ddg/icrawler
+      video yt-dlp
+      academic OpenAlex/arxiv
+      finance yahoo-finance2
+      POI Overpass/OSM
+      suggest-spell nspell
+    SCRAPE
+      fetch Bun.fetch
+      render Playwright
+      readability mozilla
+      html2md turndown
+      actions Playwright-API
+    CRAWL
+      bfs crawlee
+      robots robots-parser
+      concurrency foreach
+    MAP
+      sitemap sitemapper
+      link-bfs HTMLRewriter
+    EXTRACT
+      schema zod+instructor
+      css-xpath HTMLRewriter
+      highlights bm25
+    SUMMARIZE
+      extractive sumy
+      grounded Mastra-Agent+ollama
+      pageQA RAG
+    RESEARCH
+      multistep dowhile-loop
+      ragcontext mastra-rag
+      enrich foreach-rows
+      mcptools mcp-sdk
+    PARSE
+      pdf pdf-inspector/unpdf
+      docx mammoth
+      xlsx SheetJS
+      unified markitdown
+    MEDIA
+      screenshot Playwright
+      pdfgen Playwright
+      download yt-dlp
+    MONITOR
+      diff deep-diff
+      schedule mastra-cron
+      judge Agent
+    PROXY
+      proxy Bun.fetch-proxy
+      stealth playwright-extra
+      geo exit-node
+    BATCH
+      concurrent foreach
+      async startAsync
+      webhooks Hono/Bun.serve
+      sse async-generator
+      storage Bun.s3
+    ACT
+      open agent-browser
+      snapshot a11y-tree
+      click-fill by-ref
+      screenshot page
+      interact stateful

@@ -1,0 +1,72 @@
+%% webular — Class/module model. The code follows this structure.
+%% CLI -> Router -> MiseGateway -> (mise runs) CommandEntry -> Registry
+%% -> Workflow -> Step -> Tool -> FossAdapter. 200 LOC/file, 30/construct.
+classDiagram
+    direction LR
+    class Cli {
+      +main(argv) ExitCode
+    }
+    class Router {
+      +toTaskRef(inv) TaskRef
+      +validate(inv) Issues
+    }
+    class TaskRef {
+      +task string
+      +args Args
+      +env Env
+    }
+    class MiseGateway {
+      +run(ref) RunResult
+    }
+    class CommandEntry {
+      +main(argv) ExitCode
+    }
+    class CapabilityRegistry {
+      +get(name) WorkflowFactory
+      +list() Names
+    }
+    class Workflow {
+      +id string
+      +run(input) Result
+    }
+    class Step {
+      +id string
+      +execute(ctx) StepOut
+    }
+    class Tool {
+      +id string
+      +inputSchema Schema
+      +outputSchema Schema
+      +execute(input) Out
+    }
+    class FossAdapter {
+      <<interface>>
+      +invoke(req) Res
+    }
+    class Cache {
+      +get(key) Entry
+      +set(key, val, ttl) void
+    }
+    class Formatter {
+      +render(result, fmt) string
+    }
+    class Logger {
+      +info(msg) void
+      +error(msg) void
+    }
+    Cli --> Router
+    Cli --> Formatter
+    Cli --> Logger
+    Router --> TaskRef
+    Router --> MiseGateway
+    MiseGateway ..> CommandEntry : mise run bun
+    CommandEntry --> CapabilityRegistry
+    CapabilityRegistry --> Workflow
+    Workflow "1" o-- "many" Step
+    class AgentBrowser {
+      +runBatch(cmds) BatchResult
+    }
+    Step --> Tool
+    Step --> Cache
+    Tool ..|> FossAdapter
+    AgentBrowser ..|> FossAdapter

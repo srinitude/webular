@@ -50,14 +50,29 @@
   "dependencies": {
     "@mastra/core": "latest",
     "@mastra/loggers": "latest",
+    "@mozilla/readability": "^0.6.0",
+    "agent-browser": "^0.27.1",
+    "diff": "^9.0.0",
+    "duck-duck-scrape": "^2.2.7",
+    "linkedom": "^0.18.12",
+    "mammoth": "^1.12.0",
+    "p-limit": "^7.3.0",
+    "sitemapper": "^4.1.6",
+    "turndown": "^7.2.4",
+    "unpdf": "^1.6.2",
     "zod": "latest"
   },
   "devDependencies": {
     "@biomejs/biome": "latest",
     "@mermaid-js/mermaid-cli": "latest",
     "@types/bun": "latest",
+    "@types/diff": "^8.0.0",
+    "@types/turndown": "^5.0.6",
     "deepsec": "latest",
     "opensrc": "latest",
     "typescript": "6.0.3"
-  }
+  },
+  "trustedDependencies": [
+    "agent-browser"
+  ]
 }

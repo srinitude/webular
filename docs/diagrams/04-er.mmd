@@ -1,0 +1,84 @@
+%% webular — Data model (bun:sqlite): commands, runs, cache, monitors.
+erDiagram
+    CAPABILITY_DOMAIN ||--o{ COMMAND : groups
+    COMMAND ||--|| MISE_TASK : "routed-via"
+    COMMAND ||--o{ RUN : invokes
+    COMMAND }o--o{ TOOL : composes
+    TOOL }o--o{ FOSS_LIB : "built-from"
+    RUN ||--o{ RESULT : produces
+    RUN ||--o{ SOURCE : cites
+    RUN ||--o{ CACHE_ENTRY : "reads-writes"
+    MONITOR ||--|| COMMAND : schedules
+    MONITOR ||--o{ SNAPSHOT : tracks
+    SNAPSHOT ||--o{ DIFF : yields
+
+    CAPABILITY_DOMAIN {
+        string name PK
+        string description
+    }
+    COMMAND {
+        string id PK
+        string domain FK
+        string mise_task
+        string summary
+    }
+    MISE_TASK {
+        string name PK
+        string depends_on
+        string run
+    }
+    TOOL {
+        string id PK
+        string input_schema
+        string output_schema
+    }
+    FOSS_LIB {
+        string name PK
+        string ecosystem
+        string license
+    }
+    RUN {
+        string id PK
+        string command FK
+        string status
+        int started_at
+        int finished_at
+    }
+    RESULT {
+        string id PK
+        string run FK
+        string format
+        blob payload
+    }
+    SOURCE {
+        string id PK
+        string run FK
+        string url
+        string excerpt
+        float confidence
+    }
+    CACHE_ENTRY {
+        string url PK
+        blob content
+        int fetched_at
+        int ttl
+    }
+    MONITOR {
+        string id PK
+        string command FK
+        string schedule
+        string goal
+    }
+    SNAPSHOT {
+        string id PK
+        string monitor FK
+        string url
+        string hash
+        int taken_at
+    }
+    DIFF {
+        string id PK
+        string snapshot FK
+        string change_status
+        string diff_text
+    }

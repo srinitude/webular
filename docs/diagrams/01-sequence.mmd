@@ -1,0 +1,28 @@
+%% webular — Runtime sequence: every subcommand/flag routes through mise.
+%% Source of truth for the CLI -> mise -> Mastra workflow -> FOSS tool flow.
+sequenceDiagram
+    autonumber
+    actor User
+    participant CLI as webular CLI
+    participant Router as arg-to-task router
+    participant Mise as mise task graph
+    participant WF as Mastra Workflow
+    participant Tool as Mastra Tool / FOSS adapter
+    participant Web as Target web
+
+    User->>CLI: webular scrape URL --format md -o out.md
+    CLI->>Router: parse argv and flags (clig.dev)
+    Router->>Router: validate with zod, build task ref
+    Note over Router,Mise: CLI never calls code directly — every<br/>subcommand, flag and parameter routes to mise
+    Router->>Mise: mise run webular:scrape -- --url URL --format md
+    Mise->>Mise: resolve depends chain build then scrape (single path)
+    Mise->>WF: bun src/commands/scrape.ts (createRun, run.start)
+    WF->>Tool: fetch step (Bun.fetch or Playwright)
+    Tool->>Web: GET URL
+    Web-->>Tool: HTML or PDF bytes
+    Tool-->>WF: raw content
+    WF->>Tool: clean step (readability + turndown)
+    Tool-->>WF: markdown + metadata
+    WF-->>Mise: result on stdout (md or --json)
+    Mise-->>CLI: exit code + stdout/stderr
+    CLI-->>User: rendered TTY output or file via -o

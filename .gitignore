@@ -27,3 +27,8 @@ coverage/
 
 # OS
 .DS_Store
+
+research/
+
+# deepsec scan workspace (has its own node_modules); findings exported to docs/security/
+.deepsec/

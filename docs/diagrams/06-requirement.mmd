@@ -1,0 +1,77 @@
+%% webular — Requirements traceability: project rules to system elements.
+requirementDiagram
+    requirement tdd_ordering {
+        id: R1
+        text: diagrams before mise tasks before tests before code
+        risk: high
+        verifymethod: inspection
+    }
+    requirement loc_limits {
+        id: R2
+        text: 200 lines per file 30 per construct max nesting depth 3
+        risk: medium
+        verifymethod: test
+    }
+    requirement mise_routing {
+        id: R3
+        text: every subcommand and flag routes through mise with no cycles
+        risk: high
+        verifymethod: test
+    }
+    requirement foss_only {
+        id: R4
+        text: compose free and open source libraries with no paid api
+        risk: medium
+        verifymethod: inspection
+    }
+    requirement clig_compliance {
+        id: R5
+        text: follow clig dev command line guidelines
+        risk: low
+        verifymethod: demonstration
+    }
+    requirement security_audit {
+        id: R6
+        text: deepsec audit of composed tools with no mocks
+        risk: high
+        verifymethod: test
+    }
+    requirement real_tests {
+        id: R7
+        text: real user facing tests for contracts apis and integration
+        risk: high
+        verifymethod: test
+    }
+    requirement ci_cd {
+        id: R8
+        text: local and remote ci cd via mise on a single default path
+        risk: medium
+        verifymethod: demonstration
+    }
+    element mise_graph {
+        type: taskrunner
+    }
+    element mastra_tools {
+        type: runtime
+    }
+    element cli_entry {
+        type: interface
+    }
+    element deepsec_scan {
+        type: audit
+    }
+    element bun_test {
+        type: testsuite
+    }
+    element ci_pipeline {
+        type: pipeline
+    }
+    mise_graph - satisfies -> mise_routing
+    mise_graph - satisfies -> tdd_ordering
+    ci_pipeline - satisfies -> ci_cd
+    mastra_tools - satisfies -> foss_only
+    cli_entry - satisfies -> clig_compliance
+    deepsec_scan - verifies -> security_audit
+    bun_test - verifies -> real_tests
+    bun_test - verifies -> loc_limits
+    ci_cd - traces -> mise_routing

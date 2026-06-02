@@ -1,12 +1,15 @@
-# webular — toolchain pinning (BOOTSTRAP).
+# webular — universal task dependency graph (mise).
 #
-# IMPORTANT (TDD ordering): the [tasks] dependency graph is intentionally
-# NOT defined here yet. Per project rules, the mise task graph is authored
-# only AFTER the mermaid diagrams in docs/diagrams/ are generated, which are
-# in turn based on the synthesized research in research/INVENTORY.md.
+# Ordering note: the 7 mermaid diagrams in docs/diagrams/ are authored and
+# rendered BEFORE this task graph, which is authored BEFORE tests, which are
+# authored BEFORE code. See docs/diagrams/06-requirement.mmd (R1).
 #
-# This file currently pins only the toolchain so `mise install` is
-# deterministic across local + CI environments.
+# Graph shape (zero cycles — it is a tree rooted at `setup`):
+#   setup -> format -> lint -> typecheck -> build -> test -> validate -> ci
+#   setup -> run:<command>            (one logical predecessor each)
+# The CI/CD spine (setup..ci) is the SINGLE default dependency path.
+# The CLI never calls code directly: every subcommand/flag is routed as
+#   `mise run run:<command> -- <args>`  (see bin/webular.ts).
 
 min_version = "2026.5.18"
 
@@ -15,3 +18,150 @@ bun = "1.3.14"
 
 [env]
 WEBULAR_HOME = "{{config_root}}"
+WEBULAR_ROUTED_VIA_MISE = "1"
+
+# ───────────────────────── Quality / CI spine ─────────────────────────
+# Single linear default dependency path. Each task depends on exactly one
+# logical predecessor, making the whole pipeline deterministic.
+
+[tasks.setup]
+description = "Install pinned dependencies — root of the universal task graph"
+run = "bun install 1>&2"
+sources = ["package.json", "bun.lock"]
+outputs = ["node_modules/.bin/biome"]
+
+[tasks.format]
+description = "Format + organize imports + safe-fix sources with Biome"
+depends = ["setup"]
+run = "bunx biome check --write ."
+
+[tasks.lint]
+description = "Lint + format-verify with Biome (CI gate)"
+depends = ["format"]
+run = "bunx biome check ."
+
+[tasks.typecheck]
+description = "Compilation: strict TypeScript typecheck"
+depends = ["lint"]
+run = "bunx tsc --noEmit"
+
+[tasks.build]
+description = "Build: bundle the CLI entry to dist/"
+depends = ["typecheck"]
+run = "bun build {{config_root}}/bin/webular.ts --target=bun --outdir={{config_root}}/dist"
+sources = ["src/**/*.ts", "bin/**/*.ts", "tsconfig.json"]
+outputs = ["dist/webular.js"]
+
+[tasks.test]
+description = "Run the bun test suite (CI/CD graph + contracts + integration)"
+depends = ["build"]
+run = "bun test"
+
+[tasks.validate]
+description = "Validate gate — aggregates the full quality spine"
+depends = ["test"]
+run = "echo 'webular: validate OK'"
+
+[tasks.ci]
+description = "CI entry — single default dependency path (local + remote)"
+depends = ["validate"]
+run = "echo 'webular: ci complete'"
+
+[tasks.clean]
+description = "Remove build artifacts"
+run = "rm -rf {{config_root}}/dist"
+
+# ───────────────────────── Capability commands ─────────────────────────
+# Each is a Mastra workflow entrypoint. One logical predecessor (`setup`),
+# branching off the root so command runs stay fast and deterministic
+# without dragging the lint/typecheck spine into every invocation.
+
+[tasks."run:search"]
+description = "SEARCH — web/news/image/video/specialized (SearXNG/DDG/feeds/OpenAlex)"
+depends = ["setup"]
+run = "bun {{config_root}}/src/commands/search.ts"
+
+[tasks."run:scrape"]
+description = "SCRAPE — single URL to clean content (Bun.fetch/Playwright/readability)"
+depends = ["setup"]
+run = "bun {{config_root}}/src/commands/scrape.ts"
+
+[tasks."run:crawl"]
+description = "CRAWL — recursive site traversal (crawlee / foreach + queue)"
+depends = ["setup"]
+run = "bun {{config_root}}/src/commands/crawl.ts"
+
+[tasks."run:map"]
+description = "MAP — URL discovery only (sitemapper + HTMLRewriter link BFS)"
+depends = ["setup"]
+run = "bun {{config_root}}/src/commands/map.ts"
+
+[tasks."run:extract"]
+description = "EXTRACT — structured/schema data (HTMLRewriter/cheerio + local LLM)"
+depends = ["setup"]
+run = "bun {{config_root}}/src/commands/extract.ts"
+
+[tasks."run:summarize"]
+description = "SUMMARIZE — page/extractive summary (sumy / Mastra Agent)"
+depends = ["setup"]
+run = "bun {{config_root}}/src/commands/summarize.ts"
+
+[tasks."run:answer"]
+description = "ANSWER — grounded answer (search -> fetch -> synthesize)"
+depends = ["setup"]
+run = "bun {{config_root}}/src/commands/answer.ts"
+
+[tasks."run:research"]
+description = "RESEARCH — multi-step agentic research (Mastra .dowhile loop)"
+depends = ["setup"]
+run = "bun {{config_root}}/src/commands/research.ts"
+
+[tasks."run:parse"]
+description = "PARSE — documents to md/json (pdf-inspector/unpdf/mammoth/SheetJS)"
+depends = ["setup"]
+run = "bun {{config_root}}/src/commands/parse.ts"
+
+[tasks."run:media"]
+description = "MEDIA — screenshot/pdf/download (Playwright/yt-dlp)"
+depends = ["setup"]
+run = "bun {{config_root}}/src/commands/media.ts"
+
+[tasks."run:monitor"]
+description = "MONITOR — change tracking + scheduled monitors (diff + bun:sqlite)"
+depends = ["setup"]
+run = "bun {{config_root}}/src/commands/monitor.ts"
+
+[tasks."run:batch"]
+description = "BATCH — concurrent/async over many targets (foreach/startAsync)"
+depends = ["setup"]
+run = "bun {{config_root}}/src/commands/batch.ts"
+
+[tasks."run:doctor"]
+description = "DOCTOR — environment + toolchain diagnostics (clig.dev)"
+depends = ["setup"]
+run = "bun {{config_root}}/src/commands/doctor.ts"
+
+[tasks."run:tasks"]
+description = "TASKS — introspect the mise task graph this CLI routes through"
+depends = ["setup"]
+run = "bun {{config_root}}/src/commands/tasks.ts"
+
+[tasks."run:mcp"]
+description = "MCP — expose webular capabilities as an MCP server"
+depends = ["setup"]
+run = "bun {{config_root}}/src/commands/mcp.ts"
+
+[tasks."run:diagram"]
+description = "DIAGRAM — (re)render the design diagrams via mmdc"
+depends = ["setup"]
+run = "bun {{config_root}}/src/commands/diagram.ts"
+
+[tasks."run:audit"]
+description = "AUDIT — deepsec vulnerability scan of composed tools"
+depends = ["setup"]
+run = "bun {{config_root}}/src/commands/audit.ts"
+
+[tasks."run:act"]
+description = "ACT — drive a real browser (open/snapshot/screenshot/interact) via agent-browser"
+depends = ["setup"]
+run = "bun {{config_root}}/src/commands/act.ts"
