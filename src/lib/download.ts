@@ -1,6 +1,8 @@
-// FOSS download helper — wraps Bun.fetch for binary/media downloads.
-// Streams to disk with a byte cap; returns bytes written and the save path.
+// FOSS download helper — wraps Bun.fetch for binary/media downloads. Streams to
+// a temp file with a byte cap, then renames on success; never leaves a partial
+// file at the destination. Returns bytes written and the save path.
 import { randomUUID } from 'node:crypto'
+import { rename, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { httpGet } from '../core/http.ts'
@@ -18,18 +20,23 @@ function tempPath(): string {
 }
 
 async function streamToFile(res: Response, outPath: string, maxBytes: number): Promise<number> {
-  const writer = Bun.file(outPath).writer()
+  const tmp = `${outPath}.part-${randomUUID()}`
+  const writer = Bun.file(tmp).writer()
   let total = 0
-  for await (const chunk of res.body as ReadableStream<Uint8Array>) {
-    total += chunk.byteLength
-    if (total > maxBytes) {
-      await writer.end()
-      throw new Error(`download exceeded max ${maxBytes} bytes`)
+  try {
+    for await (const chunk of res.body as ReadableStream<Uint8Array>) {
+      total += chunk.byteLength
+      if (total > maxBytes) throw new Error(`download exceeded max ${maxBytes} bytes`)
+      writer.write(chunk)
     }
-    writer.write(chunk)
+    await writer.end()
+    await rename(tmp, outPath)
+    return total
+  } catch (err) {
+    await writer.end()
+    await rm(tmp, { force: true })
+    throw err
   }
-  await writer.end()
-  return total
 }
 
 export async function downloadToFile(

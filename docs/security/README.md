@@ -72,6 +72,28 @@ the base directory — absolute paths, `..` traversal, and symlink targets are
 rejected (`src/core/safepath.ts`). Off by default, so normal CLI use is
 unaffected.
 
+## Re-scan follow-up
+
+A forced full re-investigation (`deepsec process --reinvestigate`) surfaced
+three issues in the hardening code itself, now fixed:
+
+- **HIGH — sandbox symlinked-parent bypass** (`safepath.ts`): now canonicalizes
+  the deepest existing ancestor with `realpath`, so a symlinked parent directory
+  can no longer escape the base. Covered by a contract test.
+- **BUG — unbounded text fetch** (`http.ts`): `fetchText` now reads through a
+  25 MB streamed byte cap (rejects oversized/chunked responses).
+- **BUG — partial file on cap-exceed** (`download.ts`): downloads stream to a
+  temp file and `rename` on success; the temp is removed on failure, so the
+  destination is never left truncated.
+
+Note: deepsec re-investigates against a per-file mirror that only refreshes when
+its regex matchers re-fire, so the committed report above still lists the
+already-fixed `diagram`/`tasks`/`snapshot` bugs from a **stale mirror** (its
+text even claims `DIAGRAMS_DIR is fixed to /Users/...`, which the current code
+no longer does — it uses `import.meta.url`). A pristine re-confirm requires
+re-initialising the `.deepsec` workspace so the mirror is rebuilt from current
+code.
+
 ## Re-running the audit
 
 ```bash
