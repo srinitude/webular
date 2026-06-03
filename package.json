@@ -1,6 +1,6 @@
 {
   "name": "webular",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Universal web research CLI — scrape, crawl, map, extract, search, summarize and gather context by composing free & open-source libraries into Mastra workflows/tools, orchestrated through a deterministic mise task graph.",
   "type": "module",
   "license": "Apache-2.0",
