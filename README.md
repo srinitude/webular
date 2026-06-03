@@ -55,6 +55,15 @@ webular map https://example.com
 webular research "web scraping in 2026" --depth 3 -o report.md
 ```
 
+## Use cases
+
+webular covers **260+ concrete web use cases** across every command group —
+price & competitive intelligence, RAG/LLM-context ingestion, lead-gen, SEO
+extraction, content/research aggregation, change monitoring, visual QA, document
+parsing, and more. See [`docs/USE-CASES.md`](docs/USE-CASES.md) for the full
+catalog; each entry is exercised end-to-end through the CLI (latest run:
+**264/264 passing** — [`docs/usecase-results.md`](docs/usecase-results.md)).
+
 ## Architecture
 
 ```

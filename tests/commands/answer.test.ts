@@ -20,21 +20,25 @@ async function runAnswer(args: string[]): Promise<{ code: number; out: string; e
 }
 
 describe('webular answer — grounded answer from real search + fetch', () => {
-  test.skipIf(SKIP_LIVE)('returns JSON with answer and sources for a real query', async () => {
-    const { code, out } = await runAnswer([
-      '--query',
-      'what is the bun javascript runtime',
-      '--json',
-    ])
-    expect(code).toBe(0)
-    const data = JSON.parse(out)
-    expect(typeof data.answer).toBe('string')
-    expect(data.answer.length).toBeGreaterThan(0)
-    expect(Array.isArray(data.sources)).toBe(true)
-    expect(data.sources.length).toBeGreaterThan(0)
-    expect(typeof data.sources[0].url).toBe('string')
-    expect(data.sources[0].url.length).toBeGreaterThan(0)
-  }, 45_000)
+  test.skipIf(SKIP_LIVE)(
+    'returns JSON with answer and sources for a real query',
+    async () => {
+      const { code, out } = await runAnswer([
+        '--query',
+        'what is the bun javascript runtime',
+        '--json',
+      ])
+      expect(code).toBe(0)
+      const data = JSON.parse(out)
+      expect(typeof data.answer).toBe('string')
+      expect(data.answer.length).toBeGreaterThan(0)
+      expect(Array.isArray(data.sources)).toBe(true)
+      expect(data.sources.length).toBeGreaterThan(0)
+      expect(typeof data.sources[0].url).toBe('string')
+      expect(data.sources[0].url.length).toBeGreaterThan(0)
+    },
+    45_000,
+  )
 
   test('exits with code 2 when query is missing', async () => {
     const { code, err } = await runAnswer([])

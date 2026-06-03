@@ -51,6 +51,14 @@ function isRedirect(status: number): boolean {
   return status >= 300 && status < 400
 }
 
+// Same registrable site (apex-based): allows apex<->www and subdomains of the
+// same domain, but blocks other domains and internal IPs (SSRF stays closed).
+function sameSite(allowed: string, candidate: string): boolean {
+  if (allowed === candidate) return true
+  const apex = (h: string): string => h.split('.').slice(-2).join('.')
+  return apex(allowed) === apex(candidate)
+}
+
 // Fetch text but follow redirects MANUALLY, blocking any hop that leaves `host`.
 // Used by scoped crawls so a same-host page cannot redirect off-scope (SSRF).
 export async function fetchTextWithinHost(
@@ -65,7 +73,8 @@ export async function fetchTextWithinHost(
     const location = res.headers.get('location')
     if (!location) return okText(res, current)
     current = new URL(location, current).toString()
-    if (new URL(current).hostname !== host) throw new Error(`redirect off-host blocked: ${current}`)
+    if (!sameSite(host, new URL(current).hostname))
+      throw new Error(`redirect off-site blocked: ${current}`)
   }
   throw new Error(`too many redirects: ${url}`)
 }
