@@ -14,7 +14,3 @@ These 7 mermaid diagrams are the **design basis** for all downstream work
 | 05 | [journey](05-journey.mmd) | userJourney | User research journey, cold install → report |
 | 06 | [requirement](06-requirement.mmd) | requirementDiagram | Project rules traced to system elements |
 | 07 | [mindmap](07-mindmap.mmd) | mindmap | 12-domain capability taxonomy → FOSS libraries |
-
-- Feature source of truth: [`research/INVENTORY.md`](../../research/INVENTORY.md)
-- FOSS building blocks: [`research/FOSS.md`](../../research/FOSS.md)
-- Repo/source cache manifest: [`research/REPOS.md`](../../research/REPOS.md)

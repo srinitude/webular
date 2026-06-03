@@ -35,7 +35,6 @@
   "files": [
     "bin",
     "src",
-    "tasks",
     "mise.toml",
     "docs/diagrams",
     "README.md",

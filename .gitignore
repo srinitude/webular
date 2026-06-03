@@ -30,5 +30,10 @@ coverage/
 
 research/
 
-# deepsec scan workspace (has its own node_modules); findings exported to docs/security/
+# Internal artifacts — not part of the distributable npm package
+docs/security/
+docs/USE-CASES.md
+docs/usecase-results.md
+
+# deepsec scan workspace (has its own node_modules)
 .deepsec/

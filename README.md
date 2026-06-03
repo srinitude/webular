@@ -5,9 +5,7 @@
 `webular` distills the unique web capabilities of seven commercial web-data
 products (Firecrawl, Exa, Perplexity, Tavily, Parallel, Nimble, Brave) into a
 single CLI that needs **no paid API** — every capability is implemented from
-open-source building blocks. See [`research/INVENTORY.md`](research/INVENTORY.md)
-for the full capability catalog and [`research/FOSS.md`](research/FOSS.md) for
-the library mapping.
+open-source building blocks.
 
 ## Install
 
@@ -55,15 +53,6 @@ webular map https://example.com
 webular research "web scraping in 2026" --depth 3 -o report.md
 ```
 
-## Use cases
-
-webular covers **260+ concrete web use cases** across every command group —
-price & competitive intelligence, RAG/LLM-context ingestion, lead-gen, SEO
-extraction, content/research aggregation, change monitoring, visual QA, document
-parsing, and more. See [`docs/USE-CASES.md`](docs/USE-CASES.md) for the full
-catalog; each entry is exercised end-to-end through the CLI (latest run:
-**264/264 passing** — [`docs/usecase-results.md`](docs/usecase-results.md)).
-
 ## Architecture
 
 ```
@@ -101,5 +90,4 @@ services.
 ## License
 
 Apache-2.0 © Kiren Srinivasan. Built on Bun, Mastra, mermaid-cli, opensrc,
-deepsec, and agent-browser, plus the open-source libraries cataloged in
-`research/FOSS.md`.
+deepsec, and agent-browser, plus a set of open-source libraries.
