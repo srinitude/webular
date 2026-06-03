@@ -3,6 +3,7 @@
 // default: start an MCP server over stdio exposing webTools
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
+import pkg from '../../package.json' with { type: 'json' }
 import { parseFlags } from '../core/args.ts'
 import { emit, logErr } from '../core/output.ts'
 import { webTools } from '../tools/web.ts'
@@ -10,7 +11,7 @@ import { webTools } from '../tools/web.ts'
 const TOOL_IDS = Object.values(webTools).map((t) => t.id)
 
 async function startServer(): Promise<void> {
-  const server = new McpServer({ name: 'webular', version: '0.0.0' })
+  const server = new McpServer({ name: 'webular', version: pkg.version })
   const reg = server as unknown as {
     registerTool: (
       id: string,

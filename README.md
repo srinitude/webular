@@ -1,5 +1,10 @@
 # webular
 
+[![npm](https://img.shields.io/npm/v/webular.svg)](https://www.npmjs.com/package/webular)
+[![CI](https://github.com/srinitude/webular/actions/workflows/ci.yml/badge.svg)](https://github.com/srinitude/webular/actions/workflows/ci.yml)
+[![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![runtime: Bun](https://img.shields.io/badge/runtime-Bun-f9f1e1.svg?logo=bun&logoColor=black)](https://bun.com)
+
 > Universal web research CLI — scrape, crawl, map, extract, search, summarize, and gather context, by composing **free & open-source** libraries into **Mastra** workflows/tools, orchestrated through a deterministic **mise** task graph, on the **Bun** runtime.
 
 `webular` distills the unique web capabilities of seven commercial web-data
@@ -25,7 +30,7 @@ webular --help
 
 | Command | Capability |
 |---|---|
-| `search`    | Search web/news/images/video & specialized sources (SearXNG/DDG-class) |
+| `search`    | Keyless web search via DuckDuckGo's no-JS HTML endpoint |
 | `scrape`    | Fetch one URL → clean markdown/JSON (Bun.fetch + Readability + Turndown) |
 | `crawl`     | Recursive same-host BFS crawl |
 | `map`       | Discover all URLs for a domain (sitemap + link BFS) |
@@ -34,7 +39,7 @@ webular --help
 | `answer`    | Grounded answer (search → fetch → synthesize) |
 | `research`  | Multi-step research loop → cited markdown report |
 | `parse`     | Local docs → markdown (PDF/DOCX/HTML/CSV/JSON/TXT) |
-| `media`     | Download media; screenshot/PDF via Playwright |
+| `media`     | Download media; screenshot/PDF via a real browser (agent-browser) |
 | `monitor`   | Track changes to a URL over time (diff + bun:sqlite) |
 | `batch`     | Run a capability over many targets concurrently |
 | `doctor`    | Diagnose environment & toolchain |
@@ -67,7 +72,7 @@ command branching off `setup`). Each command is a **Mastra workflow** built from
 
 The design is captured in seven diagrams under [`docs/diagrams/`](docs/diagrams/)
 (sequence, class, state, ER, user-journey, requirement, mindmap), generated with
-`mmdc` and treated as the source of truth for the implementation.
+`mmdc` as the design basis for the implementation.
 
 Designed per the [Command Line Interface Guidelines](https://clig.dev): machine
 data to stdout, logs to stderr, `--json` everywhere, `-o` file sinks, forgiving

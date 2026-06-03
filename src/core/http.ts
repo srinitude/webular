@@ -1,5 +1,7 @@
 // FOSS fetch layer built on Bun.fetch (proxy, timeout, user-agent, redirects).
-const USER_AGENT = 'webular/0.0.0 (+https://github.com/srinitude/webular)'
+import pkg from '../../package.json' with { type: 'json' }
+
+const USER_AGENT = `webular/${pkg.version} (+https://github.com/srinitude/webular)`
 const MAX_TEXT_BYTES = 25 * 1024 * 1024
 
 export interface FetchOptions {

@@ -14,3 +14,8 @@ These 7 mermaid diagrams are the **design basis** for all downstream work
 | 05 | [journey](05-journey.mmd) | userJourney | User research journey, cold install → report |
 | 06 | [requirement](06-requirement.mmd) | requirementDiagram | Project rules traced to system elements |
 | 07 | [mindmap](07-mindmap.mmd) | mindmap | 12-domain capability taxonomy → FOSS libraries |
+
+> **Note:** these are **design-phase** artifacts. Some nodes name candidate
+> libraries explored during design (e.g. Playwright, yt-dlp, sitemapper) that the
+> shipped CLI does not use; the actual runtime dependencies are the ones declared
+> in the root [`package.json`](../../package.json).

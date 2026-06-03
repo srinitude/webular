@@ -77,32 +77,32 @@ run = "rm -rf {{config_root}}/dist"
 # without dragging the lint/typecheck spine into every invocation.
 
 [tasks."run:search"]
-description = "SEARCH — web/news/image/video/specialized (SearXNG/DDG/feeds/OpenAlex)"
+description = "SEARCH — keyless web search (DuckDuckGo HTML + linkedom)"
 depends = ["setup"]
 run = "bun {{config_root}}/src/commands/search.ts"
 
 [tasks."run:scrape"]
-description = "SCRAPE — single URL to clean content (Bun.fetch/Playwright/readability)"
+description = "SCRAPE — single URL to clean content (Bun.fetch + readability + turndown)"
 depends = ["setup"]
 run = "bun {{config_root}}/src/commands/scrape.ts"
 
 [tasks."run:crawl"]
-description = "CRAWL — recursive site traversal (crawlee / foreach + queue)"
+description = "CRAWL — recursive same-host traversal (Bun.fetch BFS + p-limit)"
 depends = ["setup"]
 run = "bun {{config_root}}/src/commands/crawl.ts"
 
 [tasks."run:map"]
-description = "MAP — URL discovery only (sitemapper + HTMLRewriter link BFS)"
+description = "MAP — URL discovery only (sitemap + link BFS via linkedom)"
 depends = ["setup"]
 run = "bun {{config_root}}/src/commands/map.ts"
 
 [tasks."run:extract"]
-description = "EXTRACT — structured/schema data (HTMLRewriter/cheerio + local LLM)"
+description = "EXTRACT — structured/schema data (CSS selectors via linkedom + zod)"
 depends = ["setup"]
 run = "bun {{config_root}}/src/commands/extract.ts"
 
 [tasks."run:summarize"]
-description = "SUMMARIZE — page/extractive summary (sumy / Mastra Agent)"
+description = "SUMMARIZE — extractive summary (no model)"
 depends = ["setup"]
 run = "bun {{config_root}}/src/commands/summarize.ts"
 
@@ -117,12 +117,12 @@ depends = ["setup"]
 run = "bun {{config_root}}/src/commands/research.ts"
 
 [tasks."run:parse"]
-description = "PARSE — documents to md/json (pdf-inspector/unpdf/mammoth/SheetJS)"
+description = "PARSE — documents to md/json (unpdf + mammoth + linkedom)"
 depends = ["setup"]
 run = "bun {{config_root}}/src/commands/parse.ts"
 
 [tasks."run:media"]
-description = "MEDIA — screenshot/pdf/download (Playwright/yt-dlp)"
+description = "MEDIA — screenshot/pdf/download (agent-browser + streamed download)"
 depends = ["setup"]
 run = "bun {{config_root}}/src/commands/media.ts"
 
@@ -132,7 +132,7 @@ depends = ["setup"]
 run = "bun {{config_root}}/src/commands/monitor.ts"
 
 [tasks."run:batch"]
-description = "BATCH — concurrent/async over many targets (foreach/startAsync)"
+description = "BATCH — concurrent over many targets (p-limit)"
 depends = ["setup"]
 run = "bun {{config_root}}/src/commands/batch.ts"
 
