@@ -6,12 +6,13 @@ import { fetchText } from '../core/http.ts'
 import { htmlToArticle } from '../lib/html.ts'
 import { compareAndStore } from '../lib/snapshot.ts'
 
-export const monitorInput = z.object({
+const monitorInput = z.object({
   url: z.string().url(),
   dbPath: z.string(),
+  timeoutMs: z.number().int().positive().optional(),
 })
 
-export const monitorOutput = z.object({
+const monitorOutput = z.object({
   url: z.string(),
   changeStatus: z.enum(['new', 'same', 'changed']),
   diff: z.string().optional(),
@@ -26,7 +27,7 @@ const fetchStep = createStep({
     text: z.string(),
   }),
   execute: async ({ inputData }) => {
-    const html = await fetchText(inputData.url)
+    const html = await fetchText(inputData.url, { timeoutMs: inputData.timeoutMs })
     const { text } = htmlToArticle(html)
     return { url: inputData.url, dbPath: inputData.dbPath, text }
   },

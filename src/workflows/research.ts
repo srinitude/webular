@@ -2,80 +2,71 @@
 // Composed as a Mastra non-model workflow over FOSS tools.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { z } from 'zod'
-import { fetchText } from '../core/http.ts'
-import { htmlToArticle } from '../lib/html.ts'
 import { webSearch } from '../lib/search.ts'
+import { fetchErrorsSchema, fetchSources, type SourceEntry } from '../lib/sources.ts'
 import { summarizeText } from '../lib/summarize.ts'
 
-export const researchInput = z.object({
+const researchInput = z.object({
   topic: z.string().min(1),
-  depth: z.number().int().positive().default(3),
-  sentences: z.number().int().positive().default(2),
+  depth: z.number().int().min(1).max(10).default(3),
+  sentences: z.number().int().min(1).max(25).default(2),
+  timeoutMs: z.number().int().positive().optional(),
 })
 
 const sourceItem = z.object({ title: z.string(), url: z.string() })
 
-export const researchOutput = z.object({
+const researchOutput = z.object({
   topic: z.string(),
   report: z.string(),
   sources: z.array(sourceItem),
+  errors: fetchErrorsSchema,
+})
+
+const foundSchema = z.object({
+  topic: z.string(),
+  sentences: z.number(),
+  timeoutMs: z.number().optional(),
+  sources: z.array(sourceItem),
+})
+
+const entriesSchema = z.object({
+  topic: z.string(),
+  sentences: z.number(),
+  entries: z.array(z.object({ title: z.string(), url: z.string(), text: z.string() })),
+  errors: fetchErrorsSchema,
 })
 
 const searchStep = createStep({
   id: 'search',
   inputSchema: researchInput,
-  outputSchema: z.object({
-    topic: z.string(),
-    depth: z.number(),
-    sentences: z.number(),
-    sources: z.array(sourceItem),
-  }),
+  outputSchema: foundSchema,
   execute: async ({ inputData }) => {
     const found = await webSearch(inputData.topic, inputData.depth)
-    const sources = found.map((h) => ({ title: h.title, url: h.url }))
     return {
       topic: inputData.topic,
-      depth: inputData.depth,
       sentences: inputData.sentences,
-      sources,
+      timeoutMs: inputData.timeoutMs,
+      sources: found.map((h) => ({ title: h.title, url: h.url })),
     }
   },
 })
 
 const fetchSourcesStep = createStep({
   id: 'fetch-sources',
-  inputSchema: z.object({
-    topic: z.string(),
-    depth: z.number(),
-    sentences: z.number(),
-    sources: z.array(sourceItem),
-  }),
-  outputSchema: z.object({
-    topic: z.string(),
-    sentences: z.number(),
-    entries: z.array(z.object({ title: z.string(), url: z.string(), text: z.string() })),
-  }),
+  inputSchema: foundSchema,
+  outputSchema: entriesSchema,
   execute: async ({ inputData }) => {
-    const entries = await Promise.all(
-      inputData.sources.map(async (src) => {
-        try {
-          const html = await fetchText(src.url, { timeoutMs: 15_000 })
-          const article = htmlToArticle(html)
-          return { title: src.title, url: src.url, text: article.text || '' }
-        } catch {
-          return { title: src.title, url: src.url, text: '' }
-        }
-      }),
-    )
-    return { topic: inputData.topic, sentences: inputData.sentences, entries }
+    const fetched = await fetchSources(inputData.sources, inputData.timeoutMs)
+    return {
+      topic: inputData.topic,
+      sentences: inputData.sentences,
+      entries: fetched.entries,
+      errors: fetched.errors,
+    }
   },
 })
 
-function buildSection(
-  entry: { title: string; url: string; text: string },
-  idx: number,
-  topN: number,
-): string {
+function buildSection(entry: SourceEntry, idx: number, topN: number): string {
   const { sentences } = summarizeText(entry.text, topN)
   const body = sentences.length > 0 ? sentences.join(' ') : 'No extractable content.'
   return `## ${entry.title || `Source ${idx + 1}`}\n\n${body}\n\n> Source [${idx + 1}]: ${entry.url}`
@@ -83,17 +74,13 @@ function buildSection(
 
 const assembleStep = createStep({
   id: 'assemble',
-  inputSchema: z.object({
-    topic: z.string(),
-    sentences: z.number(),
-    entries: z.array(z.object({ title: z.string(), url: z.string(), text: z.string() })),
-  }),
+  inputSchema: entriesSchema,
   outputSchema: researchOutput,
   execute: async ({ inputData }) => {
     const sections = inputData.entries.map((e, i) => buildSection(e, i, inputData.sentences))
     const report = `# Research: ${inputData.topic}\n\n${sections.join('\n\n')}`
     const sources = inputData.entries.map((e) => ({ title: e.title, url: e.url }))
-    return { topic: inputData.topic, report, sources }
+    return { topic: inputData.topic, report, sources, errors: inputData.errors }
   },
 })
 

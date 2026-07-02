@@ -1,6 +1,6 @@
 {
   "name": "webular",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Universal web research CLI — scrape, crawl, map, extract, search, summarize and gather context by composing free & open-source libraries into Mastra workflows/tools, orchestrated through a deterministic mise task graph.",
   "type": "module",
   "license": "Apache-2.0",
@@ -36,40 +36,42 @@
     "bin",
     "src",
     "mise.toml",
+    "bun.lock",
     "docs/diagrams",
     "README.md",
     "LICENSE"
   ],
   "engines": {
-    "bun": "latest"
+    "bun": ">=1.3.14"
   },
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
-    "@mastra/core": "latest",
+    "@mastra/core": "^1.37.1",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@mozilla/readability": "^0.6.0",
     "agent-browser": "^0.27.1",
     "diff": "^9.0.0",
     "linkedom": "^0.18.12",
     "mammoth": "^1.12.0",
+    "mise": "2026.6.14",
     "p-limit": "^7.3.0",
     "turndown": "^7.2.4",
     "unpdf": "^1.6.2",
-    "zod": "latest"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@biomejs/biome": "latest",
-    "@mermaid-js/mermaid-cli": "latest",
-    "@types/bun": "latest",
+    "@biomejs/biome": "^2.4.16",
+    "@mermaid-js/mermaid-cli": "^11.15.0",
+    "@types/bun": "^1.3.14",
     "@types/diff": "^8.0.0",
     "@types/turndown": "^5.0.6",
-    "deepsec": "latest",
-    "opensrc": "latest",
+    "deepsec": "^2.0.12",
     "typescript": "6.0.3"
   },
   "trustedDependencies": [
-    "agent-browser"
+    "agent-browser",
+    "mise"
   ]
 }

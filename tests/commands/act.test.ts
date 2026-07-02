@@ -3,22 +3,15 @@
 import { describe, expect, test } from 'bun:test'
 import { available } from '../../src/lib/agentbrowser.ts'
 
-const ROOT = new URL('../../', import.meta.url).pathname
+import { runCli } from '../_support/cli.ts'
+import { ROOT } from '../_support/root.ts'
 
-async function runAct(args: string[]): Promise<{ code: number; out: string; err: string }> {
-  const proc = Bun.spawn(['bun', `${ROOT}src/commands/act.ts`, ...args], {
-    cwd: ROOT,
-    stdout: 'pipe',
-    stderr: 'pipe',
-  })
-  const out = await new Response(proc.stdout).text()
-  const err = await new Response(proc.stderr).text()
-  const code = await proc.exited
-  return { code, out, err }
-}
+const runAct = (args: string[]) => runCli('src/commands/act.ts', args)
 
+// A usable browser is a machine property (agent-browser install); opt in with
+// WEBULAR_TEST_LIVE=1. The missing-arg contract always runs.
 describe('webular act — real browser automation via agent-browser', () => {
-  test.skipIf(!available())(
+  test.skipIf(!available() || !process.env.WEBULAR_TEST_LIVE)(
     'snapshots a live page accessibility tree',
     async () => {
       const { code, out } = await runAct(['--url', 'https://example.com', '--json'])

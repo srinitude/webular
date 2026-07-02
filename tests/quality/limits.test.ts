@@ -3,7 +3,9 @@
 import { describe, expect, test } from 'bun:test'
 import { analyzeFile, listFiles } from '../_support/limits.ts'
 
-const ROOT = new URL('../../', import.meta.url).pathname.replace(/\/$/, '')
+import { ROOT as REPO_ROOT } from '../_support/root.ts'
+
+const ROOT = REPO_ROOT.replace(/\/$/, '')
 const files = listFiles(ROOT)
 
 describe('code limits — 200 lines/file, 30/construct, nesting depth <= 3', () => {

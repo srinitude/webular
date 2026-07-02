@@ -90,9 +90,17 @@ function scoreSentence(sentence: string, freq: Map<string, number>, maxFreq: num
   return total / (words.length * maxFreq)
 }
 
-export interface SummarizeResult {
+interface SummarizeResult {
   sentences: string[]
   summary: string
+}
+
+// Loop, not Math.max(...spread): spreading a large vocabulary as arguments
+// overflows the engine's argument limit on big pages.
+function maxFrequency(freq: Map<string, number>): number {
+  let max = 0
+  for (const count of freq.values()) if (count > max) max = count
+  return max
 }
 
 export function summarizeText(text: string, topN: number): SummarizeResult {
@@ -101,7 +109,7 @@ export function summarizeText(text: string, topN: number): SummarizeResult {
 
   const allWords = tokenize(text)
   const freq = buildFreqMap(allWords)
-  const maxFreq = Math.max(0, ...freq.values())
+  const maxFreq = maxFrequency(freq)
 
   const scored = sentences.map((s, i) => ({ s, i, score: scoreSentence(s, freq, maxFreq) }))
   scored.sort((a, b) => b.score - a.score)

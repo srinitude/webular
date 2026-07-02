@@ -5,9 +5,11 @@
 # authored BEFORE code. See docs/diagrams/06-requirement.mmd (R1).
 #
 # Graph shape (zero cycles — it is a tree rooted at `setup`):
-#   setup -> format -> lint -> typecheck -> build -> test -> validate -> ci
+#   setup -> lint -> typecheck -> build -> test -> validate -> ci
+#   setup -> format                   (mutating dev task, OFF the check-only spine)
 #   setup -> run:<command>            (one logical predecessor each)
-# The CI/CD spine (setup..ci) is the SINGLE default dependency path.
+# The CI/CD spine (setup..ci) is the SINGLE default dependency path and is
+# check-only: `mise run ci` never mutates the working tree.
 # The CLI never calls code directly: every subcommand/flag is routed as
 #   `mise run run:<command> -- <args>`  (see bin/webular.ts).
 
@@ -16,28 +18,24 @@ min_version = "2026.5.18"
 [tools]
 bun = "1.3.14"
 
-[env]
-WEBULAR_HOME = "{{config_root}}"
-WEBULAR_ROUTED_VIA_MISE = "1"
-
 # ───────────────────────── Quality / CI spine ─────────────────────────
 # Single linear default dependency path. Each task depends on exactly one
 # logical predecessor, making the whole pipeline deterministic.
 
 [tasks.setup]
-description = "Install pinned dependencies — root of the universal task graph"
-run = "bun install 1>&2"
+description = "Install pinned dependencies (frozen lockfile) — root of the universal task graph"
+run = "bun install --frozen-lockfile 1>&2"
 sources = ["package.json", "bun.lock"]
 outputs = ["node_modules/.bin/biome"]
 
 [tasks.format]
-description = "Format + organize imports + safe-fix sources with Biome"
+description = "Format + organize imports + safe-fix sources with Biome (mutating; off the CI spine)"
 depends = ["setup"]
 run = "bunx biome check --write ."
 
 [tasks.lint]
-description = "Lint + format-verify with Biome (CI gate)"
-depends = ["format"]
+description = "Lint + format-verify with Biome (check-only CI gate)"
+depends = ["setup"]
 run = "bunx biome check ."
 
 [tasks.typecheck]
@@ -112,7 +110,7 @@ depends = ["setup"]
 run = "bun {{config_root}}/src/commands/answer.ts"
 
 [tasks."run:research"]
-description = "RESEARCH — multi-step agentic research (Mastra .dowhile loop)"
+description = "RESEARCH — search -> fetch -> extractive synthesis (3-step Mastra workflow)"
 depends = ["setup"]
 run = "bun {{config_root}}/src/commands/research.ts"
 
@@ -152,7 +150,7 @@ depends = ["setup"]
 run = "bun {{config_root}}/src/commands/mcp.ts"
 
 [tasks."run:diagram"]
-description = "DIAGRAM — (re)render the design diagrams via mmdc"
+description = "DIAGRAM — list the design diagrams (SVGs are pre-rendered and committed)"
 depends = ["setup"]
 run = "bun {{config_root}}/src/commands/diagram.ts"
 

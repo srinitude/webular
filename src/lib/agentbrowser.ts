@@ -1,34 +1,28 @@
 // FOSS browser-automation adapter: drives the agent-browser CLI (vercel-labs,
 // native Rust) via its JSON stdin batch mode. Commands are structured argv
 // arrays (e.g. ['open', url]) — values stay atomic, so no argument injection.
-import { existsSync } from 'node:fs'
+// Bin resolution is package-rooted, not cwd-rooted, so global installs work
+// from any directory.
+import { runProc } from '../core/proc.ts'
+import { resolveBin } from '../core/root.ts'
 
-export interface BatchResult {
+interface BatchResult {
   stdout: string
   stderr: string
   code: number
 }
 
-function binPath(): string {
-  return Bun.which('agent-browser') ?? `${process.cwd()}/node_modules/.bin/agent-browser`
-}
-
 export function available(): boolean {
-  return (
-    Bun.which('agent-browser') !== null ||
-    existsSync(`${process.cwd()}/node_modules/.bin/agent-browser`)
-  )
+  return resolveBin('agent-browser') !== null
 }
 
 export async function runBatch(commands: string[][]): Promise<BatchResult> {
-  const proc = Bun.spawn([binPath(), 'batch', '--bail'], {
-    stdin: new TextEncoder().encode(JSON.stringify(commands)),
-    stdout: 'pipe',
-    stderr: 'pipe',
-    timeout: 60_000,
+  const bin = resolveBin('agent-browser')
+  if (!bin)
+    return { stdout: '', stderr: 'agent-browser unavailable — reinstall webular', code: 127 }
+  const { stdout, stderr, code } = await runProc([bin, 'batch', '--bail'], {
+    timeoutMs: 60_000,
+    stdin: JSON.stringify(commands),
   })
-  const stdout = await new Response(proc.stdout).text()
-  const stderr = await new Response(proc.stderr).text()
-  const code = await proc.exited
   return { stdout, stderr, code }
 }

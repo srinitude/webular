@@ -1,50 +1,41 @@
-// AUDIT workflow: detect deepsec availability, compose a scan plan.
-// Non-model Mastra workflow over FOSS tools (deepsec via npx).
+// AUDIT workflow: report deepsec availability + the scan plan. Keyless by
+// design — deepsec scans need LLM API keys, so webular only detects and
+// plans. The bin resolves locally (PATH or the packaged devDependency);
+// never `npx --yes`, which would network-install at runtime.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { z } from 'zod'
+import { runProc } from '../core/proc.ts'
+import { resolveBin } from '../core/root.ts'
 
-export const auditInput = z.object({
-  plan: z.boolean().optional(),
-})
+const auditInput = z.object({})
 
-export const auditOutput = z.object({
+const auditOutput = z.object({
   tool: z.literal('deepsec'),
   available: z.boolean(),
   command: z.string(),
+  hint: z.string().optional(),
 })
 
-async function checkDeepsecAvailable(): Promise<boolean> {
-  try {
-    const proc = Bun.spawn(['npx', '--yes', 'deepsec', '--version'], {
-      stdout: 'pipe',
-      stderr: 'pipe',
-    })
-    const code = await proc.exited
-    return code === 0
-  } catch {
-    return false
-  }
+async function detectDeepsec(): Promise<boolean> {
+  const bin = resolveBin('deepsec')
+  if (!bin) return false
+  const { code } = await runProc([bin, '--version'], { timeoutMs: 10_000 })
+  return code === 0
 }
 
 const detectStep = createStep({
   id: 'detect',
   inputSchema: auditInput,
-  outputSchema: z.object({ plan: z.boolean(), available: z.boolean() }),
-  execute: async ({ inputData }) => ({
-    plan: inputData.plan ?? true,
-    available: await checkDeepsecAvailable(),
-  }),
-})
-
-const planStep = createStep({
-  id: 'plan',
-  inputSchema: z.object({ plan: z.boolean(), available: z.boolean() }),
   outputSchema: auditOutput,
-  execute: async ({ inputData }) => ({
-    tool: 'deepsec' as const,
-    available: inputData.available,
-    command: 'npx deepsec init && cd .deepsec && deepsec scan',
-  }),
+  execute: async () => {
+    const available = await detectDeepsec()
+    return {
+      tool: 'deepsec' as const,
+      available,
+      command: 'deepsec init && cd .deepsec && deepsec scan',
+      ...(available ? {} : { hint: "dev tool — run 'bun add -d deepsec' in a checkout to enable" }),
+    }
+  },
 })
 
 export const auditWorkflow = createWorkflow({
@@ -53,5 +44,4 @@ export const auditWorkflow = createWorkflow({
   outputSchema: auditOutput,
 })
   .then(detectStep)
-  .then(planStep)
   .commit()

@@ -9,9 +9,9 @@ const checkSchema = z.object({
   detail: z.string(),
 })
 
-export const doctorInput = z.object({})
+const doctorInput = z.object({})
 
-export const doctorOutput = z.object({
+const doctorOutput = z.object({
   ok: z.boolean(),
   checks: z.array(checkSchema),
 })

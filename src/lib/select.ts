@@ -1,7 +1,7 @@
 // FOSS CSS-selector helpers built on linkedom (open source).
 import { parseHTML } from 'linkedom'
 
-export interface FieldSpec {
+interface FieldSpec {
   name: string
   selector: string
 }

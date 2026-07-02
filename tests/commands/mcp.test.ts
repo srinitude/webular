@@ -2,19 +2,10 @@
 // Verifies that `mcp --list --json` returns code 0 and includes "web.fetch".
 import { describe, expect, test } from 'bun:test'
 
-const ROOT = new URL('../../', import.meta.url).pathname
+import { runCli } from '../_support/cli.ts'
+import { ROOT } from '../_support/root.ts'
 
-async function runMcp(args: string[]): Promise<{ code: number; out: string; err: string }> {
-  const proc = Bun.spawn(['bun', `${ROOT}src/commands/mcp.ts`, ...args], {
-    cwd: ROOT,
-    stdout: 'pipe',
-    stderr: 'pipe',
-  })
-  const out = await new Response(proc.stdout).text()
-  const err = await new Response(proc.stderr).text()
-  const code = await proc.exited
-  return { code, out, err }
-}
+const runMcp = (args: string[]) => runCli('src/commands/mcp.ts', args)
 
 describe('webular mcp — MCP server tool listing', () => {
   test('--list --json exits 0 and includes web.fetch', async () => {

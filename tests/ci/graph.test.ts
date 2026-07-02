@@ -3,7 +3,7 @@
 import { describe, expect, test } from 'bun:test'
 import { hasCycle, loadGraph, parentsOf } from '../_support/graph.ts'
 
-const SPINE = ['setup', 'format', 'lint', 'typecheck', 'build', 'test', 'validate', 'ci']
+const SPINE = ['setup', 'lint', 'typecheck', 'build', 'test', 'validate', 'ci']
 const COMMANDS = [
   'search',
   'scrape',
@@ -41,6 +41,12 @@ describe('mise task graph — the contract every CLI invocation routes through',
 
   test('setup is the single root with no predecessor', () => {
     expect(parentsOf(graph, 'setup')).toEqual([])
+  })
+
+  test('format is a mutating dev task OFF the check-only CI spine', () => {
+    expect(graph.format).toBeDefined()
+    expect(parentsOf(graph, 'format')).toEqual(['setup'])
+    for (const name of SPINE) expect(parentsOf(graph, name)).not.toContain('format')
   })
 
   test('every capability command depends on exactly one predecessor: setup', () => {

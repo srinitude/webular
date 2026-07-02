@@ -2,7 +2,7 @@
 // and mise can actually resolve the task graph (real behavior, no mocks).
 import { describe, expect, test } from 'bun:test'
 
-const ROOT = new URL('../../', import.meta.url).pathname
+import { ROOT } from '../_support/root.ts'
 
 describe('CI/CD wiring — one default dependency path, local and remote', () => {
   test('remote CI runs the single `mise run ci` default path', async () => {

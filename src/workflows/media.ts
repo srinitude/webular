@@ -2,20 +2,20 @@
 // agent-browser. Non-model Mastra workflow composed of FOSS tools only.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { z } from 'zod'
-import { safePath, sandboxEnabled } from '../core/safepath.ts'
+import { outPath } from '../core/safepath.ts'
 import { runBatch } from '../lib/agentbrowser.ts'
 import { downloadToFile } from '../lib/download.ts'
 
 const MAX_CAPTURE_BYTES = 50 * 1024 * 1024
 
-export const mediaInput = z.object({
+const mediaInput = z.object({
   url: z.string().url(),
   action: z.enum(['download', 'screenshot', 'pdf']).default('download'),
-  dest: z.string().optional(),
+  dest: z.string().min(1),
   maxBytes: z.number().int().positive().optional(),
 })
 
-export const mediaOutput = z.object({
+const mediaOutput = z.object({
   url: z.string(),
   savedTo: z.string(),
   bytes: z.number(),
@@ -40,13 +40,10 @@ const mediaStep = createStep({
   outputSchema: mediaOutput,
   execute: async ({ inputData }) => {
     const { url, action, maxBytes } = inputData
-    if (sandboxEnabled() && !inputData.dest)
-      throw new Error('media: -o is required when WEBULAR_SANDBOX=1')
-    const dest = inputData.dest ? safePath(inputData.dest) : undefined
+    const dest = outPath(inputData.dest)
     if (action === 'download') {
-      return { ...(await downloadToFile(url, dest, maxBytes)), action }
+      return { ...(await downloadToFile(url, dest, { maxBytes })), action }
     }
-    if (!dest) throw new Error('media: -o <file> is required for screenshot/pdf')
     return { url, savedTo: dest, bytes: await browserCapture(url, dest, action), action }
   },
 })

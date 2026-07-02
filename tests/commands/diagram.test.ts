@@ -1,19 +1,10 @@
 // DIAGRAM contract — lists .mmd files without rendering (no mmdc needed).
 import { describe, expect, test } from 'bun:test'
 
-const ROOT = new URL('../../', import.meta.url).pathname
+import { runCli } from '../_support/cli.ts'
+import { ROOT } from '../_support/root.ts'
 
-async function runDiagram(args: string[]): Promise<{ code: number; out: string; err: string }> {
-  const proc = Bun.spawn(['bun', `${ROOT}src/commands/diagram.ts`, ...args], {
-    cwd: ROOT,
-    stdout: 'pipe',
-    stderr: 'pipe',
-  })
-  const out = await new Response(proc.stdout).text()
-  const err = await new Response(proc.stderr).text()
-  const code = await proc.exited
-  return { code, out, err }
-}
+const runDiagram = (args: string[]) => runCli('src/commands/diagram.ts', args)
 
 describe('webular diagram — list .mmd files', () => {
   test('diagram --list --json exits 0 and returns diagram list', async () => {
@@ -25,4 +16,10 @@ describe('webular diagram — list .mmd files', () => {
     expect(Array.isArray(data.diagrams)).toBe(true)
     expect(data.diagrams).toContain('01-sequence')
   }, 15_000)
+
+  test('diagram without flags also lists (render path removed)', async () => {
+    const { code, out } = await runDiagram(['--json'])
+    expect(code).toBe(0)
+    expect(JSON.parse(out).diagrams).toContain('01-sequence')
+  }, 30_000)
 })

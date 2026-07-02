@@ -37,3 +37,6 @@ docs/usecase-results.md
 
 # deepsec scan workspace (has its own node_modules)
 .deepsec/
+
+# agent tooling state
+.serena/

@@ -4,7 +4,7 @@ import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { z } from 'zod'
 import { webSearch } from '../lib/search.ts'
 
-export const searchInput = z.object({
+const searchInput = z.object({
   query: z.string().min(1),
   limit: z.number().int().positive().default(10),
 })
@@ -15,7 +15,7 @@ const resultItem = z.object({
   description: z.string(),
 })
 
-export const searchOutput = z.object({
+const searchOutput = z.object({
   query: z.string(),
   count: z.number(),
   results: z.array(resultItem),

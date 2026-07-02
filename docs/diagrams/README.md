@@ -1,9 +1,15 @@
 # webular — Design Diagrams
 
 These 7 mermaid diagrams are the **design basis** for all downstream work
-(mise task graph → tests → code). They are authored as `.mmd` and rendered to
-`.svg` with `mmdc` (`@mermaid-js/mermaid-cli`). Regenerate with
-`mise run run:diagram` or `bunx mmdc -i <name>.mmd -o <name>.svg`.
+(mise task graph → tests → code). They are authored as `.mmd` and the rendered
+`.svg` files are **committed** — `webular diagram` only lists them.
+
+Regeneration is a **maintainer activity**: `bunx mmdc -i <name>.mmd -o <name>.svg`.
+mmdc drives Puppeteer, whose Chromium download is blocked by this package's
+`trustedDependencies` policy, so a fresh install has no browser. Point mmdc at
+an existing browser via `-p puppeteer.json` with
+`{"executablePath": "<path to Chrome>"}` — e.g. the one `agent-browser install`
+provisions under `~/.agent-browser/browsers/`.
 
 | # | Diagram | Type | What it defines |
 |---|---------|------|-----------------|

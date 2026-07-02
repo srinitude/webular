@@ -1,40 +1,79 @@
-// Mastra non-model tools wrapping the FOSS HTML/fetch primitives. These are
-// reused by workflows and exposed through the `webular mcp` server.
-import { createTool } from '@mastra/core/tools'
+// MCP tool definitions wrapping the FOSS HTML/fetch primitives — the single
+// source for `webular mcp` (--list and serve register the same defs, so the
+// two surfaces cannot drift). run() re-parses with the same zod schema for
+// defense in depth; a throwing tool becomes isError content, never a protocol
+// failure.
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
 import { fetchText } from '../core/http.ts'
+import { errMsg } from '../core/output.ts'
 import { extractLinks, htmlToArticle, htmlToMarkdown } from '../lib/html.ts'
 
-export const fetchTool = createTool({
-  id: 'web.fetch',
-  description: 'Fetch a URL and return its raw HTML (Bun.fetch).',
-  inputSchema: z.object({ url: z.string().url(), timeoutMs: z.number().optional() }),
-  outputSchema: z.object({ url: z.string(), html: z.string() }),
-  execute: async ({ url, timeoutMs }) => ({ url, html: await fetchText(url, { timeoutMs }) }),
-})
+interface McpToolDef {
+  id: string
+  description: string
+  schema: z.ZodObject<z.ZodRawShape>
+  run(args: Record<string, unknown>): Promise<unknown>
+}
 
-export const readabilityTool = createTool({
-  id: 'web.readability',
-  description: 'Extract main article content (Mozilla Readability + linkedom).',
-  inputSchema: z.object({ url: z.string(), html: z.string() }),
-  outputSchema: z.object({ title: z.string(), contentHtml: z.string(), text: z.string() }),
-  execute: async ({ html }) => htmlToArticle(html),
-})
+const fetchSchema = z.object({ url: z.string().url(), timeoutMs: z.number().optional() })
+const readabilitySchema = z.object({ html: z.string() })
+const markdownSchema = z.object({ html: z.string() })
+const linksSchema = z.object({ html: z.string(), base: z.string().url() })
 
-export const markdownTool = createTool({
-  id: 'web.markdown',
-  description: 'Convert HTML to Markdown (Turndown).',
-  inputSchema: z.object({ html: z.string() }),
-  outputSchema: z.object({ markdown: z.string() }),
-  execute: async ({ html }) => ({ markdown: htmlToMarkdown(html) }),
-})
+export const webTools: McpToolDef[] = [
+  {
+    id: 'web.fetch',
+    description: 'Fetch a URL and return its raw HTML (Bun.fetch).',
+    schema: fetchSchema,
+    run: async (args) => {
+      const { url, timeoutMs } = fetchSchema.parse(args)
+      return { url, html: await fetchText(url, { timeoutMs }) }
+    },
+  },
+  {
+    id: 'web.readability',
+    description: 'Extract main article content (Mozilla Readability + linkedom).',
+    schema: readabilitySchema,
+    run: async (args) => htmlToArticle(readabilitySchema.parse(args).html),
+  },
+  {
+    id: 'web.markdown',
+    description: 'Convert HTML to Markdown (Turndown).',
+    schema: markdownSchema,
+    run: async (args) => ({ markdown: htmlToMarkdown(markdownSchema.parse(args).html) }),
+  },
+  {
+    id: 'web.links',
+    description: 'Extract absolute links from HTML (linkedom document parse).',
+    schema: linksSchema,
+    run: async (args) => {
+      const { html, base } = linksSchema.parse(args)
+      return { links: extractLinks(html, base) }
+    },
+  },
+]
 
-export const linksTool = createTool({
-  id: 'web.links',
-  description: 'Extract absolute links from HTML (HTMLRewriter-class harvest).',
-  inputSchema: z.object({ html: z.string(), base: z.string().url() }),
-  outputSchema: z.object({ links: z.array(z.string()) }),
-  execute: async ({ html, base }) => ({ links: extractLinks(html, base) }),
-})
+interface McpText {
+  [key: string]: unknown
+  content: { type: 'text'; text: string }[]
+  isError?: boolean
+}
 
-export const webTools = { fetchTool, readabilityTool, markdownTool, linksTool }
+async function execute(tool: McpToolDef, args: Record<string, unknown>): Promise<McpText> {
+  try {
+    return { content: [{ type: 'text', text: JSON.stringify(await tool.run(args)) }] }
+  } catch (err) {
+    return { content: [{ type: 'text', text: errMsg(err) }], isError: true }
+  }
+}
+
+export function registerAll(server: McpServer): void {
+  for (const tool of webTools) {
+    server.registerTool(
+      tool.id,
+      { description: tool.description, inputSchema: tool.schema.shape },
+      (args: Record<string, unknown>) => execute(tool, args),
+    )
+  }
+}

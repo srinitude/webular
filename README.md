@@ -18,8 +18,11 @@ open-source building blocks.
 bun add -g webular      # or: npm i -g webular  (requires bun + mise on PATH)
 ```
 
-`webular` requires [Bun](https://bun.com) (runtime) and [mise](https://mise.jdx.dev)
-(every subcommand is routed through `mise run run:<command>`).
+`webular` requires [Bun](https://bun.com) (runtime). [mise](https://mise.jdx.dev)
+routes every subcommand (`mise run run:<command>`) and ships bundled as a pinned
+npm dependency — a PATH install is used when present. The first command after a
+fresh install provisions the pinned toolchain once (non-interactive, pinned via
+the shipped `bun.lock`); later runs skip it.
 
 ## Usage
 
@@ -32,7 +35,7 @@ webular --help
 |---|---|
 | `search`    | Keyless web search via DuckDuckGo's no-JS HTML endpoint |
 | `scrape`    | Fetch one URL → clean markdown/JSON (Bun.fetch + Readability + Turndown) |
-| `crawl`     | Recursive same-host BFS crawl |
+| `crawl`     | Recursive same-host BFS crawl (no robots.txt/rate-limiting — crawl responsibly) |
 | `map`       | Discover all URLs for a domain (sitemap + link BFS) |
 | `extract`   | Structured extraction via CSS selectors / schema |
 | `summarize` | Extractive summary (no model) |
@@ -41,15 +44,17 @@ webular --help
 | `parse`     | Local docs → markdown (PDF/DOCX/HTML/CSV/JSON/TXT) |
 | `media`     | Download media; screenshot/PDF via a real browser (agent-browser) |
 | `monitor`   | Track changes to a URL over time (diff + bun:sqlite) |
-| `batch`     | Run a capability over many targets concurrently |
+| `batch`     | Scrape many URLs concurrently |
 | `doctor`    | Diagnose environment & toolchain |
 | `tasks`     | List the mise task graph this CLI routes through |
 | `mcp`       | Expose webular capabilities as an MCP server |
-| `diagram`   | Render the design diagrams via `mmdc` |
-| `audit`     | Plan/run a `deepsec` vulnerability scan |
+| `diagram`   | List the design diagrams (pre-rendered SVGs in docs/diagrams) |
+| `audit`     | Report `deepsec` availability + scan plan (keyless; scans need LLM keys) |
 | `act`       | Drive a real browser — open, snapshot, screenshot, interact (agent-browser) |
 
-**Global options:** `--json`, `-o/--output <file>`, `-q/--quiet`, `--timeout <ms>`, `-h/--help`, `-V/--version`.
+**Global options:** `--json`, `-o/--output <file>`, `--timeout <ms>` (per request attempt), `-h/--help`, `-V/--version`.
+
+**Exit codes:** `0` success · `1` failure · `2` usage error · `3` partial failure (`batch`) · `127` toolchain missing.
 
 ```bash
 webular scrape https://example.com --json
@@ -81,18 +86,22 @@ parsing, helpful `--help`, and a `doctor` for diagnostics.
 ## Development
 
 This project is built test-first. The toolchain is pinned in `mise.toml`.
+In a fresh clone, run `mise trust ./mise.toml` once before anything else.
 
 ```bash
-mise run ci         # the single CI path: setup→format→lint→typecheck→build→test→validate
+mise run ci         # the single CI path: setup→lint→typecheck→build→test→validate
+mise run format     # apply formatting (mutating; deliberately OFF the check-only ci spine)
 mise run test       # run the bun test suite (real services, no mocks)
 mise run run:scrape -- --url https://example.com --json
 ```
 
 Conventions enforced by the suite: ≤200 lines/file, ≤30 lines/construct,
-nesting depth ≤3, and no mocks/stubs — tests exercise real behavior and real
-services.
+nesting depth ≤3, no orphaned exports, and no mocks/stubs — tests exercise
+real behavior against a local `Bun.serve` fixture (deterministic, offline-capable).
+Live-internet cases (DuckDuckGo search, a real browser) are opt-in:
+`WEBULAR_TEST_LIVE=1 mise run test`. Note: DDG blocks many datacenter IPs.
 
 ## License
 
-Apache-2.0 © Kiren Srinivasan. Built on Bun, Mastra, mermaid-cli, opensrc,
+Apache-2.0 © Kiren Srinivasan. Built on Bun, Mastra, mise, mermaid-cli,
 deepsec, and agent-browser, plus a set of open-source libraries.

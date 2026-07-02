@@ -1,19 +1,10 @@
 // SUMMARIZE contract — deterministic local text, no network calls.
 import { describe, expect, test } from 'bun:test'
 
-const ROOT = new URL('../../', import.meta.url).pathname
+import { runCli } from '../_support/cli.ts'
+import { ROOT } from '../_support/root.ts'
 
-async function runSummarize(args: string[]): Promise<{ code: number; out: string; err: string }> {
-  const proc = Bun.spawn(['bun', `${ROOT}src/commands/summarize.ts`, ...args], {
-    cwd: ROOT,
-    stdout: 'pipe',
-    stderr: 'pipe',
-  })
-  const out = await new Response(proc.stdout).text()
-  const err = await new Response(proc.stderr).text()
-  const code = await proc.exited
-  return { code, out, err }
-}
+const runSummarize = (args: string[]) => runCli('src/commands/summarize.ts', args)
 
 const SAMPLE = [
   'The quick brown fox jumps over the lazy dog near the riverbank.',
@@ -53,5 +44,11 @@ describe('webular summarize — extractive summary (no network)', () => {
     const { code, err } = await runSummarize([])
     expect(code).toBe(2)
     expect(err).toContain('missing')
+  })
+
+  test('exits with code 2 for a non-integer --sentences', async () => {
+    const { code, err } = await runSummarize(['--text', 'One. Two.', '--sentences', 'abc'])
+    expect(code).toBe(2)
+    expect(err).toContain('--sentences')
   })
 })

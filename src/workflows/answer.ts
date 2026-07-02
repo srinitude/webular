@@ -2,28 +2,30 @@
 // Mastra non-model workflow over FOSS tools (keyless search + readability + summarizer).
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { z } from 'zod'
-import { fetchText } from '../core/http.ts'
-import { htmlToArticle } from '../lib/html.ts'
 import { webSearch } from '../lib/search.ts'
+import { fetchErrorsSchema, fetchSources } from '../lib/sources.ts'
 import { summarizeText } from '../lib/summarize.ts'
 
-export const answerInput = z.object({
+const answerInput = z.object({
   query: z.string().min(1),
-  sources: z.number().int().min(1).default(3),
-  sentences: z.number().int().min(1).default(3),
+  sources: z.number().int().min(1).max(10).default(3),
+  sentences: z.number().int().min(1).max(25).default(3),
+  timeoutMs: z.number().int().positive().optional(),
 })
 
 const sourceRef = z.object({ title: z.string(), url: z.string() })
 
-export const answerOutput = z.object({
+const answerOutput = z.object({
   query: z.string(),
   answer: z.string(),
   sources: z.array(sourceRef),
+  errors: fetchErrorsSchema,
 })
 
 const hitsSchema = z.object({
   query: z.string(),
   sentences: z.number(),
+  timeoutMs: z.number().optional(),
   hits: z.array(sourceRef),
 })
 
@@ -34,27 +36,31 @@ const searchStep = createStep({
   execute: async ({ inputData }) => {
     const found = await webSearch(inputData.query, inputData.sources)
     const hits = found.map((h) => ({ title: h.title, url: h.url }))
-    return { query: inputData.query, sentences: inputData.sentences, hits }
+    return {
+      query: inputData.query,
+      sentences: inputData.sentences,
+      timeoutMs: inputData.timeoutMs,
+      hits,
+    }
   },
 })
-
-async function fetchArticleText(url: string): Promise<string> {
-  try {
-    return htmlToArticle(await fetchText(url, { timeoutMs: 15_000 })).text || ''
-  } catch {
-    return ''
-  }
-}
 
 const synthStep = createStep({
   id: 'fetch-and-summarize',
   inputSchema: hitsSchema,
   outputSchema: answerOutput,
   execute: async ({ inputData }) => {
-    const texts = await Promise.all(inputData.hits.map((h) => fetchArticleText(h.url)))
-    const combined = texts.filter((t) => t.length > 0).join('\n\n')
+    const fetched = await fetchSources(inputData.hits, inputData.timeoutMs)
+    // Cite only sources whose text actually fed the answer.
+    const used = fetched.entries.filter((e) => e.text.length > 0)
+    const combined = used.map((e) => e.text).join('\n\n')
     const { summary } = summarizeText(combined, inputData.sentences)
-    return { query: inputData.query, answer: summary, sources: inputData.hits }
+    return {
+      query: inputData.query,
+      answer: summary,
+      sources: used.map((e) => ({ title: e.title, url: e.url })),
+      errors: fetched.errors,
+    }
   },
 })
 

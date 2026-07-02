@@ -2,22 +2,14 @@
 // behavior that `mise run run:search` executes.
 import { describe, expect, test } from 'bun:test'
 
-const ROOT = new URL('../../', import.meta.url).pathname
-// Live DDG search is blocked from CI datacenter IPs; live tests run locally
-// (real, no mocks) and skip in CI. The missing-arg contract still runs in CI.
-const SKIP_LIVE = !!process.env.CI
+import { runCli } from '../_support/cli.ts'
+import { ROOT } from '../_support/root.ts'
 
-async function runSearch(args: string[]): Promise<{ code: number; out: string; err: string }> {
-  const proc = Bun.spawn(['bun', `${ROOT}src/commands/search.ts`, ...args], {
-    cwd: ROOT,
-    stdout: 'pipe',
-    stderr: 'pipe',
-  })
-  const out = await new Response(proc.stdout).text()
-  const err = await new Response(proc.stderr).text()
-  const code = await proc.exited
-  return { code, out, err }
-}
+// Live DDG search is blocked from datacenter IPs and inherently varies run to
+// run; opt in with WEBULAR_TEST_LIVE=1. The missing-arg contract always runs.
+const SKIP_LIVE = !process.env.WEBULAR_TEST_LIVE
+
+const runSearch = (args: string[]) => runCli('src/commands/search.ts', args)
 
 describe('webular search — keyless web search (real network)', () => {
   test.skipIf(SKIP_LIVE)(
@@ -66,5 +58,26 @@ describe('webular search — keyless web search (real network)', () => {
     const { code, err } = await runSearch([])
     expect(code).toBe(2)
     expect(err).toContain('missing')
+  })
+
+  test('exits with code 2 for a non-integer --limit', async () => {
+    const { code, err } = await runSearch(['--query', 'x', '--limit', 'abc'])
+    expect(code).toBe(2)
+    expect(err).toContain('--limit')
+  })
+
+  test("legacy --format's value is consumed (never swallowed as the query) and warned", async () => {
+    const { code, err } = await runSearch(['--format', 'json'])
+    expect(code).toBe(2)
+    expect(err).toContain('missing')
+    expect(err).toContain('--format')
+    expect(err).toContain('removed')
+  })
+
+  test('legacy --quiet warns and is otherwise inert', async () => {
+    const { code, err } = await runSearch(['--quiet'])
+    expect(code).toBe(2)
+    expect(err).toContain('--quiet')
+    expect(err).toContain('removed')
   })
 })

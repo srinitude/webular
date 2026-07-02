@@ -1,18 +1,16 @@
 // Bucket B contract: resource-limit guards (batch URL ceiling, download cap).
-import { describe, expect, test } from 'bun:test'
+import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
+import { runCli } from '../_support/cli.ts'
+import { type Fixture, startFixture } from '../_support/fixture.ts'
+import { defaultRoutes } from '../_support/routes.ts'
 
-const ROOT = new URL('../../', import.meta.url).pathname
+let fx: Fixture
+beforeAll(() => {
+  fx = startFixture(defaultRoutes)
+})
+afterAll(() => fx.stop())
 
-async function run(file: string, args: string[]): Promise<{ code: number; err: string }> {
-  const proc = Bun.spawn(['bun', `${ROOT}src/commands/${file}`, ...args], {
-    cwd: ROOT,
-    stdout: 'pipe',
-    stderr: 'pipe',
-  })
-  const err = await new Response(proc.stderr).text()
-  const code = await proc.exited
-  return { code, err }
-}
+const run = (file: string, args: string[]) => runCli(`src/commands/${file}`, args)
 
 describe('resource-limit hardening', () => {
   test('batch rejects more than 1000 URLs', async () => {
@@ -25,7 +23,7 @@ describe('resource-limit hardening', () => {
   test('media download enforces --max-bytes', async () => {
     const args = [
       '--url',
-      'https://example.com',
+      `${fx.origin}/bytes?n=2048`,
       '--download',
       '--max-bytes',
       '5',
@@ -35,5 +33,5 @@ describe('resource-limit hardening', () => {
     const { code, err } = await run('media.ts', args)
     expect(code).not.toBe(0)
     expect(err.toLowerCase()).toMatch(/max|exceed/)
-  }, 30_000)
+  }, 15_000)
 })

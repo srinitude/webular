@@ -2,14 +2,14 @@
 // Composed as a Mastra non-model workflow over FOSS tools.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { z } from 'zod'
-import { safePath } from '../core/safepath.ts'
+import { inPath } from '../core/safepath.ts'
 import { parseDocument } from '../lib/parse.ts'
 
-export const parseInput = z.object({
+const parseInput = z.object({
   file: z.string().min(1),
 })
 
-export const parseOutput = z.object({
+const parseOutput = z.object({
   file: z.string(),
   format: z.string(),
   markdown: z.string(),
@@ -20,7 +20,7 @@ const parseStep = createStep({
   inputSchema: parseInput,
   outputSchema: parseOutput,
   execute: async ({ inputData }) => {
-    const result = await parseDocument(safePath(inputData.file))
+    const result = await parseDocument(inPath(inputData.file))
     return { file: result.file, format: result.format, markdown: result.markdown }
   },
 })

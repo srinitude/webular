@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { fetchText } from '../core/http.ts'
 import { parseFieldSpecs, selectFields, selectMatches } from '../lib/select.ts'
 
-export const extractInput = z.object({
+const extractInput = z.object({
   url: z.string().url(),
   fields: z.string().optional(),
   selector: z.string().optional(),
@@ -14,7 +14,7 @@ export const extractInput = z.object({
 
 const fieldDataSchema = z.object({ url: z.string(), data: z.record(z.string(), z.string()) })
 const selectorDataSchema = z.object({ url: z.string(), matches: z.array(z.string()) })
-export const extractOutput = z.union([fieldDataSchema, selectorDataSchema])
+const extractOutput = z.union([fieldDataSchema, selectorDataSchema])
 
 const fetchStep = createStep({
   id: 'fetch',

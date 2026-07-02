@@ -3,7 +3,7 @@
 import { parseHTML } from 'linkedom'
 import { fetchText } from '../core/http.ts'
 
-export interface SearchHit {
+interface SearchHit {
   title: string
   url: string
   description: string

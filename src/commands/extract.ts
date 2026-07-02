@@ -1,7 +1,7 @@
 // EXTRACT command entry — invoked by `mise run run:extract`. Parses flags,
 // runs the Mastra extract workflow, emits the result. No mise logic here.
 import { runWorkflow } from '../cli/run.ts'
-import { parseFlags } from '../core/args.ts'
+import { emitOpts, parseFlags, timeoutFlag } from '../core/args.ts'
 import { logErr } from '../core/output.ts'
 import { extractWorkflow } from '../workflows/extract.ts'
 
@@ -24,9 +24,9 @@ async function main(): Promise<number> {
     url,
     fields: values.fields as string | undefined,
     selector: values.selector as string | undefined,
+    timeoutMs: timeoutFlag('extract', values),
   }
-  const opts = { json: Boolean(values.json), output: values.output as string | undefined }
-  return runWorkflow('extract', extractWorkflow, inputData, opts)
+  return runWorkflow('extract', extractWorkflow, inputData, emitOpts(values))
 }
 
 process.exit(await main())

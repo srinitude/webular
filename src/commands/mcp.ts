@@ -1,39 +1,20 @@
 // MCP command — list or serve webular tools as an MCP server over stdio.
-// --list: emit { count, tools: string[] } of exposed tool ids (fast, no server start)
-// default: start an MCP server over stdio exposing webTools
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
+// --list: emit { count, tools: string[] } (fast path — the SDK loads lazily,
+// only when the server actually starts).
 import pkg from '../../package.json' with { type: 'json' }
-import { parseFlags } from '../core/args.ts'
+import { renderFor } from '../cli/render.ts'
+import { emitOpts, parseFlags } from '../core/args.ts'
 import { emit, logErr } from '../core/output.ts'
-import { webTools } from '../tools/web.ts'
-
-const TOOL_IDS = Object.values(webTools).map((t) => t.id)
+import { registerAll, webTools } from '../tools/web.ts'
 
 async function startServer(): Promise<void> {
+  const [{ McpServer }, { StdioServerTransport }] = await Promise.all([
+    import('@modelcontextprotocol/sdk/server/mcp.js'),
+    import('@modelcontextprotocol/sdk/server/stdio.js'),
+  ])
   const server = new McpServer({ name: 'webular', version: pkg.version })
-  const reg = server as unknown as {
-    registerTool: (
-      id: string,
-      cfg: { description: string; inputSchema: Record<string, unknown> },
-      handler: (
-        a: Record<string, unknown>,
-      ) => Promise<{ content: Array<{ type: 'text'; text: string }> }>,
-    ) => void
-  }
-  for (const tool of Object.values(webTools)) {
-    const shape = (tool.inputSchema as { shape?: Record<string, unknown> } | undefined)?.shape ?? {}
-    reg.registerTool(
-      tool.id,
-      { description: tool.description ?? '', inputSchema: shape },
-      async (args) => {
-        const result = await (tool.execute as (a: unknown) => Promise<unknown>)(args)
-        return { content: [{ type: 'text' as const, text: JSON.stringify(result) }] }
-      },
-    )
-  }
-  const transport = new StdioServerTransport()
-  await server.connect(transport)
+  registerAll(server)
+  await server.connect(new StdioServerTransport())
 }
 
 async function main(): Promise<number> {
@@ -41,10 +22,8 @@ async function main(): Promise<number> {
     list: { type: 'boolean', default: false },
   })
   if (values.list) {
-    await emit(
-      { count: TOOL_IDS.length, tools: TOOL_IDS },
-      { json: Boolean(values.json), output: values.output as string | undefined },
-    )
+    const ids = webTools.map((t) => t.id)
+    await emit({ count: ids.length, tools: ids }, { ...emitOpts(values), render: renderFor('mcp') })
     return 0
   }
   try {

@@ -1,78 +1,39 @@
-// DIAGRAM workflow: list or render .mmd diagrams, composed as a
-// Mastra non-model workflow over FOSS tools (mmdc via bunx).
+// DIAGRAM workflow: list the design diagrams. The SVGs are pre-rendered and
+// committed; regeneration is a maintainer activity (see docs/diagrams/README)
+// because mmdc needs a Puppeteer browser that fresh installs never have.
 import { readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { z } from 'zod'
+import { PACKAGE_ROOT } from '../core/root.ts'
 
-// Resolve relative to this module so it works in-repo AND when npm-installed.
-const DIAGRAMS_DIR = new URL('../../docs/diagrams', import.meta.url).pathname
+const DIAGRAMS_DIR = join(PACKAGE_ROOT, 'docs/diagrams')
 
-export const diagramInput = z.object({
-  list: z.boolean().optional(),
-  dir: z.string().optional(),
-})
+const diagramInput = z.object({})
 
-export const diagramListOutput = z.object({
+const diagramListOutput = z.object({
   count: z.number(),
   diagrams: z.array(z.string()),
 })
-
-export const diagramRenderOutput = z.object({
-  rendered: z.array(z.string()),
-})
-
-async function listMmd(dir: string): Promise<string[]> {
-  const entries = await readdir(dir)
-  return entries.filter((f) => f.endsWith('.mmd')).sort()
-}
-
-async function renderOne(dir: string, file: string): Promise<string> {
-  const input = join(dir, file)
-  const output = join(dir, file.replace(/\.mmd$/, '.svg'))
-  const proc = Bun.spawn(['bunx', 'mmdc', '-i', input, '-o', output], { stderr: 'pipe' })
-  if ((await proc.exited) !== 0) {
-    const err = await new Response(proc.stderr).text()
-    throw new Error(`mmdc failed for ${file}: ${err.trim()}`)
-  }
-  return file.replace(/\.mmd$/, '')
-}
 
 const listStep = createStep({
   id: 'list',
   inputSchema: diagramInput,
   outputSchema: diagramListOutput,
-  execute: async ({ inputData }) => {
-    const files = await listMmd(inputData.dir ?? DIAGRAMS_DIR)
-    const diagrams = files.map((f) => f.replace(/\.mmd$/, ''))
+  execute: async () => {
+    const entries = await readdir(DIAGRAMS_DIR)
+    const diagrams = entries
+      .filter((f) => f.endsWith('.mmd'))
+      .sort()
+      .map((f) => f.replace(/\.mmd$/, ''))
     return { count: diagrams.length, diagrams }
-  },
-})
-
-const renderStep = createStep({
-  id: 'render',
-  inputSchema: diagramInput,
-  outputSchema: diagramRenderOutput,
-  execute: async ({ inputData }) => {
-    const dir = inputData.dir ?? DIAGRAMS_DIR
-    const rendered: string[] = []
-    for (const file of await listMmd(dir)) rendered.push(await renderOne(dir, file))
-    return { rendered }
   },
 })
 
 export const diagramWorkflow = createWorkflow({
   id: 'diagram',
   inputSchema: diagramInput,
-  outputSchema: z.union([diagramListOutput, diagramRenderOutput]),
+  outputSchema: diagramListOutput,
 })
   .then(listStep)
-  .commit()
-
-export const diagramRenderWorkflow = createWorkflow({
-  id: 'diagram-render',
-  inputSchema: diagramInput,
-  outputSchema: diagramRenderOutput,
-})
-  .then(renderStep)
   .commit()

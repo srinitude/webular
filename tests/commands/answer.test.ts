@@ -2,22 +2,14 @@
 // user-facing command behavior that `mise run run:answer` executes.
 import { describe, expect, test } from 'bun:test'
 
-const ROOT = new URL('../../', import.meta.url).pathname
-// Live DDG search is blocked from CI datacenter IPs; this runs locally (real)
-// and skips in CI. The missing-arg contract still runs in CI.
-const SKIP_LIVE = !!process.env.CI
+import { runCli } from '../_support/cli.ts'
+import { ROOT } from '../_support/root.ts'
 
-async function runAnswer(args: string[]): Promise<{ code: number; out: string; err: string }> {
-  const proc = Bun.spawn(['bun', `${ROOT}src/commands/answer.ts`, ...args], {
-    cwd: ROOT,
-    stdout: 'pipe',
-    stderr: 'pipe',
-  })
-  const out = await new Response(proc.stdout).text()
-  const err = await new Response(proc.stderr).text()
-  const code = await proc.exited
-  return { code, out, err }
-}
+// Live DDG search is blocked from datacenter IPs and inherently varies run to
+// run; opt in with WEBULAR_TEST_LIVE=1. The missing-arg contract always runs.
+const SKIP_LIVE = !process.env.WEBULAR_TEST_LIVE
+
+const runAnswer = (args: string[]) => runCli('src/commands/answer.ts', args)
 
 describe('webular answer — grounded answer from real search + fetch', () => {
   test.skipIf(SKIP_LIVE)(
@@ -44,5 +36,11 @@ describe('webular answer — grounded answer from real search + fetch', () => {
     const { code, err } = await runAnswer([])
     expect(code).toBe(2)
     expect(err).toContain('missing')
+  })
+
+  test('exits with code 2 for a non-integer --sources', async () => {
+    const { code, err } = await runAnswer(['--query', 'x', '--sources', 'abc'])
+    expect(code).toBe(2)
+    expect(err).toContain('--sources')
   })
 })

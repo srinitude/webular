@@ -1,14 +1,9 @@
 // RESEARCH command entry — invoked by `mise run run:research`. Parses flags,
 // runs the Mastra research workflow, emits the result. No mise logic here.
-import { parseFlags } from '../core/args.ts'
-import { emit, logErr } from '../core/output.ts'
+import { discoveryExit, runWorkflow } from '../cli/run.ts'
+import { emitOpts, intFlag, parseFlags, timeoutFlag } from '../core/args.ts'
+import { logErr } from '../core/output.ts'
 import { researchWorkflow } from '../workflows/research.ts'
-
-interface WorkflowOutcome {
-  status: string
-  result?: unknown
-  error?: unknown
-}
 
 async function main(): Promise<number> {
   const { values, positionals } = parseFlags(Bun.argv.slice(2), {
@@ -21,19 +16,16 @@ async function main(): Promise<number> {
     logErr('research: missing --topic <t> (or pass topic as a positional)')
     return 2
   }
-  const depth = values.depth ? parseInt(values.depth as string, 10) : 3
-  const sentences = values.sentences ? parseInt(values.sentences as string, 10) : 2
-  const run = await researchWorkflow.createRun({ runId: crypto.randomUUID() })
-  const outcome = (await run.start({ inputData: { topic, depth, sentences } })) as WorkflowOutcome
-  if (outcome.status !== 'success') {
-    logErr(`research: failed (${String(outcome.error ?? outcome.status)})`)
-    return 1
+  const inputData = {
+    topic,
+    depth: intFlag('research', values, 'depth', { def: 3, min: 1, max: 10 }),
+    sentences: intFlag('research', values, 'sentences', { def: 2, min: 1, max: 25 }),
+    timeoutMs: timeoutFlag('research', values),
   }
-  await emit(outcome.result, {
-    json: Boolean(values.json),
-    output: values.output as string | undefined,
+  return runWorkflow('research', researchWorkflow, inputData, {
+    ...emitOpts(values),
+    exitCode: discoveryExit('sources'),
   })
-  return 0
 }
 
 process.exit(await main())

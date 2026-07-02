@@ -9,8 +9,14 @@ export function sandboxEnabled(): boolean {
   return process.env.WEBULAR_SANDBOX === '1'
 }
 
+// The directory the user invoked webular from — the gateway pins the command
+// process cwd to the package root and exports the real one.
+function invokeDir(): string {
+  return process.env.WEBULAR_INVOKE_DIR ?? process.cwd()
+}
+
 function baseDir(): string {
-  return realpathSync(resolve(process.env.WEBULAR_OUTPUT_DIR ?? process.cwd()))
+  return realpathSync(resolve(process.env.WEBULAR_OUTPUT_DIR ?? invokeDir()))
 }
 
 // Canonical realpath of the deepest existing ancestor (the target may not exist
@@ -21,7 +27,7 @@ function realAncestor(full: string): string {
   return realpathSync(dir)
 }
 
-export function safePath(p: string): string {
+function safePath(p: string): string {
   if (!sandboxEnabled()) return p
   if (isAbsolute(p)) throw new Error(`sandbox: absolute paths are not allowed (${p})`)
   const base = baseDir()
@@ -30,4 +36,20 @@ export function safePath(p: string): string {
     throw new Error(`sandbox: path escapes ${base} (${p})`)
   }
   return full
+}
+
+// Resolve a user-supplied WRITE path against the invoking directory — the
+// gateway runs command processes at the package root, so a bare relative path
+// would otherwise land inside the installed package.
+export function outPath(p: string): string {
+  if (sandboxEnabled()) return safePath(p)
+  if (isAbsolute(p)) return p
+  return resolve(invokeDir(), p)
+}
+
+// Inputs are READ — resolve against the invoking directory but never confine
+// them: the sandbox is write-confinement, not read-access control.
+export function inPath(p: string): string {
+  if (isAbsolute(p)) return p
+  return resolve(invokeDir(), p)
 }

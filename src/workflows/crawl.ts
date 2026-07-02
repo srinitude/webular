@@ -2,20 +2,23 @@
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { z } from 'zod'
 import { bfsCrawl } from '../lib/crawl.ts'
+import { fetchErrorsSchema } from '../lib/sources.ts'
 
-export const crawlInput = z.object({
+const crawlInput = z.object({
   url: z.string().url(),
-  limit: z.number().int().min(1).default(5),
-  depth: z.number().int().min(0).default(2),
-  concurrency: z.number().int().min(1).default(4),
+  limit: z.number().int().min(1).max(1000).default(5),
+  depth: z.number().int().min(0).max(10).default(2),
+  concurrency: z.number().int().min(1).max(32).default(4),
+  timeoutMs: z.number().int().positive().optional(),
 })
 
-export const pageSchema = z.object({ url: z.string(), title: z.string() })
+const pageSchema = z.object({ url: z.string(), title: z.string() })
 
-export const crawlOutput = z.object({
+const crawlOutput = z.object({
   root: z.string(),
   count: z.number(),
   pages: z.array(pageSchema),
+  errors: fetchErrorsSchema,
 })
 
 const crawlStep = createStep({
@@ -23,12 +26,13 @@ const crawlStep = createStep({
   inputSchema: crawlInput,
   outputSchema: crawlOutput,
   execute: async ({ inputData }) => {
-    const pages = await bfsCrawl(inputData.url, {
+    const { root, pages, errors } = await bfsCrawl(inputData.url, {
       limit: inputData.limit,
       depth: inputData.depth,
       concurrency: inputData.concurrency,
+      timeoutMs: inputData.timeoutMs,
     })
-    return { root: inputData.url, count: pages.length, pages }
+    return { root, count: pages.length, pages, errors }
   },
 })
 

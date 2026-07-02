@@ -5,20 +5,12 @@ import { rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-const ROOT = new URL('../../', import.meta.url).pathname
+import { runCli } from '../_support/cli.ts'
+import { ROOT } from '../_support/root.ts'
+
 const TMP = join(tmpdir(), 'webular-parse-test')
 
-async function runParse(args: string[]): Promise<{ code: number; out: string; err: string }> {
-  const proc = Bun.spawn(['bun', `${ROOT}src/commands/parse.ts`, ...args], {
-    cwd: ROOT,
-    stdout: 'pipe',
-    stderr: 'pipe',
-  })
-  const out = await new Response(proc.stdout).text()
-  const err = await new Response(proc.stderr).text()
-  const code = await proc.exited
-  return { code, out, err }
-}
+const runParse = (args: string[]) => runCli('src/commands/parse.ts', args)
 
 let htmlFile: string
 let txtFile: string

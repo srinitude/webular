@@ -1,73 +1,135 @@
-// BFS crawler: same-host, deduped, bounded by limit and depth (FOSS: p-limit).
+// Deterministic BFS crawler. Shared state mutates ONLY in sequential,
+// index-ordered folds that run after each batch fully settles — concurrency
+// (p-limit, FIFO starts; Promise.all index collection) affects when fetches
+// run, never which pages are emitted or in what order. One linkedom parse per
+// page (parsePage); dedup on normalized URLs; exact-host scope.
 import pLimit from 'p-limit'
-import { fetchTextWithinHost } from '../core/http.ts'
-import { extractLinks, htmlToArticle } from './html.ts'
+import { fetchRoot, fetchTextWithinHost } from '../core/http.ts'
+import { errMsg } from '../core/output.ts'
+import { normalizeUrl, sameHost } from '../core/url.ts'
+import { titleAndLinks } from './html.ts'
 
-export interface PageInfo {
+interface PageInfo {
   url: string
   title: string
 }
 
-export interface CrawlOptions {
+interface FetchError {
+  url: string
+  reason: string
+}
+
+interface CrawlResult {
+  root: string
+  pages: PageInfo[]
+  errors: FetchError[]
+}
+
+interface CrawlOptions {
   limit: number
   depth: number
   concurrency: number
+  timeoutMs?: number
 }
 
-interface QueueItem {
-  url: string
-  d: number
-}
+type FetchOutcome =
+  | { url: string; ok: true; title: string; links: string[] }
+  | { url: string; ok: false; reason: string }
 
 interface CrawlCtx {
-  root: string
   host: string
-  depth: number
+  limit: number
+  maxDepth: number
+  timeoutMs?: number
+  pool: ReturnType<typeof pLimit>
   seen: Set<string>
-  queue: QueueItem[]
-  results: PageInfo[]
+  pages: PageInfo[]
+  errors: FetchError[]
 }
 
-function sameHost(host: string, candidate: string): boolean {
+async function fetchPage(url: string, ctx: CrawlCtx): Promise<FetchOutcome> {
   try {
-    return new URL(candidate).hostname === host
-  } catch {
-    return false
+    const html = await fetchTextWithinHost(url, ctx.host, { timeoutMs: ctx.timeoutMs })
+    const page = titleAndLinks(html, url)
+    return { url, ok: true, title: page.title, links: page.links }
+  } catch (err) {
+    return { url, ok: false, reason: errMsg(err) }
   }
 }
 
-function enqueue(html: string, item: QueueItem, ctx: CrawlCtx): void {
-  for (const link of extractLinks(html, item.url)) {
-    if (ctx.seen.has(link) || !sameHost(ctx.host, link)) continue
-    ctx.seen.add(link)
-    ctx.queue.push({ url: link, d: item.d + 1 })
-  }
-}
+type RootOutcome =
+  | { ok: true; finalUrl: string; title: string; links: string[] }
+  | { ok: false; reason: string }
 
-async function crawlOne(item: QueueItem, ctx: CrawlCtx): Promise<void> {
+// The root is the user's explicit target — its redirects are followed freely
+// and the crawl scope re-anchors on the FINAL host (apex→www).
+async function fetchRootPage(url: string, timeoutMs?: number): Promise<RootOutcome> {
   try {
-    const html = await fetchTextWithinHost(item.url, ctx.host)
-    ctx.results.push({ url: item.url, title: htmlToArticle(html).title })
-    if (item.d < ctx.depth) enqueue(html, item, ctx)
-  } catch {
-    /* skip unreachable or off-scope pages */
+    const { finalUrl, html } = await fetchRoot(url, { timeoutMs })
+    const page = titleAndLinks(html, finalUrl)
+    return { ok: true, finalUrl, title: page.title, links: page.links }
+  } catch (err) {
+    return { ok: false, reason: errMsg(err) }
   }
 }
 
-export async function bfsCrawl(root: string, opts: CrawlOptions): Promise<PageInfo[]> {
-  const host = new URL(root).hostname
+// The ONLY dedup/enqueue point — sequential, in document order, so the first
+// discoverer wins deterministically.
+function harvest(links: string[], base: string, ctx: CrawlCtx, next: string[]): void {
+  for (const link of links) {
+    const normalized = normalizeUrl(link, base)
+    if (!normalized || ctx.seen.has(normalized) || !sameHost(ctx.host, normalized)) continue
+    ctx.seen.add(normalized)
+    next.push(normalized)
+  }
+}
+
+function fold(outcomes: FetchOutcome[], mayEnqueue: boolean, ctx: CrawlCtx, next: string[]): void {
+  for (const outcome of outcomes) {
+    if (!outcome.ok) {
+      ctx.errors.push({ url: outcome.url, reason: outcome.reason })
+      continue
+    }
+    ctx.pages.push({ url: outcome.url, title: outcome.title })
+    if (mayEnqueue) harvest(outcome.links, outcome.url, ctx, next)
+  }
+}
+
+// Failures under-fill a batch, so the while-loop refills from the SAME level
+// before descending; the limit cut always slices an already-ordered array.
+async function crawlLevel(level: string[], depth: number, ctx: CrawlCtx): Promise<string[]> {
+  const next: string[] = []
+  let cursor = 0
+  while (cursor < level.length && ctx.pages.length < ctx.limit) {
+    const take = level.slice(cursor, cursor + (ctx.limit - ctx.pages.length))
+    cursor += take.length
+    const outcomes = await Promise.all(take.map((url) => ctx.pool(() => fetchPage(url, ctx))))
+    fold(outcomes, depth < ctx.maxDepth, ctx, next)
+  }
+  return next
+}
+
+export async function bfsCrawl(root: string, opts: CrawlOptions): Promise<CrawlResult> {
+  const rootUrl = normalizeUrl(root)
+  if (!rootUrl) throw new Error(`crawl: invalid URL ${root}`)
+  const entry = await fetchRootPage(rootUrl, opts.timeoutMs)
+  if (!entry.ok)
+    return { root: rootUrl, pages: [], errors: [{ url: rootUrl, reason: entry.reason }] }
+  const anchored = normalizeUrl(entry.finalUrl) ?? rootUrl
   const ctx: CrawlCtx = {
-    root,
-    host,
-    depth: opts.depth,
-    seen: new Set([root]),
-    queue: [{ url: root, d: 0 }],
-    results: [],
+    host: new URL(anchored).hostname,
+    limit: opts.limit,
+    maxDepth: opts.depth,
+    timeoutMs: opts.timeoutMs,
+    pool: pLimit(opts.concurrency),
+    seen: new Set([rootUrl, anchored]),
+    pages: [{ url: anchored, title: entry.title }],
+    errors: [],
   }
-  const pool = pLimit(opts.concurrency)
-  while (ctx.queue.length > 0 && ctx.results.length < opts.limit) {
-    const batch = ctx.queue.splice(0, opts.limit - ctx.results.length)
-    await Promise.all(batch.map((item) => pool(() => crawlOne(item, ctx))))
+  let level: string[] = []
+  if (ctx.maxDepth > 0) harvest(entry.links, anchored, ctx, level)
+  for (let d = 1; d <= opts.depth && level.length > 0 && ctx.pages.length < ctx.limit; d++) {
+    level = await crawlLevel(level, d, ctx)
   }
-  return ctx.results.slice(0, opts.limit)
+  return { root: anchored, pages: ctx.pages, errors: ctx.errors }
 }

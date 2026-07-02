@@ -4,9 +4,9 @@ import { Database } from 'bun:sqlite'
 import { createHash } from 'node:crypto'
 import { createTwoFilesPatch } from 'diff'
 
-export type ChangeStatus = 'new' | 'same' | 'changed'
+type ChangeStatus = 'new' | 'same' | 'changed'
 
-export interface SnapshotResult {
+interface SnapshotResult {
   url: string
   changeStatus: ChangeStatus
   diff?: string

@@ -1,7 +1,7 @@
 // ACT command entry — invoked by `mise run run:act`. Parses flags, runs the
 // Mastra act workflow (agent-browser), emits the result. No mise logic here.
 import { runWorkflow } from '../cli/run.ts'
-import { parseFlags } from '../core/args.ts'
+import { emitOpts, parseFlags } from '../core/args.ts'
 import { logErr } from '../core/output.ts'
 import { actWorkflow } from '../workflows/act.ts'
 
@@ -16,8 +16,7 @@ async function main(): Promise<number> {
     return 2
   }
   const inputData = { url, screenshot: values.screenshot as string | undefined }
-  const opts = { json: Boolean(values.json), output: values.output as string | undefined }
-  return runWorkflow('act', actWorkflow, inputData, opts)
+  return runWorkflow('act', actWorkflow, inputData, emitOpts(values))
 }
 
 process.exit(await main())

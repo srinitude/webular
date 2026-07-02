@@ -3,20 +3,19 @@
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { z } from 'zod'
 import { fetchText } from '../core/http.ts'
-import { extractLinks, htmlToArticle, htmlToMarkdown } from '../lib/html.ts'
+import { htmlToMarkdown, parsePage } from '../lib/html.ts'
 
-export const scrapeInput = z.object({
+const scrapeInput = z.object({
   url: z.string().url(),
   timeoutMs: z.number().optional(),
 })
 
-export const scrapeOutput = z.object({
+const scrapeOutput = z.object({
   url: z.string(),
   title: z.string(),
   markdown: z.string(),
   text: z.string(),
   links: z.array(z.string()),
-  fetchedAt: z.number(),
 })
 
 const fetchStep = createStep({
@@ -30,15 +29,14 @@ const fetchStep = createStep({
 })
 
 function toScrapeResult(url: string, html: string): z.infer<typeof scrapeOutput> {
-  const article = htmlToArticle(html)
-  const body = htmlToMarkdown(article.contentHtml || html)
+  const page = parsePage(html, url)
+  const body = htmlToMarkdown(page.article.contentHtml || html)
   return {
     url,
-    title: article.title,
-    markdown: article.title ? `# ${article.title}\n\n${body}` : body,
-    text: article.text,
-    links: extractLinks(html, url),
-    fetchedAt: Date.now(),
+    title: page.title,
+    markdown: page.title ? `# ${page.title}\n\n${body}` : body,
+    text: page.article.text,
+    links: page.links,
   }
 }
 

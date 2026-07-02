@@ -1,18 +1,23 @@
-// DOCTOR contract — real local toolchain checks (no mocks, no fixtures to clean up).
-import { describe, expect, test } from 'bun:test'
+// DOCTOR contract — real local toolchain checks; the network probe targets a
+// local fixture so the diagnosis is provable offline.
+import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
+import { runCli } from '../_support/cli.ts'
+import { type Fixture, startFixture } from '../_support/fixture.ts'
+import { defaultRoutes } from '../_support/routes.ts'
 
-const ROOT = new URL('../../', import.meta.url).pathname
+let fx: Fixture
+beforeAll(() => {
+  fx = startFixture(defaultRoutes)
+})
+afterAll(() => fx.stop())
 
-async function runDoctor(args: string[]): Promise<{ code: number; out: string; err: string }> {
-  const proc = Bun.spawn(['bun', `${ROOT}src/commands/doctor.ts`, ...args], {
-    cwd: ROOT,
-    stdout: 'pipe',
-    stderr: 'pipe',
-  })
-  const out = await new Response(proc.stdout).text()
-  const err = await new Response(proc.stderr).text()
-  const code = await proc.exited
-  return { code, out, err }
+const runDoctor = (args: string[], env: Record<string, string | undefined> = { ...process.env }) =>
+  runCli('src/commands/doctor.ts', args, { env })
+
+interface Check {
+  name: string
+  ok: boolean
+  detail: string
 }
 
 describe('webular doctor — environment diagnostics (real checks)', () => {
@@ -22,7 +27,7 @@ describe('webular doctor — environment diagnostics (real checks)', () => {
     const data = JSON.parse(out)
     expect(typeof data.ok).toBe('boolean')
     expect(Array.isArray(data.checks)).toBe(true)
-    const bunCheck = data.checks.find((c: { name: string }) => c.name === 'bun')
+    const bunCheck = data.checks.find((c: Check) => c.name === 'bun')
     expect(bunCheck).toBeDefined()
     expect(bunCheck.ok).toBe(true)
   }, 30_000)
@@ -31,7 +36,26 @@ describe('webular doctor — environment diagnostics (real checks)', () => {
     const { code, out } = await runDoctor(['--json'])
     expect(code).toBe(0)
     const data = JSON.parse(out)
-    const miseCheck = data.checks.find((c: { name: string }) => c.name === 'mise')
+    const miseCheck = data.checks.find((c: Check) => c.name === 'mise')
     expect(miseCheck).toBeDefined()
+  }, 30_000)
+
+  test('includes tolerated agent-browser and deepsec checks', async () => {
+    const { code, out } = await runDoctor(['--json'])
+    expect(code).toBe(0)
+    const names = (JSON.parse(out).checks as Check[]).map((c) => c.name)
+    expect(names).toContain('agent-browser')
+    expect(names).toContain('deepsec')
+  }, 30_000)
+
+  test('network check honors WEBULAR_DOCTOR_URL (provable offline)', async () => {
+    const { code, out } = await runDoctor(['--json'], {
+      ...process.env,
+      WEBULAR_DOCTOR_URL: `${fx.origin}/c`,
+    })
+    expect(code).toBe(0)
+    const network = (JSON.parse(out).checks as Check[]).find((c) => c.name === 'network')
+    expect(network?.ok).toBe(true)
+    expect(network?.detail).toContain('200')
   }, 30_000)
 })
