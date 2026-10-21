@@ -22,14 +22,19 @@ type SearchRound<M extends { weak: boolean }> = (
 
 // Main entity of a question: the longest run of capitalized words, minus
 // question and function words ("Where was Heisenberg born?" -> "Heisenberg").
+// A run spans lowercase name connectors ("Bank of England") and drops quote
+// marks around it, so a quoted title stays one entity.
 // ponytail: capitalization heuristic; swap in a Jev extractor if it misses.
 const NOT_ENTITY = new Set(
   'Who What When Where Which Why How Is Was Were Are Did Does Do The A An In Of On At For'.split(
     ' ',
   ),
 )
+const WORD = String.raw`\p{Lu}[\p{L}\p{M}]*(?:['’-][\p{L}\p{M}]+)*`
+const CONNECTOR = String.raw`(?:\s+(?:of|the|de|von|van|der|del|da|du|la|le))*`
+const ENTITY_RUN = new RegExp(String.raw`${WORD}(?:${CONNECTOR}\s+${WORD})*`, 'gu')
 export const mainEntity = (question: string): string | undefined =>
-  (question.match(/\p{Lu}[\p{L}\p{M}'-]*(?:\s+\p{Lu}[\p{L}\p{M}'-]*)*/gu) ?? [])
+  (question.match(ENTITY_RUN) ?? [])
     .map((run) =>
       run
         .split(/\s+/)
@@ -58,9 +63,11 @@ const bridgeEntity = (hits: ReadonlyArray<Hit>): string | undefined => {
   return best?.[0]
 }
 
-// An entity page has a short title ending in its name ("Werner Heisenberg").
+// An entity page's title ends in the entity's name, with at most three words
+// before it ("Werner Heisenberg", "One Hundred Years of Solitude").
 const namedFor = (entity: string) => (h: Hit) =>
-  h.title.split(/\s+/).length <= 4 && h.title.toLowerCase().endsWith(entity.toLowerCase())
+  h.title.split(/\s+/).length <= entity.split(/\s+/).length + 3 &&
+  h.title.toLowerCase().endsWith(entity.toLowerCase())
 
 // Runs only when the first round is weak: no top-3 hit names the entity.
 export const secondHop = Effect.fn('secondHop')(function* <M extends { weak: boolean }>(
