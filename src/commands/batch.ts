@@ -42,6 +42,8 @@ function exitCode(result: unknown): number {
   return okCount === 0 ? 1 : 3
 }
 
+const TOO_MANY = 'batch: too many URLs (the max is 1000)'
+
 const main = Effect.gen(function* () {
   const { values, positionals } = yield* parseFlags(Bun.argv.slice(2), {
     urls: { type: 'string' },
@@ -54,12 +56,7 @@ const main = Effect.gen(function* () {
     const message = 'batch: missing URLs. Pass --urls <url,...> or --input <file>.'
     return yield* new CliError({ message, exitCode: EXIT.usage })
   }
-  if (urls.length > 1000) {
-    return yield* new CliError({
-      message: 'batch: too many URLs (the max is 1000)',
-      exitCode: EXIT.usage,
-    })
-  }
+  if (urls.length > 1000) return yield* new CliError({ message: TOO_MANY, exitCode: EXIT.usage })
   const inputData = {
     urls,
     concurrency: yield* optIntFlag('batch', values, 'concurrency', { min: 1, max: 32 }),

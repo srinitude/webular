@@ -15,6 +15,7 @@ import { body, json } from './support.ts'
 
 const CAPTURE = '/web/20261021030512id_/https://example.com/'
 const NO_CACHE = { cache: false }
+const ENV = { WEBULAR_SOURCE_GAP_MS: '0', WEBULAR_NO_CACHE: '1' }
 
 // 'cdx': the availability API has nothing and the recorded CDX lists captures.
 const inFixture = <A, E, R>(
@@ -37,15 +38,10 @@ const inFixture = <A, E, R>(
       '/cdx/search/cdx': () => json(hasCapture === 'cdx' ? cdx : '[]'),
       [CAPTURE]: () => new Response(page, { headers: { 'content-type': 'text/html' } }),
     }))
-    const config = {
-      WEBULAR_SOURCE_ORIGIN: fx.origin,
-      WEBULAR_SOURCE_GAP_MS: '0',
-      WEBULAR_NO_CACHE: '1',
-    }
     const out = yield* Effect.provideService(
       use(fx.origin),
       ConfigProvider.ConfigProvider,
-      ConfigProvider.fromUnknown(config),
+      ConfigProvider.fromUnknown({ ...ENV, WEBULAR_SOURCE_ORIGIN: fx.origin }),
     )
     return { out, fx }
   })

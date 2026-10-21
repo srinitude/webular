@@ -12,19 +12,22 @@ const HELP = [
 ].join('\n')
 
 // Loaded only after the flags check, so a bad call never pays for linkedom.
-const cli = Effect.promise(() => import('../lib/jev/learn/cli.ts'))
+const load = <M, A>(loader: () => Promise<M>, pick: (m: M) => A) =>
+  Effect.map(Effect.promise(loader), pick)
+
+const FLAGS = {
+  action: { type: 'string' },
+  id: { type: 'string' },
+  label: { type: 'string' },
+  input: { type: 'string' },
+} as const
 
 const usage = (message: string) => new CliError({ message, exitCode: 2 })
 
 const main = Effect.gen(function* () {
   // Positional form (`correct <id> <label> --input F`) or the plugin's flag form
   // (`--action correct --id X --label Y --input F`).
-  const { values, positionals } = yield* parseFlags(Bun.argv.slice(2), {
-    action: { type: 'string' },
-    id: { type: 'string' },
-    label: { type: 'string' },
-    input: { type: 'string' },
-  })
+  const { values, positionals } = yield* parseFlags(Bun.argv.slice(2), FLAGS)
   const named = strFlag(values, 'action')
   const cmd = named ?? positionals[0]
   const rest = named === undefined ? positionals.slice(1) : positionals
@@ -32,9 +35,16 @@ const main = Effect.gen(function* () {
   const label = strFlag(values, 'label') ?? rest[1]
   if (cmd === undefined)
     return yield* usage(`jev: missing <action>. Pass learn or correct.\n${HELP}`)
-  if (cmd === 'learn') yield* (yield* cli).learn
+  if (cmd === 'learn')
+    yield* yield* load(
+      () => import('../lib/jev/learn/cli.ts'),
+      (m) => m.learn,
+    )
   else if (cmd === 'correct' && id && label)
-    yield* (yield* cli).correctCall(id, label, strFlag(values, 'input'))
+    yield* (yield* load(
+      () => import('../lib/jev/learn/cli.ts'),
+      (m) => m.correctCall,
+    ))(id, label, strFlag(values, 'input'))
   else if (cmd === 'correct')
     return yield* usage('jev: missing <call-id> and <right-answer>. Pass both after correct.')
   else return yield* usage(`jev: unknown command '${cmd}'\n${HELP}`)

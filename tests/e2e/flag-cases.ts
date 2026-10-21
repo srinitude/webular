@@ -20,5 +20,13 @@ export const FLAG_CASES: CliCase[] = [
     maxChars: 400,
     maxMs: 3000,
   },
+  {
+    name: 'batch archive flag',
+    cmd: 'batch',
+    args: ['--urls', '{origin}/a', '--archive', '--json'],
+    json: true,
+    maxChars: 6000,
+    maxMs: 8000,
+  },
   { name: 'scrape help', cmd: 'scrape', args: ['--help'], maxChars: 2000, maxMs: 3000 },
 ]

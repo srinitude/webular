@@ -135,10 +135,8 @@ const searchOnce = Effect.fn('searchOnce')(function* (
   )
   if (source === 'web' && !ran.some((r) => r.status === 'ok'))
     ran.push(yield* querySource('web', queries, limit, runSource, settle))
-  const scored = scoreHits(
-    [...ran.flatMap((r) => r.lists), ...(opts.local ? [opts.local] : [])],
-    query,
-  )
+  const pool = [...ran.flatMap((r) => r.lists), ...(opts.local ? [opts.local] : [])]
+  const scored = scoreHits(pool, query)
   const ok = ran.filter((r) => r.status === 'ok').length
   const meta: SearchMeta = {
     sources: Object.fromEntries(ran.map((r) => [r.source, { status: r.status, ms: r.ms }])),
