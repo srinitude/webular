@@ -2,8 +2,8 @@
 // pdf/docx parsers load their heavy deps lazily (they never tax a text parse);
 // binary formats we cannot parse fail loudly instead of decoding to garbage.
 import { Data, Effect } from 'effect'
-import { errMsg } from '../core/output.ts'
-import { htmlToMarkdown } from './html.ts'
+import { errMsg, logErr } from '../core/output.ts'
+import { htmlToMarkdown, sanitizeHtml } from './html.ts'
 
 type DocFormat = 'pdf' | 'docx' | 'html' | 'md' | 'txt' | 'csv' | 'json'
 
@@ -59,9 +59,16 @@ function detectFormat(file: string): Effect.Effect<DocFormat, ParseError> {
 // PDF bytes to text; scrape reads a fetched PDF through this same reader.
 export const pdfText = Effect.fnUntraced(function* (bytes: Uint8Array) {
   const { extractText, getDocumentProxy } = yield* attempt(() => import('unpdf'))
-  const pdf = yield* attempt(() => getDocumentProxy(bytes))
-  const { text } = yield* attempt(() => extractText(pdf, { mergePages: true }))
-  return typeof text === 'string' ? text : (text as string[]).join('\n')
+  // The pdf.js proxy holds a worker and page buffers: free it on success and failure.
+  return yield* Effect.acquireRelease(
+    attempt(() => getDocumentProxy(bytes)),
+    (pdf) =>
+      Effect.ignore(attempt(() => (pdf as unknown as { destroy(): Promise<void> }).destroy())),
+  ).pipe(
+    Effect.flatMap((pdf) => attempt(() => extractText(pdf, { mergePages: true }))),
+    Effect.map(({ text }) => (typeof text === 'string' ? text : (text as string[]).join('\n'))),
+    Effect.scoped,
+  )
 })
 
 const parsePdf = Effect.fnUntraced(function* (file: string) {
@@ -72,12 +79,17 @@ const parsePdf = Effect.fnUntraced(function* (file: string) {
 const parseDocx = Effect.fnUntraced(function* (file: string) {
   const { default: mammoth } = yield* attempt(() => import('mammoth'))
   const buf = yield* attempt(() => Bun.file(file).arrayBuffer())
-  const { value: html } = yield* attempt(() => mammoth.convertToHtml({ buffer: Buffer.from(buf) }))
-  return htmlToMarkdown(html)
+  const { value: html, messages } = yield* attempt(() =>
+    mammoth.convertToHtml({ buffer: Buffer.from(buf) }),
+  )
+  for (const m of messages) yield* logErr(`parse: ${file}: mammoth ${m.type}: ${m.message}`)
+  return htmlToMarkdown(sanitizeHtml(html))
 })
 
 const parseHtml = (file: string) =>
-  attempt(() => Bun.file(file).text()).pipe(Effect.map(htmlToMarkdown))
+  attempt(() => Bun.file(file).text()).pipe(
+    Effect.map((html) => htmlToMarkdown(sanitizeHtml(html))),
+  )
 
 // Extension checks can be fooled; NUL bytes in the head cannot.
 const parseText = Effect.fnUntraced(function* (file: string) {

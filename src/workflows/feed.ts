@@ -9,7 +9,7 @@ import { resolveFeed } from '../core/feed-source.ts'
 import { stepRuntime } from './runtime.ts'
 
 const feedInput = z.object({
-  url: z.string().url(),
+  url: z.url(),
   limit: z.number().int().positive().default(20),
   timeoutMs: z.number().int().positive().optional(),
   archive: z.boolean().optional(),

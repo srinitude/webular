@@ -9,7 +9,7 @@ import { compareAndStore } from '../lib/snapshot.ts'
 import { stepRuntime } from './runtime.ts'
 
 const monitorInput = z.object({
-  url: z.string().url(),
+  url: z.url(),
   dbPath: z.string(),
   timeoutMs: z.number().int().positive().optional(),
 })

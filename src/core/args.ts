@@ -110,12 +110,12 @@ export function timeoutFlag(
 export function emitOpts(values: Record<string, FlagValue>): {
   json: boolean
   ndjson: boolean
-  fields?: string[]
-  output?: string
+  fields?: string[] | undefined
+  output?: string | undefined
 } {
   return {
-    json: Boolean(values.json),
-    ndjson: Boolean(values.ndjson),
+    json: Boolean(values['json']),
+    ndjson: Boolean(values['ndjson']),
     fields: parseFields(strFlag(values, 'select')),
     output: strFlag(values, 'output'),
   }

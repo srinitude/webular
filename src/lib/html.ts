@@ -1,6 +1,6 @@
 // FOSS HTML operations: main-content extraction, HTML→Markdown, link harvest.
 // Composes @mozilla/readability + linkedom + turndown (all open source).
-import { Readability } from '@mozilla/readability'
+import { isProbablyReaderable, Readability } from '@mozilla/readability'
 import { parseHTML } from 'linkedom'
 import TurndownService from 'turndown'
 
@@ -30,15 +30,55 @@ function linksFrom(document: DomDocument, base: string): string[] {
   return [...out]
 }
 
+const UNSAFE_ELEMENTS = 'script, style, iframe, object, embed, form'
+const URL_ATTRS = ['href', 'src', 'action', 'formaction', 'xlink:href']
+
+// Neither Readability nor mammoth sanitizes its HTML — run this before anyone
+// embeds it. Strips active elements, on* handlers, and javascript: URLs.
+export function sanitizeHtml(html: string): string {
+  const { document } = parseHTML(`<!doctype html><html><body>${html}</body></html>`)
+  for (const el of Array.from(document.querySelectorAll(UNSAFE_ELEMENTS))) el.remove()
+  for (const el of Array.from(document.querySelectorAll('*'))) {
+    for (const name of el.getAttributeNames()) {
+      const value = el.getAttribute(name) ?? ''
+      // Browsers ignore control chars/whitespace inside the scheme ("java\tscript:").
+      // biome-ignore lint/suspicious/noControlCharactersInRegex: browsers drop C0 control chars inside a URL scheme, so the sanitizer must too.
+      const scheme = value.replace(/[\u0000-\u0020]/g, '').toLowerCase()
+      if (
+        name.toLowerCase().startsWith('on') ||
+        (URL_ATTRS.includes(name.toLowerCase()) && scheme.startsWith('javascript:'))
+      )
+        el.removeAttribute(name)
+    }
+  }
+  return document.body?.innerHTML ?? ''
+}
+
+// Plain text of a page Readability skips, read from the already-parsed body.
+// Removes non-text elements in place: no caller reads the document afterwards.
+function bodyText(body: DomDocument['body']): string {
+  for (const el of Array.from(body.querySelectorAll('script, style, noscript'))) el.remove()
+  return (body.textContent ?? '').replace(/\s+/g, ' ').trim()
+}
+
 function articleFrom(document: DomDocument, rawHtml: string): Article {
+  // linkedom's document getters throw on a document with no root (empty input).
+  if (!document.documentElement || !document.body)
+    return { title: '', contentHtml: sanitizeHtml(rawHtml), text: '' }
   const docTitle = document.title ?? ''
   // linkedom's document satisfies the DOM surface Readability touches; the
   // libraries' type worlds don't overlap, hence the one sanctioned cast.
-  const parsed = new Readability(document as unknown as Document).parse()
-  if (!parsed) return { title: docTitle, contentHtml: rawHtml, text: '' }
+  // Readability mutates its document; no caller reads it afterwards, so no clone.
+  const doc = document as unknown as Document
+  // The readerable check skips Readability's scoring pass on non-article pages;
+  // those pages still keep their body text.
+  if (!isProbablyReaderable(doc))
+    return { title: docTitle, contentHtml: sanitizeHtml(rawHtml), text: bodyText(document.body) }
+  const parsed = new Readability(doc).parse()
+  if (!parsed) return { title: docTitle, contentHtml: sanitizeHtml(rawHtml), text: '' }
   return {
     title: parsed.title ?? docTitle,
-    contentHtml: parsed.content ?? '',
+    contentHtml: sanitizeHtml(parsed.content ?? ''),
     text: parsed.textContent ?? '',
   }
 }

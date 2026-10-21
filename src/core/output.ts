@@ -84,11 +84,11 @@ export function pageText(text: string, cursor?: string, maxChars = PAGE_MAX_CHAR
 }
 
 interface EmitOptions {
-  json?: boolean
-  ndjson?: boolean
-  fields?: string[]
-  output?: string
-  render?: (data: unknown) => string
+  json?: boolean | undefined
+  ndjson?: boolean | undefined
+  fields?: string[] | undefined
+  output?: string | undefined
+  render?: ((data: unknown) => string) | undefined
 }
 
 function defaultRender(data: unknown): string {

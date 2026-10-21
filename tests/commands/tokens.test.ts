@@ -60,7 +60,7 @@ const collectPages = (client: Client) =>
       )
       expect(estimateTokens(body)).toBeLessThanOrEqual(BUDGET.page)
       pages.push(body)
-      cursor = more ? String(parseRec(more).nextCursor) : undefined
+      cursor = more ? String(parseRec(more)['nextCursor']) : undefined
     } while (cursor)
     return pages
   })
@@ -71,7 +71,7 @@ describe('MCP — compact, paged, deterministic results', () => {
       Effect.gen(function* () {
         const pages = yield* collectPages(yield* connected)
         expect(pages.length).toBeGreaterThan(1)
-        expect(String(parseRec(pages.join('')).markdown)).toContain('some words here.')
+        expect(String(parseRec(pages.join(''))['markdown'])).toContain('some words here.')
       }),
     ))
 

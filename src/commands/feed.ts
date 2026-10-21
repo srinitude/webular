@@ -11,7 +11,7 @@ const main = Effect.gen(function* () {
     limit: { type: 'string' },
     archive: { type: 'boolean' },
   })
-  const url = (values.url as string) ?? positionals[0]
+  const url = (values['url'] as string) ?? positionals[0]
   if (!url) {
     return yield* new CliError({
       message: 'feed: missing <url> (pass --url <feed-url> or a positional)',
@@ -22,7 +22,7 @@ const main = Effect.gen(function* () {
     url,
     limit: yield* intFlag('feed', values, 'limit', { def: 20, min: 1, max: 500 }),
     timeoutMs: yield* timeoutFlag('feed', values),
-    archive: values.archive === true,
+    archive: values['archive'] === true,
   }
   return yield* runWorkflow(
     'feed',

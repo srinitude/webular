@@ -12,7 +12,7 @@ const main = Effect.gen(function* () {
     depth: { type: 'string' },
     concurrency: { type: 'string' },
   })
-  const url = (values.url as string) ?? positionals[0]
+  const url = (values['url'] as string) ?? positionals[0]
   if (!url) {
     return yield* new CliError({ message: 'crawl: missing --url <url>', exitCode: 2 })
   }

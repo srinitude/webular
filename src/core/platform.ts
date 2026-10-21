@@ -17,7 +17,7 @@ export interface Target {
   key: string // webular-<key> is the npm package and asset stem; bun-<key> the build target
   os: Os
   cpu: Cpu
-  libc?: Libc
+  libc?: Libc | undefined
 }
 
 const t = (os: Os, cpu: Cpu, libc?: Libc): Target => ({
@@ -49,7 +49,7 @@ export const assetName = (target: Target): string => `webular-${target.key}${exe
 export interface Facts {
   platform: string
   arch: string
-  libc?: Libc
+  libc?: Libc | undefined
   rosetta?: boolean
 }
 

@@ -7,7 +7,7 @@ import { CliError, runMain } from '../core/effect.ts'
 
 const main = Effect.gen(function* () {
   const { values, positionals } = yield* parseFlags(Bun.argv.slice(2), { file: { type: 'string' } })
-  const file = (values.file as string) ?? positionals[0]
+  const file = (values['file'] as string) ?? positionals[0]
   if (!file) {
     return yield* new CliError({
       message: 'parse: missing --file <path> (or pass a positional path)',

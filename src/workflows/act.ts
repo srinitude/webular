@@ -9,7 +9,7 @@ import { runBatch } from '../lib/agentbrowser.ts'
 import { stepRuntime } from './runtime.ts'
 
 const actInput = z.object({
-  url: z.string().url(),
+  url: z.url(),
   screenshot: z.string().optional(),
 })
 

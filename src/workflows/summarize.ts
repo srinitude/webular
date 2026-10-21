@@ -10,7 +10,7 @@ import { stepRuntime } from './runtime.ts'
 
 const summarizeInput = z.object({
   text: z.string().optional(),
-  url: z.string().url().optional(),
+  url: z.url().optional(),
   sentences: z.number().int().min(1).max(25).default(3),
   timeoutMs: z.number().int().positive().optional(),
 })

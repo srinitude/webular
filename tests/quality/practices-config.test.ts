@@ -50,7 +50,7 @@ describe('best practices: package engines and files', () => {
     'engines.bun matches the mise bun pin',
     Effect.gen(function* () {
       const pin = (yield* read('mise.toml')).match(/^bun = "([^"]+)"/m)?.[1]
-      expect((yield* packageJson).engines.bun).toBe(`>=${pin}`)
+      expect((yield* packageJson).engines['bun']).toBe(`>=${pin}`)
     }),
   )
   check(
@@ -75,9 +75,9 @@ describe('best practices: package dependencies', () => {
   check(
     'effect packages share one exact version',
     Effect.map(packageJson, ({ dependencies, devDependencies }) => {
-      expect(dependencies.effect).toMatch(/^\d+\.\d+\.\d+$/)
+      expect(dependencies['effect']).toMatch(/^\d+\.\d+\.\d+$/)
       // bin/webular.ts runs @effect/platform-bun after install, so it ships as a dependency.
-      expect(dependencies['@effect/platform-bun']).toBe(dependencies.effect)
+      expect(dependencies['@effect/platform-bun']).toBe(dependencies['effect'])
       expect(Object.keys(devDependencies)).not.toContain('@effect/platform-bun')
     }),
   )

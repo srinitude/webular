@@ -101,7 +101,7 @@ export const scoopManifest = (version: string, sums: Sums) =>
       description: 'Universal web research CLI',
       homepage: 'https://github.com/srinitude/webular',
       license: 'Apache-2.0',
-      architecture: { '64bit': arch.x64, arm64: arch.arm64 },
+      architecture: { '64bit': arch['x64'], arm64: arch['arm64'] },
       bin: 'webular.exe',
     }
     return `${JSON.stringify(manifest, null, 2)}\n`

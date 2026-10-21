@@ -80,4 +80,19 @@ describe('webular doctor — environment diagnostics (real checks)', () => {
     ),
     30_000,
   )
+
+  test(
+    'exits 1 when a required check fails (no bun/node/mise on PATH)',
+    eff(
+      Effect.gen(function* () {
+        const { code, out } = yield* runCli('src/commands/doctor.ts', ['--json'], {
+          env: { ...process.env, PATH: '/nonexistent' },
+          exec: process.execPath,
+        })
+        expect(code).toBe(1)
+        expect(JSON.parse(out).ok).toBe(false)
+      }),
+    ),
+    30_000,
+  )
 })

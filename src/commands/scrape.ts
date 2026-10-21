@@ -20,15 +20,15 @@ const main = Effect.gen(function* () {
     archive: { type: 'boolean' },
     render: { type: 'string' },
   })
-  const url = (values.url as string) ?? positionals[0]
+  const url = (values['url'] as string) ?? positionals[0]
   if (!url) {
     return yield* new CliError({ message: 'scrape: missing --url <url>', exitCode: 2 })
   }
-  const render = yield* renderFlag(values.render as string | undefined)
+  const render = yield* renderFlag(values['render'] as string | undefined)
   const inputData = {
     url,
     timeoutMs: yield* timeoutFlag('scrape', values),
-    archive: values.archive === true,
+    archive: values['archive'] === true,
     ...(render ? { render } : {}),
   }
   return yield* runWorkflow(

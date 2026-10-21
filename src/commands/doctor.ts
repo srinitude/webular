@@ -1,5 +1,5 @@
 // DOCTOR command entry — invoked by `mise run run:doctor`. Runs diagnostics,
-// emits { ok, checks }. No required flags.
+// emits { ok, checks }; exits 1 when a required check fails. No required flags.
 import { Effect } from 'effect'
 import { runWorkflow } from '../cli/run.ts'
 import { emitOpts, parseFlags } from '../core/args.ts'
@@ -12,7 +12,7 @@ const main = Effect.gen(function* () {
     () => import('../workflows/doctor.ts'),
     (m) => m.doctorWorkflow,
     {},
-    emitOpts(values),
+    { ...emitOpts(values), exitCode: (r) => ((r as { ok: boolean }).ok ? 0 : 1) },
   )
 })
 

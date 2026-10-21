@@ -28,7 +28,7 @@ const RETRY_STATUS = new Set([408, 429, 502, 503, 504])
 const MAX_RETRY_AFTER_MS = 10_000
 
 export interface FetchOptions extends CacheOptions {
-  timeoutMs?: number
+  timeoutMs?: number | undefined
   headers?: Record<string, string>
   signal?: AbortSignal
   redirect?: RequestRedirect

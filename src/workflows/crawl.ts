@@ -8,7 +8,7 @@ import { fetchErrorsSchema } from '../lib/sources.ts'
 import { stepRuntime } from './runtime.ts'
 
 const crawlInput = z.object({
-  url: z.string().url(),
+  url: z.url(),
   limit: z.number().int().min(1).max(1000).default(5),
   depth: z.number().int().min(0).max(10).default(2),
   // Unset means host-sized (core/budget.ts).

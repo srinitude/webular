@@ -7,8 +7,8 @@ import { fetchTextOrArchive } from './archive.ts'
 import { type FetchOptions, fetchText } from './http.ts'
 
 interface SourceOptions extends FetchOptions {
-  archive?: boolean
-  archiveOrigin?: string
+  archive?: boolean | undefined
+  archiveOrigin?: string | undefined
 }
 
 // A live page that is not a feed and links to none that works.
@@ -43,7 +43,7 @@ const guesses = (url: string): string[] =>
 interface Found {
   xml: string
   feedUrl: string
-  archivedFrom?: string
+  archivedFrom?: string | undefined
 }
 
 const asFeed = (found: Found) =>

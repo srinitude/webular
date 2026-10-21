@@ -10,7 +10,7 @@ const main = Effect.gen(function* () {
     url: { type: 'string' },
     limit: { type: 'string' },
   })
-  const url = (values.url as string) ?? positionals[0]
+  const url = (values['url'] as string) ?? positionals[0]
   if (!url) {
     return yield* new CliError({
       message: 'map: missing <url> (pass --url <url> or a positional URL)',

@@ -11,7 +11,7 @@ const main = Effect.gen(function* () {
     depth: { type: 'string' },
     sentences: { type: 'string' },
   })
-  const topic = (values.topic as string) ?? positionals[0]
+  const topic = (values['topic'] as string) ?? positionals[0]
   if (!topic) {
     return yield* new CliError({
       message: 'research: missing --topic <t> (or pass topic as a positional)',

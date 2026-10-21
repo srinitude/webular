@@ -12,7 +12,7 @@ import { stepRuntime } from './runtime.ts'
 import { withFallbacks } from './scrape-fallback.ts'
 
 const scrapeInput = z.object({
-  url: z.string().url(),
+  url: z.url(),
   timeoutMs: z.number().optional(),
   // Dead page (404, 410, 5xx, network error, timeout) → Wayback raw capture.
   archive: z.boolean().optional(),

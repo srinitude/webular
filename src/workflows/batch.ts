@@ -10,7 +10,7 @@ import { stepRuntime } from './runtime.ts'
 import { scrapeWorkflow } from './scrape.ts'
 
 const batchInput = z.object({
-  urls: z.array(z.string().url()).max(1000),
+  urls: z.array(z.url()).max(1000),
   // Unset means host-sized (core/budget.ts).
   concurrency: z.number().int().positive().max(32).optional(),
   timeoutMs: z.number().int().positive().optional(),

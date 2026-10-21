@@ -8,7 +8,7 @@ import { eff } from '../_support/run.ts'
 
 // Live DDG search is blocked from datacenter IPs and inherently varies run to
 // run; opt in with WEBULAR_TEST_LIVE=1. The missing-arg contract always runs.
-const SKIP_LIVE = !process.env.WEBULAR_TEST_LIVE
+const SKIP_LIVE = !process.env['WEBULAR_TEST_LIVE']
 
 const runAnswer = (args: string[]) => runCli('src/commands/answer.ts', args)
 

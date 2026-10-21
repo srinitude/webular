@@ -13,7 +13,7 @@ import {
 import { stepRuntime } from './runtime.ts'
 
 const extractInput = z.object({
-  url: z.string().url(),
+  url: z.url(),
   fields: z.string().optional(),
   selector: z.string().optional(),
   timeoutMs: z.number().optional(),

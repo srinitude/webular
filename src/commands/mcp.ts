@@ -48,7 +48,7 @@ const main = Effect.gen(function* () {
   const { values } = yield* parseFlags(Bun.argv.slice(2), {
     list: { type: 'boolean', default: false },
   })
-  if (!values.list) return yield* serve
+  if (!values['list']) return yield* serve
   const ids = webTools.map((t) => t.id)
   yield* emit({ count: ids.length, tools: ids }, { ...emitOpts(values), render: renderFor('mcp') })
   return 0

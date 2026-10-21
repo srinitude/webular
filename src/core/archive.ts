@@ -9,7 +9,7 @@ import { type FetchOptions, fetchText, HttpStatusError } from './http.ts'
 const ARCHIVE_ORIGIN = 'https://archive.org'
 
 interface ArchiveOptions extends FetchOptions {
-  archiveOrigin?: string
+  archiveOrigin?: string | undefined
 }
 
 type FetchFailure = HttpStatusError | FetchError

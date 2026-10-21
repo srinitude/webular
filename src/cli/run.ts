@@ -9,10 +9,10 @@ import type { SandboxError } from '../core/safepath.ts'
 import { renderFor } from './render.ts'
 
 interface RunOpts {
-  json?: boolean
-  ndjson?: boolean
-  fields?: string[]
-  output?: string
+  json?: boolean | undefined
+  ndjson?: boolean | undefined
+  fields?: string[] | undefined
+  output?: string | undefined
   exitCode?: (result: unknown) => number
 }
 

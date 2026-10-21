@@ -6,7 +6,7 @@ import { Data, Effect, Option, Stream } from 'effect'
 import { ChildProcess, ChildProcessSpawner } from 'effect/process'
 import { errMsg } from './output.ts'
 
-class ProcError extends Data.TaggedError('ProcError')<{ readonly message: string }> {}
+export class ProcError extends Data.TaggedError('ProcError')<{ readonly message: string }> {}
 
 interface ProcResult {
   code: number

@@ -23,7 +23,7 @@ interface CrawlOptions {
   limit: number
   depth: number
   concurrency: number
-  timeoutMs?: number
+  timeoutMs?: number | undefined
 }
 
 type FetchOutcome =
@@ -35,7 +35,7 @@ interface CrawlCtx {
   limit: number
   maxDepth: number
   concurrency: number
-  timeoutMs?: number
+  timeoutMs?: number | undefined
   seen: Set<string>
   pages: PageInfo[]
   errors: FetchError[]

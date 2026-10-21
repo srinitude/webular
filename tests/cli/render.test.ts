@@ -1,15 +1,14 @@
 // Output contract: human text differs from --json, -o writes what stdout carries,
 // partial failures note on stderr, batch maps exit codes 0/1/3.
 import { describe, expect, test } from 'bun:test'
-import { readFileSync, rmSync } from 'node:fs'
-import { tmpdir } from 'node:os'
+import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { Effect } from 'effect'
 import { renderFor } from '../../src/cli/render.ts'
 import { runCli } from '../_support/cli.ts'
 import { type Routes, startFixture, useFixture } from '../_support/fixture.ts'
 import { defaultRoutes } from '../_support/routes.ts'
-import { eff } from '../_support/run.ts'
+import { eff, tmpDir } from '../_support/run.ts'
 
 const fx = useFixture(defaultRoutes)
 
@@ -108,13 +107,12 @@ describe('command output contract (integration)', () => {
     'scrape -o writes the markdown, not JSON',
     eff(
       Effect.gen(function* () {
-        const dest = join(tmpdir(), `webular-render-${Date.now()}.md`)
+        const dest = join(yield* tmpDir('webular-'), 'render.md')
         const { code } = yield* runCmd('scrape', ['--url', `${fx.origin}/`, '-o', dest])
         expect(code).toBe(0)
         const written = readFileSync(dest, 'utf8')
         expect(written).toContain('Fixture Home')
         expect(written.startsWith('{')).toBe(false)
-        rmSync(dest, { force: true })
       }),
     ),
     15_000,
@@ -124,7 +122,7 @@ describe('command output contract (integration)', () => {
     'media renders a one-line human summary',
     eff(
       Effect.gen(function* () {
-        const dest = join(tmpdir(), `webular-render-${Date.now()}.bin`)
+        const dest = join(yield* tmpDir('webular-'), 'render.bin')
         const { code, out } = yield* runCmd('media', [
           '--url',
           `${fx.origin}/bytes?n=64`,
@@ -134,7 +132,6 @@ describe('command output contract (integration)', () => {
         ])
         expect(code).toBe(0)
         expect(out.trim()).toBe(`download ${fx.origin}/bytes?n=64 -> ${dest} (64 bytes)`)
-        rmSync(dest, { force: true })
       }),
     ),
     15_000,

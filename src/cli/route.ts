@@ -18,6 +18,6 @@ export function route(
   if (!command || command === '--help' || command === '-h') return printHelp()
   if (command === '--version' || command === '-V') return printVersion()
   if (!isCommand(command))
-    return Effect.as(logErr(`webular: unknown command '${command}'. Run 'webular --help'.`), 1)
+    return Effect.as(logErr(`webular: unknown command '${command}'. Run 'webular --help'.`), 2)
   return Effect.map(runTask(`run:${command}`, rest, extraEnv), (result) => result.exitCode)
 }

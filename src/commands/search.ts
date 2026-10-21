@@ -8,7 +8,7 @@ import { SEARCH_SOURCES, type SearchSource } from '../lib/sources-search.ts'
 
 function buildInput(values: Record<string, string | boolean | undefined>, positionals: string[]) {
   return Effect.gen(function* () {
-    const query = (values.query as string) ?? positionals[0]
+    const query = (values['query'] as string) ?? positionals[0]
     if (!query) {
       return yield* new CliError({
         message: 'search: missing <query> (pass --query <q> or a positional)',

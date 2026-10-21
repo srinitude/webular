@@ -11,27 +11,12 @@ const STRICT_FLAGS = [
   'noUncheckedIndexedAccess',
   'noImplicitOverride',
   'noFallthroughCasesInSwitch',
+  'noUnusedLocals',
+  'exactOptionalPropertyTypes',
+  'noPropertyAccessFromIndexSignature',
   'verbatimModuleSyntax',
   'isolatedModules',
   'erasableSyntaxOnly',
-]
-
-// ponytail: ratchet. Files still on zod 3 string formats; the Effect conversion
-// removes them. A new offender or a fixed-but-still-listed file both fail.
-const ZOD3_FORMAT_FILES = [
-  'src/tools/web.ts',
-  ...[
-    'act',
-    'batch',
-    'crawl',
-    'extract',
-    'feed',
-    'map',
-    'media',
-    'monitor',
-    'scrape',
-    'summarize',
-  ].map((name) => `src/workflows/${name}.ts`),
 ]
 
 const none = (pattern: RegExp) =>
@@ -68,10 +53,7 @@ describe('best practices: source patterns', () => {
   )
   check('no XState v4 APIs', none(/\b(interpret|Machine)\(|withConfig\(|\.typegen/))
   check(
-    'zod 4 top-level string formats, ratchet on known offenders',
-    Effect.map(
-      matching(/z\.string\(\)\.(url|email|uuid)\(\)|\.passthrough\(\)|z\.nativeEnum\(/),
-      (found) => expect(found).toEqual([...ZOD3_FORMAT_FILES].sort()),
-    ),
+    'zod 4 top-level string formats, no passthrough, no nativeEnum',
+    none(/z\.string\(\)\.(url|email|uuid)\(\)|\.passthrough\(\)|z\.nativeEnum\(/),
   )
 })

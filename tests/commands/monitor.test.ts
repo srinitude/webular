@@ -1,20 +1,21 @@
 // MONITOR contract — real fetch against the local fixture, temp db (no mocks).
 import { describe, expect, test } from 'bun:test'
-import { readdirSync, rmSync } from 'node:fs'
+import { mkdtempSync, readdirSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { Effect } from 'effect'
 import { runCli } from '../_support/cli.ts'
 import { useFixture } from '../_support/fixture.ts'
 import { defaultRoutes } from '../_support/routes.ts'
-import { eff } from '../_support/run.ts'
+import { eff, tmpDir } from '../_support/run.ts'
 
 const fx = useFixture(defaultRoutes)
 
 const runMonitor = (args: string[]) => runCli('src/commands/monitor.ts', args)
 
 describe('webular monitor — change tracking across snapshots (real fetch)', () => {
-  const dbPath = join(tmpdir(), `webular-monitor-test-${Date.now()}.db`)
+  const dbDir = mkdtempSync(join(tmpdir(), 'webular-'))
+  const dbPath = join(dbDir, 'monitor.db')
 
   test(
     'first run returns changeStatus "new"',
@@ -63,18 +64,18 @@ describe('webular monitor — change tracking across snapshots (real fetch)', ()
     ),
   )
 
-  test('cleanup db', eff(Effect.sync(() => rmSync(dbPath, { force: true }))))
+  test('cleanup db', eff(Effect.sync(() => rmSync(dbDir, { recursive: true, force: true }))))
 
   test(
     'default db path is per-user, per-project and stable across runs',
     eff(
       Effect.gen(function* () {
-        const stateHome = join(tmpdir(), `webular-state-${Date.now()}`)
+        const stateHome = yield* tmpDir('webular-')
         const env: Record<string, string | undefined> = {
           ...process.env,
           XDG_STATE_HOME: stateHome,
         }
-        delete env.WEBULAR_DB
+        delete env['WEBULAR_DB']
         const spawnOnce = () =>
           runCli('src/commands/monitor.ts', ['--url', `${fx.origin}/c`, '--json'], { env })
         const first = yield* spawnOnce()
@@ -85,7 +86,6 @@ describe('webular monitor — change tracking across snapshots (real fetch)', ()
         const files = readdirSync(join(stateHome, 'webular'))
         expect(files.length).toBe(1)
         expect(files[0]).toMatch(/^monitor-[0-9a-f]{12}\.db$/)
-        rmSync(stateHome, { recursive: true, force: true })
       }),
     ),
     20_000,
@@ -97,27 +97,24 @@ describe('webular monitor — change tracking across snapshots (real fetch)', ()
       Effect.gen(function* () {
         // The gateway pins command-process cwd to the package root and exports
         // WEBULAR_INVOKE_DIR — two projects must get two databases.
-        const stateHome = join(tmpdir(), `webular-state-inv-${Date.now()}`)
+        const stateHome = yield* tmpDir('webular-')
         const spawnFrom = (invokeDir: string) => {
           const env: Record<string, string | undefined> = {
             ...process.env,
             XDG_STATE_HOME: stateHome,
             WEBULAR_INVOKE_DIR: invokeDir,
           }
-          delete env.WEBULAR_DB
+          delete env['WEBULAR_DB']
           return runCli('src/commands/monitor.ts', ['--url', `${fx.origin}/c`, '--json'], {
             env,
           }).pipe(Effect.map((r) => r.code))
         }
-        const dirA = join(tmpdir(), `webular-proj-a-${Date.now()}`)
-        const dirB = join(tmpdir(), `webular-proj-b-${Date.now()}`)
-        for (const d of [dirA, dirB]) Bun.spawnSync(['mkdir', '-p', d])
+        const dirA = yield* tmpDir('webular-')
+        const dirB = yield* tmpDir('webular-')
         expect(yield* spawnFrom(dirA)).toBe(0)
         expect(yield* spawnFrom(dirB)).toBe(0)
         const files = readdirSync(join(stateHome, 'webular'))
         expect(files.length).toBe(2)
-        rmSync(stateHome, { recursive: true, force: true })
-        for (const d of [dirA, dirB]) rmSync(d, { recursive: true, force: true })
       }),
     ),
     25_000,

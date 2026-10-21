@@ -10,14 +10,14 @@ const main = Effect.gen(function* () {
     url: { type: 'string' },
     screenshot: { type: 'string' },
   })
-  const url = (values.url as string) ?? positionals[0]
+  const url = (values['url'] as string) ?? positionals[0]
   if (!url) {
     return yield* new CliError({
       message: 'act: missing <url> (pass --url <url> or a positional URL)',
       exitCode: 2,
     })
   }
-  const inputData = { url, screenshot: values.screenshot as string | undefined }
+  const inputData = { url, screenshot: values['screenshot'] as string | undefined }
   return yield* runWorkflow(
     'act',
     () => import('../workflows/act.ts'),

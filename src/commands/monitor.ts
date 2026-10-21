@@ -15,8 +15,8 @@ import { outPath, sandboxEnabled } from '../core/safepath.ts'
 const defaultDbPath = Effect.fn('monitor.defaultDbPath')(function* () {
   const fs = yield* FileSystem.FileSystem
   const path = yield* Path.Path
-  const stateHome = process.env.XDG_STATE_HOME ?? path.join(homedir(), '.local', 'state')
-  const project = yield* fs.realPath(process.env.WEBULAR_INVOKE_DIR ?? process.cwd())
+  const stateHome = process.env['XDG_STATE_HOME'] ?? path.join(homedir(), '.local', 'state')
+  const project = yield* fs.realPath(process.env['WEBULAR_INVOKE_DIR'] ?? process.cwd())
   const key = createHash('sha256').update(project).digest('hex').slice(0, 12)
   const dir = path.join(stateHome, 'webular')
   yield* fs.makeDirectory(dir, { recursive: true })
@@ -27,7 +27,7 @@ const toCliError = (cause: unknown) => new CliError({ message: errMsg(cause), ex
 
 const resolveDbPath = Effect.fn('monitor.resolveDbPath')(function* (flagValue: unknown) {
   if (typeof flagValue === 'string' && flagValue.length > 0) return flagValue
-  if (process.env.WEBULAR_DB) return process.env.WEBULAR_DB
+  if (process.env['WEBULAR_DB']) return process.env['WEBULAR_DB']
   if (yield* sandboxEnabled()) return 'webular-monitor.db'
   return yield* defaultDbPath().pipe(Effect.mapError(toCliError))
 })
@@ -42,14 +42,14 @@ const main = Effect.gen(function* () {
     url: { type: 'string' },
     db: { type: 'string' },
   })
-  const url = (values.url as string) ?? positionals[0]
+  const url = (values['url'] as string) ?? positionals[0]
   if (!url) {
     const message = 'monitor: missing <url> (pass --url <url> or a positional URL)'
     return yield* new CliError({ message, exitCode: 2 })
   }
   const inputData = {
     url,
-    dbPath: yield* dbPathFor(values.db),
+    dbPath: yield* dbPathFor(values['db']),
     timeoutMs: yield* timeoutFlag('monitor', values),
   }
   return yield* runWorkflow(

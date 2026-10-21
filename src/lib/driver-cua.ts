@@ -47,7 +47,7 @@ const decodeIds = Schema.decodeUnknownEffect(Ids)
 const fieldsOf = (stdout: string) =>
   Effect.map(decodeFields(stdout), (top) => ({
     ...top,
-    ...Option.getOrElse(decodeNested(top.structuredContent), () => ({})),
+    ...Option.getOrElse(decodeNested(top['structuredContent']), () => ({})),
   }))
 
 export const idsFromBind = (stdout: string) =>
@@ -60,7 +60,7 @@ export const idsFromBind = (stdout: string) =>
 export const textFromPage = (stdout: string) =>
   Effect.flatMap(
     Effect.orElseSucceed(
-      Effect.map(fieldsOf(stdout), (fields) => fields.text),
+      Effect.map(fieldsOf(stdout), (fields) => fields['text']),
       () => stdout,
     ),
     (text) =>

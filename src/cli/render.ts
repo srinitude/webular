@@ -12,8 +12,8 @@ const arr = (r: Rec, key: string): Rec[] => (Array.isArray(r[key]) ? (r[key] as 
 const strs = (r: Rec, key: string): string[] => (Array.isArray(r[key]) ? (r[key] as string[]) : [])
 
 function renderExtract(r: Rec): string {
-  if (r.data && typeof r.data === 'object') {
-    return Object.entries(r.data as Rec)
+  if (r['data'] && typeof r['data'] === 'object') {
+    return Object.entries(r['data'] as Rec)
       .map(([key, value]) => `${key}: ${String(value)}`)
       .join('\n')
   }
@@ -23,11 +23,11 @@ function renderExtract(r: Rec): string {
 function renderBatch(r: Rec): string {
   const results = arr(r, 'results')
   const rows = results.map((x) =>
-    x.ok === true
+    x['ok'] === true
       ? `ok   ${str(x, 'url')}  ${str(x, 'title')}`
       : `fail ${str(x, 'url')}  ${str(x, 'error')}`,
   )
-  const okCount = results.filter((x) => x.ok === true).length
+  const okCount = results.filter((x) => x['ok'] === true).length
   return [...rows, `ok ${okCount}/${num(r, 'count')}`].join('\n')
 }
 
@@ -66,13 +66,13 @@ const RENDERERS: Record<CommandName, Renderer> = {
   batch: renderBatch,
   doctor: (r) =>
     arr(r, 'checks')
-      .map((c) => `${c.ok === true ? 'ok  ' : 'fail'} ${str(c, 'name')} ${str(c, 'detail')}`)
+      .map((c) => `${c['ok'] === true ? 'ok  ' : 'fail'} ${str(c, 'name')} ${str(c, 'detail')}`)
       .join('\n'),
   tasks: (r) => strs(r, 'tasks').join('\n'),
   diagram: (r) => strs(r, 'diagrams').join('\n'),
   mcp: (r) => strs(r, 'tools').join('\n'),
   audit: (r) =>
-    `deepsec: ${r.available === true ? 'available' : 'not installed'}\ncommand: ${str(r, 'command')}`,
+    `deepsec: ${r['available'] === true ? 'available' : 'not installed'}\ncommand: ${str(r, 'command')}`,
   act: (r) =>
     str(r, 'screenshot')
       ? `${str(r, 'snapshot')}\nscreenshot: ${str(r, 'screenshot')}`

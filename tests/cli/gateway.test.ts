@@ -66,6 +66,17 @@ const relativeOutCase = Effect.gen(function* () {
 })
 
 describe('gateway — fresh-environment routing', () => {
+  test(
+    'an unknown command exits 2 with a usage hint',
+    eff(
+      Effect.gen(function* () {
+        const { code, err } = yield* runWebular(['nonesuch'])
+        expect(code).toBe(2)
+        expect(err).toContain("unknown command 'nonesuch'")
+      }),
+    ),
+    20_000,
+  )
   test('--help and --version bypass mise entirely', eff(helpCase), 20_000)
   test('routes a command from a foreign cwd (global-install shape)', eff(foreignCwdCase), 30_000)
 

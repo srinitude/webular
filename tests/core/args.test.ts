@@ -12,8 +12,8 @@ describe('parseFlags — common surface', () => {
     eff(
       Effect.gen(function* () {
         const { values } = yield* parseFlags([])
-        expect(values.quiet).toBeUndefined()
-        expect(values.format).toBeUndefined()
+        expect(values['quiet']).toBeUndefined()
+        expect(values['format']).toBeUndefined()
       }),
     ),
   )
@@ -23,9 +23,9 @@ describe('parseFlags — common surface', () => {
     eff(
       Effect.gen(function* () {
         const { values } = yield* parseFlags(['--json', '-o', 'out.md', '--timeout', '5000'])
-        expect(values.json).toBe(true)
-        expect(values.output).toBe('out.md')
-        expect(values.timeout).toBe('5000')
+        expect(values['json']).toBe(true)
+        expect(values['output']).toBe('out.md')
+        expect(values['timeout']).toBe('5000')
       }),
     ),
   )

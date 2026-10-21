@@ -24,7 +24,7 @@ export function resolveMise(): Effect.Effect<string | null, never, Path.Path> {
 }
 
 function gatewayEnv(): Record<string, string | undefined> {
-  const trusted = process.env.MISE_TRUSTED_CONFIG_PATHS
+  const trusted = process.env['MISE_TRUSTED_CONFIG_PATHS']
   return {
     ...process.env,
     MISE_TRUSTED_CONFIG_PATHS: trusted ? `${trusted}${delimiter}${PACKAGE_ROOT}` : PACKAGE_ROOT,

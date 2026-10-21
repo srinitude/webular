@@ -7,13 +7,13 @@ import { Data, Effect, FileSystem, Path } from 'effect'
 export class SandboxError extends Data.TaggedError('SandboxError')<{ readonly message: string }> {}
 
 export function sandboxEnabled(): Effect.Effect<boolean> {
-  return Effect.sync(() => process.env.WEBULAR_SANDBOX === '1')
+  return Effect.sync(() => process.env['WEBULAR_SANDBOX'] === '1')
 }
 
 // The directory the user invoked webular from — the gateway pins the command
 // process cwd to the package root and exports the real one.
 function invokeDir(): string {
-  return process.env.WEBULAR_INVOKE_DIR ?? process.cwd()
+  return process.env['WEBULAR_INVOKE_DIR'] ?? process.cwd()
 }
 
 // Canonical realpath of the deepest existing ancestor (the target may not exist
@@ -33,7 +33,7 @@ const confine = Effect.fn('safepath.confine')(function* (p: string) {
   const path = yield* Path.Path
   if (path.isAbsolute(p)) return yield* deny(`sandbox: absolute paths are not allowed (${p})`)
   const resolved = yield* Effect.gen(function* () {
-    const base = yield* fs.realPath(path.resolve(process.env.WEBULAR_OUTPUT_DIR ?? invokeDir()))
+    const base = yield* fs.realPath(path.resolve(process.env['WEBULAR_OUTPUT_DIR'] ?? invokeDir()))
     const full = path.resolve(base, p)
     return { base, full, escapes: path.relative(base, yield* realAncestor(full)).startsWith('..') }
   }).pipe(Effect.mapError((err) => new SandboxError({ message: `sandbox: ${err.message}` })))

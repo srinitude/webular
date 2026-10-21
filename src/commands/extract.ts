@@ -7,14 +7,14 @@ import { CliError, runMain } from '../core/effect.ts'
 
 function buildInput(values: Record<string, string | boolean | undefined>, positionals: string[]) {
   return Effect.gen(function* () {
-    const url = (values.url as string) ?? positionals[0]
+    const url = (values['url'] as string) ?? positionals[0]
     if (!url) {
       return yield* new CliError({
         message: 'extract: missing <url> (pass --url <url> or a positional URL)',
         exitCode: 2,
       })
     }
-    if (!values.fields && !values.selector) {
+    if (!values['fields'] && !values['selector']) {
       return yield* new CliError({
         message: 'extract: pass --fields "name:selector[,...]" or --selector <css>',
         exitCode: 2,
@@ -22,8 +22,8 @@ function buildInput(values: Record<string, string | boolean | undefined>, positi
     }
     return {
       url,
-      fields: values.fields as string | undefined,
-      selector: values.selector as string | undefined,
+      fields: values['fields'] as string | undefined,
+      selector: values['selector'] as string | undefined,
       timeoutMs: yield* timeoutFlag('extract', values),
     }
   })

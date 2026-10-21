@@ -14,7 +14,7 @@ const runAct = (args: string[]) => runCli('src/commands/act.ts', args)
 describe('webular act — real browser automation via agent-browser', () => {
   test.skipIf(
     !Effect.runSync(Effect.provide(available(), BunServices.layer)) ||
-      !process.env.WEBULAR_TEST_LIVE,
+      !process.env['WEBULAR_TEST_LIVE'],
   )(
     'snapshots a live page accessibility tree',
     eff(

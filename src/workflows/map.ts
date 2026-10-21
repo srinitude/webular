@@ -1,7 +1,6 @@
-// MAP workflow: discover URLs via the origin-root sitemap (with one-level
-// <sitemapindex> recursion), then robots.txt Sitemap: entries, then page links. Same-host scoped, byte-capped, and
-// deterministic: children fetch with bounded concurrency but merge in child
-// order; dedup happens on normalized URLs after ordering.
+// MAP workflow: discover URLs via the origin-root sitemap (one-level <sitemapindex>
+// recursion), then robots.txt Sitemap: entries, then page links. Same-host, byte-capped,
+// deterministic: children fetch concurrently but merge in order; dedup on normalized URLs.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect, type FileSystem } from 'effect'
 import { z } from 'zod'
@@ -14,7 +13,7 @@ import { fetchErrorsSchema } from '../lib/sources.ts'
 import { stepRuntime } from './runtime.ts'
 
 const mapInput = z.object({
-  url: z.string().url(),
+  url: z.url(),
   limit: z.number().int().positive().max(10_000).optional(),
   timeoutMs: z.number().int().positive().optional(),
 })
@@ -136,8 +135,7 @@ const fetchSitemap = Effect.fn('map.fetchSitemap')(function* (site: string, time
   return { links: robots.links, errors: [...(primary?.errors ?? []), ...robots.errors] }
 })
 
-// Stops at `limit` kept links: work and memory are O(links read until the
-// limit fills), not O(all sitemap links).
+// Stops at `limit` kept links: O(links read until the limit fills), not O(all links).
 export function dedupe(links: string[], limit: number): string[] {
   const seen = new Set<string>()
   const out: string[] = []

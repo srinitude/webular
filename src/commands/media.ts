@@ -6,18 +6,18 @@ import { optIntFlag, parseFlags } from '../core/args.ts'
 import { CliError, runMain } from '../core/effect.ts'
 
 function resolveAction(values: Record<string, unknown>): 'download' | 'screenshot' | 'pdf' {
-  if (values.screenshot) return 'screenshot'
-  if (values.pdf) return 'pdf'
+  if (values['screenshot']) return 'screenshot'
+  if (values['pdf']) return 'pdf'
   return 'download'
 }
 
 function buildInput(values: Record<string, string | boolean | undefined>) {
   return Effect.gen(function* () {
-    const url = values.url as string | undefined
+    const url = values['url'] as string | undefined
     if (!url) {
       return yield* new CliError({ message: 'media: missing --url <url>', exitCode: 2 })
     }
-    const dest = values.output as string | undefined
+    const dest = values['output'] as string | undefined
     if (!dest) {
       return yield* new CliError({
         message: 'media: -o <file> is required (the artifact destination)',
@@ -47,7 +47,7 @@ const main = Effect.gen(function* () {
     () => import('../workflows/media.ts'),
     (m) => m.mediaWorkflow,
     inputData,
-    { json: Boolean(values.json) },
+    { json: Boolean(values['json']) },
   )
 })
 

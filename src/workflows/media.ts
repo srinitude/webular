@@ -12,7 +12,7 @@ import { stepRuntime } from './runtime.ts'
 const MAX_CAPTURE_BYTES = 50 * 1024 * 1024
 
 const mediaInput = z.object({
-  url: z.string().url(),
+  url: z.url(),
   action: z.enum(['download', 'screenshot', 'pdf']).default('download'),
   dest: z.string().min(1),
   maxBytes: z.number().int().positive().optional(),

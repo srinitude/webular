@@ -30,7 +30,7 @@ const paging = {
 }
 const pagingSchema = z.object(paging)
 const fetchSchema = z.object({
-  url: z.string().url(),
+  url: z.url(),
   timeoutMs: z.number().int().positive().optional(),
   ...paging,
 })
@@ -38,7 +38,7 @@ const readabilitySchema = z.object({ html: z.string(), ...paging })
 const markdownSchema = z.object({ html: z.string(), ...paging })
 const linksSchema = z.object({
   html: z.string(),
-  base: z.string().url(),
+  base: z.url(),
   limit: z.number().int().min(1).max(1000).optional(),
   ...paging,
 })

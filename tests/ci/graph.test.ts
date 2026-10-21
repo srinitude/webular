@@ -45,7 +45,7 @@ describe('mise task graph — the contract every CLI invocation routes through',
   })
 
   test('format is a mutating dev task OFF the check-only CI spine', () => {
-    expect(graph.format).toBeDefined()
+    expect(graph['format']).toBeDefined()
     expect(parentsOf(graph, 'format')).toEqual(['setup'])
     for (const name of SPINE) expect(parentsOf(graph, name)).not.toContain('format')
   })

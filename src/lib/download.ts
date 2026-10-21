@@ -9,7 +9,7 @@ import { httpGet } from '../core/http.ts'
 import { errMsg } from '../core/output.ts'
 
 interface DownloadOptions {
-  maxBytes?: number
+  maxBytes?: number | undefined
   idleMs?: number
 }
 

@@ -27,7 +27,7 @@ export type SearchSource = (typeof SEARCH_SOURCES)[number]
 
 export function endpoint(base: string, params: Record<string, string>): string {
   const url = new URL(base)
-  const override = process.env.WEBULAR_SOURCE_ORIGIN
+  const override = process.env['WEBULAR_SOURCE_ORIGIN']
   const target = override ? new URL(url.pathname, override) : url
   target.search = new URLSearchParams(params).toString()
   return target.toString()
@@ -75,7 +75,7 @@ function wikipedia(
       }),
     ),
     (data) =>
-      (((data.query as Rec | undefined)?.search ?? []) as Rec[]).map((h) => ({
+      (((data['query'] as Rec | undefined)?.['search'] ?? []) as Rec[]).map((h) => ({
         title: s(h, 'title'),
         url: `https://en.wikipedia.org/wiki/${encodeURIComponent(s(h, 'title').replace(/ /g, '_'))}`,
         description: plain(s(h, 'snippet')),
@@ -96,7 +96,7 @@ function hackernews(
       }),
     ),
     (data) =>
-      ((data.hits ?? []) as Rec[]).map((h) => {
+      ((data['hits'] ?? []) as Rec[]).map((h) => {
         const discussion = `https://news.ycombinator.com/item?id=${s(h, 'objectID')}`
         return {
           title: s(h, 'title'),

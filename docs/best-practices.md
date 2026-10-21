@@ -13,7 +13,7 @@ How to read each item:
 
 - [x] **Strict TypeScript flag set**: `strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`, `noFallthroughCasesInSwitch`, `verbatimModuleSyntax`, `isolatedModules`. Source: <https://www.typescriptlang.org/tsconfig> (undated). Check: automated, `tsconfig keeps the strict flag set`.
 - [x] **`erasableSyntaxOnly`**, so Bun can run every file by stripping types, with no enums or namespaces. Source: <https://www.typescriptlang.org/tsconfig#erasableSyntaxOnly> (2025-02, predates the pin). Check: automated, same test, plus `tsc --noEmit`.
-- [ ] **`exactOptionalPropertyTypes`, `noPropertyAccessFromIndexSignature`, `noUnusedLocals`**. Source: <https://www.typescriptlang.org/docs/handbook/release-notes/typescript-6-0.html> (page updated 2026-10-19). Check: open. Each one fails `tsc`, with 15, 57, and 17 errors measured on `upgrade-packages-to-latest`. The Effect conversion branch turns them on as it rewrites `src/`, then adds them to `STRICT_FLAGS`.
+- [x] **`exactOptionalPropertyTypes`, `noPropertyAccessFromIndexSignature`, `noUnusedLocals`**. Source: <https://www.typescriptlang.org/docs/handbook/release-notes/typescript-6-0.html> (page updated 2026-10-19). Check: automated, `tsconfig keeps the strict flag set`, plus `tsc --noEmit`.
 - [x] **Every action pinned to a full commit SHA** with a version comment. Source: <https://docs.github.com/en/actions/reference/security/secure-use> (undated). Check: automated, `every action is pinned to a full commit SHA`.
 - [x] **Read-only token, never persisted, no `pull_request_target`**. Source: <https://docs.zizmor.sh/audits/> (2026-07). Check: automated, `token is read-only, not persisted, and the job has a timeout`.
 - [x] **A `timeout-minutes` on every job**, since the default is 360. Source: <https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax> (undated). Check: automated, same test.
@@ -30,13 +30,13 @@ How to read each item:
 - [x] **No Effect 3 packages** (`@effect/schema`, `@effect/cli`, `@effect/platform`) and no beta-only `effect/unstable/*` paths. CLI, Schema, and Config come from `effect` itself. Source: <https://github.com/Effect-TS/effect/blob/main/packages/effect/package.json> (2026-10-21). Check: automated, `no Effect 3 packages or beta-only Effect paths`.
 - [ ] **Services as `Context.Service`, methods as `Effect.fn("Name.method")`, errors as `Schema.TaggedError`, settings through `Config`**. Source: <https://github.com/Effect-TS/effect/tree/main/ai-docs/src/01_effect> (2026-10-21). Check: open, for the Effect conversion branch.
 - [ ] **Run once at the edge** with `BunRuntime.runMain` and the `BunServices` layer. Tests use one `ManagedRuntime` per file. Source: <https://github.com/Effect-TS/effect/tree/main/packages/platform/bun/src> (2026-10-21). Check: open for `src/`. The test helper `tests/_support/repo-files.ts` follows it.
-- [ ] **Effect language service plugin** in `tsconfig.json`. Source: <https://github.com/Effect-TS/language-service> (2026-10-16). Check: open, for the Effect conversion branch.
+- [x] **Effect language service plugin** in `tsconfig.json`. Source: <https://github.com/Effect-TS/language-service> (2026-10-16). Check: review. `@effect/language-service` is pinned in `package.json` and listed in `tsconfig.json` plugins.
 - [x] **No pre-`setup` XState APIs**: `Machine(`, `interpret(`, `withConfig(`, typegen. Source: <https://stately.ai/docs/migration> (undated). Check: automated, `no XState v4 APIs`.
 - [ ] **XState machines built with `setup({ types, actions, guards, actors })` and run through `createActor`**. Source: <https://stately.ai/docs/setup> (undated; the stable release is `5.33.3`, published 2026-10-17). Check: review, for the state-machine branch.
 
 ## Mastra, MCP SDK, zod
 
-- [x] **zod top-level string formats**: `z.url()`, not `z.string().url()`, and `z.looseObject()`, not `.passthrough()`. Source: <https://zod.dev/v4/changelog> (undated). Check: automated as a ratchet. The test lists the 11 files that use `z.string().url()` style formats, and it fails when a file joins or leaves that list.
+- [x] **zod top-level string formats**: `z.url()`, not `z.string().url()`, and `z.looseObject()`, not `.passthrough()`. Source: <https://zod.dev/v4/changelog> (undated). Check: automated, `zod 4 top-level string formats, no passthrough, no nativeEnum`.
 - [ ] **MCP tools declare `title`, `outputSchema`, and `annotations`** (`readOnlyHint`, `openWorldHint`), and return `structuredContent`. Source: <https://modelcontextprotocol.io/specification/2025-11-25/server/tools> (2025-11-25, predates the pin). Check: open, for the agent-plugin branch.
 - [ ] **Tool failures return `isError: true`**, not a throw. JSON-RPC errors are only for protocol faults. Source: same spec page. Check: open, for the agent-plugin branch.
 - [ ] **On stdio, stdout carries only JSON-RPC**, and logs go to stderr. Source: <https://github.com/modelcontextprotocol/typescript-sdk/blob/v1.x/docs/server.md> (undated). Check: review of `src/commands/mcp.ts`.
@@ -45,18 +45,18 @@ How to read each item:
 ## Page and document libraries
 
 - [x] **No `@types` package for a library that ships its own types**: `diff`, `effect`, `zod`, `mammoth`, `@mozilla/readability`. Source: <https://github.com/kpdecker/jsdiff/blob/master/release-notes.md> (undated). Check: automated, `no @types package for a library that ships its own types`.
-- [ ] **Readability: run `isProbablyReaderable` first**, and clone the document before `parse()`, since parsing changes it. Source: <https://github.com/mozilla/readability/blob/main/README.md> (undated). Check: open, `src/lib/html.ts`.
-- [ ] **Sanitize Readability and mammoth HTML** before anyone embeds it. Neither library sanitizes. Source: same README, and <https://github.com/mwilliamson/mammoth.js/blob/master/README.md> (undated). Check: open, `src/lib/html.ts` and `src/lib/parse.ts`.
-- [ ] **unpdf: free the PDF proxy** with `destroy()` in a finalizer. Source: <https://github.com/unjs/unpdf/blob/main/README.md> (undated; `destroy` comes from pdf.js and is not in that README). Check: open, `src/lib/parse.ts`.
-- [ ] **mammoth: surface `messages`**, its warnings and errors. Source: mammoth README (undated). Check: open, `src/lib/parse.ts`.
-- [ ] **p-limit: use `limit.map(items, fn)`** over `Promise.all(items.map(...))`. Source: <https://github.com/sindresorhus/p-limit/blob/main/readme.md> (undated). Check: open. The Effect conversion replaces both with `Effect.forEach` and a `concurrency` bound.
+- [x] **Readability: run `isProbablyReaderable` first**, and clone the document before `parse()`, since parsing changes it. Source: <https://github.com/mozilla/readability/blob/main/README.md> (undated). Check: automated, `tests/engine/html.test.ts` (the non-readerable fallback). Nothing reads the document after `parse()`, so no clone is needed.
+- [x] **Sanitize Readability and mammoth HTML** before anyone embeds it. Neither library sanitizes. Source: same README, and <https://github.com/mwilliamson/mammoth.js/blob/master/README.md> (undated). Check: automated, `tests/engine/html.test.ts`, which covers the shared `sanitizeHtml` helper in `src/lib/html.ts`.
+- [x] **unpdf: free the PDF proxy** with `destroy()` in a finalizer. Source: <https://github.com/unjs/unpdf/blob/main/README.md> (undated; `destroy` comes from pdf.js and is not in that README). Check: review of `src/lib/parse.ts`, which frees it through `Effect.acquireRelease`.
+- [x] **mammoth: surface `messages`**, its warnings and errors. Source: mammoth README (undated). Check: review of `src/lib/parse.ts`, which logs them to stderr.
+- [x] **p-limit: use `limit.map(items, fn)`** over `Promise.all(items.map(...))`. Source: <https://github.com/sindresorhus/p-limit/blob/main/readme.md> (undated). Check: review. No `p-limit` or `Promise.all` pool remains in `src`; `batch`, `crawl`, `map` and `sources` use `Effect.forEach` with a `concurrency` bound.
 
 ## Practices for any TypeScript CLI
 
 - [x] **Color never carries meaning alone.** The output uses no ANSI color. Source: <https://no-color.org> (undated). Check: automated, `no ANSI color escapes, so no meaning rides on color alone`.
 - [x] **Data goes to stdout, messages go to stderr, and `--json` gives the machine shape.** Source: <https://clig.dev/#output> (undated). Check: review of `src/core/output.ts`, plus the CLI tests.
 - [x] **Exit codes are documented**: `0`, `1`, `2`, `3`, `127`. Source: <https://clig.dev/#the-basics> (undated). Check: automated, `README documents the exit codes the CLI uses`.
-- [ ] **Exit codes match the docs.** An unknown command returns `1` but should return `2`. `doctor` returns `0` even when a check fails. Source: same. Check: open, `src/cli/route.ts:16` and `src/commands/doctor.ts:9`.
+- [x] **Exit codes match the docs.** An unknown command returns `2`; `doctor` returns `1` when a required check fails. Source: same. Check: automated, `an unknown command exits 2 with a usage hint` and `exits 1 when a required check fails`.
 - [x] **Every release has a changelog entry** in Keep a Changelog form. Source: <https://keepachangelog.com/en/1.1.0/> (undated). Check: automated, `CHANGELOG.md has an entry for the package version`.
 - [x] **Semantic versioning.** Source: <https://semver.org/spec/v2.0.0.html> (undated). Check: review at each release.
 - [x] **A public security policy.** Source: <https://docs.github.com/en/code-security/getting-started/adding-a-security-policy-to-your-repository> (undated). Check: automated, same test as the changelog.
@@ -64,5 +64,5 @@ How to read each item:
 - [x] **Small units**: 200 lines per file, 30 per construct, nesting depth 3 or less. Source: the repo's own rule. Check: automated, `tests/quality/limits.test.ts`.
 - [x] **No dead exports.** Source: the repo's own rule. Check: automated, `tests/quality/exports.test.ts`.
 - [x] **No secrets in code**, and `.env` files are git-ignored. Source: <https://12factor.net/config> (undated). Check: review of `.gitignore`.
-- [ ] **Deterministic tests**: temp paths come from `mkdtemp`, not `Date.now()`. Source: <https://12factor.net/dev-prod-parity> (undated). Check: open, `tests/cli/render.test.ts`, `tests/commands/monitor.test.ts`, `tests/commands/media.test.ts`.
-- [ ] **Typed errors with a distinct exit code per kind.** Source: <https://clig.dev/#errors> (undated). Check: open. The Effect conversion maps each `Schema.TaggedError` to an exit code.
+- [x] **Deterministic tests**: temp paths come from `mkdtemp`, not `Date.now()`. Source: <https://12factor.net/dev-prod-parity> (undated). Check: review, through the `tmpDir` helper in `tests/_support/run.ts`, in `tests/cli/render.test.ts`, `tests/commands/monitor.test.ts`, `tests/commands/media.test.ts`.
+- [x] **Typed errors with a distinct exit code per kind.** Source: <https://clig.dev/#errors> (undated). Check: automated, `tests/cli/exit-codes.test.ts`. `failureOf` in `src/core/effect.ts` matches on `_tag`: `CliError` keeps its code (usage is 2), `ProcError` is 127, the rest are 1.
