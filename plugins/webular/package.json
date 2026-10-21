@@ -9,6 +9,8 @@
     "@effect/platform-bun": "4.0.5",
     "@mastra/core": "^1.78.0",
     "@mastra/mcp": "^2.4.1",
+    "@modelcontextprotocol/node": "2.0.0",
+    "@modelcontextprotocol/server": "2.2.0",
     "effect": "4.0.5",
     "zod": "^4.6.7"
   }

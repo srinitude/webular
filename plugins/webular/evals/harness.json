@@ -61,6 +61,12 @@
       "grader": "bun test: count and uniqueness of the command tool ids"
     },
     {
+      "assertion": "a ${version} client gets ${version} back and a tool call works",
+      "source": "tests/protocol.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: MCP handshake and a tool call for each protocol version"
+    },
+    {
       "assertion": "every tool is a CLI command, and mcp is the only command without one",
       "source": "tests/commands.test.ts",
       "kind": "deterministic",
