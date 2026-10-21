@@ -3,7 +3,7 @@
 // (src/machines/fetch.ts) decides every retry, redirect, and failure; this
 // file only performs the requests it asks for.
 import { BunServices } from '@effect/platform-bun'
-import { Effect } from 'effect'
+import { Clock, Effect } from 'effect'
 import { type EventFromLogic, initialTransition, type SnapshotFrom, transition } from 'xstate'
 import pkg from '../../package.json' with { type: 'json' }
 import { failureEvent, fetchMachine } from '../machines/fetch.ts'
@@ -65,11 +65,24 @@ const fetchOnce = (url: string, opts: FetchOptions): Effect.Effect<Response, Fet
 const isRedirect = (status: number) => status >= 300 && status < 400
 
 // One fetch run. With `host` set, redirects are followed by hand within it.
+// `deadline` is the wall time after which a retry would outlast the caller's timeout.
 interface Run {
   origin: string
-  host?: string
+  host?: string | undefined
   opts: FetchOptions
+  deadline: number
 }
+
+const startRun = (origin: string, opts: FetchOptions, host?: string) =>
+  Effect.map(
+    Clock.currentTimeMillis,
+    (now): Run => ({
+      origin,
+      host,
+      opts,
+      deadline: now + (opts.timeoutMs ?? Number.POSITIVE_INFINITY),
+    }),
+  )
 
 interface Landed {
   res: Response
@@ -105,7 +118,8 @@ function settle(run: Run, snap: FetchSnapshot, landed: Landed): Effect.Effect<La
 }
 
 // Fetch, name the outcome as an event, and do what the machine's next state says.
-// A retried status waits the server's Retry-After when it sends one.
+// A retried status waits the server's Retry-After when it sends one; a wait past
+// the deadline returns the status at once instead.
 function drive(run: Run, url: string, snap: FetchSnapshot): Effect.Effect<Landed, FetchError> {
   return Effect.matchEffect(fetchOnce(url, run.opts), {
     onFailure: (err) =>
@@ -120,7 +134,11 @@ function drive(run: Run, url: string, snap: FetchSnapshot): Effect.Effect<Landed
       if (next.context.hops > snap.context.hops)
         return Effect.andThen(dropBody(res), drive(run, landed.url, next))
       const waitMs = retryAfterMs(res.headers.get('retry-after'))
-      return Effect.andThen(dropBody(res), retry(run, url, next, waitMs))
+      return Effect.flatMap(Clock.currentTimeMillis, (now) =>
+        (waitMs ?? 0) > run.deadline - now
+          ? Effect.succeed(landed)
+          : Effect.andThen(dropBody(res), retry(run, url, next, waitMs)),
+      )
     },
   })
 }
@@ -131,7 +149,9 @@ export const httpGet = (
   url: string,
   opts: FetchOptions = {},
 ): Effect.Effect<Response, FetchError> =>
-  Effect.map(drive({ origin: url, opts }, url, START), (landed) => landed.res)
+  Effect.flatMap(startRun(url, opts), (run) =>
+    Effect.map(drive(run, url, START), (landed) => landed.res),
+  )
 
 // Text GETs revalidate through the disk cache; a cache config error surfaces
 // as a FetchError, so callers see only HttpStatusError or FetchError.
@@ -158,7 +178,7 @@ export const fetchRoot = Effect.fn('fetchRoot')(function* (url: string, opts: Fe
 
 // Fetch text but follow redirects MANUALLY, blocking any hop that leaves `host`
 // (EXACT hostname match — scope control for crawls, not an IP/SSRF filter).
-export const fetchTextWithinHost = (url: string, host: string, opts: FetchOptions = {}) => {
-  const run = { origin: url, host, opts: { ...opts, redirect: 'manual' as const } }
-  return Effect.flatMap(drive(run, url, START), (landed) => okText(landed.res, landed.url))
-}
+export const fetchTextWithinHost = (url: string, host: string, opts: FetchOptions = {}) =>
+  Effect.flatMap(startRun(url, { ...opts, redirect: 'manual' }, host), (run) =>
+    Effect.flatMap(drive(run, url, START), (landed) => okText(landed.res, landed.url)),
+  )

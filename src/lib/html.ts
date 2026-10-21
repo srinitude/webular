@@ -3,6 +3,7 @@
 import { isProbablyReaderable, Readability } from '@mozilla/readability'
 import { parseHTML } from 'linkedom'
 import TurndownService from 'turndown'
+import { addTableRule } from './html-table.ts'
 
 interface Article {
   title: string
@@ -54,6 +55,12 @@ export function sanitizeHtml(html: string): string {
   return document.body?.innerHTML ?? ''
 }
 
+// ponytail: banners matched by class/id substring, so a "cookie-recipe" block
+// goes too; add a text check if real content gets dropped.
+const PAGE_BOILERPLATE =
+  'nav, header, footer, aside, [role=banner], [role=navigation], [role=contentinfo], ' +
+  '[class*=cookie], [id*=cookie], [class*=consent], [id*=consent]'
+
 // Plain text of a page Readability skips, read from the already-parsed body.
 // Removes non-text elements in place: no caller reads the document afterwards.
 function bodyText(body: DomDocument['body']): string {
@@ -72,8 +79,14 @@ function articleFrom(document: DomDocument, rawHtml: string): Article {
   const doc = document as unknown as Document
   // The readerable check skips Readability's scoring pass on non-article pages;
   // those pages still keep their body text.
-  if (!isProbablyReaderable(doc))
-    return { title: docTitle, contentHtml: sanitizeHtml(rawHtml), text: bodyText(document.body) }
+  if (!isProbablyReaderable(doc)) {
+    for (const el of Array.from(document.body.querySelectorAll(PAGE_BOILERPLATE))) el.remove()
+    return {
+      title: docTitle,
+      contentHtml: sanitizeHtml(document.body.innerHTML),
+      text: bodyText(document.body),
+    }
+  }
   const parsed = new Readability(doc).parse()
   if (!parsed) return { title: docTitle, contentHtml: sanitizeHtml(rawHtml), text: '' }
   return {
@@ -115,6 +128,7 @@ export function extractLinks(html: string, base: string): string[] {
 }
 
 const turndown = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' })
+addTableRule(turndown)
 
 export function htmlToMarkdown(html: string): string {
   return turndown.turndown(html).trim()

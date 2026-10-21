@@ -70,13 +70,15 @@ export const driverError = (backend: Backend, message: string) =>
 const decodeQuoted = Schema.decodeUnknownEffect(Schema.fromJsonString(Schema.String))
 
 // agent-browser prints the page raw or as a JSON string; keep only the markup.
+// Markup with no text (a blank render) yields '' so readHtml fails it.
 export const htmlFromAgentBrowser = (stdout: string) =>
   Effect.map(
     Effect.orElseSucceed(decodeQuoted(stdout.trim()), () => stdout),
     (text) => {
       const start = text.indexOf('<')
       const end = text.lastIndexOf('>')
-      return start >= 0 && end > start ? text.slice(start, end + 1) : ''
+      const html = start >= 0 && end > start ? text.slice(start, end + 1) : ''
+      return html.replace(/<[^>]*>/g, '').trim() ? html : ''
     },
   )
 

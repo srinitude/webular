@@ -42,6 +42,16 @@ describe('back-end output parsing (recorded fixtures)', () => {
   })
 })
 
+describe('agent-browser blank page', () => {
+  // A blank render must read as empty so the scrape keeps the fetched page.
+  test('markup with no text yields empty html', () =>
+    Effect.runPromise(
+      Effect.gen(function* () {
+        expect(yield* htmlFromAgentBrowser('"<head></head><body></body>"')).toBe('')
+      }),
+    ))
+})
+
 const fakeSteps = (closed: string[], readFails: boolean): Steps => ({
   open: (url) => Effect.succeed(url),
   read: () => (readFails ? Effect.die('read failed') : Effect.succeed('<html>ok</html>')),
