@@ -29,10 +29,6 @@ const Cached = Schema.Struct({ checkedAt: Schema.Number, snapshot: Snapshot })
 type Cached = { readonly checkedAt: number; readonly snapshot: DocsSnapshot }
 const decode = Schema.decodeUnknownEffect(Schema.fromJsonString(Cached))
 
-interface DocsStore {
-  readonly load: Effect.Effect<Option.Option<Cached>>
-  readonly save: (c: Cached) => Effect.Effect<void>
-}
 export interface DocsState {
   snapshot: DocsSnapshot | undefined
   checkedAt?: number
@@ -41,15 +37,16 @@ export interface DocsState {
 
 // Temp file then rename, so a process reading at the same time never sees half a file.
 // A cache read or write that fails only skips the cache.
-export const fileStore = (fs: FileSystem.FileSystem, file: string): DocsStore => ({
+export const fileStore = (fs: FileSystem.FileSystem, file: string) => ({
   load: fs.readFileString(file).pipe(Effect.flatMap(decode), Effect.option),
-  save: (c) => {
+  save: (c: Cached) => {
     const tmp = `${file}.${process.pid}.tmp`
     return fs
       .writeFileString(tmp, JSON.stringify(c))
       .pipe(Effect.andThen(fs.rename(tmp, file)), Effect.ignore)
   },
 })
+type DocsStore = ReturnType<typeof fileStore>
 
 // WEBULAR_CACHE_DIR/jev-docs.json (default ~/.cache/webular), next to the local index.
 export const docsStore = Effect.gen(function* () {
