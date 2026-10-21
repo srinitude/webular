@@ -1,15 +1,16 @@
-// MAP workflow: discover URLs via the origin-root sitemap (one-level <sitemapindex>
-// recursion), then robots.txt Sitemap: entries, then page links (see pageLinks). Same-host,
-// byte-capped, deterministic: children fetch concurrently but merge in order; dedup normalized.
-import { createStep, createWorkflow } from '@mastra/core/workflows'
-import { Effect, type FileSystem } from 'effect'
+// MAP workflow: origin-root sitemap (one-level <sitemapindex> recursion), then robots.txt
+// Sitemap: entries, then page links (see pageLinks). Same-host, byte-capped, ordered, deduped.
+import { createWorkflow } from '@mastra/core/workflows'
+import { Effect } from 'effect'
 import { z } from 'zod'
 import { hostConcurrency } from '../core/budget.ts'
 import { fetchRoot, fetchTextWithinHost } from '../core/http.ts'
 import { errMsg } from '../core/output.ts'
 import { normalizeUrl, sameHost } from '../core/url.ts'
 import { archivedUrls } from '../lib/archive-urls.ts'
+import { jevOrder } from '../lib/crawl.ts'
 import { extractLinks } from '../lib/html.ts'
+import { decisionStep } from '../lib/jev/steps.ts'
 import { fetchErrorsSchema } from '../lib/sources.ts'
 import { stepRuntime } from './runtime.ts'
 
@@ -31,10 +32,7 @@ const mapOutput = z.object({
 const MAX_CHILD_SITEMAPS = 10
 const SITEMAP_TIMEOUT_MS = 15_000
 
-interface Discovery {
-  links: string[]
-  errors: { url: string; reason: string }[]
-}
+type Discovery = { links: string[]; errors: { url: string; reason: string }[] }
 
 type ChildResult =
   | { loc: string; ok: true; locs: string[] }
@@ -86,13 +84,9 @@ const sitemapAt = Effect.fn('map.sitemapAt')(function* (
   return { links: sameHostLocs, errors: [] } satisfies Discovery
 })
 
-const namedSitemap = (
-  loc: string,
-  host: string,
-  budget: number,
-): Effect.Effect<Discovery, never, FileSystem.FileSystem> =>
+const namedSitemap = (loc: string, host: string, budget: number) =>
   Effect.catch(sitemapAt(loc, host, budget), (err) =>
-    Effect.succeed({ links: [], errors: [{ url: loc, reason: errMsg(err) }] }),
+    Effect.succeed<Discovery>({ links: [], errors: [{ url: loc, reason: errMsg(err) }] }),
   )
 
 // robots.txt `Sitemap:` lines (key case-insensitive), same-host, capped like index children.
@@ -113,8 +107,7 @@ const robotsSitemaps = Effect.fn('map.robotsSitemaps')(function* (
   const results = yield* Effect.forEach(locs, (loc) => namedSitemap(loc, host, budget), {
     concurrency: yield* hostConcurrency,
   })
-  const links = results.flatMap((r) => r.links)
-  return { links, errors: results.flatMap((r) => r.errors) } satisfies Discovery
+  return { links: results.flatMap((r) => r.links), errors: results.flatMap((r) => r.errors) }
 })
 
 // Chain: /sitemap.xml, then robots.txt Sitemap: entries. null means "no
@@ -175,19 +168,27 @@ const discover = Effect.fn('map.discover')(function* (input: z.infer<typeof mapI
   const { url, limit = 1000, timeoutMs } = input
   const root = yield* fetchRootFor(url, timeoutMs)
   const sitemap = yield* fetchSitemap(root.final, timeoutMs)
-  const found = dedupe([...(sitemap?.links ?? []), ...pageLinks(root, sitemap)], limit)
+  const found = dedupe([...(sitemap?.links ?? []), ...pageLinks(root, sitemap)], Infinity)
   // The site would not answer at all: ask the archive indexes (2603.01548).
   const dead = found.length === 0 && root.errors.length > 0
-  const deduped = dead ? dedupe(yield* archivedUrls('map', root.final, limit), limit) : found
-  const errors = [...(deduped.length === 0 ? root.errors : []), ...(sitemap?.errors ?? [])]
-  return { url, count: deduped.length, links: deduped, errors }
+  const unique = dead ? dedupe(yield* archivedUrls('map', root.final, limit), Infinity) : found
+  return { url, site: root.final, limit, unique, root, sitemap }
 })
 
-const discoverStep = createStep({
+// Rank-then-cut: past the limit, Jev's map.kind orders links best-first; ties,
+// unsure answers, no key, and WEBULAR_JEV=off keep discovery order.
+const discoverStep = decisionStep({
   id: 'discover',
   inputSchema: mapInput,
   outputSchema: mapOutput,
-  execute: ({ inputData }) => stepRuntime.runPromise(discover(inputData)),
+  decide: jevOrder,
+  prepare: (input: z.infer<typeof mapInput>) => stepRuntime.runPromise(discover(input)),
+  pick: (d) => (d.unique.length > d.limit ? { site: d.site, urls: d.unique } : undefined),
+  output: (d, ordered) => {
+    const links = (ordered ?? d.unique).slice(0, d.limit)
+    const errors = [...(links.length === 0 ? d.root.errors : []), ...(d.sitemap?.errors ?? [])]
+    return { url: d.url, count: links.length, links, errors }
+  },
 })
 
 export const mapWorkflow = createWorkflow({

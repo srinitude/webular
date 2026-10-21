@@ -7,8 +7,8 @@ import { fetchText } from '../core/http.ts'
 import { htmlToArticle } from '../lib/html.ts'
 import { decisions } from '../lib/jev/decisions.ts'
 import { decisionStep } from '../lib/jev/steps.ts'
-import { freeSourceFallback } from '../lib/sources/registry.ts'
 import { compareAndStore } from '../lib/snapshot.ts'
+import { freeSourceFallback } from '../lib/sources/registry.ts'
 import { stepRuntime } from './runtime.ts'
 
 const monitorInput = z.object({

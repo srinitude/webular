@@ -11,7 +11,8 @@ const HELP = [
 ].join('\n')
 
 // Loaded only after the flags check, so a bad call never pays for linkedom.
-const learnCli = Effect.promise(() => import('../lib/jev/learn/cli.ts'))
+const load = <M, A>(loader: () => Promise<M>, pick: (m: M) => A) =>
+  Effect.map(Effect.promise(loader), pick)
 
 const main = Effect.gen(function* () {
   // Positional form (`correct <id> <label> --input F`) or the plugin's flag form
@@ -23,8 +24,16 @@ const main = Effect.gen(function* () {
   const id = named ? flag('--id') : args[1]
   const label = named ? flag('--label') : args[2]
   const file = flag('--input')
-  if (cmd === 'learn') yield* (yield* learnCli).learn
-  else if (cmd === 'correct' && id && label) yield* (yield* learnCli).correctCall(id, label, file)
+  if (cmd === 'learn')
+    yield* yield* load(
+      () => import('../lib/jev/learn/cli.ts'),
+      (m) => m.learn,
+    )
+  else if (cmd === 'correct' && id && label)
+    yield* (yield* load(
+      () => import('../lib/jev/learn/cli.ts'),
+      (m) => m.correctCall,
+    ))(id, label, file)
   else if (cmd === undefined || cmd === '--help') yield* Console.log(HELP)
   else
     return yield* new CliError({

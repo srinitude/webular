@@ -12,6 +12,9 @@ import { archivedUrls } from './archive-urls.ts'
 import { headingText } from './crawl-types.ts'
 import { type FetchError, type FetchPage, makeFetchLayer } from './fetch-layer.ts'
 import { titleAndLinks } from './html.ts'
+import { Jev } from './jev/client.ts'
+import { onJevRuntime } from './jev/decisions/search.ts'
+import { decisions } from './jev/decisions.ts'
 import { addPages, openLocalIndex } from './local-index.ts'
 import { localIndexPath } from './local-index-path.ts'
 import {
@@ -138,6 +141,22 @@ const crawlSeeds = (fetch: Fetcher, seeds: string[], judge: LinkJudge, opts: Cra
       })
     : Effect.succeed({ pages: [], skipped: [] })
 
+// Jev's map.kind order (main first, junk last, stable). With Jev off or no key the
+// incoming order stands: the kind baseline's junk rule must not reorder that path.
+type OrderInput = Parameters<typeof decisions.mapOrder>[0]
+export const jevOrder = Object.assign(
+  Effect.fnUntraced(function* (input: OrderInput) {
+    const jev = yield* Jev
+    return jev.available ? yield* decisions.mapOrder(input) : [...input.urls]
+  }),
+  { def: decisions.mapOrder.def },
+)
+
+// When the page limit cuts the root's links, the best ones become the first seeds.
+// ponytail: only the root's links are ranked; deeper links keep frontier (BFS) order.
+const orderSeeds = (site: string, urls: string[], room: number) =>
+  room > 0 && urls.length > room ? onJevRuntime(jevOrder, { site, urls }) : Effect.succeed(urls)
+
 const crawlFrom = (rootUrl: string, finalUrl: string, html: string, opts: CrawlOptions) =>
   Effect.gen(function* () {
     const anchored = normalizeUrl(finalUrl) ?? rootUrl
@@ -150,7 +169,8 @@ const crawlFrom = (rootUrl: string, finalUrl: string, html: string, opts: CrawlO
     const judge = harvest({ ...scope, judge: opts.linkWorthFollowing })
     const links = extractLinks(html, anchored)
     const keep = yield* judge(root, links)
-    const seeds = links.filter((_, i) => keep[i]).map((l) => l.url)
+    const kept = links.filter((_, i) => keep[i]).map((l) => l.url)
+    const seeds = yield* orderSeeds(anchored, kept, opts.limit - 1)
     const reasons = new Map<string, string>()
     const fetch = asFetcher(yield* makeFetchLayer({ deadlineMs: opts.timeoutMs }), reasons)
     const run = yield* crawlSeeds(fetch, seeds, judge, opts)
