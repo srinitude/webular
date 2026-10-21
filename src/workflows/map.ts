@@ -1,7 +1,6 @@
 // MAP workflow: discover URLs via the origin-root sitemap (one-level <sitemapindex>
-// recursion), then robots.txt Sitemap: entries, merged with the root page's same-host
-// links (sitemap order first). Same-host, byte-capped,
-// deterministic: children fetch concurrently but merge in order; dedup on normalized URLs.
+// recursion), then robots.txt Sitemap: entries, then page links (see pageLinks). Same-host,
+// byte-capped, deterministic: children fetch concurrently but merge in order; dedup normalized.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect, type FileSystem } from 'effect'
 import { z } from 'zod'
@@ -53,8 +52,7 @@ const fetchChild = (loc: string, host: string, timeoutMs: number): Effect.Effect
 function mergeChildren(host: string, results: ChildResult[]): Discovery {
   const out: Discovery = { links: [], errors: [] }
   for (const result of results) {
-    // A loop, not push(...spread): a big child sitemap would overflow the
-    // engine's argument limit and copy every loc twice.
+    // A loop, not push(...spread): a big child sitemap overflows the argument limit.
     if (!result.ok) {
       out.errors.push({ url: result.loc, reason: result.reason })
       continue
@@ -96,9 +94,8 @@ const namedSitemap = (
     Effect.succeed({ links: [], errors: [{ url: loc, reason: errMsg(err) }] }),
   )
 
-// robots.txt `Sitemap:` lines (key matched case-insensitively), same-host
-// only, capped like index children. A missing robots.txt is a fallback (null);
-// a named sitemap that fails is a reported error.
+// robots.txt `Sitemap:` lines (key case-insensitive), same-host, capped like index children.
+// A missing robots.txt is a fallback (null); a named sitemap that fails is a reported error.
 const robotsSitemaps = Effect.fn('map.robotsSitemaps')(function* (
   site: string,
   host: string,
@@ -130,10 +127,10 @@ const fetchSitemap = Effect.fn('map.fetchSitemap')(function* (site: string, time
     sitemapAt(new URL('/sitemap.xml', site).toString(), host, budget),
     () => null,
   )
-  if (primary && primary.links.length > 0) return primary
+  if (primary && primary.links.length > 0) return { ...primary, fromSitemapXml: true }
   const robots = yield* robotsSitemaps(site, host, budget)
-  if (!robots) return primary
-  return { links: robots.links, errors: [...(primary?.errors ?? []), ...robots.errors] }
+  const errors = [...(primary?.errors ?? []), ...(robots?.errors ?? [])]
+  return robots || primary ? { links: robots?.links ?? [], errors, fromSitemapXml: false } : null
 })
 
 // Stops at `limit` kept links: O(links read until the limit fills), not O(all links).
@@ -156,9 +153,8 @@ interface RootFetch {
   errors: { url: string; reason: string }[]
 }
 
-// The root is the user's explicit target: follow its redirects, anchor the
-// sitemap origin and host scope on the FINAL url, and reuse the root's own
-// HTML as the page-link fallback (no second fetch).
+// The root is the user's explicit target: follow its redirects, anchor the sitemap origin
+// and host scope on the FINAL url, and reuse its HTML for page links (no second fetch).
 const fetchRootFor = (url: string, timeoutMs?: number): Effect.Effect<RootFetch> =>
   Effect.match(fetchRoot(url, { timeoutMs: timeoutMs ?? SITEMAP_TIMEOUT_MS }), {
     onFailure: (err): RootFetch => ({
@@ -169,18 +165,20 @@ const fetchRootFor = (url: string, timeoutMs?: number): Effect.Effect<RootFetch>
     onSuccess: (entry): RootFetch => ({ final: entry.finalUrl, rootHtml: entry.html, errors: [] }),
   })
 
+// Origin-root page links join a /sitemap.xml result (sitemap order first); a deep
+// target's links or a robots.txt sitemap stand alone. No sitemap links: page links.
+function pageLinks(root: RootFetch, sitemap: { links: string[]; fromSitemapXml: boolean } | null) {
+  const final = new URL(root.final)
+  const merge = sitemap?.fromSitemapXml === true && final.pathname === '/'
+  if (!root.rootHtml || (sitemap && sitemap.links.length > 0 && !merge)) return []
+  return extractLinks(root.rootHtml, root.final).filter((u) => sameHost(final.hostname, u))
+}
+
 const discover = Effect.fn('map.discover')(function* (input: z.infer<typeof mapInput>) {
   const { url, limit = 1000, timeoutMs } = input
   const root = yield* fetchRootFor(url, timeoutMs)
-  const host = new URL(root.final).hostname
   const sitemap = yield* fetchSitemap(root.final, timeoutMs)
-  const links = [
-    ...(sitemap?.links ?? []),
-    ...(root.rootHtml
-      ? extractLinks(root.rootHtml, root.final).filter((u) => sameHost(host, u))
-      : []),
-  ]
-  const deduped = dedupe(links, limit)
+  const deduped = dedupe([...(sitemap?.links ?? []), ...pageLinks(root, sitemap)], limit)
   const errors = [...(deduped.length === 0 ? root.errors : []), ...(sitemap?.errors ?? [])]
   return { url, count: deduped.length, links: deduped, errors }
 })
