@@ -50,3 +50,13 @@ export const toolProblems = (
     .filter((t) => usedTool(uses, surface, t))
     .map((t) => `called ${t} where one ${s.tool} call does the job`),
 ]
+
+// A peer arm passes the tool check once it called any of its own MCP tools.
+export const peerProblems = (
+  s: Pick<Scenario, 'requireTool'>,
+  uses: readonly ToolUse[],
+  provider: string,
+): string[] =>
+  s.requireTool === false || uses.some((u) => u.name.startsWith(`mcp__${provider}__`))
+    ? []
+    : [`never called a ${provider} tool on the peer surface`]

@@ -7,11 +7,23 @@ import { defaultRoutes } from '../_support/routes.ts'
 import { e2eRoutes } from '../e2e/routes.ts'
 
 export const Eval = Schema.Struct({
-  kind: Schema.Literal('code'),
+  kind: Schema.Literals(['code', 'judge']),
+  // judge: the grader track's rubric for families no code check can grade.
+  rubric: Schema.optional(Schema.String),
   answerContains: Schema.optional(Schema.Array(Schema.String)),
   answerMatches: Schema.optional(Schema.String),
 })
 export type Eval = typeof Eval.Type
+
+// A peer arm: one web tool behind its official MCP server or a wrapper with
+// the shared search, fetch, answer shape. Keys name an env var and a Keychain item.
+export const Provider = Schema.Struct({
+  id: Schema.String,
+  command: Schema.String,
+  args: Schema.Array(Schema.String),
+  keys: Schema.Array(Schema.Struct({ env: Schema.String, item: Schema.String })),
+})
+export type Provider = typeof Provider.Type
 
 const Step = Schema.Union([Schema.Array(Schema.String), Schema.Struct({ file: Schema.String })])
 const Baseline = Schema.Struct({ pass: Schema.Boolean, problems: Schema.Array(Schema.String) })
@@ -44,10 +56,13 @@ export const ScenarioFile = Schema.Struct({
   smoke: Schema.String,
   evalRules: Schema.String,
   routes: Schema.Record(Schema.String, Schema.Array(Schema.String)),
+  providers: Schema.optional(Schema.Array(Provider)),
+  // The inline agent sample, used until bench/tasks holds the frozen set.
+  agentSample: Schema.optional(Schema.Array(Schema.String)),
   scenarios: Schema.Array(Scenario),
 })
 export type ScenarioFile = typeof ScenarioFile.Type
-export type Surface = ScenarioFile['surfaces'][number]
+export type Surface = ScenarioFile['surfaces'][number] | 'peer'
 
 export const SCENARIO_PATH = `${ROOT}tests/models/scenarios.json`
 

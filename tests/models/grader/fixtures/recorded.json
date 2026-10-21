@@ -1,0 +1,64 @@
+{
+  "items": 10,
+  "claudeWrittenItems": 6,
+  "graders": [
+    {
+      "model": "claude-opus-5-5",
+      "cohenKappa": 1,
+      "selfPreferenceGap": 0,
+      "setsHeadline": false
+    },
+    {
+      "model": "claude-sonnet-5-5",
+      "cohenKappa": 1,
+      "selfPreferenceGap": 0,
+      "setsHeadline": false
+    },
+    {
+      "model": "claude-haiku-5-5",
+      "cohenKappa": 1,
+      "selfPreferenceGap": 0,
+      "setsHeadline": false
+    }
+  ],
+  "fleissKappa": 1,
+  "ships": true,
+  "verdicts": {
+    "claude-opus-5-5": {
+      "capital-australia": "pass",
+      "capital-canada": "fail",
+      "author-1984": "pass",
+      "chemical-gold": "fail",
+      "largest-planet": "pass",
+      "multiply": "pass",
+      "boiling-point": "fail",
+      "moon-landing-year": "pass",
+      "speed-of-light": "pass",
+      "sides-hexagon": "fail"
+    },
+    "claude-sonnet-5-5": {
+      "capital-australia": "pass",
+      "capital-canada": "fail",
+      "author-1984": "pass",
+      "chemical-gold": "fail",
+      "largest-planet": "pass",
+      "multiply": "pass",
+      "boiling-point": "fail",
+      "moon-landing-year": "pass",
+      "speed-of-light": "pass",
+      "sides-hexagon": "fail"
+    },
+    "claude-haiku-5-5": {
+      "capital-australia": "pass",
+      "capital-canada": "fail",
+      "author-1984": "pass",
+      "chemical-gold": "fail",
+      "largest-planet": "pass",
+      "multiply": "pass",
+      "boiling-point": "fail",
+      "moon-landing-year": "pass",
+      "speed-of-light": "pass",
+      "sides-hexagon": "fail"
+    }
+  }
+}
