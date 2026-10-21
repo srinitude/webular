@@ -18,7 +18,9 @@ export interface CliOptions {
 
 const text = <E>(s: Stream.Stream<Uint8Array, E>) => Stream.mkString(Stream.decodeText(s))
 
-// An explicit env replaces the parent's; no env inherits it.
+// An explicit env replaces the parent's; no env inherits it. A child skips the
+// HTTP disk cache unless the caller sets WEBULAR_NO_CACHE, so no command test
+// writes .cache/webular (into HOME, or into the repo when HOME is unset).
 export const runCli = (
   entry: string,
   args: string[],
@@ -30,7 +32,7 @@ export const runCli = (
       const handle = yield* spawner.spawn(
         ChildProcess.make(opts.exec ?? 'bun', [`${ROOT}${entry}`, ...args], {
           cwd: opts.cwd ?? ROOT,
-          env: opts.env,
+          env: opts.env && { WEBULAR_NO_CACHE: '1', ...opts.env },
           extendEnv: opts.env === undefined,
           detached: false,
         }),

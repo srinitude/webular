@@ -1,0 +1,56 @@
+{
+  "head": {
+    "vars": ["item", "itemLabel", "itemDescription", "instanceLabel", "inception", "countryLabel"]
+  },
+  "results": {
+    "bindings": [
+      {
+        "item": { "type": "uri", "value": "http://www.wikidata.org/entity/Q42" },
+        "itemLabel": { "xml:lang": "en", "type": "literal", "value": "Douglas Adams" },
+        "itemDescription": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "English science fiction writer and humorist"
+        },
+        "instanceLabel": { "xml:lang": "en", "type": "literal", "value": "human" }
+      },
+      {
+        "item": { "type": "uri", "value": "http://www.wikidata.org/entity/Q4128476" },
+        "itemLabel": { "xml:lang": "en", "type": "literal", "value": "Douglas Adams" },
+        "itemDescription": { "xml:lang": "en", "type": "literal", "value": "American engineer" },
+        "instanceLabel": { "xml:lang": "en", "type": "literal", "value": "human" },
+        "countryLabel": { "xml:lang": "en", "type": "literal", "value": "United States" }
+      },
+      {
+        "item": { "type": "uri", "value": "http://www.wikidata.org/entity/Q2013" },
+        "itemLabel": { "xml:lang": "en", "type": "literal", "value": "Wikidata" },
+        "itemDescription": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "free knowledge base"
+        },
+        "instanceLabel": { "xml:lang": "en", "type": "literal", "value": "knowledge base" },
+        "inception": {
+          "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type": "literal",
+          "value": "2012-10-29T00:00:00Z"
+        }
+      },
+      {
+        "item": { "type": "uri", "value": "http://www.wikidata.org/entity/Q2013" },
+        "itemLabel": { "xml:lang": "en", "type": "literal", "value": "Wikidata" },
+        "itemDescription": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "free knowledge base"
+        },
+        "instanceLabel": { "xml:lang": "en", "type": "literal", "value": "wiki" },
+        "inception": {
+          "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+          "type": "literal",
+          "value": "2012-10-29T00:00:00Z"
+        }
+      }
+    ]
+  }
+}

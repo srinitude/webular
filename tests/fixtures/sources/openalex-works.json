@@ -1,0 +1,11 @@
+{
+  "results": [
+    {
+      "id": "https://openalex.org/W1",
+      "doi": "https://doi.org/10.1000/crispr.1",
+      "display_name": "CRISPR gene editing",
+      "abstract_inverted_index": { "Editing": [0], "genes": [1], "works": [2] }
+    },
+    { "id": "https://openalex.org/W2", "doi": null, "display_name": null }
+  ]
+}

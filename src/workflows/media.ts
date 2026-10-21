@@ -9,6 +9,7 @@ import { CliError } from '../core/effect.ts'
 import { outPath } from '../core/safepath.ts'
 import { runBatch } from '../lib/agentbrowser.ts'
 import { downloadToFile } from '../lib/download.ts'
+import { withArchiveCopy } from '../lib/sources/archive-copy.ts'
 import { stepRuntime } from './runtime.ts'
 
 const MAX_CAPTURE_BYTES = 50 * 1024 * 1024
@@ -25,6 +26,7 @@ const mediaOutput = z.object({
   savedTo: z.string(),
   bytes: z.number(),
   action: z.string(),
+  archivedFrom: z.string().optional(),
 })
 
 const fail = (message: string) => new CliError({ message, exitCode: EXIT.failure })
@@ -44,7 +46,13 @@ const browserCapture = Effect.fn('media.browserCapture')(function* (
 const media = Effect.fn('media')(function* (input: z.infer<typeof mediaInput>) {
   const { url, action, maxBytes } = input
   const dest = yield* outPath(input.dest)
-  if (action === 'download') return { ...(yield* downloadToFile(url, dest, { maxBytes })), action }
+  if (action === 'download') {
+    const opts = { maxBytes }
+    const got = yield* withArchiveCopy(url, downloadToFile(url, dest, opts), (capture) =>
+      downloadToFile(capture, dest, opts),
+    )
+    return { ...got.value, url, action, archivedFrom: got.archivedFrom }
+  }
   return { url, savedTo: dest, bytes: yield* browserCapture(url, dest, action), action }
 })
 

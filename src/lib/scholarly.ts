@@ -2,7 +2,8 @@
 // (WEBULAR_MAILTO joins their polite pool).
 import { Config, Effect, Schema } from 'effect'
 import { fetchText } from '../core/http.ts'
-import { endpoint, plain, SOURCE_TIMEOUT_MS } from './sources-search.ts'
+import { sourceUrl } from './sources/polite.ts'
+import { plain, SOURCE_TIMEOUT_MS } from './sources-search.ts'
 
 const Crossref = Schema.fromJsonString(
   Schema.Struct({
@@ -47,7 +48,7 @@ const getJson = Effect.fn('scholarlyGet')(function* <A>(
   params: Record<string, string>,
 ) {
   const mailto = yield* Config.String('WEBULAR_MAILTO').pipe(Config.withDefault(''))
-  const url = yield* endpoint(base, mailto ? { ...params, mailto } : params)
+  const url = yield* sourceUrl(base, mailto ? { ...params, mailto } : params)
   const body = yield* fetchText(url, { timeoutMs: SOURCE_TIMEOUT_MS })
   return yield* Schema.decodeUnknownEffect(schema)(body)
 })

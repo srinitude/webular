@@ -26,7 +26,8 @@ const gdeltCase = Effect.gen(function* () {
 
 const emptyEntities = JSON.stringify({ search: [] })
 
-// Wikidata answers empty and GDELT refuses in plain text, so Hacker News wins.
+// Wikidata answers empty, SPARQL has no route, and GDELT refuses in plain text,
+// so Hacker News wins.
 const fallbackCase = Effect.gen(function* () {
   const text = yield* body('hn-algolia-search.json')
   const routes = {
@@ -36,7 +37,7 @@ const fallbackCase = Effect.gen(function* () {
   }
   const out = yield* against(routes, freeSourceFallback('summarize', 'effect typescript', 2))
   expect(out.source).toBe('hn-algolia')
-  expect(out.failures.map((f) => f.source).sort()).toEqual(['gdelt', 'wikidata'])
+  expect(out.failures.map((f) => f.source).sort()).toEqual(['gdelt', 'wikidata', 'wikidata-sparql'])
 })
 
 describe('news source adapters', () => {

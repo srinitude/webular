@@ -1,40 +1,18 @@
-// The one entry point to the free source adapters: each adapter by name, and
+// The one entry point to the free source adapters (named in catalog.ts) and
 // the fallback order each command tries them in (ranked in
 // benchmarks/free-sources.md). Ranking and merging stay with the search chain;
 // it calls freeSourceSearch, freeSourceFallback or freeSourceStatus and
 // decides what to keep.
 import { Clock, Data, Duration, Effect } from 'effect'
-import { commonCrawlCdx, libraryOfCongress, waybackAvailable, waybackCdx } from './archives.ts'
-import { bluesky, reddit, stackExchange } from './communities.ts'
-import { gdelt, hnAlgolia } from './news.ts'
+import { FREE_SOURCES, type FreeSource, SOURCE_TRUST } from './catalog.ts'
 import { type Hit, TIMEOUT_MS } from './polite.ts'
 import { rankHits } from './rank.ts'
-import { europePmc, ncbiEutils } from './scholarly.ts'
-import { feedSearch, githubSearch, marginalia, wikidata } from './web.ts'
 
 // parse and scrape's document route: local anydoc conversion, first in parse's
 // fallback order (then Tesseract for a 'needsOcr' failure).
 export { documentToMarkdown } from './documents.ts'
 
-const FREE_SOURCES = {
-  wikidata,
-  europepmc: europePmc,
-  'ncbi-eutils': ncbiEutils,
-  stackexchange: stackExchange,
-  'github-search': githubSearch,
-  marginalia,
-  feedsearch: feedSearch,
-  'wayback-available': waybackAvailable,
-  'wayback-cdx': waybackCdx,
-  'commoncrawl-cdx': commonCrawlCdx,
-  loc: libraryOfCongress,
-  reddit,
-  bluesky,
-  'hn-algolia': hnAlgolia,
-  gdelt,
-} as const satisfies Record<string, (query: string, limit: number) => Effect.Effect<Hit[], unknown>>
-
-export type FreeSource = keyof typeof FREE_SOURCES
+export type { FreeSource }
 
 export const FREE_SOURCE_NAMES = Object.keys(FREE_SOURCES) as [FreeSource, ...FreeSource[]]
 
@@ -49,39 +27,35 @@ const FREE_SOURCE_ORDER = {
     'hn-algolia',
     'marginalia',
     'loc',
+    'openlibrary',
   ],
-  answer: ['wikidata', 'stackexchange', 'github-search', 'hn-algolia', 'europepmc'],
-  research: ['europepmc', 'ncbi-eutils', 'wikidata', 'stackexchange', 'loc', 'marginalia'],
-  summarize: ['wikidata', 'hn-algolia', 'gdelt'],
-  feed: ['feedsearch'],
+  answer: [
+    'wikidata',
+    'wikidata-sparql',
+    'stackexchange',
+    'github-search',
+    'hn-algolia',
+    'europepmc',
+    'openlibrary',
+  ],
+  research: [
+    'europepmc',
+    'ncbi-eutils',
+    'crossref',
+    'openalex',
+    'wikidata',
+    'stackexchange',
+    'loc',
+    'marginalia',
+  ],
+  summarize: ['wikidata', 'wikidata-sparql', 'hn-algolia', 'gdelt'],
+  feed: ['feedsearch', 'site-feeds'],
   monitor: ['wayback-cdx', 'wayback-available'],
   map: ['wayback-cdx', 'commoncrawl-cdx'],
   crawl: ['commoncrawl-cdx'],
 } as const satisfies Record<string, ReadonlyArray<FreeSource>>
 
 type FreeSourceCommand = keyof typeof FREE_SOURCE_ORDER
-
-// How far each source's hits can be believed, in [0, 1]: curated and
-// peer-reviewed indexes high, open community and web indexes lower.
-// Jev hook point: a per-hit trust judgment (claim vs. source evidence) would
-// replace this fixed table; it must keep the type (source: FreeSource) => number.
-const SOURCE_TRUST: Record<FreeSource, number> = {
-  europepmc: 0.9,
-  'ncbi-eutils': 0.9,
-  loc: 0.85,
-  wikidata: 0.8,
-  'wayback-available': 0.7,
-  'wayback-cdx': 0.7,
-  'commoncrawl-cdx': 0.6,
-  stackexchange: 0.6,
-  'github-search': 0.5,
-  feedsearch: 0.5,
-  'hn-algolia': 0.5,
-  gdelt: 0.5,
-  marginalia: 0.4,
-  reddit: 0.3,
-  bluesky: 0.3,
-}
 
 class FreeSourceError extends Data.TaggedError('FreeSourceError')<{
   source: FreeSource

@@ -1,0 +1,12 @@
+{
+  "message": {
+    "items": [
+      {
+        "URL": "https://doi.org/10.1000/crispr.1",
+        "title": ["CRISPR gene editing"],
+        "abstract": "<jats:p>Editing genes with CRISPR.</jats:p>"
+      },
+      { "URL": "https://doi.org/10.1000/crispr.2" }
+    ]
+  }
+}

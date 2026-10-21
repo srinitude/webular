@@ -61,7 +61,7 @@ const feedCase = Effect.gen(function* () {
   expect(hits.map((h) => h.url)).toEqual(['https://xkcd.com/rss.xml', 'https://xkcd.com/atom.xml'])
 })
 
-// answer asks five sources at once; two answer, three get a 404 and say so.
+// answer asks seven sources at once; two answer, five get a 404 and say so.
 const statusCase = Effect.gen(function* () {
   const github = yield* body('github-search.json')
   const wiki = yield* body('wikidata-search.json')
@@ -69,12 +69,14 @@ const statusCase = Effect.gen(function* () {
   const rows = yield* against(routes, freeSourceStatus('answer', 'effect', 2))
   expect(rows.map((r) => [r.source, r.ok])).toEqual([
     ['wikidata', true],
+    ['wikidata-sparql', false],
     ['stackexchange', false],
     ['github-search', true],
     ['hn-algolia', false],
     ['europepmc', false],
+    ['openlibrary', false],
   ])
-  expect(rows[2]?.hits.length).toBe(2)
+  expect(rows[3]?.hits.length).toBe(2)
   expect(rows[1]?.error?.length).toBeGreaterThan(0)
 })
 

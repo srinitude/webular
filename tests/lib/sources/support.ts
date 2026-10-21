@@ -23,6 +23,7 @@ export const against = <A, E>(
         ConfigProvider.ConfigProvider,
         ConfigProvider.fromUnknown({
           WEBULAR_MAILTO: 'me@example.com',
+          WEBULAR_NO_CACHE: '1',
           WEBULAR_SOURCE_ORIGIN: fx.origin,
           ...extra,
         }),
