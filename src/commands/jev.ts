@@ -12,8 +12,7 @@ const HELP = [
 ].join('\n')
 
 // Loaded only after the flags check, so a bad call never pays for linkedom.
-const load = <M, A>(loader: () => Promise<M>, pick: (m: M) => A) =>
-  Effect.map(Effect.promise(loader), pick)
+const cli = Effect.promise(() => import('../lib/jev/learn/cli.ts'))
 
 const usage = (message: string) => new CliError({ message, exitCode: 2 })
 
@@ -33,16 +32,9 @@ const main = Effect.gen(function* () {
   const label = strFlag(values, 'label') ?? rest[1]
   if (cmd === undefined)
     return yield* usage(`jev: missing <action>. Pass learn or correct.\n${HELP}`)
-  if (cmd === 'learn')
-    yield* yield* load(
-      () => import('../lib/jev/learn/cli.ts'),
-      (m) => m.learn,
-    )
+  if (cmd === 'learn') yield* (yield* cli).learn
   else if (cmd === 'correct' && id && label)
-    yield* (yield* load(
-      () => import('../lib/jev/learn/cli.ts'),
-      (m) => m.correctCall,
-    ))(id, label, strFlag(values, 'input'))
+    yield* (yield* cli).correctCall(id, label, strFlag(values, 'input'))
   else if (cmd === 'correct')
     return yield* usage('jev: missing <call-id> and <right-answer>. Pass both after correct.')
   else return yield* usage(`jev: unknown command '${cmd}'\n${HELP}`)

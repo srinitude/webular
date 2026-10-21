@@ -24,10 +24,8 @@ const FOREIGN_FLAGS: Record<string, string> = {
 }
 
 type Doc = { file: string; text: string }
-
 const run = <A, E>(self: Effect.Effect<A, E, FileSystem.FileSystem>) =>
   Effect.runPromise(self.pipe(Effect.provide(BunServices.layer)))
-
 const read = (path: string) => FileSystem.FileSystem.use((fs) => fs.readFileString(path))
 
 const skillDocs = Effect.gen(function* () {
@@ -195,9 +193,7 @@ test('the plugin description counts its skills correctly', () =>
   run(
     Effect.gen(function* () {
       const { names } = yield* skillDocs
-      const { description } = JSON.parse(yield* read(`${PLUGIN}plugin.json`)) as {
-        description: string
-      }
-      expect(description).toContain(`${COUNT_WORDS[names.length]} skills`)
+      const manifest = JSON.parse(yield* read(`${PLUGIN}plugin.json`)) as { description: string }
+      expect(manifest.description).toContain(`${COUNT_WORDS[names.length]} skills`)
     }),
   ))

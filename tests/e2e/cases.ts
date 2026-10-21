@@ -121,6 +121,8 @@ export const CLI_CASES: CliCase[] = [
   usage('act goal needs a window', 'act', ['--goal', 'click "Save"'], 'WEBULAR_CUA_WINDOW'),
   ok('feed items', 'feed', ['--url', '{origin}/feed.xml', '--limit', '2', '--archive']),
   usage('jev needs a known subcommand', 'jev', ['bogus'], 'jev'),
+  // The plugin's flag form; an unknown action fails before any Jev call.
+  usage('jev flags', 'jev', ['--action', 'x', '--id', 'c', '--label', 'y', '--input', 'i'], 'x'),
   // Shared flags, each once: they are one parser for every command.
   { ...ok('ndjson output', 'map', ['--url', '{origin}/', '--ndjson']), json: false },
   ok('select fields', 'map', ['--url', '{origin}/', '--select', 'count']),

@@ -106,11 +106,7 @@ describe('webular mcp — agent contract over stdio', () => {
           const flags = yield* cliFlags(tool.name)
           const extra = inputs.filter((k) => !flags.includes(k) && !common.includes(k))
           const missing = flags.filter((f) => !inputs.includes(f) && !CLI_ONLY[tool.name]?.[f])
-          expect({ tool: tool.name, extra, missing }).toEqual({
-            tool: tool.name,
-            extra: [],
-            missing: [],
-          })
+          expect([tool.name, extra, missing]).toEqual([tool.name, [], []])
           for (const key of schema.required ?? []) expect([...flags, ...common]).toContain(key)
           expect(schema.properties?.['cursor']?.type).toBe('integer')
         }
