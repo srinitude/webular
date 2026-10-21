@@ -10,6 +10,7 @@ import { hostConcurrency } from '../core/budget.ts'
 import { fetchText } from '../core/http.ts'
 import { errMsg } from '../core/output.ts'
 import { htmlToArticle } from './html.ts'
+import { withArchiveCopy } from './sources/archive-copy.ts'
 
 // The one zod mirror of the {url, reason} partial-failure shape — composed
 // into every fan-out workflow's output schema so they cannot drift.
@@ -110,9 +111,15 @@ type Outcome = { ok: true; entry: SourceEntry } | { ok: false; url: string; reas
 // 6 pages 6284 vs 2825.
 // ponytail: fixed cut from one machine's medians; re-measure if parse cost moves.
 const POOL_MIN_PAGES = 4
+// A dead page (404, 410, 5xx, network failure, timeout) reads from the Internet
+// Archive's closest capture, so one dead source does not drop out of an answer.
 const fetchOne = (src: SourceRef, timeoutMs: number, maxHtml: number, pooled: boolean) =>
-  fetchText(src.url, { timeoutMs }).pipe(
-    Effect.flatMap((html) => (pooled ? parseArticleText : parseInThread)(html.slice(0, maxHtml))),
+  withArchiveCopy(src.url, fetchText(src.url, { timeoutMs }), (capture) =>
+    fetchText(capture, { timeoutMs }),
+  ).pipe(
+    Effect.flatMap(({ value: html }) =>
+      (pooled ? parseArticleText : parseInThread)(html.slice(0, maxHtml)),
+    ),
     Effect.match({
       onSuccess: (text): Outcome => ({
         ok: true,

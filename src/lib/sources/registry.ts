@@ -52,7 +52,7 @@ const FREE_SOURCE_ORDER = {
   feed: ['feedsearch', 'site-feeds'],
   monitor: ['wayback-cdx', 'wayback-available'],
   map: ['wayback-cdx', 'commoncrawl-cdx'],
-  crawl: ['commoncrawl-cdx'],
+  crawl: ['commoncrawl-cdx', 'wayback-cdx'],
 } as const satisfies Record<string, ReadonlyArray<FreeSource>>
 
 type FreeSourceCommand = keyof typeof FREE_SOURCE_ORDER

@@ -14,6 +14,8 @@ const batchInput = z.object({
   // Unset means host-sized (core/budget.ts).
   concurrency: z.number().int().positive().max(32).optional(),
   timeoutMs: z.number().int().positive().optional(),
+  // Dead page → Wayback raw capture, as `scrape --archive` does for each URL.
+  archive: z.boolean().optional(),
 })
 
 const resultItem = z.object({
@@ -32,13 +34,20 @@ type ResultItem = z.infer<typeof resultItem>
 
 // Index-prefixed runId: deterministic AND unique — Mastra caches Run
 // instances by id, so duplicate target URLs must not share one.
-const scrapeRun = (url: string, index: number, timeoutMs?: number) =>
+const scrapeRun = (url: string, index: number, timeoutMs?: number, archive?: boolean) =>
   Effect.tryPromise(() => scrapeWorkflow.createRun({ runId: `${index}:${url}` })).pipe(
-    Effect.flatMap((run) => Effect.tryPromise(() => run.start({ inputData: { url, timeoutMs } }))),
+    Effect.flatMap((run) =>
+      Effect.tryPromise(() => run.start({ inputData: { url, timeoutMs, archive } })),
+    ),
   )
 
-const scrapeOne = (url: string, index: number, timeoutMs?: number): Effect.Effect<ResultItem> =>
-  Effect.match(scrapeRun(url, index, timeoutMs), {
+const scrapeOne = (
+  url: string,
+  index: number,
+  timeoutMs?: number,
+  archive?: boolean,
+): Effect.Effect<ResultItem> =>
+  Effect.match(scrapeRun(url, index, timeoutMs, archive), {
     onFailure: (err): ResultItem => ({ url, ok: false, error: errMsg(err.cause ?? err) }),
     onSuccess: (outcome): ResultItem => {
       if (outcome.status === 'success') return { url, ok: true, title: outcome.result.title }
@@ -57,7 +66,7 @@ const runBatchStep = createStep({
         const concurrency = inputData.concurrency ?? (yield* hostConcurrency)
         const results = yield* Effect.forEach(
           inputData.urls,
-          (url, index) => scrapeOne(url, index, inputData.timeoutMs),
+          (url, index) => scrapeOne(url, index, inputData.timeoutMs, inputData.archive),
           { concurrency },
         )
         return { count: results.length, results }

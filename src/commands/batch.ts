@@ -47,6 +47,7 @@ const main = Effect.gen(function* () {
     urls: { type: 'string' },
     input: { type: 'string' },
     concurrency: { type: 'string' },
+    archive: { type: 'boolean' },
   })
   const urls = yield* loadUrls(values, positionals)
   if (!urls || urls.length === 0) {
@@ -63,6 +64,7 @@ const main = Effect.gen(function* () {
     urls,
     concurrency: yield* optIntFlag('batch', values, 'concurrency', { min: 1, max: 32 }),
     timeoutMs: yield* timeoutFlag('batch', values),
+    archive: values['archive'] === true,
   }
   return yield* runWorkflow(
     'batch',

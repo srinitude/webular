@@ -7,7 +7,8 @@ import { Data, Effect } from 'effect'
 import { rawCapture } from '../../core/archive.ts'
 import { HttpStatusError } from '../../core/http-body.ts'
 import { errMsg } from '../../core/output.ts'
-import { waybackAvailable } from './archives.ts'
+import { waybackAvailable, waybackCdx } from './archives.ts'
+import type { Hit } from './polite.ts'
 
 export class ArchiveCopyError extends Data.TaggedError('ArchiveCopyError')<{
   readonly message: string
@@ -22,14 +23,28 @@ const isDeadPage = (err: unknown): boolean =>
     ? err.status === 404 || err.status === 410 || err.status >= 500
     : !REFUSAL.test(errMsg(err))
 
-// description is `<timestamp> HTTP <status>`.
+// description is `<timestamp> HTTP <status>` (availability) or
+// `<timestamp> <mime> HTTP <status>` (CDX).
+const CDX_ROWS = 5
+const OK_CAPTURE = /^(\d+) (?:\S+ )?HTTP 2\d\d$/
+
+const firstCapture =
+  (lookup: (url: string, limit: number) => Effect.Effect<Hit[], unknown>) => (url: string) =>
+    Effect.flatMap(lookup(url, CDX_ROWS), (hits) => {
+      for (const hit of hits) {
+        const ts = OK_CAPTURE.exec(hit.description)?.[1]
+        if (ts) return Effect.succeed(rawCapture(hit.url, ts))
+      }
+      return Effect.fail(new Error('the archive has no capture'))
+    })
+
+// The availability API first; when it has nothing or fails, the Wayback CDX
+// index. ponytail: the CDX lists oldest first, so its pick is the oldest 2xx
+// capture of five; ask with a negative limit when a newer copy matters.
 const captureOf = (url: string) =>
-  Effect.flatMap(waybackAvailable(url, 1), ([hit]) => {
-    const found = /^(\d+) HTTP 2\d\d$/.exec(hit?.description ?? '')
-    return found && hit
-      ? Effect.succeed(rawCapture(hit.url, found[1] ?? ''))
-      : Effect.fail(new Error('the archive has no capture'))
-  })
+  firstCapture(waybackAvailable)(url).pipe(
+    Effect.catch((first) => firstCapture(waybackCdx)(url).pipe(Effect.mapError(() => first))),
+  )
 
 const bothFailed = (url: string, live: unknown, archive: unknown) =>
   new ArchiveCopyError({
@@ -38,6 +53,7 @@ const bothFailed = (url: string, live: unknown, archive: unknown) =>
 
 // Run `live`; on a dead-page failure run `fromCapture` on the archive's capture
 // URL. `archivedFrom` is that capture URL, absent when the live fetch served.
+// The capture comes from the availability API, then the CDX index.
 export const withArchiveCopy = <A, E, R>(
   url: string,
   live: Effect.Effect<A, E, R>,

@@ -147,6 +147,7 @@ webular --help
 
 - Every fetch retries 408, 429, 502, 503, and 504 on a fixed backoff. Or it waits for the server's `Retry-After` (capped at 10 s).
 - `scrape --archive` uses the Wayback Machine's raw capture when the page is dead (404, 410, 5xx, network error, or timeout). It reports the capture as `archivedFrom`.
+- `batch --archive` does the same for each URL. `answer`, `research`, `extract`, and `media` (download) read a dead page from its archive copy without a flag; they find the capture through the availability API, then the Wayback CDX index. When a site's root will not answer, `map` asks the Wayback CDX and Common Crawl's index for its URLs, and `crawl` asks Common Crawl's index and the Wayback CDX.
 
 ### Examples
 

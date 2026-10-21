@@ -8,6 +8,7 @@ import { ConfigProvider, Effect, FileSystem } from 'effect'
 import { fetchText } from '../../../src/core/http.ts'
 import { downloadToFile } from '../../../src/lib/download.ts'
 import { ArchiveCopyError, withArchiveCopy } from '../../../src/lib/sources/archive-copy.ts'
+import { fetchSources } from '../../../src/lib/sources.ts'
 import { startFixture } from '../../_support/fixture.ts'
 import { eff, tmpDir } from '../../_support/run.ts'
 import { body, json } from './support.ts'
@@ -15,19 +16,25 @@ import { body, json } from './support.ts'
 const CAPTURE = '/web/20261021030512id_/https://example.com/'
 const NO_CACHE = { cache: false }
 
-const inFixture = <A, E, R>(hasCapture: boolean, use: (origin: string) => Effect.Effect<A, E, R>) =>
+// 'cdx': the availability API has nothing and the recorded CDX lists captures.
+const inFixture = <A, E, R>(
+  hasCapture: boolean | 'cdx',
+  use: (origin: string) => Effect.Effect<A, E, R>,
+) =>
   Effect.gen(function* () {
     const available = yield* body('wayback-available.json')
     const page = yield* body('archive-copy-page.html')
+    const cdx = yield* body('wayback-cdx.json')
     const fx = yield* startFixture((origin) => ({
       '/dead': () => new Response('gone', { status: 410 }),
       '/live': () => new Response('<h1>Live</h1>', { headers: { 'content-type': 'text/html' } }),
       '/wayback/available': () =>
         json(
-          hasCapture
+          hasCapture === true
             ? available.replace('http://web.archive.org', origin)
             : '{"archived_snapshots":{}}',
         ),
+      '/cdx/search/cdx': () => json(hasCapture === 'cdx' ? cdx : '[]'),
       [CAPTURE]: () => new Response(page, { headers: { 'content-type': 'text/html' } }),
     }))
     const config = {
@@ -61,6 +68,20 @@ describe('withArchiveCopy — fetch, then the Internet Archive copy', () => {
   )
 
   test(
+    'the CDX index names the capture when the availability API has none',
+    eff(
+      Effect.gen(function* () {
+        const { out } = yield* inFixture('cdx', (origin) =>
+          withArchiveCopy(`${origin}/dead`, fetchText(`${origin}/dead`, NO_CACHE), Effect.succeed),
+        )
+        expect(out.archivedFrom).toBe(
+          'https://web.archive.org/web/20020120142510id_/http://example.com:80/',
+        )
+      }),
+    ),
+  )
+
+  test(
     'a live page never asks the archive',
     eff(
       Effect.gen(function* () {
@@ -80,6 +101,32 @@ describe('withArchiveCopy — fetch, then the Internet Archive copy', () => {
         expect(out).toBeInstanceOf(ArchiveCopyError)
         expect(out.message).toMatch(/\/dead: the live fetch failed \(.*410.*\)/)
         expect(out.message).toMatch(/the archive copy failed \(the archive has no capture\)/)
+      }),
+    ),
+  )
+
+  test(
+    'answer and research read a dead source from the archive copy',
+    eff(
+      Effect.gen(function* () {
+        const { out } = yield* inFixture(true, (origin) =>
+          fetchSources([{ title: 'Dead', url: `${origin}/dead` }], 5_000),
+        )
+        expect(out.errors).toEqual([])
+        expect(out.entries[0]?.text).toContain('Internet Archive')
+      }),
+    ),
+  )
+
+  test(
+    'a dead source with no archive copy is one reported error, not a failed run',
+    eff(
+      Effect.gen(function* () {
+        const { out } = yield* inFixture(false, (origin) =>
+          fetchSources([{ title: 'Dead', url: `${origin}/dead` }], 5_000),
+        )
+        expect(out.entries).toEqual([])
+        expect(out.errors[0]?.reason).toMatch(/live fetch failed .*410.*archive has no capture/)
       }),
     ),
   )

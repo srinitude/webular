@@ -182,8 +182,8 @@ const crawlFrom = (rootUrl: string, finalUrl: string, html: string, opts: CrawlO
     return result
   })
 
-// The root would not answer: Common Crawl's index lists what it held for the
-// site (2603.01548). Titles are unknown without a fetch; the error stays when
+// The root would not answer: Common Crawl's index and the Wayback CDX list
+// what they held for the site (2603.01548). Titles are unknown without a fetch; the error stays when
 // the index has nothing.
 const archivedCrawl = (rootUrl: string, limit: number, reason: string) =>
   Effect.map(archivedUrls('crawl', rootUrl, limit), (urls) => {

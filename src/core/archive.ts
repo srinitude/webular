@@ -2,7 +2,7 @@
 // API). Only a dead page falls back — a 404, 410, or 5xx, a network failure, or
 // a timeout. A content-type refusal never does, and when the archive has no
 // capture the original error stands.
-import { Effect, Schema } from 'effect'
+import { Config, Effect, Schema } from 'effect'
 import { withJev } from '../lib/jev/budget.ts'
 import { classifyHttpError } from '../lib/jev/fetch.ts'
 import type { FetchError } from './decode.ts'
@@ -46,11 +46,18 @@ const Availability = Schema.fromJsonString(
   }),
 )
 
+// WEBULAR_SOURCE_ORIGIN, the knob every free source honors, points the lookup at
+// a local fixture; an explicit archiveOrigin wins.
+const archiveOrigin = (opts: ArchiveOptions) =>
+  opts.archiveOrigin !== undefined
+    ? Effect.succeed(opts.archiveOrigin)
+    : Config.String('WEBULAR_SOURCE_ORIGIN').pipe(Config.withDefault(ARCHIVE_ORIGIN), Effect.orDie)
+
 const closestCapture = (url: string, opts: ArchiveOptions = {}) =>
-  fetchText(
-    `${opts.archiveOrigin ?? ARCHIVE_ORIGIN}/wayback/available?url=${encodeURIComponent(url)}`,
-    opts,
-  ).pipe(
+  archiveOrigin(opts).pipe(
+    Effect.flatMap((origin) =>
+      fetchText(`${origin}/wayback/available?url=${encodeURIComponent(url)}`, opts),
+    ),
     Effect.flatMap(Schema.decodeUnknownEffect(Availability)),
     Effect.map(({ archived_snapshots: { closest } }) =>
       closest?.available && /^2\d\d$/.test(closest.status)

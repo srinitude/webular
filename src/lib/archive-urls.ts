@@ -11,9 +11,12 @@ const WAYBACK = /^https?:\/\/web\.archive\.org\/web\/\d+[a-z_]*\//
 export const archivedUrls = (command: 'map' | 'crawl', site: string, limit: number) => {
   const host = new URL(site).hostname
   return freeSourceFallback(command, `${host}/*`, limit).pipe(
-    Effect.map(({ results }) =>
-      results.map((hit) => hit.url.replace(WAYBACK, '')).filter((url) => sameHost(host, url)),
-    ),
+    // Two indexes often list the same page; keep it once, in rank order.
+    Effect.map(({ results }) => [
+      ...new Set(
+        results.map((hit) => hit.url.replace(WAYBACK, '')).filter((url) => sameHost(host, url)),
+      ),
+    ]),
     Effect.catch(() => Effect.succeed<string[]>([])),
   )
 }
