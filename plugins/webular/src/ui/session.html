@@ -4,28 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>webular session</title>
-    <style>
-      :root {
-        --ink: #1b1d21; --muted: #5d636e; --line: #dfe2e7; --bg: #ffffff;
-        --ok: #1f7a4d; --warn: #9a5b00; --bad: #b42318; --accent: #2f5bd3;
-        color-scheme: light dark;
-      }
-      @media (prefers-color-scheme: dark) {
-        :root { --ink: #eceef2; --muted: #a3a9b4; --line: #343840; --bg: #15171a;
-          --ok: #5fd39a; --warn: #f0b45a; --bad: #ff8a80; --accent: #8fb0ff; }
-      }
-      body { margin: 0; padding: 16px; font: 15px/1.5 system-ui, sans-serif; color: var(--ink); background: var(--bg); }
-      h1 { font-size: 17px; margin: 0 0 4px; }
-      .status { font-weight: 600; }
-      .status[data-tone='ok'] { color: var(--ok); }
-      .status[data-tone='warn'] { color: var(--warn); }
-      .status[data-tone='bad'] { color: var(--bad); }
-      .moves { color: var(--muted); font-size: 13px; margin: 4px 0 12px; }
-      ol { padding-left: 20px; margin: 8px 0; }
-      li { margin: 4px 0; overflow-wrap: anywhere; }
-      a { color: var(--accent); }
-      .report { white-space: pre-wrap; border-top: 1px solid var(--line); padding-top: 12px; }
-    </style>
+    <link rel="stylesheet" href="./views.css" />
   </head>
   <body>
     <main id="root"></main>

@@ -1,6 +1,7 @@
 // The MCP Apps host bridge, as an Effect: send ui/initialize, confirm with
 // ui/notifications/initialized, then route tool-input, tool-result, and
-// tool-cancelled notifications. Interrupting the fiber removes the listener.
+// tool-cancelled notifications. Re-run asks the host to call the same tool with
+// the same arguments. Interrupting the fiber removes the listener.
 import { Effect, Queue, Stream } from 'effect'
 import type { SessionResult } from './lifecycle.ts'
 
@@ -16,8 +17,8 @@ export const readResult = (r: ToolResult): SessionResult => {
   return r.isError || !r.structuredContent ? { error: true, message: text } : r.structuredContent
 }
 
-const post = (message: object) =>
-  Effect.sync(() => window.parent.postMessage({ jsonrpc: '2.0', ...message }, '*'))
+const send = (message: object) => window.parent.postMessage({ jsonrpc: '2.0', ...message }, '*')
+const post = (message: object) => Effect.sync(() => send(message))
 
 // ponytail: a 64-message buffer that drops the oldest; a run sends three or four.
 const hostMessages = Stream.callback<MessageEvent>(
@@ -38,12 +39,38 @@ const hostMessages = Stream.callback<MessageEvent>(
 export interface Handlers {
   readonly onStart: () => void
   readonly onResult: (r: SessionResult) => void
+  // Called once the tool name and arguments are known; the view shows Re-run then.
+  readonly onRerunReady: (rerun: () => void) => void
 }
 
-const route = (e: MessageEvent, h: Handlers) => {
-  const { id, method, params } = e.data
-  if (id === 1 && 'result' in e.data) return post({ method: 'ui/notifications/initialized' })
-  if (method === 'ui/notifications/tool-input') return Effect.sync(h.onStart)
+// The tool call this view renders, learned from the handshake and tool-input.
+interface Call {
+  name?: string
+  args?: unknown
+  id: number
+}
+
+const rerunOf = (call: Call, h: Handlers) => () => {
+  h.onStart()
+  call.id++
+  send({ id: call.id, method: 'tools/call', params: { name: call.name, arguments: call.args } })
+}
+
+const onInput = (call: Call, h: Handlers, args: unknown) => {
+  call.args = args
+  h.onStart()
+  if (call.name && args) h.onRerunReady(rerunOf(call, h))
+}
+
+const route = (e: MessageEvent, h: Handlers, call: Call) => {
+  const { id, method, params, result } = e.data
+  if (id === 1 && result) {
+    call.name = result.hostContext?.toolInfo?.tool?.name
+    return post({ method: 'ui/notifications/initialized' })
+  }
+  if (id > 1 && result) return Effect.sync(() => h.onResult(readResult(result)))
+  if (method === 'ui/notifications/tool-input')
+    return Effect.sync(() => onInput(call, h, params?.arguments))
   if (method === 'ui/notifications/tool-result')
     return Effect.sync(() => h.onResult(readResult(params)))
   if (method === 'ui/notifications/tool-cancelled')
@@ -56,7 +83,7 @@ const initialize = post({
   method: 'ui/initialize',
   params: {
     protocolVersion: '2026-01-26',
-    appInfo: { name: 'webular-session', version: '1.0.0' },
+    appInfo: { name: 'webular-view', version: '1.0.0' },
     appCapabilities: {},
   },
 })
@@ -65,7 +92,8 @@ const initialize = post({
 export const connectHost = (h: Handlers) =>
   Effect.scoped(
     Effect.gen(function* () {
-      yield* Effect.forkScoped(Stream.runForEach(hostMessages, (e) => route(e, h)))
+      const call: Call = { id: 1 }
+      yield* Effect.forkScoped(Stream.runForEach(hostMessages, (e) => route(e, h, call)))
       yield* Effect.yieldNow
       yield* initialize
       return yield* Effect.never

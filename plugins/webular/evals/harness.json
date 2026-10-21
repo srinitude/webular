@@ -277,10 +277,46 @@
       "grader": "bun test: final state per result shape"
     },
     {
-      "assertion": "tools/list links research and map, and only them, to the session view",
+      "assertion": "tools/list links research and answer, and only them, to the session view",
       "source": "tests/session-view.test.ts",
       "kind": "deterministic",
       "grader": "bun test: tool _meta.ui.resourceUri list"
+    },
+    {
+      "assertion": "a URL list folds into a site tree with a count on each folder and failures kept",
+      "source": "tests/views.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: buildTree counts and outcomes"
+    },
+    {
+      "assertion": "a unified diff splits into side by side rows that pair removed and added lines",
+      "source": "tests/views.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: splitDiff rows"
+    },
+    {
+      "assertion": "citation markers point at 1-based sources and say when the source failed",
+      "source": "tests/views.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: citations parts"
+    },
+    {
+      "assertion": "crawl pages and a monitor check drive the machine to its end, and the text copy names it",
+      "source": "tests/views.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: lifecycle end state and asText header"
+    },
+    {
+      "assertion": "each tool links to the view the design gives it, and every other tool stays text",
+      "source": "tests/views.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: tool _meta.ui.resourceUri map"
+    },
+    {
+      "assertion": "a real MCP client reads every view as one self-contained MCP App page",
+      "source": "tests/views.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: resources/read mimeType per view"
     },
     {
       "assertion": "a real MCP client reads the session view as one self-contained MCP App page",

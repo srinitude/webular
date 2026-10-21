@@ -1,8 +1,9 @@
-// What the session view shows, derived from the CLI's command lifecycle machine:
-// a plain label per state, the moves the machine allows next, and the events a
-// tool result sends. Pure functions, so the view and the tests share them.
+// What every view shows, derived from the CLI's command lifecycle machine:
+// a plain label per state, the three-step strip, the moves the machine allows
+// next, the events a tool result sends, and the same data as text.
 import type { EventFrom, SnapshotFrom } from 'xstate'
 import { commandLifecycleMachine } from '../../../../src/machines/command-lifecycle.ts'
+import type { FetchError } from './views.ts'
 
 type Lifecycle = typeof commandLifecycleMachine
 type LifecycleEvent = EventFrom<Lifecycle>
@@ -12,11 +13,18 @@ export const stateLabels: Record<string, string> = {
   runningWorkflow: 'Reading the web',
   rendering: 'Putting the results together',
   completed: 'Done',
-  completedWithPartialFailures: 'Done, but some sources could not be read',
-  emptyWithErrors: 'No source could be read',
-  rejected: 'The input was rejected',
-  failed: 'The command failed',
+  completedWithPartialFailures: 'Done, some sources failed',
+  emptyWithErrors: 'No results',
+  rejected: 'Input rejected',
+  failed: 'Run failed',
 }
+
+// The strip's three steps, one per non-final machine state.
+export const steps = [
+  ['validatingInput', 'Checking input'],
+  ['runningWorkflow', 'Running'],
+  ['rendering', 'Writing results'],
+] as const
 
 // What each allowed move means to a person; the system fires every event, so
 // the view shows these as plain text, never as buttons.
@@ -32,26 +40,47 @@ export const moveLabels: Record<LifecycleEvent['type'], string> = {
 
 const eventTypes = commandLifecycleMachine.root.events as LifecycleEvent['type'][]
 
+// ponytail: computed from snapshot.can; swap to machine.next when the Stately agent lands.
 export const nextMoves = (snapshot: SnapshotFrom<Lifecycle>) =>
   eventTypes.filter((type) => snapshot.can({ type }))
 
 export interface SessionResult {
   readonly topic?: string
+  readonly query?: string
   readonly url?: string
+  readonly root?: string
   readonly report?: string
+  readonly answer?: string
   readonly sources?: ReadonlyArray<{ readonly title: string; readonly url: string }>
   readonly links?: ReadonlyArray<string>
-  readonly errors?: ReadonlyArray<unknown>
+  readonly pages?: ReadonlyArray<{ readonly title: string; readonly url: string }>
+  readonly changeStatus?: 'new' | 'same' | 'changed'
+  readonly diff?: string
+  readonly errors?: ReadonlyArray<FetchError>
   readonly error?: true
   readonly message?: string
+}
+
+export const coverage = (result: SessionResult) => {
+  const failed = result.errors?.length ?? 0
+  const found =
+    (result.sources?.length ?? 0) + (result.links?.length ?? 0) + (result.pages?.length ?? 0)
+  return { found, failed, words: `${found} of ${found + failed} read, ${failed} failed` }
 }
 
 // A result means the input passed and the workflow ran; the discovery exit
 // rule (src/cli/run.ts) then splits clean, partial, and empty-with-errors.
 export const resultEvents = (result: SessionResult): LifecycleEvent[] => {
   if (result.error) return [{ type: 'INPUT_VALID' }, { type: 'WORKFLOW_FAILED' }]
-  const errors = result.errors?.length ?? 0
-  const found = (result.sources?.length ?? 0) + (result.links?.length ?? 0)
-  const end = errors === 0 ? 'NO_ERRORS' : found > 0 ? 'SOME_ERRORS' : 'EMPTY_WITH_ERRORS'
+  const { found, failed } = coverage(result)
+  const end = failed === 0 ? 'NO_ERRORS' : found > 0 ? 'SOME_ERRORS' : 'EMPTY_WITH_ERRORS'
   return [{ type: 'INPUT_VALID' }, { type: 'WORKFLOW_SUCCEEDED' }, { type: end }]
+}
+
+// Copy as text: the agent's header line, then the same JSON the agent got.
+export const asText = (snapshot: SnapshotFrom<Lifecycle>, result: SessionResult) => {
+  const { found, failed, words } = coverage(result)
+  const label = stateLabels[String(snapshot.value)]
+  const header = found + failed > 0 ? `${label} (${words})` : label
+  return `${header}\n${JSON.stringify(result, null, 2)}`
 }

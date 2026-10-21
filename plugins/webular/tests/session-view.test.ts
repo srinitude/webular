@@ -63,12 +63,12 @@ test('a tool result drives the machine to the same end the CLI exit rule picks',
 const linkOf = (meta: Record<string, unknown> | undefined) =>
   (meta?.ui as { resourceUri?: string } | undefined)?.resourceUri
 
-test('tools/list links research and map, and only them, to the session view', () =>
+test('tools/list links research and answer, and only them, to the session view', () =>
   runtime.runPromise(
     Effect.gen(function* () {
       const { tools } = yield* Effect.promise(() => Promise.resolve(server.getToolListInfo()))
       const linked = tools.filter((t) => linkOf(t._meta) === SESSION_VIEW).map((t) => t.name)
-      expect(linked.sort()).toEqual(['map', 'research'])
+      expect(linked.sort()).toEqual(['answer', 'research'])
     }),
   ))
 
