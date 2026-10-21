@@ -16,7 +16,8 @@ import { eff } from '../_support/run.ts'
 // it to a measured 4,385 tokens. The machine.next tool (name, description,
 // machine enum, events array, paging fields) measures 152 tokens by itself, so
 // the list measures about 4,537. The act tool's Cua goal input and description
-// bring it to a measured 4,709; 4,850 keeps a small margin over that.
+// bring it to a measured 4,709; the jev tool and answer urls add about 300, and
+// trimmed tool descriptions bring the list to a measured 4,841 under 4,850.
 const BUDGET = { toolsList: 4850, page: estimateTokens('x'.repeat(PAGE_MAX_CHARS)), error: 80 }
 const parseJson = Schema.decodeUnknownSync(Schema.fromJsonString(Schema.Unknown))
 const parseRec = (text: string): Record<string, unknown> =>
