@@ -91,7 +91,9 @@ test('the Claude Code manifest and marketplace entry match the plugin and the pa
 test('plugin code never reaches outside the plugin folder', () =>
   Effect.runPromise(
     noneContain(
-      ['server.ts', 'budget.ts', 'runtime.ts', 'schemas.ts'].map((f) => `${root}src/${f}`),
+      ['server.ts', 'commands.ts', 'budget.ts', 'runtime.ts', 'schemas.ts'].map(
+        (f) => `${root}src/${f}`,
+      ),
       '../../',
     ),
   ))

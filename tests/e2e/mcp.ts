@@ -1,5 +1,6 @@
 // The MCP surface from the user's side: one real stdio client talks to
-// `bun dist/commands/mcp.js`, checks that tools/list names every web tool,
+// `bun dist/commands/mcp.js`, checks that tools/list names every web tool and
+// every CLI command (src/cli/commands.ts) except the recorded NOT_ON_MCP ones,
 // then calls each MCP case and checks isError, output size, and latency.
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import {
@@ -7,7 +8,8 @@ import {
   StdioClientTransport,
 } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { Duration, Effect } from 'effect'
-import { webTools } from '../../src/tools/web.ts'
+import { COMMAND_NAMES } from '../../src/cli/commands.ts'
+import { NOT_ON_MCP, webTools } from '../../src/tools/web.ts'
 import { ROOT } from '../_support/root.ts'
 import { MCP_CASES, type McpCase } from './cases.ts'
 
@@ -58,7 +60,8 @@ export const runMcp = (fill: (s: string) => string, env: Record<string, string>)
     const client = yield* connect(env)
     const listed = yield* Effect.tryPromise(() => client.listTools())
     const got = listed.tools.map((t) => t.name).sort()
-    const want = webTools.map((t) => t.id).sort()
+    const commands = COMMAND_NAMES.filter((name) => !(name in NOT_ON_MCP))
+    const want = [...webTools.map((t) => t.id), ...commands].sort()
     const list =
       got.join() === want.join()
         ? `pass mcp tools/list (${got.length} tools)`

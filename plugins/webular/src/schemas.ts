@@ -78,6 +78,11 @@ export const schemas = {
     limit: count(500, 'Most items to return (default 20)'),
     archive,
   }),
+  // These four take no input: each reports on webular itself.
+  doctor: z.strictObject({}),
+  tasks: z.strictObject({}),
+  diagram: z.strictObject({}),
+  audit: z.strictObject({}),
 }
 
 // Output fields a tool adds only sometimes, named so an agent knows to look

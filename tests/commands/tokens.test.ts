@@ -1,6 +1,7 @@
 // Token budgets, cache stability, and determinism for the MCP server and the
 // CLI. Budgets fail on regression; raise one only with a measured reason.
 import { describe, expect, test } from 'bun:test'
+import * as BunServices from '@effect/platform-bun/BunServices'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
@@ -10,7 +11,10 @@ import { registerAll } from '../../src/tools/web.ts'
 import { runCli } from '../_support/cli.ts'
 import { eff } from '../_support/run.ts'
 
-const BUDGET = { toolsList: 520, page: estimateTokens('x'.repeat(PAGE_MAX_CHARS)), error: 80 }
+// toolsList: the four web.* tools fit in 520 tokens. The 18 command tools from
+// plugins/webular/src/commands.ts, the same list the plugin server serves, bring
+// it to a measured 4,385 tokens; 4,500 keeps a small margin over that.
+const BUDGET = { toolsList: 4500, page: estimateTokens('x'.repeat(PAGE_MAX_CHARS)), error: 80 }
 const parseJson = Schema.decodeUnknownSync(Schema.fromJsonString(Schema.Unknown))
 const parseRec = (text: string): Record<string, unknown> =>
   parseJson(text) as Record<string, unknown>
@@ -18,7 +22,7 @@ const run = <A>(body: Effect.Effect<A>): Promise<A> => Effect.runPromise(body)
 
 const connected = Effect.gen(function* () {
   const server = new McpServer({ name: 'webular-test', version: '0.0.0' })
-  yield* registerAll(server)
+  yield* registerAll(server).pipe(Effect.provide(BunServices.layer))
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair()
   yield* Effect.promise(() => server.connect(serverTransport))
   const client = new Client({ name: 'test-client', version: '0.0.0' })

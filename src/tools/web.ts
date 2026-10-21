@@ -10,8 +10,15 @@
 // `cursor`; errors are one short line.
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { Data, Effect } from 'effect'
+import type { ChildProcessSpawner } from 'effect/process'
 import { z } from 'zod'
 import { appResources } from '../../plugins/webular/src/apps.ts'
+import {
+  CommandFailed,
+  commandTools,
+  type EntryOf,
+  runCommand,
+} from '../../plugins/webular/src/commands.ts'
 import { fetchText } from '../core/http.ts'
 import { errMsg, pageText, selectFields, shortError, stableJson } from '../core/output.ts'
 import { extractLinks, htmlToArticle, htmlToMarkdown } from '../lib/html.ts'
@@ -127,11 +134,44 @@ const readApp = (uri: string, htmlPath: string) =>
     catch: () => new AppNotBuilt({ message: `${uri} is not built. Run \`mise run plugin:ui\`.` }),
   }).pipe(Effect.map((text) => ({ contents: [{ uri, mimeType: APP_MIME, text }] })))
 
+// Commands with no MCP tool, each with the reason. Every other command in
+// src/cli/commands.ts is a tool on both MCP servers.
+export const NOT_ON_MCP = {
+  mcp: 'It starts the MCP server itself, so it cannot be a tool on that server.',
+} as const
+
+// Every tool `webular mcp` lists, in tools/list order.
+export const mcpToolIds = [...webTools.map((t) => t.id), ...commandTools.map((t) => t.id)].sort()
+
+// A command tool: the plugin's runCommand, with the result as compact JSON text.
+// The plugin's own numeric cursor pages a long result.
+const runTool = (id: string, args: Record<string, unknown>, entryOf?: EntryOf) => {
+  const { cursor, ...input } = args
+  return runCommand(id, input, typeof cursor === 'number' ? cursor : 0, entryOf).pipe(
+    Effect.map((result): McpText => ({ content: [{ type: 'text', text: stableJson(result) }] })),
+    Effect.catch((e) =>
+      Effect.succeed(failure(e instanceof CommandFailed ? e.message : shortError(e))),
+    ),
+  )
+}
+
 // Registering mutates the server, so it is an Effect: it captures the caller's
 // context once, and each MCP Promise handler runs its tool Effect with it.
-// The plugin's MCP App views register too, so both servers list the same apps.
-export const registerAll = Effect.fn('registerAll')(function* (server: McpServer) {
-  const runWith = Effect.runPromiseWith(yield* Effect.context<never>())
+// The plugin's command tools and MCP App views register too, so both servers
+// list the same tools and apps. entryOf names the command file a tool starts.
+export const registerAll = Effect.fn('registerAll')(function* (
+  server: McpServer,
+  entryOf?: EntryOf,
+) {
+  const runWith = Effect.runPromiseWith(
+    yield* Effect.context<ChildProcessSpawner.ChildProcessSpawner>(),
+  )
+  // Every command name sorts before web.*, so this order is tools/list's sorted order.
+  for (const { id, outputSchema: _, ...config } of commandTools) {
+    server.registerTool(id, config, (args: Record<string, unknown>) =>
+      runWith(runTool(id, args, entryOf)),
+    )
+  }
   for (const tool of webTools) {
     server.registerTool(
       tool.id,

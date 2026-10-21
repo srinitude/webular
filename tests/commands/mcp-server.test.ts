@@ -8,12 +8,15 @@ import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { Effect, Schema } from 'effect'
 import { server as plugin } from '../../plugins/webular/src/server.ts'
-import { registerAll } from '../../src/tools/web.ts'
+import { COMMAND_NAMES } from '../../src/cli/commands.ts'
+import { NOT_ON_MCP, registerAll } from '../../src/tools/web.ts'
+import { ROOT } from '../_support/root.ts'
 import { eff, io } from '../_support/run.ts'
 
 const connected = Effect.gen(function* () {
   const server = new McpServer({ name: 'webular-test', version: '0.0.0' })
-  yield* registerAll(server)
+  // Command tools start the checkout's own command files, so no install is needed.
+  yield* registerAll(server, (command) => `${ROOT}src/commands/${command}.ts`)
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair()
   yield* io(() => server.connect(serverTransport))
   const client = new Client({ name: 'test-client', version: '0.0.0' })
@@ -25,16 +28,55 @@ const ToolResult = Schema.fromJsonString(Schema.Struct({ title: Schema.String })
 
 describe('webular mcp — server behavior over a real transport', () => {
   test(
-    'lists all four web tools',
+    'lists the four web tools and every command except the recorded NOT_ON_MCP ones',
     eff(
       Effect.gen(function* () {
         const client = yield* connected
         const { tools } = yield* io(() => client.listTools())
         const ids = tools.map((t) => t.name).sort()
-        expect(ids).toEqual(['web.fetch', 'web.links', 'web.markdown', 'web.readability'])
+        const commands = COMMAND_NAMES.filter((name) => !(name in NOT_ON_MCP))
+        const web = ['web.fetch', 'web.links', 'web.markdown', 'web.readability']
+        expect(ids).toEqual([...web, ...commands].sort())
       }),
     ),
     15_000,
+  )
+
+  test(
+    'lists the same command tools as the plugin server: names, text, inputs, and hints',
+    eff(
+      Effect.gen(function* () {
+        const client = yield* connected
+        const { tools } = yield* io(() => client.listTools())
+        const mine = tools.filter((t) => !t.name.startsWith('web.'))
+        const theirs = (yield* io(async () => plugin.getToolListInfo())).tools
+        type Listed = { name: string; description?: string | undefined; inputSchema: unknown }
+        const shape = ({ name, description, inputSchema }: Listed) => {
+          const schema = inputSchema as { properties?: object; required?: string[] }
+          const inputs = Object.keys(schema.properties ?? {}).sort()
+          return { name, description, inputs, required: [...(schema.required ?? [])].sort() }
+        }
+        const byName = (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name)
+        expect(mine.map(shape)).toEqual((theirs as Listed[]).toSorted(byName).map(shape))
+        const meta = Object.fromEntries(theirs.map((t) => [t.name, t._meta]))
+        for (const t of mine) expect(t._meta).toEqual(meta[t.name])
+      }),
+    ),
+    15_000,
+  )
+
+  test(
+    'a command tool runs the command and returns its JSON',
+    eff(
+      Effect.gen(function* () {
+        const client = yield* connected
+        const result = yield* io(() => client.callTool({ name: 'diagram', arguments: {} }))
+        expect(result.isError ?? false).toBe(false)
+        const text = (result.content as { type: string; text: string }[])[0]?.text ?? ''
+        expect(JSON.parse(text).diagrams.length).toBeGreaterThan(0)
+      }),
+    ),
+    30_000,
   )
 
   test(
