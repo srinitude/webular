@@ -121,7 +121,7 @@ test('the flatness check rejects a linear payload builder', () => {
 })
 
 test('one step makes one cache entry, and a repeat makes no new one', () => {
-  const step = decisions.searchFit as unknown as Step
+  const step = decisions.link as unknown as Step
   const input = scale(step.def.sample(), 100) as never
   const jev = fakeJev()
   const run = Effect.ignore(step(input)).pipe(Effect.provideService(Jev, jev.service))
