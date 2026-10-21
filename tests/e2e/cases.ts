@@ -79,6 +79,7 @@ export const CLI_CASES: CliCase[] = [
     8000,
     8000,
   ),
+  ok('answer from given urls', 'answer', ['--query', 'alpha', '--urls', '{origin}/a'], 8000, 8000),
   ok(
     'research a topic',
     'research',
