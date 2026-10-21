@@ -69,7 +69,9 @@ test.skipIf(!Bun.which('portless'))(
             ),
             Effect.map((url) => url.trim()),
             Effect.tap((url) =>
-              Effect.sync(() => expect(url).toMatch(/^https?:\/\/webular-mcp-test\.localhost/)),
+              Effect.sync(() =>
+                expect(url).toMatch(/^https?:\/\/([\w.-]+\.)?webular-mcp-test\.localhost/),
+              ),
             ),
             Effect.flatMap((url) => toolNamesAt(`${url}/mcp`)),
           ),
