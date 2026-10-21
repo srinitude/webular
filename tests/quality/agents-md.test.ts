@@ -13,6 +13,11 @@ import { eff } from '../_support/run.ts'
 const EXEMPT = [
   'bench/recordings',
   'bench/results',
+  // Generated or recorded fixture data: the fixture server serves these trees
+  // by path, so an extra file there would change crawl and scrape results.
+  'bench/fixtures/pages',
+  'bench/fixtures/sites',
+  'tests/bench/fixtures/recordings',
   'plugins/webular/dist',
   '.claude/worktrees',
   '.markdown-chain',
