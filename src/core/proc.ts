@@ -1,8 +1,8 @@
 // Shared subprocess runner: argv arrays only (no shell), mandatory timeout,
 // and CONCURRENT stdout/stderr draining — a child that fills one pipe past
 // 64KB while the parent awaits the other deadlocks, so both drain together.
-import { constants } from 'node:os'
-import { Data, Effect, Option, Stream } from 'effect'
+import { availableParallelism, constants } from 'node:os'
+import { Context, Data, Effect, Option, Semaphore, Stream } from 'effect'
 import { ChildProcess, ChildProcessSpawner } from 'effect/process'
 import { errMsg } from './output.ts'
 
@@ -33,6 +33,12 @@ const SIGTERM_CODE = 128 + constants.signals.SIGTERM
 export const MAX_OUTPUT_BYTES = 16 * 1024 * 1024
 // SIGTERM, then SIGKILL after this long: the grace src/cli/dispatch.ts gives its children.
 const KILL_GRACE = '5 seconds'
+
+// One permit per live child, shared by every runProc call unless a test
+// provides its own; sized to the CPUs so parallel callers queue, not fork-bomb.
+export const ProcPermits = Context.Reference<Semaphore.Semaphore>('webular/core/ProcPermits', {
+  defaultValue: () => Semaphore.makeUnsafe(availableParallelism()),
+})
 
 // The spawner fails exitCode for a child killed by a signal; report the shell
 // convention 128 + signal number instead, like any other non-zero exit.
@@ -96,13 +102,18 @@ const drain = (command: ReturnType<typeof toCommand>) =>
     }).pipe(Effect.onInterrupt(() => kill))
   })
 
+// Holds a permit for the child's whole life. It wraps the timeout, so time
+// spent queued for a permit never counts against the child's own deadline.
+const permitted = <A, E, R>(eff: Effect.Effect<A, E, R>) =>
+  Effect.flatMap(ProcPermits, (p) => p.withPermits(1)(eff))
+
 export function runProc(
   argv: [string, ...string[]],
   opts: ProcOptions,
 ): Effect.Effect<ProcResult, ProcError, ChildProcessSpawner.ChildProcessSpawner> {
   const cmd = argv[0]
   const run = drain(toCommand(argv, opts))
-  return Effect.scoped(Effect.timeoutOption(run, opts.timeoutMs)).pipe(
+  return permitted(Effect.scoped(Effect.timeoutOption(run, opts.timeoutMs))).pipe(
     Effect.map(
       Option.match({
         onNone: () => ({
