@@ -9,7 +9,7 @@ import { type AnyMachineSnapshot, type AnyStateMachine, StateMachine } from 'xst
 import { getShortestPaths } from 'xstate/graph'
 import { z } from 'zod'
 import { AgentAnswers, allowedEvents, decideAt, replay } from '../../src/machines/agent.ts'
-import { pickedPlanner } from '../../src/machines/agent-jev.ts'
+import { type JevAsk, type JevRequest, pickedPlanner } from '../../src/machines/agent-jev.ts'
 import { machineSchema, machineState } from '../../src/tools/web-machine.ts'
 import { eff } from '../_support/run.ts'
 
@@ -133,6 +133,47 @@ const modelSweep = (machine: AnyStateMachine) =>
     { concurrency: 4, discard: true },
   )
 
+// A recorded Jev reply that picks `choice` at `confidence`; `asked` keeps each request.
+const recordedJev =
+  (choice: string, confidence: number, asked: JevRequest[] = []): JevAsk =>
+  (req) =>
+    Effect.sync(() => {
+      asked.push(req)
+      return { next: { choice, confidence } }
+    })
+
+// Each decision gets its own answer cache, so no pick is served from an earlier one.
+const jevDecides = (machine: AnyStateMachine, snap: AnyMachineSnapshot, jev: JevAsk) =>
+  decideAt(machine, snap, { type: allowedEvents(snap)[0] ?? 'NONE' }, 'finish', { jev }).pipe(
+    Effect.provideService(AgentAnswers, new Map()),
+  )
+
+// Where a judgment fits (two or more allowed events), Jev is asked over exactly the
+// allowed events and its confident pick is the agent's next event; a forbidden or
+// unsure pick leaves the observed event in place.
+const checkJev = (machine: AnyStateMachine, snap: AnyMachineSnapshot) =>
+  Effect.gen(function* () {
+    const allowed = allowedEvents(snap)
+    for (const pick of allowed) {
+      const asked: JevRequest[] = []
+      const d = yield* jevDecides(machine, snap, recordedJev(pick, 0.99, asked))
+      expect(d).toEqual({ event: pick, source: 'model' })
+      const offered = Object.keys(asked[0]?.questions['next']?.criteria ?? {})
+      expect(offered.toSorted()).toEqual(allowed.toSorted())
+    }
+    const forbidden = machine.events.find((type) => !allowed.includes(type)) ?? 'NOT_AN_EVENT'
+    const kept = { event: allowed[0], source: 'machine' } as const
+    expect(yield* jevDecides(machine, snap, recordedJev(forbidden, 0.99))).toEqual(kept)
+    expect(yield* jevDecides(machine, snap, recordedJev(`${allowed[1]}`, 0.6))).toEqual(kept)
+  })
+
+const jevSweep = (machine: AnyStateMachine) =>
+  Effect.forEach(
+    reachable(machine).filter((snap) => allowedEvents(snap).length > 1),
+    (snap) => checkJev(machine, snap),
+    { concurrency: 4, discard: true },
+  )
+
 const everyMachine = (check: (machine: AnyStateMachine) => Effect.Effect<void, unknown>) =>
   Effect.flatMap(allMachines, (ms) => Effect.forEach(ms, check, { concurrency: 1, discard: true }))
 
@@ -147,5 +188,10 @@ describe('stately agent reach', () => {
   test(
     'the agent offers its model only the allowed events, in every reachable state',
     eff(everyMachine(modelSweep)),
+  )
+
+  test(
+    'where a judgment fits, the agent takes a confident allowed Jev pick as its next event',
+    eff(everyMachine(jevSweep)),
   )
 })
