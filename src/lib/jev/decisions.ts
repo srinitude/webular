@@ -11,7 +11,7 @@ import { kindDecision, mapDecision, mapOrder } from './decisions/map.ts'
 import { changeDecision } from './decisions/monitor.ts'
 import { researchDone, researchPart } from './decisions/research.ts'
 import { mainDecision } from './decisions/scrape.ts'
-import { searchFit, searchRank, searchRoute } from './decisions/search.ts'
+import { searchRank } from './decisions/search.ts'
 import { coreDecision, summaryDecision } from './decisions/summarize.ts'
 import { extractDecision, feedDecision } from './picks.ts'
 
@@ -26,8 +26,6 @@ export const decisions = {
   feed: feedDecision,
   summary: summaryDecision,
   main: mainDecision,
-  searchRoute,
-  searchFit,
   searchRank,
   act: actDecision,
   answerHits,

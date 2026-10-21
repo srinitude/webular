@@ -36,8 +36,6 @@ const DECLARED: ReadonlyArray<Declared> = [
   decisions.feed,
   decisions.summary,
   decisions.main,
-  decisions.searchRoute,
-  decisions.searchFit,
   decisions.searchRank,
   decisions.act,
   decisions.answerHits,
