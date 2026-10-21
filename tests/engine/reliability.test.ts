@@ -2,12 +2,13 @@
 // typed status errors, and the Wayback fallback for dead pages. The Wayback
 // availability body below is a recorded archive.org response (2026-10-20),
 // re-pointed at the fixture origin.
-import { afterAll, describe, expect, test } from 'bun:test'
+import { describe, expect, test } from 'bun:test'
+import type * as BunServices from '@effect/platform-bun/BunServices'
 import { Effect } from 'effect'
 import { fetchTextOrArchive, rawCapture } from '../../src/core/archive.ts'
-import { fetchTextEffect, HttpStatusError, retryAfterMs } from '../../src/core/http.ts'
-import { runtime } from '../../src/core/runtime.ts'
-import { type Routes, startFixture } from '../_support/fixture.ts'
+import { fetchText, HttpStatusError, retryAfterMs } from '../../src/core/http.ts'
+import { type Routes, useFixture } from '../_support/fixture.ts'
+import { eff } from '../_support/run.ts'
 
 const TS = '20260102000115'
 const html = (body: string) =>
@@ -47,11 +48,10 @@ const routes = (origin: string): Routes => ({
   '/wayback/available': (_req, url) => availability(origin, url),
 })
 
-const fx = startFixture(routes)
-afterAll(() => fx.stop())
+const fx = useFixture(routes)
 
-const run = <A, E>(body: () => Generator<Effect.Effect<unknown, E>, A>) =>
-  runtime.runPromise(Effect.gen(body))
+const run = <A, E>(body: () => Generator<Effect.Effect<unknown, E, BunServices.BunServices>, A>) =>
+  eff(Effect.gen(body))()
 
 describe('retryAfterMs — RFC 9110 delay-seconds or HTTP-date', () => {
   const now = Date.parse('2026-10-20T00:00:00Z')
@@ -69,19 +69,19 @@ describe('retryAfterMs — RFC 9110 delay-seconds or HTTP-date', () => {
   })
 })
 
-describe('fetchTextEffect — retry and typed errors', () => {
+describe('fetchText — retry and typed errors', () => {
   test('429 with Retry-After retries once, then succeeds', () =>
     run(function* () {
-      expect(yield* fetchTextEffect(`${fx.origin}/throttled`)).toContain('after wait')
+      expect(yield* fetchText(`${fx.origin}/throttled`)).toContain('after wait')
       expect(fx.hits('/throttled')).toBe(2)
     }))
   test('408 is retried', () =>
     run(function* () {
-      expect(yield* fetchTextEffect(`${fx.origin}/timeout408`)).toContain('second try')
+      expect(yield* fetchText(`${fx.origin}/timeout408`)).toContain('second try')
     }))
   test('a 410 fails with HttpStatusError carrying the status', () =>
     run(function* () {
-      const err = yield* Effect.flip(fetchTextEffect(`${fx.origin}/dead`))
+      const err = yield* Effect.flip(fetchText(`${fx.origin}/dead`))
       expect(err).toBeInstanceOf(HttpStatusError)
       expect((err as HttpStatusError).status).toBe(410)
       expect((err as HttpStatusError).message).toMatch(/failed: 410/)

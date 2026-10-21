@@ -1,9 +1,9 @@
 // Deterministic BFS crawler. Shared state mutates ONLY in sequential,
 // index-ordered folds that run after each batch fully settles — concurrency
-// (p-limit, FIFO starts; Promise.all index collection) affects when fetches
-// run, never which pages are emitted or in what order. One linkedom parse per
-// page (parsePage); dedup on normalized URLs; exact-host scope.
-import pLimit from 'p-limit'
+// (Effect.forEach, results in input order) affects when fetches run, never
+// which pages are emitted or in what order. One linkedom parse per page;
+// dedup on normalized URLs; exact-host scope.
+import { Data, Effect } from 'effect'
 import { fetchRoot, fetchTextWithinHost } from '../core/http.ts'
 import { errMsg } from '../core/output.ts'
 import { normalizeUrl, sameHost } from '../core/url.ts'
@@ -17,12 +17,6 @@ interface PageInfo {
 interface FetchError {
   url: string
   reason: string
-}
-
-interface CrawlResult {
-  root: string
-  pages: PageInfo[]
-  errors: FetchError[]
 }
 
 interface CrawlOptions {
@@ -40,21 +34,20 @@ interface CrawlCtx {
   host: string
   limit: number
   maxDepth: number
+  concurrency: number
   timeoutMs?: number
-  pool: ReturnType<typeof pLimit>
   seen: Set<string>
   pages: PageInfo[]
   errors: FetchError[]
 }
 
-async function fetchPage(url: string, ctx: CrawlCtx): Promise<FetchOutcome> {
-  try {
-    const html = await fetchTextWithinHost(url, ctx.host, { timeoutMs: ctx.timeoutMs })
-    const page = titleAndLinks(html, url)
-    return { url, ok: true, title: page.title, links: page.links }
-  } catch (err) {
-    return { url, ok: false, reason: errMsg(err) }
-  }
+class CrawlError extends Data.TaggedError('CrawlError')<{ readonly message: string }> {}
+
+function fetchPage(url: string, ctx: CrawlCtx): Effect.Effect<FetchOutcome> {
+  return fetchTextWithinHost(url, ctx.host, { timeoutMs: ctx.timeoutMs }).pipe(
+    Effect.map((html): FetchOutcome => ({ url, ok: true, ...titleAndLinks(html, url) })),
+    Effect.catch((err) => Effect.succeed<FetchOutcome>({ url, ok: false, reason: errMsg(err) })),
+  )
 }
 
 type RootOutcome =
@@ -63,14 +56,17 @@ type RootOutcome =
 
 // The root is the user's explicit target — its redirects are followed freely
 // and the crawl scope re-anchors on the FINAL host (apex→www).
-async function fetchRootPage(url: string, timeoutMs?: number): Promise<RootOutcome> {
-  try {
-    const { finalUrl, html } = await fetchRoot(url, { timeoutMs })
-    const page = titleAndLinks(html, finalUrl)
-    return { ok: true, finalUrl, title: page.title, links: page.links }
-  } catch (err) {
-    return { ok: false, reason: errMsg(err) }
-  }
+function fetchRootPage(url: string, timeoutMs?: number): Effect.Effect<RootOutcome> {
+  return fetchRoot(url, { timeoutMs }).pipe(
+    Effect.map(
+      ({ finalUrl, html }): RootOutcome => ({
+        ok: true,
+        finalUrl,
+        ...titleAndLinks(html, finalUrl),
+      }),
+    ),
+    Effect.catch((err) => Effect.succeed<RootOutcome>({ ok: false, reason: errMsg(err) })),
+  )
 }
 
 // The ONLY dedup/enqueue point — sequential, in document order, so the first
@@ -97,22 +93,24 @@ function fold(outcomes: FetchOutcome[], mayEnqueue: boolean, ctx: CrawlCtx, next
 
 // Failures under-fill a batch, so the while-loop refills from the SAME level
 // before descending; the limit cut always slices an already-ordered array.
-async function crawlLevel(level: string[], depth: number, ctx: CrawlCtx): Promise<string[]> {
+const crawlLevel = Effect.fnUntraced(function* (level: string[], depth: number, ctx: CrawlCtx) {
   const next: string[] = []
   let cursor = 0
   while (cursor < level.length && ctx.pages.length < ctx.limit) {
     const take = level.slice(cursor, cursor + (ctx.limit - ctx.pages.length))
     cursor += take.length
-    const outcomes = await Promise.all(take.map((url) => ctx.pool(() => fetchPage(url, ctx))))
+    const outcomes = yield* Effect.forEach(take, (url) => fetchPage(url, ctx), {
+      concurrency: ctx.concurrency,
+    })
     fold(outcomes, depth < ctx.maxDepth, ctx, next)
   }
   return next
-}
+})
 
-export async function bfsCrawl(root: string, opts: CrawlOptions): Promise<CrawlResult> {
+export const bfsCrawl = Effect.fn('bfsCrawl')(function* (root: string, opts: CrawlOptions) {
   const rootUrl = normalizeUrl(root)
-  if (!rootUrl) throw new Error(`crawl: invalid URL ${root}`)
-  const entry = await fetchRootPage(rootUrl, opts.timeoutMs)
+  if (!rootUrl) return yield* Effect.fail(new CrawlError({ message: `crawl: invalid URL ${root}` }))
+  const entry = yield* fetchRootPage(rootUrl, opts.timeoutMs)
   if (!entry.ok)
     return { root: rootUrl, pages: [], errors: [{ url: rootUrl, reason: entry.reason }] }
   const anchored = normalizeUrl(entry.finalUrl) ?? rootUrl
@@ -120,8 +118,8 @@ export async function bfsCrawl(root: string, opts: CrawlOptions): Promise<CrawlR
     host: new URL(anchored).hostname,
     limit: opts.limit,
     maxDepth: opts.depth,
+    concurrency: opts.concurrency,
     timeoutMs: opts.timeoutMs,
-    pool: pLimit(opts.concurrency),
     seen: new Set([rootUrl, anchored]),
     pages: [{ url: anchored, title: entry.title }],
     errors: [],
@@ -129,7 +127,7 @@ export async function bfsCrawl(root: string, opts: CrawlOptions): Promise<CrawlR
   let level: string[] = []
   if (ctx.maxDepth > 0) harvest(entry.links, anchored, ctx, level)
   for (let d = 1; d <= opts.depth && level.length > 0 && ctx.pages.length < ctx.limit; d++) {
-    level = await crawlLevel(level, d, ctx)
+    level = yield* crawlLevel(level, d, ctx)
   }
   return { root: anchored, pages: ctx.pages, errors: ctx.errors }
-}
+})

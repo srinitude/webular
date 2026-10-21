@@ -1,50 +1,64 @@
 // MONITOR command entry — invoked by `mise run run:monitor`. Parses flags,
 // runs the Mastra monitor workflow, emits the result. No mise logic here.
 import { createHash } from 'node:crypto'
-import { mkdirSync, realpathSync } from 'node:fs'
 import { homedir } from 'node:os'
-import { join } from 'node:path'
+import { Effect, FileSystem, Path } from 'effect'
 import { runWorkflow } from '../cli/run.ts'
 import { emitOpts, parseFlags, timeoutFlag } from '../core/args.ts'
-import { logErr } from '../core/output.ts'
+import { CliError, runMain } from '../core/effect.ts'
+import { errMsg } from '../core/output.ts'
 import { outPath, sandboxEnabled } from '../core/safepath.ts'
-import { monitorWorkflow } from '../workflows/monitor.ts'
 
 // Per-user, per-project default (keyed by realpath of the INVOKING directory —
 // the gateway pins process cwd to the package root). A tmpdir default would
 // share one single-writer sqlite file across every user on the host.
-function defaultDbPath(): string {
-  const stateHome = process.env.XDG_STATE_HOME ?? join(homedir(), '.local', 'state')
-  const project = realpathSync(process.env.WEBULAR_INVOKE_DIR ?? process.cwd())
+const defaultDbPath = Effect.fn('monitor.defaultDbPath')(function* () {
+  const fs = yield* FileSystem.FileSystem
+  const path = yield* Path.Path
+  const stateHome = process.env.XDG_STATE_HOME ?? path.join(homedir(), '.local', 'state')
+  const project = yield* fs.realPath(process.env.WEBULAR_INVOKE_DIR ?? process.cwd())
   const key = createHash('sha256').update(project).digest('hex').slice(0, 12)
-  const dir = join(stateHome, 'webular')
-  mkdirSync(dir, { recursive: true })
-  return join(dir, `monitor-${key}.db`)
-}
+  const dir = path.join(stateHome, 'webular')
+  yield* fs.makeDirectory(dir, { recursive: true })
+  return path.join(dir, `monitor-${key}.db`)
+})
 
-function resolveDbPath(flagValue: unknown): string {
+const toCliError = (cause: unknown) => new CliError({ message: errMsg(cause), exitCode: 1 })
+
+const resolveDbPath = Effect.fn('monitor.resolveDbPath')(function* (flagValue: unknown) {
   if (typeof flagValue === 'string' && flagValue.length > 0) return flagValue
   if (process.env.WEBULAR_DB) return process.env.WEBULAR_DB
-  if (sandboxEnabled()) return 'webular-monitor.db'
-  return defaultDbPath()
-}
+  if (yield* sandboxEnabled()) return 'webular-monitor.db'
+  return yield* defaultDbPath().pipe(Effect.mapError(toCliError))
+})
 
-async function main(): Promise<number> {
-  const { values, positionals } = parseFlags(Bun.argv.slice(2), {
+// The path work touches the disk (realpath, mkdir) and the sandbox check can
+// reject the path; both surface as a CliError with exit code 1.
+const dbPathFor = (flagValue: unknown) =>
+  resolveDbPath(flagValue).pipe(Effect.flatMap((p) => outPath(p).pipe(Effect.mapError(toCliError))))
+
+const main = Effect.gen(function* () {
+  const { values, positionals } = yield* parseFlags(Bun.argv.slice(2), {
     url: { type: 'string' },
     db: { type: 'string' },
   })
   const url = (values.url as string) ?? positionals[0]
   if (!url) {
-    logErr('monitor: missing <url> (pass --url <url> or a positional URL)')
-    return 2
+    const message = 'monitor: missing <url> (pass --url <url> or a positional URL)'
+    return yield* new CliError({ message, exitCode: 2 })
   }
   const inputData = {
     url,
-    dbPath: outPath(resolveDbPath(values.db)),
-    timeoutMs: timeoutFlag('monitor', values),
+    dbPath: yield* dbPathFor(values.db),
+    timeoutMs: yield* timeoutFlag('monitor', values),
   }
-  return runWorkflow('monitor', monitorWorkflow, inputData, emitOpts(values))
-}
+  return yield* runWorkflow(
+    'monitor',
+    () => import('../workflows/monitor.ts'),
+    (m) => m.monitorWorkflow,
+    inputData,
+    emitOpts(values),
+  )
+})
 
-process.exit(await main())
+runMain(main)

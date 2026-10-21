@@ -4,7 +4,7 @@
 import { Data, Effect } from 'effect'
 import { DOMParser } from 'linkedom'
 import { fetchTextOrArchive } from './archive.ts'
-import { type FetchOptions, fetchTextEffect } from './http.ts'
+import { type FetchOptions, fetchText } from './http.ts'
 
 interface SourceOptions extends FetchOptions {
   archive?: boolean
@@ -50,7 +50,7 @@ const asFeed = (found: Found) =>
   isFeed(found.xml) ? Effect.succeed(found) : Effect.fail(new NotAFeed({ url: found.feedUrl }))
 
 const tryFeed = (feedUrl: string, opts: FetchOptions) =>
-  Effect.flatMap(fetchTextEffect(feedUrl, opts), (xml) => asFeed({ xml, feedUrl }))
+  Effect.flatMap(fetchText(feedUrl, opts), (xml) => asFeed({ xml, feedUrl }))
 
 // ponytail: the Wayback step re-fetches the dead url once; reuse the first
 // failure when archive.ts exposes its archive-only path.
@@ -63,7 +63,7 @@ const fromWayback = (url: string, opts: SourceOptions) =>
 // asks the archive, so its last error is NotAFeed. Wayback runs only with
 // `archive`, like scrape.
 export const resolveFeed = (url: string, opts: SourceOptions = {}) =>
-  fetchTextEffect(url, opts).pipe(
+  fetchText(url, opts).pipe(
     Effect.matchEffect({
       onSuccess: (body) =>
         isFeed(body)

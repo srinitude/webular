@@ -1,5 +1,6 @@
 // Shared deterministic route table for the fixture server. Content is static
 // so byte-level output assertions hold across runs.
+import { Effect } from 'effect'
 import type { Routes } from './fixture.ts'
 
 function html(body: string): Response {
@@ -78,10 +79,8 @@ const misc: Routes = {
     new Response('x'.repeat(Number(url.searchParams.get('n') ?? '16')), {
       headers: { 'content-type': 'application/octet-stream' },
     }),
-  '/slow': async (_req, url) => {
-    await Bun.sleep(Number(url.searchParams.get('ms') ?? '0'))
-    return page('Slow')
-  },
+  '/slow': (_req, url) =>
+    Effect.sleep(Number(url.searchParams.get('ms') ?? '0')).pipe(Effect.as(page('Slow'))),
   '/binary': () =>
     new Response(new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0]), {
       headers: { 'content-type': 'image/png' },

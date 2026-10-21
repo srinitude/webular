@@ -4,9 +4,9 @@ import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
 import { fetchTextOrArchive } from '../core/archive.ts'
-import { fetchTextEffect } from '../core/http.ts'
-import { runtime } from '../core/runtime.ts'
+import { fetchText } from '../core/http.ts'
 import { htmlToMarkdown, parsePage } from '../lib/html.ts'
+import { stepRuntime } from './runtime.ts'
 
 const scrapeInput = z.object({
   url: z.string().url(),
@@ -29,14 +29,14 @@ const fetched = z.object({ url: z.string(), html: z.string(), archivedFrom: z.st
 const fetchPage = ({ url, timeoutMs, archive }: z.infer<typeof scrapeInput>) =>
   archive
     ? fetchTextOrArchive(url, { timeoutMs })
-    : Effect.map(fetchTextEffect(url, { timeoutMs }), (html) => ({ html }))
+    : Effect.map(fetchText(url, { timeoutMs }), (html) => ({ html }))
 
 const fetchStep = createStep({
   id: 'fetch',
   inputSchema: scrapeInput,
   outputSchema: fetched,
   execute: ({ inputData }) =>
-    runtime.runPromise(Effect.map(fetchPage(inputData), (r) => ({ url: inputData.url, ...r }))),
+    stepRuntime.runPromise(Effect.map(fetchPage(inputData), (r) => ({ url: inputData.url, ...r }))),
 })
 
 function toScrapeResult({
@@ -60,7 +60,7 @@ const extractStep = createStep({
   id: 'extract',
   inputSchema: fetched,
   outputSchema: scrapeOutput,
-  execute: ({ inputData }) => Promise.resolve(toScrapeResult(inputData)),
+  execute: ({ inputData }) => stepRuntime.runPromise(Effect.sync(() => toScrapeResult(inputData))),
 })
 
 export const scrapeWorkflow = createWorkflow({

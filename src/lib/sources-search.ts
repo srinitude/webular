@@ -3,8 +3,10 @@
 // Crossref and OpenAlex live in search-chain.ts.
 // All public, documented, no account. WEBULAR_SOURCE_ORIGIN swaps each
 // endpoint's origin (path kept) so tests run against the local fixture.
+import { Effect } from 'effect'
 import { DOMParser } from 'linkedom'
-import { fetchText } from '../core/http.ts'
+import { FetchError } from '../core/decode.ts'
+import { fetchText, type HttpStatusError } from '../core/http.ts'
 
 interface SourceHit {
   title: string
@@ -44,58 +46,68 @@ export function plain(html: string): string {
     .trim()
 }
 
-async function getJson(url: string): Promise<Record<string, unknown>> {
-  return JSON.parse(await fetchText(url, { timeoutMs: 20_000 })) as Record<string, unknown>
+function getJson(
+  url: string,
+): Effect.Effect<Record<string, unknown>, FetchError | HttpStatusError> {
+  return Effect.flatMap(fetchText(url, { timeoutMs: 20_000 }), (body) =>
+    Effect.try({
+      try: () => JSON.parse(body) as Record<string, unknown>,
+      catch: () => new FetchError({ message: `fetch ${url}: response is not JSON` }),
+    }),
+  )
 }
 
 type Rec = Record<string, unknown>
 const s = (r: Rec, k: string): string => (typeof r[k] === 'string' ? (r[k] as string) : '')
 
-async function wikipedia(query: string, limit: number): Promise<SourceHit[]> {
-  const data = await getJson(
-    endpoint('https://en.wikipedia.org/w/api.php', {
-      action: 'query',
-      list: 'search',
-      srsearch: query,
-      srlimit: String(limit),
-      format: 'json',
-    }),
+function wikipedia(
+  query: string,
+  limit: number,
+): Effect.Effect<SourceHit[], FetchError | HttpStatusError> {
+  return Effect.map(
+    getJson(
+      endpoint('https://en.wikipedia.org/w/api.php', {
+        action: 'query',
+        list: 'search',
+        srsearch: query,
+        srlimit: String(limit),
+        format: 'json',
+      }),
+    ),
+    (data) =>
+      (((data.query as Rec | undefined)?.search ?? []) as Rec[]).map((h) => ({
+        title: s(h, 'title'),
+        url: `https://en.wikipedia.org/wiki/${encodeURIComponent(s(h, 'title').replace(/ /g, '_'))}`,
+        description: plain(s(h, 'snippet')),
+      })),
   )
-  const hits = ((data.query as Rec | undefined)?.search ?? []) as Rec[]
-  return hits.map((h) => ({
-    title: s(h, 'title'),
-    url: `https://en.wikipedia.org/wiki/${encodeURIComponent(s(h, 'title').replace(/ /g, '_'))}`,
-    description: plain(s(h, 'snippet')),
-  }))
 }
 
-async function hackernews(query: string, limit: number): Promise<SourceHit[]> {
-  const data = await getJson(
-    endpoint('https://hn.algolia.com/api/v1/search', {
-      query,
-      tags: 'story',
-      hitsPerPage: String(limit),
-    }),
+function hackernews(
+  query: string,
+  limit: number,
+): Effect.Effect<SourceHit[], FetchError | HttpStatusError> {
+  return Effect.map(
+    getJson(
+      endpoint('https://hn.algolia.com/api/v1/search', {
+        query,
+        tags: 'story',
+        hitsPerPage: String(limit),
+      }),
+    ),
+    (data) =>
+      ((data.hits ?? []) as Rec[]).map((h) => {
+        const discussion = `https://news.ycombinator.com/item?id=${s(h, 'objectID')}`
+        return {
+          title: s(h, 'title'),
+          url: s(h, 'url') || discussion,
+          description: plain(s(h, 'story_text')) || discussion,
+        }
+      }),
   )
-  const hits = (data.hits ?? []) as Rec[]
-  return hits.map((h) => {
-    const discussion = `https://news.ycombinator.com/item?id=${s(h, 'objectID')}`
-    return {
-      title: s(h, 'title'),
-      url: s(h, 'url') || discussion,
-      description: plain(s(h, 'story_text')) || discussion,
-    }
-  })
 }
 
-async function arxiv(query: string, limit: number): Promise<SourceHit[]> {
-  const xml = await fetchText(
-    endpoint('https://export.arxiv.org/api/query', {
-      search_query: `all:${query}`,
-      max_results: String(limit),
-    }),
-    { timeoutMs: 20_000 },
-  )
+function parseArxiv(xml: string): SourceHit[] {
   const doc = new DOMParser().parseFromString(xml, 'text/xml')
   const text = (el: Element, tag: string): string =>
     el.getElementsByTagName(tag)[0]?.textContent?.replace(/\s+/g, ' ').trim() ?? ''
@@ -106,16 +118,32 @@ async function arxiv(query: string, limit: number): Promise<SourceHit[]> {
   }))
 }
 
+function arxiv(
+  query: string,
+  limit: number,
+): Effect.Effect<SourceHit[], FetchError | HttpStatusError> {
+  return Effect.map(
+    fetchText(
+      endpoint('https://export.arxiv.org/api/query', {
+        search_query: `all:${query}`,
+        max_results: String(limit),
+      }),
+      { timeoutMs: 20_000 },
+    ),
+    parseArxiv,
+  )
+}
+
 const BACKENDS = {
   wikipedia,
   hackernews,
   arxiv,
 } satisfies Record<string, typeof wikipedia>
 
-export async function sourceSearch(
+export function sourceSearch(
   source: keyof typeof BACKENDS,
   query: string,
   limit: number,
-): Promise<SourceHit[]> {
-  return (await BACKENDS[source](query, limit)).slice(0, limit)
+): Effect.Effect<SourceHit[], FetchError | HttpStatusError> {
+  return Effect.map(BACKENDS[source](query, limit), (hits) => hits.slice(0, limit))
 }

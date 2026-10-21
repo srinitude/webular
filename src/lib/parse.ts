@@ -1,17 +1,16 @@
 // FOSS document parsing: detect format by extension, extract markdown/text.
 // pdf/docx parsers load their heavy deps lazily (they never tax a text parse);
 // binary formats we cannot parse fail loudly instead of decoding to garbage.
+import { Data, Effect } from 'effect'
+import { errMsg } from '../core/output.ts'
 import { htmlToMarkdown } from './html.ts'
 
 type DocFormat = 'pdf' | 'docx' | 'html' | 'md' | 'txt' | 'csv' | 'json'
 
-interface ParseResult {
-  file: string
-  format: DocFormat
-  markdown: string
-}
+class ParseError extends Data.TaggedError('ParseError')<{ readonly message: string }> {}
 
 const SUPPORTED = 'pdf, docx, html, md, txt, csv, json'
+
 const BINARY_EXTS = new Set([
   'xlsx',
   'xls',
@@ -33,55 +32,62 @@ const BINARY_EXTS = new Set([
   'bin',
 ])
 
-function detectFormat(file: string): DocFormat {
+const EXT_FORMATS: Record<string, DocFormat> = {
+  pdf: 'pdf',
+  docx: 'docx',
+  html: 'html',
+  htm: 'html',
+  md: 'md',
+  csv: 'csv',
+  json: 'json',
+}
+
+const fail = (message: string) => Effect.fail(new ParseError({ message }))
+const attempt = <A>(run: () => PromiseLike<A>) =>
+  Effect.tryPromise({
+    try: () => Promise.resolve(run()),
+    catch: (e) => new ParseError({ message: errMsg(e) }),
+  })
+
+function detectFormat(file: string): Effect.Effect<DocFormat, ParseError> {
   const ext = file.split('.').pop()?.toLowerCase() ?? ''
   if (BINARY_EXTS.has(ext))
-    throw new Error(`parse: unsupported binary format .${ext} (supported: ${SUPPORTED})`)
-  if (ext === 'pdf') return 'pdf'
-  if (ext === 'docx') return 'docx'
-  if (ext === 'html' || ext === 'htm') return 'html'
-  if (ext === 'md') return 'md'
-  if (ext === 'csv') return 'csv'
-  if (ext === 'json') return 'json'
-  return 'txt'
+    return fail(`parse: unsupported binary format .${ext} (supported: ${SUPPORTED})`)
+  return Effect.succeed(EXT_FORMATS[ext] ?? 'txt')
 }
 
-async function parsePdf(file: string): Promise<string> {
-  const { extractText, getDocumentProxy } = await import('unpdf')
-  const buf = await Bun.file(file).arrayBuffer()
-  const pdf = await getDocumentProxy(new Uint8Array(buf))
-  const { text } = await extractText(pdf, { mergePages: true })
+const parsePdf = Effect.fnUntraced(function* (file: string) {
+  const { extractText, getDocumentProxy } = yield* attempt(() => import('unpdf'))
+  const buf = yield* attempt(() => Bun.file(file).arrayBuffer())
+  const pdf = yield* attempt(() => getDocumentProxy(new Uint8Array(buf)))
+  const { text } = yield* attempt(() => extractText(pdf, { mergePages: true }))
   return typeof text === 'string' ? text : (text as string[]).join('\n')
-}
+})
 
-async function parseDocx(file: string): Promise<string> {
-  const { default: mammoth } = await import('mammoth')
-  const buf = await Bun.file(file).arrayBuffer()
-  const { value: html } = await mammoth.convertToHtml({ buffer: Buffer.from(buf) })
+const parseDocx = Effect.fnUntraced(function* (file: string) {
+  const { default: mammoth } = yield* attempt(() => import('mammoth'))
+  const buf = yield* attempt(() => Bun.file(file).arrayBuffer())
+  const { value: html } = yield* attempt(() => mammoth.convertToHtml({ buffer: Buffer.from(buf) }))
   return htmlToMarkdown(html)
-}
+})
 
-async function parseHtml(file: string): Promise<string> {
-  const html = await Bun.file(file).text()
-  return htmlToMarkdown(html)
-}
+const parseHtml = (file: string) =>
+  attempt(() => Bun.file(file).text()).pipe(Effect.map(htmlToMarkdown))
 
 // Extension checks can be fooled; NUL bytes in the head cannot.
-async function parseText(file: string): Promise<string> {
-  const text = await Bun.file(file).text()
+const parseText = Effect.fnUntraced(function* (file: string) {
+  const text = yield* attempt(() => Bun.file(file).text())
   if (text.slice(0, 4096).includes('\u0000'))
-    throw new Error(`parse: ${file} looks binary (NUL bytes) — supported: ${SUPPORTED}`)
+    return yield* fail(`parse: ${file} looks binary (NUL bytes) — supported: ${SUPPORTED}`)
   return text
-}
+})
 
 // Fenced blocks ARE markdown — this keeps the "documents to markdown" claim
 // true for csv/json without a fragile format-specific converter.
-async function parseFenced(file: string, format: 'csv' | 'json'): Promise<string> {
-  const text = await parseText(file)
-  return `\`\`\`${format}\n${text.trimEnd()}\n\`\`\``
-}
+const parseFenced = (file: string, format: 'csv' | 'json') =>
+  parseText(file).pipe(Effect.map((text) => `\`\`\`${format}\n${text.trimEnd()}\n\`\`\``))
 
-async function contentOf(file: string, format: DocFormat): Promise<string> {
+function contentOf(file: string, format: DocFormat): Effect.Effect<string, ParseError> {
   switch (format) {
     case 'pdf':
       return parsePdf(file)
@@ -97,7 +103,7 @@ async function contentOf(file: string, format: DocFormat): Promise<string> {
   }
 }
 
-export async function parseDocument(file: string): Promise<ParseResult> {
-  const format = detectFormat(file)
-  return { file, format, markdown: await contentOf(file, format) }
-}
+export const parseDocument = Effect.fn('parseDocument')(function* (file: string) {
+  const format = yield* detectFormat(file)
+  return { file, format, markdown: yield* contentOf(file, format) }
+})

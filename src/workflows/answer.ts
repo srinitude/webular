@@ -1,10 +1,12 @@
 // ANSWER workflow: search -> fetch -> extractive synthesize, composed as a
 // Mastra non-model workflow over FOSS tools (keyless search + readability + summarizer).
 import { createStep, createWorkflow } from '@mastra/core/workflows'
+import { Effect } from 'effect'
 import { z } from 'zod'
 import { searchWithSource } from '../lib/search-chain.ts'
 import { fetchErrorsSchema, fetchSources } from '../lib/sources.ts'
 import { summarizeText } from '../lib/summarize.ts'
+import { stepRuntime } from './runtime.ts'
 
 const answerInput = z.object({
   query: z.string().min(1),
@@ -33,35 +35,39 @@ const searchStep = createStep({
   id: 'search',
   inputSchema: answerInput,
   outputSchema: hitsSchema,
-  execute: async ({ inputData }) => {
-    const { results: found } = await searchWithSource('web', inputData.query, inputData.sources)
-    const hits = found.map((h) => ({ title: h.title, url: h.url }))
-    return {
-      query: inputData.query,
-      sentences: inputData.sentences,
-      timeoutMs: inputData.timeoutMs,
-      hits,
-    }
-  },
+  execute: ({ inputData }) =>
+    stepRuntime.runPromise(
+      Effect.map(
+        searchWithSource('web', inputData.query, inputData.sources),
+        ({ results: found }) => ({
+          query: inputData.query,
+          sentences: inputData.sentences,
+          timeoutMs: inputData.timeoutMs,
+          hits: found.map((h) => ({ title: h.title, url: h.url })),
+        }),
+      ),
+    ),
+})
+
+const synthesize = Effect.fn('answer.synthesize')(function* (input: z.infer<typeof hitsSchema>) {
+  const fetched = yield* fetchSources(input.hits, input.timeoutMs)
+  // Cite only sources whose text actually fed the answer.
+  const used = fetched.entries.filter((e) => e.text.length > 0)
+  const combined = used.map((e) => e.text).join('\n\n')
+  const { summary } = summarizeText(combined, input.sentences)
+  return {
+    query: input.query,
+    answer: summary,
+    sources: used.map((e) => ({ title: e.title, url: e.url })),
+    errors: fetched.errors,
+  }
 })
 
 const synthStep = createStep({
   id: 'fetch-and-summarize',
   inputSchema: hitsSchema,
   outputSchema: answerOutput,
-  execute: async ({ inputData }) => {
-    const fetched = await fetchSources(inputData.hits, inputData.timeoutMs)
-    // Cite only sources whose text actually fed the answer.
-    const used = fetched.entries.filter((e) => e.text.length > 0)
-    const combined = used.map((e) => e.text).join('\n\n')
-    const { summary } = summarizeText(combined, inputData.sentences)
-    return {
-      query: inputData.query,
-      answer: summary,
-      sources: used.map((e) => ({ title: e.title, url: e.url })),
-      errors: fetched.errors,
-    }
-  },
+  execute: ({ inputData }) => stepRuntime.runPromise(synthesize(inputData)),
 })
 
 export const answerWorkflow = createWorkflow({

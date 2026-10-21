@@ -1,10 +1,12 @@
 // RESEARCH workflow: search DDG HTML → fetch top N → extract + summarize → markdown report
 // Composed as a Mastra non-model workflow over FOSS tools.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
+import { Effect } from 'effect'
 import { z } from 'zod'
 import { searchWithSource } from '../lib/search-chain.ts'
 import { fetchErrorsSchema, fetchSources, type SourceEntry } from '../lib/sources.ts'
 import { summarizeText } from '../lib/summarize.ts'
+import { stepRuntime } from './runtime.ts'
 
 const researchInput = z.object({
   topic: z.string().min(1),
@@ -40,30 +42,33 @@ const searchStep = createStep({
   id: 'search',
   inputSchema: researchInput,
   outputSchema: foundSchema,
-  execute: async ({ inputData }) => {
-    const { results: found } = await searchWithSource('web', inputData.topic, inputData.depth)
-    return {
-      topic: inputData.topic,
-      sentences: inputData.sentences,
-      timeoutMs: inputData.timeoutMs,
-      sources: found.map((h) => ({ title: h.title, url: h.url })),
-    }
-  },
+  execute: ({ inputData }) =>
+    stepRuntime.runPromise(
+      Effect.map(
+        searchWithSource('web', inputData.topic, inputData.depth),
+        ({ results: found }) => ({
+          topic: inputData.topic,
+          sentences: inputData.sentences,
+          timeoutMs: inputData.timeoutMs,
+          sources: found.map((h) => ({ title: h.title, url: h.url })),
+        }),
+      ),
+    ),
 })
 
 const fetchSourcesStep = createStep({
   id: 'fetch-sources',
   inputSchema: foundSchema,
   outputSchema: entriesSchema,
-  execute: async ({ inputData }) => {
-    const fetched = await fetchSources(inputData.sources, inputData.timeoutMs)
-    return {
-      topic: inputData.topic,
-      sentences: inputData.sentences,
-      entries: fetched.entries,
-      errors: fetched.errors,
-    }
-  },
+  execute: ({ inputData }) =>
+    stepRuntime.runPromise(
+      Effect.map(fetchSources(inputData.sources, inputData.timeoutMs), (fetched) => ({
+        topic: inputData.topic,
+        sentences: inputData.sentences,
+        entries: fetched.entries,
+        errors: fetched.errors,
+      })),
+    ),
 })
 
 function buildSection(entry: SourceEntry, idx: number, topN: number): string {
@@ -76,13 +81,15 @@ const assembleStep = createStep({
   id: 'assemble',
   inputSchema: entriesSchema,
   outputSchema: researchOutput,
-  execute: async ({ inputData }) => {
-    const sections = inputData.entries.map((e, i) => buildSection(e, i, inputData.sentences))
-    const report = `# Research: ${inputData.topic}\n\n${sections.join('\n\n')}`
-    const sources = inputData.entries.map((e) => ({ title: e.title, url: e.url }))
-    return { topic: inputData.topic, report, sources, errors: inputData.errors }
-  },
+  execute: ({ inputData }) => stepRuntime.runPromise(Effect.sync(() => assemble(inputData))),
 })
+
+function assemble(inputData: z.infer<typeof entriesSchema>): z.infer<typeof researchOutput> {
+  const sections = inputData.entries.map((e, i) => buildSection(e, i, inputData.sentences))
+  const report = `# Research: ${inputData.topic}\n\n${sections.join('\n\n')}`
+  const sources = inputData.entries.map((e) => ({ title: e.title, url: e.url }))
+  return { topic: inputData.topic, report, sources, errors: inputData.errors }
+}
 
 export const researchWorkflow = createWorkflow({
   id: 'research',

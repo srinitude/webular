@@ -7,7 +7,7 @@ import { ConfigProvider, Effect, FileSystem, Layer, type Path } from 'effect'
 
 type Services = FileSystem.FileSystem | Path.Path
 
-import { cachedGetTextEffect } from '../../src/core/cache.ts'
+import { cachedGetText } from '../../src/core/cache.ts'
 import { httpGet } from '../../src/core/http.ts'
 
 const BODY = 'héllo ✓ — cached\n'
@@ -51,10 +51,10 @@ afterAll(() => server.stop(true))
 
 const get = (path: string, opts: { cache?: boolean } = {}) => {
   const url = `http://localhost:${server.port}${path}`
-  return cachedGetTextEffect(
+  return cachedGetText(
     url,
     (headers) => httpGet(url, { headers }),
-    (res) => res.text(),
+    (res) => Effect.promise(() => res.text()),
     opts,
   )
 }

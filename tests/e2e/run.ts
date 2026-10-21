@@ -23,10 +23,7 @@ interface Result {
   err: string
 }
 
-const fixture = Effect.acquireRelease(
-  Effect.sync(() => startFixture((o) => ({ ...defaultRoutes(o), ...e2eRoutes(o) }))),
-  (f) => Effect.sync(() => f.stop()),
-)
+const fixture = startFixture((o) => ({ ...defaultRoutes(o), ...e2eRoutes(o) }))
 
 const argv = (c: CliCase, args: string[]): [string, string[]] => {
   if (c.via === 'bin') return ['bun', [`${ROOT}bin/webular.ts`, c.cmd, ...args]]

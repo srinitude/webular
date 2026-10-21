@@ -1,21 +1,22 @@
-// Output contract (C4/B30): every command renders human text distinct from
-// --json, -o writes exactly what stdout would carry, partial failures note on
-// stderr, and batch maps exit codes 0/1/3.
-import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
+// Output contract: human text differs from --json, -o writes what stdout carries,
+// partial failures note on stderr, batch maps exit codes 0/1/3.
+import { describe, expect, test } from 'bun:test'
 import { readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { Effect } from 'effect'
 import { renderFor } from '../../src/cli/render.ts'
 import { runCli } from '../_support/cli.ts'
-import { type Fixture, type Routes, startFixture } from '../_support/fixture.ts'
+import { type Routes, startFixture, useFixture } from '../_support/fixture.ts'
 import { defaultRoutes } from '../_support/routes.ts'
+import { eff } from '../_support/run.ts'
 
-let fx: Fixture
-beforeAll(() => {
-  fx = startFixture(defaultRoutes)
-})
-afterAll(() => fx.stop())
+const fx = useFixture(defaultRoutes)
 
+const page = (body: string) =>
+  new Response(`<html><head><title>R</title></head><body>${body}</body></html>`, {
+    headers: { 'content-type': 'text/html' },
+  })
 const runCmd = (cmd: string, args: string[]) => runCli(`src/commands/${cmd}.ts`, args)
 
 describe('renderFor — per-command human renderers (unit)', () => {
@@ -84,83 +85,114 @@ describe('renderFor — per-command human renderers (unit)', () => {
 })
 
 describe('command output contract (integration)', () => {
-  test('map human output is plain lines, distinct from --json', async () => {
-    const human = await runCmd('map', ['--url', fx.origin])
-    const json = await runCmd('map', ['--url', fx.origin, '--json'])
-    expect(human.code).toBe(0)
-    expect(human.out).not.toBe(json.out)
-    expect(
-      human.out
-        .trim()
-        .split('\n')
-        .every((l) => l.startsWith('http')),
-    ).toBe(true)
-  }, 15_000)
-
-  test('scrape -o writes the markdown, not JSON', async () => {
-    const dest = join(tmpdir(), `webular-render-${Date.now()}.md`)
-    const { code } = await runCmd('scrape', ['--url', `${fx.origin}/`, '-o', dest])
-    expect(code).toBe(0)
-    const written = readFileSync(dest, 'utf8')
-    expect(written).toContain('Fixture Home')
-    expect(written.startsWith('{')).toBe(false)
-    rmSync(dest, { force: true })
-  }, 15_000)
-
-  test('media renders a one-line human summary', async () => {
-    const dest = join(tmpdir(), `webular-render-${Date.now()}.bin`)
-    const { code, out } = await runCmd('media', [
-      '--url',
-      `${fx.origin}/bytes?n=64`,
-      '--download',
-      '-o',
-      dest,
-    ])
-    expect(code).toBe(0)
-    expect(out.trim()).toBe(`download ${fx.origin}/bytes?n=64 -> ${dest} (64 bytes)`)
-    rmSync(dest, { force: true })
-  }, 15_000)
-
-  test('batch exits 1 when every target fails', async () => {
-    const bad = `${fx.origin}/status?code=500`
-    const { code } = await runCmd('batch', ['--urls', `${bad},${bad}`, '--json'])
-    expect(code).toBe(1)
-  }, 20_000)
-
-  test('batch exits 3 on partial failure', async () => {
-    const { code } = await runCmd('batch', [
-      '--urls',
-      `${fx.origin}/a,${fx.origin}/status?code=500`,
-      '--json',
-    ])
-    expect(code).toBe(3)
-  }, 20_000)
-
-  test('crawl reports partial fetch failures on stderr and still exits 0', async () => {
-    const local = startFixture(
-      (origin): Routes => ({
-        '/': () =>
-          new Response(
-            `<html><head><title>R</title></head><body><a href="/a">a</a><a href="/nope">n</a></body></html>`,
-            { headers: { 'content-type': 'text/html' } },
-          ),
-        '/a': () =>
-          new Response('<html><head><title>A</title></head><body>ok</body></html>', {
-            headers: { 'content-type': 'text/html' },
-          }),
+  test(
+    'map human output is plain lines, distinct from --json',
+    eff(
+      Effect.gen(function* () {
+        const human = yield* runCmd('map', ['--url', fx.origin])
+        const json = yield* runCmd('map', ['--url', fx.origin, '--json'])
+        expect(human.code).toBe(0)
+        expect(human.out).not.toBe(json.out)
+        expect(
+          human.out
+            .trim()
+            .split('\n')
+            .every((l) => l.startsWith('http')),
+        ).toBe(true)
       }),
-    )
-    try {
-      const { code, err } = await runCmd('crawl', ['--url', `${local.origin}/`, '--json'])
-      expect(code).toBe(0)
-      expect(err).toContain('failed')
-    } finally {
-      local.stop()
-    }
-  }, 20_000)
+    ),
+    15_000,
+  )
 
-  test('crawl exits 1 when nothing was crawled and errors exist', async () => {
-    const { code } = await runCmd('crawl', ['--url', `${fx.origin}/status?code=500`, '--json'])
-    expect(code).toBe(1)
-  }, 20_000)
+  test(
+    'scrape -o writes the markdown, not JSON',
+    eff(
+      Effect.gen(function* () {
+        const dest = join(tmpdir(), `webular-render-${Date.now()}.md`)
+        const { code } = yield* runCmd('scrape', ['--url', `${fx.origin}/`, '-o', dest])
+        expect(code).toBe(0)
+        const written = readFileSync(dest, 'utf8')
+        expect(written).toContain('Fixture Home')
+        expect(written.startsWith('{')).toBe(false)
+        rmSync(dest, { force: true })
+      }),
+    ),
+    15_000,
+  )
+
+  test(
+    'media renders a one-line human summary',
+    eff(
+      Effect.gen(function* () {
+        const dest = join(tmpdir(), `webular-render-${Date.now()}.bin`)
+        const { code, out } = yield* runCmd('media', [
+          '--url',
+          `${fx.origin}/bytes?n=64`,
+          '--download',
+          '-o',
+          dest,
+        ])
+        expect(code).toBe(0)
+        expect(out.trim()).toBe(`download ${fx.origin}/bytes?n=64 -> ${dest} (64 bytes)`)
+        rmSync(dest, { force: true })
+      }),
+    ),
+    15_000,
+  )
+
+  test(
+    'batch exits 1 when every target fails',
+    eff(
+      Effect.gen(function* () {
+        const bad = `${fx.origin}/status?code=500`
+        const { code } = yield* runCmd('batch', ['--urls', `${bad},${bad}`, '--json'])
+        expect(code).toBe(1)
+      }),
+    ),
+    20_000,
+  )
+
+  test(
+    'batch exits 3 on partial failure',
+    eff(
+      Effect.gen(function* () {
+        const { code } = yield* runCmd('batch', [
+          '--urls',
+          `${fx.origin}/a,${fx.origin}/status?code=500`,
+          '--json',
+        ])
+        expect(code).toBe(3)
+      }),
+    ),
+    20_000,
+  )
+
+  test(
+    'crawl reports partial fetch failures on stderr and still exits 0',
+    eff(
+      Effect.gen(function* () {
+        const local = yield* startFixture(
+          (): Routes => ({
+            '/': () => page('<a href="/a">a</a><a href="/nope">n</a>'),
+            '/a': () => page('ok'),
+          }),
+        )
+        const { code, err } = yield* runCmd('crawl', ['--url', `${local.origin}/`, '--json'])
+        expect(code).toBe(0)
+        expect(err).toContain('failed')
+      }),
+    ),
+    20_000,
+  )
+
+  test(
+    'crawl exits 1 when nothing was crawled and errors exist',
+    eff(
+      Effect.gen(function* () {
+        const { code } = yield* runCmd('crawl', ['--url', `${fx.origin}/status?code=500`, '--json'])
+        expect(code).toBe(1)
+      }),
+    ),
+    20_000,
+  )
 })

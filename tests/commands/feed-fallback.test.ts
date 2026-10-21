@@ -2,11 +2,12 @@
 // <link rel="alternate"> discovery, same-origin guesses, then Wayback. The
 // availability body is the recorded archive.org shape from reliability.test.ts,
 // re-pointed at the fixture origin.
-import { afterAll, describe, expect, test } from 'bun:test'
+import { describe, expect, test } from 'bun:test'
+import type * as BunServices from '@effect/platform-bun/BunServices'
 import { Effect } from 'effect'
 import { resolveFeed } from '../../src/core/feed-source.ts'
-import { runtime } from '../../src/core/runtime.ts'
-import { type Routes, startFixture } from '../_support/fixture.ts'
+import { type Routes, useFixture } from '../_support/fixture.ts'
+import { eff } from '../_support/run.ts'
 
 const TS = '20260102000115'
 const RSS = `<?xml version="1.0"?><rss version="2.0"><channel><title>T</title></channel></rss>`
@@ -14,7 +15,7 @@ const res = (body: string, type: string) => () =>
   new Response(body, { headers: { 'content-type': type } })
 const page = (head: string) => res(`<html><head>${head}</head><body>hi</body></html>`, 'text/html')
 
-const site = startFixture(() => ({
+const site = useFixture(() => ({
   '/direct.xml': res(RSS, 'application/rss+xml'),
   '/alt.xml': res(RSS, 'application/rss+xml'),
   '/linked': page('<link rel="alternate" type="application/rss+xml" href="/alt.xml">'),
@@ -35,20 +36,16 @@ function availability(origin: string, url: URL): Response {
 }
 
 // A bare origin: no feed paths, so only the archive can answer.
-const bare = startFixture(
+const bare = useFixture(
   (origin): Routes => ({
     '/plain': page(''),
     '/wayback/available': (_req, url) => availability(origin, url),
     [`/web/${TS}id_/${origin}/dead`]: res(RSS, 'application/rss+xml'),
   }),
 )
-afterAll(() => {
-  site.stop()
-  bare.stop()
-})
 
-const run = <A, E>(body: () => Generator<Effect.Effect<unknown, E>, A>) =>
-  runtime.runPromise(Effect.gen(body))
+const run = <A, E>(body: () => Generator<Effect.Effect<unknown, E, BunServices.BunServices>, A>) =>
+  eff(Effect.gen(body))()
 const resolve = (url: string) => resolveFeed(url, { archive: true, archiveOrigin: bare.origin })
 
 describe('resolveFeed — feed fallback chain', () => {

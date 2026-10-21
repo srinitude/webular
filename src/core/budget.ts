@@ -3,7 +3,7 @@
 // derive the fetch fan-out from them. Pure derive + injectable reader keeps
 // it testable with simulated limits; WEBULAR_CONCURRENCY overrides the result.
 import { availableParallelism, freemem, platform, totalmem } from 'node:os'
-import { Config, Effect, Layer, ManagedRuntime } from 'effect'
+import { Config, Effect, FileSystem } from 'effect'
 
 interface HostLimits {
   cpus: number
@@ -14,7 +14,7 @@ interface Budget extends HostLimits {
   concurrency: number
 }
 
-type ReadFile = (path: string) => Effect.Effect<string | null>
+type ReadFile = (path: string) => Effect.Effect<string | null, never, FileSystem.FileSystem>
 
 // Worst case per in-flight fetch: the 25 MiB text cap held as a UTF-16
 // string plus its parsed DOM — about 4x the byte cap.
@@ -25,10 +25,10 @@ const CEILING = 16
 const OVERRIDE_CEILING = 32
 
 const readOrNull: ReadFile = (path) =>
-  Effect.tryPromise(() => Bun.file(path).text()).pipe(
-    Effect.map((text) => text.trim()),
-    Effect.orElseSucceed(() => null),
-  )
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem
+    return (yield* fs.readFileString(path)).trim()
+  }).pipe(Effect.orElseSucceed(() => null))
 
 const positive = (n: number): number | null => (Number.isFinite(n) && n > 0 ? n : null)
 
@@ -61,7 +61,9 @@ export const readHost = (read: ReadFile = readOrNull, os: string = platform()) =
     const cpus = availableParallelism()
     const mem = os === 'darwin' ? totalmem() : freemem()
     if (os !== 'linux') return { cpus, memoryBytes: mem }
-    const [quota, limit] = yield* Effect.all([cgroupCpus(read), cgroupMemory(read)])
+    const [quota, limit] = yield* Effect.all([cgroupCpus(read), cgroupMemory(read)], {
+      concurrency: 2,
+    })
     return {
       cpus: Math.max(1, Math.min(cpus, Math.ceil(quota ?? cpus))),
       memoryBytes: Math.min(mem, limit ?? mem),
@@ -82,14 +84,10 @@ const override = Effect.gen(function* () {
   return yield* Config.Int('WEBULAR_CONCURRENCY')
 }).pipe(Effect.orElseSucceed(() => 0))
 
-// The one Promise edge for the callers that are not Effect yet. Layer.empty
-// holds no resources, so there is nothing to dispose.
-const budgetRuntime = ManagedRuntime.make(Layer.empty)
-
 // Memoized: the host reads run once per process, on first use, so commands
 // that never fan out never pay for them.
-const cachedBudget = budgetRuntime.runSync(
+const cachedBudget = Effect.runSync(
   Effect.cached(Effect.zipWith(readHost(), override, (host, n) => deriveBudget(host, n))),
 )
 
-export const hostBudget = (): Promise<Budget> => budgetRuntime.runPromise(cachedBudget)
+export const hostBudget = (): Effect.Effect<Budget, never, FileSystem.FileSystem> => cachedBudget

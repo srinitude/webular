@@ -1,26 +1,31 @@
 // SCRAPE command entry — invoked by `mise run run:scrape`. Parses flags,
 // runs the Mastra scrape workflow, emits the result. No mise logic here.
+import { Effect } from 'effect'
 import { runWorkflow } from '../cli/run.ts'
 import { emitOpts, parseFlags, timeoutFlag } from '../core/args.ts'
-import { logErr } from '../core/output.ts'
-import { scrapeWorkflow } from '../workflows/scrape.ts'
+import { CliError, runMain } from '../core/effect.ts'
 
-async function main(): Promise<number> {
-  const { values, positionals } = parseFlags(Bun.argv.slice(2), {
+const main = Effect.gen(function* () {
+  const { values, positionals } = yield* parseFlags(Bun.argv.slice(2), {
     url: { type: 'string' },
     archive: { type: 'boolean' },
   })
   const url = (values.url as string) ?? positionals[0]
   if (!url) {
-    logErr('scrape: missing --url <url>')
-    return 2
+    return yield* new CliError({ message: 'scrape: missing --url <url>', exitCode: 2 })
   }
   const inputData = {
     url,
-    timeoutMs: timeoutFlag('scrape', values),
+    timeoutMs: yield* timeoutFlag('scrape', values),
     archive: values.archive === true,
   }
-  return runWorkflow('scrape', scrapeWorkflow, inputData, emitOpts(values))
-}
+  return yield* runWorkflow(
+    'scrape',
+    () => import('../workflows/scrape.ts'),
+    (m) => m.scrapeWorkflow,
+    inputData,
+    emitOpts(values),
+  )
+})
 
-process.exit(await main())
+runMain(main)

@@ -129,8 +129,9 @@ The suite enforces these rules: at most 200 lines per file, at most 30 lines per
 construct, nesting depth of 3 or less, no orphaned exports, and no mocks or
 stubs. Tests check real behavior against a local `Bun.serve` fixture, so they
 give the same result every run and work offline.
+
 Cases that need the live internet (DuckDuckGo search, a real browser) are opt-in:
-`WEBULAR_TEST_LIVE=1 mise run test`. Note: DuckDuckGo blocks many datacenter IPs.
+`WEBULAR_TEST_LIVE=1 mise run test`. DuckDuckGo blocks many datacenter IPs.
 The `search --source` and `feed` suites run offline: `WEBULAR_SOURCE_ORIGIN`
 points the Wikipedia, Hacker News, and arXiv endpoints at the local fixture.
 

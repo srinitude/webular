@@ -1,9 +1,11 @@
 // Model-based test: every path of the CLI dispatch machine, replayed against
 // the real `bin/webular.ts` (real mise, real commands).
 import { describe, expect, test } from 'bun:test'
+import { Effect } from 'effect'
 import { cliDispatchMachine } from '../../src/machines/cli-dispatch.ts'
 import { runCli } from '../_support/cli.ts'
 import { exitCodeOf, finalPaths } from '../_support/paths.ts'
+import { eff } from '../_support/run.ts'
 
 const ARGV_FOR_PATH: Record<string, string[]> = {
   HELP: ['--help'],
@@ -29,11 +31,14 @@ describe('CLI dispatch machine matches bin/webular.ts', () => {
 
   test.each(paths.map((p) => [p.final, p] as const))(
     '%s',
-    async (_name, path) => {
-      const argv = ARGV_FOR_PATH[path.events.join(' ')] ?? []
-      const { code } = await runCli('bin/webular.ts', argv)
-      expect(code).toBe(exitCodeOf(path))
-    },
+    (_name, path) =>
+      eff(
+        Effect.gen(function* () {
+          const argv = ARGV_FOR_PATH[path.events.join(' ')] ?? []
+          const { code } = yield* runCli('bin/webular.ts', argv)
+          expect(code).toBe(exitCodeOf(path))
+        }),
+      )(),
     60_000,
   )
 })

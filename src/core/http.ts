@@ -1,10 +1,10 @@
 // Bun.fetch layer: timeout, user-agent, scoped redirects, textual-content guard,
-// deterministic bounded retry. Effect core; Promise exports for non-Effect callers.
+// deterministic bounded retry, disk-cache revalidation.
+import { BunServices } from '@effect/platform-bun'
 import { Data, Effect } from 'effect'
 import pkg from '../../package.json' with { type: 'json' }
 import { type CacheOptions, cachedGetText } from './cache.ts'
-import { readTextCapped } from './decode.ts'
-import { runtime } from './runtime.ts'
+import { FetchError, readTextCapped } from './decode.ts'
 import { sameHost } from './url.ts'
 
 const USER_AGENT = `webular/${pkg.version} (+https://github.com/srinitude/webular)`
@@ -66,6 +66,11 @@ const fetchOnce = (url: string, opts: FetchOptions) =>
     catch: (err) => err,
   })
 
+const toFetchError = (err: unknown) =>
+  err instanceof FetchError
+    ? err
+    : new FetchError({ message: err instanceof Error ? err.message : String(err) })
+
 function isAbort(err: unknown): boolean {
   return err instanceof DOMException && (err.name === 'TimeoutError' || err.name === 'AbortError')
 }
@@ -101,11 +106,11 @@ const attemptGet = (url: string, opts: FetchOptions, last: boolean): Effect.Effe
 
 // GET with retry: network-level throws and 408/429/502/503/504 responses retry
 // on the fixed backoff (or the server's Retry-After); other statuses return as-is.
-const httpGetEffect = Effect.fn('httpGet')(function* (url: string, opts: FetchOptions = {}) {
+export const httpGet = Effect.fn('httpGet')(function* (url: string, opts: FetchOptions = {}) {
   for (let attempt = 0; ; attempt++) {
     const outcome = yield* attemptGet(url, opts, attempt >= RETRY_BACKOFF_MS.length)
     if (outcome.kind === 'response') return outcome.res
-    if (outcome.kind === 'raise') return yield* Effect.fail(outcome.err)
+    if (outcome.kind === 'raise') return yield* Effect.fail(toFetchError(outcome.err))
     yield* Effect.sleep(outcome.waitMs ?? RETRY_BACKOFF_MS[attempt] ?? 750)
   }
 })
@@ -129,35 +134,36 @@ const readOk = Effect.fn('readOk')(function* (res: Response, url: string) {
     return yield* new HttpStatusError({ url, status: res.status, statusText: res.statusText })
   const bad = refusedMime(res)
   if (bad !== undefined)
-    return yield* Effect.fail(
-      new Error(`fetch ${url}: unsupported content-type "${bad}" — use media --download`),
-    )
-  return yield* Effect.tryPromise({
-    try: () => readTextCapped(res, url, MAX_TEXT_BYTES),
-    catch: (err) => err,
-  })
+    return yield* new FetchError({
+      message: `fetch ${url}: unsupported content-type "${bad}" — use media --download`,
+    })
+  return yield* readTextCapped(res, url, MAX_TEXT_BYTES)
 })
 
 // Every rejected response releases its body.
 const okText = (res: Response, url: string) =>
   readOk(res, url).pipe(Effect.tapError(() => dropBody(res)))
 
-// Text GETs revalidate through the disk cache; cachedGetText rejects with this
-// layer's squashed error, so callers still see HttpStatusError or Error.
-export const fetchTextEffect = (url: string, opts: FetchOptions = {}) => {
-  const get = (h: Record<string, string>) =>
-    runtime.runPromise(httpGetEffect(url, { ...opts, headers: { ...opts.headers, ...h } }))
-  const read = (res: Response) => runtime.runPromise(okText(res, url))
-  return Effect.tryPromise({
-    try: () => cachedGetText(url, get, read, opts),
-    catch: (err) => err as HttpStatusError | Error,
-  })
-}
+// Text GETs revalidate through the disk cache; a cache config error surfaces
+// as a FetchError, so callers see only HttpStatusError or FetchError.
+export const fetchText = (
+  url: string,
+  opts: FetchOptions = {},
+): Effect.Effect<string, HttpStatusError | FetchError> =>
+  cachedGetText<HttpStatusError | FetchError>(
+    url,
+    (h) => httpGet(url, { ...opts, headers: { ...opts.headers, ...h } }),
+    (res) => okText(res, url),
+    opts,
+  ).pipe(
+    Effect.catchTag('ConfigError', (err) => Effect.fail(toFetchError(err))),
+    Effect.provide(BunServices.layer),
+  )
 
 // The ROOT of a crawl/map is the user's explicit target: follow its redirects
 // freely (apex→www) and report the FINAL url to re-anchor the host scope on.
-const fetchRootEffect = Effect.fn('fetchRoot')(function* (url: string, opts: FetchOptions) {
-  const res = yield* httpGetEffect(url, opts)
+export const fetchRoot = Effect.fn('fetchRoot')(function* (url: string, opts: FetchOptions = {}) {
+  const res = yield* httpGet(url, opts)
   return { finalUrl: res.url || url, html: yield* okText(res, url) }
 })
 
@@ -165,35 +171,20 @@ const isRedirect = (status: number) => status >= 300 && status < 400
 
 // Fetch text but follow redirects MANUALLY, blocking any hop that leaves `host`
 // (EXACT hostname match — scope control for crawls, not an IP/SSRF filter).
-const withinHostEffect = Effect.fn('fetchTextWithinHost')(function* (
+export const fetchTextWithinHost = Effect.fn('fetchTextWithinHost')(function* (
   url: string,
   host: string,
-  opts: FetchOptions,
+  opts: FetchOptions = {},
 ) {
   let current = url
   for (let hop = 0; hop < 5; hop++) {
-    const res = yield* httpGetEffect(current, { ...opts, redirect: 'manual' })
+    const res = yield* httpGet(current, { ...opts, redirect: 'manual' })
     const location = isRedirect(res.status) ? res.headers.get('location') : null
     if (!location) return yield* okText(res, current)
     yield* dropBody(res) // the hop's body is never read; free its connection
     current = new URL(location, current).toString()
     if (!sameHost(host, current))
-      return yield* Effect.fail(new Error(`redirect off-site blocked: ${current}`))
+      return yield* new FetchError({ message: `redirect off-site blocked: ${current}` })
   }
-  return yield* Effect.fail(new Error(`too many redirects: ${url}`))
+  return yield* new FetchError({ message: `too many redirects: ${url}` })
 })
-
-// Promise boundary for callers that are not Effect code yet.
-export const httpGet = (url: string, opts: FetchOptions = {}): Promise<Response> =>
-  runtime.runPromise(httpGetEffect(url, opts))
-export const fetchText = (url: string, opts: FetchOptions = {}): Promise<string> =>
-  runtime.runPromise(fetchTextEffect(url, opts))
-export const fetchRoot = (
-  url: string,
-  opts: FetchOptions = {},
-): Promise<{ finalUrl: string; html: string }> => runtime.runPromise(fetchRootEffect(url, opts))
-export const fetchTextWithinHost = (
-  url: string,
-  host: string,
-  opts: FetchOptions = {},
-): Promise<string> => runtime.runPromise(withinHostEffect(url, host, opts))

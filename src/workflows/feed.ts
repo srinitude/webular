@@ -2,10 +2,11 @@
 // (title, link, date, summary), parsed as XML with linkedom. No model, no key.
 // A url that is not a feed falls back through core/feed-source.ts.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
+import { Effect } from 'effect'
 import { DOMParser } from 'linkedom'
 import { z } from 'zod'
 import { resolveFeed } from '../core/feed-source.ts'
-import { runtime } from '../core/runtime.ts'
+import { stepRuntime } from './runtime.ts'
 
 const feedInput = z.object({
   url: z.string().url(),
@@ -66,12 +67,14 @@ const feedStep = createStep({
   id: 'feed',
   inputSchema: feedInput,
   outputSchema: feedOutput,
-  execute: async ({ inputData }) => {
+  execute: ({ inputData }) => {
     const { url, timeoutMs, limit, archive } = inputData
-    const found = await runtime.runPromise(resolveFeed(url, { timeoutMs, archive }))
-    const { xml, feedUrl, archivedFrom } = found
-    const { title, items } = parseFeed(xml, limit)
-    return { url, feedUrl, archivedFrom, title, count: items.length, items }
+    return stepRuntime.runPromise(
+      Effect.map(resolveFeed(url, { timeoutMs, archive }), ({ xml, feedUrl, archivedFrom }) => {
+        const { title, items } = parseFeed(xml, limit)
+        return { url, feedUrl, archivedFrom, title, count: items.length, items }
+      }),
+    )
   },
 })
 

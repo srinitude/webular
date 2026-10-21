@@ -1,22 +1,30 @@
 // ACT command entry — invoked by `mise run run:act`. Parses flags, runs the
 // Mastra act workflow (agent-browser), emits the result. No mise logic here.
+import { Effect } from 'effect'
 import { runWorkflow } from '../cli/run.ts'
 import { emitOpts, parseFlags } from '../core/args.ts'
-import { logErr } from '../core/output.ts'
-import { actWorkflow } from '../workflows/act.ts'
+import { CliError, runMain } from '../core/effect.ts'
 
-async function main(): Promise<number> {
-  const { values, positionals } = parseFlags(Bun.argv.slice(2), {
+const main = Effect.gen(function* () {
+  const { values, positionals } = yield* parseFlags(Bun.argv.slice(2), {
     url: { type: 'string' },
     screenshot: { type: 'string' },
   })
   const url = (values.url as string) ?? positionals[0]
   if (!url) {
-    logErr('act: missing <url> (pass --url <url> or a positional URL)')
-    return 2
+    return yield* new CliError({
+      message: 'act: missing <url> (pass --url <url> or a positional URL)',
+      exitCode: 2,
+    })
   }
   const inputData = { url, screenshot: values.screenshot as string | undefined }
-  return runWorkflow('act', actWorkflow, inputData, emitOpts(values))
-}
+  return yield* runWorkflow(
+    'act',
+    () => import('../workflows/act.ts'),
+    (m) => m.actWorkflow,
+    inputData,
+    emitOpts(values),
+  )
+})
 
-process.exit(await main())
+runMain(main)

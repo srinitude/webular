@@ -1,5 +1,6 @@
 // Keyless web search via DuckDuckGo's no-JS HTML endpoint (fetch + linkedom).
 // Headless and CI-safe — no browser, no API key. Shared by search/answer/research.
+import { Effect } from 'effect'
 import { parseHTML } from 'linkedom'
 import { fetchText } from '../core/http.ts'
 import { endpoint } from './sources-search.ts'
@@ -14,12 +15,9 @@ const UA =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'
 
 function decodeHref(href: string): string {
-  try {
-    const u = new URL(href.startsWith('http') ? href : `https:${href}`)
-    return u.searchParams.get('uddg') ?? href
-  } catch {
-    return href
-  }
+  if (!URL.canParse(href.startsWith('http') ? href : `https:${href}`)) return href
+  const u = new URL(href.startsWith('http') ? href : `https:${href}`)
+  return u.searchParams.get('uddg') ?? href
 }
 
 function toHit(el: Element): SearchHit | null {
@@ -36,11 +34,7 @@ function toHit(el: Element): SearchHit | null {
   }
 }
 
-export async function webSearch(query: string, limit: number): Promise<SearchHit[]> {
-  const html = await fetchText(endpoint('https://html.duckduckgo.com/html/', { q: query }), {
-    timeoutMs: 20_000,
-    headers: { 'user-agent': UA, accept: 'text/html,application/xhtml+xml' },
-  })
+function hitsFrom(html: string, limit: number): SearchHit[] {
   const { document } = parseHTML(html)
   const hits: SearchHit[] = []
   for (const el of document.querySelectorAll('.result')) {
@@ -50,3 +44,11 @@ export async function webSearch(query: string, limit: number): Promise<SearchHit
   }
   return hits
 }
+
+export const webSearch = Effect.fn('webSearch')(function* (query: string, limit: number) {
+  const html = yield* fetchText(endpoint('https://html.duckduckgo.com/html/', { q: query }), {
+    timeoutMs: 20_000,
+    headers: { 'user-agent': UA, accept: 'text/html,application/xhtml+xml' },
+  })
+  return hitsFrom(html, limit)
+})

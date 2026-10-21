@@ -1,5 +1,13 @@
 // Bytes → text: charset detection (BOM > Content-Type > meta prescan > utf-8)
 // and a streaming, byte-capped decode — no whole-body double buffering.
+import { Data, Effect, Stream } from 'effect'
+import { errMsg } from './output.ts'
+
+export class FetchError extends Data.TaggedError('FetchError')<{
+  readonly message: string
+  readonly retryable?: boolean
+}> {}
+
 const PRESCAN_BYTES = 1024
 
 interface DecodeState {
@@ -68,25 +76,42 @@ function feed(state: DecodeState, chunk: Uint8Array, contentType: string | null)
   if (state.prefixBytes >= PRESCAN_BYTES) beginDecode(state, contentType)
 }
 
+function finish(state: DecodeState, contentType: string | null): string {
+  if (!state.decoder) beginDecode(state, contentType)
+  return state.text + (state.decoder ?? new TextDecoder()).decode()
+}
+
+const fetchError = (message: string) => new FetchError({ message })
+
 // Read a response body as text with a hard byte cap. The charset is chosen
 // from the first ≤1024 bytes (HTML5 prescan window) before any decoding.
-export async function readTextCapped(
+export function readTextCapped(
   res: Response,
   url: string,
   maxBytes: number,
-): Promise<string> {
+): Effect.Effect<string, FetchError> {
   const declared = Number(res.headers.get('content-length') ?? '')
   if (Number.isFinite(declared) && declared > maxBytes)
-    throw new Error(`fetch ${url}: response too large (${declared} bytes)`)
-  if (!res.body) return ''
+    return Effect.fail(fetchError(`fetch ${url}: response too large (${declared} bytes)`))
+  const body = res.body
+  if (!body) return Effect.succeed('')
   const contentType = res.headers.get('content-type')
   const state: DecodeState = { prefix: [], prefixBytes: 0, decoder: null, text: '' }
-  let total = 0
-  for await (const chunk of res.body as ReadableStream<Uint8Array>) {
-    total += chunk.byteLength
-    if (total > maxBytes) throw new Error(`fetch ${url}: response exceeded ${maxBytes} bytes`)
-    feed(state, chunk, contentType)
-  }
-  if (!state.decoder) beginDecode(state, contentType)
-  return state.text + (state.decoder ?? new TextDecoder()).decode()
+  const chunks = Stream.fromReadableStream({
+    evaluate: () => body as ReadableStream<Uint8Array>,
+    onError: (err) => fetchError(`fetch ${url}: ${errMsg(err)}`),
+  })
+  return Stream.runFoldEffect(
+    chunks,
+    () => 0,
+    (total, chunk) => {
+      const next = total + chunk.byteLength
+      if (next > maxBytes)
+        return Effect.fail(fetchError(`fetch ${url}: response exceeded ${maxBytes} bytes`))
+      return Effect.sync(() => {
+        feed(state, chunk, contentType)
+        return next
+      })
+    },
+  ).pipe(Effect.map(() => finish(state, contentType)))
 }

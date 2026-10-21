@@ -1,10 +1,12 @@
 // MONITOR workflow: fetch page → snapshot compare → emit change status.
 // Composed as a Mastra non-model workflow over FOSS tools.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
+import { Effect } from 'effect'
 import { z } from 'zod'
 import { fetchText } from '../core/http.ts'
 import { htmlToArticle } from '../lib/html.ts'
 import { compareAndStore } from '../lib/snapshot.ts'
+import { stepRuntime } from './runtime.ts'
 
 const monitorInput = z.object({
   url: z.string().url(),
@@ -26,11 +28,14 @@ const fetchStep = createStep({
     dbPath: z.string(),
     text: z.string(),
   }),
-  execute: async ({ inputData }) => {
-    const html = await fetchText(inputData.url, { timeoutMs: inputData.timeoutMs })
-    const { text } = htmlToArticle(html)
-    return { url: inputData.url, dbPath: inputData.dbPath, text }
-  },
+  execute: ({ inputData }) =>
+    stepRuntime.runPromise(
+      Effect.map(fetchText(inputData.url, { timeoutMs: inputData.timeoutMs }), (html) => ({
+        url: inputData.url,
+        dbPath: inputData.dbPath,
+        text: htmlToArticle(html).text,
+      })),
+    ),
 })
 
 const snapshotStep = createStep({
@@ -41,8 +46,8 @@ const snapshotStep = createStep({
     text: z.string(),
   }),
   outputSchema: monitorOutput,
-  execute: async ({ inputData }) =>
-    compareAndStore(inputData.dbPath, inputData.url, inputData.text),
+  execute: ({ inputData }) =>
+    stepRuntime.runPromise(compareAndStore(inputData.dbPath, inputData.url, inputData.text)),
 })
 
 export const monitorWorkflow = createWorkflow({

@@ -19,12 +19,7 @@ interface PageDoc {
 type DomDocument = ReturnType<typeof parseHTML>['document']
 
 function addLink(out: Set<string>, href: string | null, base: string): void {
-  if (!href) return
-  try {
-    out.add(new URL(href, base).toString())
-  } catch {
-    /* skip invalid hrefs */
-  }
+  if (href && URL.canParse(href, base)) out.add(new URL(href, base).toString())
 }
 
 function linksFrom(document: DomDocument, base: string): string[] {

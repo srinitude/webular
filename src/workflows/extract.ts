@@ -1,9 +1,16 @@
 // EXTRACT workflow: fetch → CSS-selector extraction, composed as a Mastra
 // non-model workflow over FOSS tools (linkedom).
 import { createStep, createWorkflow } from '@mastra/core/workflows'
+import { Effect } from 'effect'
 import { z } from 'zod'
 import { fetchText } from '../core/http.ts'
-import { parseFieldSpecs, selectFields, selectMatches } from '../lib/select.ts'
+import {
+  type InvalidFieldSpecError,
+  parseFieldSpecs,
+  selectFields,
+  selectMatches,
+} from '../lib/select.ts'
+import { stepRuntime } from './runtime.ts'
 
 const extractInput = z.object({
   url: z.string().url(),
@@ -25,12 +32,15 @@ const fetchStep = createStep({
     fields: z.string().optional(),
     selector: z.string().optional(),
   }),
-  execute: async ({ inputData }) => ({
-    url: inputData.url,
-    html: await fetchText(inputData.url, { timeoutMs: inputData.timeoutMs }),
-    fields: inputData.fields,
-    selector: inputData.selector,
-  }),
+  execute: ({ inputData }) =>
+    stepRuntime.runPromise(
+      Effect.map(fetchText(inputData.url, { timeoutMs: inputData.timeoutMs }), (html) => ({
+        url: inputData.url,
+        html,
+        fields: inputData.fields,
+        selector: inputData.selector,
+      })),
+    ),
 })
 
 const selectStep = createStep({
@@ -42,18 +52,27 @@ const selectStep = createStep({
     selector: z.string().optional(),
   }),
   outputSchema: extractOutput,
-  execute: async ({ inputData }) => {
-    const { url, html, fields, selector } = inputData
-    if (fields) {
-      const specs = parseFieldSpecs(fields)
-      return { url, data: selectFields(html, specs) }
-    }
-    if (selector) {
-      return { url, matches: selectMatches(html, selector) }
-    }
-    return { url, data: {} }
-  },
+  execute: ({ inputData }) => stepRuntime.runPromise(select(inputData)),
 })
+
+function select(inputData: {
+  url: string
+  html: string
+  fields?: string | undefined
+  selector?: string | undefined
+}): Effect.Effect<z.infer<typeof extractOutput>, InvalidFieldSpecError> {
+  const { url, html, fields, selector } = inputData
+  if (fields) {
+    return Effect.map(parseFieldSpecs(fields), (specs) => ({
+      url,
+      data: selectFields(html, specs),
+    }))
+  }
+  if (selector) {
+    return Effect.succeed({ url, matches: selectMatches(html, selector) })
+  }
+  return Effect.succeed({ url, data: {} })
+}
 
 export const extractWorkflow = createWorkflow({
   id: 'extract',

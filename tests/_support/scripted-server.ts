@@ -1,6 +1,9 @@
 // Real TCP server that answers each new connection with the next scripted
 // reply: an HTTP response, a dropped connection, or silence (a hang). Lets
-// tests drive the fetch layer through network errors and timeouts.
+// tests drive the fetch layer through network errors and timeouts. The server
+// is owned by the enclosing Scope: it stops when the scope closes.
+import { Effect, type Scope } from 'effect'
+
 export type Reply = { status: number; location?: string } | 'drop' | 'hang'
 
 export interface ScriptedServer {
@@ -15,7 +18,7 @@ function httpText(reply: { status: number; location?: string }): string {
   return `HTTP/1.1 ${reply.status} X\r\nContent-Type: text/plain\r\n${location}Content-Length: 2\r\nConnection: close\r\n\r\nok`
 }
 
-export function startScriptedServer(): ScriptedServer {
+const listen = (): ScriptedServer => {
   let queue: Reply[] = []
   let count = 0
   const server = Bun.listen({
@@ -41,3 +44,6 @@ export function startScriptedServer(): ScriptedServer {
     stop: () => server.stop(true),
   }
 }
+
+export const startScriptedServer = (): Effect.Effect<ScriptedServer, never, Scope.Scope> =>
+  Effect.acquireRelease(Effect.sync(listen), (server) => Effect.sync(() => server.stop()))

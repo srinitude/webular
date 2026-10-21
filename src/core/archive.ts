@@ -3,7 +3,8 @@
 // a timeout. A content-type refusal never does, and when the archive has no
 // capture the original error stands.
 import { Effect, Schema } from 'effect'
-import { type FetchOptions, fetchTextEffect, HttpStatusError } from './http.ts'
+import type { FetchError } from './decode.ts'
+import { type FetchOptions, fetchText, HttpStatusError } from './http.ts'
 
 const ARCHIVE_ORIGIN = 'https://archive.org'
 
@@ -11,11 +12,13 @@ interface ArchiveOptions extends FetchOptions {
   archiveOrigin?: string
 }
 
-function isDeadPage(err: unknown): boolean {
-  if (err instanceof HttpStatusError)
-    return err.status === 404 || err.status === 410 || err.status >= 500
-  return err instanceof TypeError || (err instanceof DOMException && err.name === 'TimeoutError')
-}
+type FetchFailure = HttpStatusError | FetchError
+
+// A content-type refusal is a live page the caller cannot read, not a dead one.
+const isDeadPage = (err: FetchFailure): boolean =>
+  err instanceof HttpStatusError
+    ? err.status === 404 || err.status === 410 || err.status >= 500
+    : !/unsupported content-type/.test(err.message)
 
 // The raw capture (no Wayback toolbar): `id_` after the timestamp, https for
 // the real archive host.
@@ -41,7 +44,7 @@ const Availability = Schema.fromJsonString(
 )
 
 const closestCapture = (url: string, opts: ArchiveOptions = {}) =>
-  fetchTextEffect(
+  fetchText(
     `${opts.archiveOrigin ?? ARCHIVE_ORIGIN}/wayback/available?url=${encodeURIComponent(url)}`,
     opts,
   ).pipe(
@@ -53,12 +56,12 @@ const closestCapture = (url: string, opts: ArchiveOptions = {}) =>
     ),
   )
 
-const fromArchive = (url: string, opts: ArchiveOptions, original: unknown) =>
+const fromArchive = (url: string, opts: ArchiveOptions, original: FetchFailure) =>
   closestCapture(url, opts).pipe(
     Effect.orElseSucceed(() => undefined),
     Effect.flatMap((capture) =>
       capture
-        ? Effect.map(fetchTextEffect(capture, opts), (html) => ({
+        ? Effect.map(fetchText(capture, opts), (html) => ({
             html,
             archivedFrom: capture as string | undefined,
           }))
@@ -67,7 +70,7 @@ const fromArchive = (url: string, opts: ArchiveOptions, original: unknown) =>
   )
 
 export const fetchTextOrArchive = (url: string, opts: ArchiveOptions = {}) =>
-  fetchTextEffect(url, opts).pipe(
+  fetchText(url, opts).pipe(
     Effect.map((html) => ({ html, archivedFrom: undefined as string | undefined })),
     Effect.catch((err) => (isDeadPage(err) ? fromArchive(url, opts, err) : Effect.fail(err))),
   )

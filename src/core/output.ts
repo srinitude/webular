@@ -5,10 +5,15 @@
 // Token rules shared by the CLI and the MCP server: sorted-key JSON (same value,
 // same bytes), compact JSON unless a person is reading a TTY, field selection,
 // NDJSON, and lossless cursor paging under a fixed character cap.
-import { outPath } from './safepath.ts'
+import { Data, Effect, type FileSystem, type Path } from 'effect'
+import { outPath, type SandboxError } from './safepath.ts'
 
-export function logErr(msg: string): void {
-  process.stderr.write(`${msg}\n`)
+export class OutputError extends Data.TaggedError('OutputError')<{ readonly message: string }> {}
+
+export function logErr(msg: string): Effect.Effect<void> {
+  return Effect.sync(() => {
+    process.stderr.write(`${msg}\n`)
+  })
 }
 
 export function errMsg(err: unknown): string {
@@ -105,11 +110,20 @@ export function formatOutput(data: unknown, opts: EmitOptions): string {
   return (opts.render ?? defaultRender)(data)
 }
 
-export async function emit(data: unknown, opts: EmitOptions): Promise<void> {
+function writeFile(path: string, text: string): Effect.Effect<void, OutputError> {
+  return Effect.tryPromise({
+    try: () => Bun.write(path, text),
+    catch: (err) => new OutputError({ message: `write ${path}: ${errMsg(err)}` }),
+  }).pipe(Effect.asVoid)
+}
+
+export function emit(
+  data: unknown,
+  opts: EmitOptions,
+): Effect.Effect<void, OutputError | SandboxError, FileSystem.FileSystem | Path.Path> {
   const text = formatOutput(data, opts)
-  if (opts.output) {
-    await Bun.write(outPath(opts.output), text)
-    return
-  }
-  process.stdout.write(`${text}\n`)
+  if (opts.output) return Effect.flatMap(outPath(opts.output), (path) => writeFile(path, text))
+  return Effect.sync(() => {
+    process.stdout.write(`${text}\n`)
+  })
 }

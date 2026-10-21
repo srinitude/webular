@@ -1,8 +1,10 @@
 // FEED contract — RSS 2.0 and Atom 1.0 parsing against the deterministic local
 // fixture (real fetch, no mocks). Tests what `mise run run:feed` executes.
-import { afterAll, describe, expect, test } from 'bun:test'
+import { describe, expect, test } from 'bun:test'
+import { Effect } from 'effect'
 import { runCli } from '../_support/cli.ts'
 import { startFixture } from '../_support/fixture.ts'
+import { eff } from '../_support/run.ts'
 
 const RSS = `<?xml version="1.0"?><rss version="2.0"><channel><title>Fixture RSS</title>
 <item><title>First &amp; best</title><link>https://example.com/1</link><pubDate>Mon, 19 Oct 2026 10:00:00 GMT</pubDate><description>One</description></item>
@@ -16,58 +18,64 @@ const ATOM = `<?xml version="1.0"?><feed xmlns="http://www.w3.org/2005/Atom"><ti
 const xml = (body: string, type: string) => () =>
   new Response(body, { headers: { 'content-type': type } })
 
-const fx = startFixture(() => ({
+const withFx = startFixture(() => ({
   '/rss.xml': xml(RSS, 'application/rss+xml'),
   '/atom.xml': xml(ATOM, 'application/atom+xml'),
 }))
 // No feed paths at all, so the same-origin guesses fail too.
-const empty = startFixture(() => ({}))
-afterAll(() => {
-  fx.stop()
-  empty.stop()
-})
+const withEmpty = startFixture(() => ({}))
 
 const runFeed = (args: string[]) => runCli('src/commands/feed.ts', args)
 
-describe('webular feed — read an RSS or Atom feed (real fetch)', () => {
-  test('parses RSS 2.0 items as JSON', async () => {
-    const { code, out } = await runFeed([`${fx.origin}/rss.xml`, '--json'])
-    expect(code).toBe(0)
-    const data = JSON.parse(out)
-    expect(data.title).toBe('Fixture RSS')
-    expect(data.count).toBe(2)
-    expect(data.items[0]).toEqual({
-      title: 'First & best',
-      url: 'https://example.com/1',
-      published: 'Mon, 19 Oct 2026 10:00:00 GMT',
-      summary: 'One',
-    })
-  }, 15_000)
-
-  test('parses Atom 1.0 entries, preferring the alternate link', async () => {
-    const { code, out } = await runFeed(['--url', `${fx.origin}/atom.xml`, '--json'])
-    expect(code).toBe(0)
-    const data = JSON.parse(out)
-    expect(data.title).toBe('Fixture Atom')
-    expect(data.items[0].url).toBe('https://example.com/a')
-    expect(data.items[0].published).toBe('2026-10-19T10:00:00Z')
-  }, 15_000)
-
-  test('respects --limit and renders human text by default', async () => {
-    const { code, out } = await runFeed([`${fx.origin}/rss.xml`, '--limit', '1'])
-    expect(code).toBe(0)
-    expect(out).toContain('First & best')
-    expect(out).not.toContain('Second')
-  }, 15_000)
-
-  test('exits with code 2 when url is missing', async () => {
-    const { code, err } = await runFeed([])
-    expect(code).toBe(2)
-    expect(err).toContain('missing')
+const rssCase = Effect.gen(function* () {
+  const fx = yield* withFx
+  const { code, out } = yield* runFeed([`${fx.origin}/rss.xml`, '--json'])
+  expect(code).toBe(0)
+  const data = JSON.parse(out)
+  expect(data.title).toBe('Fixture RSS')
+  expect(data.count).toBe(2)
+  expect(data.items[0]).toEqual({
+    title: 'First & best',
+    url: 'https://example.com/1',
+    published: 'Mon, 19 Oct 2026 10:00:00 GMT',
+    summary: 'One',
   })
+})
 
-  test('exits with code 1 on a fetch failure', async () => {
-    const { code } = await runFeed([`${empty.origin}/nope.xml`, '--json'])
-    expect(code).toBe(1)
-  }, 15_000)
+const atomCase = Effect.gen(function* () {
+  const fx = yield* withFx
+  const { code, out } = yield* runFeed(['--url', `${fx.origin}/atom.xml`, '--json'])
+  expect(code).toBe(0)
+  const data = JSON.parse(out)
+  expect(data.title).toBe('Fixture Atom')
+  expect(data.items[0].url).toBe('https://example.com/a')
+  expect(data.items[0].published).toBe('2026-10-19T10:00:00Z')
+})
+
+const limitCase = Effect.gen(function* () {
+  const fx = yield* withFx
+  const { code, out } = yield* runFeed([`${fx.origin}/rss.xml`, '--limit', '1'])
+  expect(code).toBe(0)
+  expect(out).toContain('First & best')
+  expect(out).not.toContain('Second')
+})
+
+const missingUrlCase = Effect.gen(function* () {
+  const { code, err } = yield* runFeed([])
+  expect(code).toBe(2)
+  expect(err).toContain('missing')
+})
+
+const fetchFailureCase = Effect.gen(function* () {
+  const empty = yield* withEmpty
+  const { code } = yield* runFeed([`${empty.origin}/nope.xml`, '--json'])
+  expect(code).toBe(1)
+})
+
+describe('webular feed — read an RSS or Atom feed (real fetch)', () => {
+  test('parses RSS 2.0 items as JSON', eff(rssCase), 15_000)
+  test('parses Atom 1.0 entries, preferring the alternate link', eff(atomCase), 15_000)
+  test('respects --limit and renders human text by default', eff(limitCase), 15_000)
+  test('exits with code 2 when url is missing', eff(missingUrlCase))
+  test('exits with code 1 on a fetch failure', eff(fetchFailureCase), 15_000)
 })

@@ -1,6 +1,8 @@
 // Forgiving flag parsing (clig.dev) on top of node:util parseArgs, plus
 // bounds-checked flag accessors shared by every command.
 import { parseArgs } from 'node:util'
+import { Effect } from 'effect'
+import { CliError } from './effect.ts'
 import { logErr, parseFields } from './output.ts'
 
 type FlagValue = string | boolean | undefined
@@ -19,7 +21,7 @@ const COMMON: Record<string, OptionSpec> = {
   timeout: { type: 'string' },
 }
 
-// 0.1.1 flags removed in 0.2.0 — still PARSED so a legacy `--format json`
+// Retired flags the CLI ignores — still PARSED so a legacy `--format json`
 // consumes its value instead of leaking it into positionals (a silent
 // wrong-query hazard under strict:false), warned on stderr, never read.
 const REMOVED: Record<string, OptionSpec> = {
@@ -27,22 +29,28 @@ const REMOVED: Record<string, OptionSpec> = {
   quiet: { type: 'boolean', short: 'q' },
 }
 
-function warnRemoved(values: Record<string, FlagValue>): void {
-  for (const name of Object.keys(REMOVED)) {
-    if (values[name] !== undefined) logErr(`webular: --${name} was removed in 0.2.0 and is ignored`)
-  }
+function warnRemoved(values: Record<string, FlagValue>): Effect.Effect<void> {
+  const used = Object.keys(REMOVED).filter((name) => values[name] !== undefined)
+  return Effect.forEach(used, (name) => logErr(`webular: --${name} was removed and is ignored`), {
+    concurrency: 1,
+    discard: true,
+  })
 }
 
-export function parseFlags(argv: string[], extra: Record<string, OptionSpec> = {}): ParsedArgs {
-  const parsed = parseArgs({
-    args: argv,
-    options: { ...COMMON, ...REMOVED, ...extra },
-    allowPositionals: true,
-    strict: false,
+export function parseFlags(
+  argv: string[],
+  extra: Record<string, OptionSpec> = {},
+): Effect.Effect<ParsedArgs> {
+  return Effect.suspend(() => {
+    const parsed = parseArgs({
+      args: argv,
+      options: { ...COMMON, ...REMOVED, ...extra },
+      allowPositionals: true,
+      strict: false,
+    })
+    const values = parsed.values as Record<string, FlagValue>
+    return Effect.as(warnRemoved(values), { values, positionals: parsed.positionals })
   })
-  const values = parsed.values as Record<string, FlagValue>
-  warnRemoved(values)
-  return { values, positionals: parsed.positionals }
 }
 
 interface IntRange {
@@ -57,11 +65,11 @@ function toInt(raw: FlagValue): number | null {
   return Number.isInteger(n) ? n : null
 }
 
-// Usage errors are terminal by design (clig: exit 2). The exit path is covered
-// by the spawned command tests; unit tests exercise only the returning paths.
-function usageExit(cmd: string, name: string, range: IntRange): never {
-  logErr(`${cmd}: --${name} must be an integer between ${range.min} and ${range.max}`)
-  process.exit(2)
+// Usage errors are terminal by design (clig: exit 2); runMain prints the
+// message and sets the exit code.
+function usageError(cmd: string, name: string, range: IntRange): CliError {
+  const message = `${cmd}: --${name} must be an integer between ${range.min} and ${range.max}`
+  return new CliError({ message, exitCode: 2 })
 }
 
 export function optIntFlag(
@@ -69,12 +77,12 @@ export function optIntFlag(
   values: Record<string, FlagValue>,
   name: string,
   range: IntRange,
-): number | undefined {
+): Effect.Effect<number | undefined, CliError> {
   const raw = values[name]
-  if (raw === undefined) return undefined
+  if (raw === undefined) return Effect.succeed(undefined)
   const n = toInt(raw)
-  if (n === null || n < range.min || n > range.max) usageExit(cmd, name, range)
-  return n
+  if (n === null || n < range.min || n > range.max) return Effect.fail(usageError(cmd, name, range))
+  return Effect.succeed(n)
 }
 
 export function intFlag(
@@ -82,8 +90,8 @@ export function intFlag(
   values: Record<string, FlagValue>,
   name: string,
   bounds: IntRange & { def: number },
-): number {
-  return optIntFlag(cmd, values, name, bounds) ?? bounds.def
+): Effect.Effect<number, CliError> {
+  return Effect.map(optIntFlag(cmd, values, name, bounds), (n) => n ?? bounds.def)
 }
 
 export function strFlag(values: Record<string, FlagValue>, name: string): string | undefined {
@@ -92,7 +100,10 @@ export function strFlag(values: Record<string, FlagValue>, name: string): string
 }
 
 // The one --timeout contract every command shares (per request attempt).
-export function timeoutFlag(cmd: string, values: Record<string, FlagValue>): number | undefined {
+export function timeoutFlag(
+  cmd: string,
+  values: Record<string, FlagValue>,
+): Effect.Effect<number | undefined, CliError> {
   return optIntFlag(cmd, values, 'timeout', { min: 1, max: 600_000 })
 }
 

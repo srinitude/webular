@@ -1,61 +1,67 @@
 // FOSS download helper — wraps Bun.fetch for binary/media downloads. Streams
-// to a fixed `<dest>.part` temp (overwritten on retry, removed on failure),
-// then renames on success. The connect phase has a 30s budget; the body is
-// governed by a per-chunk idle timer so long healthy streams never die at an
-// arbitrary wall clock (B5).
+// to a unique `<dest>.part.<pid>.<uuid>` temp (removed on failure), then
+// renames on success. The connect phase has a 30s budget; the body is
+// governed by a per-chunk idle timeout so long healthy streams never die at an
+// arbitrary wall clock.
+import { randomUUID } from 'node:crypto'
 import { rename, rm } from 'node:fs/promises'
+import { Data, Effect, Exit, Schedule } from 'effect'
 import { httpGet } from '../core/http.ts'
-
-interface DownloadResult {
-  url: string
-  savedTo: string
-  bytes: number
-}
+import { errMsg } from '../core/output.ts'
 
 interface DownloadOptions {
   maxBytes?: number
   idleMs?: number
 }
 
+type Reader = ReadableStreamDefaultReader<Uint8Array>
+type Writer = ReturnType<ReturnType<typeof Bun.file>['writer']>
+
+class DownloadError extends Data.TaggedError('DownloadError')<{ readonly message: string }> {}
+
 const DEFAULT_MAX_BYTES = 100 * 1024 * 1024
 const CONNECT_TIMEOUT_MS = 30_000
 const DEFAULT_IDLE_MS = 30_000
-const IDLE: unique symbol = Symbol('idle')
 
-// Race one read against a CANCELLED-on-settle timer — a bare Bun.sleep per
-// chunk would leave thousands of pending 30s timers on fast downloads.
-async function readWithIdle(reader: ReadableStreamDefaultReader<Uint8Array>, idleMs: number) {
-  let timer: ReturnType<typeof setTimeout> | undefined
-  const idle = new Promise<typeof IDLE>((resolveIdle) => {
-    timer = setTimeout(() => resolveIdle(IDLE), idleMs)
+const failWith = (message: string) => Effect.fail(new DownloadError({ message }))
+const attempt = <A>(run: () => PromiseLike<A> | A) =>
+  Effect.tryPromise({
+    try: () => Promise.resolve(run()),
+    catch: (err) => new DownloadError({ message: errMsg(err) }),
   })
-  try {
-    return await Promise.race([reader.read(), idle])
-  } finally {
-    clearTimeout(timer)
-  }
-}
 
-async function pump(
-  reader: ReadableStreamDefaultReader<Uint8Array>,
-  writer: { write(c: Uint8Array): unknown },
+// The timeout fiber is interrupted when the read settles, so fast downloads
+// never pile up pending idle timers.
+const readChunk = (reader: Reader, idleMs: number) =>
+  attempt(() => reader.read()).pipe(
+    Effect.timeoutOrElse({
+      duration: idleMs,
+      orElse: () => failWith(`download stalled (no data for ${idleMs}ms)`),
+    }),
+  )
+
+const pump = Effect.fnUntraced(function* (
+  reader: Reader,
+  writer: Writer,
   maxBytes: number,
   idleMs: number,
-): Promise<number> {
+) {
   let total = 0
   for (;;) {
-    const next = await readWithIdle(reader, idleMs)
-    if (next === IDLE) throw new Error(`download stalled (no data for ${idleMs}ms)`)
+    const next = yield* readChunk(reader, idleMs)
     if (next.done) return total
     total += next.value.byteLength
-    if (total > maxBytes) throw new Error(`download exceeded max ${maxBytes} bytes`)
+    if (total > maxBytes) return yield* failWith(`download exceeded max ${maxBytes} bytes`)
     writer.write(next.value)
   }
-}
+})
 
-// pid + counter keep concurrent downloads to ONE dest (in-process or across
-// processes) on separate temps; the suffix never reaches output (savedTo=dest).
-let tempSeq = 0
+const discard = (reader: Reader, writer: Writer, tmp: string) =>
+  Effect.all([
+    Effect.ignore(attempt(() => reader.cancel())),
+    Effect.ignore(attempt(() => writer.end())),
+    Effect.ignore(attempt(() => rm(tmp, { force: true }))),
+  ]).pipe(Effect.asVoid)
 
 // Windows: a rename onto a dest that another rename is replacing (or a reader
 // holds open) fails EPERM/EBUSY/EACCES for a moment, so retry briefly. POSIX
@@ -63,67 +69,55 @@ let tempSeq = 0
 const RENAME_BUSY = new Set(['EPERM', 'EBUSY', 'EACCES'])
 const RENAME_TRIES = 10
 
-// true = renamed; false = dest busy, worth a retry; any other error rethrows.
-async function tryRename(from: string, to: string): Promise<boolean> {
-  try {
-    await rename(from, to)
-    return true
-  } catch (err) {
-    if (!RENAME_BUSY.has((err as NodeJS.ErrnoException).code ?? '')) throw err
-    return false
-  }
-}
+const renameOver = (from: string, to: string) =>
+  Effect.tryPromise({
+    try: () => rename(from, to),
+    catch: (err) => err as NodeJS.ErrnoException,
+  }).pipe(
+    Effect.retry({
+      while: (err) => RENAME_BUSY.has(err.code ?? ''),
+      times: RENAME_TRIES - 1,
+      schedule: Schedule.spaced(20),
+    }),
+    Effect.mapError((err) => new DownloadError({ message: errMsg(err) })),
+  )
 
-async function renameOver(from: string, to: string): Promise<void> {
-  for (let attempt = 1; attempt < RENAME_TRIES; attempt += 1) {
-    if (await tryRename(from, to)) return
-    await Bun.sleep(attempt * 10)
-  }
-  await rename(from, to)
-}
-
-async function streamToFile(
+function streamToFile(
   body: ReadableStream<Uint8Array>,
   outPath: string,
   maxBytes: number,
   idleMs: number,
-): Promise<number> {
-  tempSeq += 1
-  const tmp = `${outPath}.part.${process.pid}.${tempSeq}`
-  const writer = Bun.file(tmp).writer()
-  const reader = body.getReader()
-  try {
-    const total = await pump(reader, writer, maxBytes, idleMs)
-    await writer.end()
-    await renameOver(tmp, outPath)
-    return total
-  } catch (err) {
-    await reader.cancel().catch(() => {})
-    await writer.end()
-    await rm(tmp, { force: true })
-    throw err
-  }
+) {
+  const tmp = `${outPath}.part.${process.pid}.${randomUUID()}`
+  return Effect.acquireUseRelease(
+    Effect.sync(() => ({ writer: Bun.file(tmp).writer(), reader: body.getReader() })),
+    ({ reader, writer }) =>
+      pump(reader, writer, maxBytes, idleMs).pipe(
+        Effect.tap(() => attempt(() => writer.end())),
+        Effect.tap(() => renameOver(tmp, outPath)),
+      ),
+    ({ reader, writer }, exit) =>
+      Exit.isSuccess(exit) ? Effect.void : discard(reader, writer, tmp),
+  )
 }
 
-export async function downloadToFile(
+export const downloadToFile = Effect.fn('downloadToFile')(function* (
   url: string,
   dest: string,
   opts: DownloadOptions = {},
-): Promise<DownloadResult> {
+) {
   const maxBytes = opts.maxBytes ?? DEFAULT_MAX_BYTES
-  const connect = new AbortController()
-  const timer = setTimeout(() => connect.abort(), CONNECT_TIMEOUT_MS)
-  let res: Response
-  try {
-    res = await httpGet(url, { signal: connect.signal })
-  } finally {
-    clearTimeout(timer)
-  }
-  if (!res.ok) throw new Error(`download ${url} failed: ${res.status} ${res.statusText}`)
-  if (!res.body) throw new Error(`download ${url} returned no body`)
+  const res = yield* httpGet(url).pipe(
+    Effect.timeoutOrElse({
+      duration: CONNECT_TIMEOUT_MS,
+      orElse: () => failWith(`download ${url} timed out connecting`),
+    }),
+  )
+  if (!res.ok) return yield* failWith(`download ${url} failed: ${res.status} ${res.statusText}`)
+  if (!res.body) return yield* failWith(`download ${url} returned no body`)
   const declared = Number(res.headers.get('content-length') ?? '')
   if (Number.isFinite(declared) && declared > maxBytes)
-    throw new Error(`download exceeds max ${maxBytes} bytes (declared ${declared})`)
-  const bytes = await streamToFile(res.body, dest, maxBytes, opts.idleMs ?? DEFAULT_IDLE_MS)
+    return yield* failWith(`download exceeds max ${maxBytes} bytes (declared ${declared})`)
+  const bytes = yield* streamToFile(res.body, dest, maxBytes, opts.idleMs ?? DEFAULT_IDLE_MS)
   return { url, savedTo: dest, bytes }
-}
+})

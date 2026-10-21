@@ -8,6 +8,7 @@
 // and the invocation directory is exported so user-relative paths resolve
 // where the user is standing.
 import { delimiter, dirname, join } from 'node:path'
+import { Effect, type Path } from 'effect'
 import { errMsg, logErr } from '../core/output.ts'
 import { PACKAGE_ROOT, resolveBin } from '../core/root.ts'
 
@@ -15,7 +16,10 @@ interface RunResult {
   exitCode: number
 }
 
-export function resolveMise(): string | null {
+const MISSING =
+  'webular: mise not found — install it (https://mise.jdx.dev/getting-started.html) or reinstall webular, then re-run.'
+
+export function resolveMise(): Effect.Effect<string | null, never, Path.Path> {
   return resolveBin('mise', join(PACKAGE_ROOT, 'node_modules/mise/bin/mise'))
 }
 
@@ -33,29 +37,44 @@ function gatewayEnv(): Record<string, string | undefined> {
   }
 }
 
-export async function runTask(
+// The child inherits stdio; an interrupted run kills it instead of orphaning it.
+function spawnMise(cmd: string[], env: ReturnType<typeof gatewayEnv>): Effect.Effect<RunResult> {
+  const launch = Effect.try({
+    try: () =>
+      Bun.spawn(cmd, {
+        cwd: PACKAGE_ROOT,
+        env,
+        stdout: 'inherit',
+        stderr: 'inherit',
+        stdin: 'inherit',
+      }),
+    catch: errMsg,
+  })
+  return Effect.acquireUseRelease(
+    launch,
+    (proc) => Effect.tryPromise({ try: () => proc.exited, catch: errMsg }),
+    (proc) =>
+      Effect.sync(() => {
+        if (proc.exitCode === null) proc.kill()
+      }),
+  ).pipe(
+    Effect.matchEffect({
+      onFailure: (detail) =>
+        Effect.as(logErr(`webular: failed to launch mise (${detail})`), { exitCode: 127 }),
+      onSuccess: (exitCode) => Effect.succeed({ exitCode }),
+    }),
+  )
+}
+
+export function runTask(
   task: string,
   args: string[],
   extraEnv: Record<string, string> = {},
-): Promise<RunResult> {
-  const mise = resolveMise()
-  if (!mise) {
-    logErr(
-      'webular: mise not found — install it (https://mise.jdx.dev/getting-started.html) or reinstall webular, then re-run.',
-    )
-    return { exitCode: 127 }
-  }
-  try {
-    const proc = Bun.spawn([mise, 'run', task, '--', ...args], {
-      cwd: PACKAGE_ROOT,
-      env: { ...gatewayEnv(), ...extraEnv },
-      stdout: 'inherit',
-      stderr: 'inherit',
-      stdin: 'inherit',
-    })
-    return { exitCode: await proc.exited }
-  } catch (err) {
-    logErr(`webular: failed to launch mise (${errMsg(err)})`)
-    return { exitCode: 127 }
-  }
+): Effect.Effect<RunResult, never, Path.Path> {
+  const env = { ...gatewayEnv(), ...extraEnv }
+  return Effect.flatMap(resolveMise(), (mise) =>
+    mise
+      ? spawnMise([mise, 'run', task, '--', ...args], env)
+      : Effect.as(logErr(MISSING), { exitCode: 127 }),
+  )
 }

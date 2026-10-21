@@ -2,48 +2,87 @@
 // defaults, and the emit-option projection. Invalid input paths exit(2) and are
 // covered by the spawned command tests, not in-process here.
 import { describe, expect, test } from 'bun:test'
+import { Effect } from 'effect'
 import { emitOpts, intFlag, optIntFlag, parseFlags, strFlag } from '../../src/core/args.ts'
+import { eff } from '../_support/run.ts'
 
 describe('parseFlags — common surface', () => {
-  test('no longer defines the dead quiet/format flags', () => {
-    const { values } = parseFlags([])
-    expect(values.quiet).toBeUndefined()
-    expect(values.format).toBeUndefined()
-  })
+  test(
+    'no longer defines the dead quiet/format flags',
+    eff(
+      Effect.gen(function* () {
+        const { values } = yield* parseFlags([])
+        expect(values.quiet).toBeUndefined()
+        expect(values.format).toBeUndefined()
+      }),
+    ),
+  )
 
-  test('still parses json, output and timeout', () => {
-    const { values } = parseFlags(['--json', '-o', 'out.md', '--timeout', '5000'])
-    expect(values.json).toBe(true)
-    expect(values.output).toBe('out.md')
-    expect(values.timeout).toBe('5000')
-  })
+  test(
+    'still parses json, output and timeout',
+    eff(
+      Effect.gen(function* () {
+        const { values } = yield* parseFlags(['--json', '-o', 'out.md', '--timeout', '5000'])
+        expect(values.json).toBe(true)
+        expect(values.output).toBe('out.md')
+        expect(values.timeout).toBe('5000')
+      }),
+    ),
+  )
 })
 
 describe('intFlag — bounds-checked with default', () => {
-  test('returns the default when the flag is absent', () => {
-    expect(intFlag('crawl', {}, 'depth', { def: 2, min: 0, max: 10 })).toBe(2)
-  })
+  const bounds = { def: 2, min: 0, max: 10 }
 
-  test('accepts zero when min allows it', () => {
-    expect(intFlag('crawl', { depth: '0' }, 'depth', { def: 2, min: 0, max: 10 })).toBe(0)
-  })
+  test(
+    'returns the default when the flag is absent',
+    eff(
+      Effect.gen(function* () {
+        expect(yield* intFlag('crawl', {}, 'depth', bounds)).toBe(2)
+      }),
+    ),
+  )
 
-  test('accepts both boundary values', () => {
-    expect(intFlag('c', { n: '1' }, 'n', { def: 4, min: 1, max: 32 })).toBe(1)
-    expect(intFlag('c', { n: '32' }, 'n', { def: 4, min: 1, max: 32 })).toBe(32)
-  })
+  test(
+    'accepts zero when min allows it',
+    eff(
+      Effect.gen(function* () {
+        expect(yield* intFlag('crawl', { depth: '0' }, 'depth', bounds)).toBe(0)
+      }),
+    ),
+  )
+
+  test(
+    'accepts both boundary values',
+    eff(
+      Effect.gen(function* () {
+        expect(yield* intFlag('c', { n: '1' }, 'n', { def: 4, min: 1, max: 32 })).toBe(1)
+        expect(yield* intFlag('c', { n: '32' }, 'n', { def: 4, min: 1, max: 32 })).toBe(32)
+      }),
+    ),
+  )
 })
 
 describe('optIntFlag — bounds-checked without default', () => {
-  test('returns undefined when absent', () => {
-    expect(optIntFlag('scrape', {}, 'timeout', { min: 1, max: 600_000 })).toBeUndefined()
-  })
+  const bounds = { min: 1, max: 600_000 }
 
-  test('parses a valid integer', () => {
-    expect(optIntFlag('scrape', { timeout: '5000' }, 'timeout', { min: 1, max: 600_000 })).toBe(
-      5000,
-    )
-  })
+  test(
+    'returns undefined when absent',
+    eff(
+      Effect.gen(function* () {
+        expect(yield* optIntFlag('scrape', {}, 'timeout', bounds)).toBeUndefined()
+      }),
+    ),
+  )
+
+  test(
+    'parses a valid integer',
+    eff(
+      Effect.gen(function* () {
+        expect(yield* optIntFlag('scrape', { timeout: '5000' }, 'timeout', bounds)).toBe(5000)
+      }),
+    ),
+  )
 })
 
 describe('strFlag / emitOpts', () => {

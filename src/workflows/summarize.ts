@@ -1,10 +1,12 @@
 // SUMMARIZE workflow: fetch optional URL → extractive sentence-scoring summary,
 // composed as a Mastra non-model workflow over FOSS tools.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
+import { Effect } from 'effect'
 import { z } from 'zod'
 import { fetchText } from '../core/http.ts'
 import { htmlToArticle } from '../lib/html.ts'
 import { summarizeText } from '../lib/summarize.ts'
+import { stepRuntime } from './runtime.ts'
 
 const summarizeInput = z.object({
   text: z.string().optional(),
@@ -22,13 +24,15 @@ const resolveStep = createStep({
   id: 'resolve',
   inputSchema: summarizeInput,
   outputSchema: z.object({ text: z.string(), sentences: z.number() }),
-  execute: async ({ inputData }) => {
-    if (inputData.url) {
-      const html = await fetchText(inputData.url, { timeoutMs: inputData.timeoutMs })
-      const article = htmlToArticle(html)
-      return { text: article.text || html, sentences: inputData.sentences }
-    }
-    return { text: inputData.text ?? '', sentences: inputData.sentences }
+  execute: ({ inputData }) => {
+    const { url, sentences } = inputData
+    const text = url
+      ? Effect.map(
+          fetchText(url, { timeoutMs: inputData.timeoutMs }),
+          (html) => htmlToArticle(html).text || html,
+        )
+      : Effect.succeed(inputData.text ?? '')
+    return stepRuntime.runPromise(Effect.map(text, (t) => ({ text: t, sentences })))
   },
 })
 
@@ -36,7 +40,8 @@ const extractStep = createStep({
   id: 'extract',
   inputSchema: z.object({ text: z.string(), sentences: z.number() }),
   outputSchema: summarizeOutput,
-  execute: async ({ inputData }) => summarizeText(inputData.text, inputData.sentences),
+  execute: ({ inputData }) =>
+    stepRuntime.runPromise(Effect.sync(() => summarizeText(inputData.text, inputData.sentences))),
 })
 
 export const summarizeWorkflow = createWorkflow({

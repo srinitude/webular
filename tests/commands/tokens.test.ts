@@ -8,6 +8,7 @@ import { Effect, Schema } from 'effect'
 import { estimateTokens, PAGE_MAX_CHARS } from '../../src/core/output.ts'
 import { registerAll } from '../../src/tools/web.ts'
 import { runCli } from '../_support/cli.ts'
+import { eff } from '../_support/run.ts'
 
 const BUDGET = { toolsList: 520, page: estimateTokens('x'.repeat(PAGE_MAX_CHARS)), error: 80 }
 const parseJson = Schema.decodeUnknownSync(Schema.fromJsonString(Schema.Unknown))
@@ -17,7 +18,7 @@ const run = <A>(body: Effect.Effect<A>): Promise<A> => Effect.runPromise(body)
 
 const connected = Effect.gen(function* () {
   const server = new McpServer({ name: 'webular-test', version: '0.0.0' })
-  registerAll(server)
+  yield* registerAll(server)
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair()
   yield* Effect.promise(() => server.connect(serverTransport))
   const client = new Client({ name: 'test-client', version: '0.0.0' })
@@ -110,40 +111,39 @@ describe('MCP — compact, paged, deterministic results', () => {
     ))
 })
 
-const cli = (args: string[]) => Effect.promise(() => runCli('/bin/webular.ts', args))
+const cli = (args: string[]) => runCli('/bin/webular.ts', args)
 
 describe('CLI — piped output is compact, sorted, colorless, repeatable', () => {
   test(
     '--json off a TTY is one line; two runs match byte for byte',
-    () =>
-      run(
-        Effect.gen(function* () {
-          const [one, two] = yield* Effect.all([
-            cli(['diagram', '--json']),
-            cli(['diagram', '--json']),
-          ])
-          expect(one.code).toBe(0)
-          expect(one.out).toBe(two.out)
-          expect(one.out.trim().split('\n')).toHaveLength(1)
-          expect(one.out).not.toContain('\x1b[')
-        }),
-      ),
+    eff(
+      Effect.gen(function* () {
+        // One at a time: two concurrent first runs race on the setup stamp.
+        const [one, two] = yield* Effect.all(
+          [cli(['diagram', '--json']), cli(['diagram', '--json'])],
+          { concurrency: 1 },
+        )
+        expect(one.code).toBe(0)
+        expect(one.out).toBe(two.out)
+        expect(one.out.trim().split('\n')).toHaveLength(1)
+        expect(one.out).not.toContain('\x1b[')
+      }),
+    ),
     30_000,
   )
 
   test(
     '--select and --ndjson',
-    () =>
-      run(
-        Effect.gen(function* () {
-          const fields = yield* cli(['diagram', '--select', 'count'])
-          expect(Object.keys(parseRec(fields.out))).toEqual(['count'])
-          const nd = yield* cli(['diagram', '--ndjson'])
-          const lines = nd.out.trim().split('\n')
-          expect(lines.length).toBeGreaterThan(1)
-          for (const line of lines) expect(typeof parseJson(line)).toBe('string')
-        }),
-      ),
+    eff(
+      Effect.gen(function* () {
+        const fields = yield* cli(['diagram', '--select', 'count'])
+        expect(Object.keys(parseRec(fields.out))).toEqual(['count'])
+        const nd = yield* cli(['diagram', '--ndjson'])
+        const lines = nd.out.trim().split('\n')
+        expect(lines.length).toBeGreaterThan(1)
+        for (const line of lines) expect(typeof parseJson(line)).toBe('string')
+      }),
+    ),
     30_000,
   )
 })

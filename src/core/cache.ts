@@ -1,8 +1,7 @@
 // Bounded disk cache for text GETs: ETag / Last-Modified revalidation,
 // atomic temp-then-rename writes, oldest-write-first eviction under a byte
 // bound. Cache I/O failures never fail the fetch: they only skip the cache.
-import { BunServices } from '@effect/platform-bun'
-import { Config, Effect, FileSystem, ManagedRuntime, Option, Path, Random, Schema } from 'effect'
+import { Config, Effect, FileSystem, Option, Path, Random, Schema } from 'effect'
 
 export interface CacheOptions {
   cache?: boolean
@@ -93,8 +92,6 @@ const store = (dir: string, file: string, entry: Entry, maxBytes: number) =>
     yield* evict(dir, maxBytes)
   }).pipe(Effect.ignore)
 
-const attempt = <A>(run: () => Promise<A>) => Effect.tryPromise({ try: run, catch: (err) => err })
-
 const toEntry = (body: string, h: Headers): Entry => ({
   body,
   etag: h.get('etag'),
@@ -104,34 +101,23 @@ const toEntry = (body: string, h: Headers): Entry => ({
 
 // GET text through the disk cache. `get` performs the request with the extra
 // validator headers; `read` turns a response into text (and rejects bad ones).
-export const cachedGetTextEffect = Effect.fn('cachedGetText')(function* (
+export const cachedGetText = Effect.fn('cachedGetText')(function* <E>(
   url: string,
-  get: (headers: Record<string, string>) => Promise<Response>,
-  read: (res: Response) => Promise<string>,
+  get: (headers: Record<string, string>) => Effect.Effect<Response, E>,
+  read: (res: Response) => Effect.Effect<string, E>,
   opts: CacheOptions = {},
 ) {
   const { dir, maxBytes, off } = yield* settings
   const bypass = off || opts.cache === false
   const file = (yield* Path.Path).join(dir, `${keyOf('GET', url)}.json`)
   const entry = bypass ? Option.none<Entry>() : yield* load(file)
-  const res = yield* attempt(() => get(validators(entry)))
+  const res = yield* get(validators(entry))
   const stream = res.body
   if (res.status === 304 && Option.isSome(entry)) {
-    if (stream) yield* attempt(() => stream.cancel()).pipe(Effect.ignore)
+    if (stream) yield* Effect.ignore(Effect.tryPromise(() => stream.cancel()))
     return entry.value.body
   }
-  const body = yield* attempt(() => read(res))
+  const body = yield* read(res)
   if (!bypass && storable(res)) yield* store(dir, file, toEntry(body, res.headers), maxBytes)
   return body
 })
-
-// ponytail: owns only stateless Bun services, so it is never disposed.
-const runtime = ManagedRuntime.make(BunServices.layer)
-
-// Promise boundary for the not-yet-Effect fetch layer.
-export const cachedGetText = (
-  url: string,
-  get: (headers: Record<string, string>) => Promise<Response>,
-  read: (res: Response) => Promise<string>,
-  opts: CacheOptions = {},
-): Promise<string> => runtime.runPromise(cachedGetTextEffect(url, get, read, opts))

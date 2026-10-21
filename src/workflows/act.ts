@@ -1,9 +1,12 @@
 // ACT workflow: drive a real browser via the agent-browser CLI (open ->
 // snapshot [-> screenshot] -> close), composed as a Mastra non-model workflow.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
+import { Effect } from 'effect'
 import { z } from 'zod'
+import { CliError } from '../core/effect.ts'
 import { outPath } from '../core/safepath.ts'
 import { runBatch } from '../lib/agentbrowser.ts'
+import { stepRuntime } from './runtime.ts'
 
 const actInput = z.object({
   url: z.string().url(),
@@ -16,18 +19,24 @@ const actOutput = z.object({
   screenshot: z.string().optional(),
 })
 
+const act = Effect.fn('act')(function* (input: z.infer<typeof actInput>) {
+  const cmds: string[][] = [['open', input.url], ['snapshot']]
+  if (input.screenshot) cmds.push(['screenshot', yield* outPath(input.screenshot)])
+  cmds.push(['close'])
+  const res = yield* runBatch(cmds)
+  if (res.code !== 0)
+    return yield* new CliError({
+      message: `agent-browser failed: ${res.stderr.trim()}`,
+      exitCode: 1,
+    })
+  return { url: input.url, snapshot: res.stdout.trim(), screenshot: input.screenshot }
+})
+
 const actStep = createStep({
   id: 'act',
   inputSchema: actInput,
   outputSchema: actOutput,
-  execute: async ({ inputData }) => {
-    const cmds: string[][] = [['open', inputData.url], ['snapshot']]
-    if (inputData.screenshot) cmds.push(['screenshot', outPath(inputData.screenshot)])
-    cmds.push(['close'])
-    const res = await runBatch(cmds)
-    if (res.code !== 0) throw new Error(`agent-browser failed: ${res.stderr.trim()}`)
-    return { url: inputData.url, snapshot: res.stdout.trim(), screenshot: inputData.screenshot }
-  },
+  execute: ({ inputData }) => stepRuntime.runPromise(act(inputData)),
 })
 
 export const actWorkflow = createWorkflow({

@@ -4,9 +4,11 @@
 // `source` names the one that answered.
 // composed as a Mastra non-model workflow over the FOSS search lib.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
+import { Effect } from 'effect'
 import { z } from 'zod'
 import { searchWithSource } from '../lib/search-chain.ts'
 import { SEARCH_SOURCES } from '../lib/sources-search.ts'
+import { stepRuntime } from './runtime.ts'
 
 const searchInput = z.object({
   query: z.string().min(1),
@@ -31,10 +33,16 @@ const searchStep = createStep({
   id: 'search',
   inputSchema: searchInput,
   outputSchema: searchOutput,
-  execute: async ({ inputData }) => {
+  execute: ({ inputData }) => {
     const { query, limit, source } = inputData
-    const { source: answered, results } = await searchWithSource(source, query, limit)
-    return { query, count: results.length, ...(answered && { source: answered }), results }
+    return stepRuntime.runPromise(
+      Effect.map(searchWithSource(source, query, limit), ({ source: answered, results }) => ({
+        query,
+        count: results.length,
+        ...(answered && { source: answered }),
+        results,
+      })),
+    )
   },
 })
 

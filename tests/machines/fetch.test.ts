@@ -1,14 +1,13 @@
 // Model-based test: the shortest path to every final state and context of
 // the fetch machine, replayed against the real fetchTextWithinHost over real sockets.
-import { afterAll, describe, expect, test } from 'bun:test'
+import { describe, expect, test } from 'bun:test'
+import { Effect } from 'effect'
 import { getShortestPaths } from 'xstate/graph'
 import { fetchTextWithinHost } from '../../src/core/http.ts'
 import { fetchMachine } from '../../src/machines/fetch.ts'
 import { finalPaths } from '../_support/paths.ts'
+import { eff } from '../_support/run.ts'
 import { type Reply, startScriptedServer } from '../_support/scripted-server.ts'
-
-const server = startScriptedServer()
-afterAll(() => server.stop())
 
 const REPLY_FOR_EVENT: Record<string, Reply> = {
   OK: { status: 200 },
@@ -31,10 +30,10 @@ const OUTCOME_FOR_FINAL: Record<string, RegExp> = {
 
 const paths = finalPaths(fetchMachine, Object.keys(REPLY_FOR_EVENT), getShortestPaths)
 
-async function outcome(): Promise<string> {
-  const url = `${server.origin}/start`
-  return fetchTextWithinHost(url, '127.0.0.1', { timeoutMs: 150 }).catch((e) => String(e))
-}
+const outcome = (origin: string) =>
+  fetchTextWithinHost(`${origin}/start`, '127.0.0.1', { timeoutMs: 150 }).pipe(
+    Effect.catch((e) => Effect.succeed(String(e))),
+  )
 
 describe('fetch machine matches fetchTextWithinHost', () => {
   test('the model reaches every final state', () => {
@@ -43,15 +42,19 @@ describe('fetch machine matches fetchTextWithinHost', () => {
 
   test.each(paths.map((p) => [`${p.final}: ${p.events.join(' ')}`, p] as const))(
     '%s',
-    async (_name, path) => {
-      server.play(path.events.map((e) => REPLY_FOR_EVENT[e] ?? 'drop'))
-      expect(await outcome()).toMatch(OUTCOME_FOR_FINAL[path.final] ?? /never/)
-      // ponytail: a hung final request can be aborted before its socket is
-      // counted, so timeouts check only the requests before the hang.
-      const minimum = path.final === 'timedOut' ? path.events.length - 1 : path.events.length
-      expect(server.served()).toBeGreaterThanOrEqual(minimum)
-      expect(server.served()).toBeLessThanOrEqual(path.events.length)
-    },
+    (_name, path) =>
+      eff(
+        Effect.gen(function* () {
+          const server = yield* startScriptedServer()
+          server.play(path.events.map((e) => REPLY_FOR_EVENT[e] ?? 'drop'))
+          expect(yield* outcome(server.origin)).toMatch(OUTCOME_FOR_FINAL[path.final] ?? /never/)
+          // ponytail: a hung final request can be aborted before its socket is
+          // counted, so timeouts check only the requests before the hang.
+          const minimum = path.final === 'timedOut' ? path.events.length - 1 : path.events.length
+          expect(server.served()).toBeGreaterThanOrEqual(minimum)
+          expect(server.served()).toBeLessThanOrEqual(path.events.length)
+        }),
+      )(),
     10_000,
   )
 })

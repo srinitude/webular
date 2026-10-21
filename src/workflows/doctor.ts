@@ -2,6 +2,7 @@
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { z } from 'zod'
 import { runChecks } from '../lib/doctor.ts'
+import { stepRuntime } from './runtime.ts'
 
 const checkSchema = z.object({
   name: z.string(),
@@ -20,7 +21,7 @@ const checksStep = createStep({
   id: 'checks',
   inputSchema: doctorInput,
   outputSchema: doctorOutput,
-  execute: async () => runChecks(),
+  execute: () => stepRuntime.runPromise(runChecks()),
 })
 
 export const doctorWorkflow = createWorkflow({

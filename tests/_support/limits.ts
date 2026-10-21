@@ -4,6 +4,7 @@
 // nesting is naturally measured relative to the test() declaration.
 import { readFileSync } from 'node:fs'
 import { Glob } from 'bun'
+import { Effect } from 'effect'
 import ts from 'typescript'
 
 export interface Violation {
@@ -39,7 +40,7 @@ const NESTERS = new Set<ts.SyntaxKind>([
   ts.SyntaxKind.CatchClause,
 ])
 
-export function listFiles(repo: string): string[] {
+function scan(repo: string): string[] {
   const out: string[] = []
   for (const dir of ROOTS) {
     for (const f of new Glob('**/*.ts').scanSync({ cwd: `${repo}/${dir}`, absolute: true })) {
@@ -99,7 +100,7 @@ function deepest(node: ts.Node, depth: number): number {
   return max
 }
 
-export function analyzeFile(file: string, rel: string): Violation[] {
+function analyze(file: string, rel: string): Violation[] {
   const src = readFileSync(file, 'utf8')
   const out: Violation[] = []
   const lines = src.split('\n').length
@@ -110,3 +111,7 @@ export function analyzeFile(file: string, rel: string): Violation[] {
   if (nesting > LIMITS.nesting) out.push({ file: rel, kind: 'nesting', detail: `depth ${nesting}` })
   return out
 }
+
+export const listFiles = (repo: string) => Effect.sync(() => scan(repo))
+
+export const analyzeFile = (file: string, rel: string) => Effect.sync(() => analyze(file, rel))

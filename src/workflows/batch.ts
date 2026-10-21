@@ -1,10 +1,11 @@
-// BATCH workflow: scrape many targets concurrently using p-limit. Results
-// collect by Promise.all index (input order), never completion order; sub-runs
+// BATCH workflow: scrape many targets concurrently with a bounded
+// Effect.forEach. Results keep input order, never completion order; sub-runs
 // get deterministic runIds (the target URL).
 import { createStep, createWorkflow } from '@mastra/core/workflows'
-import pLimit from 'p-limit'
+import { Effect } from 'effect'
 import { z } from 'zod'
 import { errMsg } from '../core/output.ts'
+import { stepRuntime } from './runtime.ts'
 import { scrapeWorkflow } from './scrape.ts'
 
 const batchInput = z.object({
@@ -25,37 +26,38 @@ const batchOutput = z.object({
   results: z.array(resultItem),
 })
 
-async function scrapeOne(
-  url: string,
-  index: number,
-  timeoutMs?: number,
-): Promise<z.infer<typeof resultItem>> {
-  try {
-    // Index-prefixed runId: deterministic AND unique — Mastra caches Run
-    // instances by id, so duplicate target URLs must not share one.
-    const run = await scrapeWorkflow.createRun({ runId: `${index}:${url}` })
-    const outcome = await run.start({ inputData: { url, timeoutMs } })
-    if (outcome.status !== 'success') {
+type ResultItem = z.infer<typeof resultItem>
+
+// Index-prefixed runId: deterministic AND unique — Mastra caches Run
+// instances by id, so duplicate target URLs must not share one.
+const scrapeRun = (url: string, index: number, timeoutMs?: number) =>
+  Effect.tryPromise(() => scrapeWorkflow.createRun({ runId: `${index}:${url}` })).pipe(
+    Effect.flatMap((run) => Effect.tryPromise(() => run.start({ inputData: { url, timeoutMs } }))),
+  )
+
+const scrapeOne = (url: string, index: number, timeoutMs?: number): Effect.Effect<ResultItem> =>
+  Effect.match(scrapeRun(url, index, timeoutMs), {
+    onFailure: (err): ResultItem => ({ url, ok: false, error: errMsg(err.cause ?? err) }),
+    onSuccess: (outcome): ResultItem => {
+      if (outcome.status === 'success') return { url, ok: true, title: outcome.result.title }
       const detail = outcome.status === 'failed' ? outcome.error.message : outcome.status
       return { url, ok: false, error: detail }
-    }
-    return { url, ok: true, title: outcome.result.title }
-  } catch (err) {
-    return { url, ok: false, error: errMsg(err) }
-  }
-}
+    },
+  })
 
 const runBatchStep = createStep({
   id: 'run-batch',
   inputSchema: batchInput,
   outputSchema: batchOutput,
-  execute: async ({ inputData }) => {
-    const limit = pLimit(inputData.concurrency)
-    const results = await Promise.all(
-      inputData.urls.map((url, index) => limit(() => scrapeOne(url, index, inputData.timeoutMs))),
-    )
-    return { count: results.length, results }
-  },
+  execute: ({ inputData }) =>
+    stepRuntime.runPromise(
+      Effect.map(
+        Effect.forEach(inputData.urls, (url, index) => scrapeOne(url, index, inputData.timeoutMs), {
+          concurrency: inputData.concurrency,
+        }),
+        (results) => ({ count: results.length, results }),
+      ),
+    ),
 })
 
 export const batchWorkflow = createWorkflow({

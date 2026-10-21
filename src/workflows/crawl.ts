@@ -1,8 +1,10 @@
 // CRAWL workflow: BFS over same-host pages, non-model, FOSS only.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
+import { Effect } from 'effect'
 import { z } from 'zod'
 import { bfsCrawl } from '../lib/crawl.ts'
 import { fetchErrorsSchema } from '../lib/sources.ts'
+import { stepRuntime } from './runtime.ts'
 
 const crawlInput = z.object({
   url: z.string().url(),
@@ -25,15 +27,18 @@ const crawlStep = createStep({
   id: 'crawl',
   inputSchema: crawlInput,
   outputSchema: crawlOutput,
-  execute: async ({ inputData }) => {
-    const { root, pages, errors } = await bfsCrawl(inputData.url, {
-      limit: inputData.limit,
-      depth: inputData.depth,
-      concurrency: inputData.concurrency,
-      timeoutMs: inputData.timeoutMs,
-    })
-    return { root, count: pages.length, pages, errors }
-  },
+  execute: ({ inputData }) =>
+    stepRuntime.runPromise(
+      Effect.map(
+        bfsCrawl(inputData.url, {
+          limit: inputData.limit,
+          depth: inputData.depth,
+          concurrency: inputData.concurrency,
+          timeoutMs: inputData.timeoutMs,
+        }),
+        ({ root, pages, errors }) => ({ root, count: pages.length, pages, errors }),
+      ),
+    ),
 })
 
 export const crawlWorkflow = createWorkflow({

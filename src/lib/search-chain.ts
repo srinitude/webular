@@ -3,8 +3,7 @@
 // Also home of the scholarly backends: Crossref and OpenAlex (keyless REST
 // APIs; WEBULAR_MAILTO joins their polite pool).
 import { Config, Data, Effect, Schema } from 'effect'
-import { fetchTextEffect } from '../core/http.ts'
-import { runtime } from '../core/runtime.ts'
+import { fetchText } from '../core/http.ts'
 import { webSearch } from './search.ts'
 import {
   endpoint,
@@ -18,6 +17,11 @@ interface Hit {
   title: string
   url: string
   description: string
+}
+
+interface Answer {
+  source?: SearchSource
+  results: Hit[]
 }
 
 class SearchSourceError extends Data.TaggedError('SearchSourceError')<{
@@ -73,7 +77,7 @@ const getJson = Effect.fn('scholarlyGet')(function* <A>(
 ) {
   const mailto = yield* Config.String('WEBULAR_MAILTO').pipe(Config.withDefault(''))
   const url = endpoint(base, mailto ? { ...params, mailto } : params)
-  const body = yield* fetchTextEffect(url, { timeoutMs: 20_000 })
+  const body = yield* fetchText(url, { timeoutMs: 20_000 })
   return yield* Schema.decodeUnknownEffect(schema)(body)
 })
 
@@ -102,13 +106,10 @@ const openalex = (query: string, limit: number) =>
     ),
   )
 
-const one = (source: SearchSource, query: string, limit: number): Effect.Effect<Hit[], unknown> => {
+const one = (source: SearchSource, query: string, limit: number) => {
   if (source === 'crossref') return crossref(query, limit)
   if (source === 'openalex') return openalex(query, limit)
-  return Effect.tryPromise({
-    try: () => (source === 'web' ? webSearch(query, limit) : sourceSearch(source, query, limit)),
-    catch: (cause) => cause,
-  })
+  return source === 'web' ? webSearch(query, limit) : sourceSearch(source, query, limit)
 }
 
 const searchSourceEffect = (source: SearchSource, query: string, limit: number) =>
@@ -127,21 +128,14 @@ const fallbackSearchEffect = (query: string, limit: number) =>
           (results) => results.length > 0,
           () => new EmptySearchError({ source }),
         ),
-        Effect.map((results) => ({ source, results })),
+        Effect.map((results): Answer => ({ source, results })),
       ),
     ),
   )
 
-// Promise edge for the workflow: the default web source runs the chain; an
-// explicit source queries just that source.
-export function searchWithSource(
-  source: SearchSource,
-  query: string,
-  limit: number,
-): Promise<{ source?: SearchSource; results: Hit[] }> {
-  return runtime.runPromise(
-    source === 'web'
-      ? fallbackSearchEffect(query, limit)
-      : Effect.map(searchSourceEffect(source, query, limit), (results) => ({ results })),
-  )
-}
+// The default web source runs the chain; an explicit source queries just that
+// source.
+export const searchWithSource = (source: SearchSource, query: string, limit: number) =>
+  source === 'web'
+    ? fallbackSearchEffect(query, limit)
+    : Effect.map(searchSourceEffect(source, query, limit), (results): Answer => ({ results }))

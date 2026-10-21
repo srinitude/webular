@@ -1,18 +1,26 @@
 // PARSE command entry — invoked by `mise run run:parse`. Parses flags,
 // runs the Mastra parse workflow, emits the result. No mise logic here.
+import { Effect } from 'effect'
 import { runWorkflow } from '../cli/run.ts'
 import { emitOpts, parseFlags } from '../core/args.ts'
-import { logErr } from '../core/output.ts'
-import { parseWorkflow } from '../workflows/parse.ts'
+import { CliError, runMain } from '../core/effect.ts'
 
-async function main(): Promise<number> {
-  const { values, positionals } = parseFlags(Bun.argv.slice(2), { file: { type: 'string' } })
+const main = Effect.gen(function* () {
+  const { values, positionals } = yield* parseFlags(Bun.argv.slice(2), { file: { type: 'string' } })
   const file = (values.file as string) ?? positionals[0]
   if (!file) {
-    logErr('parse: missing --file <path> (or pass a positional path)')
-    return 2
+    return yield* new CliError({
+      message: 'parse: missing --file <path> (or pass a positional path)',
+      exitCode: 2,
+    })
   }
-  return runWorkflow('parse', parseWorkflow, { file }, emitOpts(values))
-}
+  return yield* runWorkflow(
+    'parse',
+    () => import('../workflows/parse.ts'),
+    (m) => m.parseWorkflow,
+    { file },
+    emitOpts(values),
+  )
+})
 
-process.exit(await main())
+runMain(main)

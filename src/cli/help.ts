@@ -1,13 +1,19 @@
 // Help + version text (clig.dev: helpful, discoverable, no surprises).
+import { Effect } from 'effect'
 import pkg from '../../package.json' with { type: 'json' }
 import { COMMANDS } from './commands.ts'
 
-export function printVersion(): number {
-  process.stdout.write(`webular ${pkg.version}\n`)
-  return 0
+const print = (text: string): Effect.Effect<number> =>
+  Effect.sync(() => {
+    process.stdout.write(`${text}\n`)
+    return 0
+  })
+
+export function printVersion(): Effect.Effect<number> {
+  return print(`webular ${pkg.version}`)
 }
 
-export function printHelp(): number {
+export function printHelp(): Effect.Effect<number> {
   const head = [
     'webular — universal web research CLI',
     '',
@@ -34,6 +40,5 @@ export function printHelp(): number {
     '',
     'Every command is routed through `mise run run:<command>`.',
   ]
-  process.stdout.write(`${[...head, ...cmds, ...tail].join('\n')}\n`)
-  return 0
+  return print([...head, ...cmds, ...tail].join('\n'))
 }

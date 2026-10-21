@@ -2,7 +2,7 @@
 // must be imported somewhere else in src/, bin/ or tests/ — orphaned exports
 // are dead surface. Name-based (not path-resolved): a name imported anywhere
 // counts everywhere, which errs on the permissive side.
-import { readFileSync } from 'node:fs'
+import { Effect, FileSystem } from 'effect'
 import ts from 'typescript'
 import { listFiles } from './limits.ts'
 
@@ -41,26 +41,53 @@ function collectImports(sf: ts.SourceFile, into: Set<string>): void {
     if (!bindings || !ts.isNamedImports(bindings)) continue
     for (const el of bindings.elements) into.add((el.propertyName ?? el.name).text)
   }
+  collectLazyImports(sf, into)
 }
 
-function parse(file: string): ts.SourceFile {
-  return ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.Latest, true)
+// A call with a lazy loader `() => import('x')` and a picker `(m) => m.name`
+// imports `name` too.
+const isImportLoader = (arg: ts.Expression): boolean =>
+  ts.isArrowFunction(arg) &&
+  ts.isCallExpression(arg.body) &&
+  arg.body.expression.kind === ts.SyntaxKind.ImportKeyword
+
+function collectLazyImports(node: ts.Node, into: Set<string>): void {
+  if (ts.isCallExpression(node) && node.arguments.some(isImportLoader)) {
+    for (const arg of node.arguments) {
+      if (ts.isArrowFunction(arg) && ts.isPropertyAccessExpression(arg.body))
+        into.add(arg.body.name.text)
+    }
+  }
+  ts.forEachChild(node, (child) => collectLazyImports(child, into))
 }
 
-export function findDeadExports(repo: string, allow: Set<string>): DeadExport[] {
-  const files = listFiles(repo)
+const parse = (fs: FileSystem.FileSystem, file: string) =>
+  Effect.map(fs.readFileString(file), (src) =>
+    ts.createSourceFile(file, src, ts.ScriptTarget.Latest, true),
+  )
+
+function dead(sources: ts.SourceFile[], repo: string, allow: Set<string>): DeadExport[] {
   const imported = new Set<string>()
   const exported: DeadExport[] = []
-  for (const file of files) {
-    const sf = parse(file)
+  for (const sf of sources) {
     collectImports(sf, imported)
-    if (!file.includes('/src/')) continue
+    if (!sf.fileName.includes('/src/')) continue
     for (const stmt of sf.statements) {
       if (!hasExport(stmt)) continue
       for (const name of declaredNames(stmt)) {
-        exported.push({ file: file.slice(repo.length + 1), name })
+        exported.push({ file: sf.fileName.slice(repo.length + 1), name })
       }
     }
   }
   return exported.filter((e) => !imported.has(e.name) && !allow.has(e.name))
 }
+
+export const findDeadExports = Effect.fn('findDeadExports')(function* (
+  repo: string,
+  allow: Set<string>,
+) {
+  const fs = yield* FileSystem.FileSystem
+  const files = yield* listFiles(repo)
+  const sources = yield* Effect.forEach(files, (file) => parse(fs, file), { concurrency: 16 })
+  return dead(sources, repo, allow)
+})

@@ -3,9 +3,10 @@
 // DuckDuckGo one included). Crossref and OpenAlex bodies are recorded live
 // responses, trimmed to two items. No mocks.
 import { describe, expect, test } from 'bun:test'
-import { Config, Effect, Schema } from 'effect'
+import { Config, Effect, FileSystem, Schema } from 'effect'
 import { runCli } from '../_support/cli.ts'
 import { type Routes, startFixture } from '../_support/fixture.ts'
+import { eff } from '../_support/run.ts'
 
 const Output = Schema.fromJsonString(
   Schema.Struct({
@@ -18,8 +19,10 @@ const Output = Schema.fromJsonString(
 )
 type Output = typeof Output.Type
 
-const body = (name: string) =>
-  Effect.promise(() => Bun.file(`${import.meta.dir}/../fixtures/${name}`).text())
+const body = Effect.fn('body')(function* (name: string) {
+  const fs = yield* FileSystem.FileSystem
+  return yield* fs.readFileString(`${import.meta.dir}/../fixtures/${name}`)
+})
 
 const json = (text: string) =>
   new Response(text, { headers: { 'content-type': 'application/json' } })
@@ -38,25 +41,22 @@ const fixture = Effect.fn('fixture')(function* (crossrefUp: boolean) {
   const empty = JSON.stringify({ message: { items: [] } })
   const crossref = crossrefUp ? yield* body('crossref-works.json') : empty
   const openalex = yield* body('openalex-works.json')
-  return yield* Effect.acquireRelease(
-    Effect.sync(() => startFixture(() => routes(crossref, openalex))),
-    (fx) => Effect.sync(() => fx.stop()),
-  )
+  return yield* startFixture(() => routes(crossref, openalex))
 })
 
 const search = (args: string[], crossrefUp: boolean, check: (d: Output, webHits: number) => void) =>
-  Effect.gen(function* () {
-    const fx = yield* fixture(crossrefUp)
-    // Windows spells the variable `Path`.
-    const PATH = yield* Config.String('PATH').pipe(Config.orElse(() => Config.String('Path')))
-    const HOME = yield* Config.String('HOME').pipe(Config.withDefault('/tmp'))
-    const env = { PATH, HOME, WEBULAR_SOURCE_ORIGIN: fx.origin }
-    const run = yield* Effect.promise(() =>
-      runCli('src/commands/search.ts', ['bun', ...args, '--json'], { env }),
-    )
-    expect(run.code).toBe(0)
-    check(yield* Schema.decodeUnknownEffect(Output)(run.out), fx.hits('/html/'))
-  }).pipe(Effect.scoped, Effect.runPromise)
+  eff(
+    Effect.gen(function* () {
+      const fx = yield* fixture(crossrefUp)
+      // Windows spells the variable `Path`.
+      const PATH = yield* Config.String('PATH').pipe(Config.orElse(() => Config.String('Path')))
+      const HOME = yield* Config.String('HOME').pipe(Config.withDefault('/tmp'))
+      const env = { PATH, HOME, WEBULAR_SOURCE_ORIGIN: fx.origin }
+      const run = yield* runCli('src/commands/search.ts', ['bun', ...args, '--json'], { env })
+      expect(run.code).toBe(0)
+      check(yield* Schema.decodeUnknownEffect(Output)(run.out), fx.hits('/html/'))
+    }),
+  )()
 
 describe('webular search — fallback chain for the default web source', () => {
   test(

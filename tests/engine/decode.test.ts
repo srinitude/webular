@@ -1,7 +1,9 @@
 // Decode-layer contract: charset precedence (BOM > header > meta > utf-8),
 // streaming byte cap, and content-length prechecks — on real Response objects.
 import { describe, expect, test } from 'bun:test'
+import { Effect } from 'effect'
 import { pickCharset, readTextCapped } from '../../src/core/decode.ts'
+import { eff, failMsg } from '../_support/run.ts'
 
 const latin1 = (s: string): Uint8Array<ArrayBuffer> =>
   new Uint8Array([...s].map((c) => c.charCodeAt(0) & 0xff))
@@ -27,34 +29,59 @@ describe('pickCharset — precedence', () => {
 })
 
 describe('readTextCapped — streaming cap + charset decode', () => {
-  test('decodes windows-1252 bytes correctly', async () => {
-    const res = new Response(latin1('caf\xe9'), {
-      headers: { 'content-type': 'text/plain; charset=windows-1252' },
-    })
-    expect(await readTextCapped(res, 'u', 1024)).toBe('café')
-  })
+  test(
+    'decodes windows-1252 bytes correctly',
+    eff(
+      Effect.gen(function* () {
+        const res = new Response(latin1('caf\xe9'), {
+          headers: { 'content-type': 'text/plain; charset=windows-1252' },
+        })
+        expect(yield* readTextCapped(res, 'u', 1024)).toBe('café')
+      }),
+    ),
+  )
 
-  test('rejects when the stream exceeds the cap', async () => {
-    const res = new Response('x'.repeat(100))
-    expect(readTextCapped(res, 'u', 10)).rejects.toThrow(/exceeded/)
-  })
+  test(
+    'rejects when the stream exceeds the cap',
+    eff(
+      Effect.gen(function* () {
+        const res = new Response('x'.repeat(100))
+        expect(yield* failMsg(readTextCapped(res, 'u', 10))).toMatch(/exceeded/)
+      }),
+    ),
+  )
 
-  test('rejects on an oversized declared content-length', async () => {
-    const res = new Response('tiny', { headers: { 'content-length': '5000' } })
-    expect(readTextCapped(res, 'u', 100)).rejects.toThrow(/too large/)
-  })
+  test(
+    'rejects on an oversized declared content-length',
+    eff(
+      Effect.gen(function* () {
+        const res = new Response('tiny', { headers: { 'content-length': '5000' } })
+        expect(yield* failMsg(readTextCapped(res, 'u', 100))).toMatch(/too large/)
+      }),
+    ),
+  )
 
-  test('a malformed content-length falls through to the stream cap', async () => {
-    const res = new Response('x'.repeat(100), { headers: { 'content-length': 'abc' } })
-    expect(readTextCapped(res, 'u', 10)).rejects.toThrow(/exceeded/)
-    const ok = new Response('fine', { headers: { 'content-length': 'abc' } })
-    expect(await readTextCapped(ok, 'u', 1024)).toBe('fine')
-  })
+  test(
+    'a malformed content-length falls through to the stream cap',
+    eff(
+      Effect.gen(function* () {
+        const res = new Response('x'.repeat(100), { headers: { 'content-length': 'abc' } })
+        expect(yield* failMsg(readTextCapped(res, 'u', 10))).toMatch(/exceeded/)
+        const ok = new Response('fine', { headers: { 'content-length': 'abc' } })
+        expect(yield* readTextCapped(ok, 'u', 1024)).toBe('fine')
+      }),
+    ),
+  )
 
-  test('an unsupported charset label falls back to utf-8 deterministically', async () => {
-    const res = new Response('plain', {
-      headers: { 'content-type': 'text/plain; charset=koi8-r' },
-    })
-    expect(await readTextCapped(res, 'u', 1024)).toBe('plain')
-  })
+  test(
+    'an unsupported charset label falls back to utf-8 deterministically',
+    eff(
+      Effect.gen(function* () {
+        const res = new Response('plain', {
+          headers: { 'content-type': 'text/plain; charset=koi8-r' },
+        })
+        expect(yield* readTextCapped(res, 'u', 1024)).toBe('plain')
+      }),
+    ),
+  )
 })
