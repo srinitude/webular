@@ -110,8 +110,7 @@ const robotsSitemaps = Effect.fn('map.robotsSitemaps')(function* (
   return { links: results.flatMap((r) => r.links), errors: results.flatMap((r) => r.errors) }
 })
 
-// Chain: /sitemap.xml, then robots.txt Sitemap: entries. null means "no
-// sitemap" — the caller falls back to page links, which is not an error.
+// Chain: /sitemap.xml, then robots.txt Sitemap: entries. null means "no sitemap": the caller falls back to page links, which is not an error.
 const fetchSitemap = Effect.fn('map.fetchSitemap')(function* (site: string, timeoutMs?: number) {
   const host = new URL(site).hostname
   const budget = timeoutMs ?? SITEMAP_TIMEOUT_MS

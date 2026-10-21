@@ -190,7 +190,6 @@ const archivedCrawl = (rootUrl: string, limit: number, reason: string) =>
     const pages = urls.map((url) => ({ url, title: '' }))
     return { root: rootUrl, pages, errors: pages.length ? [] : [{ url: rootUrl, reason }] }
   })
-
 export const bfsCrawl = Effect.fn('bfsCrawl')(function* (root: string, opts: CrawlOptions) {
   const rootUrl = normalizeUrl(root)
   if (!rootUrl) return yield* new CrawlError({ message: `crawl: invalid URL ${root}` })

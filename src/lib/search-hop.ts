@@ -58,6 +58,10 @@ const bridgeEntity = (hits: ReadonlyArray<Hit>): string | undefined => {
   return best?.[0]
 }
 
+// An entity page has a short title ending in its name ("Werner Heisenberg").
+const namedFor = (entity: string) => (h: Hit) =>
+  h.title.split(/\s+/).length <= 4 && h.title.toLowerCase().endsWith(entity.toLowerCase())
+
 // Runs only when the first round is weak: no top-3 hit names the entity.
 export const secondHop = Effect.fn('secondHop')(function* <M extends { weak: boolean }>(
   query: string,
@@ -66,10 +70,8 @@ export const secondHop = Effect.fn('secondHop')(function* <M extends { weak: boo
   search: SearchRound<M>,
 ) {
   const entity = mainEntity(query) ?? bridgeEntity(first.results.slice(0, HOP_TOP))
-  // An entity page has a short title ending in its name ("Werner Heisenberg").
-  const named = (h: Hit) =>
-    h.title.split(/\s+/).length <= 4 && h.title.toLowerCase().endsWith(entity?.toLowerCase() ?? '')
   if (!entity) return first
+  const named = namedFor(entity)
   // The entity page is already near the top: lead with it, since the answer
   // step takes the lead hit's title as the entity of a nameless question.
   const here = first.results.slice(0, HOP_TOP).find(named)
