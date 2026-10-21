@@ -3,7 +3,7 @@
 // the entity, and fuse both with the first round. One extra round, never
 // recursive. The caller passes its own one-round search in, so this file
 // never imports search-chain.ts.
-import { Effect } from 'effect'
+import { Effect, Fiber } from 'effect'
 import { hitKey, scoreHits, WEAK_SCORE } from './search.ts'
 
 interface Hit {
@@ -69,7 +69,22 @@ const namedFor = (entity: string) => (h: Hit) =>
   h.title.split(/\s+/).length <= entity.split(/\s+/).length + 3 &&
   h.title.toLowerCase().endsWith(entity.toLowerCase())
 
+// The fact round searches the query with the entity page's title in place of
+// the entity. That title is most often the entity itself, so the unchanged
+// query starts beside the entity round; a renamed query drops it and runs anew.
+const factRound = <M extends { weak: boolean }>(
+  query: string,
+  renamed: string,
+  limit: number,
+  early: Fiber.Fiber<Found<M>>,
+  search: SearchRound<M>,
+) =>
+  renamed === query
+    ? Fiber.join(early)
+    : Effect.andThen(Fiber.interrupt(early), search(renamed, limit))
+
 // Runs only when the first round is weak: no top-3 hit names the entity.
+// Scoped, so a fact round still in flight stops when the hop ends or times out.
 export const secondHop = Effect.fn('secondHop')(function* <M extends { weak: boolean }>(
   query: string,
   limit: number,
@@ -83,11 +98,12 @@ export const secondHop = Effect.fn('secondHop')(function* <M extends { weak: boo
   // step takes the lead hit's title as the entity of a nameless question.
   const here = first.results.slice(0, HOP_TOP).find(named)
   if (here) return { ...first, results: [here, ...first.results.filter((h) => h !== here)] }
+  // A bridge entity is not in the question, so its page is the fact source.
+  const early = query.includes(entity) ? yield* Effect.forkScoped(search(query, limit)) : undefined
   const page = yield* search(entity, HOP_PAGE_LIMIT)
   const name = page.results.find(named)?.title ?? entity
-  // A bridge entity is not in the question, so its page is the fact source.
-  const fact = query.includes(entity)
-    ? yield* search(query.replace(entity, name), limit)
+  const fact = early
+    ? yield* factRound(query, query.replace(entity, name), limit, early, search)
     : { results: [] as Hit[] }
   // The entity page leads: the domain signal would sink a Wikipedia bio.
   const lead = page.results.filter(named).slice(0, 1)
@@ -98,4 +114,4 @@ export const secondHop = Effect.fn('secondHop')(function* <M extends { weak: boo
     results: [...lead, ...rest].slice(0, limit),
     meta: { ...first.meta, weak: !lead.length && (scored[0]?.score ?? 0) < WEAK_SCORE },
   }
-})
+}, Effect.scoped)
