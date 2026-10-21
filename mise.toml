@@ -179,7 +179,7 @@ depends = ["ci"]
 run = "echo webular: default complete"
 
 [tasks.bench]
-description = "Benchmark cold start (wall + CPU) of the CLI and its network-free commands with hyperfine (off the CI spine)"
+description = "Benchmark cold start (wall + CPU) of the CLI and its network-free commands with hyperfine, then the summarizer scaling run at 10, 1,000 and 100,000 sentences (off the CI spine)"
 depends = ["setup"]
 run = """
 command -v hyperfine >/dev/null || { echo 'bench: hyperfine not on PATH (brew install hyperfine)' >&2; exit 127; }
@@ -195,4 +195,5 @@ hyperfine -N --warmup 1 --runs ${BENCH_RUNS:-10} --style basic \
   -n import-feed-workflow "bun -e 'await import(\\"./src/workflows/feed.ts\\")'" \
   -n import-mastra-workflows "bun -e 'await import(\\"@mastra/core/workflows\\")'" \
   -n bare-bun "bun -e 0"
+bun tests/bench/complexity.ts
 """

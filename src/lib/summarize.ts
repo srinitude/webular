@@ -62,29 +62,42 @@ const STOPWORDS = new Set([
   'who',
 ])
 
+// match() yields the same maximal [a-z0-9] runs as replace-then-split, with
+// one fewer full-size copy and no empty tokens to filter.
 function tokenize(text: string): string[] {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, ' ')
-    .split(/\s+/)
-    .filter((w) => w.length > 1 && !STOPWORDS.has(w))
+  return (text.toLowerCase().match(/[a-z0-9]+/g) ?? []).filter(
+    (w) => w.length > 1 && !STOPWORDS.has(w),
+  )
 }
+
+function pushTrimmed(out: string[], piece: string): void {
+  const trimmed = piece.trim()
+  if (trimmed.length > 0) out.push(trimmed)
+}
+
+// A sentence ends at [.!?] plus whitespace before an uppercase letter or a
+// quote. One forward scan, O(B): the lookbehind split it replaces went
+// superlinear on big pages (100,000 sentences took about 6 s).
+const BOUNDARY = /[.!?]\s+(?=[A-Z"'])/g
 
 function splitSentences(text: string): string[] {
-  return text
-    .split(/(?<=[.!?])\s+(?=[A-Z"'])/)
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0)
+  const out: string[] = []
+  let last = 0
+  for (const m of text.matchAll(BOUNDARY)) {
+    pushTrimmed(out, text.slice(last, m.index + 1))
+    last = m.index + m[0].length
+  }
+  pushTrimmed(out, text.slice(last))
+  return out
 }
 
-function buildFreqMap(words: string[]): Map<string, number> {
+function buildFreqMap(lists: string[][]): Map<string, number> {
   const freq = new Map<string, number>()
-  for (const w of words) freq.set(w, (freq.get(w) ?? 0) + 1)
+  for (const words of lists) for (const w of words) freq.set(w, (freq.get(w) ?? 0) + 1)
   return freq
 }
 
-function scoreSentence(sentence: string, freq: Map<string, number>, maxFreq: number): number {
-  const words = tokenize(sentence)
+function scoreTokens(words: string[], freq: Map<string, number>, maxFreq: number): number {
   if (words.length === 0 || maxFreq === 0) return 0
   const total = words.reduce((sum, w) => sum + (freq.get(w) ?? 0), 0)
   return total / (words.length * maxFreq)
@@ -107,11 +120,18 @@ export function summarizeText(text: string, topN: number): SummarizeResult {
   const sentences = splitSentences(text)
   if (sentences.length === 0) return { sentences: [], summary: '' }
 
-  const allWords = tokenize(text)
-  const freq = buildFreqMap(allWords)
+  // Tokenize each sentence once and reuse it for counting and scoring.
+  // Sentence cuts fall on whitespace, so the joined sentence tokens equal
+  // the whole text's tokens.
+  const tokens = sentences.map(tokenize)
+  const freq = buildFreqMap(tokens)
   const maxFreq = maxFrequency(freq)
 
-  const scored = sentences.map((s, i) => ({ s, i, score: scoreSentence(s, freq, maxFreq) }))
+  const scored = sentences.map((s, i) => ({
+    s,
+    i,
+    score: scoreTokens(tokens[i] ?? [], freq, maxFreq),
+  }))
   scored.sort((a, b) => b.score - a.score)
 
   const top = scored.slice(0, topN).sort((a, b) => a.i - b.i)
