@@ -49,9 +49,7 @@ const guardDocs = (
     docs,
     httpFetcher(http),
     (l) =>
-      l.event === 'unchanged'
-        ? Effect.void
-        : logErr(`jev docs ${l.event} ${l.reason ?? ''}`),
+      l.event === 'unchanged' ? Effect.void : logErr(`jev docs ${l.event} ${l.reason ?? ''}`),
     Effect.void,
   ).pipe(
     Effect.mapError(
