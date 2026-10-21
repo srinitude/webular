@@ -5,6 +5,7 @@
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
+import { nameCountry } from '../lib/answer-country.ts'
 import { answerPassage } from '../lib/answer-passage.ts'
 import { answerSentences } from '../lib/jev/decisions/answer.ts'
 import { citedSources } from '../lib/jev/decisions/answer-citation.ts'
@@ -140,7 +141,7 @@ const synthStep = decisionStep({
     const first = lead === undefined ? undefined : answerSentences(text)[lead]
     return {
       query,
-      answer: leadFirst(top, first, sentences).join(' '),
+      answer: nameCountry(query, leadFirst(top, first, sentences).join(' ')),
       sources: cited.map((e) => ({ title: e.title, url: e.url })),
       errors,
     }
