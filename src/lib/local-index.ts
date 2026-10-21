@@ -147,6 +147,21 @@ export const fuseRanked = <T extends { readonly url: string }>(
   return [...merged.values()].sort((a, b) => b.score - a.score).map((e) => e.item)
 }
 
+const PRIVATE_HOST =
+  /^(localhost|\[::1\]|.*\.local|127(\.\d+){3}|10(\.\d+){3}|192\.168(\.\d+){2}|169\.254(\.\d+){2}|172\.(1[6-9]|2\d|3[01])(\.\d+){2})$/
+
+/** Drops hits on loopback or private hosts unless the query names that host (bench fixtures must not answer web queries). */
+export const dropPrivateHosts = <T extends { readonly url: string }>(
+  query: string,
+  hits: T[],
+): T[] => {
+  const q = query.toLowerCase()
+  return hits.filter(({ url }) => {
+    const host = URL.canParse(url) ? new URL(url).hostname : ''
+    return !PRIVATE_HOST.test(host) || q.includes(host.replace(/^\[|\]$/g, ''))
+  })
+}
+
 /** The search step's local list for fuseRanked: {title, url, description}; empty on any index error. */
 export const searchLocalIndex = (query: string, limit: number) =>
   Effect.scoped(

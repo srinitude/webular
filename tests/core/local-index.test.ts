@@ -7,6 +7,7 @@ import { Effect } from 'effect'
 import { headingText } from '../../src/lib/crawl-types.ts'
 import {
   addPages,
+  dropPrivateHosts,
   fuseRanked,
   type LocalIndex,
   openLocalIndex,
@@ -94,6 +95,28 @@ test('fuseRanked sums 1/(k+rank) by URL and keeps first-seen items', () => {
   expect(fused.map((h) => h.url)).toEqual(['y', 'x', 'z'])
   expect(fused[0]?.src).toBe('web')
   expect(fuseRanked([])).toEqual([])
+})
+
+test('dropPrivateHosts drops loopback and private hosts unless the query names them', () => {
+  const hits = [
+    'http://localhost:54096/a',
+    'http://127.0.0.1/b',
+    'http://[::1]/c',
+    'http://10.1.2.3/d',
+    'http://172.20.0.1/e',
+    'http://192.168.1.5/f',
+    'http://169.254.0.9/g',
+    'http://box.local/h',
+    'http://172.32.0.1/ok',
+    'https://example.com/ok',
+  ].map((url) => ({ url }))
+  expect(dropPrivateHosts('tides', hits).map((h) => h.url)).toEqual([
+    'http://172.32.0.1/ok',
+    'https://example.com/ok',
+  ])
+  expect(dropPrivateHosts('see localhost:54096', hits).map((h) => h.url)).toContain(
+    'http://localhost:54096/a',
+  )
 })
 
 // The cache env vars are set for the test and put back on every exit path.

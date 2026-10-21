@@ -8,7 +8,7 @@
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
-import { fuseRanked, searchLocalIndex } from '../lib/local-index.ts'
+import { dropPrivateHosts, fuseRanked, searchLocalIndex } from '../lib/local-index.ts'
 import { searchEffect } from '../lib/search-chain.ts'
 import { MAX_VARIANTS } from '../lib/search-source-names.ts'
 import { FREE_SOURCE_NAMES } from '../lib/sources/registry.ts'
@@ -50,7 +50,7 @@ const searchStep = createStep({
         const web = yield* searchEffect(source, query, limit, { variants: variants ?? [] })
         // Local BM25 hits answer alongside the free APIs: one SQLite query, a few ms.
         const local = yield* searchLocalIndex(query, limit)
-        const results = fuseRanked([web.results, local]).slice(0, limit)
+        const results = dropPrivateHosts(query, fuseRanked([web.results, local])).slice(0, limit)
         const answered = web.source && { source: web.source }
         return { query, count: results.length, ...answered, results, meta: web.meta }
       }),
