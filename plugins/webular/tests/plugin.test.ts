@@ -27,7 +27,7 @@ const readJson = <S extends Schema.Top>(path: string, schema: S) =>
 const Manifest = Schema.Struct({ $schema: Schema.String, name: Schema.String })
 const Evals = Schema.Struct({
   skill_name: Schema.String,
-  evals: Schema.Array(Schema.Struct({ id: Schema.String, query: Schema.String })),
+  evals: Schema.Array(Schema.Struct({ id: Schema.String, prompt: Schema.String })),
 })
 
 type Skill = { name: string; body: string; front: string; rest: string; texts: Map<string, string> }

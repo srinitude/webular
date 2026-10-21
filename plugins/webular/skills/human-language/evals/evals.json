@@ -3,7 +3,7 @@
   "evals": [
     {
       "id": "rewrite-mcp-scrape-tool-description",
-      "query": "Rewrite this MCP tool description for the webular scrape tool: \"A powerful, seamless solution that leverages cutting-edge technology to unlock all of your web content needs.\" Keep the tool name and the `archive` field exact.",
+      "prompt": "Rewrite this MCP tool description for the webular scrape tool: \"A powerful, seamless solution that leverages cutting-edge technology to unlock all of your web content needs.\" Keep the tool name and the `archive` field exact.",
       "expected_output": "A plain description that says what `scrape` does, what it returns, what `archive` does, and when to pick another tool, with no hype words.",
       "assertions": [
         "The output names the tool `scrape` exactly",
@@ -17,7 +17,7 @@
     },
     {
       "id": "write-cli-help-for-map-command",
-      "query": "Write the CLI help text for `webular map`. It lists the pages on one site from its sitemap, then robots.txt, then link crawling. It takes --url and --limit (default 50). Make it clear for a person who reads it once.",
+      "prompt": "Write the CLI help text for `webular map`. It lists the pages on one site from its sitemap, then robots.txt, then link crawling. It takes --url and --limit (default 50). Make it clear for a person who reads it once.",
       "expected_output": "One line on what `webular map` does, the sitemap then robots.txt then links order, and one line per flag with its default.",
       "assertions": [
         "The first line says the command lists the pages on one site",
@@ -31,7 +31,7 @@
     },
     {
       "id": "write-jev-payload-question-text",
-      "query": "Write the state and question text for a Jev payload that asks whether a scraped page states the price of the 2026 model. Keep the JSON keys and the yes/no enum values exact, and put every decisive fact in the state.",
+      "prompt": "Write the state and question text for a Jev payload that asks whether a scraped page states the price of the 2026 model. Keep the JSON keys and the yes/no enum values exact, and put every decisive fact in the state.",
       "expected_output": "State text that says what page was scraped and why, and a question that asks for `yes` or `no` on whether the page states the 2026 model's price.",
       "assertions": [
         "The state says a product page was scraped",
@@ -45,7 +45,7 @@
     },
     {
       "id": "rewrite-schema-field-description-limit",
-      "query": "Rewrite the description of the `limit` field in the search tool schema, which says \"Allows the caller to optionally specify a desired quantity of results\". The default is 5 and the most is 20.",
+      "prompt": "Rewrite the description of the `limit` field in the search tool schema, which says \"Allows the caller to optionally specify a desired quantity of results\". The default is 5 and the most is 20.",
       "expected_output": "One sentence that says `limit` is the most results to return, with default 5 and max 20.",
       "assertions": [
         "The output is one or two short sentences",
@@ -59,7 +59,7 @@
     },
     {
       "id": "report-partial-crawl-result-honestly",
-      "query": "A crawl read 40 of 120 pages before it hit the time limit. Write the status line for the user. Do not say it is done, and do not invent a cause.",
+      "prompt": "A crawl read 40 of 120 pages before it hit the time limit. Write the status line for the user. Do not say it is done, and do not invent a cause.",
       "expected_output": "A status line that says the crawl stopped at the time limit after 40 of 120 pages, that 80 were not read, and how to read the rest.",
       "assertions": [
         "The output says 40 of 120 pages were read",
@@ -73,7 +73,7 @@
     },
     {
       "id": "leave-fixed-wording-and-quote-alone",
-      "query": "Tidy this error text but keep the quoted string exact: Failed to fetch \"https://example.com/a?b=1\": ECONNRESET. Add a plain next step.",
+      "prompt": "Tidy this error text but keep the quoted string exact: Failed to fetch \"https://example.com/a?b=1\": ECONNRESET. Add a plain next step.",
       "expected_output": "The error line with the quoted URL and ECONNRESET unchanged, followed by one plain next step.",
       "assertions": [
         "The string \"https://example.com/a?b=1\" appears exactly",

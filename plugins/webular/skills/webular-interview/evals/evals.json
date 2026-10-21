@@ -3,7 +3,7 @@
   "evals": [
     {
       "id": "outcome-before-method",
-      "query": "Interview me about adding a search page to my site.",
+      "prompt": "Interview me about adding a search page to my site.",
       "expected_behavior": [
         "Reads the working folder before the first question",
         "Opens with a guess at intent and outcome and asks for a correction",
@@ -12,7 +12,7 @@
     },
     {
       "id": "one-question-at-a-time",
-      "query": "Ask me questions so we can plan the release notes.",
+      "prompt": "Ask me questions so we can plan the release notes.",
       "expected_behavior": [
         "Asks exactly one question per turn",
         "Uses the host's native question tool, or a plain chat question when none exists",
@@ -21,7 +21,7 @@
     },
     {
       "id": "ends-with-decisions",
-      "query": "Help me decide how to store user settings by asking me questions.",
+      "prompt": "Help me decide how to store user settings by asking me questions.",
       "expected_behavior": [
         "Ends with a decisions summary, one line per decision, in question order",
         "Marks each decision as the user's answer or a default taken",

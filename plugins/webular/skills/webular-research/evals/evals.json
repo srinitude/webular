@@ -3,7 +3,7 @@
   "evals": [
     {
       "id": "answer-with-sources",
-      "query": "What does the Bun 1.3 release add? Give sources.",
+      "prompt": "What does the Bun 1.3 release add? Give sources.",
       "expected_behavior": [
         "Calls search with a plain query, then scrape on two or three result URLs",
         "Every fact in the answer sits next to a URL that a tool returned",
@@ -12,7 +12,7 @@
     },
     {
       "id": "map-before-scrape",
-      "query": "List the guide pages on https://bun.com/docs and summarize the install guide.",
+      "prompt": "List the guide pages on https://bun.com/docs and summarize the install guide.",
       "expected_behavior": [
         "Calls map on the site before any scrape",
         "Scrapes or summarizes only the install guide page",
@@ -21,7 +21,7 @@
     },
     {
       "id": "recover-from-bad-url",
-      "query": "Read the page at bun.com/blog",
+      "prompt": "Read the page at bun.com/blog",
       "expected_behavior": [
         "Passes the full https:// URL, or retries once with it after an Invalid URL error",
         "Does not guess the page content when a call fails"
@@ -29,7 +29,7 @@
     },
     {
       "id": "feed-from-page-url",
-      "query": "What are the newest posts on https://bun.com/blog?",
+      "prompt": "What are the newest posts on https://bun.com/blog?",
       "expected_behavior": [
         "Calls feed with the plain page URL, without guessing a feed path first",
         "Names the feedUrl the tool returned",
@@ -38,7 +38,7 @@
     },
     {
       "id": "archive-for-dead-page",
-      "query": "The page https://example.com/old-post is gone now. What did it say?",
+      "prompt": "The page https://example.com/old-post is gone now. What did it say?",
       "expected_behavior": [
         "Calls scrape with archive set to true",
         "Says the text came from the Wayback Machine copy that archivedFrom names",
@@ -47,7 +47,7 @@
     },
     {
       "id": "tools-still-connecting",
-      "query": "Read the page https://bun.com/blog and tell me the newest post title, right as the session starts.",
+      "prompt": "Read the page https://bun.com/blog and tell me the newest post title, right as the session starts.",
       "expected_behavior": [
         "When no webular tool is listed yet, lists the webular server's MCP resources once instead of giving up",
         "Then calls scrape on the page",
@@ -56,7 +56,7 @@
     },
     {
       "id": "search-falls-back",
-      "query": "Find three papers on retrieval-augmented generation, with links.",
+      "prompt": "Find three papers on retrieval-augmented generation, with links.",
       "expected_behavior": [
         "Calls search once, with the default source or with crossref or openalex",
         "Names the source the result says answered",

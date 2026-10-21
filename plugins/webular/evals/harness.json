@@ -493,6 +493,18 @@
       "grader": "bun test: check.ts findings on stored good and bad Markdown"
     },
     {
+      "assertion": "SKILL.md frontmatter follows the agentskills.io specification",
+      "source": "tests/skill-spec.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: schema decode and equality"
+    },
+    {
+      "assertion": "eval cases follow the agentskills.io case shape",
+      "source": "tests/skill-spec.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: schema decode and equality"
+    },
+    {
       "assertion": "the plugin server answers initialize and tools/list within 10 seconds",
       "source": "tests/startup.test.ts",
       "kind": "deterministic",
