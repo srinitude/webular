@@ -50,6 +50,10 @@ describe('webular mcp — MCP server tool listing', () => {
         })
         expect(code).toBe(0)
         expect(stdout).toContain('"serverInfo"')
+        // The client shows these instructions to the model: steer many URLs to batch.
+        expect(JSON.parse(stdout.split('\n')[0] ?? '').result.instructions).toBe(
+          'When you have two or more URLs, call batch once instead of calling scrape for each.',
+        )
       }),
     ),
     15_000,

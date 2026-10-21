@@ -36,11 +36,18 @@ const loadSdk = Effect.all(
 // dist/commands) on this process's own runtime, as the CLI's dispatch does.
 const sibling = (command: string) => join(import.meta.dir, `${command}${extname(import.meta.path)}`)
 
+// Sent in the initialize result; the client shows it to the model.
+const INSTRUCTIONS =
+  'When you have two or more URLs, call batch once instead of calling scrape for each.'
+
 const serve = Effect.gen(function* () {
   const [{ McpServer }, { StdioServerTransport }] = yield* loadSdk
   const { registerAll } = yield* lazy(() => import('../tools/web.ts'))
   const server = yield* Effect.acquireRelease(
-    Effect.sync(() => new McpServer({ name: 'webular', version: pkg.version })),
+    Effect.sync(
+      () =>
+        new McpServer({ name: 'webular', version: pkg.version }, { instructions: INSTRUCTIONS }),
+    ),
     (s) => Effect.tryPromise(() => s.close()).pipe(Effect.ignore),
   )
   yield* registerAll(server, sibling)
