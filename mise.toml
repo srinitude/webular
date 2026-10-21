@@ -60,11 +60,12 @@ run = "bunx tsc --noEmit"
 
 [tasks.build]
 description = "Build: bundle every command into dist/commands (shared chunks in dist/chunks), compile the native webular executable into dist/bin, and bundle the plugin's MCP App views (plugin:ui), which the plugin's MCP server reads at startup"
-depends = ["typecheck", "plugin:ui"]
+depends = ["typecheck"]
 run = [
   'bun scripts/clean.ts',
   'bun build {{vars.entries}} --target=bun --minify --splitting --root="{{config_root}}/src" --outdir="{{config_root}}/dist" --chunk-naming=chunks/[name]-[hash].[ext]',
   'bun build "{{config_root}}/bin/webular.ts" --compile --minify --sourcemap --bytecode --format=esm --outfile="{{config_root}}/dist/bin/webular"',
+  { task = "plugin:ui" },
 ]
 sources = ["src/**/*.ts", "bin/**/*.ts", "package.json", "tsconfig.json"]
 outputs = ["dist/commands/search.js", "dist/bin/webular"]
