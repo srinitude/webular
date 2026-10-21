@@ -25,7 +25,7 @@ export interface TreeNode {
   count: number
   failed: number
   url?: string
-  outcome?: string
+  outcome?: string | undefined
   readonly children: Map<string, TreeNode>
 }
 

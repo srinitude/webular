@@ -77,7 +77,7 @@ test('crawl pages and a monitor check drive the machine to its end, and the text
 })
 
 const linkOf = (meta: Record<string, unknown> | undefined) =>
-  (meta?.ui as { resourceUri?: string } | undefined)?.resourceUri
+  (meta?.['ui'] as { resourceUri?: string } | undefined)?.resourceUri
 
 test('each tool links to the view the design gives it, and every other tool stays text', () =>
   runtime.runPromise(

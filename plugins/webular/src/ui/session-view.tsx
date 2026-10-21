@@ -26,7 +26,7 @@ function SourceRow(props: {
   n: number
   title: string
   url: string
-  outcome?: string
+  outcome?: string | undefined
   active: boolean
 }) {
   return (
@@ -44,7 +44,7 @@ function SourceRow(props: {
 }
 
 // Past 20 rows the list folds behind Show all, but failed rows never fold.
-function Sources({ result, active }: { result: SessionResult; active?: number }) {
+function Sources({ result, active }: { result: SessionResult; active?: number | undefined }) {
   const [all, setAll] = useState(false)
   const failed = outcomes(result)
   const rows = sourceRows(result).map((s, i) => ({ ...s, n: i + 1, outcome: failed.get(s.url) }))
@@ -77,7 +77,7 @@ function Marker({
   onActive,
 }: {
   n: number
-  outcome?: string
+  outcome?: string | undefined
   onActive: (n?: number) => void
 }) {
   return (

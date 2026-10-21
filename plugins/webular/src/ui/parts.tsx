@@ -57,14 +57,14 @@ function Strip({ state }: { state: string }) {
 // When the result came back (Effect clock, ms), and how long the run took when the view saw it start.
 export interface Timing {
   readonly at: number
-  readonly took?: number
+  readonly took?: number | undefined
 }
 
 export interface Props {
   readonly result: SessionResult
   readonly rerun?: () => void
   readonly copy?: Copy
-  readonly timing?: Timing
+  readonly timing?: Timing | undefined
 }
 
 const copyLabels = { idle: 'Copy as text', done: 'Copied', failed: 'Copy failed, try again' }
@@ -106,7 +106,7 @@ function Status({
   result,
   count,
   timing,
-}: Props & { snapshot: Snapshot; count?: string }) {
+}: Props & { snapshot: Snapshot; count?: string | undefined }) {
   const state = String(snapshot.value)
   const moves = nextMoves(snapshot)
   const { found, failed, words } = coverage(result)
@@ -133,7 +133,7 @@ export function Frame(
   props: Props & {
     actor: Lifecycle
     title: string
-    count?: string
+    count?: string | undefined
     empty?: string
     children: ReactNode
   },
@@ -165,7 +165,7 @@ export type View = (props: Props & { actor: Lifecycle }) => ReactNode
 export const mount = (View: View) => {
   const root = createRoot(document.getElementById('root') ?? document.body)
   let actor = createActor(commandLifecycleMachine).start()
-  const state: { props: Props; startedAt?: number } = { props: { result: {} } }
+  const state: { props: Props; startedAt?: number | undefined } = { props: { result: {} } }
   const show = (next: Partial<Props>) => {
     state.props = { ...state.props, ...next }
     root.render(<View actor={actor} {...state.props} />)

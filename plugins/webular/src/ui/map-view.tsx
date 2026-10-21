@@ -11,7 +11,7 @@ interface BranchProps {
   readonly node: TreeNode
   readonly open: boolean
   readonly onPick: (n: TreeNode) => void
-  readonly picked?: string
+  readonly picked?: string | undefined
 }
 
 // The picked page's row stays marked, as in file explorers with a detail pane.
@@ -58,7 +58,7 @@ function Branch(props: BranchProps) {
   )
 }
 
-function Detail({ node, result }: { node?: TreeNode; result: SessionResult }) {
+function Detail({ node, result }: { node?: TreeNode | undefined; result: SessionResult }) {
   if (!node?.url)
     return (
       <aside className="detail" aria-label="Page detail">

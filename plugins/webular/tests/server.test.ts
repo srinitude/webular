@@ -80,12 +80,12 @@ test('a site that cannot be read comes back as an error result with a next step'
 test('every tool carries a title, read-only and open-world hints', () =>
   run((tools) =>
     Effect.sync(() => {
-      const hints = tools.webular_scrape?.mcp?.annotations
+      const hints = tools['webular_scrape']?.mcp?.annotations
       expect(hints?.title).toBe('Scrape a page')
       expect(hints?.readOnlyHint).toBe(true)
       expect(hints?.openWorldHint).toBe(true)
-      expect(tools.webular_media?.mcp?.annotations?.readOnlyHint).toBe(false)
-      expect(tools.webular_parse?.mcp?.annotations?.openWorldHint).toBe(false)
+      expect(tools['webular_media']?.mcp?.annotations?.readOnlyHint).toBe(false)
+      expect(tools['webular_parse']?.mcp?.annotations?.openWorldHint).toBe(false)
     }),
   ))
 

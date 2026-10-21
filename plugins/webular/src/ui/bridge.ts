@@ -80,7 +80,7 @@ const onInput = (call: Call, h: Handlers, args: unknown, at: number) => {
 // The host's theme drives the page's color-scheme; without one the system theme holds.
 const applyTheme = (context?: { theme?: string }) => {
   if (context?.theme === 'light' || context?.theme === 'dark')
-    document.documentElement.dataset.theme = context.theme
+    document.documentElement.dataset['theme'] = context.theme
 }
 
 const route = (e: MessageEvent, h: Handlers, call: Call) => {
