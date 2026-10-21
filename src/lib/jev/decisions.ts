@@ -12,6 +12,7 @@ import { kindDecision, mapDecision, mapOrder } from './decisions/map.ts'
 import { changeDecision } from './decisions/monitor.ts'
 import { titleDecision } from './decisions/page-title.ts'
 import { researchDone, researchPart } from './decisions/research.ts'
+import { researchSentence } from './decisions/research-sentences.ts'
 import { mainDecision } from './decisions/scrape.ts'
 import { searchRank } from './decisions/search.ts'
 import { intentDecision } from './decisions/search-intent.ts'
@@ -25,6 +26,7 @@ export const decisions = {
   change: changeDecision,
   researchPart,
   research: researchDone,
+  researchSentence,
   extract: extractDecision,
   feed: feedDecision,
   summary: summaryDecision,

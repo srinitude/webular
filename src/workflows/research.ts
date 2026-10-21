@@ -3,6 +3,7 @@
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
+import { answerSentences } from '../lib/jev/decisions/answer.ts'
 import { searchRounds } from '../lib/jev/decisions/research.ts'
 import { decisions } from '../lib/jev/decisions.ts'
 import { onJevRuntime } from '../lib/jev/run.ts'
@@ -89,31 +90,49 @@ const fetchSourcesStep = createStep({
   execute: ({ inputData }) => stepRuntime.runPromise(fetchAndFilter(inputData)),
 })
 
-// The topic focuses each section: sentences holding its key terms rank first.
-function buildSection(entry: SourceEntry, idx: number, topN: number, topic: string): string {
-  const { sentences } = summarizeText(entry.text, topN, { query: topic })
+// Each section opens with the sentences Jev keeps as the source's facts, in page
+// order (research.sentences, one call per source); the topic-focused summarizer
+// fills the rest, so sentences holding the topic's key terms rank first.
+function buildSection(
+  entry: SourceEntry,
+  idx: number,
+  topN: number,
+  topic: string,
+  kept: ReadonlyArray<number> = [],
+) {
+  const all = answerSentences(entry.text)
+  const top = summarizeText(entry.text, topN, { query: topic }).sentences
+  const lead = kept.flatMap((i) => (all[i] === undefined ? [] : [all[i]]))
+  const sentences = [...new Set([...lead, ...top])].slice(0, topN)
   const body = sentences.length > 0 ? sentences.join(' ') : 'No extractable content.'
   return `## ${entry.title || `Source ${idx + 1}`}\n\n${body}\n\n> Source [${idx + 1}]: ${entry.url}`
 }
+
+const assemble = Effect.fn('research.assemble')(function* (
+  inputData: z.infer<typeof entriesSchema>,
+) {
+  const { topic, entries } = inputData
+  const leads = yield* Effect.forEach(
+    entries,
+    (e) =>
+      e.text.length === 0
+        ? Effect.succeed(undefined)
+        : onJevRuntime(decisions.researchSentence, { topic, text: e.text }),
+    { concurrency: 8 }, // Jev per-org bound; workflows never import the client
+  )
+  const sections = entries.map((e, i) => buildSection(e, i, inputData.sentences, topic, leads[i]))
+  const report = `# Research: ${topic}\n\n${sections.join('\n\n')}`
+  const sources = entries.map((e) => ({ title: e.title, url: e.url }))
+  return { topic, report, sources, errors: inputData.errors }
+})
 
 const assembleStep = createStep({
   id: 'assemble',
   inputSchema: entriesSchema,
   outputSchema: researchOutput,
   execute: ({ inputData }) =>
-    stepRuntime.runPromise(
-      Effect.sync(() => assemble(inputData)).pipe(Effect.flatMap(withReadability('report'))),
-    ),
+    stepRuntime.runPromise(assemble(inputData).pipe(Effect.flatMap(withReadability('report')))),
 })
-
-function assemble(inputData: z.infer<typeof entriesSchema>) {
-  const sections = inputData.entries.map((e, i) =>
-    buildSection(e, i, inputData.sentences, inputData.topic),
-  )
-  const report = `# Research: ${inputData.topic}\n\n${sections.join('\n\n')}`
-  const sources = inputData.entries.map((e) => ({ title: e.title, url: e.url }))
-  return { topic: inputData.topic, report, sources, errors: inputData.errors }
-}
 
 export const researchWorkflow = createWorkflow({
   id: 'research',

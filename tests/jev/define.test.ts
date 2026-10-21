@@ -32,6 +32,7 @@ const DECLARED: ReadonlyArray<Declared> = [
   decisions.map,
   decisions.change,
   decisions.researchPart,
+  decisions.researchSentence,
   decisions.extract,
   decisions.feed,
   decisions.summary,
