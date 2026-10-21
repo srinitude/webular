@@ -45,6 +45,7 @@ export const CLI_CASES: CliCase[] = [
   usage('search unknown source', 'search', ['bun', '--source', 'nope'], '--source'),
   ok('scrape a page', 'scrape', ['--url', '{origin}/a', '--archive']),
   usage('scrape needs a url', 'scrape', [], 'url'),
+  usage('scrape bad renderer', 'scrape', ['{origin}/a', '--render', 'x'], '--render'),
   ok('crawl a site', 'crawl', [
     '--url',
     '{origin}/',

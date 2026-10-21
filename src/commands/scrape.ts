@@ -5,6 +5,15 @@ import { runWorkflow } from '../cli/run.ts'
 import { emitOpts, parseFlags, timeoutFlag } from '../core/args.ts'
 import { CliError, runMain } from '../core/effect.ts'
 
+const RENDERERS = ['agent-browser', 'cua', 'off']
+
+const renderFlag = (render: string | undefined) =>
+  render === undefined || RENDERERS.includes(render)
+    ? Effect.succeed(render)
+    : Effect.fail(
+        new CliError({ message: 'scrape: --render takes agent-browser, cua, or off', exitCode: 2 }),
+      )
+
 const main = Effect.gen(function* () {
   const { values, positionals } = yield* parseFlags(Bun.argv.slice(2), {
     url: { type: 'string' },
@@ -15,13 +24,7 @@ const main = Effect.gen(function* () {
   if (!url) {
     return yield* new CliError({ message: 'scrape: missing --url <url>', exitCode: 2 })
   }
-  const render = values.render as string | undefined
-  if (render !== undefined && !['agent-browser', 'cua', 'off'].includes(render)) {
-    return yield* new CliError({
-      message: 'scrape: --render takes agent-browser, cua, or off',
-      exitCode: 2,
-    })
-  }
+  const render = yield* renderFlag(values.render as string | undefined)
   const inputData = {
     url,
     timeoutMs: yield* timeoutFlag('scrape', values),
