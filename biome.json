@@ -12,7 +12,8 @@
       "!!.claude/worktrees",
       "!!.claude/*.json",
       "!!bench/recordings",
-      "!!bench/results"
+      "!!bench/results",
+      "!!tests/jev/replay"
     ]
   },
   "formatter": {

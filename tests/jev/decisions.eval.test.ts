@@ -3,7 +3,16 @@
 // rate holds or rises over the baseline. Runs live when a TypeSafe key resolves.
 import { expect, test } from 'bun:test'
 import { BunServices } from '@effect/platform-bun'
-import { Clock, Config, Effect, FileSystem, Layer, ManagedRuntime, Option } from 'effect'
+import {
+  Clock,
+  Config,
+  ConfigProvider,
+  Effect,
+  FileSystem,
+  Layer,
+  ManagedRuntime,
+  Option,
+} from 'effect'
 import { Jev } from '../../src/lib/jev/client.ts'
 import { decisions } from '../../src/lib/jev/decisions.ts'
 
@@ -17,7 +26,20 @@ const changeMatters = (url: string, watchFor: string, diff: string) =>
 const { links: linkWorthFollowing, research: researchDone } = decisions
 const researchBaseline = researchDone.baseline
 
-const rt = ManagedRuntime.make(Jev.live)
+// CI has no key: there this eval alone answers from tests/jev/replay (a miss
+// fails). A local run with a key stays live; WEBULAR_JEV_REPLAY in the env wins.
+const replayStore = ConfigProvider.layerAdd(
+  ConfigProvider.fromUnknown({ WEBULAR_JEV_REPLAY: `${import.meta.dir}/replay` }),
+)
+const rt = ManagedRuntime.make(
+  Layer.unwrap(
+    Config.option(Config.String('CI')).pipe(
+      Effect.map((ci) =>
+        Option.isSome(ci) ? Jev.live.pipe(Layer.provide(replayStore)) : Jev.live,
+      ),
+    ),
+  ),
+)
 const page = { url: 'https://docs.example.dev/', title: 'Example docs' }
 const goal = 'how to configure the Example CLI'
 const links: Array<[string, string, boolean]> = [
