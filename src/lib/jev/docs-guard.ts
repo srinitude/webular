@@ -5,13 +5,9 @@
 // the caller's code rule decides. Parts: docs-snapshot (proof), docs-violations
 // (limit checks), docs-fetch (refresh); this file is the wrapper and the public path.
 import { Effect, Schema } from 'effect'
-import { DocsRefused, type Fetcher, type GuardLog, refresh } from './docs-fetch.ts'
-import {
-  committedSnapshot,
-  DECISION_MODELS,
-  type DocsLimits,
-  type DocsSnapshot,
-} from './docs-snapshot.ts'
+import { cachedRefresh, type DocsState } from './docs-cache.ts'
+import { DocsRefused, type Fetcher, type GuardLog } from './docs-fetch.ts'
+import { committedSnapshot, DECISION_MODELS, type DocsLimits } from './docs-snapshot.ts'
 import { isObject, violations } from './docs-violations.ts'
 
 export { httpFetcher } from './docs-fetch.ts'
@@ -38,7 +34,7 @@ const modelFor = (name: string) => DECISION_MODELS.find((m) => m.models.test(nam
 // the limits, then the call. A refusal leaves the caller's code rule in charge.
 export const guarded = <A, E, R>(
   body: string,
-  state: { snapshot: DocsSnapshot | undefined },
+  state: DocsState,
   get: Fetcher,
   log: (l: GuardLog) => Effect.Effect<void>,
   call: Effect.Effect<A, E, R>,
@@ -49,7 +45,7 @@ export const guarded = <A, E, R>(
     const model = modelFor(name)
     if (model === undefined)
       return yield* new DocsRefused({ reason: `${name}: not a registered decision model` })
-    state.snapshot = yield* refresh(model, state.snapshot, get, log)
+    state.snapshot = yield* cachedRefresh(model, state, get, log)
     yield* checked(req, body, state.snapshot.limits)
     return yield* call
   })

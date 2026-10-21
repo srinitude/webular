@@ -89,6 +89,8 @@ const envFor = (origin: string, tmp: string): Record<string, string> => ({
   WEBULAR_INVOKE_DIR: tmp,
   WEBULAR_DB: `${tmp}/webular.db`,
   WEBULAR_NO_CACHE: '1',
+  // Child runs never reach live Jev or its docs, so case time does not ride the network.
+  WEBULAR_JEV: 'off',
 })
 
 const main = Effect.gen(function* () {

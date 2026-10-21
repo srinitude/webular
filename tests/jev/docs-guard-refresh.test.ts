@@ -60,7 +60,7 @@ test('unreachable docs: the last verified snapshot is used and logged; none veri
     }),
   ))
 
-test('O(1) per batch when docs are unchanged: one 304, no download, no re-proof', () =>
+test('O(1) per batch when docs are unchanged: one 304 per hour, no download, no re-proof', () =>
   Effect.runPromise(
     Effect.gen(function* () {
       const r = recorder([{ status: 304, text: '' }])
@@ -80,7 +80,7 @@ test('O(1) per batch when docs are unchanged: one 304, no download, no re-proof'
         { concurrency: 1, discard: true },
       )
       expect(calls).toBe(1000)
-      expect(r.seen.length).toBe(1000) // one conditional GET per batch
+      expect(r.seen.length).toBe(1) // one conditional GET, then fresh for the hour
       expect(state.snapshot).toBe(committedSnapshot) // same object: never re-hashed or re-parsed
       expect(r.logs.every((l) => l.event === 'unchanged')).toBe(true)
     }),

@@ -16,6 +16,8 @@ import * as FetchHttpClient from 'effect/http/FetchHttpClient'
 import * as HttpClient from 'effect/http/HttpClient'
 import * as ChildProcess from 'effect/process/ChildProcess'
 import { ChildProcessSpawner } from 'effect/process/ChildProcessSpawner'
+import { docsStore } from './docs-cache.ts'
+import { committedSnapshot } from './docs-guard.ts'
 import type { JevError } from './errors.ts'
 import { withRecorder } from './learn/recorder.ts'
 import { postOnce, type Result, withFallback } from './post.ts'
@@ -81,7 +83,10 @@ const make = Effect.gen(function* () {
   const ask = makeAsk({
     model,
     replay,
-    live: withFallback(postOnce(ENDPOINT, http, key), model),
+    live: withFallback(
+      postOnce(ENDPOINT, http, key, { snapshot: committedSnapshot, store: yield* docsStore }),
+      model,
+    ),
     lru: yield* Effect.sync(() => makeLru(CACHE_CAPACITY)),
     log: logCalibration(fs, yield* setting('WEBULAR_JEV_LOG')),
     drift: flagDrift(fs, yield* setting('WEBULAR_JEV_DRIFT_FILE')),

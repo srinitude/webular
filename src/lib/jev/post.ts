@@ -5,6 +5,7 @@ import type * as HttpClient from 'effect/http/HttpClient'
 import * as HttpClientRequest from 'effect/http/HttpClientRequest'
 import { logErr } from '../../core/output.ts'
 import type { JevRequest } from './client.ts'
+import type { DocsState } from './docs-cache.ts'
 import { committedSnapshot, guarded, httpFetcher } from './docs-guard.ts'
 import { errorKind, JevError, nextAction, retryAfterMs, retryable } from './errors.ts'
 import { requestBytes } from './payload/index.ts'
@@ -39,11 +40,7 @@ export const Result = Schema.Struct({
 type Post = (body: string) => Effect.Effect<typeof Result.Type, JevError>
 
 // Docs guard: current TypeSafe docs (one conditional GET), then their limits, before the call.
-const guardDocs = (
-  http: HttpClient.HttpClient,
-  body: string,
-  docs: { snapshot: typeof committedSnapshot },
-) =>
+const guardDocs = (http: HttpClient.HttpClient, body: string, docs: DocsState) =>
   guarded(
     body,
     docs,
@@ -76,7 +73,7 @@ export const postOnce =
     endpoint: string,
     http: HttpClient.HttpClient,
     key: Option.Option<Redacted.Redacted<string>>,
-    docs = { snapshot: committedSnapshot },
+    docs: DocsState = { snapshot: committedSnapshot },
   ): Post =>
   (body) =>
     Effect.gen(function* () {
