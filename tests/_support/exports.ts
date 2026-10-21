@@ -2,8 +2,9 @@
 // must be imported somewhere else in src/, bin/ or tests/ — orphaned exports
 // are dead surface. Name-based (not path-resolved): a name imported anywhere
 // counts everywhere, which errs on the permissive side.
+
+import ts from '@typescript/typescript6'
 import { Effect, FileSystem } from 'effect'
-import ts from 'typescript'
 import { listFiles } from './limits.ts'
 
 export interface DeadExport {
