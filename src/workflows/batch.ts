@@ -33,7 +33,7 @@ const batchOutput = z.object({
 type ResultItem = z.infer<typeof resultItem>
 
 // Index-prefixed runId: deterministic AND unique — Mastra caches Run
-// instances by id, so duplicate target URLs must not share one.
+// instances by id; targets are deduped first, so the index is per distinct URL.
 const scrapeRun = (url: string, index: number, timeoutMs?: number, archive?: boolean) =>
   Effect.tryPromise(() => scrapeWorkflow.createRun({ runId: `${index}:${url}` })).pipe(
     Effect.flatMap((run) =>
@@ -59,6 +59,13 @@ const scrapeOne = (
     },
   })
 
+// Each distinct URL is fetched once; every input slot, duplicates included,
+// gets its URL's result, in input order.
+const spreadToInputs = (urls: string[], unique: string[], fetched: ResultItem[]) => {
+  const byUrl = new Map(unique.map((url, i) => [url, fetched[i] as ResultItem]))
+  return urls.map((url) => byUrl.get(url) as ResultItem)
+}
+
 const runBatchStep = createStep({
   id: 'run-batch',
   inputSchema: batchInput,
@@ -67,11 +74,13 @@ const runBatchStep = createStep({
     stepRuntime.runPromise(
       Effect.gen(function* () {
         const concurrency = inputData.concurrency ?? (yield* hostConcurrency)
-        const results = yield* Effect.forEach(
-          inputData.urls,
+        const unique = [...new Set(inputData.urls)]
+        const fetched = yield* Effect.forEach(
+          unique,
           (url, index) => scrapeOne(url, index, inputData.timeoutMs, inputData.archive),
           { concurrency },
         )
+        const results = spreadToInputs(inputData.urls, unique, fetched)
         return { count: results.length, results }
       }),
       { signal: abortSignal },

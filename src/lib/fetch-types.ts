@@ -36,7 +36,7 @@ interface CallOptions {
 }
 
 export interface FetchLayerOptions extends CallOptions {
-  /** SQLite file for validators; ':memory:' when absent. */
+  /** SQLite file for validators; the webular cache folder when absent. */
   readonly cachePath?: string
   readonly cacheRows?: number
   readonly globalSockets?: number

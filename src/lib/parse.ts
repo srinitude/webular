@@ -120,7 +120,17 @@ function contentOf(file: string, format: DocFormat): Effect.Effect<string, Parse
   }
 }
 
+// Every parser reads the whole file into memory: stat it against a budget first.
+const MAX_PARSE_BYTES = 64 * 1024 * 1024
+
+const checkSize = Effect.fnUntraced(function* (file: string) {
+  const { size } = yield* attempt(() => Bun.file(file).stat())
+  if (size > MAX_PARSE_BYTES)
+    return yield* fail(`parse: ${file} is too large (${size} bytes; limit ${MAX_PARSE_BYTES})`)
+})
+
 export const parseDocument = Effect.fn('parseDocument')(function* (file: string) {
   const format = yield* detectFormat(file)
+  yield* checkSize(file)
   return { file, format, markdown: yield* contentOf(file, format) }
 })

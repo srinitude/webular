@@ -34,9 +34,10 @@ export const openCache = (path: string, rows: number) => {
     if (row) touch.run(++tick, url)
     return row
   }
-  const store = (url: string, r: Reply) => {
+  // One transaction: one commit (one fsync) per store, and a failed evict undoes the put.
+  const store = db.transaction((url: string, r: Reply) => {
     put.run(url, r.headers['etag'] ?? null, r.headers['last-modified'] ?? null, r.body, ++tick)
     evict.run(rows)
-  }
+  })
   return { db, lookup, store }
 }
