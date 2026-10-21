@@ -493,6 +493,24 @@
       "grader": "bun test: check.ts findings on stored good and bad Markdown"
     },
     {
+      "assertion": "the plugin server answers initialize and tools/list within 10 seconds",
+      "source": "tests/startup.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: server start and JSON-RPC reply timing"
+    },
+    {
+      "assertion": "batch with one missing page returns the good page and names the bad one",
+      "source": "tests/partial.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: partial batch result equality"
+    },
+    {
+      "assertion": "the research skill says to wait out a connecting server before the tool table",
+      "source": "tests/plugin.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: skill text match"
+    },
+    {
       "assertion": "each Jev scorer agrees with its calibration labels",
       "source": "tests/jev.test.ts",
       "kind": "jev",
@@ -542,6 +560,12 @@
     },
     {
       "assertion": "archive-for-dead-page",
+      "source": "skills/webular-research/evals/evals.json",
+      "kind": "jev",
+      "grader": "Jev yes/no per expected_behavior line, against the run transcript"
+    },
+    {
+      "assertion": "tools-still-connecting",
       "source": "skills/webular-research/evals/evals.json",
       "kind": "jev",
       "grader": "Jev yes/no per expected_behavior line, against the run transcript"
