@@ -1,0 +1,3 @@
+{"changeStatus":"new","url":"{origin}/notice"}
+
+{"changeStatus":"changed","diff":"Index: {origin}/notice\n===================================================================\n--- {origin}/notice\tprevious\n+++ {origin}/notice\tcurrent\n@@ -1,1 +1,1 @@\n-The east dock is open.Fares are 3 dollars.\n\\ No newline at end of file\n+The east dock is open.Fares are 4 dollars.\n\\ No newline at end of file\n","url":"{origin}/notice"}

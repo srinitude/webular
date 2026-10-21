@@ -1,0 +1,288 @@
+{
+  "defaults": {
+    "maxTurns": 10,
+    "timeoutSec": 300
+  },
+  "models": ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"],
+  "surfaces": ["cli", "mcp", "plugin"],
+  "smoke": "scrape-reads-article",
+  "evalRules": "Every eval is a code check over the final reply: answerContains strings must all appear, answerMatches must match, and the run must call the scenario tool on its surface unless the scenario sets requireTool to false, which grades the reply alone. No scenario needs a judgment call, so none uses a Jev judge.",
+  "routes": {
+    "/article": [
+      "<!doctype html><html><head><title>Tide Tables</title></head><body><nav>Home | Shop | Login</nav><article><h1>Tide Tables</h1><p>High tide at the north pier is at 06:12.</p><p>Low tide follows at 12:31 on the same day.</p></article><footer>Copyright Example Harbor</footer></body></html>"
+    ],
+    "/tides": [
+      "<html><head><title>North Pier Tides</title></head><body><p>High tide at the north pier is at 06:12 on Tuesday.</p><p>The pier closes in storms.</p></body></html>"
+    ],
+    "/product": [
+      "<html><head><title>Widget</title></head><body><h1>Widget</h1><span class='price'>$19.99</span><span class='sku'>W-100</span></body></html>"
+    ],
+    "/notice": [
+      "<html><head><title>Notice</title></head><body><p>The east dock is open.</p><p>Fares are 3 dollars.</p></body></html>",
+      "<html><head><title>Notice</title></head><body><p>The east dock is open.</p><p>Fares are 4 dollars.</p></body></html>"
+    ]
+  },
+  "scenarios": [
+    {
+      "id": "scrape-reads-article",
+      "intent": "An agent wants one page as clean text so it can answer a question about it without menus and footers in the way.",
+      "outcome": "The reply gives the low tide time from the article, 12:31.",
+      "eval": {
+        "kind": "code",
+        "answerContains": ["12:31"]
+      },
+      "tool": "scrape",
+      "prompt": "Read the page {origin}/article. What time is low tide? Reply in one line with the time.",
+      "reference": [["scrape", "--url", "{origin}/article", "--json"]],
+      "baseline": {
+        "pass": true,
+        "problems": []
+      }
+    },
+    {
+      "id": "search-finds-pages",
+      "intent": "An agent wants web search results it can follow, so it can find pages about a topic.",
+      "outcome": "The reply names the first search hit, the fixture page /a.",
+      "eval": {
+        "kind": "code",
+        "answerContains": ["{origin}/a"]
+      },
+      "tool": "search",
+      "prompt": "Search the web for \"alpha story\" (source: web). Reply with the URL of the first result.",
+      "reference": [["search", "--query", "alpha story", "--source", "web", "--json"]],
+      "baseline": {
+        "pass": true,
+        "problems": []
+      }
+    },
+    {
+      "id": "answer-cites-source",
+      "intent": "An agent wants a short answer tied to the page it came from, so the user can trust and check it.",
+      "outcome": "The reply gives the high tide time, 06:12, and cites the page /tides.",
+      "eval": {
+        "kind": "code",
+        "answerContains": ["06:12", "{origin}/tides"]
+      },
+      "tool": "answer",
+      "requireTool": false,
+      "prompt": "Answer the question \"When is high tide at the north pier?\" using only the source {origin}/tides. Reply with the time and the source URL you cited.",
+      "reference": [
+        [
+          "answer",
+          "--query",
+          "When is high tide at the north pier?",
+          "--urls",
+          "{origin}/tides",
+          "--json"
+        ]
+      ],
+      "baseline": {
+        "pass": true,
+        "problems": []
+      }
+    },
+    {
+      "id": "extract-product-fields",
+      "intent": "An agent wants named fields from a product page as data, so it can fill a table without reading the page itself.",
+      "outcome": "The reply gives the price $19.99 and the sku W-100 read from the page.",
+      "eval": {
+        "kind": "code",
+        "answerContains": ["$19.99", "W-100"]
+      },
+      "tool": "extract",
+      "prompt": "From {origin}/product, extract the fields title (selector h1), price (selector .price) and sku (selector .sku). Reply with the price and the sku.",
+      "reference": [
+        [
+          "extract",
+          "--url",
+          "{origin}/product",
+          "--fields",
+          "title:h1,price:.price,sku:.sku",
+          "--json"
+        ]
+      ],
+      "baseline": {
+        "pass": true,
+        "problems": []
+      }
+    },
+    {
+      "id": "map-lists-site-urls",
+      "intent": "An agent wants every URL on a site before it reads any of them, so it can plan what to fetch.",
+      "outcome": "The reply lists the site's pages /a, /b and /c.",
+      "eval": {
+        "kind": "code",
+        "answerContains": ["{origin}/a", "{origin}/b", "{origin}/c"]
+      },
+      "tool": "map",
+      "prompt": "Map the site {origin}/ and list every URL you found, one per line.",
+      "reference": [["map", "--url", "{origin}/", "--json"]],
+      "baseline": {
+        "pass": true,
+        "problems": []
+      }
+    },
+    {
+      "id": "crawl-reads-every-page",
+      "intent": "An agent wants the content of every page on a small site, so it can study the whole site at once.",
+      "outcome": "The reply names all five page titles: Alpha, Beta, Gamma, Delta and Epsilon.",
+      "eval": {
+        "kind": "code",
+        "answerContains": ["Alpha", "Beta", "Gamma", "Delta", "Epsilon"]
+      },
+      "tool": "crawl",
+      "prompt": "Crawl {origin}/ to depth 2 (at most 10 pages). Reply with the title of every page you crawled.",
+      "reference": [["crawl", "--url", "{origin}/", "--depth", "2", "--limit", "10", "--json"]],
+      "baseline": {
+        "pass": true,
+        "problems": []
+      }
+    },
+    {
+      "id": "monitor-reports-change",
+      "intent": "An agent wants to know when a page it watches really changes, so it can alert the user only about what is new.",
+      "outcome": "The reply says the fare changed to 4 dollars.",
+      "eval": {
+        "kind": "code",
+        "answerContains": ["4 dollars"]
+      },
+      "tool": "monitor",
+      "prompt": "Check the page {origin}/notice for changes twice in a row, using the monitor database {tmp}/monitor.sqlite both times. Reply with what changed between the two checks.",
+      "reference": [
+        ["monitor", "--url", "{origin}/notice", "--db", "{tmp}/monitor.sqlite", "--json"],
+        ["monitor", "--url", "{origin}/notice", "--db", "{tmp}/monitor.sqlite", "--json"]
+      ],
+      "baseline": {
+        "pass": true,
+        "problems": []
+      }
+    },
+    {
+      "id": "feed-lists-items",
+      "intent": "An agent wants the items of a news feed in order, so it can follow updates without scraping pages.",
+      "outcome": "The reply lists the feed items Alpha, Beta and Gamma, in that order.",
+      "eval": {
+        "kind": "code",
+        "answerMatches": "Alpha[\\s\\S]*Beta[\\s\\S]*Gamma"
+      },
+      "tool": "feed",
+      "prompt": "Read the feed {origin}/feed.xml. Reply with the item titles in the order the feed lists them, one per line.",
+      "reference": [["feed", "--url", "{origin}/feed.xml", "--json"]],
+      "baseline": {
+        "pass": true,
+        "problems": []
+      }
+    },
+    {
+      "id": "research-gathers-sources",
+      "intent": "An agent wants a topic researched across sources in one step, so it gets findings with the pages behind them.",
+      "outcome": "The reply names the fixture page /a as a source the research used.",
+      "eval": {
+        "kind": "code",
+        "answerContains": ["{origin}/a"]
+      },
+      "tool": "research",
+      "prompt": "Research the topic \"alpha story\". Reply with the source URLs the research used.",
+      "reference": [["research", "--topic", "alpha story", "--json"]],
+      "baseline": {
+        "pass": true,
+        "problems": []
+      }
+    },
+    {
+      "id": "summarize-picks-key-sentence",
+      "intent": "An agent wants a long text cut to its key sentences with no model call, so it saves tokens and gets the same result each time.",
+      "outcome": "The reply contains a summary sentence about the north pier taken word for word from the text.",
+      "eval": {
+        "kind": "code",
+        "answerMatches": "The north pier floods at high tide\\.|High tide at the north pier is at 06:12\\."
+      },
+      "tool": "summarize",
+      "prompt": "Summarize this text to 2 sentences: \"Tides rise twice a day. The north pier floods at high tide. Gulls nest on the breakwater. High tide at the north pier is at 06:12.\" Reply with the summary exactly as the tool returned it.",
+      "reference": [
+        [
+          "summarize",
+          "--text",
+          "Tides rise twice a day. The north pier floods at high tide. Gulls nest on the breakwater. High tide at the north pier is at 06:12.",
+          "--sentences",
+          "2",
+          "--json"
+        ]
+      ],
+      "baseline": {
+        "pass": true,
+        "problems": []
+      }
+    },
+    {
+      "id": "scrape-reports-missing-page",
+      "intent": "An agent wants a clear error when a page is gone, so it can tell the user instead of guessing.",
+      "outcome": "The reply says the page was not found (HTTP 404).",
+      "eval": {
+        "kind": "code",
+        "answerMatches": "404|[Nn]ot [Ff]ound"
+      },
+      "tool": "scrape",
+      "prompt": "Read the page {origin}/gone. Reply with what happened, including the HTTP status if there was one.",
+      "reference": [["scrape", "--url", "{origin}/gone", "--json"]],
+      "baseline": {
+        "pass": true,
+        "problems": []
+      }
+    },
+    {
+      "id": "batch-names-failed-url",
+      "intent": "An agent wants many pages read in one call and told which ones failed, so one bad URL does not hide the good results.",
+      "outcome": "The reply names /binary as the URL that failed.",
+      "eval": {
+        "kind": "code",
+        "answerContains": ["{origin}/binary"]
+      },
+      "tool": "batch",
+      "prompt": "Read these pages in one batch: {origin}/a, {origin}/b, {origin}/binary. Reply with the URL that failed.",
+      "reference": [["batch", "--urls", "{origin}/a,{origin}/b,{origin}/binary", "--json"]],
+      "baseline": {
+        "pass": true,
+        "problems": []
+      }
+    },
+    {
+      "id": "batch-reads-urls-in-one-call",
+      "intent": "An agent wants several pages read with one tool call, so it does not spend a call and a turn on each URL.",
+      "outcome": "One batch call reads every URL, no scrape call runs, and the reply names /binary as the URL that failed.",
+      "eval": {
+        "kind": "code",
+        "answerContains": ["{origin}/binary"]
+      },
+      "tool": "batch",
+      "avoidTools": ["scrape"],
+      "prompt": "Read these pages: {origin}/a, {origin}/b, {origin}/binary. Reply with the URL that failed.",
+      "reference": [["batch", "--urls", "{origin}/a,{origin}/b,{origin}/binary", "--json"]],
+      "baseline": {
+        "pass": true,
+        "problems": []
+      }
+    },
+    {
+      "id": "mcp-app-map-view",
+      "intent": "An agent host wants the site-map MCP App view, so it can show the user a map of a site instead of a wall of URLs.",
+      "outcome": "The reply gives the view's title, webular site map.",
+      "eval": {
+        "kind": "code",
+        "answerContains": ["webular site map"]
+      },
+      "tool": "ReadMcpResourceTool",
+      "prompt": "Read the MCP resource ui://webular/map from the webular MCP server. Reply with the exact text inside its <title> tag.",
+      "reference": [
+        {
+          "file": "plugins/webular/src/ui/map.html"
+        }
+      ],
+      "surfaces": ["plugin"],
+      "baseline": {
+        "pass": true,
+        "problems": []
+      }
+    }
+  ]
+}

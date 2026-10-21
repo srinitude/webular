@@ -1,0 +1,1 @@
+{"answer":"High tide at the north pier is at 06:12 on Tuesday.The pier closes in storms.","errors":[],"query":"When is high tide at the north pier?","sources":[{"title":"{origin}/tides","url":"{origin}/tides"}]}

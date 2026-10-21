@@ -1,0 +1,1 @@
+{"count":2,"query":"alpha story","results":[{"description":"Alpha story","title":"Alpha","url":"{origin}/a"},{"description":"Beta story","title":"Beta","url":"{origin}/b"}],"source":"hackernews"}

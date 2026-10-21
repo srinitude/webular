@@ -1,0 +1,9 @@
+{"count":3,"results":[{"ok":true,"title":"Alpha","url":"{origin}/a"},{"ok":true,"title":"Beta","url":"{origin}/b"},{"error":"fetch {origin}/binary: unsupported content-type \"image/png\" — use media --download","ok":false,"url":"{origin}/binary"}]}
+Error executing step workflow.scrape.step.fetch: Error: fetch {origin}/binary: unsupported content-type "image/png" — use media --download
+    at <anonymous> (/Users/kiren/webular-work/model-matrix/src/core/http.ts:137:23)
+    at ~effect/Effect/successCont (/Users/kiren/webular-work/model-matrix/node_modules/effect/dist/internal/effect.js:979:28)
+    at runLoop (/Users/kiren/webular-work/model-matrix/node_modules/effect/dist/internal/effect.js:453:88)
+    at evaluate (/Users/kiren/webular-work/model-matrix/node_modules/effect/dist/internal/effect.js:402:23)
+    at runInAsyncScope (node:async_hooks:207:23)
+    at <anonymous> (/Users/kiren/webular-work/model-matrix/node_modules/effect/dist/internal/effect.js:808:17)
+    at processTicksAndRejections (native:7:39)

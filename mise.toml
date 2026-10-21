@@ -340,6 +340,13 @@ description = "Default path: a bare `mise run` runs the repo CI spine, the plugi
 depends = ["ci", "plugin:ci", "e2e"]
 run = "echo webular: default complete"
 
+# ───────────────────────── Three-model test (subscription; never CI) ─────────────────────────
+
+[tasks."test:models"]
+description = "Run the agent scenarios through headless Claude Code on the subscription models, per surface, into bench/results (off the CI spine; pass --smoke for one run per model)"
+depends = ["build"]
+run = 'bun "{{config_root}}/tests/models/run.ts"'
+
 [tasks.bench]
 description = "Benchmark cold start (wall + CPU) of the CLI and its network-free commands with hyperfine, then the summarizer scaling run at 10, 1,000 and 100,000 sentences (off the CI spine)"
 depends = ["setup"]

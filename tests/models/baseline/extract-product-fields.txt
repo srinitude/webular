@@ -1,0 +1,1 @@
+{"data":{"price":"$19.99","sku":"W-100","title":"Widget"},"url":"{origin}/product"}

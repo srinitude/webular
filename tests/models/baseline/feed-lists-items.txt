@@ -1,0 +1,1 @@
+{"count":3,"feedUrl":"{origin}/feed.xml","items":[{"published":"","summary":"First","title":"Alpha","url":"{origin}/a"},{"published":"","summary":"Second","title":"Beta","url":"{origin}/b"},{"published":"","summary":"Third","title":"Gamma","url":"{origin}/c"}],"title":"Fixture feed","url":"{origin}/feed.xml"}

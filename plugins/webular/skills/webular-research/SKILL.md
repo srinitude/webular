@@ -31,7 +31,7 @@ The webular MCP server can take a few seconds to start. If no webular tool is in
 | Shorten a text or a page | `summarize` |
 | Read many pages of one site | `crawl` |
 | Pull named fields from a page | `extract` |
-| Get a short, sourced answer to one question | `answer` (`urls` reads only those pages) |
+| Get a short, sourced answer to one question | `answer` (`urls`, or `--urls` on the command line, reads only those pages) |
 | Research a topic. Call this first, not `search` and then `scrape` | `research` |
 | Turn a file into text | `parse` |
 | Get text or details from an image, audio, or video | `media` |

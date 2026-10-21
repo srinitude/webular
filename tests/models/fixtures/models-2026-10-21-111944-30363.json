@@ -1,0 +1,135 @@
+{
+  "date": "2026-10-21",
+  "runs": [
+    {
+      "model": "claude-opus-5-5",
+      "surface": "plugin",
+      "scenario": "scrape-reads-article",
+      "pass": true,
+      "problems": [],
+      "turns": 2,
+      "wallMs": 20801,
+      "raw": "bench/results/raw/models-2026-10-21-111944-30363/claude-opus-5-5-plugin-scrape-reads-article.jsonl"
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "plugin",
+      "scenario": "search-finds-pages",
+      "pass": true,
+      "problems": [],
+      "turns": 2,
+      "wallMs": 18856,
+      "raw": "bench/results/raw/models-2026-10-21-111944-30363/claude-opus-5-5-plugin-search-finds-pages.jsonl"
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "plugin",
+      "scenario": "answer-cites-source",
+      "pass": true,
+      "problems": [],
+      "turns": 2,
+      "wallMs": 26947,
+      "raw": "bench/results/raw/models-2026-10-21-111944-30363/claude-opus-5-5-plugin-answer-cites-source.jsonl"
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "plugin",
+      "scenario": "extract-product-fields",
+      "pass": true,
+      "problems": [],
+      "turns": 2,
+      "wallMs": 14524,
+      "raw": "bench/results/raw/models-2026-10-21-111944-30363/claude-opus-5-5-plugin-extract-product-fields.jsonl"
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "plugin",
+      "scenario": "map-lists-site-urls",
+      "pass": true,
+      "problems": [],
+      "turns": 2,
+      "wallMs": 21119,
+      "raw": "bench/results/raw/models-2026-10-21-111944-30363/claude-opus-5-5-plugin-map-lists-site-urls.jsonl"
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "plugin",
+      "scenario": "crawl-reads-every-page",
+      "pass": true,
+      "problems": [],
+      "turns": 2,
+      "wallMs": 16890,
+      "raw": "bench/results/raw/models-2026-10-21-111944-30363/claude-opus-5-5-plugin-crawl-reads-every-page.jsonl"
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "plugin",
+      "scenario": "monitor-reports-change",
+      "pass": true,
+      "problems": [],
+      "turns": 3,
+      "wallMs": 20723,
+      "raw": "bench/results/raw/models-2026-10-21-111944-30363/claude-opus-5-5-plugin-monitor-reports-change.jsonl"
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "plugin",
+      "scenario": "feed-lists-items",
+      "pass": true,
+      "problems": [],
+      "turns": 2,
+      "wallMs": 10082,
+      "raw": "bench/results/raw/models-2026-10-21-111944-30363/claude-opus-5-5-plugin-feed-lists-items.jsonl"
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "plugin",
+      "scenario": "research-gathers-sources",
+      "pass": true,
+      "problems": [],
+      "turns": 4,
+      "wallMs": 19122,
+      "raw": "bench/results/raw/models-2026-10-21-111944-30363/claude-opus-5-5-plugin-research-gathers-sources.jsonl"
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "plugin",
+      "scenario": "summarize-picks-key-sentence",
+      "pass": true,
+      "problems": [],
+      "turns": 2,
+      "wallMs": 30620,
+      "raw": "bench/results/raw/models-2026-10-21-111944-30363/claude-opus-5-5-plugin-summarize-picks-key-sentence.jsonl"
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "plugin",
+      "scenario": "scrape-reports-missing-page",
+      "pass": true,
+      "problems": [],
+      "turns": 2,
+      "wallMs": 14544,
+      "raw": "bench/results/raw/models-2026-10-21-111944-30363/claude-opus-5-5-plugin-scrape-reports-missing-page.jsonl"
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "plugin",
+      "scenario": "batch-names-failed-url",
+      "pass": true,
+      "problems": [],
+      "turns": 2,
+      "wallMs": 16866,
+      "raw": "bench/results/raw/models-2026-10-21-111944-30363/claude-opus-5-5-plugin-batch-names-failed-url.jsonl"
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "plugin",
+      "scenario": "batch-reads-urls-in-one-call",
+      "pass": true,
+      "problems": [],
+      "turns": 2,
+      "wallMs": 11478,
+      "raw": "bench/results/raw/models-2026-10-21-111944-30363/claude-opus-5-5-plugin-batch-reads-urls-in-one-call.jsonl"
+    }
+  ]
+}
