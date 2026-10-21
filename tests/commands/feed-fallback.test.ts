@@ -2,9 +2,9 @@
 // <link rel="alternate"> discovery, same-origin guesses, then Wayback, then the
 // free feed search. The availability body is the recorded archive.org shape
 // from reliability.test.ts, re-pointed at the fixture origin.
-import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
+import { describe, expect, test } from 'bun:test'
 import type * as BunServices from '@effect/platform-bun/BunServices'
-import { Effect } from 'effect'
+import { ConfigProvider, Effect } from 'effect'
 import { resolveFeed } from '../../src/core/feed-source.ts'
 import { type Routes, useFixture } from '../_support/fixture.ts'
 import { eff } from '../_support/run.ts'
@@ -54,24 +54,24 @@ const free = useFixture(
     '/found.xml': res(RSS, 'application/rss+xml'),
   }),
 )
-const saved = {
-  origin: process.env['WEBULAR_SOURCE_ORIGIN'],
-  gap: process.env['WEBULAR_SOURCE_GAP_MS'],
-}
-beforeAll(() => {
-  process.env['WEBULAR_SOURCE_ORIGIN'] = free.origin
-  process.env['WEBULAR_SOURCE_GAP_MS'] = '0'
-})
-afterAll(() => {
-  if (saved.origin === undefined) delete process.env['WEBULAR_SOURCE_ORIGIN']
-  else process.env['WEBULAR_SOURCE_ORIGIN'] = saved.origin
-  if (saved.gap === undefined) delete process.env['WEBULAR_SOURCE_GAP_MS']
-  else process.env['WEBULAR_SOURCE_GAP_MS'] = saved.gap
-})
-
 const run = <A, E>(body: () => Generator<Effect.Effect<unknown, E, BunServices.BunServices>, A>) =>
   eff(Effect.gen(body))()
-const resolve = (url: string) => resolveFeed(url, { archive: true, archiveOrigin: bare.origin })
+// The fixture origin goes through the ConfigProvider, never process.env: the
+// default env provider fixes its key set when first built, and an env write
+// would leak into every later test file in the same process.
+const resolve = (url: string) =>
+  resolveFeed(url, { archive: true, archiveOrigin: bare.origin }).pipe(
+    Effect.provideService(
+      ConfigProvider.ConfigProvider,
+      ConfigProvider.orElse(
+        ConfigProvider.fromUnknown({
+          WEBULAR_SOURCE_ORIGIN: free.origin,
+          WEBULAR_SOURCE_GAP_MS: '0',
+        }),
+        ConfigProvider.fromEnv(),
+      ),
+    ),
+  )
 
 describe('resolveFeed — feed fallback chain', () => {
   test('a direct feed is used as given', () =>

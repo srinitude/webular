@@ -55,6 +55,7 @@ test('allowedEvents lists exactly the moves the snapshot can take', () => {
   expect(allowedEvents(rendering as AnyMachineSnapshot).sort()).toEqual([
     'EMPTY_WITH_ERRORS',
     'NO_ERRORS',
+    'PARTIAL',
     'SOME_ERRORS',
   ])
 })
