@@ -8,6 +8,8 @@ import { renderFor } from './render.ts'
 
 interface RunOpts {
   json?: boolean
+  ndjson?: boolean
+  fields?: string[]
   output?: string
   exitCode?: (result: unknown) => number
 }
@@ -52,6 +54,7 @@ export async function runWorkflow(
   }
   const failures = errorCount(outcome.result)
   if (failures > 0) logErr(`${name}: ${failures} fetch${failures === 1 ? '' : 'es'} failed`)
-  await emit(outcome.result, { json: opts.json, output: opts.output, render: renderFor(name) })
-  return opts.exitCode?.(outcome.result) ?? 0
+  const { exitCode, ...emitOpts } = opts
+  await emit(outcome.result, { ...emitOpts, render: renderFor(name) })
+  return exitCode?.(outcome.result) ?? 0
 }

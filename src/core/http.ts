@@ -1,8 +1,8 @@
-// FOSS fetch layer built on Bun.fetch: timeout, user-agent, scoped redirects,
-// textual-content guard, and deterministic bounded retry. The core is Effect;
-// the Promise exports run it on the shared runtime for non-Effect callers.
+// Bun.fetch layer: timeout, user-agent, scoped redirects, textual-content guard,
+// deterministic bounded retry. Effect core; Promise exports for non-Effect callers.
 import { Data, Effect } from 'effect'
 import pkg from '../../package.json' with { type: 'json' }
+import { type CacheOptions, cachedGetText } from './cache.ts'
 import { readTextCapped } from './decode.ts'
 import { runtime } from './runtime.ts'
 import { sameHost } from './url.ts'
@@ -27,7 +27,7 @@ const RETRY_STATUS = new Set([408, 429, 502, 503, 504])
 // hostile value cannot stall the CLI.
 const MAX_RETRY_AFTER_MS = 10_000
 
-export interface FetchOptions {
+export interface FetchOptions extends CacheOptions {
   timeoutMs?: number
   headers?: Record<string, string>
   signal?: AbortSignal
@@ -142,20 +142,26 @@ const readOk = Effect.fn('readOk')(function* (res: Response, url: string) {
 const okText = (res: Response, url: string) =>
   readOk(res, url).pipe(Effect.tapError(() => dropBody(res)))
 
-export const fetchTextEffect = (url: string, opts: FetchOptions = {}) =>
-  Effect.flatMap(httpGetEffect(url, opts), (res) => okText(res, url))
+// Text GETs revalidate through the disk cache; cachedGetText rejects with this
+// layer's squashed error, so callers still see HttpStatusError or Error.
+export const fetchTextEffect = (url: string, opts: FetchOptions = {}) => {
+  const get = (h: Record<string, string>) =>
+    runtime.runPromise(httpGetEffect(url, { ...opts, headers: { ...opts.headers, ...h } }))
+  const read = (res: Response) => runtime.runPromise(okText(res, url))
+  return Effect.tryPromise({
+    try: () => cachedGetText(url, get, read, opts),
+    catch: (err) => err as HttpStatusError | Error,
+  })
+}
 
 // The ROOT of a crawl/map is the user's explicit target: follow its redirects
-// freely (apex→www is ubiquitous) and report the FINAL url so callers can
-// re-anchor their host scope on it.
+// freely (apex→www) and report the FINAL url to re-anchor the host scope on.
 const fetchRootEffect = Effect.fn('fetchRoot')(function* (url: string, opts: FetchOptions) {
   const res = yield* httpGetEffect(url, opts)
   return { finalUrl: res.url || url, html: yield* okText(res, url) }
 })
 
-function isRedirect(status: number): boolean {
-  return status >= 300 && status < 400
-}
+const isRedirect = (status: number) => status >= 300 && status < 400
 
 // Fetch text but follow redirects MANUALLY, blocking any hop that leaves `host`
 // (EXACT hostname match — scope control for crawls, not an IP/SSRF filter).

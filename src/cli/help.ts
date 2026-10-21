@@ -20,7 +20,9 @@ export function printHelp(): number {
   const tail = [
     '',
     'GLOBAL OPTIONS',
-    '  --json            Emit structured JSON',
+    '  --json            Emit JSON (sorted keys; one line unless stdout is a terminal)',
+    '  --ndjson          Emit one JSON line per result item',
+    '  --select <a,b>    Keep only these top-level JSON fields',
     '  -o, --output <f>  Write output to a file',
     '  --timeout <ms>    Network timeout per request attempt (default 30000)',
     '  -h, --help        Show help',

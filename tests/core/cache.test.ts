@@ -1,0 +1,173 @@
+// Disk cache contract: ETag / Last-Modified revalidation, no-store and opt-out
+// bypass, oldest-write-first eviction under the byte bound, byte-identical
+// bodies — against a real local Bun.serve server, one temp cache dir per test.
+import { afterAll, describe, expect, test } from 'bun:test'
+import { BunServices } from '@effect/platform-bun'
+import { ConfigProvider, Effect, FileSystem, Layer, type Path } from 'effect'
+
+type Services = FileSystem.FileSystem | Path.Path
+
+import { cachedGetTextEffect } from '../../src/core/cache.ts'
+import { httpGet } from '../../src/core/http.ts'
+
+const BODY = 'héllo ✓ — cached\n'
+const LAST_MODIFIED = 'Tue, 20 Oct 2026 00:00:00 GMT'
+const TEXT = { 'content-type': 'text/plain; charset=utf-8' }
+
+const route = (path: string, inm: string | null, ims: string | null): Response => {
+  if (path.startsWith('/etag'))
+    return inm === '"v1"'
+      ? new Response(null, { status: 304 })
+      : new Response(BODY, { headers: { ...TEXT, etag: '"v1"' } })
+  if (path.startsWith('/lm'))
+    return ims === LAST_MODIFIED
+      ? new Response(null, { status: 304 })
+      : new Response(BODY, { headers: { ...TEXT, 'last-modified': LAST_MODIFIED } })
+  if (path.startsWith('/nostore'))
+    return new Response(BODY, { headers: { ...TEXT, etag: '"n"', 'cache-control': 'no-store' } })
+  if (path.startsWith('/missing'))
+    return new Response('nope', { status: 404, headers: { etag: '"m"' } })
+  return new Response('x'.repeat(1000), { headers: { ...TEXT, etag: `"${path}"` } })
+}
+
+// The server records the validator headers each path received.
+const startServer = () => {
+  const seen = new Map<string, { inm: string | null; ims: string | null }[]>()
+  const server = Bun.serve({
+    port: 0,
+    maxRequestBodySize: 1024,
+    fetch(req) {
+      const path = new URL(req.url).pathname
+      const inm = req.headers.get('if-none-match')
+      const ims = req.headers.get('if-modified-since')
+      seen.set(path, [...(seen.get(path) ?? []), { inm, ims }])
+      return route(path, inm, ims)
+    },
+  })
+  return { server, seen }
+}
+const { server, seen } = startServer()
+afterAll(() => server.stop(true))
+
+const get = (path: string, opts: { cache?: boolean } = {}) => {
+  const url = `http://localhost:${server.port}${path}`
+  return cachedGetTextEffect(
+    url,
+    (headers) => httpGet(url, { headers }),
+    (res) => res.text(),
+    opts,
+  )
+}
+
+const withCacheDir = <A>(
+  env: Record<string, string>,
+  body: (dir: string) => Effect.Effect<A, unknown, Services>,
+) =>
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem
+    const dir = yield* fs.makeTempDirectoryScoped({ prefix: 'webular-cache-' })
+    const provider = ConfigProvider.fromEnvRecord({ ...env, WEBULAR_CACHE_DIR: dir })
+    const services = Layer.merge(ConfigProvider.layer(provider), BunServices.layer)
+    return yield* body(dir).pipe(Effect.provide(services))
+  })
+
+// Each test runs in its own scoped temp cache dir with its own env.
+const run = <A>(
+  env: Record<string, string>,
+  body: (dir: string) => Effect.Effect<A, unknown, Services>,
+) =>
+  Effect.runPromise(Effect.scoped(withCacheDir(env, body)).pipe(Effect.provide(BunServices.layer)))
+
+const entries = (dir: string) =>
+  Effect.gen(function* () {
+    const names = yield* (yield* FileSystem.FileSystem).readDirectory(dir)
+    return names.filter((n) => n.endsWith('.json'))
+  }).pipe(Effect.provide(BunServices.layer), Effect.orDie)
+
+const hitThen304 = (dir: string) =>
+  Effect.gen(function* () {
+    expect(yield* get('/etag/hit')).toBe(BODY)
+    expect(yield* entries(dir)).toHaveLength(1)
+    expect(yield* get('/etag/hit')).toBe(BODY)
+    expect(seen.get('/etag/hit')?.map((r) => r.inm)).toEqual([null, '"v1"'])
+  })
+
+const lastModified = () =>
+  Effect.gen(function* () {
+    yield* get('/lm')
+    expect(yield* get('/lm')).toBe(BODY)
+    expect(seen.get('/lm')?.[1]?.ims).toBe(LAST_MODIFIED)
+  })
+
+const byteIdentical = () =>
+  Effect.gen(function* () {
+    const first = Buffer.from(yield* get('/etag/bytes'))
+    const second = Buffer.from(yield* get('/etag/bytes'))
+    expect(first.equals(second)).toBe(true)
+    expect(second.equals(Buffer.from(BODY))).toBe(true)
+    expect(seen.get('/etag/bytes')).toHaveLength(2)
+  })
+
+const neverStored = (dir: string) =>
+  Effect.gen(function* () {
+    yield* get('/nostore')
+    yield* get('/nostore')
+    expect(seen.get('/nostore')?.map((r) => r.inm)).toEqual([null, null])
+    yield* get('/missing')
+    expect(yield* entries(dir)).toHaveLength(0)
+  })
+
+const bypassed = (path: string, opts: { cache?: boolean }) => (dir: string) =>
+  Effect.gen(function* () {
+    yield* get(path, opts)
+    yield* get(path, opts)
+    expect(yield* entries(dir)).toHaveLength(0)
+    expect(seen.get(path)?.map((r) => r.inm)).toEqual([null, null])
+  })
+
+const evictsOldest = (dir: string) =>
+  Effect.gen(function* () {
+    for (const name of ['a', 'b', 'c']) {
+      yield* get(`/big/${name}`)
+      yield* Effect.sleep('20 millis')
+    }
+    expect(yield* entries(dir)).toHaveLength(2)
+    yield* get('/big/a')
+    yield* get('/big/c')
+    expect(seen.get('/big/a')?.[1]?.inm).toBeNull()
+    expect(seen.get('/big/c')?.[1]?.inm).toBe('"/big/c"')
+  })
+
+describe('disk cache', () => {
+  test('stores a hit, then revalidates with If-None-Match and reuses the body on 304', () =>
+    run({}, hitThen304))
+  test('revalidates with If-Modified-Since from a stored Last-Modified', () =>
+    run({}, lastModified))
+  test('repeat bodies are byte-identical to the first fetch', () => run({}, byteIdentical))
+  test('never stores Cache-Control: no-store or non-2xx responses', () => run({}, neverStored))
+  test('cache:false bypasses the cache', () => run({}, bypassed('/etag/off', { cache: false })))
+  test('WEBULAR_NO_CACHE=1 bypasses the cache', () =>
+    run({ WEBULAR_NO_CACHE: '1' }, bypassed('/etag/env', {})))
+  test('evicts the oldest write first to stay under the byte bound', () =>
+    run({ WEBULAR_CACHE_MAX_BYTES: '2600' }, evictsOldest))
+})
+
+// A Windows-like environment: no HOME and no WEBULAR_CACHE_DIR, only LOCALAPPDATA
+// (or USERPROFILE). The default folder must land under it, not under ./.cache.
+const defaultUnder = (key: 'LOCALAPPDATA' | 'USERPROFILE') =>
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem
+    const base = yield* fs.makeTempDirectoryScoped({ prefix: 'webular-win-' })
+    const provider = ConfigProvider.fromEnvRecord({ [key]: base })
+    const services = Layer.merge(ConfigProvider.layer(provider), BunServices.layer)
+    yield* get(`/etag/win-${key}`).pipe(Effect.provide(services))
+    const dir = `${base}/.cache/webular`
+    expect(yield* entries(dir)).toHaveLength(1)
+  })
+
+describe('default cache folder on Windows', () => {
+  for (const key of ['LOCALAPPDATA', 'USERPROFILE'] as const) {
+    test(`uses ${key} when HOME is unset`, () =>
+      Effect.runPromise(Effect.scoped(defaultUnder(key)).pipe(Effect.provide(BunServices.layer))))
+  }
+})

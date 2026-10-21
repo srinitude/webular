@@ -1,7 +1,7 @@
 // Forgiving flag parsing (clig.dev) on top of node:util parseArgs, plus
 // bounds-checked flag accessors shared by every command.
 import { parseArgs } from 'node:util'
-import { logErr } from './output.ts'
+import { logErr, parseFields } from './output.ts'
 
 type FlagValue = string | boolean | undefined
 interface ParsedArgs {
@@ -13,6 +13,8 @@ type OptionSpec = { type: 'string' | 'boolean'; short?: string; default?: string
 
 const COMMON: Record<string, OptionSpec> = {
   json: { type: 'boolean', default: false },
+  ndjson: { type: 'boolean', default: false },
+  select: { type: 'string' },
   output: { type: 'string', short: 'o' },
   timeout: { type: 'string' },
 }
@@ -94,6 +96,16 @@ export function timeoutFlag(cmd: string, values: Record<string, FlagValue>): num
   return optIntFlag(cmd, values, 'timeout', { min: 1, max: 600_000 })
 }
 
-export function emitOpts(values: Record<string, FlagValue>): { json: boolean; output?: string } {
-  return { json: Boolean(values.json), output: strFlag(values, 'output') }
+export function emitOpts(values: Record<string, FlagValue>): {
+  json: boolean
+  ndjson: boolean
+  fields?: string[]
+  output?: string
+} {
+  return {
+    json: Boolean(values.json),
+    ndjson: Boolean(values.ndjson),
+    fields: parseFields(strFlag(values, 'select')),
+    output: strFlag(values, 'output'),
+  }
 }

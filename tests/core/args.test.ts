@@ -54,7 +54,15 @@ describe('strFlag / emitOpts', () => {
   })
 
   test('emitOpts projects json and output', () => {
-    expect(emitOpts({ json: true, output: 'f.md' })).toEqual({ json: true, output: 'f.md' })
-    expect(emitOpts({})).toEqual({ json: false, output: undefined })
+    expect(emitOpts({ json: true, output: 'f.md' })).toEqual({
+      json: true,
+      ndjson: false,
+      output: 'f.md',
+    })
+    expect(emitOpts({})).toEqual({ json: false, ndjson: false, output: undefined })
+    expect(emitOpts({ ndjson: true, select: 'url, title,' })).toMatchObject({
+      ndjson: true,
+      fields: ['url', 'title'],
+    })
   })
 })
