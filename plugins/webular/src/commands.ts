@@ -8,7 +8,6 @@ import { constants } from 'node:os'
 import { Config, Data, Effect, Stream } from 'effect'
 import { ChildProcess, ChildProcessSpawner } from 'effect/process'
 import { z } from 'zod'
-import { uiMeta } from './apps.ts'
 import { cap } from './budget.ts'
 import descriptions from './descriptions.json' with { type: 'json' }
 import { outputs, schemas } from './schemas.ts'
@@ -129,7 +128,6 @@ export const commandTools = (Object.keys(schemas) as Command[]).sort().map((id) 
   description: descriptions.tools[id],
   inputSchema: z.strictObject({ ...schemas[id].shape, cursor }),
   outputSchema: outputs[id] ?? outputSchema,
-  ...uiMeta(id),
   annotations: {
     title: descriptions.titles[id],
     readOnlyHint: !writesFiles.has(id),

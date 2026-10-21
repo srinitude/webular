@@ -59,7 +59,7 @@ depends = ["lint"]
 run = ["bunx tsc --noEmit", "bunx tsc --noEmit -p plugins/webular"]
 
 [tasks.build]
-description = "Build: bundle every command into dist/commands (shared chunks in dist/chunks), compile the native webular executable into dist/bin, and bundle the plugin's MCP App views (plugin:ui), which the plugin's MCP server reads at startup"
+description = "Build: bundle every command into dist/commands (shared chunks in dist/chunks), and compile the native webular executable into dist/bin"
 depends = ["typecheck"]
 run = [
   'bun scripts/gen-dispatch.ts',
@@ -67,7 +67,6 @@ run = [
   'bun build {{vars.entries}} --target=bun --minify --splitting --root="{{config_root}}/src" --outdir="{{config_root}}/dist" --chunk-naming=chunks/[name]-[hash].[ext]',
   'bun build "{{config_root}}/bin/webular.ts" --compile --minify --sourcemap --bytecode --format=esm --outfile="{{config_root}}/dist/bin/webular"',
   'bun build "{{config_root}}/src/release/node-launcher.ts" --target=node --format=esm --minify --outfile="{{config_root}}/dist/webular.js"',
-  { task = "plugin:ui" },
 ]
 sources = ["src/**/*.ts", "bin/**/*.ts", "scripts/**/*.ts", "mise.toml", "package.json", "tsconfig.json"]
 outputs = ["dist/commands/search.js", "dist/bin/webular", "dist/webular.js"]
@@ -304,12 +303,6 @@ description = "Plugin: no time-anchored wording in Markdown"
 depends = ["plugin:check-reachable"]
 run = 'bun "{{config_root}}/plugins/webular/scripts/check-timeless.ts"'
 
-[tasks."plugin:ui"]
-description = "Plugin: bundle each MCP App view into one self-contained HTML file in plugins/webular/dist/ui"
-depends = ["setup"]
-env = { NODE_ENV = "production" }
-run = 'bun build --compile --target=browser --minify "{{config_root}}/plugins/webular/src/ui/session.html" "{{config_root}}/plugins/webular/src/ui/map.html" "{{config_root}}/plugins/webular/src/ui/monitor.html" --outdir="{{config_root}}/plugins/webular/dist/ui"'
-
 [tasks."plugin:bundle"]
 description = "Plugin: bundle the MCP server into plugins/webular/dist/server.js, the file mcp.json starts, so a host starts it without transpiling hundreds of modules"
 depends = ["setup"]
@@ -317,7 +310,7 @@ run = 'bun build --target=bun --minify "{{config_root}}/plugins/webular/src/serv
 
 [tasks."plugin:test"]
 description = "Plugin: run the webular agent plugin's outcome evals and tests"
-depends = ["plugin:check-timeless", "plugin:ui", "plugin:bundle"]
+depends = ["plugin:check-timeless", "plugin:bundle"]
 run = "bun test --timeout 30000 plugins/webular"
 
 [tasks."plugin:ci"]

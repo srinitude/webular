@@ -15,7 +15,6 @@ import { createMcpHandler, type Server } from '@modelcontextprotocol/server'
 import { serveStdio } from '@modelcontextprotocol/server/stdio'
 import { Config, Effect } from 'effect'
 import manifest from '../.claude-plugin/plugin.json' with { type: 'json' }
-import { appResources } from './apps.ts'
 import { type CommandFailed, commandTools, runCommand } from './commands.ts'
 import descriptions from './descriptions.json' with { type: 'json' }
 import { runtime } from './runtime.ts'
@@ -49,7 +48,6 @@ export const server = new MCPServer({
   version: manifest.version,
   description: descriptions.server,
   tools: Object.fromEntries(commandTools.map((t) => [t.id, tool(t)])),
-  appResources,
 })
 
 // MCPServer.startStdio and startHTTP hardcode legacy: 'reject', so a client
