@@ -56,6 +56,20 @@ function getJson(
 type Rec = Record<string, unknown>
 const s = (r: Rec, k: string): string => (typeof r[k] === 'string' ? (r[k] as string) : '')
 
+// Wikipedia full-text search ranks a raw question by its function words and
+// reads "?" as a wildcard, so "What is the height of Mount Everest ...?" tops
+// out at Chimborazo. Keep only the content words.
+// ponytail: fixed English word list; extend it when a question form misses.
+const FUNCTION_WORDS = new Set(
+  'what who whom whose when where which why how is was were are be been did does do the a an in of on at for to by from with according meters metres feet miles kilometers city country year born'.split(
+    ' ',
+  ),
+)
+export const keywordQuery = (query: string): string =>
+  (query.match(/[\p{L}\p{N}][\p{L}\p{N}'.,-]*[\p{L}\p{N}]|[\p{L}\p{N}]/gu) ?? [])
+    .filter((w) => !FUNCTION_WORDS.has(w.toLowerCase()))
+    .join(' ') || query
+
 function wikipedia(
   query: string,
   limit: number,
@@ -65,7 +79,7 @@ function wikipedia(
       endpoint('https://en.wikipedia.org/w/api.php', {
         action: 'query',
         list: 'search',
-        srsearch: query,
+        srsearch: keywordQuery(query),
         srlimit: String(limit),
         format: 'json',
       }),
