@@ -29,7 +29,7 @@ export interface FetchOptions extends CacheOptions {
 }
 
 // Retry-After (RFC 9110 section 10.2.3): delay-seconds or an HTTP-date.
-export function retryAfterMs(header: string | null, now = Date.now()): number | undefined {
+export function retryAfterMs(header: string | null, now: number): number | undefined {
   if (!header?.trim()) return undefined
   const secs = Number(header)
   const ms = Number.isFinite(secs) ? secs * 1000 : Date.parse(header) - now
@@ -133,12 +133,12 @@ function drive(run: Run, url: string, snap: FetchSnapshot): Effect.Effect<Landed
       if (next.status === 'done') return settle(run, next, landed)
       if (next.context.hops > snap.context.hops)
         return Effect.andThen(dropBody(res), drive(run, landed.url, next))
-      const waitMs = retryAfterMs(res.headers.get('retry-after'))
-      return Effect.flatMap(Clock.currentTimeMillis, (now) =>
-        (waitMs ?? 0) > run.deadline - now
+      return Effect.flatMap(Clock.currentTimeMillis, (now) => {
+        const waitMs = retryAfterMs(res.headers.get('retry-after'), now)
+        return (waitMs ?? 0) > run.deadline - now
           ? Effect.succeed(landed)
-          : Effect.andThen(dropBody(res), retry(run, url, next, waitMs)),
-      )
+          : Effect.andThen(dropBody(res), retry(run, url, next, waitMs))
+      })
     },
   })
 }
