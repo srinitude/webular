@@ -4,7 +4,7 @@ import { Effect, Schedule } from 'effect'
 import * as FetchHttpClient from 'effect/http/FetchHttpClient'
 import * as HttpClient from 'effect/http/HttpClient'
 
-export const WDQS = 'https://query.wikidata.org/sparql'
+const WDQS = 'https://query.wikidata.org/sparql'
 export const UA = 'webular-bench-generator/1.0 (kiren@fantasymetals.com)'
 
 export interface Row {
@@ -59,7 +59,7 @@ const toRow = (b: Binding): Row => ({
   year: (b.inc?.value ?? '').slice(0, 4),
 })
 
-export const queryUrl = (q: Query) => `${WDQS}?query=${encodeURIComponent(sparql(q))}`
+const queryUrl = (q: Query) => `${WDQS}?query=${encodeURIComponent(sparql(q))}`
 
 // One row per entity: the endpoint repeats an item once per site, country, or date.
 // Sorted by QID so a rerun on the same data picks the same entities.

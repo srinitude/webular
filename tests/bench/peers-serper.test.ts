@@ -1,30 +1,17 @@
 // Contract for the Serper peer adapter: request shape and how a recorded
 // reply (trimmed from the serper.dev playground) maps to Output.
 import { expect, test } from 'bun:test'
-import { Effect, Schema } from 'effect'
+import { Effect } from 'effect'
 import { HttpClient, HttpClientResponse } from 'effect/http'
-import { fail, type Post } from '../../scripts/bench/peers/peers.ts'
 import { serper } from '../../scripts/bench/peers/serper.ts'
-
-interface Req {
-  url: string
-  headers: Record<string, string>
-  body: object
-}
+import { recorded } from './replay.ts'
 
 const unused = HttpClient.make((req) =>
   Effect.succeed(HttpClientResponse.fromWeb(req, new Response('{}'))),
 )
 
 const run = (reply: unknown) => {
-  const seen: Req[] = []
-  const post: Post = (url, headers, body, schema) => {
-    seen.push({ url, headers, body })
-    return Schema.decodeUnknownEffect(schema)(reply).pipe(
-      Effect.map((r) => ({ r, sentBytes: 7 })),
-      Effect.mapError(fail),
-    )
-  }
+  const { post, seen } = recorded(reply)
   const call = serper(post, 'k', unused).search
   return (call ? call({ query: 'q' }) : Effect.die('no search')).pipe(
     Effect.map((o) => ({ o, req: seen[0] })),

@@ -1,24 +1,17 @@
 // Contract for the Apify peer adapter: request shape and how recorded
 // website-content-crawler dataset items map to Output.
 import { expect, test } from 'bun:test'
-import { Effect, Schema } from 'effect'
+import { Effect } from 'effect'
 import type { HttpClient } from 'effect/http'
 import { apify } from '../../scripts/bench/peers/apify.ts'
-import { fail, type Post } from '../../scripts/bench/peers/peers.ts'
+import { recorded } from './replay.ts'
 
 const items = [
   { url: 'https://x.test/a', text: 'Hello page', markdown: '# Hello', metadata: { title: 'A' } },
 ]
 
 const run = (body: unknown) => {
-  const seen: { url: string; headers: Record<string, string>; body: object }[] = []
-  const post: Post = (url, headers, b, schema) => {
-    seen.push({ url, headers, body: b })
-    return Schema.decodeUnknownEffect(schema)(body).pipe(
-      Effect.map((r) => ({ r, sentBytes: 7 })),
-      Effect.mapError(fail),
-    )
-  }
+  const { post, seen } = recorded(body)
   const call = apify(post, 'k', {} as HttpClient.HttpClient).scrape
   return (call ? call({ url: 'https://x.test/a' }) : Effect.die('no scrape job')).pipe(
     Effect.map((o) => ({ o, req: seen[0] })),

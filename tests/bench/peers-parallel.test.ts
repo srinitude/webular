@@ -1,10 +1,10 @@
 // Contract for the Parallel peer adapter: request shape per endpoint and how
 // recorded replies (trimmed from docs.parallel.ai examples) map to Output.
 import { expect, test } from 'bun:test'
-import { Effect, Schema } from 'effect'
+import { Effect } from 'effect'
 import type { TaskInput } from '../../scripts/bench/peers/model.ts'
 import { parallel } from '../../scripts/bench/peers/parallel.ts'
-import { fail, type Post } from '../../scripts/bench/peers/peers.ts'
+import { recorded } from './replay.ts'
 
 const searchReply = {
   search_id: 'search_1',
@@ -45,25 +45,6 @@ const answerReply = {
       ],
     },
   ],
-}
-
-interface Req {
-  url: string
-  headers: Record<string, string>
-  body: object
-}
-
-// A Post that replays one recorded reply through the real schema decode.
-const recorded = (reply: unknown) => {
-  const seen: Req[] = []
-  const post: Post = (url, headers, body, schema) => {
-    seen.push({ url, headers, body })
-    return Schema.decodeUnknownEffect(schema)(reply).pipe(
-      Effect.map((r) => ({ r, sentBytes: 7 })),
-      Effect.mapError(fail),
-    )
-  }
-  return { post, seen }
 }
 
 const run = (reply: unknown, job: 'search' | 'answer', input: TaskInput) => {

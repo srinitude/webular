@@ -20,7 +20,7 @@ const blank = (s: string) => s.trim() === ''
 const emptyCheck = (c: Check) => typeof c.value === 'string' && blank(c.value)
 
 // Every reason one task cannot be graded fairly; empty when it is fine.
-export const taskProblems = (t: Task): string[] => {
+const taskProblems = (t: Task): string[] => {
   const rules: ReadonlyArray<readonly [boolean, string]> = [
     [blank(t.tags.domain), 'empty tags.domain'],
     [blank(t.tags.language), 'empty tags.language'],
@@ -36,7 +36,7 @@ export const taskProblems = (t: Task): string[] => {
   return rules.filter(([bad]) => bad).map(([, why]) => `${t.id}: ${why}`)
 }
 
-export const fileProblems = (file: TaskFile): string[] => [
+const fileProblems = (file: TaskFile): string[] => [
   ...(file.frozen ? [] : ['set is not frozen']),
   ...(blank(file.canary) ? ['no canary'] : []),
   ...file.tasks.flatMap(taskProblems),
@@ -55,7 +55,7 @@ const differs = (fs: FileSystem.FileSystem, path: string, want: string) =>
   )
 
 // Paths in manifest.json whose file is missing or whose sha256 differs.
-export const manifestMismatches = (dir: string) =>
+const manifestMismatches = (dir: string) =>
   Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem
     const manifest = yield* readManifest(fs, dir)

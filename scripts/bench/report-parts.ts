@@ -53,7 +53,7 @@ export interface ReportInput {
 }
 
 // A vendor's own number next to the harness number, with its URL and date.
-export interface VendorClaim {
+interface VendorClaim {
   readonly tool: string
   readonly metric: string
   readonly claimed: string

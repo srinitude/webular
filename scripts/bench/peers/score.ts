@@ -113,7 +113,7 @@ export function summarize(
   return out
 }
 
-export interface MetricVerdict {
+interface MetricVerdict {
   metric: string
   dimension: string
   unit: string

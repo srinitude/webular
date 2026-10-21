@@ -1,16 +1,10 @@
 // Contract for the Linkup peer adapter: request shape per output type and
 // how recorded replies (trimmed from docs.linkup.so examples) map to Output.
 import { expect, test } from 'bun:test'
-import { Effect, Schema } from 'effect'
+import { Effect } from 'effect'
 import type { HttpClient } from 'effect/http'
 import { linkup } from '../../scripts/bench/peers/linkup.ts'
-import { fail, type Post } from '../../scripts/bench/peers/peers.ts'
-
-interface Req {
-  url: string
-  headers: Record<string, string>
-  body: object
-}
+import { recorded } from './replay.ts'
 
 const searchReply = {
   results: [
@@ -26,16 +20,8 @@ const answerReply = {
   ],
 }
 
-// A Post that replays one recorded reply through the real schema decode.
-const run = (recorded: unknown, job: 'search' | 'answer') => {
-  const seen: Req[] = []
-  const post: Post = (url, headers, body, schema) => {
-    seen.push({ url, headers, body })
-    return Schema.decodeUnknownEffect(schema)(recorded).pipe(
-      Effect.map((r) => ({ r, sentBytes: 7 })),
-      Effect.mapError(fail),
-    )
-  }
+const run = (reply: unknown, job: 'search' | 'answer') => {
+  const { post, seen } = recorded(reply)
   const call = linkup(post, 'k', {} as HttpClient.HttpClient)[job]
   return (call ? call({ query: 'q' }) : Effect.die(`no ${job} job`)).pipe(
     Effect.map((o) => ({ o, req: seen[0] })),

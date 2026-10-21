@@ -2,11 +2,11 @@
 // HttpClient, POST fetch through a replaying Post, and how recorded replies
 // (trimmed from docs.tinyfish.ai examples) map to Output.
 import { expect, test } from 'bun:test'
-import { Effect, Schema } from 'effect'
+import { Effect } from 'effect'
 import { HttpClient, HttpClientResponse } from 'effect/http'
 import type { TaskInput } from '../../scripts/bench/peers/model.ts'
-import { fail, type Post } from '../../scripts/bench/peers/peers.ts'
 import { tinyfish } from '../../scripts/bench/peers/tinyfish.ts'
+import { recorded } from './replay.ts'
 
 const searchReply = {
   query: 'q',
@@ -30,21 +30,8 @@ const fetchReply = {
   errors: [],
 }
 
-interface Req {
-  url: string
-  headers: Record<string, string>
-  body?: object
-}
-
 const run = (reply: unknown, job: 'search' | 'scrape', input: TaskInput) => {
-  const seen: Req[] = []
-  const post: Post = (url, headers, body, schema) => {
-    seen.push({ url, headers, body })
-    return Schema.decodeUnknownEffect(schema)(reply).pipe(
-      Effect.map((r) => ({ r, sentBytes: 7 })),
-      Effect.mapError(fail),
-    )
-  }
+  const { post, seen } = recorded(reply)
   const client = HttpClient.make((req, url) => {
     seen.push({ url: url.toString(), headers: { ...req.headers } })
     return Effect.succeed(HttpClientResponse.fromWeb(req, new Response(JSON.stringify(reply))))

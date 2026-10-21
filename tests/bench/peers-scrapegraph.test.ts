@@ -1,10 +1,10 @@
 // Contract for the ScrapeGraphAI peer adapter: request shape and how a
 // recorded reply (trimmed from docs.scrapegraphai.com) maps to Output.
 import { expect, test } from 'bun:test'
-import { Effect, Schema } from 'effect'
+import { Effect } from 'effect'
 import type { HttpClient } from 'effect/http'
-import { fail, type Post } from '../../scripts/bench/peers/peers.ts'
 import { scrapegraph } from '../../scripts/bench/peers/scrapegraph.ts'
+import { recorded } from './replay.ts'
 
 const reply = {
   request_id: 'r1',
@@ -16,14 +16,7 @@ const reply = {
 }
 
 const run = (body: unknown) => {
-  const seen: { url: string; headers: Record<string, string>; body: object }[] = []
-  const post: Post = (url, headers, b, schema) => {
-    seen.push({ url, headers, body: b })
-    return Schema.decodeUnknownEffect(schema)(body).pipe(
-      Effect.map((r) => ({ r, sentBytes: 7 })),
-      Effect.mapError(fail),
-    )
-  }
+  const { post, seen } = recorded(body)
   const call = scrapegraph(post, 'k', {} as HttpClient.HttpClient).scrape
   return (call ? call({ url: 'https://x.test/a' }) : Effect.die('no scrape job')).pipe(
     Effect.map((o) => ({ o, req: seen[0] })),

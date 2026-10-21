@@ -11,7 +11,7 @@ const ROOT = `${import.meta.dir}/../../..`
 // The first 6 types get 13 tasks and the rest 12: 150 page tasks in all.
 const count = (i: number) => (i < 6 ? 13 : 12)
 
-export interface PageTask {
+interface PageTask {
   readonly task: Task
   readonly path: string
   readonly bytes: Uint8Array

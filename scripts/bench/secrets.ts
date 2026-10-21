@@ -2,7 +2,7 @@
 // pattern names one common key shape; a hit names the shape, never the value.
 import { Effect, FileSystem } from 'effect'
 
-export const SECRET_SHAPES: ReadonlyArray<readonly [string, RegExp]> = [
+const SECRET_SHAPES: ReadonlyArray<readonly [string, RegExp]> = [
   ['sk- key', /\bsk-[A-Za-z0-9_-]{20,}/],
   ['xai key', /\bxai-[A-Za-z0-9]{20,}/],
   ['bearer token', /\bBearer\s+[A-Za-z0-9._~+/-]{16,}/],

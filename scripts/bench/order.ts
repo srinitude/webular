@@ -19,7 +19,7 @@ export const mulberry32 = (seed: number) => {
   }
 }
 
-export const shuffle = <A>(items: ReadonlyArray<A>, rand: () => number): A[] => {
+const shuffle = <A>(items: ReadonlyArray<A>, rand: () => number): A[] => {
   const out = [...items]
   for (let i = out.length - 1; i > 0; i--) {
     const j = Math.floor(rand() * (i + 1))

@@ -7,7 +7,7 @@ import type { Row, RunConfig } from './schema.ts'
 const PRIVATE_URL =
   /\bhttps?:\/\/(?:localhost|127\.\d+\.\d+\.\d+|\[::1\]|0\.0\.0\.0|10\.\d+\.\d+\.\d+|172\.(?:1[6-9]|2\d|3[01])\.\d+\.\d+|192\.168\.\d+\.\d+|169\.254\.\d+\.\d+)(?=[:/?#\s"']|$)/gi
 
-export const privateUrls = (text: string): string[] => text.match(PRIVATE_URL) ?? []
+const privateUrls = (text: string): string[] => text.match(PRIVATE_URL) ?? []
 
 // A row whose output holds a private URL, or a fixture path from the task set
 // (bench/fixtures/server.ts), fails guard 8.

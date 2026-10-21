@@ -11,9 +11,9 @@ export const ANSWER_MODES = [
   'answer.native',
   'closed-book',
 ] as const
-export type AnswerMode = (typeof ANSWER_MODES)[number]
+type AnswerMode = (typeof ANSWER_MODES)[number]
 
-export interface Graded {
+interface Graded {
   readonly taskId: string
   readonly provider: string
   readonly mode: AnswerMode | undefined
@@ -78,7 +78,7 @@ export const runCheck = (check: Check, output: string): boolean => {
 }
 
 // An "ok" row with no text is empty, not ok.
-export const effectiveStatus = (row: Row): Status =>
+const effectiveStatus = (row: Row): Status =>
   row.status === 'ok' && row.output.trim() === '' ? 'empty' : row.status
 
 export const gradeRow = (task: Task, row: Row, mode?: AnswerMode): Graded => {
@@ -105,7 +105,7 @@ export const checkModesApart = (group: readonly Graded[]): Effect.Effect<void, E
     : Effect.void
 }
 
-export interface LatencySample {
+interface LatencySample {
   readonly ms: number
   readonly censored: boolean
 }

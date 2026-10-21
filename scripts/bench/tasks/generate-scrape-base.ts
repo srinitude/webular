@@ -15,7 +15,7 @@ export interface Built {
   readonly jsLevel?: 'light' | 'heavy' | 'lazy'
 }
 
-export const enc = (s: string) => new TextEncoder().encode(s)
+const enc = (s: string) => new TextEncoder().encode(s)
 export const ps = (xs: ReadonlyArray<string>) => xs.map((p) => `<p>${escapeHtml(p)}</p>`).join('\n')
 
 export const html = (

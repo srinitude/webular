@@ -1,10 +1,10 @@
 // Contract for the Context.dev peer adapter: request shape per endpoint and how
 // recorded replies (trimmed from docs.context.dev schemas) map to Output.
 import { expect, test } from 'bun:test'
-import { Effect, Schema } from 'effect'
+import { Effect } from 'effect'
 import { contextdev } from '../../scripts/bench/peers/contextdev.ts'
 import type { TaskInput } from '../../scripts/bench/peers/model.ts'
-import { fail, type Post } from '../../scripts/bench/peers/peers.ts'
+import { recorded } from './replay.ts'
 
 const searchReply = {
   partial: false,
@@ -19,25 +19,6 @@ const scrapeReply = {
   url: 'https://x.test/',
   markdown: { requested: true, success: true, data: '# Example' },
   metadata: { title: 'Example' },
-}
-
-interface Req {
-  url: string
-  headers: Record<string, string>
-  body: object
-}
-
-// A Post that replays one recorded reply through the real schema decode.
-const recorded = (reply: unknown) => {
-  const seen: Req[] = []
-  const post: Post = (url, headers, body, schema) => {
-    seen.push({ url, headers, body })
-    return Schema.decodeUnknownEffect(schema)(reply).pipe(
-      Effect.map((r) => ({ r, sentBytes: 7 })),
-      Effect.mapError(fail),
-    )
-  }
-  return { post, seen }
 }
 
 const run = (reply: unknown, job: 'search' | 'scrape', input: TaskInput) => {

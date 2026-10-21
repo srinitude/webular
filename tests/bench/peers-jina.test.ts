@@ -2,11 +2,11 @@
 // Reader calls, and how recorded replies (shaped like the jina-ai/reader JSON
 // mode examples) map to Output.
 import { expect, test } from 'bun:test'
-import { Effect, Schema } from 'effect'
+import { Effect } from 'effect'
 import { HttpClient } from 'effect/http'
 import { jina } from '../../scripts/bench/peers/jina.ts'
 import type { TaskInput } from '../../scripts/bench/peers/model.ts'
-import { fail, type Post } from '../../scripts/bench/peers/peers.ts'
+import { recorded } from './replay.ts'
 
 const readReply = {
   code: 200,
@@ -21,24 +21,10 @@ const searchReply = {
   ],
 }
 
-interface Req {
-  url: string
-  headers: Record<string, string>
-  body: object
-}
-
 const unused = HttpClient.make(() => Effect.die('no GET expected'))
 
-// A Post that replays one recorded reply through the real schema decode.
 const run = (reply: unknown, job: 'search' | 'scrape', input: TaskInput, key = 'k') => {
-  const seen: Req[] = []
-  const post: Post = (url, headers, body, schema) => {
-    seen.push({ url, headers, body })
-    return Schema.decodeUnknownEffect(schema)(reply).pipe(
-      Effect.map((r) => ({ r, sentBytes: 7 })),
-      Effect.mapError(fail),
-    )
-  }
+  const { post, seen } = recorded(reply)
   const call = jina(post, key, unused)[job]
   return (call ? call(input) : Effect.die(`no ${job} job`)).pipe(
     Effect.map((o) => ({ o, req: seen[0] })),

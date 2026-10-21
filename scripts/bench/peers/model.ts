@@ -47,7 +47,7 @@ export const Plan = Schema.Struct({
 })
 export type Plan = typeof Plan.Type
 
-export interface Citation {
+interface Citation {
   url: string
   text: string
 }

@@ -102,7 +102,7 @@ export const reportMarkdown = (input: ReportInput) =>
     changes(input.changes),
   ].join('\n')
 
-export const reportJson = (input: ReportInput) =>
+const reportJson = (input: ReportInput) =>
   `${JSON.stringify(
     {
       header: input.header,

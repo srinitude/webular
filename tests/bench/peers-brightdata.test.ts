@@ -1,31 +1,18 @@
 // Contract for the Bright Data peer adapter: one /request endpoint routed by
 // zone, SERP API for search and Web Unlocker for scrape, with recorded replies.
 import { expect, test } from 'bun:test'
-import { Effect, Schema } from 'effect'
+import { Effect } from 'effect'
 import { HttpClient, HttpClientResponse } from 'effect/http'
 import { brightdata } from '../../scripts/bench/peers/brightdata.ts'
 import type { TaskInput } from '../../scripts/bench/peers/model.ts'
-import { fail, type Post } from '../../scripts/bench/peers/peers.ts'
-
-interface Req {
-  url: string
-  headers: Record<string, string>
-  body: object
-}
+import { recorded } from './replay.ts'
 
 const unused = HttpClient.make((req) =>
   Effect.succeed(HttpClientResponse.fromWeb(req, new Response('{}'))),
 )
 
 const run = (reply: unknown, job: 'search' | 'scrape', input: TaskInput) => {
-  const seen: Req[] = []
-  const post: Post = (url, headers, body, schema) => {
-    seen.push({ url, headers, body })
-    return Schema.decodeUnknownEffect(schema)(reply).pipe(
-      Effect.map((r) => ({ r, sentBytes: 7 })),
-      Effect.mapError(fail),
-    )
-  }
+  const { post, seen } = recorded(reply)
   const call = brightdata(post, 'k', unused)[job]
   return (call ? call(input) : Effect.die(`no ${job}`)).pipe(
     Effect.map((o) => ({ o, req: seen[0] })),

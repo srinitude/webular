@@ -11,11 +11,11 @@ import { type Slot, schedule } from './order.ts'
 import { readRecordings, rowSetProblems, writeRecording } from './recordings.ts'
 import { OutboundCall, type Row, RunConfig, Status, Task } from './schema.ts'
 
-export class RunError extends Data.TaggedError('RunError')<{ readonly message: string }> {}
+class RunError extends Data.TaggedError('RunError')<{ readonly message: string }> {}
 
 type Settings = 'default' | 'best'
 // The shape every peer adapter (scripts/bench/peers/<provider>.ts) exports.
-export interface Adapter {
+interface Adapter {
   readonly provider: string
   readonly run: (input: string, settings: Settings) => Effect.Effect<AdapterResult, unknown>
 }
@@ -62,7 +62,7 @@ export const roundCache = (dir: string) =>
     )
   })
 
-export const bustQuery = (query: string, nonce: string) => `${query} ${BUST_PARAM}${nonce}`
+const bustQuery = (query: string, nonce: string) => `${query} ${BUST_PARAM}${nonce}`
 
 // Worker side: runs one adapter call in its own process and prints the result.
 const worker = (provider: string, settings: Settings, query: string) =>

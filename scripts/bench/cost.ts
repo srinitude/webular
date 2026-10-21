@@ -8,7 +8,7 @@ export const JEV_HOST = 'api.typesafe.ai'
 
 // Public per-token list prices for the agent track, each with its source and
 // the date it was read. Dollars per million tokens.
-export interface TokenRate {
+interface TokenRate {
   readonly model: string
   readonly host: string
   readonly inputPerMTok: number
@@ -17,7 +17,7 @@ export interface TokenRate {
   readonly priceDate: string
 }
 
-export const TOKEN_RATES: readonly TokenRate[] = [
+const TOKEN_RATES: readonly TokenRate[] = [
   {
     model: 'claude-sonnet-4-5',
     host: 'api.anthropic.com',

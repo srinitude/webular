@@ -6,11 +6,11 @@ import { type Routes, startFixture } from '../../tests/_support/fixture'
 
 const ROOT = import.meta.dir
 
-export const ROBOTS_TXT = 'User-agent: *\nDisallow: /pages/blocked/\nDisallow: /sites/private/\n'
+const ROBOTS_TXT = 'User-agent: *\nDisallow: /pages/blocked/\nDisallow: /sites/private/\n'
 
 // Every path the core must never echo into output: loopback hosts and the
 // fixture path prefixes.
-export const FIXTURE_URL_PATTERNS: ReadonlyArray<RegExp> = [
+const FIXTURE_URL_PATTERNS: ReadonlyArray<RegExp> = [
   /127\.0\.0\.1/,
   /\blocalhost\b/i,
   /\[::1\]/,

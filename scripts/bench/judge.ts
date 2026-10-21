@@ -5,33 +5,23 @@
 import { Effect } from 'effect'
 import type { JudgeLabel } from './schema.ts'
 
-export interface ReferenceInput {
+interface ReferenceInput {
   readonly answer: string
   readonly gold: string
   readonly aliases: readonly string[]
 }
 
-export interface ReferenceJudge {
+interface ReferenceJudge {
   readonly model: string
   readonly judge: (input: ReferenceInput) => Effect.Effect<JudgeLabel, Error>
-}
-
-export interface RubricInput {
-  readonly report: string
-  readonly rubric: string
-}
-
-export interface RubricJudge {
-  readonly model: string
-  readonly score: (input: RubricInput) => Effect.Effect<number, Error>
 }
 
 // The default: no judge. Callers grade with deterministic checks only.
 export const defaultJudge: ReferenceJudge | undefined = undefined
 
-export const MIN_KAPPA = 0.8
-export const MIN_ACCURACY = 0.95
-export const MIN_CALIBRATION_ITEMS = 200
+const MIN_KAPPA = 0.8
+const MIN_ACCURACY = 0.95
+const MIN_CALIBRATION_ITEMS = 200
 
 export interface Calibration {
   readonly n: number
@@ -83,7 +73,7 @@ export interface Answer {
   readonly text: string
 }
 
-export interface JudgeInput {
+interface JudgeInput {
   readonly texts: readonly string[]
   readonly order: readonly number[]
   readonly seed: number
@@ -91,12 +81,12 @@ export interface JudgeInput {
 }
 
 // Seeded rotation of answer positions: order[i] is the answer shown at i.
-export const judgeOrder = (n: number, seed: number): number[] =>
+const judgeOrder = (n: number, seed: number): number[] =>
   Array.from({ length: n }, (_, i) => (i + seed) % Math.max(1, n))
 
 const escapeRegex = (s: string): string => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
-export const stripToolNames = (text: string, tools: readonly string[]): string =>
+const stripToolNames = (text: string, tools: readonly string[]): string =>
   tools
     .filter((t) => t !== '')
     .reduce((s, t) => s.replace(new RegExp(escapeRegex(t), 'gi'), '[tool]'), text)

@@ -26,7 +26,7 @@ export type Family = typeof Family.Type
 export const Split = Schema.Literals(['dev', 'sealed'])
 
 // Diversity axes used by the quota guard and the slices part of the report.
-export const Tags = Schema.Struct({
+const Tags = Schema.Struct({
   domain: Schema.String,
   language: Schema.String,
   fresh: Schema.Boolean,

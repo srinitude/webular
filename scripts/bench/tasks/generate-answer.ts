@@ -22,7 +22,7 @@ import {
 } from './generate-answer-wikidata.ts'
 import { type Task, writeSets } from './generate-common.ts'
 
-export const COUNTS = { short: 134, citation: 60, falsePremise: 40, noAnswer: 30 } as const
+const COUNTS = { short: 134, citation: 60, falsePremise: 40, noAnswer: 30 } as const
 const NON_EN = LANGS.filter((l) => l !== 'en')
 
 const fetchPools = Effect.forEach(

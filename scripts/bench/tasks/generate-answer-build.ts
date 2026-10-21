@@ -13,7 +13,7 @@ const FRAME: Record<Lang, (p: string, i: string) => string> = {
   es: (p, i) => `¿Cuál es ${p} de ${i}?`,
 }
 
-export const LONG_TAIL_SITELINKS = 10
+const LONG_TAIL_SITELINKS = 10
 const wd = (qid: string) => `https://www.wikidata.org/wiki/${qid}`
 
 export interface Pick {

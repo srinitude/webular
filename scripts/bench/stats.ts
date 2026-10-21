@@ -14,12 +14,12 @@ export interface Pair {
   readonly group?: string | undefined
 }
 
-export const ALPHA = 0.05
-export const MIN_GAP = 0.05
-export const RESAMPLES = 10_000
+const ALPHA = 0.05
+const MIN_GAP = 0.05
+const RESAMPLES = 10_000
 
 // Seeded PRNG (mulberry32) so every interval and p value replays exactly.
-export const prng = (seed: number): (() => number) => {
+const prng = (seed: number): (() => number) => {
   let s = seed >>> 0
   return () => {
     s = (s + 0x6d2b79f5) >>> 0
@@ -91,7 +91,7 @@ export const mcnemarExact = (b: number, c: number): number => {
 }
 
 // Paired permutation (sign-flip) test on mean(a - b), two-sided.
-export const permutationTest = (
+const permutationTest = (
   pairs: readonly Pair[],
   seed: number,
   permutations = RESAMPLES,
@@ -125,7 +125,7 @@ export const holm = (ps: readonly number[]): number[] => {
 export const requiredTasks = (pd: number, d = MIN_GAP): number =>
   (1.96 * Math.sqrt(pd) + 0.84 * Math.sqrt(Math.max(0, pd - d * d))) ** 2 / (d * d)
 
-export interface Draft extends Omit<Comparison, 'pHolm' | 'verdict'> {
+interface Draft extends Omit<Comparison, 'pHolm' | 'verdict'> {
   readonly pd: number
   readonly errA: number
   readonly errB: number
@@ -155,7 +155,7 @@ export const draft = (
   }
 }
 
-export const verdictOf = (d: Draft, pHolm: number, minGap = MIN_GAP): Verdict => {
+const verdictOf = (d: Draft, pHolm: number, minGap = MIN_GAP): Verdict => {
   if (d.n === 0 || d.n < requiredTasks(d.pd, minGap)) return 'not enough tasks'
   if (pHolm < ALPHA && d.ci[0] > 0 && d.errA <= d.errB + 0.01) return 'win'
   if (pHolm < ALPHA && d.ci[1] < 0 && d.errB <= d.errA + 0.01) return 'loss'

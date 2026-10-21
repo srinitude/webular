@@ -3,21 +3,21 @@
 import { Data, Effect, FileSystem, Path, Schema } from 'effect'
 import { type RecordingKey, Row } from './schema.ts'
 
-export class RecordingError extends Data.TaggedError('RecordingError')<{
+class RecordingError extends Data.TaggedError('RecordingError')<{
   readonly message: string
 }> {}
 
 const COMMIT = /^[0-9a-f]{7,40}$/
 const DATE = /^\d{4}-\d{2}-\d{2}$/
 
-export const keyProblems = (key: RecordingKey): string[] => [
+const keyProblems = (key: RecordingKey): string[] => [
   ...(COMMIT.test(key.commit) ? [] : ['commit missing or not a git sha']),
   ...(key.settingsHash === '' ? ['settings hash missing'] : []),
   ...(DATE.test(key.date) ? [] : ['date missing or not YYYY-MM-DD']),
   ...(key.provider === '' || key.taskId === '' ? ['provider or task missing'] : []),
 ]
 
-export const recordingName = ({ key: k, settings, phase }: Row) =>
+const recordingName = ({ key: k, settings, phase }: Row) =>
   `${k.provider}/${k.taskId}.${k.run}.${k.commit}.${k.settingsHash}.${k.date}.${settings}-${phase}.json`
 
 const fail = (message: string) => Effect.fail(new RecordingError({ message }))

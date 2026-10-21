@@ -1,16 +1,10 @@
 // Contract for the Valyu peer adapter: request shape and how a recorded reply
 // (trimmed from the docs.valyu.ai search example) maps to Output.
 import { expect, test } from 'bun:test'
-import { Effect, Schema } from 'effect'
+import { Effect } from 'effect'
 import type { HttpClient } from 'effect/http'
-import { fail, type Post } from '../../scripts/bench/peers/peers.ts'
 import { valyu } from '../../scripts/bench/peers/valyu.ts'
-
-interface Req {
-  url: string
-  headers: Record<string, string>
-  body: object
-}
+import { recorded } from './replay.ts'
 
 const reply = {
   success: true,
@@ -26,16 +20,8 @@ const reply = {
   total_characters: 14,
 }
 
-// A Post that replays one recorded reply through the real schema decode.
-const run = (recorded: unknown) => {
-  const seen: Req[] = []
-  const post: Post = (url, headers, body, schema) => {
-    seen.push({ url, headers, body })
-    return Schema.decodeUnknownEffect(schema)(recorded).pipe(
-      Effect.map((r) => ({ r, sentBytes: 7 })),
-      Effect.mapError(fail),
-    )
-  }
+const run = (reply: unknown) => {
+  const { post, seen } = recorded(reply)
   const call = valyu(post, 'k', {} as HttpClient.HttpClient).search
   return (call ? call({ query: 'q' }) : Effect.die('no search job')).pipe(
     Effect.map((o) => ({ o, req: seen[0] })),
