@@ -61,7 +61,7 @@
     "zod": "^4.6.7"
   },
   "optionalDependencies": {
-    "mise": "2026.10.15"
+    "mise": "2026.10.17"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
