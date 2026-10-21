@@ -42,7 +42,10 @@ export const tsconfig = Effect.flatMap(read('tsconfig.json'), Schema.decodeUnkno
 const tsFiles = Effect.fn('tsFiles')(function* (dir: string) {
   const fs = yield* FileSystem.FileSystem
   const entries = yield* fs.readDirectory(`${ROOT}${dir}`, { recursive: true })
-  return entries.filter((file) => file.endsWith('.ts')).map((file) => `${dir}/${file}`)
+  // Windows lists nested entries with backslashes; the checks compare POSIX paths.
+  return entries
+    .filter((file) => file.endsWith('.ts'))
+    .map((file) => `${dir}/${file.replaceAll('\\', '/')}`)
 })
 
 // Sorted list of src/ and bin/ files whose text matches the pattern.
