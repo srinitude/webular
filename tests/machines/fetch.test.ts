@@ -1,0 +1,57 @@
+// Model-based test: the shortest path to every final state and context of
+// the fetch machine, replayed against the real fetchTextWithinHost over real sockets.
+import { afterAll, describe, expect, test } from 'bun:test'
+import { getShortestPaths } from 'xstate/graph'
+import { fetchTextWithinHost } from '../../src/core/http.ts'
+import { fetchMachine } from '../../src/machines/fetch.ts'
+import { finalPaths } from '../_support/paths.ts'
+import { type Reply, startScriptedServer } from '../_support/scripted-server.ts'
+
+const server = startScriptedServer()
+afterAll(() => server.stop())
+
+const REPLY_FOR_EVENT: Record<string, Reply> = {
+  OK: { status: 200 },
+  HTTP_ERROR: { status: 404 },
+  RETRYABLE_STATUS: { status: 503 },
+  NETWORK_ERROR: 'drop',
+  TIMEOUT: 'hang',
+  REDIRECT_SAME_HOST: { status: 302, location: '/next' },
+  REDIRECT_OFF_HOST: { status: 302, location: 'http://off-host.invalid/' },
+}
+
+const OUTCOME_FOR_FINAL: Record<string, RegExp> = {
+  succeeded: /^ok$/,
+  httpFailed: /failed: (404|503)/,
+  networkFailed: /closed|reset|ECONN|socket/i,
+  timedOut: /timed? ?out/i,
+  offHostBlocked: /off-site blocked/,
+  tooManyRedirects: /too many redirects/,
+}
+
+const paths = finalPaths(fetchMachine, Object.keys(REPLY_FOR_EVENT), getShortestPaths)
+
+async function outcome(): Promise<string> {
+  const url = `${server.origin}/start`
+  return fetchTextWithinHost(url, '127.0.0.1', { timeoutMs: 150 }).catch((e) => String(e))
+}
+
+describe('fetch machine matches fetchTextWithinHost', () => {
+  test('the model reaches every final state', () => {
+    expect(new Set(paths.map((p) => p.final))).toEqual(new Set(Object.keys(OUTCOME_FOR_FINAL)))
+  })
+
+  test.each(paths.map((p) => [`${p.final}: ${p.events.join(' ')}`, p] as const))(
+    '%s',
+    async (_name, path) => {
+      server.play(path.events.map((e) => REPLY_FOR_EVENT[e] ?? 'drop'))
+      expect(await outcome()).toMatch(OUTCOME_FOR_FINAL[path.final] ?? /never/)
+      // ponytail: a hung final request can be aborted before its socket is
+      // counted, so timeouts check only the requests before the hang.
+      const minimum = path.final === 'timedOut' ? path.events.length - 1 : path.events.length
+      expect(server.served()).toBeGreaterThanOrEqual(minimum)
+      expect(server.served()).toBeLessThanOrEqual(path.events.length)
+    },
+    10_000,
+  )
+})

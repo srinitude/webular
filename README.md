@@ -20,8 +20,8 @@ bun add -g webular      # or: npm i -g webular  (requires bun + mise on PATH)
 `webular` needs [Bun](https://bun.com) to run. [mise](https://mise.jdx.dev)
 routes every subcommand (`mise run run:<command>`). It ships as a pinned npm
 dependency, and a mise install on your PATH is used when present. The first
-command after a fresh install sets up the pinned toolchain once, with no
-prompts, pinned by the shipped `bun.lock`. Later runs skip this step.
+command after a fresh install sets up the toolchain once, with no prompts,
+using the versions locked in the shipped `bun.lock`. Later runs skip this step.
 
 ## Usage
 
@@ -47,7 +47,7 @@ webular --help
 | `doctor`    | Diagnose environment & toolchain |
 | `tasks`     | List the mise task graph this CLI routes through |
 | `mcp`       | Expose webular capabilities as an MCP server |
-| `diagram`   | List the design diagrams (pre-rendered SVGs in docs/diagrams) |
+| `diagram`   | List the XState machines that model the CLI flows (src/machines) |
 | `audit`     | Report `deepsec` availability + scan plan (keyless; scans need LLM keys) |
 | `act`       | Drive a real browser — open, snapshot, screenshot, interact (agent-browser) |
 | `feed`      | Read an RSS 2.0 or Atom 1.0 feed and list its items (title, link, date, summary) |
@@ -77,9 +77,18 @@ The CLI never calls feature code directly. It parses argv and routes to
 command branches off `setup`). Each command is a **Mastra workflow** built from
 **Mastra tools that use no model** and wrap open-source libraries.
 
-Seven diagrams under [`docs/diagrams/`](docs/diagrams/) hold the design
-(sequence, class, state, ER, user-journey, requirement, mindmap). They are made
-with `mmdc` and are the basis for the code.
+Tested [XState](https://stately.ai/docs) machines in
+[`src/machines/`](src/machines/) model the CLI flows. Model-based tests in
+[`tests/machines/`](tests/machines/) walk the paths of each machine against the
+real code:
+
+- [`cli-dispatch.ts`](src/machines/cli-dispatch.ts): argv to help, version, an
+  unknown-command error, or `mise run run:<command>` and its exit code.
+- [`command-lifecycle.ts`](src/machines/command-lifecycle.ts): input
+  validation, the workflow run, rendering, and the exit-code rule for
+  partial failures.
+- [`fetch.ts`](src/machines/fetch.ts): the timeout for each attempt, bounded
+  retry, same-host redirects, and each failure the fetch layer reports.
 
 The CLI follows the [Command Line Interface Guidelines](https://clig.dev): data
 goes to stdout, logs go to stderr, `--json` works everywhere, `-o` writes to a
@@ -108,5 +117,5 @@ points the Wikipedia, Hacker News, and arXiv endpoints at the local fixture.
 
 ## License
 
-Apache-2.0 © Kiren Srinivasan. Built on Bun, Mastra, mise, mermaid-cli,
+Apache-2.0 © Kiren Srinivasan. Built on Bun, Mastra, mise, XState,
 deepsec, and agent-browser, plus a set of open-source libraries.

@@ -16,7 +16,7 @@ export const COMMANDS = {
   doctor: 'Diagnose the environment and toolchain',
   tasks: 'List the mise task graph this CLI routes through',
   mcp: 'Expose webular capabilities as an MCP server',
-  diagram: 'List the design diagrams (pre-rendered SVGs ship in docs/diagrams)',
+  diagram: 'List the XState machines that model the CLI flows (src/machines)',
   audit: 'Report deepsec availability and the scan plan (keyless)',
   act: 'Drive a real browser — open, snapshot, screenshot, interact (agent-browser)',
   feed: 'Read an RSS or Atom feed and list its items',

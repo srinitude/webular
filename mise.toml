@@ -1,8 +1,8 @@
 # webular — universal task dependency graph (mise).
 #
-# Ordering note: the 7 mermaid diagrams in docs/diagrams/ are authored and
-# rendered BEFORE this task graph, which is authored BEFORE tests, which are
-# authored BEFORE code. See docs/diagrams/06-requirement.mmd (R1).
+# Ordering note: the XState machines in src/machines/ model the CLI flows;
+# their model-based tests (tests/machines/) walk every path against the real
+# code. Tests are authored BEFORE code (R1).
 #
 # Graph shape (zero cycles — it is a tree rooted at `setup`):
 #   setup -> lint -> typecheck -> build -> test -> validate -> ci
@@ -152,7 +152,7 @@ depends = ["setup"]
 run = 'bun "{{config_root}}/src/commands/mcp.ts"'
 
 [tasks."run:diagram"]
-description = "DIAGRAM — list the design diagrams (SVGs are pre-rendered and committed)"
+description = "DIAGRAM — list the XState machines in src/machines"
 depends = ["setup"]
 run = 'bun "{{config_root}}/src/commands/diagram.ts"'
 

@@ -1,13 +1,12 @@
-// DIAGRAM workflow: list the design diagrams. The SVGs are pre-rendered and
-// committed; regeneration is a maintainer activity (see docs/diagrams/README)
-// because mmdc needs a Puppeteer browser that fresh installs never have.
+// DIAGRAM workflow: list the XState machines in src/machines, one per CLI
+// flow (dispatch, command lifecycle, fetch).
 import { readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { z } from 'zod'
 import { PACKAGE_ROOT } from '../core/root.ts'
 
-const DIAGRAMS_DIR = join(PACKAGE_ROOT, 'docs/diagrams')
+const MACHINES_DIR = join(PACKAGE_ROOT, 'src/machines')
 
 const diagramInput = z.object({})
 
@@ -21,11 +20,11 @@ const listStep = createStep({
   inputSchema: diagramInput,
   outputSchema: diagramListOutput,
   execute: async () => {
-    const entries = await readdir(DIAGRAMS_DIR)
+    const entries = await readdir(MACHINES_DIR)
     const diagrams = entries
-      .filter((f) => f.endsWith('.mmd'))
+      .filter((f) => f.endsWith('.ts'))
       .sort()
-      .map((f) => f.replace(/\.mmd$/, ''))
+      .map((f) => f.replace(/\.ts$/, ''))
     return { count: diagrams.length, diagrams }
   },
 })

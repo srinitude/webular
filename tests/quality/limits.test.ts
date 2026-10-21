@@ -1,5 +1,5 @@
 // Enforces the project's structural rules across the whole codebase
-// (verifymethod: test for requirement R2 — see docs/diagrams/06-requirement.mmd).
+// (requirement R2: 200 lines per file, 30 per construct, nesting depth 3).
 import { describe, expect, test } from 'bun:test'
 import { analyzeFile, listFiles } from '../_support/limits.ts'
 
