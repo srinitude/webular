@@ -15,7 +15,7 @@
 
 ## Outcome
 
-- "When this is done, what is there that is not there now?" Options: a file, a working feature, a decision, your own words.
+- "When this is done, what is there that was not there before?" Options: a file, a working feature, a decision, your own words.
 
 ## Criteria
 

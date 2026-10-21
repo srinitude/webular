@@ -12,6 +12,18 @@ describe('sanitizeHtml', () => {
     expect(out).toContain('https://ok.test/')
     expect(out).toContain('hi')
   })
+
+  test('strips data:/vbscript: URLs, srcdoc, style, and document-level or foreign elements', () => {
+    const out = sanitizeHtml(
+      '<a href="data:text/html,x">d</a><a href="VBScript:x">v</a><p style="x">keep</p>' +
+        '<iframe srcdoc="x"></iframe><div srcdoc="y"></div><base href="//e"><meta http-equiv="refresh">' +
+        '<link rel="import"><template><b>t</b></template><svg><a href="#"/></svg><math><mi>m</mi></math>' +
+        '<img src="https://ok.test/i.png">',
+    )
+    expect(out).not.toMatch(/data:|vbscript|srcdoc|style|<base|<meta|<link|<template|<svg|<math/i)
+    expect(out).toContain('keep')
+    expect(out).toContain('https://ok.test/i.png')
+  })
 })
 
 describe('htmlToArticle', () => {

@@ -14,7 +14,7 @@ Each tool result holds at most 8,000 characters. A longer result comes back cut,
 
 ## stdio or HTTP
 
-- **stdio** (`webular`): the app starts `bun ./src/server.ts` itself, with nothing else to run. This is the only server the plugin ships.
+- **stdio** (`webular`): the app starts `bun ./dist/server.js` itself, with nothing else to run. This is the only server the plugin ships.
 - **HTTP**, for local development only: you run the server, and your app calls `https://webular-mcp.localhost/mcp`. Start it from a checkout with `mise run plugin:dev`. This address works only on your own machine, so no shipped manifest names it.
 
 `mise run plugin:dev` uses portless. Portless gives the server a steady name instead of a random port. It serves HTTPS on port 443 by default, so the address has no port in it. Run `portless get webular-mcp` to print the address it is using.

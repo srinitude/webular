@@ -91,7 +91,7 @@ const harvest =
 
 const reasonOf = (e: FetchError) => (e.status ? `HTTP ${e.status}` : `${e.kind} error`)
 
-// Fetch failures come back as status responses, so a robots.txt 4xx means allow-all.
+// Fetch failures come back as status responses: a robots.txt 4xx means allow-all, status 0 (no response) disallow-all.
 const asFetcher =
   (fetchPage: FetchPage, reasons: Map<string, string>): Fetcher =>
   (url) =>

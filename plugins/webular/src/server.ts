@@ -67,9 +67,22 @@ const handleHttp = toNodeHandler(createMcpHandler(instance, { legacy: 'stateless
   onerror,
 })
 
+// DNS rebinding guard: only loopback Host and Origin values reach /mcp; any other
+// gets 403, as the MCP spec asks of a local HTTP server.
+// portless names (*.localhost) resolve to loopback too (RFC 6761), so they pass.
+const loopback = (url: string) =>
+  URL.canParse(url) &&
+  /^(localhost|127\.0\.0\.1|\[::1\]|.+\.localhost)$/.test(new URL(url).hostname)
+const trusted = ({ host, origin }: { host?: string | undefined; origin?: string | undefined }) =>
+  loopback(`http://${host}`) && (origin === undefined || loopback(origin))
+
 const listen = (port: number) =>
   Effect.callback<ReturnType<typeof createServer>>((resume) => {
     const http = createServer((req, res) => {
+      if (!trusted(req.headers)) {
+        res.writeHead(403).end()
+        return
+      }
       if (new URL(req.url ?? '/', 'http://localhost').pathname !== '/mcp') {
         res.writeHead(404).end()
         return

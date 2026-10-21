@@ -6,6 +6,7 @@
       "name": "webular",
       "dependencies": {
         "@ai-sdk/anthropic": "0.0.56",
+        "@ai-sdk/openai": "0.0.40",
         "@effect/platform-bun": "4.0.5",
         "@firecrawl/anydoc": "^0.2.4",
         "@mastra/core": "^1.78.0",
@@ -26,9 +27,13 @@
       "devDependencies": {
         "@biomejs/biome": "^2.5.15",
         "@effect/language-service": "0.87.5",
+        "@modelcontextprotocol/client": "2.2.0",
+        "@modelcontextprotocol/node": "2.0.0",
+        "@modelcontextprotocol/server": "2.2.0",
         "@types/bun": "^1.4.3",
         "@types/turndown": "^5.0.6",
         "@typescript/typescript6": "6.0.2",
+        "ai": "3.4.33",
         "deepsec": "^2.3.10",
         "portless": "0.15.8",
         "typescript": "7.0.2",

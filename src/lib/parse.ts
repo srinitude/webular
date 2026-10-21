@@ -56,8 +56,12 @@ function detectFormat(file: string): Effect.Effect<DocFormat, ParseError> {
   return Effect.succeed(EXT_FORMATS[ext] ?? 'txt')
 }
 
+// A page cap and a deadline bound one PDF's text extraction (CPU and memory).
+const MAX_PDF_PAGES = 2_000
+const PDF_TIMEOUT = '60 seconds'
+
 // PDF bytes to text; scrape reads a fetched PDF through this same reader.
-export const pdfText = Effect.fnUntraced(function* (bytes: Uint8Array) {
+export const pdfText = Effect.fnUntraced(function* (bytes: Uint8Array, maxPages = MAX_PDF_PAGES) {
   const { extractText, getDocumentProxy } = yield* attempt(() => import('unpdf'))
   // The pdf.js proxy holds a worker and page buffers: free it on success and failure.
   return yield* Effect.acquireRelease(
@@ -65,7 +69,19 @@ export const pdfText = Effect.fnUntraced(function* (bytes: Uint8Array) {
     (pdf) =>
       Effect.ignore(attempt(() => (pdf as unknown as { destroy(): Promise<void> }).destroy())),
   ).pipe(
-    Effect.flatMap((pdf) => attempt(() => extractText(pdf, { mergePages: true }))),
+    Effect.tap((pdf) =>
+      pdf.numPages > maxPages
+        ? fail(`parse: PDF has ${pdf.numPages} pages, over the ${maxPages}-page cap`)
+        : Effect.void,
+    ),
+    Effect.flatMap((pdf) =>
+      attempt(() => extractText(pdf, { mergePages: true })).pipe(
+        Effect.timeoutOrElse({
+          duration: PDF_TIMEOUT,
+          orElse: () => fail(`parse: PDF text took over ${PDF_TIMEOUT}`),
+        }),
+      ),
+    ),
     Effect.map(({ text }) => (typeof text === 'string' ? text : (text as string[]).join('\n'))),
     Effect.scoped,
   )

@@ -16,7 +16,7 @@ import { dropBody, type HttpStatusError, okText } from './http-body.ts'
 import { errMsg } from './output.ts'
 import { sameHost } from './url.ts'
 
-const USER_AGENT = `webular/${pkg.version} (+https://github.com/srinitude/webular)`
+export const USER_AGENT = `webular/${pkg.version} (+https://github.com/srinitude/webular)`
 // A server's Retry-After wins over the backoff, capped so a hostile value cannot stall the CLI.
 const MAX_RETRY_AFTER_MS = 10_000
 

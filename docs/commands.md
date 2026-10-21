@@ -9,7 +9,7 @@ usage line, the global options, the exit codes, and examples.
 |---|---|
 | `search`    | Searches the web with no key, through DuckDuckGo's no-JS HTML page. `--source wikipedia\|hackernews\|arxiv` searches one of those keyless sources instead |
 | `scrape`    | Reads one URL as clean markdown or JSON (Bun.fetch + Readability + Turndown) |
-| `crawl`     | Reads a site page by page on the same host, breadth first (no robots.txt or rate limits, so crawl with care) |
+| `crawl`     | Reads a site page by page on the same host, breadth first (no rate limits, so crawl with care; an unreachable robots.txt blocks the crawl) |
 | `map`       | Finds all URLs for a domain (sitemap + link BFS) |
 | `extract`   | Pulls fields with CSS selectors or a schema |
 | `summarize` | Picks the key sentences (no model) |

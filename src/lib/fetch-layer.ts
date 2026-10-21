@@ -7,6 +7,8 @@ import { BunServices } from '@effect/platform-bun'
 import { Config, Effect, FileSystem, Path, type Scope, Semaphore } from 'effect'
 import * as FetchHttpClient from 'effect/http/FetchHttpClient'
 import * as HttpClient from 'effect/http/HttpClient'
+import { setHeader } from 'effect/http/HttpClientRequest'
+import { USER_AGENT } from '../core/http.ts'
 import { openCache } from './fetch-cache.ts'
 import { type Ctx, escalate, type Gate, httpWithRetry, perHost } from './fetch-http.ts'
 import { type FetchError, type FetchLayerOptions, type FetchPage, fail } from './fetch-types.ts'
@@ -78,9 +80,7 @@ export const makeFetchLayer = (
       (c) => Effect.sync(() => closeSqlite(c.db)),
     )
     const client = yield* Effect.provide(
-      Effect.gen(function* () {
-        return yield* HttpClient.HttpClient
-      }),
+      Effect.map(HttpClient.HttpClient, HttpClient.mapRequest(setHeader('user-agent', USER_AGENT))),
       FetchHttpClient.layer,
     )
     return fetchWith({

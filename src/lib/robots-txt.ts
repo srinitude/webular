@@ -70,12 +70,12 @@ export const parseRobots = (body: string, userAgent: string): Robots => {
   }
 }
 
-/** Status rules: 2xx parse, 4xx (and unfollowed 3xx) allow all, 5xx or no response disallow all. */
+/** Status rules: 2xx parse, 4xx (and unfollowed 3xx) allow all, 5xx, status 0, or no response disallow all. */
 export const robotsFromResponse = (
   response: { status: number; body: string } | null,
   userAgent: string,
 ): Robots => {
-  if (!response || response.status >= 500) return DISALLOW_ALL
+  if (!response || response.status === 0 || response.status >= 500) return DISALLOW_ALL
   if (response.status >= 200 && response.status < 300) return parseRobots(response.body, userAgent)
   return ALLOW_ALL
 }

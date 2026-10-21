@@ -11,7 +11,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { Effect } from 'effect'
 import type { ChildProcessSpawner } from 'effect/process'
-import { z } from 'zod'
+import type { z } from 'zod'
 import {
   CommandFailed,
   commandTools,
@@ -21,8 +21,15 @@ import {
 import { fetchText } from '../core/http.ts'
 import { errMsg, pageText, selectFields, shortError, stableJson } from '../core/output.ts'
 import { extractLinks, htmlToArticle, htmlToMarkdown } from '../lib/html.ts'
-import { machineSchema, machineState, paging, ToolArgsError } from './web-machine.ts'
-import { lenient } from './web-register.ts'
+import { machineSchema, machineState, ToolArgsError } from './web-machine.ts'
+import { hintsOnly, lenient, webMeta } from './web-register.ts'
+import {
+  fetchSchema,
+  linksSchema,
+  markdownSchema,
+  pagingSchema,
+  readabilitySchema,
+} from './web-schemas.ts'
 
 interface McpToolDef {
   id: string
@@ -31,20 +38,6 @@ interface McpToolDef {
   run(args: Record<string, unknown>): Effect.Effect<unknown, unknown>
 }
 
-const pagingSchema = z.object(paging)
-const fetchSchema = z.object({
-  url: z.url(),
-  timeoutMs: z.number().int().positive().optional(),
-  ...paging,
-})
-const readabilitySchema = z.object({ html: z.string(), ...paging })
-const markdownSchema = z.object({ html: z.string(), ...paging })
-const linksSchema = z.object({
-  html: z.string(),
-  base: z.url(),
-  limit: z.number().int().min(1).max(1000).optional(),
-  ...paging,
-})
 const parseArgs = <T>(schema: z.ZodType<T>, args: Record<string, unknown>) =>
   Effect.try({
     try: () => schema.parse(args),
@@ -105,7 +98,6 @@ interface McpText {
   content: { type: 'text'; text: string }[]
   isError?: boolean
 }
-
 const failure = (text: string): McpText => ({ content: [{ type: 'text', text }], isError: true })
 
 // ponytail: each page re-runs the tool; web.fetch pages lean on the HTTP cache.
@@ -152,9 +144,10 @@ const runTool = (id: string, args: Record<string, unknown>, entryOf?: EntryOf) =
 
 // Registering mutates the server, so it is an Effect: it captures the caller's
 // context once, and each MCP Promise handler runs its tool Effect with it.
-// Command tools register on both servers alike.
+// Command tools register on both servers alike; extra.signal cancels a call.
 type RunWith = <A, E>(
   effect: Effect.Effect<A, E, ChildProcessSpawner.ChildProcessSpawner>,
+  options: { signal: AbortSignal },
 ) => Promise<A>
 
 // Registration order is tools/list order, so register every tool sorted by id.
@@ -167,8 +160,9 @@ const toolRegistrations = (server: McpServer, runWith: RunWith, entryOf?: EntryO
           () =>
             server.registerTool(
               id,
-              { ...config, inputSchema: lenient(inputSchema) },
-              (args: Record<string, unknown>) => runWith(runTool(id, args, entryOf)),
+              { ...hintsOnly(config), inputSchema: lenient(inputSchema) },
+              (args: Record<string, unknown>, { signal }) =>
+                runWith(runTool(id, args, entryOf), { signal }),
             ),
         ] as const,
     ),
@@ -179,8 +173,9 @@ const toolRegistrations = (server: McpServer, runWith: RunWith, entryOf?: EntryO
           () =>
             server.registerTool(
               tool.id,
-              { description: tool.description, inputSchema: tool.schema.shape },
-              (args: Record<string, unknown>) => runWith(execute(tool, args)),
+              { ...webMeta(tool), inputSchema: tool.schema.shape },
+              (args: Record<string, unknown>, { signal }) =>
+                runWith(execute(tool, args), { signal }),
             ),
         ] as const,
     ),

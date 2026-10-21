@@ -77,7 +77,7 @@ This file gives detail for the cases named in the skill's "When to read more" se
 - State text says what is true. Put every decisive fact in it, plus the motivation, the outcome sought, and the background a fresh reader lacks.
 - Question text says plainly what answer is wanted and what each option means.
 - Weak question: "Is this page relevant?"
-- Useful question: "The user wants the price of the 2026 model. Does this page state that price? Answer yes if a price for the 2026 model is on the page. Answer no if the page gives only older models."
+- Useful question: "The user wants the price of the Pro plan. Does this page state that price? Answer yes if a price for the Pro plan is on the page. Answer no if the page gives only other plans."
 - Write each free-text value at grade 6. Leave keys, enum values, ids, and numbers exactly as given.
 - Never write a payload value that hints the answer you hope for.
 

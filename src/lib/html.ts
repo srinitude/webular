@@ -33,25 +33,37 @@ function linksFrom(document: DomDocument, base: string): string[] {
   return [...out]
 }
 
-const UNSAFE_ELEMENTS = 'script, style, iframe, object, embed, form'
-const URL_ATTRS = ['href', 'src', 'action', 'formaction', 'xlink:href']
+// Active, document-level (base, meta, link), inert-template, and foreign
+// (svg, math) content: each can run script or re-point URLs once embedded.
+const UNSAFE_ELEMENTS =
+  'script, style, iframe, frame, frameset, object, embed, applet, form, ' +
+  'base, meta, link, template, svg, math, noscript'
+const URL_ATTRS = ['href', 'src', 'action', 'formaction', 'xlink:href', 'poster', 'background']
+const UNSAFE_ATTRS = ['srcdoc', 'style']
+const UNSAFE_SCHEME = /^(javascript|vbscript|data):/
+
+const unsafeAttr = (name: string, value: string): boolean => {
+  // Browsers ignore control chars/whitespace inside the scheme ("java\tscript:").
+  // biome-ignore lint/suspicious/noControlCharactersInRegex: browsers drop C0 control chars inside a URL scheme, so the sanitizer must too.
+  const scheme = value.replace(/[\u0000- ]/g, '').toLowerCase()
+  const lower = name.toLowerCase()
+  return (
+    lower.startsWith('on') ||
+    UNSAFE_ATTRS.includes(lower) ||
+    (URL_ATTRS.includes(lower) && UNSAFE_SCHEME.test(scheme))
+  )
+}
 
 // Neither Readability nor mammoth sanitizes its HTML — run this before anyone
-// embeds it. Strips active elements, on* handlers, and javascript: URLs.
+// embeds it. Strips the elements above, on* handlers, srcdoc, inline style, and
+// javascript:, vbscript:, and data: URLs.
+// ponytail: a widened denylist, not an allowlist; DOMPurify if a gap shows up.
 export function sanitizeHtml(html: string): string {
   const { document } = parseHTML(`<!doctype html><html><body>${html}</body></html>`)
   for (const el of Array.from(document.querySelectorAll(UNSAFE_ELEMENTS))) el.remove()
   for (const el of Array.from(document.querySelectorAll('*'))) {
     for (const name of el.getAttributeNames()) {
-      const value = el.getAttribute(name) ?? ''
-      // Browsers ignore control chars/whitespace inside the scheme ("java\tscript:").
-      // biome-ignore lint/suspicious/noControlCharactersInRegex: browsers drop C0 control chars inside a URL scheme, so the sanitizer must too.
-      const scheme = value.replace(/[\u0000-\u0020]/g, '').toLowerCase()
-      if (
-        name.toLowerCase().startsWith('on') ||
-        (URL_ATTRS.includes(name.toLowerCase()) && scheme.startsWith('javascript:'))
-      )
-        el.removeAttribute(name)
+      if (unsafeAttr(name, el.getAttribute(name) ?? '')) el.removeAttribute(name)
     }
   }
   return document.body?.innerHTML ?? ''
