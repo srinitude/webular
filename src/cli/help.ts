@@ -1,7 +1,9 @@
 // Help + version text (clig.dev: helpful, discoverable, no surprises).
+// Rows wrap to the terminal width; a pipe or file gets whole lines.
 import { Effect } from 'effect'
 import pkg from '../../package.json' with { type: 'json' }
 import { COMMANDS } from './commands.ts'
+import { termWidth, wrap } from './style.ts'
 
 const print = (text: string): Effect.Effect<number> =>
   Effect.sync(() => {
@@ -24,26 +26,41 @@ export const GLOBAL_OPTIONS = [
   '  -V, --version     Show version',
 ]
 
-export function printHelp(): Effect.Effect<number> {
-  const head = [
-    'webular — a command line tool for web research',
-    '',
-    'USAGE',
-    '  webular <command> [options]',
-    '',
-    'COMMANDS',
-  ]
+const HEAD = [
+  'webular — a command line tool for web research',
+  '',
+  'USAGE',
+  '  webular <command> [options]',
+  '',
+  'COMMANDS',
+]
+
+const TAIL = [
+  '',
+  'EXIT CODES',
+  '  0 success · 1 failure · 2 wrong usage',
+  '  3 some items failed (batch) · 127 a tool is missing',
+  '  128+n stopped by signal n (130 for Ctrl-C)',
+  '',
+  "Run 'webular <command> --help' to see its options.",
+  "Run 'webular doctor' if something does not work.",
+]
+
+// Each block wraps under its own description column.
+export function helpText(width: number): string {
+  const block = (lines: readonly string[], indent: number) =>
+    lines.map((line) => wrap(line, indent, width))
   const cmds = Object.entries(COMMANDS).map(([name, desc]) => `  ${name.padEnd(10)} ${desc}`)
-  const tail = [
+  return [
+    ...block(HEAD, 2),
+    ...block(cmds, 13),
     '',
     'GLOBAL OPTIONS',
-    ...GLOBAL_OPTIONS,
-    '',
-    'EXIT CODES',
-    '  0 success · 1 failure · 2 wrong usage',
-    '  3 some items failed (batch) · 127 a tool is missing',
-    '',
-    'Every command runs through `mise run run:<command>`.',
-  ]
-  return print([...head, ...cmds, ...tail].join('\n'))
+    ...block(GLOBAL_OPTIONS, 20),
+    ...block(TAIL, 2),
+  ].join('\n')
+}
+
+export function printHelp(): Effect.Effect<number> {
+  return print(helpText(termWidth()))
 }

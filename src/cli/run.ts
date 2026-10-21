@@ -10,6 +10,7 @@ import type { SandboxError } from '../core/safepath.ts'
 import { commandLifecycleMachine } from '../machines/command-lifecycle.ts'
 import { EXIT, payloadExit, settledExit } from './exit-codes.ts'
 import { renderFor } from './render.ts'
+import { safeText } from './style.ts'
 
 interface RunOpts {
   json?: boolean | undefined
@@ -43,8 +44,15 @@ export function discoveryExit(field: string): (result: unknown) => number {
 type LifecycleEvent = EventFromLogic<typeof commandLifecycleMachine>
 
 // Every exit below comes from the command-lifecycle machine's final state.
+// Failure lines say what went wrong, then what to try next. The detail may
+// quote web text, so it is escaped before it reaches a terminal.
 const failed = (name: string, detail: string, events: LifecycleEvent[]) =>
-  Effect.as(logErr(`${name}: failed (${detail})`), settledExit(commandLifecycleMachine, events))
+  Effect.as(
+    logErr(
+      `${name}: failed (${safeText(detail)})\nCheck the input, then try again. Run 'webular doctor' to check your setup.`,
+    ),
+    settledExit(commandLifecycleMachine, events),
+  )
 
 function rendered(failures: number, policy: number): LifecycleEvent {
   if (policy === EXIT.partial) return { type: 'PARTIAL' }
@@ -71,7 +79,9 @@ function report(
   ])
   const note =
     failures > 0
-      ? logErr(`${name}: ${failures} fetch${failures === 1 ? '' : 'es'} failed`)
+      ? logErr(
+          `${name}: ${failures} fetch${failures === 1 ? '' : 'es'} failed. Run again with --json to see each error.`,
+        )
       : Effect.void
   return note.pipe(
     Effect.andThen(emit(outcome.result, { ...emitOpts, render: renderFor(name) })),

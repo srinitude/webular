@@ -9,9 +9,24 @@ import { COMMAND_NAMES, type CommandName } from './commands.ts'
 import { runCommand } from './dispatch.ts'
 import { settledExit } from './exit-codes.ts'
 import { printHelp, printVersion } from './help.ts'
+import { closest, errorLabel, safeText } from './style.ts'
 
 function isCommand(value: string): value is CommandName {
   return (COMMAND_NAMES as string[]).includes(value)
+}
+
+// Usage error on stderr: the closest command, then where to look.
+function unknownCommand(command: string): Effect.Effect<number> {
+  const guess = closest(command, COMMAND_NAMES)
+  const hint = guess ? ` Did you mean '${guess}'?` : ''
+  return errorLabel.pipe(
+    Effect.flatMap((label) =>
+      logErr(
+        `${label} unknown command '${safeText(command)}'.${hint}\nRun 'webular --help' to see all commands.`,
+      ),
+    ),
+    Effect.as(settledExit(cliDispatchMachine, [{ type: 'UNKNOWN_COMMAND' }])),
+  )
 }
 
 export function route(argv: string[]) {
@@ -20,10 +35,6 @@ export function route(argv: string[]) {
     return Effect.as(printHelp(), settledExit(cliDispatchMachine, [{ type: 'HELP' }]))
   if (command === '--version' || command === '-V')
     return Effect.as(printVersion(), settledExit(cliDispatchMachine, [{ type: 'VERSION' }]))
-  if (!isCommand(command))
-    return Effect.as(
-      logErr(`webular: unknown command '${command}'. Run 'webular --help'.`),
-      settledExit(cliDispatchMachine, [{ type: 'UNKNOWN_COMMAND' }]),
-    )
+  if (!isCommand(command)) return unknownCommand(command)
   return runCommand(command, rest)
 }

@@ -53,7 +53,7 @@ How to read each item:
 
 ## Practices for any TypeScript CLI
 
-- [x] **Color never carries meaning alone.** The output uses no ANSI color. Source: <https://no-color.org> (undated). Check: automated, `no ANSI color escapes, so no meaning rides on color alone`.
+- [x] **Color never carries meaning alone.** The only color is the red `error:` label, and the word says the same thing. `NO_COLOR` turns color off and wins over `FORCE_COLOR`. A pipe or `TERM=dumb` gets no color. Source: <https://no-color.org> (undated). Check: automated, `ANSI color lives only in src/cli/style.ts, so no meaning rides on color alone` and `NO_COLOR wins over FORCE_COLOR`.
 - [x] **Data goes to stdout, messages go to stderr, and `--json` gives the machine shape.** Source: <https://clig.dev/#output> (undated). Check: review of `src/core/output.ts`, plus the CLI tests.
 - [x] **Exit codes are documented**: `0`, `1`, `2`, `3`, `127`. Source: <https://clig.dev/#the-basics> (undated). Check: automated, `README documents the exit codes the CLI uses`.
 - [x] **Exit codes match the docs.** An unknown command returns `2`; `doctor` returns `1` when a required check fails. Source: same. Check: automated, `an unknown command exits 2 with a usage hint` and `exits 1 when a required check fails`.

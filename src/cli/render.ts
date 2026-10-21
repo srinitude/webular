@@ -2,6 +2,7 @@
 // the --json contract; stdout (and -o) carry what a human reads. Typing the
 // map over CommandName makes a missing renderer a compile error.
 import type { CommandName } from './commands.ts'
+import { safeText } from './style.ts'
 
 type Rec = Record<string, unknown>
 type Renderer = (r: Rec) => string
@@ -84,8 +85,10 @@ const RENDERERS: Record<CommandName, Renderer> = {
       .join('\n'),
 }
 
+// Every human print path ends here, so one safeText call covers every string
+// fetched from the web (renderers only add tabs, newlines, and spaces).
 export function renderFor(name: string): ((data: unknown) => string) | undefined {
   const renderer = (RENDERERS as Record<string, Renderer | undefined>)[name]
   if (!renderer) return undefined
-  return (data) => (data && typeof data === 'object' ? renderer(data as Rec) : String(data))
+  return (data) => safeText(data && typeof data === 'object' ? renderer(data as Rec) : String(data))
 }

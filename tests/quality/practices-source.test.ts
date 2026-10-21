@@ -46,7 +46,12 @@ describe('best practices: compiler and docs', () => {
 })
 
 describe('best practices: source patterns', () => {
-  check('no ANSI color escapes, so no meaning rides on color alone', none(/\\x1b\[|\\u001b\[/))
+  check(
+    'ANSI color lives only in src/cli/style.ts, so no meaning rides on color alone',
+    Effect.map(matching(/\\x1b\[|\\u001b\[/), (found) =>
+      expect(found.filter((file) => !file.endsWith('src/cli/style.ts'))).toEqual([]),
+    ),
+  )
   check(
     'no Effect 3 packages or beta-only Effect paths',
     none(/'(@effect\/(schema|cli|platform)'|effect\/unstable\/)|GenericTag/),
