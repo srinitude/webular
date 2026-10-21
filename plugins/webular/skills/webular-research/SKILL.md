@@ -22,7 +22,7 @@ A web answer is only as good as its sources. This skill takes each fact from a p
 | Shorten a text or a page | `summarize` |
 | Read many pages of one site | `crawl` |
 | Pull named fields from a page | `extract` |
-| Get a short, sourced answer to one question | `answer` (`--urls a,b` reads only those pages) |
+| Get a short, sourced answer to one question | `answer` (`urls` reads only those pages) |
 | Study a topic over many steps | `research` |
 | Turn a file into text | `parse` |
 | Get text or details from an image, audio, or video | `media` |
@@ -45,6 +45,7 @@ The tools retry on their own in these ways.
 - `feed` takes a plain page URL. It reads the feed the page links to. If the page links none, it tries `/feed` and `/rss` on the same site. The result's `feedUrl` names the feed it read.
 - `scrape` and `feed` take `archive: true`. When the live page fails, they read its closest Wayback Machine copy. `archivedFrom` names that copy. Tell the user when a fact comes from an archived copy.
 - `map` reads the site's sitemap, then the `Sitemap:` lines in `robots.txt`, then crawls links when no sitemap exists.
+- A result too long for one reply comes back cut, with `truncated: true` and a `cursor`. Call the same tool again with the same input and that `cursor` for the next page.
 
 Do not call a second tool to redo a fallback the first one already ran.
 
