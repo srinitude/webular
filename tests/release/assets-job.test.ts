@@ -53,7 +53,9 @@ test(
       const bin = join(dir, 'dist', 'bin')
       yield* fs.makeDirectory(bin, { recursive: true })
       const names = [...TARGETS.map(assetName), 'webular-completions.tar.gz']
-      yield* Effect.forEach(names, (name) => fs.writeFileString(join(bin, name), name), { discard: true })
+      yield* Effect.forEach(names, (name) => fs.writeFileString(join(bin, name), name), {
+        discard: true,
+      })
       yield* fs.writeFileString(join(bin, 'webular'), 'host build, not a release file')
       const run = steps('assets').find((s) => s.run?.includes('sha256sum webular-*'))?.run ?? ''
       expect((yield* runProc(['sh', '-c', run], { cwd: dir, timeoutMs: 20_000 })).code).toBe(0)
@@ -77,11 +79,17 @@ test(
       const fs = yield* FileSystem.FileSystem
       const bin = join(yield* tmpDir('webular-maps-'), 'dist', 'bin')
       yield* fs.makeDirectory(bin, { recursive: true })
-      yield* Effect.forEach(['webular-linux-x64', 'webular-linux-x64.map'], (n) => fs.writeFileString(join(bin, n), n), {
-        discard: true,
-      })
+      yield* Effect.forEach(
+        ['webular-linux-x64', 'webular-linux-x64.map'],
+        (n) => fs.writeFileString(join(bin, n), n),
+        {
+          discard: true,
+        },
+      )
       const run = steps('assets')[cleanup]?.run ?? ''
-      expect((yield* runProc(['sh', '-c', run], { cwd: join(bin, '..', '..'), timeoutMs: 20_000 })).code).toBe(0)
+      expect(
+        (yield* runProc(['sh', '-c', run], { cwd: join(bin, '..', '..'), timeoutMs: 20_000 })).code,
+      ).toBe(0)
       expect(yield* fs.readDirectory(bin)).toEqual(['webular-linux-x64'])
     }),
   ),
