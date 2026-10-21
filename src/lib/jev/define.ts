@@ -3,8 +3,9 @@
 // a fallback, a code check after the pick, or the docs hash it was validated
 // against does not typecheck. tests/jev/define.test.ts proves the rest in CI.
 import { Effect } from 'effect'
-import { Jev, type JevAnswer, type JevRequest } from './client.ts'
-import type { CONFIDENCE_BAR } from './payload/index.ts'
+import { JEV_MODEL_DEFAULT, Jev, type JevAnswer, type JevRequest } from './client.ts'
+import { JevPayloadTooLarge } from './errors.ts'
+import { type CONFIDENCE_BAR, JEV_TOKEN_CAP, payloadTokens, requestBytes } from './payload/index.ts'
 
 // Runs `jevPart` when Jev is available; any error uses `fallback`. The
 // fallback is lazy, so a rule that scans the whole input runs only when needed.
@@ -55,6 +56,24 @@ export interface DecisionDef<I, A> {
   readonly evals: `tests/jev/evals/${string}.json`
   // sha256 of the llms-full.txt this decision was validated against.
   readonly docs: string
+  // Token budget for one payload; defaults to JEV_TOKEN_CAP. Over it, the fallback decides.
+  readonly maxTokens?: number
+}
+
+// Run-time size guard: a payload over `cap` tokens (chars / 4 of the canonical
+// body) fails with JevPayloadTooLarge and is never sent.
+export const guardPayload = (
+  decision: string,
+  req: JevRequest,
+  cap: number = JEV_TOKEN_CAP,
+  model: string = JEV_MODEL_DEFAULT,
+): Effect.Effect<JevRequest, JevPayloadTooLarge> => {
+  const tokens = payloadTokens(requestBytes(model, req.state, req.questions))
+  return tokens > cap
+    ? Effect.fail(new JevPayloadTooLarge({ decision, tokens, cap })).pipe(
+        Effect.tapError((e) => Effect.logWarning(e.message)),
+      )
+    : Effect.succeed(req)
 }
 
 // The one place a Jev service is asked. defineDecision asks through it, and the
@@ -72,7 +91,8 @@ export const defineDecision = <I, A>(def: DecisionDef<I, A>) =>
         def.name,
         () => def.fallback(input),
         (jev) =>
-          askJev(jev, def.name, def.payload(input)).pipe(
+          guardPayload(def.name, def.payload(input), def.maxTokens, def.model).pipe(
+            Effect.flatMap((req) => askJev(jev, def.name, req)),
             Effect.map((r) => {
               const picked = def.read(r.answers, def.bar, input)
               return picked !== undefined && def.codeCheck(picked, input)

@@ -18,6 +18,12 @@ export const CAPS = {
   bytes: 262_144, // serialized bytes of state plus questions: 256 KiB
 } as const
 
+// Jev's per-question context is 32k tokens, and `state` counts once against it
+// (docs.typesafe.ai/models#context-length). A token is about 4 chars, so a
+// payload past this cap is refused before the call and the fallback decides.
+export const JEV_TOKEN_CAP = 32_000
+export const payloadTokens = (body: string) => Math.ceil(body.length / 4)
+
 interface Budget {
   bytes: number
   nodes: number

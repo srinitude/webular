@@ -60,3 +60,14 @@ export class JevError extends Data.TaggedError('JevError')<{
   kind?: JevErrorKind
   retryAfterMs?: number | undefined
 }> {}
+
+// A payload over its token budget: refused before the call, so the fallback decides.
+export class JevPayloadTooLarge extends Data.TaggedError('JevPayloadTooLarge')<{
+  decision: string
+  tokens: number
+  cap: number
+}> {
+  override get message() {
+    return `Jev payload for ${this.decision} is ${this.tokens} tokens, over the cap of ${this.cap}`
+  }
+}

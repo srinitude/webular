@@ -16,6 +16,7 @@ import {
   sureShare,
   sureYes,
 } from '../../src/lib/jev/payload/index.ts'
+import { counted, newCount, total } from './work-count.ts'
 
 // The research payload for a whole state: one batch holding every sub-question.
 const researchArg = (s: Parameters<typeof decisions.research>[0]) =>
@@ -40,33 +41,29 @@ const bigState = (n: number) => ({
 })
 const Q = { q: { type: 'noul', instructions: 'Is `items` useful?' } } as const
 
-const timeBody = (n: number) => {
-  const s = bigState(n)
-  const t0 = Bun.nanoseconds()
-  let body = ''
-  for (let i = 0; i < 200; i++) body = requestBytes(JEV_MODEL_DEFAULT, s, Q)
-  return { ms: (Bun.nanoseconds() - t0) / 1e6, bytes: body.length }
+// Work the payload walk does on one input: every read, key listing, and key
+// check on the state is counted, so the result is exact on every machine.
+const workBody = (n: number) => {
+  const c = newCount()
+  const body = requestBytes(JEV_MODEL_DEFAULT, counted(bigState(n), c), Q)
+  return { work: total(c), bytes: body.length }
 }
 
-// Fastest of a few runs: a GC pause or a busy machine only ever adds time.
-const fastest = (n: number) => {
-  const runs = Array.from({ length: 5 }, () => timeBody(n))
-  return { ms: Math.min(...runs.map((r) => r.ms)), bytes: runs[0]?.bytes ?? 0 }
-}
-
-test('payload time and size stay flat from 10 to 100,000 items', () => {
-  timeBody(1_000) // warm the JIT
-  const small = fastest(1_000)
-  const large = fastest(100_000)
+test('payload work and size stay flat from 1,000 to 100,000 items', () => {
+  const small = workBody(1_000)
+  const large = workBody(100_000)
   expect(large.bytes).toBe(small.bytes)
   expect(large.bytes).toBeLessThanOrEqual(CAPS.bytes)
-  // A growth ratio, not a millisecond limit, so machine speed cancels out. The
-  // input grows 100x, and linear growth would put the time ratio near 100. The
-  // `index` field still grows 5x (1,000 to 5,000 keys), so the measured ratio is
-  // about 13x. A bound of a quarter of the size ratio (25x) leaves about 2x
-  // headroom for noise and still fails on any linear or worse-than-linear walk.
+  // Sound because the measure is a count of state accesses, not wall time: it
+  // has no noise, so the bound can be exact. The input grows 100x and the walk
+  // must not touch one more value. The growth ratio stays under a quarter of the
+  // size ratio (25x), and the exact equality below is stricter still: a linear
+  // walk grows the count about 100x, and a walk that reads even one item past
+  // the caps grows it too.
   const sizeRatio = 100_000 / 1_000
-  expect(large.ms / small.ms).toBeLessThan(sizeRatio / 4)
+  expect(large.work / small.work).toBeLessThan(sizeRatio / 4)
+  expect(large.work).toBe(small.work)
+  expect(small.work).toBeLessThanOrEqual(CAPS.nodes * 3)
 })
 
 test('payload budgets hold for every decision on huge input', () => {
