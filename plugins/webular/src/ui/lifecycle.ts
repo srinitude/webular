@@ -13,17 +13,18 @@ export const stateLabels: Record<string, string> = {
   runningWorkflow: 'Reading the web',
   rendering: 'Putting the results together',
   completed: 'Done',
-  completedWithPartialFailures: 'Done, some sources failed',
+  completedWithPartialFailures: 'Done, some failed',
   emptyWithErrors: 'No results',
   rejected: 'Input rejected',
   failed: 'Run failed',
 }
 
-// The strip's three steps, one per non-final machine state.
+// The strip's three steps, one per non-final machine state: the label while
+// the step runs, then the label once it is done.
 export const steps = [
-  ['validatingInput', 'Checking input'],
-  ['runningWorkflow', 'Running'],
-  ['rendering', 'Writing results'],
+  ['validatingInput', 'Checking input', 'Input checked'],
+  ['runningWorkflow', 'Fetching pages', 'Pages fetched'],
+  ['rendering', 'Writing results', 'Results written'],
 ] as const
 
 // What each allowed move means to a person; the system fires every event, so
@@ -68,9 +69,14 @@ export const coverage = (result: SessionResult) => {
   return { found, failed, words: `${found} of ${found + failed} read, ${failed} failed` }
 }
 
-// A result means the input passed and the workflow ran; the discovery exit
-// rule (src/cli/run.ts) then splits clean, partial, and empty-with-errors.
+// Bad input says so in its message: the server's exit-2 wording, or Mastra's schema check.
+const badInput = /Fix the input|input validation failed/i
+
+// A rejected input stops before the run; otherwise the input passed and the
+// workflow ran, and the discovery exit rule (src/cli/run.ts) splits clean,
+// partial, and empty-with-errors.
 export const resultEvents = (result: SessionResult): LifecycleEvent[] => {
+  if (result.error && badInput.test(result.message ?? '')) return [{ type: 'INPUT_INVALID' }]
   if (result.error) return [{ type: 'INPUT_VALID' }, { type: 'WORKFLOW_FAILED' }]
   const { found, failed } = coverage(result)
   const end = failed === 0 ? 'NO_ERRORS' : found > 0 ? 'SOME_ERRORS' : 'EMPTY_WITH_ERRORS'

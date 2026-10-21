@@ -277,12 +277,6 @@
       "grader": "bun test: final state per result shape"
     },
     {
-      "assertion": "tools/list links research and answer, and only them, to the session view",
-      "source": "tests/session-view.test.ts",
-      "kind": "deterministic",
-      "grader": "bun test: tool _meta.ui.resourceUri list"
-    },
-    {
       "assertion": "a URL list folds into a site tree with a count on each folder and failures kept",
       "source": "tests/views.test.ts",
       "kind": "deterministic",
@@ -319,10 +313,10 @@
       "grader": "bun test: resources/read mimeType per view"
     },
     {
-      "assertion": "a real MCP client reads the session view as one self-contained MCP App page",
-      "source": "tests/session-view.test.ts",
+      "assertion": "the view says when a result came back and how long the run took",
+      "source": "tests/views.test.ts",
       "kind": "deterministic",
-      "grader": "bun test: resource MIME type and inline module script"
+      "grader": "bun test: when() words for check time and elapsed time"
     },
     {
       "assertion": "a host that never reads ui:// still gets the linked map result as data",

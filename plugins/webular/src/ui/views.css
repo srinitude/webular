@@ -1,31 +1,24 @@
+/* One token set: light-dark() follows color-scheme. The host theme (data-theme,
+   set by the bridge from the MCP Apps host context) wins; the system theme backs it up. */
 :root {
-  --ink: #1b1d21;
-  --muted: #5d636e;
-  --line: #dfe2e7;
-  --bg: #ffffff;
-  --hl: #fff3c4;
-  --ok: #1f7a4d;
-  --warn: #9a5b00;
-  --bad: #b42318;
-  --accent: #2f5bd3;
-  --del: #fde7e7;
-  --add: #e3f6ea;
+  --ink: light-dark(#1b1d21, #eceef2);
+  --muted: light-dark(#5d636e, #a3a9b4);
+  --line: light-dark(#dfe2e7, #343840);
+  --bg: light-dark(#ffffff, #15171a);
+  --hl: light-dark(#fff3c4, #4a3f12);
+  --ok: light-dark(#1f7a4d, #5fd39a);
+  --warn: light-dark(#9a5b00, #f0b45a);
+  --bad: light-dark(#b42318, #ff8a80);
+  --accent: light-dark(#2f5bd3, #8fb0ff);
+  --del: light-dark(#fde7e7, #4a2224);
+  --add: light-dark(#e3f6ea, #1d3a29);
   color-scheme: light dark;
 }
-@media (prefers-color-scheme: dark) {
-  :root {
-    --ink: #eceef2;
-    --muted: #a3a9b4;
-    --line: #343840;
-    --bg: #15171a;
-    --hl: #4a3f12;
-    --ok: #5fd39a;
-    --warn: #f0b45a;
-    --bad: #ff8a80;
-    --accent: #8fb0ff;
-    --del: #4a2224;
-    --add: #1d3a29;
-  }
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
 }
 body {
   margin: 0;
@@ -83,6 +76,9 @@ a {
 .count {
   color: var(--ink);
   font-weight: 400;
+}
+.count::before {
+  content: " · " / ", ";
 }
 .moves {
   color: var(--muted);
@@ -219,19 +215,10 @@ input:focus-visible {
 }
 summary {
   cursor: pointer;
+  line-height: 32px;
 }
-.change {
-  font-weight: 600;
-  text-transform: capitalize;
-}
-.change[data-status="changed"] {
-  color: var(--warn);
-}
-.change[data-status="new"] {
-  color: var(--accent);
-}
-.change[data-status="same"] {
-  color: var(--ok);
+.sources .domain {
+  display: block;
 }
 .diff {
   width: 100%;
@@ -278,10 +265,23 @@ footer {
   .explorer {
     grid-template-columns: 1fr;
   }
+  /* The detail sits above the tree and stays in view while the tree scrolls. */
   .detail {
+    order: -1;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--bg);
     border-left: 0;
-    border-top: 1px solid var(--line);
-    padding: 8px 0 0;
+    border-bottom: 1px solid var(--line);
+    padding: 8px 0;
+    min-height: 72px;
+  }
+  .status .count {
+    display: block;
+  }
+  .status .count::before {
+    content: none;
   }
   .diff thead {
     display: none;
@@ -294,4 +294,62 @@ footer {
   .diff tr[data-changed="false"] td[data-side="after"] {
     display: none;
   }
+}
+.when {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0 0 4px;
+}
+.tree ul {
+  border-left: 1px solid var(--line);
+  margin-left: 6px;
+}
+.answer .marker .tag {
+  margin-left: 2px;
+}
+.detail h2,
+.detail p {
+  margin: 0 0 4px;
+}
+.detail h2 {
+  font-size: 15px;
+  color: var(--ink);
+}
+.detail p {
+  font-size: 13px;
+  color: var(--muted);
+}
+.strip li[data-warn="true"]::before {
+  content: "! " / "";
+}
+.diff tr[data-changed="false"] td::before {
+  content: "  " / "";
+}
+.leaf[aria-pressed="true"] {
+  background: var(--hl);
+  color: var(--ink);
+}
+.folder-count {
+  color: var(--muted);
+  font-size: 13px;
+}
+.folder-count .failed {
+  color: var(--bad);
+}
+.answer .marker {
+  min-width: 0;
+  min-height: 0;
+  padding: 0 0 0 1px;
+  margin: 0;
+  border: 0;
+  vertical-align: super;
+  font-size: 0.75em;
+  line-height: 1;
+}
+.diff tr[data-changed="true"] td:empty {
+  background: transparent;
+}
+.strip li[data-warn="true"] {
+  border-color: var(--warn);
+  color: var(--warn);
 }

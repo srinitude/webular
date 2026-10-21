@@ -15,8 +15,12 @@ const sourceRows = (result: SessionResult) => [
   ...(result.sources ?? []),
   ...(result.errors ?? [])
     .filter((e) => !result.sources?.some((s) => s.url === e.url))
-    .map((e) => ({ title: e.url, url: e.url })),
+    .map((e) => ({ title: 'Page not read', url: e.url })),
 ]
+
+// One name per failed source, the same in the answer and the source list.
+const outcomes = (result: SessionResult) =>
+  new Map((result.errors ?? []).map((e) => [e.url, outcomeLabel(e.reason)]))
 
 function SourceRow(props: {
   n: number
@@ -27,9 +31,13 @@ function SourceRow(props: {
 }) {
   return (
     <li id={`source-${props.n}`} value={props.n} tabIndex={-1} data-active={props.active}>
-      <a href={props.url} target="_blank" rel="noopener noreferrer">
-        {props.title}
-      </a>
+      {props.outcome ? (
+        props.title
+      ) : (
+        <a href={props.url} target="_blank" rel="noopener noreferrer">
+          {props.title}
+        </a>
+      )}
       <span className="domain">{` ${domain(props.url)} · ${props.outcome ?? 'Read'}`}</span>
     </li>
   )
@@ -38,7 +46,7 @@ function SourceRow(props: {
 // Past 20 rows the list folds behind Show all, but failed rows never fold.
 function Sources({ result, active }: { result: SessionResult; active?: number }) {
   const [all, setAll] = useState(false)
-  const failed = new Map((result.errors ?? []).map((e) => [e.url, outcomeLabel(e.reason)]))
+  const failed = outcomes(result)
   const rows = sourceRows(result).map((s, i) => ({ ...s, n: i + 1, outcome: failed.get(s.url) }))
   if (rows.length === 0) return null
   const shown = rows.filter((r) => all || r.n <= FOLD || r.outcome)
@@ -65,18 +73,18 @@ const jump = (n: number) => {
 
 function Marker({
   n,
-  failed,
+  outcome,
   onActive,
 }: {
   n: number
-  failed: boolean
+  outcome?: string
   onActive: (n?: number) => void
 }) {
   return (
     <a
       className="marker"
       href={`#source-${n}`}
-      aria-label={`Source ${n}${failed ? ', failed' : ''}`}
+      aria-label={`Source ${n}${outcome ? `, ${outcome}` : ''}`}
       onMouseEnter={() => onActive(n)}
       onFocus={() => onActive(n)}
       onMouseLeave={() => onActive()}
@@ -87,7 +95,7 @@ function Marker({
       }}
     >
       {`[${n}]`}
-      {failed && <span className="tag">failed</span>}
+      {outcome && <span className="tag">{outcome}</span>}
     </a>
   )
 }
@@ -95,27 +103,36 @@ function Marker({
 function Answer({ result, onActive }: { result: SessionResult; onActive: (n?: number) => void }) {
   const text = result.answer ?? result.report
   if (!text) return null
-  const parts = citations(text, sourceRows(result), result.errors)
+  const rows = sourceRows(result)
+  const failed = outcomes(result)
+  const parts = citations(text, rows, result.errors)
+  // A marker sits right after its word, as footnotes do.
+  const tight = (i: number) => {
+    const next = parts[i + 1]
+    return typeof next === 'object' && !next.missing
+  }
   return (
     <article className="answer" aria-label="Answer">
       <h2>Answer</h2>
       <p>
         {parts.map((part, i) => {
-          if (typeof part === 'string') return part
+          if (typeof part === 'string') return tight(i) ? part.trimEnd() : part
           if (part.missing) return `[${part.n}]`
+          const outcome = failed.get(rows[part.n - 1]?.url ?? '')
           // biome-ignore lint/suspicious/noArrayIndexKey: answer parts are positional and never reorder
-          return <Marker key={i} n={part.n} failed={part.failed} onActive={onActive} />
+          return <Marker key={i} n={part.n} outcome={outcome} onActive={onActive} />
         })}
       </p>
     </article>
   )
 }
 
-const SessionView: View = ({ actor, result, rerun }) => {
+const SessionView: View = (props) => {
+  const { result } = props
   const [active, setActive] = useState<number>()
   const title = result.topic ?? result.query ?? 'Research'
   return (
-    <Frame actor={actor} result={result} rerun={rerun} title={title} empty="Nothing found.">
+    <Frame {...props} title={title} empty="Nothing found.">
       <div className="columns">
         <Answer result={result} onActive={setActive} />
         <Sources result={result} active={active} />

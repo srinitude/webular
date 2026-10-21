@@ -11,36 +11,46 @@ interface BranchProps {
   readonly node: TreeNode
   readonly open: boolean
   readonly onPick: (n: TreeNode) => void
+  readonly picked?: string
 }
 
-function Leaf({ node, onPick }: Omit<BranchProps, 'open'>) {
+// The picked page's row stays marked, as in file explorers with a detail pane.
+function Leaf({ node, onPick, picked }: Omit<BranchProps, 'open'>) {
   if (!node.url) return null
   return (
-    <button type="button" className="leaf" onClick={() => onPick(node)}>
-      {node.name}
-      {node.outcome && <span className="tag">{node.outcome}</span>}
-    </button>
+    <li>
+      <button
+        type="button"
+        className="leaf"
+        aria-pressed={picked === node.url}
+        onClick={() => onPick(node)}
+      >
+        {node.name}
+        {node.outcome && <span className="tag">{node.outcome}</span>}
+      </button>
+    </li>
   )
 }
 
 // A folder opens on its own when filtering, when it holds a failure, or when small.
-function Branch({ node, open, onPick }: BranchProps) {
+function Branch(props: BranchProps) {
+  const { node, open } = props
   const kids = [...node.children.values()]
-  if (kids.length === 0)
-    return (
-      <li>
-        <Leaf node={node} onPick={onPick} />
-      </li>
-    )
-  const failed = node.failed > 0 ? `, ${node.failed} failed` : ''
+  if (kids.length === 0) return <Leaf {...props} />
   return (
     <li>
       <details open={open || node.failed > 0 || node.count <= 50}>
-        <summary>{`${node.name}/ (${node.count}${failed})`}</summary>
-        <Leaf node={node} onPick={onPick} />
+        <summary>
+          {`${node.name}/ `}
+          <span className="folder-count">
+            {`${node.count} pages`}
+            {node.failed > 0 && <span className="failed">{` · ${node.failed} failed`}</span>}
+          </span>
+        </summary>
         <ul>
+          <Leaf {...props} />
           {kids.map((k) => (
-            <Branch key={k.name} node={k} open={open} onPick={onPick} />
+            <Branch key={k.name} {...props} node={k} />
           ))}
         </ul>
       </details>
@@ -49,7 +59,12 @@ function Branch({ node, open, onPick }: BranchProps) {
 }
 
 function Detail({ node, result }: { node?: TreeNode; result: SessionResult }) {
-  if (!node?.url) return null
+  if (!node?.url)
+    return (
+      <aside className="detail" aria-label="Page detail">
+        <p className="moves">Pick a page to see its title, outcome, and link.</p>
+      </aside>
+    )
   const page = result.pages?.find((p) => p.url === node.url)
   return (
     <aside className="detail" aria-label="Page detail" aria-live="polite">
@@ -92,7 +107,7 @@ function Filter({
 const depthOf = (urls: ReadonlyArray<string>) =>
   Math.max(0, ...urls.map((u) => (URL.parse(u)?.pathname ?? '').split('/').filter(Boolean).length))
 
-// The filtered tree, the full count words the header shows, and the page total.
+// The filtered tree, the full count words the header shows once pages exist, and the page total.
 const shape = (result: SessionResult, filter: string) => {
   const urls = [...(result.links ?? []), ...(result.pages ?? []).map((p) => p.url)]
   const keep = (url: string) => url.toLowerCase().includes(filter.toLowerCase())
@@ -104,30 +119,32 @@ const shape = (result: SessionResult, filter: string) => {
   return {
     tree,
     total: all.count,
-    count: `${all.count} pages, depth ${depthOf(urls)}, ${all.failed} failed`,
+    count:
+      all.count > 0
+        ? `${all.count} pages, depth ${depthOf(urls)}, ${all.failed} failed`
+        : undefined,
   }
 }
 
-const MapView: View = ({ actor, result, rerun }) => {
+const MapView: View = (props) => {
+  const { result } = props
   const [filter, setFilter] = useState('')
   const [picked, setPicked] = useState<TreeNode>()
   const { tree, total, count } = shape(result, filter)
-  const all = { count: total }
   const title = result.root ?? result.url ?? 'Site map'
   return (
-    <Frame
-      actor={actor}
-      result={result}
-      rerun={rerun}
-      title={title}
-      count={count}
-      empty="No pages found."
-    >
-      {all.count > 0 && <Filter value={filter} set={setFilter} matches={tree.count} />}
+    <Frame {...props} title={title} count={count} empty="No pages found.">
+      {total > 0 && <Filter value={filter} set={setFilter} matches={tree.count} />}
       <div className="explorer">
         <ul className="tree" aria-label="Site tree">
           {[...tree.children.values()].map((k) => (
-            <Branch key={k.name} node={k} open={filter !== ''} onPick={setPicked} />
+            <Branch
+              key={k.name}
+              node={k}
+              open={filter !== ''}
+              onPick={setPicked}
+              picked={picked?.url}
+            />
           ))}
         </ul>
         <Detail node={picked} result={result} />

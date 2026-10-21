@@ -13,6 +13,7 @@ import { MAP_VIEW, MONITOR_VIEW, SESSION_VIEW } from '../src/apps.ts'
 import { runtime } from '../src/runtime.ts'
 import { server } from '../src/server.ts'
 import { asText, resultEvents } from '../src/ui/lifecycle.ts'
+import { when } from '../src/ui/parts.tsx'
 import { buildTree, citations, splitDiff } from '../src/ui/views.ts'
 
 test('a URL list folds into a site tree with a count on each folder and failures kept', () => {
@@ -125,3 +126,9 @@ test('a real MCP client reads every view as one self-contained MCP App page', ()
       (client) => Effect.promise(() => client.disconnect()),
     ).pipe(Effect.timeout('25 seconds')),
   ))
+
+test('the view says when a result came back and how long the run took', () => {
+  const at = new Date(2026, 9, 21, 13, 5).getTime()
+  expect(when({ at, took: 3240 })).toMatch(/^Checked 1:05.PM, took 3\.2 s$/)
+  expect(when({ at })).toMatch(/^Checked 1:05.PM$/)
+})

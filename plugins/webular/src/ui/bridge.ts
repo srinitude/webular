@@ -1,8 +1,9 @@
 // The MCP Apps host bridge, as an Effect: send ui/initialize, confirm with
-// ui/notifications/initialized, then route tool-input, tool-result, and
-// tool-cancelled notifications. Re-run asks the host to call the same tool with
-// the same arguments. Interrupting the fiber removes the listener.
-import { Effect, Queue, Stream } from 'effect'
+// ui/notifications/initialized, then route tool-input, tool-result,
+// tool-cancelled, and host-context-changed notifications. Page clicks (Re-run,
+// Copy as text) queue up and run on this fiber. Interrupting the fiber removes
+// the listener.
+import { Clock, Effect, Queue, Stream } from 'effect'
 import type { SessionResult } from './lifecycle.ts'
 
 interface ToolResult {
@@ -36,47 +37,81 @@ const hostMessages = Stream.callback<MessageEvent>(
   { bufferSize: 64, strategy: 'sliding' },
 )
 
+// A copy request: the text, and who hears whether the clipboard write worked.
+export type Copy = (text: string, done: (ok: boolean) => void) => void
+
 export interface Handlers {
-  readonly onStart: () => void
-  readonly onResult: (r: SessionResult) => void
+  // `at` is the Effect clock reading, in ms, when the run started or its result arrived.
+  readonly onStart: (at: number) => void
+  readonly onResult: (r: SessionResult, at: number) => void
   // Called once the tool name and arguments are known; the view shows Re-run then.
   readonly onRerunReady: (rerun: () => void) => void
+  readonly onCopyReady: (copy: Copy) => void
 }
 
-// The tool call this view renders, learned from the handshake and tool-input.
+// The tool call this view renders, learned from the handshake and tool-input,
+// and the queue page clicks go through.
 interface Call {
   name?: string
   args?: unknown
   id: number
+  readonly clicks: Queue.Queue<Effect.Effect<void>>
 }
 
-const rerunOf = (call: Call, h: Handlers) => () => {
-  h.onStart()
-  call.id++
-  send({ id: call.id, method: 'tools/call', params: { name: call.name, arguments: call.args } })
-}
+const stamped = (f: (at: number) => void) =>
+  Effect.flatMap(Clock.currentTimeMillis, (at) => Effect.sync(() => f(at)))
 
-const onInput = (call: Call, h: Handlers, args: unknown) => {
+const rerunOf = (call: Call, h: Handlers) => () =>
+  Queue.offerUnsafe(
+    call.clicks,
+    stamped((at) => {
+      h.onStart(at)
+      call.id++
+      send({ id: call.id, method: 'tools/call', params: { name: call.name, arguments: call.args } })
+    }),
+  )
+
+const onInput = (call: Call, h: Handlers, args: unknown, at: number) => {
   call.args = args
-  h.onStart()
+  h.onStart(at)
   if (call.name && args) h.onRerunReady(rerunOf(call, h))
+}
+
+// The host's theme drives the page's color-scheme; without one the system theme holds.
+const applyTheme = (context?: { theme?: string }) => {
+  if (context?.theme === 'light' || context?.theme === 'dark')
+    document.documentElement.dataset.theme = context.theme
 }
 
 const route = (e: MessageEvent, h: Handlers, call: Call) => {
   const { id, method, params, result } = e.data
   if (id === 1 && result) {
     call.name = result.hostContext?.toolInfo?.tool?.name
+    applyTheme(result.hostContext)
     return post({ method: 'ui/notifications/initialized' })
   }
-  if (id > 1 && result) return Effect.sync(() => h.onResult(readResult(result)))
+  if (method === 'ui/notifications/host-context-changed')
+    return Effect.sync(() => applyTheme(params))
+  if (id > 1 && result) return stamped((at) => h.onResult(readResult(result), at))
   if (method === 'ui/notifications/tool-input')
-    return Effect.sync(() => onInput(call, h, params?.arguments))
+    return stamped((at) => onInput(call, h, params?.arguments, at))
   if (method === 'ui/notifications/tool-result')
-    return Effect.sync(() => h.onResult(readResult(params)))
+    return stamped((at) => h.onResult(readResult(params), at))
   if (method === 'ui/notifications/tool-cancelled')
-    return Effect.sync(() => h.onResult({ error: true, message: 'The host cancelled this run.' }))
+    return stamped((at) => h.onResult({ error: true, message: 'The host cancelled this run.' }, at))
   return Effect.void
 }
+
+// "Copied" only once the clipboard write resolves; a denied write reports false.
+const copyOf =
+  (call: Call): Copy =>
+  (text, done) =>
+    Queue.offerUnsafe(
+      call.clicks,
+      Effect.tryPromise(() => navigator.clipboard.writeText(text)).pipe(
+        Effect.match({ onSuccess: () => done(true), onFailure: () => done(false) }),
+      ),
+    )
 
 const initialize = post({
   id: 1,
@@ -92,7 +127,10 @@ const initialize = post({
 export const connectHost = (h: Handlers) =>
   Effect.scoped(
     Effect.gen(function* () {
-      const call: Call = { id: 1 }
+      // ponytail: 8 pending clicks, oldest dropped; a person clicks one at a time.
+      const call: Call = { id: 1, clicks: yield* Queue.sliding<Effect.Effect<void>>(8) }
+      yield* Effect.forkScoped(Stream.runForEach(Stream.fromQueue(call.clicks), (click) => click))
+      h.onCopyReady(copyOf(call))
       yield* Effect.forkScoped(Stream.runForEach(hostMessages, (e) => route(e, h, call)))
       yield* Effect.yieldNow
       yield* initialize
