@@ -2,7 +2,7 @@
 // list both the CLI router and the help text are generated from.
 export const COMMANDS = {
   search: 'Search the web, news, images, video, and other sources',
-  scrape: 'Fetch one URL and return clean markdown or JSON',
+  scrape: 'Fetch one URL and return clean markdown or JSON. For two or more URLs, use batch.',
   crawl: 'Follow links on a site and collect its pages',
   map: 'Find all the URLs on a domain (sitemap and links)',
   extract: 'Pull named fields out of pages using a schema',
@@ -12,7 +12,7 @@ export const COMMANDS = {
   parse: 'Turn local files (PDF/DOCX/HTML/MD/CSV/JSON/TXT) into markdown',
   media: 'Save screenshots and PDFs, or download media',
   monitor: 'Watch a URL and show what changed',
-  batch: 'Scrape many URLs at the same time',
+  batch: 'Read two or more URLs in one call, not one scrape per URL',
   doctor: 'Check your setup and tools',
   tasks: 'List the mise tasks this CLI runs',
   mcp: 'Run webular as an MCP server',
