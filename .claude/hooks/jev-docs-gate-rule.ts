@@ -70,7 +70,8 @@ const fetchProven = (r: Receipt, copy: Copy | undefined) =>
 const SITUATION_LINE = /^JEV-SITUATION:[ \t]*([A-Za-z0-9_-]{1,64})[ \t]*$/m
 export const declaredSituation = (text: string) => SITUATION_LINE.exec(text)?.[1]
 // The first action binds; every later action keeps the bound situation.
-export const situationOf = (declared: string | undefined, bound: string | undefined) => bound ?? declared
+export const situationOf = (declared: string | undefined, bound: string | undefined) =>
+  bound ?? declared
 export const SITUATION_MISSING =
   'situation_missing: the first action of this agent needs a `JEV-SITUATION: <name>` line naming its situation'
 export const receiptBorrowed = (r: Receipt, who: Who) =>

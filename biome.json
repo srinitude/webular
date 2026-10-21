@@ -7,7 +7,13 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**", "!!.claude", "!!bench/recordings", "!!bench/results"]
+    "includes": [
+      "**",
+      "!!.claude/worktrees",
+      "!!.claude/*.json",
+      "!!bench/recordings",
+      "!!bench/results"
+    ]
   },
   "formatter": {
     "enabled": true,

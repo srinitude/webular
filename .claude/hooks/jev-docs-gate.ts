@@ -36,7 +36,9 @@ const Input = Schema.fromJsonString(
       content: Schema.optional(Schema.String),
       new_string: Schema.optional(Schema.String),
       command: Schema.optional(Schema.String),
-      edits: Schema.optional(Schema.Array(Schema.Struct({ new_string: Schema.optional(Schema.String) }))),
+      edits: Schema.optional(
+        Schema.Array(Schema.Struct({ new_string: Schema.optional(Schema.String) })),
+      ),
     }),
   }),
 )
@@ -106,10 +108,12 @@ const bindSituation = (session: string, agent: string, declared: string | undefi
       Effect.orElseSucceed(() => undefined),
     )
     if (bound === undefined && declared !== undefined)
-      yield* fs.makeDirectory(dir, { recursive: true }).pipe(
-        Effect.andThen(fs.writeFileString(file, JSON.stringify({ situation: declared }))),
-        Effect.ignore,
-      )
+      yield* fs
+        .makeDirectory(dir, { recursive: true })
+        .pipe(
+          Effect.andThen(fs.writeFileString(file, JSON.stringify({ situation: declared }))),
+          Effect.ignore,
+        )
     return situationOf(declared, bound)
   }).pipe(Effect.orElseSucceed(() => declared))
 
@@ -137,14 +141,15 @@ const denyOrPass = (session: string, agent: string, path: string, reason: string
       Effect.orElseSucceed(() => 0),
     )
     if (count < MAX_DENIALS) {
-      yield* fs.makeDirectory(counts, { recursive: true }).pipe(
-        Effect.andThen(fs.writeFileString(file, String(count + 1))),
-        Effect.ignore,
-      )
+      yield* fs
+        .makeDirectory(counts, { recursive: true })
+        .pipe(Effect.andThen(fs.writeFileString(file, String(count + 1))), Effect.ignore)
       return yield* deny(reason)
     }
     const row = { session, agent, path, reason, at: yield* Clock.currentTimeMillis }
-    yield* fs.writeFileString(`${dir}/violations.jsonl`, `${JSON.stringify(row)}\n`, { flag: 'a' }).pipe(Effect.ignore)
+    yield* fs
+      .writeFileString(`${dir}/violations.jsonl`, `${JSON.stringify(row)}\n`, { flag: 'a' })
+      .pipe(Effect.ignore)
   }).pipe(Effect.catch(() => deny(reason)))
 
 const main = Effect.gen(function* () {
@@ -153,19 +158,32 @@ const main = Effect.gen(function* () {
   const raw = yield* stdio.stdin.pipe(Stream.decodeText(), Stream.mkString)
   const input = yield* Schema.decodeUnknownEffect(Input)(raw)
   const path = input.tool_input.file_path ?? ''
-  const env = Option.getOrElse(yield* Config.option(Config.String('WEBULAR_JEV_DOCS_GATE')), () => '')
+  const env = Option.getOrElse(
+    yield* Config.option(Config.String('WEBULAR_JEV_DOCS_GATE')),
+    () => '',
+  )
   const off = env === 'off' || (yield* fs.exists(`${root}/.claude/.jev-docs-gate-off`))
-  const proof = yield* fs
-    .readFileString(`${root}/.claude/jev-docs-proof.json`)
-    .pipe(Effect.flatMap(Schema.decodeUnknownEffect(ProofJson)), Effect.orElseSucceed(() => undefined))
-  const snap = yield* Schema.decodeUnknownEffect(Snap)(yield* fs.readFileString(`${root}/src/lib/jev/docs-snapshot.json`))
+  const proof = yield* fs.readFileString(`${root}/.claude/jev-docs-proof.json`).pipe(
+    Effect.flatMap(Schema.decodeUnknownEffect(ProofJson)),
+    Effect.orElseSucceed(() => undefined),
+  )
+  const snap = yield* Schema.decodeUnknownEffect(Snap)(
+    yield* fs.readFileString(`${root}/src/lib/jev/docs-snapshot.json`),
+  )
   const ti = input.tool_input
-  const text = [ti.content, ti.new_string, ti.command, ...(ti.edits ?? []).map((e) => e.new_string)].join('\n')
+  const text = [
+    ti.content,
+    ti.new_string,
+    ti.command,
+    ...(ti.edits ?? []).map((e) => e.new_string),
+  ].join('\n')
   const session = input.session_id ?? ''
   const agent = input.agent_id ?? 'main'
   const situation = yield* bindSituation(session, agent, declaredSituation(text))
-  if (!off && isJevPath(path) && situation === undefined) return yield* denyOrPass(session, agent, path, SITUATION_MISSING)
-  const receipt = situation && session ? yield* hasReceipt(session, snap.sha256, { situation, agent }) : false
+  if (!off && isJevPath(path) && situation === undefined)
+    return yield* denyOrPass(session, agent, path, SITUATION_MISSING)
+  const receipt =
+    situation && session ? yield* hasReceipt(session, snap.sha256, { situation, agent }) : false
   const reason = gate(path, proof, snap.sha256, yield* Clock.currentTimeMillis, off, receipt)
   if (reason !== undefined) yield* denyOrPass(session, agent, path, reason)
 })
