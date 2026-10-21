@@ -8,10 +8,12 @@ import { renderFor } from '../cli/render.ts'
 import { emitOpts, parseFlags } from '../core/args.ts'
 import { CliError, runMain } from '../core/effect.ts'
 import { emit } from '../core/output.ts'
-import { mcpToolIds, registerAll } from '../tools/web.ts'
 
 const serverError = (cause: unknown) =>
   new CliError({ message: `mcp: the server failed (${String(cause)})`, exitCode: 1 })
+
+// The tool table (zod schemas, HTML parsing) loads after the flags parse.
+const loadTools = Effect.tryPromise({ try: () => import('../tools/web.ts'), catch: serverError })
 
 const loadSdk = Effect.tryPromise({
   try: () =>
@@ -30,6 +32,7 @@ const sibling = (command: string) => join(import.meta.dir, `${command}${extname(
 
 const serve = Effect.gen(function* () {
   const [{ McpServer }, { StdioServerTransport }] = yield* loadSdk
+  const { registerAll } = yield* loadTools
   const server = yield* Effect.acquireRelease(
     Effect.sync(() => new McpServer({ name: 'webular', version: pkg.version })),
     (s) => Effect.tryPromise(() => s.close()).pipe(Effect.ignore),
@@ -54,6 +57,7 @@ const main = Effect.gen(function* () {
     list: { type: 'boolean', default: false },
   })
   if (!values['list']) return yield* serve
+  const { mcpToolIds } = yield* loadTools
   yield* emit(
     { count: mcpToolIds.length, tools: mcpToolIds },
     { ...emitOpts(values), render: renderFor('mcp') },

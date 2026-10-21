@@ -8,22 +8,13 @@ import { DOMParser } from 'linkedom'
 import { FetchError } from '../core/decode.ts'
 import { fetchText, type HttpStatusError } from '../core/http.ts'
 
+export { SEARCH_SOURCES, type SearchSource } from './search-source-names.ts'
+
 interface SourceHit {
   title: string
   url: string
   description: string
 }
-
-// Also the fallback order for the default web source.
-export const SEARCH_SOURCES = [
-  'web',
-  'wikipedia',
-  'hackernews',
-  'arxiv',
-  'crossref',
-  'openalex',
-] as const
-export type SearchSource = (typeof SEARCH_SOURCES)[number]
 
 export function endpoint(base: string, params: Record<string, string>): string {
   const url = new URL(base)

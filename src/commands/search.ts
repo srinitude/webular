@@ -4,7 +4,7 @@ import { Effect } from 'effect'
 import { runWorkflow } from '../cli/run.ts'
 import { emitOpts, intFlag, parseFlags, strFlag } from '../core/args.ts'
 import { CliError, runMain } from '../core/effect.ts'
-import { SEARCH_SOURCES, type SearchSource } from '../lib/sources-search.ts'
+import { SEARCH_SOURCES, type SearchSource } from '../lib/search-source-names.ts'
 
 function buildInput(values: Record<string, string | boolean | undefined>, positionals: string[]) {
   return Effect.gen(function* () {
