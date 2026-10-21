@@ -8,8 +8,16 @@ import { CANARY, type Task } from './generate-common'
 const root = `${import.meta.dir}/../../..`
 const decode = Schema.decodeUnknownSync(Schema.fromJsonString(Schema.Unknown))
 
+// The private split lives only on the machine that built it (git ignores it).
+// Row checks run on the splits present; whole-set quotas need all three.
+// Bun.file(...).size is 0 for a missing file and is known before tests are declared.
+const hasPrivate = Bun.file(`${root}/bench/tasks/private/research.jsonl`).size > 0
+const splits = hasPrivate ? ['dev', 'test', 'private'] : ['dev', 'test']
+const quotaTest = test.skipIf(!hasPrivate)
+const noPrivate = hasPrivate ? '' : ' (skipped: bench/tasks/private/research.jsonl is missing)'
+
 const load = Effect.forEach(
-  ['dev', 'test', 'private'],
+  splits,
   (s) =>
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem
@@ -25,8 +33,9 @@ const load = Effect.forEach(
 const check = (
   name: string,
   f: (sets: ReadonlyArray<ReadonlyArray<unknown>>, tasks: Task[]) => void,
+  run = test,
 ) =>
-  test(name, () =>
+  run(name, () =>
     load.pipe(
       Effect.map((sets) => f(sets, sets.flatMap((rows) => rows.slice(1)) as Task[])),
       Effect.provide(BunServices.layer),
@@ -58,18 +67,26 @@ check('ids are unique and counts stay within the plan', (_, tasks) => {
   expect(by['research.report']?.length ?? 0).toBeLessThanOrEqual(30)
 })
 
-check('domain quota: at least 8, none over 20%', (_, tasks) => {
-  const domains = Object.groupBy(tasks, (t) => t.tags.domain)
-  expect(Object.keys(domains).length).toBeGreaterThanOrEqual(8)
-  for (const d of Object.values(domains))
-    expect((d?.length ?? 0) / tasks.length).toBeLessThanOrEqual(0.2)
-})
+check(
+  `domain quota: at least 8, none over 20%${noPrivate}`,
+  (_, tasks) => {
+    const domains = Object.groupBy(tasks, (t) => t.tags.domain)
+    expect(Object.keys(domains).length).toBeGreaterThanOrEqual(8)
+    for (const d of Object.values(domains))
+      expect((d?.length ?? 0) / tasks.length).toBeLessThanOrEqual(0.2)
+  },
+  quotaTest,
+)
 
-check('language, freshness, and long-tail quotas', (_, tasks) => {
-  const langs = new Set(tasks.map((t) => t.tags.language).filter((l) => l !== 'en'))
-  expect(langs.size).toBeGreaterThanOrEqual(5)
-  expect(langs.has('zh') && langs.has('ko')).toBe(true)
-  expect(share(tasks, (t) => t.tags.language !== 'en')).toBeGreaterThanOrEqual(0.2)
-  expect(share(tasks, (t) => t.tags.fresh)).toBeGreaterThanOrEqual(0.2)
-  expect(share(tasks, (t) => t.tags.longTail)).toBeGreaterThanOrEqual(0.25)
-})
+check(
+  `language, freshness, and long-tail quotas${noPrivate}`,
+  (_, tasks) => {
+    const langs = new Set(tasks.map((t) => t.tags.language).filter((l) => l !== 'en'))
+    expect(langs.size).toBeGreaterThanOrEqual(5)
+    expect(langs.has('zh') && langs.has('ko')).toBe(true)
+    expect(share(tasks, (t) => t.tags.language !== 'en')).toBeGreaterThanOrEqual(0.2)
+    expect(share(tasks, (t) => t.tags.fresh)).toBeGreaterThanOrEqual(0.2)
+    expect(share(tasks, (t) => t.tags.longTail)).toBeGreaterThanOrEqual(0.25)
+  },
+  quotaTest,
+)

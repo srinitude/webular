@@ -38,7 +38,13 @@ const line = (label: string, have: number, need: number) =>
     Effect.as(have >= need ? [] : [label]),
   )
 
-test('cross-family quotas', () =>
+// The private split lives only on the machine that built it (git ignores it),
+// and these quotas count the whole set, so they skip on a clean checkout.
+// Bun.file(...).size is 0 for a missing file and is known before tests are declared.
+const hasPrivate = Bun.file(`${root}/bench/tasks/private/answer.jsonl`).size > 0
+const noPrivate = hasPrivate ? '' : ' (skipped: bench/tasks/private/answer.jsonl is missing)'
+
+test.skipIf(!hasPrivate)(`cross-family quotas${noPrivate}`, () =>
   Effect.runPromise(
     Effect.gen(function* () {
       const fresh = yield* rowsOf('fresh')
