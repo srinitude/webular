@@ -4,7 +4,8 @@
 
 The webular benchmark reuses a public set only where its license allows the reuse.
 When a license is unclear, we do not copy the set. We build fresh tasks instead.
-Each entry below gives the data license and the code license apart, the URL where each was read, the reuse the license allows, and a verdict.
+Each entry below lists the data license and the code license separately, with the URL where each was read.
+It also gives the reuse the license allows and a verdict.
 Every license was read on 2026-10-21.
 
 Each verdict names the reuse the license allows:
