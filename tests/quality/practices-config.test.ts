@@ -74,9 +74,11 @@ describe('best practices: package dependencies', () => {
   )
   check(
     'effect packages share one exact version',
-    Effect.map(packageJson, ({ dependencies }) => {
+    Effect.map(packageJson, ({ dependencies, devDependencies }) => {
       expect(dependencies.effect).toMatch(/^\d+\.\d+\.\d+$/)
+      // bin/webular.ts runs @effect/platform-bun after install, so it ships as a dependency.
       expect(dependencies['@effect/platform-bun']).toBe(dependencies.effect)
+      expect(Object.keys(devDependencies)).not.toContain('@effect/platform-bun')
     }),
   )
 })

@@ -88,6 +88,11 @@ description = "Write one npm package per executable target into npm/ and list th
 depends = ["compile:all"]
 run = 'bun "{{config_root}}/src/release/platform-packages.ts"'
 
+[tasks."package:manifests"]
+description = "Write the Homebrew formula and Scoop manifest into dist/bin from dist/bin/SHA256SUMS (release path, after compile:all)"
+depends = ["compile:all"]
+run = 'bun "{{config_root}}/src/release/distribution.ts"'
+
 [tasks."test:file"]
 description = "Run the named test files only (targeted check while editing)"
 depends = ["setup"]
