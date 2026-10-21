@@ -3,6 +3,7 @@
 // the exact names a Jev question must carry). Strings that another test pins
 // word for word are listed in readability-lint-exempt.json with that test.
 import { expect, test } from 'bun:test'
+import { fileURLToPath } from 'node:url'
 import { BunServices } from '@effect/platform-bun'
 import { Effect, FileSystem } from 'effect'
 import { z } from 'zod'
@@ -32,10 +33,10 @@ const matches = (source: string, pattern: RegExp, where: string): Array<Item> =>
   [...source.matchAll(pattern)].map((m): Item => ({ where, text: m[1] ?? '' }))
 
 // Usage errors: every quoted `message` in a command file.
-const commandsDir = new URL('../../../src/commands/', import.meta.url).pathname
+const commandsDir = fileURLToPath(new URL('../../../src/commands/', import.meta.url))
 // MCP command tools: the failure messages and `.describe` texts in commands.ts.
 // A `${...}` slot reads as one word.
-const pluginCommands = new URL('../src/commands.ts', import.meta.url).pathname
+const pluginCommands = fileURLToPath(new URL('../src/commands.ts', import.meta.url))
 const pluginTexts = (source: string): Array<Item> => [
   ...matches(source, /\.describe\('((?:[^'\\]|\\.)*)'\)/g, 'mcp commands.ts describe'),
   ...matches(
