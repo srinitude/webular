@@ -9,8 +9,11 @@ import { call, run } from './mcp-harness.ts'
 const toolNames = [
   'act',
   'answer',
+  'audit',
   'batch',
   'crawl',
+  'diagram',
+  'doctor',
   'extract',
   'feed',
   'map',
@@ -21,6 +24,7 @@ const toolNames = [
   'scrape',
   'search',
   'summarize',
+  'tasks',
 ]
 
 test('an agent sees one typed tool per webular outcome', () =>
