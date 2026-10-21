@@ -19,7 +19,7 @@ export const schemas = {
     source: z
       .enum(searchSources)
       .optional()
-      .describe('Where to search (default web, which falls back through the others in order)'),
+      .describe('Where to search (default web; if web fails, it tries the others in order)'),
   }),
   scrape: z.strictObject({ url, archive }),
   map: z.strictObject({ url, limit: count(10_000, 'Most URLs to return') }),
@@ -42,9 +42,7 @@ export const schemas = {
   }),
   extract: z.strictObject({
     url,
-    fields: words(
-      'Fields as name:selector pairs, comma separated, such as title:h1,price:.price',
-    ).optional(),
+    fields: words('Name:selector pairs split by commas, such as title:h1,price:.price').optional(),
     selector: words('One CSS selector, such as h1').optional(),
   }),
   answer: z.strictObject({
@@ -80,7 +78,7 @@ export const schemas = {
   }),
   act: z.strictObject({ url, screenshot: words('File path for a screenshot').optional() }),
   feed: z.strictObject({
-    url: url.describe('A feed URL, or a plain page URL whose feed webular finds'),
+    url: url.describe('A feed URL, or a page URL. webular finds its feed.'),
     limit: count(500, 'Most items to return (default 20)'),
     archive,
   }),

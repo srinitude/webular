@@ -13,9 +13,19 @@ export function printVersion(): Effect.Effect<number> {
   return print(`webular ${pkg.version}`)
 }
 
+export const GLOBAL_OPTIONS = [
+  '  --json            Print JSON (keys sorted; one line unless output is a terminal)',
+  '  --ndjson          Print one JSON line per result item',
+  '  --select <a,b>    Show only these top-level JSON fields',
+  '  -o, --output <f>  Write the output to a file',
+  '  --timeout <ms>    Time limit for each network try (default 30000)',
+  '  -h, --help        Show help',
+  '  -V, --version     Show version',
+]
+
 export function printHelp(): Effect.Effect<number> {
   const head = [
-    'webular — universal web research CLI',
+    'webular — a command line tool for web research',
     '',
     'USAGE',
     '  webular <command> [options]',
@@ -26,19 +36,13 @@ export function printHelp(): Effect.Effect<number> {
   const tail = [
     '',
     'GLOBAL OPTIONS',
-    '  --json            Emit JSON (sorted keys; one line unless stdout is a terminal)',
-    '  --ndjson          Emit one JSON line per result item',
-    '  --select <a,b>    Keep only these top-level JSON fields',
-    '  -o, --output <f>  Write output to a file',
-    '  --timeout <ms>    Network timeout per request attempt (default 30000)',
-    '  -h, --help        Show help',
-    '  -V, --version     Show version',
+    ...GLOBAL_OPTIONS,
     '',
     'EXIT CODES',
-    '  0 success · 1 failure · 2 usage error',
-    '  3 partial failure (batch) · 127 toolchain missing',
+    '  0 success · 1 failure · 2 wrong usage',
+    '  3 some items failed (batch) · 127 a tool is missing',
     '',
-    'Every command is routed through `mise run run:<command>`.',
+    'Every command runs through `mise run run:<command>`.',
   ]
   return print([...head, ...cmds, ...tail].join('\n'))
 }

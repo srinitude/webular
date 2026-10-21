@@ -2,7 +2,7 @@
   "decisions": [
     {
       "id": "research-skill-triggers-for-query",
-      "question": "Should a web research skill (search the web, scrape a page, map a site, summarize a page) handle the request in `input`?",
+      "question": "Does the request in `input` ask to search the web, scrape a page, map a site, or summarize a page?",
       "labels": ["yes", "no"],
       "scoring": { "yes": 1, "no": 0 },
       "cases": [
@@ -16,7 +16,7 @@
     },
     {
       "id": "interview-skill-triggers-for-query",
-      "question": "Does the request in `input` ask to be interviewed or asked questions one at a time before web research starts?",
+      "question": "Does the request in `input` ask to be interviewed, or asked questions one at a time, before the web search starts?",
       "labels": ["yes", "no"],
       "scoring": { "yes": 1, "no": 0 },
       "cases": [
@@ -36,7 +36,7 @@
     },
     {
       "id": "tool-result-on-topic-for-query",
-      "question": "Does the tool result in `input.result` answer or relate to the query in `input.query`?",
+      "question": "Does the text in `input.result` answer the query in `input.query`, or relate to it?",
       "labels": ["yes", "no"],
       "scoring": { "yes": 1, "no": 0 },
       "cases": [

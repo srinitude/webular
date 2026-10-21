@@ -73,7 +73,7 @@ const failure = (command: string, code: number, err: string) => {
 
 const startFailed = (command: string, e: unknown) =>
   new CommandFailed({
-    message: `webular ${command} could not start: ${String(e)}. Check that webular is installed and on PATH (or WEBULAR_BIN names it), then restart the MCP server.`,
+    message: `webular ${command} could not start: ${String(e)}. Check that webular is installed and on PATH, or that WEBULAR_BIN names it. Then restart the MCP server.`,
   })
 
 const notJson = (command: string) =>
@@ -118,7 +118,7 @@ const cursor = z
   .int()
   .min(0)
   .optional()
-  .describe('Where to resume a cut result: the cursor value it returned')
+  .describe('Where to pick up a cut result: the cursor value it returned')
 
 // One entry per command tool, sorted by id: registration order is tools/list order.
 export const commandTools = (Object.keys(schemas) as Command[]).sort().map((id) => ({

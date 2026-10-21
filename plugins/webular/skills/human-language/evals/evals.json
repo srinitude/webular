@@ -1,0 +1,29 @@
+{
+  "skill_name": "human-language",
+  "evals": [
+    {
+      "id": "rewrite-mcp-scrape-tool-description",
+      "query": "Rewrite this MCP tool description for the webular scrape tool: \"A powerful, seamless solution that leverages cutting-edge technology to unlock all of your web content needs.\" Keep the tool name and the `archive` field exact."
+    },
+    {
+      "id": "write-cli-help-for-map-command",
+      "query": "Write the CLI help text for `webular map`. It lists the pages on one site from its sitemap, then robots.txt, then link crawling. It takes --url and --limit (default 50). Make it clear for a person who reads it once."
+    },
+    {
+      "id": "write-jev-payload-question-text",
+      "query": "Write the state and question text for a Jev payload that asks whether a scraped page states the price of the 2026 model. Keep the JSON keys and the yes/no enum values exact, and put every decisive fact in the state."
+    },
+    {
+      "id": "rewrite-schema-field-description-limit",
+      "query": "Rewrite the description of the `limit` field in the search tool schema, which says \"Allows the caller to optionally specify a desired quantity of results\". The default is 5 and the most is 20."
+    },
+    {
+      "id": "report-partial-crawl-result-honestly",
+      "query": "A crawl read 40 of 120 pages before it hit the time limit. Write the status line for the user. Do not say it is done, and do not invent a cause."
+    },
+    {
+      "id": "leave-fixed-wording-and-quote-alone",
+      "query": "Tidy this error text but keep the quoted string exact: Failed to fetch \"https://example.com/a?b=1\": ECONNRESET. Add a plain next step."
+    }
+  ]
+}

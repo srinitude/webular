@@ -10,7 +10,7 @@ metadata:
 
 ## Why
 
-A web answer is only as good as its sources. This skill gets each fact from a page a tool returned, with the fewest tool calls, so the user can check every claim.
+A web answer is only as good as its sources. This skill takes each fact from a page a tool returned. It uses as few tool calls as it can. The user can check every claim.
 
 ## Pick the tool
 
@@ -35,16 +35,18 @@ For the input fields, output shape, and errors of `search`, `scrape`, `map`, `su
 
 ## Fallbacks the tools run for you
 
+The tools retry on their own in these ways.
+
 - `search` on the default `web` source falls back through Wikipedia, Hacker News, arXiv, Crossref, and OpenAlex, in that order. The result's `source` field names the one that answered. `WEBULAR_MAILTO` is optional: set it to an email address to put the Crossref and OpenAlex calls in their polite pools.
 - `feed` takes a plain page URL. It reads the feed the page links to. If the page links none, it tries `/feed` and `/rss` on the same site. The result's `feedUrl` names the feed it read.
-- `scrape` and `feed` take `archive: true`. When the live page fails, they read its closest Wayback Machine copy, and `archivedFrom` names that copy. Tell the user when a fact comes from an archived copy.
+- `scrape` and `feed` take `archive: true`. When the live page fails, they read its closest Wayback Machine copy. `archivedFrom` names that copy. Tell the user when a fact comes from an archived copy.
 - `map` reads the site's sitemap, then the `Sitemap:` lines in `robots.txt`, then crawls links when no sitemap exists.
 
-Don't call a second tool to redo a fallback the first one already ran.
+Do not call a second tool to redo a fallback the first one already ran.
 
 ## Workflow
 
-Copy this checklist and tick each step:
+Copy this checklist. Tick each step.
 
 ```text
 - [ ] 1. Write the question in one sentence, and what a good answer holds.
@@ -58,7 +60,7 @@ Copy this checklist and tick each step:
 
 - The error says what failed and what to try next. Follow it once.
 - An invalid URL fails before any request is sent. Pass the full `https://` form.
-- A page that returns no text may need a browser. Say so, and don't guess what it says.
+- A page that returns no text may need a browser. Say so. Do not guess what it says.
 
 ## Rules
 

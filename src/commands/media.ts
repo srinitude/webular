@@ -20,7 +20,7 @@ function buildInput(values: Record<string, string | boolean | undefined>) {
     const dest = values['output'] as string | undefined
     if (!dest) {
       return yield* new CliError({
-        message: 'media: -o <file> is required (the artifact destination)',
+        message: 'media: -o <file> is required. It says where to save the result.',
         exitCode: 2,
       })
     }

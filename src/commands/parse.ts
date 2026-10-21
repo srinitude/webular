@@ -10,7 +10,7 @@ const main = Effect.gen(function* () {
   const file = (values['file'] as string) ?? positionals[0]
   if (!file) {
     return yield* new CliError({
-      message: 'parse: missing --file <path> (or pass a positional path)',
+      message: 'parse: missing --file <path>. You can also put the path after the command.',
       exitCode: 2,
     })
   }

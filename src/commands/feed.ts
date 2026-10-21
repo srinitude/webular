@@ -14,7 +14,7 @@ const main = Effect.gen(function* () {
   const url = (values['url'] as string) ?? positionals[0]
   if (!url) {
     return yield* new CliError({
-      message: 'feed: missing <url> (pass --url <feed-url> or a positional)',
+      message: 'feed: missing <url>. Pass --url <feed-url> or put the URL after the command.',
       exitCode: 2,
     })
   }

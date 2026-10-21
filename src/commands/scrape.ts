@@ -11,7 +11,10 @@ const renderFlag = (render: string | undefined) =>
   render === undefined || RENDERERS.includes(render)
     ? Effect.succeed(render)
     : Effect.fail(
-        new CliError({ message: 'scrape: --render takes agent-browser, cua, or off', exitCode: 2 }),
+        new CliError({
+          message: 'scrape: --render must be agent-browser, cua, or off',
+          exitCode: 2,
+        }),
       )
 
 const main = Effect.gen(function* () {

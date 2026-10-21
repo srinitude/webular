@@ -10,13 +10,13 @@ function buildInput(values: Record<string, string | boolean | undefined>, positi
     const url = (values['url'] as string) ?? positionals[0]
     if (!url) {
       return yield* new CliError({
-        message: 'extract: missing <url> (pass --url <url> or a positional URL)',
+        message: 'extract: missing <url>. Pass --url <url> or put the URL after the command.',
         exitCode: 2,
       })
     }
     if (!values['fields'] && !values['selector']) {
       return yield* new CliError({
-        message: 'extract: pass --fields "name:selector[,...]" or --selector <css>',
+        message: 'extract: missing fields. Pass --fields "name:selector[,...]" or --selector <css>',
         exitCode: 2,
       })
     }

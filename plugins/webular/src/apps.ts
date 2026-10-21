@@ -14,13 +14,13 @@ export const appResources = {
   [SESSION_VIEW]: {
     name: 'webular session',
     description:
-      'Shows a research or answer run: where it is, every source it read or failed, and which source each citation backs.',
+      'Shows a research or answer run: its status, each source read or failed, and which source backs each citation.',
     htmlPath: built('session.html'),
   },
   [MAP_VIEW]: {
     name: 'webular site map',
     description:
-      'Shows a map or crawl run as a tree of the site, with a count on each folder and failed pages kept.',
+      'Shows a map or crawl run as a site tree. Each folder has a count. Failed pages stay in the tree.',
     htmlPath: built('map.html'),
   },
   [MONITOR_VIEW]: {

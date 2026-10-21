@@ -15,7 +15,7 @@ const main = Effect.gen(function* () {
   const url = (values['url'] as string | undefined) ?? positionals[0]
   if (!text && !url) {
     return yield* new CliError({
-      message: 'summarize: missing input (pass --text <text> or --url <url>)',
+      message: 'summarize: missing input. Pass --text <text> or --url <url>.',
       exitCode: 2,
     })
   }

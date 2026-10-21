@@ -5,7 +5,7 @@
 | [Intent](#intent) | You need to know what the user wants and why. | The request already says why. | [Outcome](#outcome) |
 | [Outcome](#outcome) | You need to know what the finished result is. | Intent is still open. | [Criteria](#criteria) |
 | [Criteria](#criteria) | You need the done-when checks. | The outcome is still open. | [Proof](#proof) |
-| [Proof](#proof) | You need to know what evidence will convince the user. | No criteria exist yet. | [Criteria](#criteria) |
+| [Proof](#proof) | You need to know what will convince the user. | No criteria exist yet. | [Criteria](#criteria) |
 | [Boundaries](#boundaries) | You need to know what must not change. | Proof is still open. | [Method](#method) |
 | [Method](#method) | Steps one to five are settled. | Any earlier step is open. | [Boundaries](#boundaries) |
 

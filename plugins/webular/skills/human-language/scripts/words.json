@@ -1,0 +1,35 @@
+{
+  "maxSentenceWords": 28,
+  "swaps": [
+    ["utilize", "use"],
+    ["utilizes", "uses"],
+    ["leverage", "use"],
+    ["leverages", "uses"],
+    ["in order to", "to"],
+    ["prior to", "before"],
+    ["subsequent to", "after"],
+    ["in the event that", "if"],
+    ["due to the fact that", "because"],
+    ["at this point in time", "now"],
+    ["a number of", "some"],
+    ["facilitate", "help"],
+    ["commence", "start"]
+  ],
+  "cut": [
+    "seamless",
+    "seamlessly",
+    "game-changing",
+    "cutting-edge",
+    "robust",
+    "powerful",
+    "effortless",
+    "effortlessly",
+    "simply",
+    "just",
+    "basically",
+    "very",
+    "really",
+    "delve",
+    "let me know if you need anything else"
+  ]
+}

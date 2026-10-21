@@ -349,6 +349,72 @@
       "grader": "bun test: tool result text over a local site"
     },
     {
+      "assertion": "${name} source rules match the pinned hash",
+      "source": "tests/readability-drift.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: sha256 of normalized rule lines"
+    },
+    {
+      "assertion": "ruleHash ignores formatting but not wording",
+      "source": "tests/readability-drift.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: hash equality and inequality"
+    },
+    {
+      "assertion": "every help, usage, MCP, schema, and Jev string follows the human-language rules",
+      "source": "tests/readability-lint.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: proseIssues over every shipped string"
+    },
+    {
+      "assertion": "the lint reads the MCP command tool messages and descriptions",
+      "source": "tests/readability-lint.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: commands.ts strings present in the lint set"
+    },
+    {
+      "assertion": "every exempt string is still in use and names the test that pins it",
+      "source": "tests/readability-lint.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: exempt list lookup"
+    },
+    {
+      "assertion": "the checker catches filler, cut words, long sentences, and missing names",
+      "source": "tests/readability-lint.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: proseIssues output equality"
+    },
+    {
+      "assertion": "a clean file passes, and links inside fences are skipped",
+      "source": "tests/markdown-check.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: checker result equality"
+    },
+    {
+      "assertion": "a broken link and a bad anchor are errors",
+      "source": "tests/markdown-check.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: checker result equality"
+    },
+    {
+      "assertion": "200 lines fail and 150 lines need review",
+      "source": "tests/markdown-check.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: checker result equality"
+    },
+    {
+      "assertion": "a required cycle and an unreachable file are errors",
+      "source": "tests/markdown-check.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: checker result equality"
+    },
+    {
+      "assertion": "plainText swaps filler and collapses space but never touches code spans",
+      "source": "tests/jev.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: plainText output equality"
+    },
+    {
       "assertion": "each Jev scorer agrees with its calibration labels",
       "source": "tests/jev.test.ts",
       "kind": "jev",
@@ -405,6 +471,72 @@
     {
       "assertion": "search-falls-back",
       "source": "skills/webular-research/evals/evals.json",
+      "kind": "jev",
+      "grader": "Jev yes/no per expected_behavior line, against the run transcript"
+    },
+    {
+      "assertion": "rewrite-mcp-scrape-tool-description",
+      "source": "skills/human-language/evals/evals.json",
+      "kind": "jev",
+      "grader": "Jev yes/no per expected_behavior line, against the run transcript"
+    },
+    {
+      "assertion": "write-cli-help-for-map-command",
+      "source": "skills/human-language/evals/evals.json",
+      "kind": "jev",
+      "grader": "Jev yes/no per expected_behavior line, against the run transcript"
+    },
+    {
+      "assertion": "write-jev-payload-question-text",
+      "source": "skills/human-language/evals/evals.json",
+      "kind": "jev",
+      "grader": "Jev yes/no per expected_behavior line, against the run transcript"
+    },
+    {
+      "assertion": "rewrite-schema-field-description-limit",
+      "source": "skills/human-language/evals/evals.json",
+      "kind": "jev",
+      "grader": "Jev yes/no per expected_behavior line, against the run transcript"
+    },
+    {
+      "assertion": "report-partial-crawl-result-honestly",
+      "source": "skills/human-language/evals/evals.json",
+      "kind": "jev",
+      "grader": "Jev yes/no per expected_behavior line, against the run transcript"
+    },
+    {
+      "assertion": "leave-fixed-wording-and-quote-alone",
+      "source": "skills/human-language/evals/evals.json",
+      "kind": "jev",
+      "grader": "Jev yes/no per expected_behavior line, against the run transcript"
+    },
+    {
+      "assertion": "scrape-output-keeps-quote-and-source-url",
+      "source": "skills/rich-and-native-markdown/evals/evals.json",
+      "kind": "jev",
+      "grader": "Jev yes/no per expected_behavior line, against the run transcript"
+    },
+    {
+      "assertion": "research-report-marks-unsourced-claims",
+      "source": "skills/rich-and-native-markdown/evals/evals.json",
+      "kind": "jev",
+      "grader": "Jev yes/no per expected_behavior line, against the run transcript"
+    },
+    {
+      "assertion": "readme-over-limit-splits-into-linked-files",
+      "source": "skills/rich-and-native-markdown/evals/evals.json",
+      "kind": "jev",
+      "grader": "Jev yes/no per expected_behavior line, against the run transcript"
+    },
+    {
+      "assertion": "prompt-text-stays-data-not-orders",
+      "source": "skills/rich-and-native-markdown/evals/evals.json",
+      "kind": "jev",
+      "grader": "Jev yes/no per expected_behavior line, against the run transcript"
+    },
+    {
+      "assertion": "skill-file-needs-linked-references",
+      "source": "skills/rich-and-native-markdown/evals/evals.json",
       "kind": "jev",
       "grader": "Jev yes/no per expected_behavior line, against the run transcript"
     }

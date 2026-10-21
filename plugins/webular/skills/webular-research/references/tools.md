@@ -15,14 +15,14 @@
 - For stdio, run `bun ./src/server.ts` from the plugin folder.
 - For HTTP, run `mise run plugin:dev` from the repo root. Portless then serves it at `https://webular-mcp.localhost/mcp`.
 - Without portless, run `bun ./src/server.ts --http`. It listens on `http://127.0.0.1:$PORT/mcp`, and the port is 3939 when `PORT` is not set.
-- Run `mise run build` once. Each tool call then starts a prebuilt command file, which starts much faster than the source files. Set `WEBULAR_DEV=1` to run the source files instead.
+- Run `mise run build` once. Each tool call then starts a prebuilt command file. It starts much faster than the source files. Set `WEBULAR_DEV=1` to run the source files instead.
 
 ## search
 
 - Input: `query` (text, required), `limit` (1 to 50, default 10), and `source` (`web`, `wikipedia`, `hackernews`, `arxiv`, `crossref`, or `openalex`, default `web`).
 - Output: a list of results, each with a title, a URL, and a snippet, plus `source`, the source that answered.
-- When a source fails or finds nothing, the default `web` source falls back through the others in that order.
-- It needs no API key. `WEBULAR_MAILTO` is optional: an email address that puts the Crossref and OpenAlex calls in their polite pools.
+- When a source fails or finds nothing, the default `web` source falls back through the others, in that order.
+- It needs no API key. `WEBULAR_MAILTO` is optional. It is an email address that puts the Crossref and OpenAlex calls in their polite pools.
 
 ## scrape
 
@@ -45,7 +45,7 @@
 
 - Input: `url` (a feed URL or a plain page URL, required), `limit` (1 to 500, default 20), and `archive` (true or false).
 - Output: the feed title and its items, each with a title, link, date, and summary, plus `feedUrl`, the feed it read.
-- A plain page URL works. It reads the feed the page links to, then tries `/feed` and `/rss` on the same site.
+- A plain page URL works. It reads the feed the page links to. Then it tries `/feed` and `/rss` on the same site.
 - With `archive: true`, a dead URL is read from its closest Wayback Machine copy, and `archivedFrom` names that copy.
 
 ## Errors

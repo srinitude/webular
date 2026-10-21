@@ -10,39 +10,43 @@ metadata:
 
 ## Why
 
-Work built on a guess gets redone. Ask about the outcome first and the method last. Then each answer shapes the next question, and the user decides what matters before anyone picks how to do it.
+Work built on a guess gets redone. Ask about the outcome first and the method last. Each answer then shapes the next question. The user decides what matters before anyone picks how to do it.
 
 ## Before the first question
 
-Read the working folder before the first question. Look at its files, notes, and git log, so you never ask what the folder already answers.
-
-Then open with one or two plain sentences: what you think the user wants (intent) and what the finished result looks like (outcome). Ask the user to correct you.
+1. Read the working folder before the first question. Look at its files, notes, and git log. Never ask what the folder already answers.
+2. Open with one or two plain sentences. Say what you think the user wants (intent) and what the finished result looks like (outcome).
+3. Ask the user to correct you.
 
 ## How to ask
 
-- Ask only the questions the request leaves open. Skip any it already answers. Ask none for a single lookup with a clear URL or query.
-- When the folder or an earlier answer settles a question, skip it and say what you took instead.
+- Ask only what the request leaves open. Skip what it already answers.
+- Ask no questions for a single lookup with a clear URL or query.
+- When the folder or an earlier answer settles a question, skip it. Say what you took instead.
 - Ask one question at a time. Wait for the answer before you write the next one.
 - Ask through the host's native question tool, or a plain chat question when none exists.
-- When the answer is a choice, offer two to four short options, and always leave room for the user's own words.
+- When the answer is a choice, offer two to four short options. Always leave room for the user's own words.
 - Write each question about the user's own subject, in plain words.
 
 ## Question order
 
 Ask in this order. Move on only when the current step is settled.
 
-1. **Intent**: what the user wants and why it matters to them.
-2. **Outcome**: what exists or changes when the work is finished.
-3. **Criteria**: the done-when checks that say the outcome is reached.
+1. **Intent**: what the user wants, and why it matters to them.
+2. **Outcome**: what exists or changes when the work is done.
+3. **Criteria**: the done-when checks that show the outcome is reached.
 4. **Proof**: what the user will look at to believe each check passed.
 5. **Boundaries**: what must not change, and what is out of scope.
-6. **Method**: how to do the work, only once steps 1 to 5 are settled.
+6. **Method**: how to do the work. Ask this only after steps 1 to 5 are settled.
 
 For sample questions and options at each step, read [the question bank](references/questions.md).
 
 ## Decisions summary
 
-End with a short list of every decision, one line each, in the order above. Mark each one as the user's answer or a default you took. Ask the user to confirm the list in one last question.
+End with a short list of every decision, one line each, in the order above.
+
+- Mark each one as the user's answer or a default you took.
+- Ask the user to confirm the list in one last question.
 
 ## Evals
 

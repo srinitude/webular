@@ -44,7 +44,7 @@ const main = Effect.gen(function* () {
   })
   const url = (values['url'] as string) ?? positionals[0]
   if (!url) {
-    const message = 'monitor: missing <url> (pass --url <url> or a positional URL)'
+    const message = 'monitor: missing <url>. Pass --url <url> or put the URL after the command.'
     return yield* new CliError({ message, exitCode: 2 })
   }
   const inputData = {

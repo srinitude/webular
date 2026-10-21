@@ -14,7 +14,7 @@ const main = Effect.gen(function* () {
   const topic = (values['topic'] as string) ?? positionals[0]
   if (!topic) {
     return yield* new CliError({
-      message: 'research: missing --topic <t> (or pass topic as a positional)',
+      message: 'research: missing --topic <t>. You can also put the topic after the command.',
       exitCode: 2,
     })
   }

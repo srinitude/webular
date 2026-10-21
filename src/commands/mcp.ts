@@ -11,7 +11,7 @@ import { emit } from '../core/output.ts'
 import { mcpToolIds, registerAll } from '../tools/web.ts'
 
 const serverError = (cause: unknown) =>
-  new CliError({ message: `mcp: server error (${String(cause)})`, exitCode: 1 })
+  new CliError({ message: `mcp: the server failed (${String(cause)})`, exitCode: 1 })
 
 const loadSdk = Effect.tryPromise({
   try: () =>

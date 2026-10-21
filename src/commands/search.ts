@@ -11,7 +11,7 @@ function buildInput(values: Record<string, string | boolean | undefined>, positi
     const query = (values['query'] as string) ?? positionals[0]
     if (!query) {
       return yield* new CliError({
-        message: 'search: missing <query> (pass --query <q> or a positional)',
+        message: 'search: missing <query>. Pass --query <q> or put the query after the command.',
         exitCode: 2,
       })
     }

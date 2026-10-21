@@ -2,7 +2,14 @@
 // scorer agrees with its labeled cases when a TypeSafe key is present.
 import { expect, test } from 'bun:test'
 import { ConfigProvider, Effect, Option, Redacted } from 'effect'
-import { decisions, scorers, typesafeKey } from '../evals/jev.ts'
+import { decisions, plainText, scorers, typesafeKey } from '../evals/jev.ts'
+
+test('plainText swaps filler and collapses space but never touches code spans', () => {
+  expect(plainText('  Utilize   the `in order to` key\n prior to   sending. ')).toBe(
+    'Use the `in order to` key before sending.',
+  )
+  for (const d of decisions) expect(plainText(d.question)).toBe(d.question)
+})
 
 const count = (label: string) => (d: (typeof decisions)[number]) =>
   d.cases.filter((c) => c.expected === label).length

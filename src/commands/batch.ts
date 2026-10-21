@@ -49,11 +49,11 @@ const main = Effect.gen(function* () {
   })
   const urls = yield* loadUrls(values, positionals)
   if (!urls || urls.length === 0) {
-    const message = 'batch: missing URLs (pass --urls <url,...> or --input <file>)'
+    const message = 'batch: missing URLs. Pass --urls <url,...> or --input <file>.'
     return yield* new CliError({ message, exitCode: 2 })
   }
   if (urls.length > 1000) {
-    return yield* new CliError({ message: 'batch: too many URLs (max 1000)', exitCode: 2 })
+    return yield* new CliError({ message: 'batch: too many URLs (the max is 1000)', exitCode: 2 })
   }
   const inputData = {
     urls,

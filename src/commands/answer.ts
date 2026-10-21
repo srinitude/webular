@@ -15,7 +15,7 @@ const main = Effect.gen(function* () {
   const query = (values['query'] as string) ?? positionals[0]
   if (!query) {
     return yield* new CliError({
-      message: 'answer: missing --query <q> (or a positional query string)',
+      message: 'answer: missing --query <q>. You can also put the question after the command.',
       exitCode: 2,
     })
   }
