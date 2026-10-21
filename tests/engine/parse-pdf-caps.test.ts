@@ -1,60 +1,70 @@
 // The PDF page cap (2,000 by default) and deadline (60 s by default) bound one
 // PDF's text extraction; WEBULAR_PDF_MAX_PAGES and WEBULAR_PDF_TIMEOUT_MS override them.
+// Either one stops early with the pages read and a truncation note; only a stop
+// before page 1 fails.
 import { expect, test } from 'bun:test'
 import { ConfigProvider, Effect } from 'effect'
 import { pdfText } from '../../src/lib/parse.ts'
+import { textPdf } from '../_support/pdf-fixture.ts'
 import { eff, failMsg } from '../_support/run.ts'
-
-// A valid PDF of `pages` empty pages, built in memory (a few KB per hundred pages).
-const blankPdf = (pages: number) => {
-  const objs = ['<< /Type /Catalog /Pages 2 0 R >>', '']
-  const kids = Array.from({ length: pages }, (_, i) => `${i + 3} 0 R`)
-  objs[1] = `<< /Type /Pages /Kids [${kids.join(' ')}] /Count ${pages} >>`
-  for (let i = 0; i < pages; i++) objs.push('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 9 9] >>')
-  let out = '%PDF-1.4\n'
-  const offsets = objs.map((o, i) => {
-    const at = out.length
-    out += `${i + 1} 0 obj\n${o}\nendobj\n`
-    return `${String(at).padStart(10, '0')} 00000 n \n`
-  })
-  const xref = out.length
-  out += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n${offsets.join('')}`
-  out += `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`
-  return new TextEncoder().encode(out)
-}
 
 const withEnv = (env: Record<string, string>) =>
   Effect.provideService(ConfigProvider.ConfigProvider, ConfigProvider.fromEnv({ env }))
 
 test(
-  'the default cap allows 2,000 pages and refuses 2,001 before extracting text',
+  'the default cap reads 2,000 pages of a 2,001-page PDF and notes the cap',
   eff(
     Effect.gen(function* () {
-      const msg = yield* failMsg(pdfText(blankPdf(2_001)).pipe(withEnv({})))
-      expect(msg).toBe('parse: PDF has 2001 pages, over the 2000-page cap (WEBULAR_PDF_MAX_PAGES)')
-      expect(yield* pdfText(blankPdf(20)).pipe(withEnv({}))).toBeString()
+      const text = yield* pdfText(textPdf(2_001)).pipe(withEnv({}))
+      expect(text).toContain('page 2000\n\n')
+      expect(text).not.toContain('page 2001')
+      expect(text).toEndWith(
+        '[truncated at page 2000 of 2001 (WEBULAR_PDF_MAX_PAGES: 2000-page cap)]',
+      )
+      expect(yield* pdfText(textPdf(20)).pipe(withEnv({}))).not.toContain('truncated')
     }),
   ),
 )
 
 test(
-  'WEBULAR_PDF_MAX_PAGES lowers the cap',
+  'WEBULAR_PDF_MAX_PAGES lowers the cap; a cap of 0 reads no page and fails',
   eff(
     Effect.gen(function* () {
-      const run = pdfText(blankPdf(3)).pipe(withEnv({ WEBULAR_PDF_MAX_PAGES: '2' }))
-      expect(yield* failMsg(run)).toMatch(/3 pages, over the 2-page cap/)
+      const text = yield* pdfText(textPdf(3)).pipe(withEnv({ WEBULAR_PDF_MAX_PAGES: '2' }))
+      expect(text).toBe(
+        'page 1\npage 2\n\n[truncated at page 2 of 3 (WEBULAR_PDF_MAX_PAGES: 2-page cap)]',
+      )
+      const none = pdfText(textPdf(3)).pipe(withEnv({ WEBULAR_PDF_MAX_PAGES: '0' }))
+      expect(yield* failMsg(none)).toBe(
+        'parse: PDF text stopped before page 1 (WEBULAR_PDF_MAX_PAGES: 0-page cap)',
+      )
     }),
   ),
 )
 
-// ponytail: todo until extraction yields between pages; pdf.js text extraction
-// never yields to timers, so the deadline cannot fire mid-document.
-test.todo(
-  'WEBULAR_PDF_TIMEOUT_MS bounds text extraction with a named error',
+test(
+  'WEBULAR_PDF_TIMEOUT_MS stops mid-document with the pages read and a note',
   eff(
     Effect.gen(function* () {
-      const run = pdfText(blankPdf(500)).pipe(withEnv({ WEBULAR_PDF_TIMEOUT_MS: '0' }))
-      expect(yield* failMsg(run)).toBe('parse: PDF text took over 0 ms (WEBULAR_PDF_TIMEOUT_MS)')
+      const text = yield* pdfText(textPdf(2_000)).pipe(withEnv({ WEBULAR_PDF_TIMEOUT_MS: '50' }))
+      const reached = /\[truncated at page (\d+) of 2000 \(WEBULAR_PDF_TIMEOUT_MS: over 50 ms\)\]$/
+      const page = Number(text.match(reached)?.[1])
+      expect(page).toBeGreaterThan(0)
+      expect(page).toBeLessThan(2_000)
+      expect(text).toStartWith('page 1\n')
+      expect(text).toContain(`page ${page}\n\n`)
+    }),
+  ),
+)
+
+test(
+  'WEBULAR_PDF_TIMEOUT_MS of 0 fires at the first yield, after page 1',
+  eff(
+    Effect.gen(function* () {
+      const text = yield* pdfText(textPdf(500)).pipe(withEnv({ WEBULAR_PDF_TIMEOUT_MS: '0' }))
+      expect(text).toBe(
+        'page 1\n\n[truncated at page 1 of 500 (WEBULAR_PDF_TIMEOUT_MS: over 0 ms)]',
+      )
     }),
   ),
 )
