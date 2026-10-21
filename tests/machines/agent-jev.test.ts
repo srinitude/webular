@@ -22,7 +22,11 @@ const observed = { type: 'NETWORK_ERROR' }
 // A recorded Jev reply; `asked` collects every request it was sent.
 const recorded = (answer: JevAnswer) => {
   const asked: JevRequest[] = []
-  const ask: JevAsk = (req) => Effect.sync(() => (asked.push(req), { next: answer }))
+  const ask: JevAsk = (req) =>
+    Effect.sync(() => {
+      asked.push(req)
+      return { next: answer }
+    })
   return { ask, asked }
 }
 

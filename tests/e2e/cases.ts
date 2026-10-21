@@ -43,6 +43,12 @@ export const CLI_CASES: CliCase[] = [
   ok('search a source', 'search', ['--query', 'bun', '--source', 'hackernews', '--limit', '2']),
   ok('search short flag', 'search', ['-q', 'bun', '--source', 'hackernews']),
   usage('search unknown source', 'search', ['bun', '--source', 'nope'], '--source'),
+  usage(
+    'search too many variants',
+    'search',
+    ['bun', '--variant', 'a', '--variant', 'b', '--variant', 'c'],
+    '--variant',
+  ),
   ok('scrape a page', 'scrape', ['--url', '{origin}/a', '--archive']),
   usage('scrape needs a url', 'scrape', [], 'url'),
   usage('scrape bad renderer', 'scrape', ['{origin}/a', '--render', 'x'], '--render'),
@@ -110,6 +116,7 @@ export const CLI_CASES: CliCase[] = [
   ok('audit', 'audit', []),
   usage('act needs a url', 'act', ['--screenshot', 'shot.png'], 'url'),
   usage('act empty url', 'act', ['--url', ''], 'url'),
+  usage('act goal needs a window', 'act', ['--goal', 'click "Save"'], 'WEBULAR_CUA_WINDOW'),
   ok('feed items', 'feed', ['--url', '{origin}/feed.xml', '--limit', '2', '--archive']),
   // Shared flags, each once: they are one parser for every command.
   { ...ok('ndjson output', 'map', ['--url', '{origin}/', '--ndjson']), json: false },

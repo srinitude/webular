@@ -15,7 +15,7 @@ import { feedSearch, githubSearch, marginalia, wikidata } from './web.ts'
 // fallback order (then Tesseract for a 'needsOcr' failure).
 export { documentToMarkdown } from './documents.ts'
 
-export const FREE_SOURCES = {
+const FREE_SOURCES = {
   wikidata,
   europepmc: europePmc,
   'ncbi-eutils': ncbiEutils,
@@ -82,7 +82,7 @@ class AllFreeSourcesFailed extends Data.TaggedError('AllFreeSourcesFailed')<{
 
 // One adapter, cut to `limit`, each hit stamped with its origin and trust.
 // Each request inside it has its own TIMEOUT_MS.
-export const freeSourceSearch = (source: FreeSource, query: string, limit: number) =>
+const freeSourceSearch = (source: FreeSource, query: string, limit: number) =>
   FREE_SOURCES[source](query, limit).pipe(
     Effect.map((hits) =>
       hits.slice(0, limit).map((h) => ({ ...h, origin: source, trust: SOURCE_TRUST[source] })),

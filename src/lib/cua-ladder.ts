@@ -20,7 +20,7 @@ export type Rung = 'ax' | 'ocr' | 'pixel'
 // One grounded step: the element the grounder picked (by stable id), the
 // text OCR looks for, the planner's normalized hint, and the verify_state
 // predicate that proves the step worked.
-export interface LadderStep {
+interface LadderStep {
   elementId?: string | undefined
   label: string
   ocrText?: string | undefined
