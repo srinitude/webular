@@ -31,7 +31,7 @@ jobs:
         with:
           experimental: true
       - name: Tag must match package.json version
-        run: test "v$(node -p "require('./package.json').version")" = "${GITHUB_REF_NAME}"
+        run: test "v$(jq -r .version package.json)" = "${GITHUB_REF_NAME}"
       # mise.toml defines tasks.test (depends on setup -> lint -> typecheck -> build).
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:

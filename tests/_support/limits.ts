@@ -12,7 +12,7 @@ export interface Violation {
   detail: string
 }
 
-const ROOTS = ['src', 'bin', 'tests']
+const ROOTS = ['src', 'bin', 'tests', 'scripts']
 const LIMITS = { file: 200, construct: 30, nesting: 3 }
 
 const CONSTRUCTS = new Set<ts.SyntaxKind>([

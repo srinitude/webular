@@ -62,7 +62,7 @@ run = "bunx tsc --noEmit"
 description = "Build: bundle every command into dist/commands (shared chunks in dist/chunks) and compile the native webular executable into dist/bin"
 depends = ["typecheck"]
 run = [
-  '''bun -e "require('node:fs').rmSync(process.argv[1], { recursive: true, force: true })" "{{config_root}}/dist"''',
+  'bun scripts/clean.ts',
   'bun build {{vars.entries}} --target=bun --minify --splitting --root="{{config_root}}/src" --outdir="{{config_root}}/dist" --chunk-naming=chunks/[name]-[hash].[ext]',
   'bun build "{{config_root}}/bin/webular.ts" --compile --minify --sourcemap --bytecode --format=esm --outfile="{{config_root}}/dist/bin/webular"',
 ]
@@ -101,7 +101,8 @@ run = "echo webular: ci complete"
 [tasks.clean]
 description = "Remove build artifacts"
 # Portable delete: `rm -rf` does not exist in the Windows task shell.
-run = '''bun -e "require('node:fs').rmSync('dist', { recursive: true, force: true })"'''
+depends = ["setup"]
+run = "bun scripts/clean.ts"
 
 # ───────────────────────── Capability commands ─────────────────────────
 # Each is a Mastra workflow entrypoint. One logical predecessor (`setup`),
@@ -230,8 +231,8 @@ hyperfine -N --warmup 1 --runs ${BENCH_RUNS:-10} --style basic \
   -n exe-version 'dist/bin/webular --version' \
   -n exe-diagram 'env BUN_BE_BUN=1 dist/bin/webular dist/commands/diagram.js --json' \
   -n exe-summarize 'env BUN_BE_BUN=1 dist/bin/webular dist/commands/summarize.js --text "One. Two." --json' \
-  -n import-feed-workflow "bun -e 'await import(\\"./src/workflows/feed.ts\\")'" \
-  -n import-mastra-workflows "bun -e 'await import(\\"@mastra/core/workflows\\")'" \
-  -n bare-bun "bun -e 0"
+  -n import-feed-workflow 'bun scripts/bench/import-feed-workflow.ts' \
+  -n import-mastra-workflows 'bun scripts/bench/import-mastra-workflows.ts' \
+  -n bare-bun 'bun scripts/bench/bare-bun.ts'
 bun tests/bench/complexity.ts
 """
