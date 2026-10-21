@@ -1,0 +1,14 @@
+{
+  "elapsed_ms": 5019,
+  "predicates": [
+    {
+      "index": 0,
+      "observed_json": "{\"matches\":1}",
+      "status": "unknown",
+      "unknown_reason": "untrusted_source"
+    }
+  ],
+  "samples": 20,
+  "stable": false,
+  "status": "unknown"
+}

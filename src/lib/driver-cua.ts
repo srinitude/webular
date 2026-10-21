@@ -6,14 +6,18 @@
 // - It drives one window the user named for webular in WEBULAR_CUA_WINDOW
 //   ("<pid>:<window_id>"). It never picks the active tab on its own.
 // - It calls only start_session, get_browser_state (bind), browser_navigate,
-//   page get_text, and end_session. It never calls bring_to_front,
+//   get_window_state (the accessibility tree, without a screenshot), page
+//   get_text (when the tree has no text), and end_session. It never calls bring_to_front,
 //   escalate_session, clipboard, keyboard, or desktop tools, and never sets
 //   delivery_mode, so focus, the clipboard, the keyboard, and sound stay
 //   with the user.
+// - act --goal (src/commands/act.ts) also calls click, verify_state, and
+//   parse_visual_regions on that same window, background delivery only.
 import * as BunServices from '@effect/platform-bun/BunServices'
-import { Config, Effect, Layer, Option, Predicate, Random, Schema } from 'effect'
+import { Config, Effect, Layer, Predicate, Random, Schema } from 'effect'
 import { runProc } from '../core/proc.ts'
 import { resolveBin } from '../core/root.ts'
+import { fieldsOf, snapshot, treeText } from './cua-tree.ts'
 import { Driver, driverError, makeDriver, type Steps } from './driver.ts'
 
 const CALL_TIMEOUT_MS = 30_000
@@ -28,27 +32,15 @@ export function cuaTarget(raw: string | undefined): CuaTarget | undefined {
   return match ? { pid: Number(match[1]), window_id: Number(match[2]) } : undefined
 }
 
-const windowSetting = Effect.orElseSucceed(
+export const windowSetting = Effect.orElseSucceed(
   Effect.gen(function* () {
     return yield* Config.withDefault(Config.String('WEBULAR_CUA_WINDOW'), '')
   }),
   () => '',
 )
 
-const Fields = Schema.Record(Schema.String, Schema.Unknown)
-const FieldsJson = Schema.fromJsonString(Fields)
 const Ids = Schema.Struct({ target_id: Schema.String, tab_id: Schema.String })
-const decodeFields = Schema.decodeUnknownEffect(FieldsJson)
-const decodeNested = Schema.decodeUnknownOption(Fields)
 const decodeIds = Schema.decodeUnknownEffect(Ids)
-
-// A tool result carries its fields at the top level or under
-// structuredContent; one decode merges both, structuredContent winning.
-const fieldsOf = (stdout: string) =>
-  Effect.map(decodeFields(stdout), (top) => ({
-    ...top,
-    ...Option.getOrElse(decodeNested(top['structuredContent']), () => ({})),
-  }))
 
 export const idsFromBind = (stdout: string) =>
   Effect.mapError(Effect.flatMap(fieldsOf(stdout), decodeIds), () =>
@@ -79,7 +71,7 @@ const textToHtml = (text: string) =>
     .map((p) => `<p>${escapeHtml(p.trim())}</p>`)
     .join('')}</main></body></html>`
 
-const call = (tool: string, args: Record<string, unknown>) =>
+export const cuaCall = (tool: string, args: Record<string, unknown>) =>
   Effect.flatMap(resolveBin('cua-driver'), (bin) =>
     bin === null
       ? Effect.fail(driverError('cua', 'cua-driver not installed'))
@@ -109,16 +101,29 @@ const open = Effect.fnUntraced(function* (url: string) {
       'set WEBULAR_CUA_WINDOW=<pid>:<window_id> to a window kept for webular',
     )
   const session = `webular-${yield* Random.nextInt}`
-  yield* call('start_session', { session })
-  const ids = yield* idsFromBind(yield* call('get_browser_state', { ...target, session }))
-  yield* call('browser_navigate', { ...ids, url, session })
+  yield* cuaCall('start_session', { session })
+  const ids = yield* idsFromBind(yield* cuaCall('get_browser_state', { ...target, session }))
+  yield* cuaCall('browser_navigate', { ...ids, url, session })
   return { ...target, session } satisfies Opened
 })
 
+// The window's accessibility tree comes first (2606.30697); page get_text
+// covers a window whose tree holds no text.
 const read = (_url: string, opened: unknown) => {
   const { pid, window_id } = opened as Opened
+  const pageText = Effect.flatMap(
+    cuaCall('page', { action: 'get_text', pid, window_id }),
+    textFromPage,
+  )
+  // treeText is already plain text, so it needs only an emptiness check.
+  const axText = Effect.flatMap(snapshot(cuaCall, { pid, window_id }, false), ({ elements }) => {
+    const text = treeText(elements)
+    return text.trim()
+      ? Effect.succeed(text)
+      : Effect.fail(driverError('cua', 'accessibility tree has no text'))
+  })
   return Effect.map(
-    Effect.flatMap(call('page', { action: 'get_text', pid, window_id }), textFromPage),
+    Effect.catch(axText, () => pageText),
     textToHtml,
   )
 }
@@ -126,7 +131,7 @@ const read = (_url: string, opened: unknown) => {
 const cuaSteps: Steps = {
   open,
   read,
-  close: (opened) => Effect.ignore(call('end_session', { session: (opened as Opened).session })),
+  close: (opened) => Effect.ignore(cuaCall('end_session', { session: (opened as Opened).session })),
 }
 
 export const CuaLive = Layer.effect(Driver, makeDriver('cua', cuaSteps))

@@ -15,8 +15,9 @@ import { eff } from '../_support/run.ts'
 // plugins/webular/src/commands.ts, the same list the plugin server serves, bring
 // it to a measured 4,385 tokens. The machine.next tool (name, description,
 // machine enum, events array, paging fields) measures 152 tokens by itself, so
-// the list measures about 4,537; 4,700 keeps a small margin over that.
-const BUDGET = { toolsList: 4700, page: estimateTokens('x'.repeat(PAGE_MAX_CHARS)), error: 80 }
+// the list measures about 4,537. The act tool's Cua goal input and description
+// bring it to a measured 4,709; 4,850 keeps a small margin over that.
+const BUDGET = { toolsList: 4850, page: estimateTokens('x'.repeat(PAGE_MAX_CHARS)), error: 80 }
 const parseJson = Schema.decodeUnknownSync(Schema.fromJsonString(Schema.Unknown))
 const parseRec = (text: string): Record<string, unknown> =>
   parseJson(text) as Record<string, unknown>

@@ -13,7 +13,7 @@
     "media": "Save a page's media to a file: download it, take a screenshot, or print a PDF. Use it when you need the file itself. Returns where the file was saved and its size.",
     "monitor": "Check a page for changes since the last check. Use it to watch a page over time. Returns whether it changed and what changed.",
     "batch": "Scrape many URLs in one call. Use it when you already have a list of pages. Returns one result per URL, each marked ok or not.",
-    "act": "Open a page in a real browser and read it, with an optional screenshot. Use it for pages that need JavaScript to show their text. Returns the page text.",
+    "act": "Open a page in a real browser and read it, with an optional screenshot. Use it for pages that need JavaScript to show their text. Returns the page text. Or pass goal instead of url to act in the Cua window named by WEBULAR_CUA_WINDOW, such as goal: click \"Press me\" until it says \"Done\". Then it returns status (done or infeasible), at (the step it could not reach), and rungs (how each step was clicked: ax, ocr, or pixel).",
     "feed": "Read an RSS or Atom feed. Use it to get the newest posts from a site. Returns each item's title, link, and date.",
     "doctor": "Check that webular can run on this computer. Use it when a webular tool fails for no clear reason. Returns each check, whether it passed, and a short note.",
     "tasks": "List the mise tasks that webular runs through. Use it to see how webular builds, checks, and runs its commands. Returns the task names and how many there are.",

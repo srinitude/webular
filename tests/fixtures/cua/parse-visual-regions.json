@@ -1,0 +1,5 @@
+{
+  "code": "not_installed",
+  "message": "the optional cua-perception extension is not installed",
+  "retryable": false
+}

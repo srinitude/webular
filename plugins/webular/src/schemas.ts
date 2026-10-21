@@ -76,7 +76,13 @@ export const schemas = {
     input: words('Path to a file with one URL per line').optional(),
     concurrency: count(32, 'Pages to fetch at once (default 4)'),
   }),
-  act: z.strictObject({ url, screenshot: words('File path for a screenshot').optional() }),
+  act: z.strictObject({
+    url: url.optional(),
+    screenshot: words('File path for a screenshot').optional(),
+    goal: words(
+      'A plain goal for the Cua window, such as: click "Press me" until it says "Done". Needs WEBULAR_CUA_WINDOW. No url needed with goal.',
+    ).optional(),
+  }),
   feed: z.strictObject({
     url: url.describe('A feed URL, or a page URL. webular finds its feed.'),
     limit: count(500, 'Most items to return (default 20)'),

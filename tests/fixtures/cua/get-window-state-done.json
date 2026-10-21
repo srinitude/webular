@@ -1,0 +1,1884 @@
+{
+  "app_name": "Google Chrome",
+  "window_title": "Press test",
+  "elements": [
+    {
+      "actions": ["AXRaise"],
+      "depth": 0,
+      "element_index": 0,
+      "frame": {
+        "h": 905,
+        "w": 1200,
+        "x": 22,
+        "y": 55
+      },
+      "label": "Press test - Google Chrome",
+      "role": "AXWindow"
+    },
+    {
+      "actions": ["AXPress", "AXShowMenu"],
+      "depth": 2,
+      "element_index": 1,
+      "enabled": true,
+      "frame": {
+        "h": 34,
+        "w": 34,
+        "x": 100,
+        "y": 101
+      },
+      "label": "Reload",
+      "parent_index": 0,
+      "role": "AXButton",
+      "selected": false
+    },
+    {
+      "actions": ["AXPress", "AXShowMenu"],
+      "depth": 2,
+      "element_index": 2,
+      "enabled": true,
+      "frame": {
+        "h": 24,
+        "w": 53,
+        "x": 148,
+        "y": 106
+      },
+      "label": "File",
+      "parent_index": 0,
+      "role": "AXPopUpButton",
+      "selected": false
+    },
+    {
+      "actions": ["AXPress", "AXShowMenu"],
+      "depth": 2,
+      "element_index": 3,
+      "enabled": true,
+      "frame": {
+        "h": 24,
+        "w": 884,
+        "x": 209,
+        "y": 106
+      },
+      "label": "Address and search bar",
+      "parent_index": 0,
+      "role": "AXTextField",
+      "selected": false,
+      "value": "/Users/kiren/webular-work/join/.claude/worktrees/cua-on-23fc458/.claude/press/press.html"
+    },
+    {
+      "actions": ["AXPress"],
+      "depth": 2,
+      "element_index": 4,
+      "enabled": true,
+      "frame": {
+        "h": 24,
+        "w": 24,
+        "x": 1101,
+        "y": 106
+      },
+      "label": "Bookmark this tab",
+      "parent_index": 0,
+      "role": "AXButton",
+      "selected": false
+    },
+    {
+      "actions": ["AXPress", "AXShowMenu"],
+      "depth": 2,
+      "element_index": 5,
+      "enabled": true,
+      "frame": {
+        "h": 34,
+        "w": 34,
+        "x": 1146,
+        "y": 101
+      },
+      "label": "You",
+      "parent_index": 0,
+      "role": "AXButton",
+      "selected": false
+    },
+    {
+      "actions": ["AXPress", "AXShowMenu"],
+      "depth": 2,
+      "element_index": 6,
+      "enabled": true,
+      "frame": {
+        "h": 34,
+        "w": 34,
+        "x": 1182,
+        "y": 101
+      },
+      "label": "Chrome",
+      "parent_index": 0,
+      "role": "AXPopUpButton",
+      "selected": false
+    },
+    {
+      "actions": ["AXShowMenu", "AXScrollToVisible"],
+      "depth": 1,
+      "element_index": 7,
+      "enabled": true,
+      "frame": {
+        "h": 818,
+        "w": 1200,
+        "x": 22,
+        "y": 142
+      },
+      "in_web_content": true,
+      "label": "Press test",
+      "parent_index": 0,
+      "role": "AXWebArea",
+      "selected": false
+    },
+    {
+      "actions": ["AXPress", "AXShowMenu", "AXScrollToVisible"],
+      "depth": 2,
+      "element_index": 8,
+      "enabled": true,
+      "frame": {
+        "h": 22,
+        "w": 48,
+        "x": 30,
+        "y": 150
+      },
+      "in_web_content": true,
+      "label": "Done",
+      "parent_index": 7,
+      "role": "AXButton",
+      "selected": false
+    },
+    {
+      "actions": ["AXPress", "AXShowMenu"],
+      "depth": 1,
+      "element_index": 9,
+      "enabled": true,
+      "frame": {
+        "h": 28,
+        "w": 28,
+        "x": 114,
+        "y": 61
+      },
+      "label": "Tab search",
+      "parent_index": 0,
+      "role": "AXPopUpButton",
+      "selected": false
+    },
+    {
+      "actions": ["AXPress", "AXShowMenu"],
+      "depth": 2,
+      "element_index": 10,
+      "enabled": true,
+      "frame": {
+        "h": 41,
+        "w": 256,
+        "x": 136,
+        "y": 55
+      },
+      "label": "Press test - Memory usage - 29.1 MB",
+      "parent_index": 0,
+      "role": "AXRadioButton",
+      "selected": true,
+      "value": "1"
+    },
+    {
+      "actions": ["AXPress"],
+      "depth": 3,
+      "element_index": 11,
+      "enabled": true,
+      "frame": {
+        "h": 28,
+        "w": 28,
+        "x": 350,
+        "y": 61
+      },
+      "label": "Close",
+      "parent_index": 10,
+      "role": "AXButton",
+      "selected": false
+    },
+    {
+      "actions": ["AXPress", "AXShowMenu"],
+      "depth": 1,
+      "element_index": 12,
+      "enabled": true,
+      "frame": {
+        "h": 41,
+        "w": 28,
+        "x": 386,
+        "y": 55
+      },
+      "label": "New Tab",
+      "parent_index": 0,
+      "role": "AXButton",
+      "selected": false
+    },
+    {
+      "actions": ["AXPress"],
+      "depth": 1,
+      "element_index": 13,
+      "enabled": true,
+      "frame": {
+        "h": 16,
+        "w": 16,
+        "x": 34,
+        "y": 67.5
+      },
+      "parent_index": 0,
+      "role": "AXButton"
+    },
+    {
+      "actions": ["AXPress", "AXZoomWindow", "AXShowMenu"],
+      "depth": 1,
+      "element_index": 14,
+      "enabled": true,
+      "frame": {
+        "h": 16,
+        "w": 16,
+        "x": 80,
+        "y": 67.5
+      },
+      "parent_index": 0,
+      "role": "AXButton"
+    },
+    {
+      "actions": ["AXPress"],
+      "depth": 1,
+      "element_index": 15,
+      "enabled": true,
+      "frame": {
+        "h": 16,
+        "w": 16,
+        "x": 57,
+        "y": 67.5
+      },
+      "parent_index": 0,
+      "role": "AXButton"
+    },
+    {
+      "actions": ["AXCancel"],
+      "depth": 0,
+      "element_index": 16,
+      "enabled": true,
+      "frame": {
+        "h": 33,
+        "w": 1512,
+        "x": 0,
+        "y": 0
+      },
+      "role": "AXMenuBar",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 1,
+      "element_index": 17,
+      "enabled": true,
+      "frame": {
+        "h": 33,
+        "w": 34,
+        "x": 10,
+        "y": 0
+      },
+      "label": "Apple",
+      "parent_index": 16,
+      "role": "AXMenuBarItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel"],
+      "depth": 2,
+      "element_index": 18,
+      "enabled": true,
+      "parent_index": 17,
+      "role": "AXMenu",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 19,
+      "enabled": true,
+      "label": "About This Mac",
+      "parent_index": 18,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 20,
+      "enabled": true,
+      "label": "System Information",
+      "parent_index": 18,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 21,
+      "enabled": true,
+      "label": "System Settings…",
+      "parent_index": 18,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 22,
+      "enabled": true,
+      "label": "App Store",
+      "parent_index": 18,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 23,
+      "enabled": true,
+      "label": "Recent Items",
+      "parent_index": 18,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel"],
+      "depth": 4,
+      "element_index": 24,
+      "enabled": true,
+      "parent_index": 23,
+      "role": "AXMenu",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 25,
+      "enabled": true,
+      "label": "ChatGPT",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 26,
+      "enabled": true,
+      "label": "Show “ChatGPT” in Finder",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 27,
+      "enabled": true,
+      "label": "cmux",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 28,
+      "enabled": true,
+      "label": "Show “cmux” in Finder",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 29,
+      "enabled": true,
+      "label": "Comet",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 30,
+      "enabled": true,
+      "label": "Show “Comet” in Finder",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 31,
+      "enabled": true,
+      "label": "ego lite",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 32,
+      "enabled": true,
+      "label": "Show “ego lite” in Finder",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 33,
+      "enabled": true,
+      "label": "Finder",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 34,
+      "enabled": true,
+      "label": "Show “Finder” in Finder",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 35,
+      "enabled": true,
+      "label": "Google Chrome",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 36,
+      "enabled": true,
+      "label": "Show “Google Chrome” in Finder",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 37,
+      "enabled": true,
+      "label": "Linear",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 38,
+      "enabled": true,
+      "label": "Show “Linear” in Finder",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 39,
+      "enabled": true,
+      "label": "Notes",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 40,
+      "enabled": true,
+      "label": "Show “Notes” in Finder",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 41,
+      "enabled": true,
+      "label": "Pen",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 42,
+      "enabled": true,
+      "label": "Show “Pen” in Finder",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 43,
+      "enabled": true,
+      "label": "WhatsApp",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 44,
+      "enabled": true,
+      "label": "Show “WhatsApp” in Finder",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 45,
+      "enabled": true,
+      "label": "design-audit",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 46,
+      "enabled": true,
+      "label": "Show “design-audit” in Finder",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 47,
+      "enabled": true,
+      "label": "design-like-im-5",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 48,
+      "enabled": true,
+      "label": "Show “design-like-im-5” in Finder",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 49,
+      "enabled": true,
+      "label": "image-description-taxonomy",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 50,
+      "enabled": true,
+      "label": "Show “image-description-taxonomy” in Finder",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 51,
+      "enabled": true,
+      "label": "image-description-taxonomy-md",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 52,
+      "enabled": true,
+      "label": "Show “image-description-taxonomy-md” in Finder",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 53,
+      "enabled": true,
+      "label": "image-description-taxonomy.md",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 54,
+      "enabled": true,
+      "label": "Show “image-description-taxonomy.md” in Finder",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 55,
+      "enabled": true,
+      "label": "image-prompt-builder",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 56,
+      "enabled": true,
+      "label": "Show “image-prompt-builder” in Finder",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 57,
+      "enabled": true,
+      "label": "image-prompt-builder.zip",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 58,
+      "enabled": true,
+      "label": "Show “image-prompt-builder.zip” in Finder",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 59,
+      "enabled": true,
+      "label": "README.md",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 60,
+      "enabled": true,
+      "label": "Show “README.md” in Finder",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 61,
+      "enabled": true,
+      "label": "SCR-20261019-iman.png",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 62,
+      "enabled": true,
+      "label": "Show “SCR-20261019-iman.png” in Finder",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 63,
+      "enabled": true,
+      "label": "SCR-20261019-imbg.png",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 64,
+      "enabled": true,
+      "label": "Show “SCR-20261019-imbg.png” in Finder",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 65,
+      "enabled": true,
+      "label": "Cua Volume",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 66,
+      "enabled": true,
+      "label": "Macintosh HD",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 67,
+      "enabled": true,
+      "label": "Macintosh HD",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 68,
+      "enabled": true,
+      "label": "Clear Menu",
+      "parent_index": 24,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 69,
+      "enabled": true,
+      "label": "Force Quit…",
+      "parent_index": 18,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 70,
+      "enabled": true,
+      "label": "Force Quit Chrome",
+      "parent_index": 18,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 71,
+      "enabled": true,
+      "label": "Sleep",
+      "parent_index": 18,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 72,
+      "enabled": true,
+      "label": "Restart…",
+      "parent_index": 18,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 73,
+      "enabled": true,
+      "label": "Restart",
+      "parent_index": 18,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 74,
+      "enabled": true,
+      "label": "Shut Down…",
+      "parent_index": 18,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 75,
+      "enabled": true,
+      "label": "Shut Down",
+      "parent_index": 18,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 76,
+      "enabled": true,
+      "label": "Lock Screen",
+      "parent_index": 18,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 77,
+      "enabled": true,
+      "label": "Log Out Kiren Srinivasan…",
+      "parent_index": 18,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 78,
+      "enabled": true,
+      "label": "Log Out Kiren Srinivasan",
+      "parent_index": 18,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 1,
+      "element_index": 79,
+      "enabled": true,
+      "frame": {
+        "h": 33,
+        "w": 71,
+        "x": 44,
+        "y": 0
+      },
+      "label": "Chrome",
+      "parent_index": 16,
+      "role": "AXMenuBarItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel"],
+      "depth": 2,
+      "element_index": 80,
+      "enabled": true,
+      "parent_index": 79,
+      "role": "AXMenu",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 81,
+      "enabled": true,
+      "label": "About Google Chrome",
+      "parent_index": 80,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 82,
+      "enabled": true,
+      "label": "Settings…",
+      "parent_index": 80,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 83,
+      "enabled": true,
+      "label": "Delete Browsing Data…",
+      "parent_index": 80,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 84,
+      "enabled": true,
+      "label": "Import Bookmarks and Settings…",
+      "parent_index": 80,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 85,
+      "enabled": true,
+      "label": "Services",
+      "parent_index": 80,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel"],
+      "depth": 4,
+      "element_index": 86,
+      "enabled": true,
+      "parent_index": 85,
+      "role": "AXMenu",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 87,
+      "enabled": true,
+      "label": "Activity Monitor",
+      "parent_index": 86,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 88,
+      "enabled": true,
+      "label": "Allocations & Leaks",
+      "parent_index": 86,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 89,
+      "enabled": true,
+      "label": "File Activity",
+      "parent_index": 86,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 90,
+      "enabled": true,
+      "label": "System Trace",
+      "parent_index": 86,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 91,
+      "enabled": true,
+      "label": "Time Profile Active Application",
+      "parent_index": 86,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 92,
+      "enabled": true,
+      "label": "Time Profile App Under Mouse",
+      "parent_index": 86,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 93,
+      "enabled": true,
+      "label": "Time Profile Entire System",
+      "parent_index": 86,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 94,
+      "enabled": true,
+      "label": "Toggle Instruments Recording",
+      "parent_index": 86,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 95,
+      "enabled": true,
+      "label": "Services Settings…",
+      "parent_index": 86,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 96,
+      "enabled": true,
+      "label": "Hide Google Chrome",
+      "parent_index": 80,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 97,
+      "enabled": true,
+      "label": "Hide Others",
+      "parent_index": 80,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 98,
+      "enabled": true,
+      "label": "Warn Before Quitting (⌘Q)",
+      "parent_index": 80,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 99,
+      "enabled": true,
+      "label": "Quit Google Chrome",
+      "parent_index": 80,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 1,
+      "element_index": 100,
+      "enabled": true,
+      "frame": {
+        "h": 33,
+        "w": 42,
+        "x": 115,
+        "y": 0
+      },
+      "label": "File",
+      "parent_index": 16,
+      "role": "AXMenuBarItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel"],
+      "depth": 2,
+      "element_index": 101,
+      "enabled": true,
+      "parent_index": 100,
+      "role": "AXMenu",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 102,
+      "enabled": true,
+      "label": "New Tab",
+      "parent_index": 101,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 103,
+      "enabled": true,
+      "label": "New Window",
+      "parent_index": 101,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 104,
+      "enabled": true,
+      "label": "New Incognito Window",
+      "parent_index": 101,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 105,
+      "enabled": true,
+      "label": "Open File…",
+      "parent_index": 101,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 106,
+      "enabled": true,
+      "label": "Open Location…",
+      "parent_index": 101,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 107,
+      "enabled": true,
+      "label": "Close All",
+      "parent_index": 101,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 108,
+      "enabled": true,
+      "label": "Share",
+      "parent_index": 101,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel"],
+      "depth": 4,
+      "element_index": 109,
+      "enabled": true,
+      "parent_index": 108,
+      "role": "AXMenu",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 110,
+      "enabled": true,
+      "label": "Email Link",
+      "parent_index": 109,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 111,
+      "enabled": true,
+      "label": "AirDrop",
+      "parent_index": 109,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 112,
+      "enabled": true,
+      "label": "Messages",
+      "parent_index": 109,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 113,
+      "enabled": true,
+      "label": "Notes",
+      "parent_index": 109,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 114,
+      "enabled": true,
+      "label": "Open in News",
+      "parent_index": 109,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 115,
+      "enabled": true,
+      "label": "Freeform",
+      "parent_index": 109,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 116,
+      "enabled": true,
+      "label": "Journal",
+      "parent_index": 109,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 117,
+      "enabled": true,
+      "label": "Reminders",
+      "parent_index": 109,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 118,
+      "enabled": true,
+      "label": "Shortcuts",
+      "parent_index": 109,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 119,
+      "enabled": true,
+      "label": "More…",
+      "parent_index": 109,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 1,
+      "element_index": 120,
+      "enabled": true,
+      "frame": {
+        "h": 33,
+        "w": 44,
+        "x": 157,
+        "y": 0
+      },
+      "label": "Edit",
+      "parent_index": 16,
+      "role": "AXMenuBarItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel"],
+      "depth": 2,
+      "element_index": 121,
+      "enabled": true,
+      "parent_index": 120,
+      "role": "AXMenu",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 122,
+      "enabled": true,
+      "label": "Find",
+      "parent_index": 121,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel"],
+      "depth": 4,
+      "element_index": 123,
+      "enabled": true,
+      "parent_index": 122,
+      "role": "AXMenu",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 124,
+      "enabled": true,
+      "label": "Search the Web…",
+      "parent_index": 123,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 125,
+      "enabled": true,
+      "label": "Writing Tools",
+      "parent_index": 121,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel"],
+      "depth": 4,
+      "element_index": 126,
+      "enabled": true,
+      "parent_index": 125,
+      "role": "AXMenu",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 127,
+      "enabled": true,
+      "label": "Spelling and Grammar",
+      "parent_index": 121,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel"],
+      "depth": 4,
+      "element_index": 128,
+      "enabled": true,
+      "parent_index": 127,
+      "role": "AXMenu",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 5,
+      "element_index": 129,
+      "enabled": true,
+      "label": "Show Spelling and Grammar",
+      "parent_index": 128,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 130,
+      "enabled": true,
+      "label": "Substitutions",
+      "parent_index": 121,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel"],
+      "depth": 4,
+      "element_index": 131,
+      "enabled": true,
+      "parent_index": 130,
+      "role": "AXMenu",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 132,
+      "enabled": true,
+      "label": "Transformations",
+      "parent_index": 121,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel"],
+      "depth": 4,
+      "element_index": 133,
+      "enabled": true,
+      "parent_index": 132,
+      "role": "AXMenu",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 134,
+      "enabled": true,
+      "label": "Speech",
+      "parent_index": 121,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel"],
+      "depth": 4,
+      "element_index": 135,
+      "enabled": true,
+      "parent_index": 134,
+      "role": "AXMenu",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 136,
+      "enabled": true,
+      "label": "AutoFill",
+      "parent_index": 121,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel"],
+      "depth": 4,
+      "element_index": 137,
+      "enabled": true,
+      "parent_index": 136,
+      "role": "AXMenu",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 138,
+      "enabled": true,
+      "label": "Emoji & Symbols",
+      "parent_index": 121,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 1,
+      "element_index": 139,
+      "enabled": true,
+      "frame": {
+        "h": 33,
+        "w": 50,
+        "x": 201,
+        "y": 0
+      },
+      "label": "View",
+      "parent_index": 16,
+      "role": "AXMenuBarItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel"],
+      "depth": 2,
+      "element_index": 140,
+      "enabled": true,
+      "parent_index": 139,
+      "role": "AXMenu",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 141,
+      "enabled": true,
+      "label": "Developer",
+      "parent_index": 140,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel"],
+      "depth": 4,
+      "element_index": 142,
+      "enabled": true,
+      "parent_index": 141,
+      "role": "AXMenu",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 1,
+      "element_index": 143,
+      "enabled": true,
+      "frame": {
+        "h": 33,
+        "w": 64,
+        "x": 251,
+        "y": 0
+      },
+      "label": "History",
+      "parent_index": 16,
+      "role": "AXMenuBarItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel"],
+      "depth": 2,
+      "element_index": 144,
+      "enabled": true,
+      "parent_index": 143,
+      "role": "AXMenu",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 145,
+      "enabled": true,
+      "label": "Press test",
+      "parent_index": 144,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 146,
+      "enabled": true,
+      "label": "Show Full History",
+      "parent_index": 144,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 1,
+      "element_index": 147,
+      "enabled": true,
+      "frame": {
+        "h": 33,
+        "w": 88,
+        "x": 315,
+        "y": 0
+      },
+      "label": "Bookmarks",
+      "parent_index": 16,
+      "role": "AXMenuBarItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel"],
+      "depth": 2,
+      "element_index": 148,
+      "enabled": true,
+      "parent_index": 147,
+      "role": "AXMenu",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 149,
+      "enabled": true,
+      "label": "Open Bookmarks Manager",
+      "parent_index": 148,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 1,
+      "element_index": 150,
+      "enabled": true,
+      "frame": {
+        "h": 33,
+        "w": 66,
+        "x": 403,
+        "y": 0
+      },
+      "label": "Profiles",
+      "parent_index": 16,
+      "role": "AXMenuBarItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel"],
+      "depth": 2,
+      "element_index": 151,
+      "enabled": true,
+      "parent_index": 150,
+      "role": "AXMenu",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 152,
+      "enabled": true,
+      "label": "Your Chrome",
+      "parent_index": 151,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 153,
+      "enabled": true,
+      "label": "Edit…",
+      "parent_index": 151,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 154,
+      "enabled": true,
+      "label": "Add Profile…",
+      "parent_index": 151,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 1,
+      "element_index": 155,
+      "enabled": true,
+      "frame": {
+        "h": 33,
+        "w": 42,
+        "x": 469,
+        "y": 0
+      },
+      "label": "Tab",
+      "parent_index": 16,
+      "role": "AXMenuBarItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel"],
+      "depth": 2,
+      "element_index": 156,
+      "enabled": true,
+      "parent_index": 155,
+      "role": "AXMenu",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 157,
+      "enabled": true,
+      "label": "Press test",
+      "parent_index": 156,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 1,
+      "element_index": 158,
+      "enabled": true,
+      "frame": {
+        "h": 33,
+        "w": 69,
+        "x": 511,
+        "y": 0
+      },
+      "label": "Window",
+      "parent_index": 16,
+      "role": "AXMenuBarItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel"],
+      "depth": 2,
+      "element_index": 159,
+      "enabled": true,
+      "parent_index": 158,
+      "role": "AXMenu",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 160,
+      "enabled": true,
+      "label": "Minimize All",
+      "parent_index": 159,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 161,
+      "enabled": true,
+      "label": "Zoom All",
+      "parent_index": 159,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 162,
+      "enabled": true,
+      "label": "Move & Resize",
+      "parent_index": 159,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel"],
+      "depth": 4,
+      "element_index": 163,
+      "enabled": true,
+      "parent_index": 162,
+      "role": "AXMenu",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 164,
+      "enabled": true,
+      "label": "Downloads",
+      "parent_index": 159,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 165,
+      "enabled": true,
+      "label": "Extensions",
+      "parent_index": 159,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 166,
+      "enabled": true,
+      "label": "Task Manager",
+      "parent_index": 159,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 167,
+      "enabled": true,
+      "label": "Bring All to Front",
+      "parent_index": 159,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 168,
+      "enabled": true,
+      "label": "Arrange in Front",
+      "parent_index": 159,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 169,
+      "enabled": true,
+      "label": "Press test",
+      "parent_index": 159,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 1,
+      "element_index": 170,
+      "enabled": true,
+      "frame": {
+        "h": 33,
+        "w": 48,
+        "x": 580,
+        "y": 0
+      },
+      "label": "Help",
+      "parent_index": 16,
+      "role": "AXMenuBarItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel"],
+      "depth": 2,
+      "element_index": 171,
+      "enabled": true,
+      "parent_index": 170,
+      "role": "AXMenu",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 172,
+      "enabled": true,
+      "label": "Report an Issue…",
+      "parent_index": 171,
+      "role": "AXMenuItem",
+      "selected": false
+    },
+    {
+      "actions": ["AXCancel", "AXPress", "AXPick"],
+      "depth": 3,
+      "element_index": 173,
+      "enabled": true,
+      "label": "Google Chrome Help",
+      "parent_index": 171,
+      "role": "AXMenuItem",
+      "selected": false
+    }
+  ]
+}
