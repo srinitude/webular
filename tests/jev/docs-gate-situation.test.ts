@@ -108,3 +108,26 @@ test(
     ),
   90_000,
 ) // five hook processes; bun startup alone can take seconds under load
+
+test(
+  'hook: after 3 denials an agent passes, and each pass leaves a violation row',
+  () =>
+    Effect.runPromise(
+      Effect.scoped(
+        Effect.gen(function* () {
+          const fs = yield* FileSystem.FileSystem
+          const home = yield* fs.makeTempDirectoryScoped({ prefix: 'jev-denials-' })
+          for (const _ of [1, 2, 3])
+            expect(yield* hook(home, { file_path }, 'a3')).toContain('deny')
+          expect(yield* hook(home, { file_path }, 'a3')).toBe('')
+          const rows = yield* fs.readFileString(
+            `${home}/.local/state/webular-jev-docs-gate/violations.jsonl`,
+          )
+          expect(rows.trim().split('\n')).toHaveLength(1)
+          expect(rows).toContain('"agent":"a3"')
+          expect(yield* hook(home, { file_path }, 'a4')).toContain('deny')
+        }),
+      ).pipe(Effect.provide(BunServices.layer)),
+    ),
+  90_000,
+) // five hook processes, as above

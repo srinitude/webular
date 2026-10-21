@@ -7,6 +7,8 @@
 // One receipt per situation: an agent names its situation on its first action with a
 // `JEV-SITUATION: <name>` line, bound per agent; a Jev edit without one is refused as
 // situation_missing, and a receipt from another situation or agent as borrowed_fetch.
+// After 3 denials an agent's edits pass, each one logged as a row in
+// ~/.local/state/webular-jev-docs-gate/violations.jsonl, so no agent gets stuck.
 import { BunRuntime, BunServices } from '@effect/platform-bun'
 import { Clock, Config, Console, Effect, FileSystem, Option, Schema, Stdio, Stream } from 'effect'
 import {
@@ -24,6 +26,7 @@ import {
 
 const root = `${import.meta.dir}/../..`
 const STATE = '.local/state/decision-models-first'
+const MAX_DENIALS = 3
 const Input = Schema.fromJsonString(
   Schema.Struct({
     session_id: Schema.optional(Schema.String),
@@ -121,6 +124,29 @@ const deny = (reason: string) =>
     }),
   )
 
+// Denies and counts, per session and agent. Past MAX_DENIALS the edit passes and appends
+// a violation row instead. A failed count read or write still denies.
+const denyOrPass = (session: string, agent: string, path: string, reason: string) =>
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem
+    const dir = `${yield* Config.String('HOME')}/.local/state/webular-jev-docs-gate`
+    const counts = `${dir}/denials/${safeName(session)}`
+    const file = `${counts}/${safeName(agent)}`
+    const count = yield* fs.readFileString(file).pipe(
+      Effect.map((s) => Number(s) || 0),
+      Effect.orElseSucceed(() => 0),
+    )
+    if (count < MAX_DENIALS) {
+      yield* fs.makeDirectory(counts, { recursive: true }).pipe(
+        Effect.andThen(fs.writeFileString(file, String(count + 1))),
+        Effect.ignore,
+      )
+      return yield* deny(reason)
+    }
+    const row = { session, agent, path, reason, at: yield* Clock.currentTimeMillis }
+    yield* fs.writeFileString(`${dir}/violations.jsonl`, `${JSON.stringify(row)}\n`, { flag: 'a' }).pipe(Effect.ignore)
+  }).pipe(Effect.catch(() => deny(reason)))
+
 const main = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem
   const stdio = yield* Stdio.Stdio
@@ -138,10 +164,10 @@ const main = Effect.gen(function* () {
   const session = input.session_id ?? ''
   const agent = input.agent_id ?? 'main'
   const situation = yield* bindSituation(session, agent, declaredSituation(text))
-  if (!off && isJevPath(path) && situation === undefined) return yield* deny(SITUATION_MISSING)
+  if (!off && isJevPath(path) && situation === undefined) return yield* denyOrPass(session, agent, path, SITUATION_MISSING)
   const receipt = situation && session ? yield* hasReceipt(session, snap.sha256, { situation, agent }) : false
   const reason = gate(path, proof, snap.sha256, yield* Clock.currentTimeMillis, off, receipt)
-  if (reason !== undefined) yield* deny(reason)
+  if (reason !== undefined) yield* denyOrPass(session, agent, path, reason)
 })
 
 BunRuntime.runMain(main.pipe(Effect.ignore, Effect.provide(BunServices.layer)))
