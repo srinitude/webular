@@ -14,7 +14,7 @@ export const paging = {
 }
 
 export const machineSchema = z.object({
-  machine: z.enum(['cliDispatch', 'commandLifecycle', 'fetch']),
+  machine: z.enum(['cliDispatch', 'commandLifecycle', 'fetch', 'mcpServe', 'scrapeFallback']),
   events: z.array(z.string()).max(64).default([]),
   ...paging,
 })
@@ -22,24 +22,26 @@ export const machineSchema = z.object({
 const lazy = <T>(load: () => Promise<T>) =>
   Effect.tryPromise({ try: load, catch: (e) => new ToolArgsError({ message: errMsg(e) }) })
 
-const loadMachines = Effect.all(
-  [
-    lazy(() => import('../machines/agent.ts')),
-    lazy(() => import('../machines/cli-dispatch.ts')),
-    lazy(() => import('../machines/command-lifecycle.ts')),
-    lazy(() => import('../machines/fetch.ts')),
-  ],
-  { concurrency: 4 },
-)
+// One lazy loader per machine, so a replay imports only the machine it names.
+const machines = {
+  cliDispatch: lazy(() => import('../machines/cli-dispatch.ts')).pipe(
+    Effect.map((m) => m.cliDispatchMachine),
+  ),
+  commandLifecycle: lazy(() => import('../machines/command-lifecycle.ts')).pipe(
+    Effect.map((m) => m.commandLifecycleMachine),
+  ),
+  fetch: lazy(() => import('../machines/fetch.ts')).pipe(Effect.map((m) => m.fetchMachine)),
+  mcpServe: lazy(() => import('../machines/mcp-serve.ts')).pipe(
+    Effect.map((m) => m.mcpServeMachine),
+  ),
+  scrapeFallback: lazy(() => import('../machines/scrape-fallback.ts')).pipe(
+    Effect.map((m) => m.scrapeFallbackMachine),
+  ),
+}
 
 export const machineState = (name: z.infer<typeof machineSchema>['machine'], events: string[]) =>
-  loadMachines.pipe(
-    Effect.map(([agent, cli, lifecycle, fetch]) => {
-      const machine = {
-        cliDispatch: cli.cliDispatchMachine,
-        commandLifecycle: lifecycle.commandLifecycleMachine,
-        fetch: fetch.fetchMachine,
-      }[name]
+  Effect.all([lazy(() => import('../machines/agent.ts')), machines[name]]).pipe(
+    Effect.map(([agent, machine]) => {
       const snapshot = agent.replay(
         machine,
         events.map((type) => ({ type })),
