@@ -9,10 +9,9 @@
 // JSON, narrowed by `select`, paged under PAGE_MAX_CHARS with an opaque
 // `cursor`; errors are one short line.
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { Data, Effect } from 'effect'
+import { Effect } from 'effect'
 import type { ChildProcessSpawner } from 'effect/process'
 import { z } from 'zod'
-import { appResources } from '../../plugins/webular/src/apps.ts'
 import {
   CommandFailed,
   commandTools,
@@ -22,8 +21,8 @@ import {
 import { fetchText } from '../core/http.ts'
 import { errMsg, pageText, selectFields, shortError, stableJson } from '../core/output.ts'
 import { extractLinks, htmlToArticle, htmlToMarkdown } from '../lib/html.ts'
-
-class ToolArgsError extends Data.TaggedError('ToolArgsError')<{ readonly message: string }> {}
+import { machineSchema, machineState, paging, ToolArgsError } from './web-machine.ts'
+import { registerApps } from './web-register.ts'
 
 interface McpToolDef {
   id: string
@@ -32,10 +31,6 @@ interface McpToolDef {
   run(args: Record<string, unknown>): Effect.Effect<unknown, unknown>
 }
 
-const paging = {
-  cursor: z.string().optional().describe('nextCursor from the previous page'),
-  select: z.array(z.string()).optional().describe('Top-level result select to keep'),
-}
 const pagingSchema = z.object(paging)
 const fetchSchema = z.object({
   url: z.url(),
@@ -50,47 +45,6 @@ const linksSchema = z.object({
   limit: z.number().int().min(1).max(1000).optional(),
   ...paging,
 })
-const machineSchema = z.object({
-  machine: z.enum(['cliDispatch', 'commandLifecycle', 'fetch']),
-  events: z.array(z.string()).max(64).default([]),
-  ...paging,
-})
-
-const lazy = <T>(load: () => Promise<T>) =>
-  Effect.tryPromise({ try: load, catch: (e) => new ToolArgsError({ message: errMsg(e) }) })
-
-// The Stately agent's view of a machine after replaying events: its state, the
-// events it allows next, and whether it is done. Machines load lazily so
-// `mcp --list` stays fast.
-const machineState = (name: z.infer<typeof machineSchema>['machine'], events: string[]) =>
-  Effect.all(
-    [
-      lazy(() => import('../machines/agent.ts')),
-      lazy(() => import('../machines/cli-dispatch.ts')),
-      lazy(() => import('../machines/command-lifecycle.ts')),
-      lazy(() => import('../machines/fetch.ts')),
-    ],
-    { concurrency: 4 },
-  ).pipe(
-    Effect.map(([agent, cli, lifecycle, fetch]) => {
-      const machine = {
-        cliDispatch: cli.cliDispatchMachine,
-        commandLifecycle: lifecycle.commandLifecycleMachine,
-        fetch: fetch.fetchMachine,
-      }[name]
-      const snapshot = agent.replay(
-        machine,
-        events.map((type) => ({ type })),
-      )
-      return {
-        state: snapshot.value,
-        next: agent.allowedEvents(snapshot),
-        done: snapshot.status === 'done',
-        tags: [...snapshot.tags],
-      }
-    }),
-  )
-
 const parseArgs = <T>(schema: z.ZodType<T>, args: Record<string, unknown>) =>
   Effect.try({
     try: () => schema.parse(args),
@@ -170,20 +124,6 @@ function execute(tool: McpToolDef, args: Record<string, unknown>): Effect.Effect
   }).pipe(Effect.catch((err) => Effect.succeed(failure(shortError(err)))))
 }
 
-class AppNotBuilt extends Data.TaggedError('AppNotBuilt')<{ readonly message: string }> {}
-
-// The MCP Apps media type, as the plugin's Mastra server lists it.
-const APP_MIME = 'text/html;profile=mcp-app'
-
-// Each view reads its built page on demand, from the plugin's own resource list.
-// ponytail: htmlPath is a checkout path; embed the pages when the compiled
-// executable needs to serve views.
-const readApp = (uri: string, htmlPath: string) =>
-  Effect.tryPromise({
-    try: () => Bun.file(htmlPath).text(),
-    catch: () => new AppNotBuilt({ message: `${uri} is not built. Run \`mise run plugin:ui\`.` }),
-  }).pipe(Effect.map((text) => ({ contents: [{ uri, mimeType: APP_MIME, text }] })))
-
 // Commands with no MCP tool, each with the reason. Every other command in
 // src/cli/commands.ts is a tool on both MCP servers.
 export const NOT_ON_MCP = {
@@ -209,16 +149,12 @@ const runTool = (id: string, args: Record<string, unknown>, entryOf?: EntryOf) =
 // context once, and each MCP Promise handler runs its tool Effect with it.
 // The plugin's command tools and MCP App views register too, so both servers
 // list the same tools and apps. entryOf names the command file a tool starts.
-export const registerAll = Effect.fn('registerAll')(function* (
-  server: McpServer,
-  entryOf?: EntryOf,
-) {
-  const runWith = Effect.runPromiseWith(
-    yield* Effect.context<ChildProcessSpawner.ChildProcessSpawner>(),
-  )
-  // Registration order is tools/list order, so register every tool sorted by id
-  // (machine.next sorts among the command names, web.* after them).
-  const registrations = [
+type RunWith = Parameters<typeof registerApps>[1]
+
+// Registration order is tools/list order, so register every tool sorted by id
+// (machine.next sorts among the command names, web.* after them).
+const toolRegistrations = (server: McpServer, runWith: RunWith, entryOf?: EntryOf) =>
+  [
     ...commandTools.map(
       ({ id, outputSchema: _, ...config }) =>
         [
@@ -242,13 +178,14 @@ export const registerAll = Effect.fn('registerAll')(function* (
         ] as const,
     ),
   ].sort(([x], [y]) => (x < y ? -1 : 1))
-  for (const [, register] of registrations) register()
-  for (const [uri, app] of Object.entries(appResources)) {
-    server.registerResource(
-      app.name,
-      uri,
-      { description: app.description, mimeType: APP_MIME },
-      () => runWith(readApp(uri, app.htmlPath)),
-    )
-  }
+
+export const registerAll = Effect.fn('registerAll')(function* (
+  server: McpServer,
+  entryOf?: EntryOf,
+) {
+  const runWith = Effect.runPromiseWith(
+    yield* Effect.context<ChildProcessSpawner.ChildProcessSpawner>(),
+  )
+  for (const [, register] of toolRegistrations(server, runWith, entryOf)) register()
+  registerApps(server, runWith)
 })
