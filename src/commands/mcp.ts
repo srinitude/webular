@@ -17,7 +17,9 @@ async function startServer(): Promise<void> {
   await server.connect(new StdioServerTransport())
 }
 
-async function main(): Promise<number> {
+// Returns an exit code, or undefined while the server runs: the stdio
+// transport keeps the process alive until the client closes stdin.
+async function main(): Promise<number | undefined> {
   const { values } = parseFlags(Bun.argv.slice(2), {
     list: { type: 'boolean', default: false },
   })
@@ -28,11 +30,12 @@ async function main(): Promise<number> {
   }
   try {
     await startServer()
-    return 0
+    return undefined
   } catch (err) {
     logErr(`mcp: server error (${String(err)})`)
     return 1
   }
 }
 
-process.exit(await main())
+const code = await main()
+if (code !== undefined) process.exit(code)

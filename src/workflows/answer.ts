@@ -2,7 +2,7 @@
 // Mastra non-model workflow over FOSS tools (keyless search + readability + summarizer).
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { z } from 'zod'
-import { webSearch } from '../lib/search.ts'
+import { searchWithSource } from '../lib/search-chain.ts'
 import { fetchErrorsSchema, fetchSources } from '../lib/sources.ts'
 import { summarizeText } from '../lib/summarize.ts'
 
@@ -34,7 +34,7 @@ const searchStep = createStep({
   inputSchema: answerInput,
   outputSchema: hitsSchema,
   execute: async ({ inputData }) => {
-    const found = await webSearch(inputData.query, inputData.sources)
+    const { results: found } = await searchWithSource('web', inputData.query, inputData.sources)
     const hits = found.map((h) => ({ title: h.title, url: h.url }))
     return {
       query: inputData.query,

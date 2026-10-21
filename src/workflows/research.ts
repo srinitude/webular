@@ -2,7 +2,7 @@
 // Composed as a Mastra non-model workflow over FOSS tools.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { z } from 'zod'
-import { webSearch } from '../lib/search.ts'
+import { searchWithSource } from '../lib/search-chain.ts'
 import { fetchErrorsSchema, fetchSources, type SourceEntry } from '../lib/sources.ts'
 import { summarizeText } from '../lib/summarize.ts'
 
@@ -41,7 +41,7 @@ const searchStep = createStep({
   inputSchema: researchInput,
   outputSchema: foundSchema,
   execute: async ({ inputData }) => {
-    const found = await webSearch(inputData.topic, inputData.depth)
+    const { results: found } = await searchWithSource('web', inputData.topic, inputData.depth)
     return {
       topic: inputData.topic,
       sentences: inputData.sentences,

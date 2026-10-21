@@ -275,9 +275,14 @@ run = 'bunx portless webular-mcp bun "{{config_root}}/plugins/webular/src/server
 
 # ───────────────────────── Default + benchmark ─────────────────────────
 
+[tasks.e2e]
+description = "End-to-end: every command, flag, MCP tool, plugin tool, skill, and the executable, from the user's side, on a local fixture server"
+depends = ["build"]
+run = "bun tests/e2e/run.ts"
+
 [tasks.default]
-description = "Default path: a bare `mise run` runs the repo CI spine and the plugin chain"
-depends = ["ci", "plugin:ci"]
+description = "Default path: a bare `mise run` runs the repo CI spine, the plugin chain, then the end-to-end run"
+depends = ["ci", "plugin:ci", "e2e"]
 run = "echo webular: default complete"
 
 [tasks.bench]
