@@ -92,7 +92,7 @@
     "@types/turndown": "^5.0.6",
     "deepsec": "^2.3.10",
     "portless": "0.15.8",
-    "typescript": "6.0.3"
+    "typescript": "7.0.2"
   },
   "trustedDependencies": [
     "agent-browser",
