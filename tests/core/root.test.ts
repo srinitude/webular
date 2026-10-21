@@ -1,6 +1,7 @@
 import { expect, test } from 'bun:test'
 import { join, parse, sep } from 'node:path'
-import { findPackageRoot, PACKAGE_ROOT } from '../../src/core/root.ts'
+import { Effect } from 'effect'
+import { findPackageRoot, PACKAGE_ROOT, packageRoot } from '../../src/core/root.ts'
 
 const repo = join(import.meta.dir, '..', '..')
 
@@ -16,3 +17,6 @@ test('findPackageRoot walks up from any depth, as bundles and split chunks need'
 test('findPackageRoot returns null when no mise.toml is above', () => {
   expect(findPackageRoot(join(parse(repo).root, 'no-such-webular-dir'))).toBeNull()
 })
+
+test('packageRoot finds the repo from the source module', () =>
+  Effect.runPromise(Effect.map(packageRoot, (root) => expect(root).toBe(repo))))

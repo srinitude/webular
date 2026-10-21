@@ -13,13 +13,16 @@ export function findPackageRoot(start: string): string | null {
   }
 }
 
-// Keeps the trailing separator callers rely on (`${PACKAGE_ROOT}src/...`).
 // Fallback: a standalone executable has no mise.toml above its embedded
-// modules, so the folder that holds the executable stands in.
-export const PACKAGE_ROOT = join(
-  findPackageRoot(import.meta.dir) ?? findPackageRoot(dirname(process.execPath)) ?? process.cwd(),
-  sep,
-)
+// modules, so the walk starts again from the folder that holds the executable.
+const FOUND = findPackageRoot(import.meta.dir) ?? findPackageRoot(dirname(process.execPath))
+
+// null when no mise.toml is above: dispatch reports a broken install instead
+// of guessing a folder.
+export const packageRoot = Effect.succeed(FOUND)
+
+// Keeps the trailing separator callers rely on (`${PACKAGE_ROOT}src/...`).
+export const PACKAGE_ROOT = join(FOUND ?? process.cwd(), sep)
 
 // PATH first, then the packaged binary — ONE resolution policy for every
 // external tool (mise, deepsec, agent-browser), so diagnosis and runtime

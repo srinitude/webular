@@ -2,14 +2,14 @@
 // and CPU, else Bun running the dist bundle, else Bun running src. A wrong or
 // corrupt binary never runs (platform.ts checks its header first), and a
 // binary that cannot start falls through with one stderr line.
-import { join, sep } from 'node:path'
-import { Config, Effect, FileSystem, Option } from 'effect'
+// The Bun rungs live in src/cli/dispatch.ts (entryFor).
+import { sep } from 'node:path'
+import { Config, Effect, Option } from 'effect'
 import { ChildProcess, ChildProcessSpawner } from 'effect/process'
 import { logErr } from '../core/output.ts'
 import { hostFacts, nativeExecutable, targetFor } from '../core/platform.ts'
 import { PACKAGE_ROOT } from '../core/root.ts'
 
-const NO_ENV: Record<string, string> = {}
 const env = (name: string) => Config.String(name).pipe(Config.withDefault(''))
 
 // Failures that mean "this build cannot run here": the spawn itself failed, or
@@ -48,17 +48,7 @@ export const launchNative = (argv: string[]) =>
     const exe = yield* nativeExecutable(PACKAGE_ROOT, facts)
     const code = Option.isSome(exe) ? yield* runNative(exe.value, argv) : Option.none<number>()
     if (Option.isNone(code) && (installed || Option.isSome(exe))) {
-      logErr(`webular: no runnable native build for ${key}; running with Bun instead.`)
+      yield* logErr(`webular: no runnable native build for ${key}; running with Bun instead.`)
     }
     return code
   })
-
-// Bun rung: the dist bundle when it was built, else src. Returns the extra
-// task env (WEBULAR_DEV, which mise.toml reads) for the gateway to pass on.
-export const bunEntryEnv = Effect.gen(function* () {
-  const fs = yield* FileSystem.FileSystem
-  const built = yield* fs.exists(join(PACKAGE_ROOT, 'dist', 'commands', 'search.js'))
-  if (built || (yield* env('WEBULAR_DEV')) !== '') return NO_ENV
-  logErr('webular: no dist bundle found; running commands from src.')
-  return { ...NO_ENV, WEBULAR_DEV: '1' }
-}).pipe(Effect.orElseSucceed(() => NO_ENV))

@@ -1,80 +1,10 @@
-// The ONLY bridge from the CLI to executable logic: shell out to mise.
-// The CLI never imports command/workflow code directly — every subcommand,
-// flag and parameter is routed here as `mise run run:<command> -- <args>`.
-// Fresh-env hardening: mise resolves from PATH or the bundled npm binary (the
-// pinned `mise` dependency); tasks run at the PACKAGE ROOT because a global
-// install is invoked from directories that have no webular task graph; our own
-// shipped config is pre-trusted (installing the package implies trusting it);
-// and the invocation directory is exported so user-relative paths resolve
-// where the user is standing.
-import { delimiter, dirname, join } from 'node:path'
-import { Effect, type Path } from 'effect'
-import { errMsg, logErr } from '../core/output.ts'
+// mise lookup for the commands that use mise itself: doctor reports its
+// version and tasks lists the graph. Commands start without mise; see
+// src/cli/dispatch.ts.
+import { join } from 'node:path'
+import type { Effect, Path } from 'effect'
 import { PACKAGE_ROOT, resolveBin } from '../core/root.ts'
-
-interface RunResult {
-  exitCode: number
-}
-
-const MISSING =
-  'webular: mise not found — install it (https://mise.jdx.dev/getting-started.html) or reinstall webular, then re-run.'
 
 export function resolveMise(): Effect.Effect<string | null, never, Path.Path> {
   return resolveBin('mise', join(PACKAGE_ROOT, 'node_modules/mise/bin/mise'))
-}
-
-function gatewayEnv(): Record<string, string | undefined> {
-  const trusted = process.env['MISE_TRUSTED_CONFIG_PATHS']
-  return {
-    ...process.env,
-    MISE_TRUSTED_CONFIG_PATHS: trusted ? `${trusted}${delimiter}${PACKAGE_ROOT}` : PACKAGE_ROOT,
-    // Configs above the package must not affect task runs (deterministic graph).
-    MISE_CEILING_PATHS: dirname(PACKAGE_ROOT),
-    WEBULAR_INVOKE_DIR: process.cwd(),
-    // A compiled webular runs each command with itself as the bun runtime
-    // (BUN_BE_BUN=1 makes the executable act as the bun CLI), still via mise.
-    ...(Bun.isStandaloneExecutable ? { WEBULAR_BUN: process.execPath, BUN_BE_BUN: '1' } : {}),
-  }
-}
-
-// The child inherits stdio; an interrupted run kills it instead of orphaning it.
-function spawnMise(cmd: string[], env: ReturnType<typeof gatewayEnv>): Effect.Effect<RunResult> {
-  const launch = Effect.try({
-    try: () =>
-      Bun.spawn(cmd, {
-        cwd: PACKAGE_ROOT,
-        env,
-        stdout: 'inherit',
-        stderr: 'inherit',
-        stdin: 'inherit',
-      }),
-    catch: errMsg,
-  })
-  return Effect.acquireUseRelease(
-    launch,
-    (proc) => Effect.tryPromise({ try: () => proc.exited, catch: errMsg }),
-    (proc) =>
-      Effect.sync(() => {
-        if (proc.exitCode === null) proc.kill()
-      }),
-  ).pipe(
-    Effect.matchEffect({
-      onFailure: (detail) =>
-        Effect.as(logErr(`webular: failed to launch mise (${detail})`), { exitCode: 127 }),
-      onSuccess: (exitCode) => Effect.succeed({ exitCode }),
-    }),
-  )
-}
-
-export function runTask(
-  task: string,
-  args: string[],
-  extraEnv: Record<string, string> = {},
-): Effect.Effect<RunResult, never, Path.Path> {
-  const env = { ...gatewayEnv(), ...extraEnv }
-  return Effect.flatMap(resolveMise(), (mise) =>
-    mise
-      ? spawnMise([mise, 'run', task, '--', ...args], env)
-      : Effect.as(logErr(MISSING), { exitCode: 127 }),
-  )
 }

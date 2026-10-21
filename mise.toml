@@ -10,8 +10,8 @@
 #   setup -> run:<command>            (one logical predecessor each)
 # The CI/CD spine (setup..ci) is the SINGLE default dependency path and is
 # check-only: `mise run ci` never mutates the working tree.
-# The CLI never calls code directly: every subcommand/flag is routed as
-#   `mise run run:<command> -- <args>`  (see bin/webular.ts).
+# The CLI never imports command code: each subcommand starts its run:<command>
+#   entry in its own process via src/cli/dispatch-table.ts, generated from here.
 
 min_version = "2026.5.18"
 
@@ -62,12 +62,13 @@ run = "bunx tsc --noEmit"
 description = "Build: bundle every command into dist/commands (shared chunks in dist/chunks), compile the native webular executable into dist/bin, and bundle the plugin's MCP App views (plugin:ui), which the plugin's MCP server reads at startup"
 depends = ["typecheck"]
 run = [
+  'bun scripts/gen-dispatch.ts',
   'bun scripts/clean.ts',
   'bun build {{vars.entries}} --target=bun --minify --splitting --root="{{config_root}}/src" --outdir="{{config_root}}/dist" --chunk-naming=chunks/[name]-[hash].[ext]',
   'bun build "{{config_root}}/bin/webular.ts" --compile --minify --sourcemap --bytecode --format=esm --outfile="{{config_root}}/dist/bin/webular"',
   { task = "plugin:ui" },
 ]
-sources = ["src/**/*.ts", "bin/**/*.ts", "package.json", "tsconfig.json"]
+sources = ["src/**/*.ts", "bin/**/*.ts", "scripts/**/*.ts", "mise.toml", "package.json", "tsconfig.json"]
 outputs = ["dist/commands/search.js", "dist/bin/webular"]
 
 [tasks."compile:all"]
@@ -138,7 +139,7 @@ depends = ["setup"]
 run = '"{{vars.bun}}" "{{config_root}}/{{vars.commands}}/scrape.{{vars.ext}}"'
 
 [tasks."run:crawl"]
-description = "CRAWL — recursive same-host traversal (Bun.fetch BFS + p-limit)"
+description = "CRAWL — recursive same-host traversal (Bun.fetch BFS)"
 depends = ["setup"]
 run = '"{{vars.bun}}" "{{config_root}}/{{vars.commands}}/crawl.{{vars.ext}}"'
 
@@ -183,7 +184,7 @@ depends = ["setup"]
 run = '"{{vars.bun}}" "{{config_root}}/{{vars.commands}}/monitor.{{vars.ext}}"'
 
 [tasks."run:batch"]
-description = "BATCH — concurrent over many targets (p-limit)"
+description = "BATCH — concurrent over many targets"
 depends = ["setup"]
 run = '"{{vars.bun}}" "{{config_root}}/{{vars.commands}}/batch.{{vars.ext}}"'
 

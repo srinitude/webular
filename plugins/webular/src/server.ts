@@ -6,6 +6,7 @@
 // Self-contained: nothing here reaches outside the plugin folder, so a host
 // that copies only this folder still runs it.
 import { createServer } from 'node:http'
+import { constants } from 'node:os'
 import { BunRuntime } from '@effect/platform-bun'
 import { createTool } from '@mastra/core/tools'
 import { MCPServer } from '@mastra/mcp'
@@ -20,17 +21,32 @@ import { runtime } from './runtime.ts'
 import { outputs, schemas } from './schemas.ts'
 
 // The process a tool call runs: `webular <command>`, from WEBULAR_BIN or PATH.
-// WEBULAR_COMMANDS_DIR (a checkout's src/commands, for tests and development)
-// runs `bun <dir>/<command>.ts` directly and skips the CLI's mise routing.
-// ponytail: one child process per call; swap for the CLI's shared dispatch
-// (commandFor) and the OS/CPU executable resolver when they land.
+// The webular launcher picks the native build for this OS and CPU, then starts
+// the command directly (src/cli/dispatch.ts commandFor). WEBULAR_COMMANDS_DIR
+// (a checkout's src/commands, for tests and development) starts the command
+// file on this server's own runtime, as commandFor does. The plugin folder
+// stays self-contained, so this mirrors commandFor instead of importing it.
 const commandLine = (command: string, args: ReadonlyArray<string>) =>
   Effect.gen(function* () {
     const dir = yield* Config.String('WEBULAR_COMMANDS_DIR').pipe(Config.withDefault(''))
-    if (dir !== '') return ChildProcess.make('bun', [`${dir}/${command}.ts`, ...args])
+    if (dir !== '') return ChildProcess.make(process.execPath, [`${dir}/${command}.ts`, ...args])
     const bin = yield* Config.String('WEBULAR_BIN').pipe(Config.withDefault('webular'))
     return ChildProcess.make(bin, [command, ...args])
   })
+
+// A child killed by a signal reports it only in the error text.
+const KILLED = /signal: '(\w+)'/
+
+// The CLI's exit-code rule: the child's own code, or 128 + n when signal n
+// killed it, so a killed command reads as a failed run, not a failed start.
+const exitOf = (exitCode: Effect.Effect<unknown, unknown>) =>
+  exitCode.pipe(
+    Effect.map(Number),
+    Effect.catch((err) => {
+      const signal = KILLED.exec(String(err))?.[1] as NodeJS.Signals | undefined
+      return signal ? Effect.succeed(128 + (constants.signals[signal] ?? 0)) : Effect.fail(err)
+    }),
+  )
 
 class CommandFailed extends Data.TaggedError('CommandFailed')<{ readonly message: string }> {}
 
@@ -63,7 +79,7 @@ const runCommand = (command: string, input: Record<string, unknown>, from = 0) =
       const spawner = yield* ChildProcessSpawner.ChildProcessSpawner
       const proc = yield* spawner.spawn(yield* commandLine(command, [...toFlags(input), '--json']))
       const [out, err, code] = yield* Effect.all(
-        [decode(proc.stdout), decode(proc.stderr), proc.exitCode],
+        [decode(proc.stdout), decode(proc.stderr), exitOf(proc.exitCode)],
         { concurrency: 3 },
       )
       if (code !== 0) return yield* failure(command, code, err)

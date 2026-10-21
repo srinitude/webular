@@ -102,11 +102,8 @@ const main = Effect.gen(function* () {
   const bundled = CLI_CASES.filter((c) => (c.via ?? 'bundle') === 'bundle')
   const routed = CLI_CASES.filter((c) => (c.via ?? 'bundle') !== 'bundle')
   const direct = yield* Effect.forEach(bundled, (c) => runCase(c, fill, env), { concurrency: 4 })
-  // ponytail: router and executable cases run one at a time, because two
-  // concurrent `mise run run:*` calls race on `bun install` in setup (EEXIST).
-  // That race is routed to the dispatch owner (task 4); lift this once fixed.
-  const viaMise = yield* Effect.forEach(routed, (c) => runCase(c, fill, env), { concurrency: 1 })
-  const cli = [...direct, ...viaMise]
+  const viaCli = yield* Effect.forEach(routed, (c) => runCase(c, fill, env), { concurrency: 4 })
+  const cli = [...direct, ...viaCli]
   const mcp = yield* runMcp(fill, env)
   const plugin = yield* Effect.forEach(PLUGIN_CASES, (c) => runPluginCase(c, env), {
     concurrency: 1,
