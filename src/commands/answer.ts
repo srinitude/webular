@@ -5,6 +5,22 @@ import { discoveryExit, runWorkflow } from '../cli/run.ts'
 import { emitOpts, intFlag, parseFlags, timeoutFlag } from '../core/args.ts'
 import { CliError, runMain } from '../core/effect.ts'
 
+type Values = Parameters<typeof emitOpts>[0]
+
+const answerInput = (values: Values, query: string) =>
+  Effect.gen(function* () {
+    return {
+      query,
+      sources: yield* intFlag('answer', values, 'sources', { def: 3, min: 1, max: 10 }),
+      sentences: yield* intFlag('answer', values, 'sentences', { def: 3, min: 1, max: 25 }),
+      timeoutMs: yield* timeoutFlag('answer', values),
+      urls: (values['urls'] as string | undefined)
+        ?.split(',')
+        .map((u) => u.trim())
+        .filter(Boolean),
+    }
+  })
+
 const main = Effect.gen(function* () {
   const { values, positionals } = yield* parseFlags(Bun.argv.slice(2), {
     query: { type: 'string' },
@@ -19,16 +35,7 @@ const main = Effect.gen(function* () {
       exitCode: 2,
     })
   }
-  const inputData = {
-    query,
-    sources: yield* intFlag('answer', values, 'sources', { def: 3, min: 1, max: 10 }),
-    sentences: yield* intFlag('answer', values, 'sentences', { def: 3, min: 1, max: 25 }),
-    timeoutMs: yield* timeoutFlag('answer', values),
-    urls: (values['urls'] as string | undefined)
-      ?.split(',')
-      .map((u) => u.trim())
-      .filter(Boolean),
-  }
+  const inputData = yield* answerInput(values, query)
   return yield* runWorkflow(
     'answer',
     () => import('../workflows/answer.ts'),

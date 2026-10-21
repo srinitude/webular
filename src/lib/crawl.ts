@@ -124,6 +124,19 @@ const indexPages = (pages: ReadonlyArray<PageInfo>, bodies: Map<string, string>)
     yield* addPages(index, indexed)
   })
 
+const crawlSeeds = (fetch: Fetcher, seeds: string[], judge: LinkJudge, opts: CrawlOptions) =>
+  seeds.length > 0 && opts.limit > 1
+    ? crawl({
+        fetch,
+        seeds,
+        dbPath: ':memory:',
+        concurrency: opts.concurrency,
+        minDelayMs: opts.minDelayMs,
+        maxPages: opts.limit - 1,
+        linkWorthFollowing: judge,
+      })
+    : Effect.succeed({ pages: [], skipped: [] })
+
 const crawlFrom = (rootUrl: string, finalUrl: string, html: string, opts: CrawlOptions) =>
   Effect.gen(function* () {
     const anchored = normalizeUrl(finalUrl) ?? rootUrl
@@ -139,18 +152,7 @@ const crawlFrom = (rootUrl: string, finalUrl: string, html: string, opts: CrawlO
     const seeds = links.filter((_, i) => keep[i]).map((l) => l.url)
     const reasons = new Map<string, string>()
     const fetch = asFetcher(yield* makeFetchLayer({ deadlineMs: opts.timeoutMs }), reasons)
-    const run =
-      seeds.length > 0 && opts.limit > 1
-        ? yield* crawl({
-            fetch,
-            seeds,
-            dbPath: ':memory:',
-            concurrency: opts.concurrency,
-            minDelayMs: opts.minDelayMs,
-            maxPages: opts.limit - 1,
-            linkWorthFollowing: judge,
-          })
-        : { pages: [], skipped: [] }
+    const run = yield* crawlSeeds(fetch, seeds, judge, opts)
     const result = toResult(root, run, reasons)
     yield* indexPages(
       result.pages,
