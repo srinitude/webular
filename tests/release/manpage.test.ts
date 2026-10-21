@@ -8,7 +8,8 @@ import { manpage, writeManpage } from '../../src/release/manpage.ts'
 import { ROOT } from '../_support/root.ts'
 import { eff } from '../_support/run.ts'
 
-const MANDOC = '/usr/bin/mandoc'
+// Found on PATH: macOS ships it in /usr/bin, Linux CI installs it with apt.
+const MANDOC = 'mandoc'
 // dist/ is gitignored, so the page never reaches a commit.
 const DIR = join(ROOT, 'dist', 'man-test')
 

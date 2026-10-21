@@ -71,6 +71,19 @@ jobs:
         with:
           path: ${{ runner.temp }}/bun-install-cache
           key: bun-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('mise.toml', 'bun.lock') }}
+      # Trust is stored under HOME, so it reaches child processes that start
+      # with a minimal environment (the MCP stdio tests run `mise tasks ls`).
+      - name: Trust the repo's mise.toml
+        run: mise trust
+      # The completions test parses webular.fish with fish; the Ubuntu image
+      # has it, the macOS image does not.
+      - name: Install fish (macOS)
+        if: runner.os == 'macOS'
+        run: brew install fish
+      # The manpage test lints webular.1 with mandoc; macOS ships it, Ubuntu does not.
+      - name: Install mandoc (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update -q && sudo apt-get install -y -q mandoc
       - name: Run the single CI dependency path
         env:
           BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
