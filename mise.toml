@@ -101,6 +101,20 @@ description = "Write the winget manifest set (version, installer, defaultLocale)
 depends = ["compile:all"]
 run = 'bun "{{config_root}}/src/release/winget.ts"'
 
+[tasks."package:completions"]
+description = "Write shell completions (bash, zsh, fish, PowerShell) into dist/completions from the command and flag tables (release path, after compile:all)"
+depends = ["compile:all"]
+run = 'bun "{{config_root}}/src/release/completions.ts"'
+
+[tasks."package:man"]
+description = "Write the webular(1) manual page to dist/man/webular.1 (release path)"
+run = 'bun "{{config_root}}/src/release/manpage.ts"'
+
+[tasks."package:distros"]
+description = "Write the AUR PKGBUILD, .SRCINFO, and webular.nix into dist/packaging from dist/bin/SHA256SUMS (release path, after compile:all)"
+depends = ["compile:all"]
+run = 'bun "{{config_root}}/src/release/distros.ts"'
+
 [tasks."test:file"]
 description = "Run the named test files only (targeted check while editing)"
 depends = ["setup"]

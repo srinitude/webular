@@ -10,7 +10,7 @@ import { Effect, FileSystem, Schema } from 'effect'
 import { PACKAGE_ROOT } from '../core/root.ts'
 import { parseSums, releaseUrl, scoopTargets, sumFor } from './distribution.ts'
 
-const ID = 'Srinitude.Webular'
+export const WINGET_ID = 'Srinitude.Webular'
 const MANIFEST_VERSION = '1.12.0'
 
 // Every manifest opens with the schema hint and the package identity, and ends
@@ -19,7 +19,7 @@ const manifest = (type: string, version: string, body: readonly string[]): strin
   [
     `# yaml-language-server: $schema=https://aka.ms/winget-manifest.${type}.${MANIFEST_VERSION}.schema.json`,
     '',
-    `PackageIdentifier: ${ID}`,
+    `PackageIdentifier: ${WINGET_ID}`,
     `PackageVersion: ${version}`,
     ...body,
     `ManifestType: ${type}`,
@@ -42,9 +42,9 @@ const installerEntries = (version: string, sums: ReadonlyMap<string, string>) =>
 // [file name, YAML text] for the three files of a multi-file winget manifest.
 export const wingetManifests = (version: string, sums: ReadonlyMap<string, string>) =>
   Effect.map(installerEntries(version, sums), (entries) => [
-    [`${ID}.yaml`, manifest('version', version, ['DefaultLocale: en-US'])] as const,
+    [`${WINGET_ID}.yaml`, manifest('version', version, ['DefaultLocale: en-US'])] as const,
     [
-      `${ID}.installer.yaml`,
+      `${WINGET_ID}.installer.yaml`,
       manifest('installer', version, [
         'InstallerType: portable',
         'Commands:',
@@ -54,7 +54,7 @@ export const wingetManifests = (version: string, sums: ReadonlyMap<string, strin
       ]),
     ] as const,
     [
-      `${ID}.locale.en-US.yaml`,
+      `${WINGET_ID}.locale.en-US.yaml`,
       manifest('defaultLocale', version, [
         'PackageLocale: en-US',
         'Publisher: Srinitude',

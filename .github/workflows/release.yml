@@ -5,7 +5,7 @@
 # write the winget manifest set (src/release/winget.ts) and upload it as the
 # build artifact "winget-manifests" (submitting it to microsoft/winget-pkgs is
 # a manual step), attest every file (actions/attest, Sigstore build provenance), and attach
-# them all, plus scripts/install.sh, to a DRAFT GitHub release -> publish: one
+# them all, plus scripts/install.sh and scripts/install.ps1, to a DRAFT GitHub release -> publish: one
 # npm package per target (webular-<key>, with os/cpu/libc fields), then the
 # root package that lists them as optionalDependencies, then un-draft the
 # release. Immutable releases lock assets on publish, so the release goes
@@ -105,6 +105,16 @@ jobs:
         run: mise run compile:all
         env:
           BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
+      # The completions tarball is a release file: it exists before SHA256SUMS,
+      # so the webular-* globs below checksum, attest, and upload it.
+      - name: Stage shell completions and the webular(1) man page
+        run: |
+          mise run package:completions
+          mise run package:man
+          tar -czf dist/bin/webular-completions.tar.gz -C dist completions
+          cp dist/man/webular.1 dist/bin/webular.1
+        env:
+          MISE_TASK_SKIP_DEPENDS: "1" # binaries exist above; skip compile:all
       - name: Checksum the executables
         run: (cd dist/bin && sha256sum webular-* > SHA256SUMS)
       - name: Write the Homebrew formula and Scoop manifest from SHA256SUMS
@@ -121,8 +131,17 @@ jobs:
           name: winget-manifests
           path: dist/bin/winget
           if-no-files-found: error
-      - name: Stage the installer
-        run: cp scripts/install.sh dist/bin/install.sh
+      - name: Stage the installers
+        run: cp scripts/install.sh scripts/install.ps1 dist/bin/
+      - name: Write the Arch and Nix packaging files from SHA256SUMS
+        run: mise run package:distros
+      - name: Upload the Arch and Nix packaging files for a manual publish
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: distro-packaging
+          path: dist/packaging
+          include-hidden-files: true
+          if-no-files-found: error
       - name: Attest build provenance for every release file
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
@@ -130,14 +149,16 @@ jobs:
             dist/bin/webular-*
             dist/bin/SHA256SUMS
             dist/bin/install.sh
+            dist/bin/install.ps1
             dist/bin/webular.rb
             dist/bin/webular.json
+            dist/bin/webular.1
       - name: Attach every file to a draft GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           prerelease=; case "$GITHUB_REF_NAME" in *-*) prerelease=--prerelease ;; esac
-          set -- dist/bin/webular-* dist/bin/SHA256SUMS dist/bin/install.sh dist/bin/webular.rb dist/bin/webular.json
+          set -- dist/bin/webular-* dist/bin/SHA256SUMS dist/bin/install.sh dist/bin/install.ps1 dist/bin/webular.rb dist/bin/webular.json dist/bin/webular.1
           gh release create "$GITHUB_REF_NAME" --draft $prerelease --title "$GITHUB_REF_NAME" --generate-notes --verify-tag "$@" \
             || gh release upload "$GITHUB_REF_NAME" "$@" --clobber
 

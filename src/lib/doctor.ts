@@ -8,6 +8,7 @@ import { httpGet } from '../core/http.ts'
 import { runProc } from '../core/proc.ts'
 import { resolveBin } from '../core/root.ts'
 import { resolveMise } from '../mise/gateway.ts'
+import { upgradeFor } from '../release/upgrade.ts'
 
 interface Check {
   name: string
@@ -42,12 +43,21 @@ function checkNetwork(): Effect.Effect<Check> {
   }).pipe(Effect.catch((e) => Effect.succeed({ name: 'network', ok: false, detail: String(e) })))
 }
 
+// How to upgrade the running install; informational, so it always passes.
+const checkUpgrade = Effect.gen(function* () {
+  const install = yield* Config.String('WEBULAR_INSTALL').pipe(Config.withDefault(''))
+  const paths = [process.execPath, process.argv[1] ?? '']
+  const { command } = upgradeFor(paths, { WEBULAR_INSTALL: install })
+  return { name: 'upgrade', ok: true, detail: command }
+}).pipe(Effect.orDie)
+
 export const runChecks = Effect.fn('runChecks')(function* () {
   const probes = [
     versionCheck('bun', Bun.which('bun')),
     versionCheck('mise', yield* resolveMise()),
     versionCheck('node', Bun.which('node')),
     checkNetwork(),
+    checkUpgrade,
     versionCheck('agent-browser', yield* resolveBin('agent-browser')),
     versionCheck('deepsec', yield* resolveBin('deepsec')),
   ]

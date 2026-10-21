@@ -70,6 +70,13 @@ Pick one channel.
   curl -fsSL https://github.com/srinitude/webular/releases/latest/download/install.sh | sh
   ```
 
+  On Windows, `scripts/install.ps1` does the same in PowerShell and installs
+  to `~\.webular\bin\webular.exe`:
+
+  ```powershell
+  irm https://github.com/srinitude/webular/releases/latest/download/install.ps1 | iex
+  ```
+
 To run from source, you need [Bun](https://bun.com). The `run:<command>`
 tasks in `mise.toml` define every subcommand. `mise run build` turns them into
 a committed table, `src/cli/dispatch-table.ts`. The CLI reads that table and
