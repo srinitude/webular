@@ -1,11 +1,13 @@
 // MCP server contract (B26/B27/D3) — real SDK client/server over an in-memory
 // transport: tool listing, a working call, {html}-only readability input, and
-// isError (not a protocol crash) when a tool throws.
+// isError (not a protocol crash) when a tool throws; and the same MCP App
+// views the plugin's Mastra server lists and serves.
 import { describe, expect, test } from 'bun:test'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js'
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { Effect, Schema } from 'effect'
+import { server as plugin } from '../../plugins/webular/src/server.ts'
 import { registerAll } from '../../src/tools/web.ts'
 import { eff, io } from '../_support/run.ts'
 
@@ -72,5 +74,35 @@ describe('webular mcp — server behavior over a real transport', () => {
       }),
     ),
     15_000,
+  )
+
+  test(
+    'lists and serves the same app resources as the plugin server',
+    eff(
+      Effect.gen(function* () {
+        const client = yield* connected
+        const { resources } = yield* io(() => client.listResources())
+        const listed = yield* io(() => plugin.listResources())
+        const byUri = (a: { uri: string }, b: { uri: string }) => a.uri.localeCompare(b.uri)
+        expect(resources.map((r) => r.uri).sort()).toEqual([
+          'ui://webular/map',
+          'ui://webular/monitor',
+          'ui://webular/session',
+        ])
+        expect(resources.toSorted(byUri)).toEqual(listed.resources.toSorted(byUri))
+        for (const { uri } of resources) {
+          const [mine, theirs] = yield* Effect.all([
+            io(() => client.readResource({ uri })),
+            io(() => plugin.readResource(uri)),
+          ])
+          expect<unknown>(mine.contents).toEqual(theirs.contents)
+          expect(mine.contents[0]).toMatchObject({
+            mimeType: 'text/html;profile=mcp-app',
+            text: expect.stringContaining('<script type="module"'),
+          })
+        }
+      }),
+    ),
+    30_000,
   )
 })

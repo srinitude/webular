@@ -11,6 +11,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { Data, Effect } from 'effect'
 import { z } from 'zod'
+import { appResources } from '../../plugins/webular/src/apps.ts'
 import { fetchText } from '../core/http.ts'
 import { errMsg, pageText, selectFields, shortError, stableJson } from '../core/output.ts'
 import { extractLinks, htmlToArticle, htmlToMarkdown } from '../lib/html.ts'
@@ -112,8 +113,23 @@ function execute(tool: McpToolDef, args: Record<string, unknown>): Effect.Effect
   }).pipe(Effect.catch((err) => Effect.succeed(failure(shortError(err)))))
 }
 
+class AppNotBuilt extends Data.TaggedError('AppNotBuilt')<{ readonly message: string }> {}
+
+// The MCP Apps media type, as the plugin's Mastra server lists it.
+const APP_MIME = 'text/html;profile=mcp-app'
+
+// Each view reads its built page on demand, from the plugin's own resource list.
+// ponytail: htmlPath is a checkout path; embed the pages when the compiled
+// executable needs to serve views.
+const readApp = (uri: string, htmlPath: string) =>
+  Effect.tryPromise({
+    try: () => Bun.file(htmlPath).text(),
+    catch: () => new AppNotBuilt({ message: `${uri} is not built. Run \`mise run plugin:ui\`.` }),
+  }).pipe(Effect.map((text) => ({ contents: [{ uri, mimeType: APP_MIME, text }] })))
+
 // Registering mutates the server, so it is an Effect: it captures the caller's
 // context once, and each MCP Promise handler runs its tool Effect with it.
+// The plugin's MCP App views register too, so both servers list the same apps.
 export const registerAll = Effect.fn('registerAll')(function* (server: McpServer) {
   const runWith = Effect.runPromiseWith(yield* Effect.context<never>())
   for (const tool of webTools) {
@@ -121,6 +137,14 @@ export const registerAll = Effect.fn('registerAll')(function* (server: McpServer
       tool.id,
       { description: tool.description, inputSchema: tool.schema.shape },
       (args: Record<string, unknown>) => runWith(execute(tool, args)),
+    )
+  }
+  for (const [uri, app] of Object.entries(appResources)) {
+    server.registerResource(
+      app.name,
+      uri,
+      { description: app.description, mimeType: APP_MIME },
+      () => runWith(readApp(uri, app.htmlPath)),
     )
   }
 })
