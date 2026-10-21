@@ -59,9 +59,7 @@ const fetchStep = createStep({
   execute: ({ inputData, abortSignal }) =>
     stepRuntime.runPromise(
       Effect.map(fetchPage(inputData), (r) => ({ url: inputData.url, ...r })),
-      {
-        signal: abortSignal,
-      },
+      { signal: abortSignal },
     ),
 })
 

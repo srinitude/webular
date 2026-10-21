@@ -1,4 +1,4 @@
-// The retry pause is the fixed backoff with jitter (Schedule.jittered: 0.8x to 1.2x),
+// The retry pause reuses fullJitterDelay: a random wait in [0, backoff),
 // run under TestClock so no real time passes.
 import { expect, test } from 'bun:test'
 import { Effect } from 'effect'
@@ -14,16 +14,13 @@ const pauseDone = (advanceMs: number) =>
     return fiber.pollUnsafe() !== undefined
   }).pipe(Effect.scoped, Effect.provide(TestClock.layer()))
 
-test('retry pause never ends before 0.8x the backoff', () =>
-  Effect.runPromise(Effect.map(pauseDone(BASE * 0.8 - 1), (done) => expect(done).toBe(false))))
-
-test('retry pause always ends by 1.2x the backoff', () =>
-  Effect.runPromise(Effect.map(pauseDone(BASE * 1.2 + 1), (done) => expect(done).toBe(true))))
+test('retry pause always ends by the backoff', () =>
+  Effect.runPromise(Effect.map(pauseDone(BASE + 1), (done) => expect(done).toBe(true))))
 
 test('retry pause is jittered, not fixed', () =>
   Effect.runPromise(
     Effect.map(
-      Effect.forEach(Array.from({ length: 20 }), () => pauseDone(BASE), { concurrency: 4 }),
+      Effect.forEach(Array.from({ length: 20 }), () => pauseDone(BASE / 2), { concurrency: 4 }),
       (ends) => expect(new Set(ends).size).toBe(2),
     ),
   ))

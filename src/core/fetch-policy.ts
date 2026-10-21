@@ -1,4 +1,5 @@
-import { Effect, Schedule } from 'effect'
+import { Effect, Random } from 'effect'
+import { fullJitterDelay } from '../lib/fetch-types.ts'
 
 // Fetch policy: the one source of the retry, redirect, and failure rules.
 // src/machines/fetch.ts decides with them and src/core/http.ts runs that
@@ -8,12 +9,9 @@ import { Effect, Schedule } from 'effect'
 export const RETRY_BACKOFF_MS = [250, 750] as const
 export const MAX_RETRIES = RETRY_BACKOFF_MS.length
 
-// Sleep one backoff step, jittered to 0.8x-1.2x so clients do not retry in lockstep.
+// Sleep one backoff step, fully jittered (0 to ms) so clients do not retry in lockstep.
 export const retryPause = (ms: number) =>
-  Effect.flatMap(
-    Schedule.toStepWithSleep(Schedule.jittered(Schedule.spaced(ms))),
-    (step) => Effect.orDie(step(undefined)), // spaced never ends, so Done cannot occur
-  )
+  Effect.flatMap(Random.next, (u) => Effect.sleep(fullJitterDelay(0, ms, ms, u)))
 export const RETRY_STATUS: ReadonlySet<number> = new Set([408, 429, 502, 503, 504])
 
 // Status and network failures retry; a timeout is the caller's budget, so it never does.
