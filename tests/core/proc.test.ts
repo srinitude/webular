@@ -1,7 +1,7 @@
 // Subprocess-runner contract: concurrent pipe draining (no 64KB deadlock),
 // mandatory timeout, exit-code capture — against real child processes.
 import { describe, expect, test } from 'bun:test'
-import { Effect } from 'effect'
+import { Clock, Effect } from 'effect'
 import { runProc } from '../../src/core/proc.ts'
 import { eff } from '../_support/run.ts'
 
@@ -71,9 +71,10 @@ describe('runProc — spawn with drain + timeout', () => {
     'kills the child at the timeout and reports timedOut',
     eff(
       Effect.gen(function* () {
-        const started = Date.now()
+        const started = yield* Clock.currentTimeNanos
         const result = yield* runProc(['bun', '-e', 'await Bun.sleep(60000)'], { timeoutMs: 500 })
-        expect(Date.now() - started).toBeLessThan(10_000)
+        const elapsedMs = Number((yield* Clock.currentTimeNanos) - started) / 1e6
+        expect(elapsedMs).toBeLessThan(10_000)
         expect(result.timedOut).toBe(true)
         expect(result.code).not.toBe(0)
       }),

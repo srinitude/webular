@@ -4,6 +4,7 @@ import { expect, test } from 'bun:test'
 import { join } from 'node:path'
 import { Effect, FileSystem } from 'effect'
 import { COMMAND_NAMES } from '../../src/cli/commands.ts'
+import { runProc } from '../../src/core/proc.ts'
 import { manpage, writeManpage } from '../../src/release/manpage.ts'
 import { ROOT } from '../_support/root.ts'
 import { eff } from '../_support/run.ts'
@@ -13,7 +14,7 @@ const MANDOC = 'mandoc'
 // dist/ is gitignored, so the page never reaches a commit.
 const DIR = join(ROOT, 'dist', 'man-test')
 
-const mandoc = (args: string[]) => Effect.sync(() => Bun.spawnSync([MANDOC, ...args]))
+const mandoc = (args: string[]) => runProc([MANDOC, ...args], { timeoutMs: 20_000 })
 
 test(
   'webular.1 lints without warnings or errors and renders every command',
@@ -27,12 +28,12 @@ test(
       if (!Bun.which(MANDOC)) return yield* fs.remove(DIR, { recursive: true, force: true })
       const lint = yield* mandoc(['-T', 'lint', '-W', 'warning', file])
       const bad = lint.stderr
-        .toString()
         .split('\n')
         .filter((line) => line !== '' && !line.includes(': STYLE:'))
-      const text = (yield* mandoc(['-T', 'utf8', file])).stdout
-        .toString()
-        .replace(new RegExp(`.${String.fromCharCode(8)}`, 'g'), '')
+      const text = (yield* mandoc(['-T', 'utf8', file])).stdout.replace(
+        new RegExp(`.${String.fromCharCode(8)}`, 'g'),
+        '',
+      )
       yield* fs.remove(DIR, { recursive: true, force: true })
       expect(bad).toEqual([])
       for (const name of COMMAND_NAMES) expect(text).toContain(name)
