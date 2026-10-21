@@ -86,11 +86,15 @@ const parseInWorker = (state: PoolState, html: string) =>
   )
 
 // The pool's permits and idle workers live as long as the runtime that builds
-// this layer. Building it starts no worker; closing it terminates the idle ones
-// (a busy one is terminated by its interrupted parse).
+// this layer. Building it starts no worker; closing it, or `drain`, terminates
+// the idle ones (a busy one is terminated by its interrupted parse). A drained
+// pool stays usable: the next parse starts a fresh worker.
 const terminateIdle = (idle: PoolState['idle']) =>
-  Effect.flatMap(Ref.get(idle), (workers) =>
-    Effect.forEach(workers, (worker) => Effect.sync(() => worker.terminate()), { discard: true }),
+  Effect.flatMap(Ref.getAndSet(idle, []), (workers) =>
+    Effect.forEach(workers, (worker) => Effect.sync(() => worker.terminate()), {
+      concurrency: 1,
+      discard: true,
+    }),
   )
 
 const makePool = Effect.gen(function* () {
@@ -103,12 +107,15 @@ const makePool = Effect.gen(function* () {
     Effect.flatMap(Ref.get(state.broken), (broken) =>
       broken ? parseInThread(html) : permits.withPermit(parseInWorker(state, html)),
     )
-  return { parse }
+  return { parse, drain: terminateIdle(state.idle) }
 })
 
 export class ParsePool extends Context.Service<
   ParsePool,
-  { readonly parse: (html: string) => Effect.Effect<string, unknown> }
+  {
+    readonly parse: (html: string) => Effect.Effect<string, unknown>
+    readonly drain: Effect.Effect<void>
+  }
 >()('webular/lib/ParsePool') {
   static readonly layer = Layer.effect(ParsePool, makePool)
 }

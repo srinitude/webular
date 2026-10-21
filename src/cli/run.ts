@@ -106,10 +106,11 @@ const checkUrl = (name: string, inputData: unknown): Effect.Effect<void, CliErro
 const startRun = (inputData: unknown) => (created: WorkflowRun) =>
   Effect.tryPromise({ try: () => created.start({ inputData }), catch: errMsg })
 
-// The one-shot command ends its steps' shared runtime with the run, so the
-// parse pool's idle workers stop. The module is cached: the workflow loaded it.
+// The run ends by stopping the parse pool's idle workers. The shared step
+// runtime stays usable for the next run in this process. The module is cached:
+// the workflow loaded it.
 const disposeSteps = Effect.promise(() => import('../workflows/runtime.ts')).pipe(
-  Effect.flatMap((m) => m.stepRuntime.disposeEffect),
+  Effect.flatMap((m) => m.drainParsePool),
   Effect.ignore,
 )
 

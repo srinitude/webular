@@ -20,7 +20,8 @@ describe('batch dedupes target URLs', () => {
         const other = `${fx.origin}/other`
         const run = yield* io(() => batchWorkflow.createRun())
         const out = yield* io(() => run.start({ inputData: { urls: [once, other, once, once] } }))
-        expect(out.status).toBe('success')
+        // A failed run shows its cause, not only its status.
+        expect(out.status === 'failed' ? out.error.message : out.status).toBe('success')
         if (out.status !== 'success') return
         expect(out.result.results.map((r) => r.url)).toEqual([once, other, once, once])
         expect(out.result.count).toBe(4)

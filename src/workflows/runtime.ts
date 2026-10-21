@@ -4,7 +4,14 @@
 // ChildProcessSpawner) that step programs yield, and the one Readability
 // worker pool the source fan-out parses on.
 import * as BunServices from '@effect/platform-bun/BunServices'
-import { Layer, ManagedRuntime } from 'effect'
+import { Effect, Layer, ManagedRuntime } from 'effect'
 import { ParsePool } from '../lib/sources.ts'
 
 export const stepRuntime = ManagedRuntime.make(Layer.mergeAll(BunServices.layer, ParsePool.layer))
+
+// Stops the parse pool's idle workers once a command ends. It never disposes
+// the runtime: a disposed ManagedRuntime dies on every later run, and one
+// process runs many workflows (the MCP server, a test run).
+export const drainParsePool = Effect.tryPromise(() =>
+  stepRuntime.runPromise(ParsePool.use((pool) => pool.drain)),
+)
