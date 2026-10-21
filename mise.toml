@@ -54,9 +54,9 @@ depends = ["setup"]
 run = "bunx biome check ."
 
 [tasks.typecheck]
-description = "Compilation: strict TypeScript typecheck"
+description = "Compilation: strict TypeScript typecheck of the CLI and of plugins/webular (its own tsconfig, outside the root include)"
 depends = ["lint"]
-run = "bunx tsc --noEmit"
+run = ["bunx tsc --noEmit", "bunx tsc --noEmit -p plugins/webular"]
 
 [tasks.build]
 description = "Build: bundle every command into dist/commands (shared chunks in dist/chunks), compile the native webular executable into dist/bin, and bundle the plugin's MCP App views (plugin:ui), which the plugin's MCP server reads at startup"
