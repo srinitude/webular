@@ -2,11 +2,12 @@
 // the plugin source produces, so a source change that skipped
 // `mise run plugin:bundle` cannot ship a stale server to an agent host.
 import { expect, test } from 'bun:test'
+import { fileURLToPath } from 'node:url'
 import { Effect, FileSystem, Path, Stream } from 'effect'
 import { ChildProcess, ChildProcessSpawner } from 'effect/process'
 import { eff, tmpDir } from '../../../tests/_support/run.ts'
 
-const PLUGIN = new URL('..', import.meta.url).pathname
+const PLUGIN = fileURLToPath(new URL('..', import.meta.url))
 const COMMITTED = `${PLUGIN}dist/server.js`
 
 // The same flags as the plugin:bundle task in mise.toml; keep the two in step.

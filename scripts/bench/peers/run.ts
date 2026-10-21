@@ -3,6 +3,7 @@
 // response keyed by request, and writes a dated results file and report.
 // Flags: --live, --runs N (3), --peers a,b (live peers; default firecrawl,exa),
 // --max-calls N (20 per peer). BENCH_PLAN points at an extra plan file.
+import { fileURLToPath } from 'node:url'
 import { BunRuntime, BunServices } from '@effect/platform-bun'
 import { Clock, Config, Console, Effect, FileSystem, Layer, Ref, Schema } from 'effect'
 import { FetchHttpClient } from 'effect/http'
@@ -27,7 +28,7 @@ const live = Bun.argv.includes('--live')
 const runs = Number(flag('runs') ?? 3)
 const livePeers = new Set(['webular', ...(flag('peers') ?? 'firecrawl,exa').split(',')])
 const maxCalls = Number(flag('max-calls') ?? 20)
-const root = new URL('../../../bench/', import.meta.url).pathname
+const root = fileURLToPath(new URL('../../../bench/', import.meta.url))
 
 const Recording = Schema.Union([
   Schema.Struct({ status: Schema.Literal('ok'), output: RecordedOutput }),

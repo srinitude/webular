@@ -1,6 +1,7 @@
 // Answer and research output must pass the readability chain: the Markdown
 // check first, then the human-language check, with the text left as it was.
 import { expect, test } from 'bun:test'
+import { fileURLToPath } from 'node:url'
 import { BunServices } from '@effect/platform-bun'
 import { Effect, FileSystem } from 'effect'
 import { readabilityChain, withReadability } from '../../src/lib/readability-chain.ts'
@@ -30,7 +31,7 @@ test('withReadability adds findings and keeps every field', () =>
 
 const source = (name: string) =>
   Effect.flatMap(FileSystem.FileSystem, (fs) =>
-    fs.readFileString(new URL(`../../src/workflows/${name}`, import.meta.url).pathname),
+    fs.readFileString(fileURLToPath(new URL(`../../src/workflows/${name}`, import.meta.url))),
   )
 
 test('answer and research output go through the chain', () =>

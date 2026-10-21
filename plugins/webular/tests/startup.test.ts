@@ -2,9 +2,10 @@
 // answer to initialize and tools/list in a few seconds, even when the optional
 // MCP App views were never built (a fresh checkout has no dist/ui).
 import { expect, test } from 'bun:test'
+import { fileURLToPath } from 'node:url'
 import { Effect } from 'effect'
 
-const SERVER = new URL('../dist/server.js', import.meta.url).pathname
+const SERVER = fileURLToPath(new URL('../dist/server.js', import.meta.url))
 const requests = [
   {
     jsonrpc: '2.0',
