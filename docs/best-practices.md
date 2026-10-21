@@ -1,6 +1,6 @@
 # Best practices checklist
 
-This checklist lists the practices webular follows for each library and tool it uses, plus practices that hold for any TypeScript CLI. Each item names its source, the source's date, and how the item is checked. A final audit across every branch uses this list.
+This list names the practices webular follows for each library and tool it uses, plus practices that hold for any TypeScript CLI. Each item names its source, the source's date, and how the item is checked. A final audit across every branch uses this list.
 
 How to read each item:
 
@@ -20,8 +20,8 @@ How to read each item:
 - [x] **Dependabot for actions and npm**, so pins stay current. Source: <https://docs.github.com/en/code-security/dependabot> (undated). Check: automated, `dependabot keeps action and npm pins current`.
 - [x] **Frozen lockfile installs**, through `bun install --frozen-lockfile` in the mise `setup` task. Source: <https://bun.com/docs/pm/cli/install> (undated). Check: review of `mise.toml`.
 - [x] **`engines.bun` matches the mise Bun pin**. Source: <https://docs.npmjs.com/cli/configuring-npm/package-json#engines> (undated). Check: automated, `engines.bun matches the mise bun pin`.
-- [ ] **Bun `minimumReleaseAge`** in `bunfig.toml`, so a malicious release can't land the hour it ships. Source: <https://bun.com/docs/pm/cli/install> (undated). Check: open. The package-upgrade owner picks the window, since it owns package versions.
-- [ ] **mise lockfile in locked mode**, with `[settings] lockfile = true` and `MISE_LOCKED=1` in CI. Source: <https://mise.jdx.dev/dev-tools/mise-lock.html> (undated). Check: open, for the join branch.
+- [x] **Bun `minimumReleaseAge`** in `bunfig.toml`, so a malicious release can't land the hour it ships. The window is one day (`86400` seconds), short enough that every pinned version still resolves. Source: <https://bun.com/docs/runtime/bunfig> (undated). Check: automated, `bunfig.toml sets a minimumReleaseAge of at least one day`.
+- [x] **mise lockfile in locked mode**, with `[settings] lockfile = true`, a committed `mise.lock` that lists Bun for `linux-x64`, `macos-arm64`, and `windows-x64`, and `MISE_LOCKED=1` in CI. Source: <https://mise.jdx.dev/dev-tools/mise-lock.html> (undated). Check: automated, `mise installs only what mise.lock records, for every CI platform`.
 - [ ] **Biome rules promoted in Biome 2.5**: `noUnnecessaryConditions`, `noShadow`, `useErrorCause`, `noFloatingPromises`. Source: <https://biomejs.dev/blog/biome-v2-5/> (2026-06-05). Check: open. Turn them on once the Effect conversion lands, since they flag Promise code that branch removes.
 
 ## Effect and XState

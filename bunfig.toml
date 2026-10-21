@@ -1,0 +1,4 @@
+[install]
+# Minimum package version age, in seconds (one day). Very fresh releases stay out
+# of installs, so a malicious release is usually pulled before it can land.
+minimumReleaseAge = 86400

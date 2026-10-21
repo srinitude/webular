@@ -26,6 +26,17 @@ describe('best practices: CI workflow', () => {
     }),
   )
   check(
+    'mise installs only what mise.lock records, for every CI platform',
+    Effect.gen(function* () {
+      expect(yield* read('mise.toml')).toMatch(/^\[settings\]\s+lockfile = true$/m)
+      const lock = yield* read('mise.lock')
+      for (const platform of ['linux-x64', 'macos-arm64', 'windows-x64']) {
+        expect(lock).toContain(`[tools.bun."platforms.${platform}"]`)
+      }
+      expect(yield* workflow).toMatch(/^\s+MISE_LOCKED: 1$/m)
+    }),
+  )
+  check(
     'dependabot keeps action and npm pins current',
     Effect.map(read('.github/dependabot.yml'), (yml) => {
       expect(yml).toContain('package-ecosystem: github-actions')
@@ -66,6 +77,16 @@ describe('best practices: package dependencies', () => {
     Effect.map(packageJson, ({ dependencies, devDependencies }) => {
       expect(dependencies.effect).toMatch(/^\d+\.\d+\.\d+$/)
       expect(devDependencies['@effect/platform-bun']).toBe(dependencies.effect)
+    }),
+  )
+})
+
+describe('best practices: supply chain', () => {
+  check(
+    'bunfig.toml sets a minimumReleaseAge of at least one day',
+    Effect.map(read('bunfig.toml'), (toml) => {
+      const age = Number(toml.match(/^minimumReleaseAge\s*=\s*(\d+)/m)?.[1])
+      expect(age).toBeGreaterThanOrEqual(86400)
     }),
   )
 })
