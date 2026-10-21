@@ -23,9 +23,10 @@ dependency, and a mise install on your PATH is used when present. The first
 command after a fresh install sets up the toolchain once, with no prompts,
 using the versions locked in the shipped `bun.lock`. Later runs skip this step.
 
-Commands run from minified bundles in `dist/commands`. These use about half
-the startup CPU of the TypeScript sources. `mise run build` makes them. Set
-`WEBULAR_DEV=1` to run straight from `src/` while you edit, with no build step.
+Commands run from minified bundles in `dist/commands`. A bundle starts with
+about half the CPU that the TypeScript source needs. `mise run build` makes the
+bundles. Set `WEBULAR_DEV=1` to run straight from `src/` while you edit, with no
+build step.
 
 ### Standalone executable
 
@@ -85,7 +86,7 @@ webular research "web scraping in 2026" --depth 3 -o report.md
 
 ## Architecture
 
-```
+```text
 you ▸ webular CLI ▸ mise (universal task graph) ▸ Mastra workflow ▸ Mastra tools ▸ FOSS libs ▸ web
 ```
 
