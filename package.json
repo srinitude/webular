@@ -59,7 +59,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "0.0.56",
+    "@ai-sdk/anthropic": "4.0.82",
     "@effect/platform-bun": "4.0.5",
     "@firecrawl/anydoc": "^0.2.4",
     "@mastra/core": "^1.78.0",
