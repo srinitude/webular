@@ -147,7 +147,6 @@ test('test:models stays out of CI and the default path', () =>
 test('model runs are recorded and every run kept its raw output (evidence first)', () =>
   run((fs) =>
     Effect.gen(function* () {
-      // One committed copy of a recorded run; its raw paths name bench/results.
       const dir = `${ROOT}tests/models/fixtures`
       const names = ((yield* fs.exists(dir)) ? yield* fs.readDirectory(dir) : []).filter((f) =>
         /^models-.*\.json$/.test(f),
