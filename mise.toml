@@ -96,6 +96,11 @@ description = "Write the Homebrew formula and Scoop manifest into dist/bin from 
 depends = ["compile:all"]
 run = 'bun "{{config_root}}/src/release/distribution.ts"'
 
+[tasks."package:winget"]
+description = "Write the winget manifest set (version, installer, defaultLocale) into dist/bin/winget from dist/bin/SHA256SUMS (release path, after compile:all)"
+depends = ["compile:all"]
+run = 'bun "{{config_root}}/src/release/winget.ts"'
+
 [tasks."test:file"]
 description = "Run the named test files only (targeted check while editing)"
 depends = ["setup"]

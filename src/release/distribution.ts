@@ -28,7 +28,7 @@ export const parseSums = (text: string): Sums =>
 export const brewTargets = TARGETS.filter((x) => x.os !== 'win32' && x.libc !== 'musl')
 export const scoopTargets = TARGETS.filter((x) => x.os === 'win32')
 
-const sumFor = (sums: Sums, target: Target) => {
+export const sumFor = (sums: Sums, target: Target) => {
   const asset = assetName(target)
   const sha = sums.get(asset)
   return sha ? Effect.succeed({ asset, sha }) : Effect.fail(new MissingChecksum({ asset }))

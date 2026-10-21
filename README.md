@@ -13,13 +13,66 @@ It needs **no paid API**. Every feature uses open-source parts.
 
 ## Install
 
-```bash
-bun add -g webular      # or: npm i -g webular  (requires bun on PATH)
-```
+Pick one channel.
 
-`webular` needs [Bun](https://bun.com) to run. The `run:<command>` tasks in
-`mise.toml` define every subcommand. `mise run build` turns them into a
-committed table, `src/cli/dispatch-table.ts`. The CLI reads that table and
+- **npm** (any OS; needs only Node). The root package is a Node launcher. It
+  installs the matching `webular-<platform>` native package through
+  `optionalDependencies`.
+
+  ```bash
+  npm i -g webular
+  ```
+
+- **Bun** (needs Node on your PATH, because the launcher starts with a Node
+  shebang).
+
+  ```bash
+  bun add -g webular
+  ```
+
+- **Homebrew** (macOS and glibc Linux).
+
+  ```bash
+  brew install srinitude/webular/webular
+  ```
+
+- **Scoop** (Windows).
+
+  ```powershell
+  scoop bucket add webular https://github.com/srinitude/scoop-webular
+  scoop install webular
+  ```
+
+- **winget** (Windows). It works once the manifest pull request to
+  `microsoft/winget-pkgs` has merged.
+
+  ```powershell
+  winget install Srinitude.Webular
+  ```
+
+- **GitHub release binaries** (any platform). Download
+  `webular-<platform>` (`webular-<platform>.exe` on Windows) from the
+  [releases page](https://github.com/srinitude/webular/releases). Then verify
+  it:
+
+  ```bash
+  sha256sum --check --ignore-missing SHA256SUMS
+  gh attestation verify webular-<platform> --repo srinitude/webular
+  ```
+
+  The platforms are `darwin-arm64`, `darwin-x64`, `linux-x64`, `linux-arm64`,
+  `linux-x64-musl`, `linux-arm64-musl`, `windows-x64`, and `windows-arm64`.
+  On macOS and Linux, including musl, `scripts/install.sh` picks the right
+  asset, checks it against `SHA256SUMS`, and installs it to
+  `~/.webular/bin/webular`:
+
+  ```bash
+  curl -fsSL https://github.com/srinitude/webular/releases/latest/download/install.sh | sh
+  ```
+
+To run from source, you need [Bun](https://bun.com). The `run:<command>`
+tasks in `mise.toml` define every subcommand. `mise run build` turns them into
+a committed table, `src/cli/dispatch-table.ts`. The CLI reads that table and
 starts the command itself, so no mise process runs per command. A test fails
 when the table and `mise.toml` disagree. [mise](https://mise.jdx.dev) comes as
 a pinned npm dependency for the build, `doctor`, and `tasks`. If mise is on

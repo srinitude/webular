@@ -32,17 +32,25 @@ export const packageCopies = (root: string, target: Target): ReadonlyArray<[stri
   ]
 }
 
-const writePackage = (target: Target, version: string) =>
+const platformReadme = (target: Target) =>
+  `# ${packageName(target)}\n\nThe webular executable for ${target.key}. Install \`webular\` instead; it picks this package for you.\n`
+
+export const writePackage = (root: string, target: Target, version: string) =>
   Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem
-    const dir = join(PACKAGE_ROOT, 'npm', packageName(target))
+    const dir = join(root, 'npm', packageName(target))
     const exe = join(dir, 'bin', exeName(target))
     yield* fs.makeDirectory(join(dir, 'bin'), { recursive: true })
-    for (const [from, to] of packageCopies(PACKAGE_ROOT, target)) yield* fs.copyFile(from, to)
+    for (const [from, to] of packageCopies(root, target)) yield* fs.copyFile(from, to)
+    yield* fs.writeFileString(join(dir, 'README.md'), platformReadme(target))
     if (target.os !== 'win32') yield* fs.chmod(exe, 0o755)
     const manifest = `${JSON.stringify(platformManifest(target, version), null, 2)}\n`
     yield* fs.writeFileString(join(dir, 'package.json'), manifest)
   })
+
+// The root package's exact-version optionalDependencies: one per target.
+export const platformDependencies = (version: string) =>
+  Object.fromEntries(TARGETS.map((target) => [packageName(target), version]))
 
 const RootManifest = Schema.fromJsonString(
   Schema.Struct({
@@ -58,12 +66,14 @@ const main = Effect.gen(function* () {
   const text = yield* fs.readFileString(path)
   const { version, optionalDependencies } = yield* Schema.decodeUnknownEffect(RootManifest)(text)
   const pkg = yield* Schema.decodeUnknownEffect(AnyManifest)(text)
-  yield* Effect.forEach(TARGETS, (target) => writePackage(target, version), {
+  yield* Effect.forEach(TARGETS, (target) => writePackage(PACKAGE_ROOT, target, version), {
     concurrency: 4,
     discard: true,
   })
-  const platforms = Object.fromEntries(TARGETS.map((target) => [packageName(target), version]))
-  const next = { ...pkg, optionalDependencies: { ...optionalDependencies, ...platforms } }
+  const next = {
+    ...pkg,
+    optionalDependencies: { ...optionalDependencies, ...platformDependencies(version) },
+  }
   yield* fs.writeFileString(path, `${JSON.stringify(next, null, 2)}\n`)
 })
 

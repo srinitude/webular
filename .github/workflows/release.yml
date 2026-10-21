@@ -2,7 +2,9 @@
 # test -> assets: cross-compile every TARGETS entry (src/core/platform.ts) with
 # `mise run compile:all` as webular-<key>[.exe], write SHA256SUMS, generate the
 # Homebrew formula and Scoop manifest from it (src/release/distribution.ts),
-# attest every file (actions/attest, Sigstore build provenance), and attach
+# write the winget manifest set (src/release/winget.ts) and upload it as the
+# build artifact "winget-manifests" (submitting it to microsoft/winget-pkgs is
+# a manual step), attest every file (actions/attest, Sigstore build provenance), and attach
 # them all, plus scripts/install.sh, to a DRAFT GitHub release -> publish: one
 # npm package per target (webular-<key>, with os/cpu/libc fields), then the
 # root package that lists them as optionalDependencies, then un-draft the
@@ -109,6 +111,16 @@ jobs:
         run: mise run package:manifests
         env:
           MISE_TASK_SKIP_DEPENDS: "1" # binaries and SHA256SUMS exist above; skip compile:all
+      - name: Write the winget manifests from SHA256SUMS
+        run: mise run package:winget
+        env:
+          MISE_TASK_SKIP_DEPENDS: "1" # binaries and SHA256SUMS exist above; skip compile:all
+      - name: Upload the winget manifests for a manual winget-pkgs submission
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: winget-manifests
+          path: dist/bin/winget
+          if-no-files-found: error
       - name: Stage the installer
         run: cp scripts/install.sh dist/bin/install.sh
       - name: Attest build provenance for every release file
