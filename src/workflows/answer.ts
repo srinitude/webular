@@ -15,7 +15,7 @@ import { onJevRuntime } from '../lib/jev/run.ts'
 import { decisionStep } from '../lib/jev/steps.ts'
 import { readabilitySchema, withReadability } from '../lib/readability-chain.ts'
 import { searchEffect } from '../lib/search-chain.ts'
-import { mainEntity } from '../lib/search-hop.ts'
+import { mainEntity, nestedBridge } from '../lib/search-hop.ts'
 import { subjectSources } from '../lib/source-subject.ts'
 import { fetchErrorsSchema, fetchSources } from '../lib/sources.ts'
 import { stepRuntime } from './runtime.ts'
@@ -92,11 +92,24 @@ const gather = Effect.fn('answer.gather')(function* (input: z.infer<typeof answe
   return { query, sentences, entity, used: [...used], errors: fetched.errors }
 })
 
+// A nested question ("the capital of the country that hosted ...") takes its
+// bridge country from the first round's pages, then asks the outer question.
+const gatherBridged = Effect.fn('answer.bridge')(function* (input: z.infer<typeof answerInput>) {
+  const first = yield* gather(input)
+  const bridged = input.urls
+    ? undefined
+    : nestedBridge(
+        input.query,
+        first.used.map((e) => e.text),
+      )
+  return bridged ? yield* gather({ ...input, query: bridged }) : first
+})
+
 const searchStep = createStep({
   id: 'search',
   inputSchema: answerInput,
   outputSchema: evidenceSchema,
-  execute: ({ inputData }) => stepRuntime.runPromise(gather(inputData)),
+  execute: ({ inputData }) => stepRuntime.runPromise(gatherBridged(inputData)),
 })
 
 const topSentences = (data: Evidence) =>
