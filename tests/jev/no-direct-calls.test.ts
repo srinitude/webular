@@ -51,9 +51,10 @@ const offences = (file: string, text: string) => {
 const outsideJev = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem
   const root = `${import.meta.dir}/../../src`
-  const files = (yield* fs.readDirectory(root, { recursive: true })).filter(
-    (f) => f.endsWith('.ts') && !f.startsWith('lib/jev/'),
-  )
+  const files = (yield* fs.readDirectory(root, { recursive: true }))
+    // Windows lists nested entries with backslashes; the rules compare POSIX paths.
+    .map((f) => f.replaceAll('\\', '/'))
+    .filter((f) => f.endsWith('.ts') && !f.startsWith('lib/jev/'))
   const texts = yield* Effect.forEach(files, (f) => fs.readFileString(`${root}/${f}`), {
     concurrency: 16,
   })

@@ -77,9 +77,10 @@ const build = (d: Declared['def']) => {
 }
 const srcFiles = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem
-  const files = (yield* fs.readDirectory(`${root}/src`, { recursive: true })).filter((f) =>
-    f.endsWith('.ts'),
-  )
+  const files = (yield* fs.readDirectory(`${root}/src`, { recursive: true }))
+    // Windows lists nested entries with backslashes; the checks compare POSIX paths.
+    .map((f) => f.replaceAll('\\', '/'))
+    .filter((f) => f.endsWith('.ts'))
   const texts = yield* Effect.forEach(files, (f) => fs.readFileString(`${root}/src/${f}`), {
     concurrency: 16,
   })
