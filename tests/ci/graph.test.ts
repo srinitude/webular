@@ -23,6 +23,7 @@ const COMMANDS = [
   'diagram',
   'audit',
   'act',
+  'feed',
 ]
 const graph = loadGraph()
 
@@ -55,5 +56,19 @@ describe('mise task graph — the contract every CLI invocation routes through',
 
   test('the universal task graph is acyclic', () => {
     expect(hasCycle(graph)).toBe(false)
+  })
+
+  // Installs live under paths with spaces (e.g. C:\Users\Jane Doe\...), and
+  // Windows task shells have no POSIX `rm`: every task must survive both.
+  test('every task run string quotes {{config_root}} and avoids POSIX-only commands', () => {
+    for (const [name, task] of Object.entries(graph)) {
+      const run = task.run ?? ''
+      expect({ name, unquoted: /(^|[^"])\{\{config_root\}\}/.test(run) }).toEqual({
+        name,
+        unquoted: false,
+      })
+      const posix = /(^|[;&|]\s*)(rm|cp|mv|test)\s/.test(run)
+      expect({ name, posix }).toEqual({ name, posix: false })
+    }
   })
 })

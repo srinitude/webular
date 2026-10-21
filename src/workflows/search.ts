@@ -1,12 +1,15 @@
-// SEARCH workflow: keyless web search (DuckDuckGo HTML endpoint via fetch),
+// SEARCH workflow: keyless web search (DuckDuckGo HTML endpoint via fetch) or a
+// specialized keyless source (--source wikipedia|hackernews|arxiv),
 // composed as a Mastra non-model workflow over the FOSS search lib.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { z } from 'zod'
 import { webSearch } from '../lib/search.ts'
+import { SEARCH_SOURCES, sourceSearch } from '../lib/sources-search.ts'
 
 const searchInput = z.object({
   query: z.string().min(1),
   limit: z.number().int().positive().default(10),
+  source: z.enum(SEARCH_SOURCES).default('web'),
 })
 
 const resultItem = z.object({
@@ -26,7 +29,9 @@ const searchStep = createStep({
   inputSchema: searchInput,
   outputSchema: searchOutput,
   execute: async ({ inputData }) => {
-    const results = await webSearch(inputData.query, inputData.limit)
+    const { query, limit, source } = inputData
+    const results =
+      source === 'web' ? await webSearch(query, limit) : await sourceSearch(source, query, limit)
     return { query: inputData.query, count: results.length, results }
   },
 })

@@ -12,7 +12,6 @@
         "diff": "^9.0.0",
         "linkedom": "^0.18.13",
         "mammoth": "^1.13.0",
-        "mise": "2026.10.15",
         "p-limit": "^7.3.3",
         "turndown": "^7.2.4",
         "unpdf": "^1.9.1",
@@ -26,6 +25,9 @@
         "@types/turndown": "^5.0.6",
         "deepsec": "^2.3.10",
         "typescript": "6.0.3",
+      },
+      "optionalDependencies": {
+        "mise": "2026.10.15",
       },
     },
   },

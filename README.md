@@ -5,12 +5,11 @@
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![runtime: Bun](https://img.shields.io/badge/runtime-Bun-f9f1e1.svg?logo=bun&logoColor=black)](https://bun.com)
 
-> Universal web research CLI — scrape, crawl, map, extract, search, summarize, and gather context, by composing **free & open-source** libraries into **Mastra** workflows/tools, orchestrated through a deterministic **mise** task graph, on the **Bun** runtime.
+> A web research CLI for every platform. It can scrape, crawl, map, extract, search, summarize, and gather context. It builds on **free and open-source** libraries, runs them as **Mastra** workflows and tools, routes every command through a fixed **mise** task graph, and runs on **Bun**.
 
-`webular` distills the unique web capabilities of seven commercial web-data
-products (Firecrawl, Exa, Perplexity, Tavily, Parallel, Nimble, Brave) into a
-single CLI that needs **no paid API** — every capability is implemented from
-open-source building blocks.
+`webular` brings together the web features of seven paid web-data products
+(Firecrawl, Exa, Perplexity, Tavily, Parallel, Nimble, Brave) in one CLI that
+needs **no paid API**. Every feature is built from open-source parts.
 
 ## Install
 
@@ -18,11 +17,11 @@ open-source building blocks.
 bun add -g webular      # or: npm i -g webular  (requires bun + mise on PATH)
 ```
 
-`webular` requires [Bun](https://bun.com) (runtime). [mise](https://mise.jdx.dev)
-routes every subcommand (`mise run run:<command>`) and ships bundled as a pinned
-npm dependency — a PATH install is used when present. The first command after a
-fresh install provisions the pinned toolchain once (non-interactive, pinned via
-the shipped `bun.lock`); later runs skip it.
+`webular` needs [Bun](https://bun.com) to run. [mise](https://mise.jdx.dev)
+routes every subcommand (`mise run run:<command>`). It ships as a pinned npm
+dependency, and a mise install on your PATH is used when present. The first
+command after a fresh install sets up the pinned toolchain once, with no
+prompts, pinned by the shipped `bun.lock`. Later runs skip this step.
 
 ## Usage
 
@@ -31,9 +30,9 @@ webular <command> [options]
 webular --help
 ```
 
-| Command | Capability |
+| Command | What it does |
 |---|---|
-| `search`    | Keyless web search via DuckDuckGo's no-JS HTML endpoint |
+| `search`    | Keyless web search via DuckDuckGo's no-JS HTML endpoint; `--source wikipedia\|hackernews\|arxiv` searches one of those keyless sources instead |
 | `scrape`    | Fetch one URL → clean markdown/JSON (Bun.fetch + Readability + Turndown) |
 | `crawl`     | Recursive same-host BFS crawl (no robots.txt/rate-limiting — crawl responsibly) |
 | `map`       | Discover all URLs for a domain (sitemap + link BFS) |
@@ -51,6 +50,7 @@ webular --help
 | `diagram`   | List the design diagrams (pre-rendered SVGs in docs/diagrams) |
 | `audit`     | Report `deepsec` availability + scan plan (keyless; scans need LLM keys) |
 | `act`       | Drive a real browser — open, snapshot, screenshot, interact (agent-browser) |
+| `feed`      | Read an RSS 2.0 or Atom 1.0 feed and list its items (title, link, date, summary) |
 
 **Global options:** `--json`, `-o/--output <file>`, `--timeout <ms>` (per request attempt), `-h/--help`, `-V/--version`.
 
@@ -59,6 +59,8 @@ webular --help
 ```bash
 webular scrape https://example.com --json
 webular search "bun javascript runtime" --json
+webular search "bun runtime" --source wikipedia --json   # also: hackernews, arxiv
+webular feed https://hnrss.org/frontpage --limit 5
 webular map https://example.com
 webular research "web scraping in 2026" --depth 3 -o report.md
 ```
@@ -69,19 +71,19 @@ webular research "web scraping in 2026" --depth 3 -o report.md
 you ▸ webular CLI ▸ mise (universal task graph) ▸ Mastra workflow ▸ Mastra tools ▸ FOSS libs ▸ web
 ```
 
-The CLI never calls capability code directly: it parses argv and routes to
-`mise run run:<command> -- <args>`. mise owns a **single, acyclic task graph**
-(`setup → format → lint → typecheck → build → test → validate → ci`, with each
-command branching off `setup`). Each command is a **Mastra workflow** built from
-**non-model Mastra tools** that wrap open-source libraries.
+The CLI never calls feature code directly. It parses argv and routes to
+`mise run run:<command> -- <args>`. mise owns **one task graph with no cycles**
+(`setup → format → lint → typecheck → build → test → validate → ci`, and each
+command branches off `setup`). Each command is a **Mastra workflow** built from
+**Mastra tools that use no model** and wrap open-source libraries.
 
-The design is captured in seven diagrams under [`docs/diagrams/`](docs/diagrams/)
-(sequence, class, state, ER, user-journey, requirement, mindmap), generated with
-`mmdc` as the design basis for the implementation.
+Seven diagrams under [`docs/diagrams/`](docs/diagrams/) hold the design
+(sequence, class, state, ER, user-journey, requirement, mindmap). They are made
+with `mmdc` and are the basis for the code.
 
-Designed per the [Command Line Interface Guidelines](https://clig.dev): machine
-data to stdout, logs to stderr, `--json` everywhere, `-o` file sinks, forgiving
-parsing, helpful `--help`, and a `doctor` for diagnostics.
+The CLI follows the [Command Line Interface Guidelines](https://clig.dev): data
+goes to stdout, logs go to stderr, `--json` works everywhere, `-o` writes to a
+file, parsing is forgiving, `--help` is helpful, and `doctor` checks your setup.
 
 ## Development
 
@@ -95,11 +97,14 @@ mise run test       # run the bun test suite (real services, no mocks)
 mise run run:scrape -- --url https://example.com --json
 ```
 
-Conventions enforced by the suite: ≤200 lines/file, ≤30 lines/construct,
-nesting depth ≤3, no orphaned exports, and no mocks/stubs — tests exercise
-real behavior against a local `Bun.serve` fixture (deterministic, offline-capable).
-Live-internet cases (DuckDuckGo search, a real browser) are opt-in:
-`WEBULAR_TEST_LIVE=1 mise run test`. Note: DDG blocks many datacenter IPs.
+The suite enforces these rules: at most 200 lines per file, at most 30 lines per
+construct, nesting depth of 3 or less, no orphaned exports, and no mocks or
+stubs. Tests check real behavior against a local `Bun.serve` fixture, so they
+give the same result every run and work offline.
+Cases that need the live internet (DuckDuckGo search, a real browser) are opt-in:
+`WEBULAR_TEST_LIVE=1 mise run test`. Note: DuckDuckGo blocks many datacenter IPs.
+The `search --source` and `feed` suites run offline: `WEBULAR_SOURCE_ORIGIN`
+points the Wikipedia, Hacker News, and arXiv endpoints at the local fixture.
 
 ## License
 

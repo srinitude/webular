@@ -19,6 +19,7 @@ export const COMMANDS = {
   diagram: 'List the design diagrams (pre-rendered SVGs ship in docs/diagrams)',
   audit: 'Report deepsec availability and the scan plan (keyless)',
   act: 'Drive a real browser — open, snapshot, screenshot, interact (agent-browser)',
+  feed: 'Read an RSS or Atom feed and list its items',
 } as const
 
 export type CommandName = keyof typeof COMMANDS

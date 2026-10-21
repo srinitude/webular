@@ -44,12 +44,18 @@ describe('gateway — fresh-environment routing', () => {
     expect(JSON.parse(out).count).toBeGreaterThanOrEqual(7)
   }, 30_000)
 
-  test('falls back to the bundled mise binary when PATH has none', async () => {
-    const env = { ...process.env, PATH: '/usr/bin:/bin' }
-    const { code, out } = await runWebular(['diagram', '--list', '--json'], { cwd: dir, env })
-    expect(code).toBe(0)
-    expect(JSON.parse(out).count).toBeGreaterThanOrEqual(7)
-  }, 30_000)
+  // The mise npm package publishes no Windows binary, so there is no bundled
+  // fallback to exercise there; Windows users install mise on PATH.
+  test.skipIf(process.platform === 'win32')(
+    'falls back to the bundled mise binary when PATH has none',
+    async () => {
+      const env = { ...process.env, PATH: '/usr/bin:/bin' }
+      const { code, out } = await runWebular(['diagram', '--list', '--json'], { cwd: dir, env })
+      expect(code).toBe(0)
+      expect(JSON.parse(out).count).toBeGreaterThanOrEqual(7)
+    },
+    30_000,
+  )
 
   test('bootstraps trust for its own config under a fresh mise state dir', async () => {
     const stateDir = join(dir, 'mise-state')

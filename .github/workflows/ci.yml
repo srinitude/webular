@@ -1,13 +1,16 @@
 # webular — remote CI/CD. Single default dependency path: `mise run ci`
-# pulls setup -> format -> lint -> typecheck -> build -> test -> validate -> ci.
-# Identical to local CI (`mise run ci`); mise owns the toolchain + graph.
+# pulls setup -> lint -> typecheck -> build -> test -> validate -> ci.
+# Identical to local CI (`mise run ci`); mise owns the toolchain + graph, so
+# tool versions come from mise.toml, never from this file.
+# Runs on Linux, macOS and Windows: the CLI ships to all three.
 name: CI
 
 on:
   push:
-    branches: [main]
+    branches: ["**"]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -18,7 +21,11 @@ concurrency:
 
 jobs:
   ci:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: jdx/mise-action@fc42bcc7ddbf51124c30f95a877a0c5168a3bfde # v5.2.1

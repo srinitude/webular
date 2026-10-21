@@ -55,11 +55,13 @@
     "diff": "^9.0.0",
     "linkedom": "^0.18.13",
     "mammoth": "^1.13.0",
-    "mise": "2026.10.15",
     "p-limit": "^7.3.3",
     "turndown": "^7.2.4",
     "unpdf": "^1.9.1",
     "zod": "^4.6.7"
+  },
+  "optionalDependencies": {
+    "mise": "2026.10.15"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",

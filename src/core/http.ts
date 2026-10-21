@@ -84,10 +84,18 @@ function assertTextual(res: Response, url: string): void {
     throw new Error(`fetch ${url}: unsupported content-type "${mime}" — use media --download`)
 }
 
+// Every rejected response releases its body, so the pooled connection is
+// freed at once instead of waiting for GC (Bun guide BUN027).
 async function okText(res: Response, url: string): Promise<string> {
-  if (!res.ok) throw new Error(`fetch ${url} failed: ${res.status} ${res.statusText}`)
-  assertTextual(res, url)
-  return readTextCapped(res, url, MAX_TEXT_BYTES)
+  try {
+    if (!res.ok) throw new Error(`fetch ${url} failed: ${res.status} ${res.statusText}`)
+    assertTextual(res, url)
+    return await readTextCapped(res, url, MAX_TEXT_BYTES)
+  } catch (err) {
+    // A stream already locked by the reader was cancelled by its iterator.
+    await res.body?.cancel().catch(() => undefined)
+    throw err
+  }
 }
 
 export async function fetchText(url: string, opts: FetchOptions = {}): Promise<string> {
@@ -122,6 +130,7 @@ export async function fetchTextWithinHost(
     if (!isRedirect(res.status)) return okText(res, current)
     const location = res.headers.get('location')
     if (!location) return okText(res, current)
+    await res.body?.cancel() // the hop's body is never read; free its connection
     current = new URL(location, current).toString()
     if (!sameHost(host, current)) throw new Error(`redirect off-site blocked: ${current}`)
   }

@@ -1,0 +1,4 @@
+# Pin LF in the working tree on every OS: Biome checks formatting byte for byte,
+# and Windows checkouts with core.autocrlf=true would otherwise turn every file CRLF.
+* text=auto eol=lf
+*.svg binary

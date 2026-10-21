@@ -77,6 +77,10 @@ const RENDERERS: Record<CommandName, Renderer> = {
     str(r, 'screenshot')
       ? `${str(r, 'snapshot')}\nscreenshot: ${str(r, 'screenshot')}`
       : str(r, 'snapshot'),
+  feed: (r) =>
+    arr(r, 'items')
+      .map((x) => `${str(x, 'published')}\t${str(x, 'title')}\n  ${str(x, 'url')}`)
+      .join('\n'),
 }
 
 export function renderFor(name: string): ((data: unknown) => string) | undefined {
