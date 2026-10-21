@@ -55,10 +55,22 @@
       "grader": "bun test: name parity across descriptions.json, mise.toml, and src/cli/commands.ts"
     },
     {
-      "assertion": "the command tool list holds 18 unique tools, each a CLI command with a title and description",
+      "assertion": "the list holds the 18 command tools, with unique names",
       "source": "tests/commands.test.ts",
       "kind": "deterministic",
-      "grader": "bun test: count, uniqueness, and name parity with src/cli/commands.ts"
+      "grader": "bun test: count and uniqueness of the command tool ids"
+    },
+    {
+      "assertion": "every tool is a CLI command, and mcp is the only command without one",
+      "source": "tests/commands.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: name parity with src/cli/commands.ts"
+    },
+    {
+      "assertion": "every tool has a non-empty title and description",
+      "source": "tests/commands.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: each command tool has a non-empty title and description"
     },
     {
       "assertion": "every reference file opens with a table of contents whose links resolve",
