@@ -6,10 +6,11 @@ import { Clock, Effect } from 'effect'
 import { type SourceRunner, searchEffect } from '../../src/lib/search-chain.ts'
 import { eff } from '../_support/run.ts'
 
-const novel = 'Love in the Time of Cholera'
+const novel = 'One Hundred Years of Solitude'
 const question = `Who wrote the novel ${novel}?`
-// mainEntity splits the title at "in", so the entity round asks this part.
-const entityName = 'Time of Cholera'
+// The entity round asks the title; a longer namesake page renames the fact query.
+const entityName = novel
+const namesake = `Novel ${novel}`
 const film = {
   title: `${novel} (film)`,
   url: 'https://en.wikipedia.org/wiki/Love_in_the_Time_of_Cholera_(film)',
@@ -60,10 +61,10 @@ test(
   'a renamed fact query runs after the entity round',
   eff(
     Effect.gen(function* () {
-      const { spans, runSource } = recorded(novel)
+      const { spans, runSource } = recorded(namesake)
       yield* searchEffect('web', question, 3, { hop: true, runSource })
       const entity = spans.find((s) => s.query === entityName)
-      const fact = spans.find((s) => s.query === question.replace(entityName, novel))
+      const fact = spans.find((s) => s.query === question.replace(entityName, namesake))
       expect(fact && entity && fact.start >= entity.end).toBe(true)
     }),
   ),

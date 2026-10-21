@@ -23,7 +23,8 @@ type SearchRound<M extends { weak: boolean }> = (
 // Main entity of a question: the longest run of capitalized words, minus
 // question and function words ("Where was Heisenberg born?" -> "Heisenberg").
 // A run spans lowercase name connectors ("Bank of England") and drops quote
-// marks around it, so a quoted title stays one entity.
+// marks around it, so a quoted title stays one entity. "in" joins only before
+// "the" ("Love in the Time of Cholera"), so "Eiffel Tower in Paris" stays apart.
 // ponytail: capitalization heuristic; swap in a Jev extractor if it misses.
 const NOT_ENTITY = new Set(
   'Who What When Where Which Why How Is Was Were Are Did Does Do The A An In Of On At For'.split(
@@ -31,7 +32,7 @@ const NOT_ENTITY = new Set(
   ),
 )
 const WORD = String.raw`\p{Lu}[\p{L}\p{M}]*(?:['’-][\p{L}\p{M}]+)*`
-const CONNECTOR = String.raw`(?:\s+(?:of|the|de|von|van|der|del|da|du|la|le))*`
+const CONNECTOR = String.raw`(?:\s+(?:of|the|in(?=\s+the\b)|de|von|van|der|del|da|du|la|le))*`
 const ENTITY_RUN = new RegExp(String.raw`${WORD}(?:${CONNECTOR}\s+${WORD})*`, 'gu')
 export const mainEntity = (question: string): string | undefined =>
   (question.match(ENTITY_RUN) ?? [])
@@ -69,6 +70,11 @@ const namedFor = (entity: string) => (h: Hit) =>
   h.title.split(/\s+/).length <= entity.split(/\s+/).length + 3 &&
   h.title.toLowerCase().endsWith(entity.toLowerCase())
 
+// The page titled exactly the entity wins over a longer namesake the ranking
+// put higher ("Cookie Love in the Time of Cholera", a blog post).
+const entityPage = (entity: string, hits: ReadonlyArray<Hit>) =>
+  hits.find((h) => h.title.toLowerCase() === entity.toLowerCase()) ?? hits.find(namedFor(entity))
+
 // The fact round searches the query with the entity page's title in place of
 // the entity. That title is most often the entity itself, so the unchanged
 // query starts beside the entity round; a renamed query drops it and runs anew.
@@ -93,20 +99,20 @@ export const secondHop = Effect.fn('secondHop')(function* <M extends { weak: boo
 ) {
   const entity = mainEntity(query) ?? bridgeEntity(first.results.slice(0, HOP_TOP))
   if (!entity) return first
-  const named = namedFor(entity)
   // The entity page is already near the top: lead with it, since the answer
   // step takes the lead hit's title as the entity of a nameless question.
-  const here = first.results.slice(0, HOP_TOP).find(named)
+  const here = first.results.slice(0, HOP_TOP).find(namedFor(entity))
   if (here) return { ...first, results: [here, ...first.results.filter((h) => h !== here)] }
   // A bridge entity is not in the question, so its page is the fact source.
   const early = query.includes(entity) ? yield* Effect.forkScoped(search(query, limit)) : undefined
   const page = yield* search(entity, HOP_PAGE_LIMIT)
-  const name = page.results.find(named)?.title ?? entity
+  const pageHit = entityPage(entity, page.results)
+  const renamed = query.replace(entity, pageHit?.title ?? entity)
   const fact = early
-    ? yield* factRound(query, query.replace(entity, name), limit, early, search)
+    ? yield* factRound(query, renamed, limit, early, search)
     : { results: [] as Hit[] }
   // The entity page leads: the domain signal would sink a Wikipedia bio.
-  const lead = page.results.filter(named).slice(0, 1)
+  const lead = pageHit ? [pageHit] : []
   const leadKeys = new Set(lead.map((h) => hitKey(h.url)))
   const scored = scoreHits([fact.results, first.results], query)
   const rest = scored.map((e) => e.hit).filter((h) => !leadKeys.has(hitKey(h.url)))

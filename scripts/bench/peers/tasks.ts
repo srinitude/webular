@@ -147,6 +147,15 @@ export const builtinTasks: readonly Task[] = [
     'What is the height of Mount Everest in meters according to the 2020 survey?',
     ['8,848', '8848'],
   ),
+  // Spot misses: trailing navigational filler, and a title split at "in the".
+  {
+    id: 'search-bun-docs-homepage',
+    job: 'search',
+    suite: 'search',
+    input: { query: 'Bun runtime documentation homepage' },
+    checks: [{ kind: 'urlMatches', values: ['^https://bun\\.(sh|com)'] }],
+  },
+  qa('qa-cholera-author', 'Who wrote the novel Love in the Time of Cholera?', ['Garcia Marquez']),
 ]
 
 export const loadPlan = (path: string) =>

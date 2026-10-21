@@ -56,6 +56,13 @@ const bestStatus = (outcomes: ReadonlyArray<Outcome>) =>
     outcomes[0]?.status ?? 'no-results',
   )
 
+// Trailing navigational filler ("Bun runtime documentation homepage"): the
+// free full-text APIs need every word, so it hides the project. Questions and
+// a query that is only filler stay as they are.
+const TRAILING_NAV =
+  /(?:\s+(?:official|site|website|homepage|home page|docs?|documentation|library|github))+\s*$/i
+const navCore = (q: string) => (q.trim().endsWith('?') ? q : q.replace(TRAILING_NAV, ''))
+
 // One source, every query variant at once; the best variant status wins.
 // `hit` fires on the first variant with hits; `cutoff` ends the stragglers.
 export const querySource = Effect.fn('querySource')(function* (
@@ -74,7 +81,7 @@ export const querySource = Effect.fn('querySource')(function* (
   const cut = Effect.as(settle.cutoff, { status: 'timeout', hits: [] } as Outcome)
   const outcomes = yield* Effect.forEach(
     queries,
-    (q) => runVariant(runSource(source, q, limit), onHit, cut),
+    (q) => runVariant(runSource(source, navCore(q), limit), onHit, cut),
     { concurrency: MAX_VARIANTS + 1 },
   )
   const endedAt = yield* Clock.currentTimeMillis
