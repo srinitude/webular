@@ -85,10 +85,23 @@ const ERROR_RUNS: { name: string; args: string[]; code: number; starts: string }
   },
   { name: 'missing input', args: ['scrape'], code: 2, starts: 'scrape: missing' },
   {
+    name: 'ftp address',
+    args: ['map', 'ftp://example.com'],
+    code: 2,
+    starts: "map: 'ftp://example.com' is not a web address.",
+  },
+  {
+    name: 'text that is not an address',
+    args: ['scrape', '--url', 'not a url'],
+    code: 2,
+    starts: "scrape: 'not a url' is not a web address.",
+  },
+  {
     name: 'unreachable URL',
     args: ['scrape', '--url', 'http://127.0.0.1:9/'],
     code: 1,
-    starts: '',
+    // No stack trace comes first: the failure line opens stderr.
+    starts: 'scrape: failed (',
   },
 ]
 

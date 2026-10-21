@@ -22,7 +22,7 @@ import { fetchText } from '../core/http.ts'
 import { errMsg, pageText, selectFields, shortError, stableJson } from '../core/output.ts'
 import { extractLinks, htmlToArticle, htmlToMarkdown } from '../lib/html.ts'
 import { machineSchema, machineState, paging, ToolArgsError } from './web-machine.ts'
-import { registerApps } from './web-register.ts'
+import { lenient, registerApps } from './web-register.ts'
 
 interface McpToolDef {
   id: string
@@ -152,21 +152,21 @@ const runTool = (id: string, args: Record<string, unknown>, entryOf?: EntryOf) =
 
 // Registering mutates the server, so it is an Effect: it captures the caller's
 // context once, and each MCP Promise handler runs its tool Effect with it.
-// The plugin's command tools and MCP App views register too, so both servers
-// list the same tools and apps. entryOf names the command file a tool starts.
+// Command tools and MCP App views register on both servers alike.
 type RunWith = Parameters<typeof registerApps>[1]
 
-// Registration order is tools/list order, so register every tool sorted by id
-// (machine.next sorts among the command names, web.* after them).
+// Registration order is tools/list order, so register every tool sorted by id.
 const toolRegistrations = (server: McpServer, runWith: RunWith, entryOf?: EntryOf) =>
   [
     ...commandTools.map(
-      ({ id, outputSchema: _, ...config }) =>
+      ({ id, outputSchema: _, inputSchema, ...config }) =>
         [
           id,
           () =>
-            server.registerTool(id, config, (args: Record<string, unknown>) =>
-              runWith(runTool(id, args, entryOf)),
+            server.registerTool(
+              id,
+              { ...config, inputSchema: lenient(inputSchema) },
+              (args: Record<string, unknown>) => runWith(runTool(id, args, entryOf)),
             ),
         ] as const,
     ),

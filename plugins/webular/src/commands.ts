@@ -57,7 +57,8 @@ const decode = (bytes: Stream.Stream<Uint8Array, unknown>) =>
 const toFlags = (input: Record<string, unknown>) =>
   Object.entries(input).flatMap(([k, v]) => {
     if (v === undefined || v === false) return []
-    return v === true ? [`--${k}`] : [`--${k}`, String(v)]
+    // One --key=value token, so a value that starts with '-' is never read as a flag.
+    return v === true ? [`--${k}`] : [`--${k}=${String(v)}`]
   })
 
 // Picks the next step by exit code: 2 is bad input, anything else is the site or the network.

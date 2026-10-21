@@ -41,8 +41,8 @@ const CALLS: Record<string, (o: string) => Record<string, unknown>> = {
   tasks: () => ({}),
 }
 
-// Inputs the CLI rejects as wrong usage (exit 2). The MCP input schema rejects
-// them first with the SDK's own text, so the error text differs from the CLI's.
+// Inputs the CLI rejects as wrong usage (exit 2). The MCP input schema lets each
+// bad value through, so the agent sees the CLI's own usage error.
 const BAD: Record<string, Record<string, unknown>> = {
   map: { url: 'http://127.0.0.1:9/', limit: 0 },
   crawl: { url: 'http://127.0.0.1:9/', depth: -1 },
@@ -97,7 +97,7 @@ const checkError = (client: Client, name: string) =>
   Effect.gen(function* () {
     const args = BAD[name] ?? {}
     const r = yield* call(client, name, args)
-    const flags = Object.entries(args).flatMap(([k, v]) => [`--${k}`, String(v)])
+    const flags = Object.entries(args).map(([k, v]) => `--${k}=${String(v)}`)
     const cli = yield* runCli(`src/commands/${name}.ts`, [...flags, '--json'])
     const want = `webular ${name} failed: ${cli.err.trim()}. Fix the input and call it again.`
     return { name, code: cli.code, isError: r.isError ?? false, text: textOf(r), want }
@@ -139,7 +139,6 @@ describe('webular mcp — agent contract gaps over stdio', () => {
     eff(outputsMatch),
     90_000,
   )
-  // Open gap (clause 3): flip to test() once a schema-rejected input returns the CLI's text.
-  test.failing("a bad input's isError text is the CLI's usage error", eff(errorsMatch), 30_000)
+  test("a bad input's isError text is the CLI's usage error", eff(errorsMatch), 30_000)
   test('tools/list names every CLI command except NOT_ON_MCP', eff(namesMatch), 20_000)
 })

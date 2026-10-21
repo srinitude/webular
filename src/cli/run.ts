@@ -5,8 +5,10 @@
 import type { AnyWorkflow } from '@mastra/core/workflows'
 import { Effect, type FileSystem, type Path } from 'effect'
 import type { EventFromLogic } from 'xstate'
+import { CliError } from '../core/effect.ts'
 import { emit, errMsg, logErr, type OutputError } from '../core/output.ts'
 import type { SandboxError } from '../core/safepath.ts'
+import { normalizeUrl } from '../core/url.ts'
 import { commandLifecycleMachine } from '../machines/command-lifecycle.ts'
 import { EXIT, payloadExit, settledExit } from './exit-codes.ts'
 import { renderFor } from './render.ts'
@@ -89,29 +91,54 @@ function report(
   )
 }
 
+// A url that is not a full http or https address is wrong usage (exit 2), so
+// it fails before the workflow loads.
+const checkUrl = (name: string, inputData: unknown): Effect.Effect<void, CliError> => {
+  const url = (inputData as { url?: unknown } | null)?.url
+  if (typeof url !== 'string') return Effect.void
+  const href = normalizeUrl(url)
+  const protocol = href === null ? '' : new URL(href).protocol
+  if (protocol === 'http:' || protocol === 'https:') return Effect.void
+  const message = `${name}: '${safeText(url)}' is not a web address. Use a full http or https URL, such as https://example.com.`
+  return Effect.fail(new CliError({ message, exitCode: EXIT.usage }))
+}
+
 // The Mastra run is the Promise edge; it surfaces input-validation failures by
 // rejecting from start, which reports as a plain failure (exit 1). The
 // workflow loads lazily: importing @mastra/core costs seconds of disk reads,
 // so flag errors fail before it loads. The loader resolves to the module, never
 // the workflow: a Mastra workflow has a builder .then, so a Promise resolving to
-// it adopts it as a thenable and never settles.
+// it adopts it as a thenable and never settles. The logger loads with it: a
+// silent logger keeps the step's stack trace off stderr, and the failure line
+// still names the cause.
 export function runWorkflow<M>(
   name: string,
   load: () => Promise<M>,
   pick: (mod: M) => AnyWorkflow,
   inputData: unknown,
   opts: RunOpts,
-): Effect.Effect<number, OutputError | SandboxError, FileSystem.FileSystem | Path.Path> {
-  return Effect.tryPromise({ try: load, catch: errMsg }).pipe(
-    Effect.flatMap((mod) =>
-      Effect.tryPromise({ try: () => pick(mod).createRun({ runId: name }), catch: errMsg }),
+): Effect.Effect<number, CliError | OutputError | SandboxError, FileSystem.FileSystem | Path.Path> {
+  const run = Effect.tryPromise({
+    try: () => Promise.all([load(), import('@mastra/core/logger')]),
+    catch: errMsg,
+  }).pipe(
+    Effect.flatMap(([mod, { noopLogger }]) =>
+      Effect.tryPromise({
+        try: () => {
+          const workflow = pick(mod)
+          workflow.__setLogger(noopLogger)
+          return workflow.createRun({ runId: name })
+        },
+        catch: errMsg,
+      }),
     ),
-    Effect.flatMap((run) =>
-      Effect.tryPromise({ try: () => run.start({ inputData }), catch: errMsg }),
+    Effect.flatMap((created) =>
+      Effect.tryPromise({ try: () => created.start({ inputData }), catch: errMsg }),
     ),
     Effect.matchEffect({
       onFailure: (detail) => failed(name, detail, [{ type: 'INPUT_INVALID' }]),
       onSuccess: (outcome) => report(name, outcome, opts),
     }),
   )
+  return Effect.andThen(checkUrl(name, inputData), run)
 }
