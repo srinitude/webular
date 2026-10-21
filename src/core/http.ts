@@ -73,7 +73,6 @@ const send = Effect.fn('send')(function* (url: string, opts: FetchOptions) {
   return yield* Effect.promise(() => pending as Promise<Response>) // settled: the client resolved it
 }, Effect.provide(FetchHttpClient.layer))
 
-// Every response, retries included, reaches onResponse before its body is read.
 const fetchOnce = (url: string, opts: FetchOptions): Effect.Effect<Response, FetchError> =>
   send(url, opts).pipe(
     Effect.mapError((err) => {
