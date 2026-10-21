@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { fetchText } from '../core/http.ts'
 import { htmlToArticle } from '../lib/html.ts'
 import { compareAndStore } from '../lib/snapshot.ts'
+import { freeSourceFallback } from '../lib/sources/registry.ts'
 import { stepRuntime } from './runtime.ts'
 
 const monitorInput = z.object({
@@ -20,6 +21,23 @@ const monitorOutput = z.object({
   diff: z.string().optional(),
 })
 
+const MAX_SNAPSHOTS = 3
+
+// The page itself; when it fails to load, the closest archived snapshots the
+// free sources list for the url, in rank order. With none, the page's own
+// error stands.
+const pageHtml = (url: string, timeoutMs: number | undefined) =>
+  fetchText(url, { timeoutMs }).pipe(
+    Effect.catch((err) =>
+      freeSourceFallback('monitor', url, MAX_SNAPSHOTS).pipe(
+        Effect.flatMap(({ results }) =>
+          Effect.firstSuccessOf(results.map((hit) => fetchText(hit.url, { timeoutMs }))),
+        ),
+        Effect.mapError(() => err),
+      ),
+    ),
+  )
+
 const fetchStep = createStep({
   id: 'fetch',
   inputSchema: monitorInput,
@@ -30,7 +48,7 @@ const fetchStep = createStep({
   }),
   execute: ({ inputData }) =>
     stepRuntime.runPromise(
-      Effect.map(fetchText(inputData.url, { timeoutMs: inputData.timeoutMs }), (html) => ({
+      Effect.map(pageHtml(inputData.url, inputData.timeoutMs), (html) => ({
         url: inputData.url,
         dbPath: inputData.dbPath,
         text: htmlToArticle(html).text,

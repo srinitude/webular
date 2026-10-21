@@ -1,0 +1,17 @@
+{
+  "pagination": { "current": 1, "total": 2, "perpage": 2 },
+  "results": [
+    {
+      "id": "http://www.loc.gov/item/2001696789/",
+      "url": "https://www.loc.gov/item/2001696789/",
+      "title": "The effect of printing on early newspapers",
+      "description": ["Study of early American newspapers.", "Includes illustrations."],
+      "original_format": ["newspaper"]
+    },
+    {
+      "id": "http://www.loc.gov/item/2003000012/",
+      "title": "Effect of rain on harvest",
+      "description": []
+    }
+  ]
+}

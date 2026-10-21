@@ -1,0 +1,31 @@
+{
+  "kind": "Listing",
+  "data": {
+    "after": "t3_abc2",
+    "dist": 2,
+    "children": [
+      {
+        "kind": "t3",
+        "data": {
+          "subreddit": "typescript",
+          "title": "Effect for TypeScript: worth it?",
+          "selftext": "Has anyone shipped Effect to production? Looking for real experience.",
+          "permalink": "/r/typescript/comments/abc1/effect_for_typescript_worth_it/",
+          "score": 42,
+          "num_comments": 17
+        }
+      },
+      {
+        "kind": "t3",
+        "data": {
+          "subreddit": "node",
+          "title": "Side effects in TypeScript services",
+          "selftext": "",
+          "permalink": "/r/node/comments/abc2/side_effects_in_typescript_services/",
+          "score": 9,
+          "num_comments": 3
+        }
+      }
+    ]
+  }
+}

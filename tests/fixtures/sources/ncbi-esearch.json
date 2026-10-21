@@ -1,0 +1,16 @@
+{
+  "header": { "type": "esearch", "version": "0.3" },
+  "esearchresult": {
+    "count": "71899",
+    "retmax": "2",
+    "retstart": "0",
+    "idlist": ["42901663", "42901363"],
+    "translationset": [
+      {
+        "from": "crispr",
+        "to": "\"clustered regularly interspaced short palindromic repeats\"[MeSH Terms] OR (\"clustered\"[All Fields] AND \"regularly\"[All Fields] AND \"interspaced\"[All Fields] AND \"short\"[All Fields] AND \"palindromic\"[All Fields] AND \"repeats\"[All Fields]) OR \"clustered regularly interspaced short palindromic repeats\"[All Fields] OR \"crispr\"[All Fields] OR \"crisprs\"[All Fields]"
+      }
+    ],
+    "querytranslation": "\"clustered regularly interspaced short palindromic repeats\"[MeSH Terms] OR (\"clustered\"[All Fields] AND \"regularly\"[All Fields] AND \"interspaced\"[All Fields] AND \"short\"[All Fields] AND \"palindromic\"[All Fields] AND \"repeats\"[All Fields]) OR \"clustered regularly interspaced short palindromic repeats\"[All Fields] OR \"crispr\"[All Fields] OR \"crisprs\"[All Fields]"
+  }
+}

@@ -29,25 +29,36 @@ const json = (text: string) =>
 
 // '/html/' (DuckDuckGo) has no route, so the web source gets a 404; wikipedia
 // and arxiv answer empty, hackernews fails. Crossref sends `query`, OpenAlex
-// sends `search`; both use /works.
-const routes = (crossref: string, openalex: string): Routes => ({
-  '/w/api.php': () => Response.json({ query: { search: [] } }),
+// sends `search`; both use /works. Wikidata shares /w/api.php with Wikipedia
+// and is told apart by its `wbsearchentities` action; the other free sources
+// have no route and fail.
+const routes = (crossref: string, openalex: string, wikidata: string): Routes => ({
+  '/w/api.php': (_req, url) =>
+    url.searchParams.get('action') === 'wbsearchentities'
+      ? json(wikidata)
+      : Response.json({ query: { search: [] } }),
   '/api/v1/search': () => new Response('boom', { status: 500 }),
   '/api/query': () => new Response('<feed xmlns="http://www.w3.org/2005/Atom"></feed>'),
   '/works': (_req, url) => json(url.searchParams.has('search') ? openalex : crossref),
 })
 
-const fixture = Effect.fn('fixture')(function* (crossrefUp: boolean) {
+const fixture = Effect.fn('fixture')(function* (crossrefUp: boolean, openalexUp: boolean) {
   const empty = JSON.stringify({ message: { items: [] } })
   const crossref = crossrefUp ? yield* body('crossref-works.json') : empty
-  const openalex = yield* body('openalex-works.json')
-  return yield* startFixture(() => routes(crossref, openalex))
+  const openalex = openalexUp ? yield* body('openalex-works.json') : '{"results":[]}'
+  const wikidata = yield* body('sources/wikidata-search.json')
+  return yield* startFixture(() => routes(crossref, openalex, wikidata))
 })
 
-const search = (args: string[], crossrefUp: boolean, check: (d: Output, webHits: number) => void) =>
+const search = (
+  args: string[],
+  crossrefUp: boolean,
+  check: (d: Output, webHits: number) => void,
+  openalexUp = true,
+) =>
   eff(
     Effect.gen(function* () {
-      const fx = yield* fixture(crossrefUp)
+      const fx = yield* fixture(crossrefUp, openalexUp)
       // Windows spells the variable `Path`.
       const PATH = yield* Config.String('PATH').pipe(Config.orElse(() => Config.String('Path')))
       const HOME = yield* Config.String('HOME').pipe(Config.withDefault('/tmp'))
@@ -74,6 +85,25 @@ describe('webular search — fallback chain for the default web source', () => {
     'an empty crossref answer falls through to openalex',
     () => search([], false, (data) => expect(data.source).toBe('openalex')),
     30_000,
+  )
+})
+
+// 2603.01548: when every search source fails or comes back empty, the chain
+// falls back to the free sources instead of failing the command.
+describe('webular search — free-source fallback', () => {
+  test(
+    'every search source failing falls back to the free sources',
+    () =>
+      search(
+        ['--limit', '2'],
+        false,
+        (data) => {
+          expect(data.source).toBe('wikidata')
+          expect(data.results[0]?.url).toStartWith('http://www.wikidata.org/entity/Q')
+        },
+        false,
+      ),
+    45_000,
   )
 })
 

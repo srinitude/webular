@@ -1,8 +1,8 @@
 // FEED fallback chain against real local fixtures (no mocks): direct feed,
-// <link rel="alternate"> discovery, same-origin guesses, then Wayback. The
-// availability body is the recorded archive.org shape from reliability.test.ts,
-// re-pointed at the fixture origin.
-import { describe, expect, test } from 'bun:test'
+// <link rel="alternate"> discovery, same-origin guesses, then Wayback, then the
+// free feed search. The availability body is the recorded archive.org shape
+// from reliability.test.ts, re-pointed at the fixture origin.
+import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
 import type * as BunServices from '@effect/platform-bun/BunServices'
 import { Effect } from 'effect'
 import { resolveFeed } from '../../src/core/feed-source.ts'
@@ -44,6 +44,31 @@ const bare = useFixture(
   }),
 )
 
+// feedsearch.dev stand-in: it knows one site, whose feed lives on this origin.
+const free = useFixture(
+  (origin): Routes => ({
+    '/api/v1/search': (_req, url) =>
+      Response.json(
+        url.searchParams.get('url')?.endsWith('/nothing') ? [{ url: `${origin}/found.xml` }] : [],
+      ),
+    '/found.xml': res(RSS, 'application/rss+xml'),
+  }),
+)
+const saved = {
+  origin: process.env['WEBULAR_SOURCE_ORIGIN'],
+  gap: process.env['WEBULAR_SOURCE_GAP_MS'],
+}
+beforeAll(() => {
+  process.env['WEBULAR_SOURCE_ORIGIN'] = free.origin
+  process.env['WEBULAR_SOURCE_GAP_MS'] = '0'
+})
+afterAll(() => {
+  if (saved.origin === undefined) delete process.env['WEBULAR_SOURCE_ORIGIN']
+  else process.env['WEBULAR_SOURCE_ORIGIN'] = saved.origin
+  if (saved.gap === undefined) delete process.env['WEBULAR_SOURCE_GAP_MS']
+  else process.env['WEBULAR_SOURCE_GAP_MS'] = saved.gap
+})
+
 const run = <A, E>(body: () => Generator<Effect.Effect<unknown, E, BunServices.BunServices>, A>) =>
   eff(Effect.gen(body))()
 const resolve = (url: string) => resolveFeed(url, { archive: true, archiveOrigin: bare.origin })
@@ -80,5 +105,11 @@ describe('resolveFeed — feed fallback chain', () => {
       const err = yield* Effect.flip(resolve(`${bare.origin}/plain`))
       expect(err).toMatchObject({ _tag: 'NotAFeed', url: `${bare.origin}/plain` })
       expect(bare.hits('/wayback/available')).toBe(before)
+    }))
+  test('a chain that fails everywhere falls back to the free feed search', () =>
+    run(function* () {
+      const r = yield* resolve(`${free.origin}/nothing`)
+      expect(r.feedUrl).toBe(`${free.origin}/found.xml`)
+      expect(r.xml).toContain('<rss')
     }))
 })

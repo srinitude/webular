@@ -1,0 +1,18 @@
+[
+  {
+    "id": "CC-MAIN-2026-39",
+    "name": "September 2026 Index",
+    "timegate": "https://index.commoncrawl.org/CC-MAIN-2026-39/",
+    "cdx-api": "https://index.commoncrawl.org/CC-MAIN-2026-39-index",
+    "from": "2026-09-04T13:16:03",
+    "to": "2026-09-17T05:59:21"
+  },
+  {
+    "id": "CC-MAIN-2026-34",
+    "name": "August 2026 Index",
+    "timegate": "https://index.commoncrawl.org/CC-MAIN-2026-34/",
+    "cdx-api": "https://index.commoncrawl.org/CC-MAIN-2026-34-index",
+    "from": "2026-08-07T10:18:45",
+    "to": "2026-08-20T01:52:41"
+  }
+]

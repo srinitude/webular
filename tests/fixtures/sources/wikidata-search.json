@@ -1,0 +1,40 @@
+{
+  "searchinfo": { "search": "douglas adams" },
+  "search": [
+    {
+      "id": "Q28421831",
+      "title": "Q28421831",
+      "pageid": 30117550,
+      "concepturi": "http://www.wikidata.org/entity/Q28421831",
+      "repository": "wikidata",
+      "url": "//www.wikidata.org/wiki/Q28421831",
+      "display": {
+        "label": { "value": "Douglas Adams", "language": "en" },
+        "description": { "value": "American environmental engineer", "language": "en" }
+      },
+      "label": "Douglas Adams",
+      "description": "American environmental engineer",
+      "match": { "type": "label", "language": "en", "text": "Douglas Adams" }
+    },
+    {
+      "id": "Q42",
+      "title": "Q42",
+      "pageid": 138,
+      "concepturi": "http://www.wikidata.org/entity/Q42",
+      "repository": "wikidata",
+      "url": "//www.wikidata.org/wiki/Q42",
+      "display": {
+        "label": { "value": "Douglas Adams", "language": "mul" },
+        "description": {
+          "value": "British science fiction writer and humorist (1952\u20132001)",
+          "language": "en"
+        }
+      },
+      "label": "Douglas Adams",
+      "description": "British science fiction writer and humorist (1952\u20132001)",
+      "match": { "type": "label", "language": "mul", "text": "Douglas Adams" }
+    }
+  ],
+  "search-continue": 2,
+  "success": 1
+}

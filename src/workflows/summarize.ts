@@ -5,6 +5,7 @@ import { Effect } from 'effect'
 import { z } from 'zod'
 import { fetchText } from '../core/http.ts'
 import { htmlToArticle } from '../lib/html.ts'
+import { freeSourceFallback } from '../lib/sources/registry.ts'
 import { summarizeText } from '../lib/summarize.ts'
 import { stepRuntime } from './runtime.ts'
 
@@ -20,6 +21,19 @@ const summarizeOutput = z.object({
   summary: z.string(),
 })
 
+// The url first; when its fetch fails, the free sources routed to summarize
+// name a page for it and that page is fetched instead (2603.01548). An empty
+// page that fetched fine stands.
+const fetchPage = (url: string, timeoutMs?: number) =>
+  fetchText(url, { timeoutMs }).pipe(
+    Effect.catch((error) =>
+      freeSourceFallback('summarize', url, 1).pipe(
+        Effect.flatMap(({ results }) => fetchText(results[0]?.url ?? url, { timeoutMs })),
+        Effect.catch(() => Effect.fail(error)),
+      ),
+    ),
+  )
+
 const resolveStep = createStep({
   id: 'resolve',
   inputSchema: summarizeInput,
@@ -27,10 +41,7 @@ const resolveStep = createStep({
   execute: ({ inputData }) => {
     const { url, sentences } = inputData
     const text = url
-      ? Effect.map(
-          fetchText(url, { timeoutMs: inputData.timeoutMs }),
-          (html) => htmlToArticle(html).text || html,
-        )
+      ? Effect.map(fetchPage(url, inputData.timeoutMs), (html) => htmlToArticle(html).text || html)
       : Effect.succeed(inputData.text ?? '')
     return stepRuntime.runPromise(Effect.map(text, (t) => ({ text: t, sentences })))
   },

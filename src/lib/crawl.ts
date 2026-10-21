@@ -8,6 +8,7 @@ import { Data, Effect } from 'effect'
 import { fetchRoot } from '../core/http.ts'
 import { errMsg } from '../core/output.ts'
 import { normalizeUrl, sameHost } from '../core/url.ts'
+import { archivedUrls } from './archive-urls.ts'
 import { headingText } from './crawl-types.ts'
 import { type FetchError, type FetchPage, makeFetchLayer } from './fetch-layer.ts'
 import { titleAndLinks } from './html.ts'
@@ -161,11 +162,19 @@ const crawlFrom = (rootUrl: string, finalUrl: string, html: string, opts: CrawlO
     return result
   })
 
+// The root would not answer: Common Crawl's index lists what it held for the
+// site (2603.01548). Titles are unknown without a fetch; the error stays when
+// the index has nothing.
+const archivedCrawl = (rootUrl: string, limit: number, reason: string) =>
+  Effect.map(archivedUrls('crawl', rootUrl, limit), (urls) => {
+    const pages = urls.map((url) => ({ url, title: '' }))
+    return { root: rootUrl, pages, errors: pages.length ? [] : [{ url: rootUrl, reason }] }
+  })
+
 export const bfsCrawl = Effect.fn('bfsCrawl')(function* (root: string, opts: CrawlOptions) {
   const rootUrl = normalizeUrl(root)
   if (!rootUrl) return yield* new CrawlError({ message: `crawl: invalid URL ${root}` })
   const entry = yield* fetchRootPage(rootUrl, opts.timeoutMs)
-  if (!entry.ok)
-    return { root: rootUrl, pages: [], errors: [{ url: rootUrl, reason: entry.reason }] }
+  if (!entry.ok) return yield* archivedCrawl(rootUrl, opts.limit, entry.reason)
   return yield* Effect.scoped(crawlFrom(rootUrl, entry.finalUrl, entry.html, opts))
 })

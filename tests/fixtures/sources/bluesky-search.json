@@ -1,0 +1,33 @@
+{
+  "cursor": "2",
+  "posts": [
+    {
+      "uri": "at://did:plc:abc123/app.bsky.feed.post/3kabc111",
+      "cid": "bafyreia",
+      "author": { "did": "did:plc:abc123", "handle": "alice.bsky.social", "displayName": "Alice" },
+      "record": {
+        "$type": "app.bsky.feed.post",
+        "text": "Trying Effect for TypeScript today.\nThe error channel is great.",
+        "createdAt": "2026-10-01T12:00:00.000Z"
+      },
+      "replyCount": 1,
+      "repostCount": 0,
+      "likeCount": 5,
+      "indexedAt": "2026-10-01T12:00:01.000Z"
+    },
+    {
+      "uri": "at://did:plc:def456/app.bsky.feed.post/3kdef222",
+      "cid": "bafyreib",
+      "author": { "did": "did:plc:def456", "handle": "bob.example.com" },
+      "record": {
+        "$type": "app.bsky.feed.post",
+        "text": "Effect fibers explained in one thread",
+        "createdAt": "2026-10-02T09:30:00.000Z"
+      },
+      "replyCount": 0,
+      "repostCount": 2,
+      "likeCount": 11,
+      "indexedAt": "2026-10-02T09:30:01.000Z"
+    }
+  ]
+}

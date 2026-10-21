@@ -1,0 +1,26 @@
+{
+  "query": "effect typescript",
+  "license": "CC-BY-NC-SA 4.0",
+  "page": 1,
+  "pages": 1,
+  "results": [
+    {
+      "url": "https://effect.website/docs/",
+      "title": "Effect Documentation",
+      "description": "Effect is a powerful TypeScript library designed to help developers build complex programs.",
+      "quality": -3.2,
+      "format": "html5",
+      "details": "",
+      "year": 2026
+    },
+    {
+      "url": "https://example.org/blog/effect-intro",
+      "title": "An introduction to Effect",
+      "description": "Notes on typed errors and services in TypeScript.",
+      "quality": -4.1,
+      "format": "html5",
+      "details": "",
+      "year": 2026
+    }
+  ]
+}

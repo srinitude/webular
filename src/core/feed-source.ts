@@ -1,8 +1,10 @@
 // Feed source resolution: the given url as a feed, else the page's
 // <link rel="alternate"> feeds (first MAX_ALTERNATES), else same-origin
-// guesses, else (with `archive`) a Wayback copy of the given url.
+// guesses, else (with `archive`) a Wayback copy of the given url, else the feeds
+// the free feed search lists for the url.
 import { Data, Effect } from 'effect'
 import { DOMParser } from 'linkedom'
+import { freeSourceFallback } from '../lib/sources/registry.ts'
 import { fetchTextOrArchive } from './archive.ts'
 import { type FetchOptions, fetchText } from './http.ts'
 
@@ -58,10 +60,17 @@ const fromWayback = (url: string, opts: SourceOptions) =>
     asFeed({ xml: html, feedUrl: url, archivedFrom }),
   )
 
-// Candidates run one at a time, first success wins; a live non-feed page never
-// asks the archive, so its last error is NotAFeed. Wayback runs only with
-// `archive`, like scrape.
-export const resolveFeed = (url: string, opts: SourceOptions = {}) =>
+// The feeds the free search lists for the url, tried in rank order. When it
+// has none (or none works), the chain's own error stands.
+const fromFreeSources = <E>(url: string, opts: FetchOptions, chainError: E) =>
+  freeSourceFallback('feed', url, MAX_ALTERNATES).pipe(
+    Effect.flatMap(({ results }) =>
+      Effect.firstSuccessOf(results.map((hit) => tryFeed(hit.url, opts))),
+    ),
+    Effect.mapError(() => chainError),
+  )
+
+const resolveChain = (url: string, opts: SourceOptions) =>
   fetchText(url, opts).pipe(
     Effect.matchEffect({
       onSuccess: (body) =>
@@ -77,3 +86,10 @@ export const resolveFeed = (url: string, opts: SourceOptions = {}) =>
         ]),
     }),
   )
+
+// Candidates run one at a time, first success wins; a live non-feed page never
+// asks the archive, so its last error is NotAFeed. Wayback runs only with
+// `archive`, like scrape. When the whole chain fails, the free feed search
+// answers.
+export const resolveFeed = (url: string, opts: SourceOptions = {}) =>
+  resolveChain(url, opts).pipe(Effect.catch((err) => fromFreeSources(url, opts, err)))

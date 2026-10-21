@@ -1,0 +1,21 @@
+[
+  ["urlkey", "timestamp", "original", "mimetype", "statuscode", "digest", "length"],
+  [
+    "com,example)/",
+    "20020120142510",
+    "http://example.com:80/",
+    "text/html",
+    "200",
+    "HT2DYGA5UKZCPBSFVCV3JOBXGW2G5UUA",
+    "1792"
+  ],
+  [
+    "com,example)/",
+    "20020328012821",
+    "http://www.example.com:80/",
+    "text/html",
+    "200",
+    "UY3I2DT2AMWAY6DECFCFYMT5ZOTFHUCH",
+    "481"
+  ]
+]

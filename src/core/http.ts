@@ -22,6 +22,7 @@ const MAX_RETRY_AFTER_MS = 10_000
 
 export interface FetchOptions extends CacheOptions {
   timeoutMs?: number | undefined
+  maxBytes?: number | undefined // body cap, MAX_TEXT_BYTES when unset
   headers?: Record<string, string>
   signal?: AbortSignal
   redirect?: RequestRedirect
@@ -141,7 +142,7 @@ export const fetchText = (
   cachedGetText<HttpStatusError | FetchError>(
     url,
     (h) => httpGet(url, { ...opts, headers: { ...opts.headers, ...h } }),
-    (res) => okText(res, url),
+    (res) => okText(res, url, opts.maxBytes),
     opts,
   ).pipe(
     Effect.catchTag('ConfigError', (err) => Effect.fail(new FetchError({ message: errMsg(err) }))),

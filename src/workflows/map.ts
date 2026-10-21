@@ -8,6 +8,7 @@ import { hostConcurrency } from '../core/budget.ts'
 import { fetchRoot, fetchTextWithinHost } from '../core/http.ts'
 import { errMsg } from '../core/output.ts'
 import { normalizeUrl, sameHost } from '../core/url.ts'
+import { archivedUrls } from '../lib/archive-urls.ts'
 import { extractLinks } from '../lib/html.ts'
 import { fetchErrorsSchema } from '../lib/sources.ts'
 import { stepRuntime } from './runtime.ts'
@@ -112,10 +113,8 @@ const robotsSitemaps = Effect.fn('map.robotsSitemaps')(function* (
   const results = yield* Effect.forEach(locs, (loc) => namedSitemap(loc, host, budget), {
     concurrency: yield* hostConcurrency,
   })
-  return {
-    links: results.flatMap((r) => r.links),
-    errors: results.flatMap((r) => r.errors),
-  } satisfies Discovery
+  const links = results.flatMap((r) => r.links)
+  return { links, errors: results.flatMap((r) => r.errors) } satisfies Discovery
 })
 
 // Chain: /sitemap.xml, then robots.txt Sitemap: entries. null means "no
@@ -123,10 +122,8 @@ const robotsSitemaps = Effect.fn('map.robotsSitemaps')(function* (
 const fetchSitemap = Effect.fn('map.fetchSitemap')(function* (site: string, timeoutMs?: number) {
   const host = new URL(site).hostname
   const budget = timeoutMs ?? SITEMAP_TIMEOUT_MS
-  const primary = yield* Effect.orElseSucceed(
-    sitemapAt(new URL('/sitemap.xml', site).toString(), host, budget),
-    () => null,
-  )
+  const xmlUrl = new URL('/sitemap.xml', site).toString()
+  const primary = yield* Effect.orElseSucceed(sitemapAt(xmlUrl, host, budget), () => null)
   if (primary && primary.links.length > 0) return { ...primary, fromSitemapXml: true }
   const robots = yield* robotsSitemaps(site, host, budget)
   const errors = [...(primary?.errors ?? []), ...(robots?.errors ?? [])]
@@ -178,7 +175,10 @@ const discover = Effect.fn('map.discover')(function* (input: z.infer<typeof mapI
   const { url, limit = 1000, timeoutMs } = input
   const root = yield* fetchRootFor(url, timeoutMs)
   const sitemap = yield* fetchSitemap(root.final, timeoutMs)
-  const deduped = dedupe([...(sitemap?.links ?? []), ...pageLinks(root, sitemap)], limit)
+  const found = dedupe([...(sitemap?.links ?? []), ...pageLinks(root, sitemap)], limit)
+  // The site would not answer at all: ask the archive indexes (2603.01548).
+  const dead = found.length === 0 && root.errors.length > 0
+  const deduped = dead ? dedupe(yield* archivedUrls('map', root.final, limit), limit) : found
   const errors = [...(deduped.length === 0 ? root.errors : []), ...(sitemap?.errors ?? [])]
   return { url, count: deduped.length, links: deduped, errors }
 })

@@ -5,6 +5,7 @@
 import { Config, Data, Effect, Schema } from 'effect'
 import { fetchText } from '../core/http.ts'
 import { webSearch } from './search.ts'
+import { type FreeSource, freeSourceFallback } from './sources/registry.ts'
 import {
   endpoint,
   plain,
@@ -20,7 +21,7 @@ interface Hit {
 }
 
 interface Answer {
-  source?: SearchSource
+  source?: SearchSource | FreeSource
   results: Hit[]
 }
 
@@ -119,7 +120,8 @@ const searchSourceEffect = (source: SearchSource, query: string, limit: number) 
   )
 
 // Sequential by construction: firstSuccessOf runs the next source only after
-// the previous one failed. An empty answer counts as a failure.
+// the previous one failed. An empty answer counts as a failure. When every
+// search source fails, the free sources answer instead (2603.01548).
 const fallbackSearchEffect = (query: string, limit: number) =>
   Effect.firstSuccessOf(
     SEARCH_SOURCES.map((source) =>
@@ -131,11 +133,17 @@ const fallbackSearchEffect = (query: string, limit: number) =>
         Effect.map((results): Answer => ({ source, results })),
       ),
     ),
-  )
+  ).pipe(Effect.catch(() => freeSourceFallback('search', query, limit)))
+
+type FreeSourcesFailed = Effect.Error<ReturnType<typeof freeSourceFallback>>
 
 // The default web source runs the chain; an explicit source queries just that
 // source.
-export const searchWithSource = (source: SearchSource, query: string, limit: number) =>
+export const searchWithSource = (
+  source: SearchSource,
+  query: string,
+  limit: number,
+): Effect.Effect<Answer, SearchSourceError | FreeSourcesFailed> =>
   source === 'web'
     ? fallbackSearchEffect(query, limit)
     : Effect.map(searchSourceEffect(source, query, limit), (results): Answer => ({ results }))

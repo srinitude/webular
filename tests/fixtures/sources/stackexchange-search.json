@@ -1,0 +1,57 @@
+{
+  "items": [
+    {
+      "tags": ["typescript", "deprecated", "deprecation-warning", "typescript-definitions"],
+      "owner": {
+        "account_id": 232631,
+        "reputation": 30834,
+        "user_id": 497600,
+        "user_type": "registered",
+        "accept_rate": 81,
+        "profile_image": "https://www.gravatar.com/avatar/9d2bd51b0d7a3e483cb42919119d2e8d?s=256&d=identicon&r=PG",
+        "display_name": "lhk",
+        "link": "https://stackoverflow.com/users/497600/lhk"
+      },
+      "is_answered": true,
+      "view_count": 164162,
+      "accepted_answer_id": 62991642,
+      "answer_count": 1,
+      "score": 294,
+      "last_activity_date": 1715800559,
+      "creation_date": 1584615238,
+      "last_edit_date": 1624872719,
+      "question_id": 60755711,
+      "content_license": "CC BY-SA 4.0",
+      "link": "https://stackoverflow.com/questions/60755711/is-it-possible-to-mark-something-as-deprecated-in-typescript",
+      "title": "Is it possible to mark something as deprecated in typescript?"
+    },
+    {
+      "tags": ["typescript", "abstract-class", "abstract"],
+      "owner": {
+        "account_id": 871926,
+        "reputation": 12584,
+        "user_id": 922584,
+        "user_type": "registered",
+        "accept_rate": 80,
+        "profile_image": "https://www.gravatar.com/avatar/05766da42bea2cb7c9e185fa66be4725?s=256&d=identicon&r=PG",
+        "display_name": "Vojtěch",
+        "link": "https://stackoverflow.com/users/922584/vojt%c4%9bch"
+      },
+      "is_answered": true,
+      "view_count": 269086,
+      "accepted_answer_id": 13335645,
+      "answer_count": 5,
+      "score": 260,
+      "last_activity_date": 1663835483,
+      "creation_date": 1352654302,
+      "last_edit_date": 1663835483,
+      "question_id": 13333489,
+      "content_license": "CC BY-SA 4.0",
+      "link": "https://stackoverflow.com/questions/13333489/declaring-abstract-method-in-typescript",
+      "title": "Declaring abstract method in TypeScript"
+    }
+  ],
+  "has_more": true,
+  "quota_max": 300,
+  "quota_remaining": 298
+}

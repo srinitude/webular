@@ -50,7 +50,7 @@ function refusedMime(res: Response): string | undefined {
   return ok ? undefined : mime
 }
 
-const readOk = Effect.fn('readOk')(function* (res: Response, url: string) {
+const readOk = Effect.fn('readOk')(function* (res: Response, url: string, max = MAX_TEXT_BYTES) {
   if (!res.ok)
     return yield* new HttpStatusError({ url, status: res.status, statusText: res.statusText })
   const bad = refusedMime(res)
@@ -58,9 +58,9 @@ const readOk = Effect.fn('readOk')(function* (res: Response, url: string) {
     return yield* new FetchError({
       message: `fetch ${url}: unsupported content-type "${bad}" — use media --download`,
     })
-  return yield* readTextCapped(res, url, MAX_TEXT_BYTES)
+  return yield* readTextCapped(res, url, max)
 })
 
 // Every rejected response releases its body.
-export const okText = (res: Response, url: string) =>
-  readOk(res, url).pipe(Effect.tapError(() => dropBody(res)))
+export const okText = (res: Response, url: string, maxBytes?: number) =>
+  readOk(res, url, maxBytes).pipe(Effect.tapError(() => dropBody(res)))

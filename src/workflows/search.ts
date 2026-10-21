@@ -1,13 +1,15 @@
 // SEARCH workflow: keyless web search (DuckDuckGo HTML endpoint via fetch) or a
 // specialized keyless source (--source wikipedia|hackernews|arxiv|crossref|
-// openalex). The default web source falls back through the others in order;
-// `source` names the one that answered. Local index hits fuse in after web hits.
+// openalex). The default web source falls back through the others in order,
+// then through the free sources; `source` names the one that answered. Local
+// index hits fuse in after web hits.
 // composed as a Mastra non-model workflow over the FOSS search lib.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
 import { fuseRanked, searchLocalIndex } from '../lib/local-index.ts'
 import { searchWithSource } from '../lib/search-chain.ts'
+import { FREE_SOURCE_NAMES } from '../lib/sources/registry.ts'
 import { SEARCH_SOURCES } from '../lib/sources-search.ts'
 import { stepRuntime } from './runtime.ts'
 
@@ -26,7 +28,7 @@ const resultItem = z.object({
 const searchOutput = z.object({
   query: z.string(),
   count: z.number(),
-  source: z.enum(SEARCH_SOURCES).optional(),
+  source: z.enum([...SEARCH_SOURCES, ...FREE_SOURCE_NAMES]).optional(),
   results: z.array(resultItem),
 })
 
