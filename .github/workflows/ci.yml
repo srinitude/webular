@@ -46,12 +46,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # timeout = about 3x the job's cold-cache time.
+        # timeout = about 1.6x the job's measured time with the full suite
+        # (1147 tests in 206 files): Windows 7.1 min, Ubuntu about 6.3 min,
+        # macOS about 6.7 min. Measured in run 39657398809; Ubuntu and macOS
+        # are projected from 180 and 174 files done in 4 and 5 min.
         include:
           - os: ubuntu-latest
-            timeout: 4
+            timeout: 10
           - os: macos-latest
-            timeout: 5
+            timeout: 11
           - os: windows-latest
             timeout: 11
     runs-on: ${{ matrix.os }}
@@ -96,7 +99,8 @@ jobs:
         run: mise run e2e
 
   # Standalone executable: each runner builds its native target (mise run
-  # build) and smoke-tests it. Same 3-OS matrix, gate, and timeouts as ci.
+  # build) and smoke-tests it. Same 3-OS matrix and gate as ci; its timeouts fit
+  # the build alone, which runs no test suite.
   executable:
     needs: push-covered-by-pr
     if: ${{ !cancelled() && needs.push-covered-by-pr.outputs.covered != 'true' }}
