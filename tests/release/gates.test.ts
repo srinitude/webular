@@ -28,8 +28,27 @@ const jobs = (release as { jobs: Record<string, Job> }).jobs
 const runs = (job: string) => jobs[job]?.steps.map((s) => s.run ?? '') ?? []
 const at = (job: string, text: string) => runs(job).findIndex((r) => r.includes(text))
 
-// Lays out a global install: node_modules/webular/dist/webular.js plus a fake
-// native package that echoes its arguments and exits 7.
+// A fake native package that echoes its arguments and exits 7. Windows runs
+// no shebang script, so there the fake is a real compiled .exe.
+const writeFakeNative = (dir: string, target: Target) => {
+  const native = join(dir, 'node_modules', packageName(target))
+  mkdirSync(join(native, 'bin'), { recursive: true })
+  writeFileSync(join(native, 'package.json'), '{"name":"x","version":"0.0.0"}')
+  const exe = join(native, 'bin', exeName(target))
+  if (target.os !== 'win32') {
+    writeFileSync(exe, '#!/bin/sh\necho "native $*"\nexit 7\n', { mode: 0o755 })
+    return
+  }
+  const source = join(dir, 'fake-native.ts')
+  writeFileSync(
+    source,
+    "console.log('native ' + process.argv.slice(2).join(' '))\nprocess.exit(7)\n",
+  )
+  expect(Bun.spawnSync(['bun', 'build', '--compile', source, `--outfile=${exe}`]).exitCode).toBe(0)
+}
+
+// Lays out a global install: node_modules/webular/dist/webular.js plus,
+// when asked, the fake native package.
 const install = async (withNative: boolean) => {
   const dir = mkdtempSync(join(tmp, 'install-'))
   const launcher = join(dir, 'node_modules', 'webular', 'dist', 'webular.js')
@@ -44,23 +63,7 @@ const install = async (withNative: boolean) => {
   expect(built.exitCode).toBe(0)
   const target = targetFor(await runtime.runPromise(hostFacts)) as Target
   expect(target).toBeDefined()
-  if (withNative) {
-    const native = join(dir, 'node_modules', packageName(target))
-    mkdirSync(join(native, 'bin'), { recursive: true })
-    writeFileSync(join(native, 'package.json'), '{"name":"x","version":"0.0.0"}')
-    const exe = join(native, 'bin', exeName(target))
-    if (target.os === 'win32') {
-      // Windows runs no shebang script, so the fake is a real compiled .exe.
-      const source = join(dir, 'fake-native.ts')
-      writeFileSync(
-        source,
-        "console.log('native ' + process.argv.slice(2).join(' '))\nprocess.exit(7)\n",
-      )
-      expect(
-        Bun.spawnSync(['bun', 'build', '--compile', source, `--outfile=${exe}`]).exitCode,
-      ).toBe(0)
-    } else writeFileSync(exe, '#!/bin/sh\necho "native $*"\nexit 7\n', { mode: 0o755 })
-  }
+  if (withNative) writeFakeNative(dir, target)
   return { launcher, name: packageName(target) }
 }
 // Node without Bun on PATH.
