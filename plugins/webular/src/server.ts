@@ -13,6 +13,7 @@ import { Config, Data, Effect, Stream } from 'effect'
 import { ChildProcess, ChildProcessSpawner } from 'effect/process'
 import { z } from 'zod'
 import manifest from '../.claude-plugin/plugin.json' with { type: 'json' }
+import { appResources, uiMeta } from './apps.ts'
 import { cap } from './budget.ts'
 import descriptions from './descriptions.json' with { type: 'json' }
 import { runtime } from './runtime.ts'
@@ -109,6 +110,7 @@ const tool = (id: Command) =>
     inputSchema: z.strictObject({ ...schemas[id].shape, cursor }),
     outputSchema: outputs[id] ?? outputSchema,
     mcp: {
+      ...uiMeta(id),
       annotations: {
         title: descriptions.titles[id],
         readOnlyHint: !writesFiles.has(id),
@@ -131,6 +133,7 @@ export const server = new MCPServer({
   version: manifest.version,
   description: descriptions.server,
   tools: Object.fromEntries(ids.map((id) => [id, tool(id)])),
+  appResources,
 })
 
 const listen = (port: number) =>

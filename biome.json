@@ -19,8 +19,15 @@
     "enabled": true,
     "rules": {
       "preset": "recommended"
-    }
+    },
+    "domains": { "react": "none" }
   },
+  "overrides": [
+    {
+      "includes": ["plugins/webular/src/ui/**"],
+      "linter": { "domains": { "react": "recommended" } }
+    }
+  ],
   "javascript": {
     "formatter": {
       "quoteStyle": "single",

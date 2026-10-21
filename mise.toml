@@ -258,9 +258,15 @@ description = "Plugin: no time-anchored wording in Markdown"
 depends = ["plugin:check-reachable"]
 run = 'bun "{{config_root}}/plugins/webular/scripts/check-timeless.ts"'
 
+[tasks."plugin:ui"]
+description = "Plugin: bundle each MCP App view into one self-contained HTML file in plugins/webular/dist/ui"
+depends = ["setup"]
+env = { NODE_ENV = "production" }
+run = 'bun build --compile --target=browser --minify "{{config_root}}/plugins/webular/src/ui/session.html" --outdir="{{config_root}}/plugins/webular/dist/ui"'
+
 [tasks."plugin:test"]
 description = "Plugin: run the webular agent plugin's outcome evals and tests"
-depends = ["plugin:check-timeless"]
+depends = ["plugin:check-timeless", "plugin:ui"]
 run = "bun test --timeout 30000 plugins/webular"
 
 [tasks."plugin:ci"]

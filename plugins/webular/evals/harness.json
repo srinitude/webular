@@ -259,6 +259,42 @@
       "grader": "bun test: tool result text over a local site and feed"
     },
     {
+      "assertion": "the bridge reads a tool result the way the view needs it",
+      "source": "tests/session-view.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: equality on error, structured, and empty results"
+    },
+    {
+      "assertion": "every path through the lifecycle shows a label and only moves the machine allows",
+      "source": "tests/session-view.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: model-based simple paths of the lifecycle machine"
+    },
+    {
+      "assertion": "a tool result drives the machine to the same end the CLI exit rule picks",
+      "source": "tests/session-view.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: final state per result shape"
+    },
+    {
+      "assertion": "tools/list links research and map, and only them, to the session view",
+      "source": "tests/session-view.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: tool _meta.ui.resourceUri list"
+    },
+    {
+      "assertion": "a real MCP client reads the session view as one self-contained MCP App page",
+      "source": "tests/session-view.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: resource MIME type and inline module script"
+    },
+    {
+      "assertion": "a host that never reads ui:// still gets the linked map result as data",
+      "source": "tests/session-view.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: tool result text over a local site"
+    },
+    {
       "assertion": "each Jev scorer agrees with its calibration labels",
       "source": "tests/jev.test.ts",
       "kind": "jev",
