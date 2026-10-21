@@ -6,6 +6,7 @@ import { BunServices } from '@effect/platform-bun'
 import { Effect, FileSystem } from 'effect'
 import { schemas } from '../../plugins/webular/src/schemas.ts'
 import { COMMAND_NAMES } from '../../src/cli/commands.ts'
+import { machineSchema, paging } from '../../src/tools/web-machine.ts'
 import { ROOT } from '../_support/root.ts'
 import { coverage } from '../e2e/surface.ts'
 
@@ -14,7 +15,7 @@ const CLAUDE_ROOT = ['$', '{CLAUDE_PLUGIN_ROOT}'].join('')
 
 // Commands no skill names, each with the reason. A stale entry fails the test.
 const UNDOCUMENTED: Record<string, string> = {
-  mcp: 'It starts the server that offers the tools; it is not a tool itself.',
+  jev: 'It records and labels Jev calls for webular developers; no research flow uses it.',
 }
 // Flags that belong to a script, not to a webular command, and the file that reads them.
 const FOREIGN_FLAGS: Record<string, string> = {
@@ -98,7 +99,14 @@ test('the research skill documents real tools and their real input fields', () =
         read(`${dir}/SKILL.md`),
         read(`${dir}/references/tools.md`),
       ])
-      const tools = Object.keys(schemas)
+      // machine.next is served by `webular mcp`, not the plugin; its paging fields are shared.
+      const shapes: Record<string, Record<string, unknown>> = {
+        ...Object.fromEntries(Object.entries(schemas).map(([k, v]) => [k, v.shape])),
+        'machine.next': Object.fromEntries(
+          Object.entries(machineSchema.shape).filter(([k]) => !(k in paging)),
+        ),
+      }
+      const tools = Object.keys(shapes)
       const rows = [...skill.matchAll(/\| `([a-z]+)` \|$/gm)].map((m) => m[1] ?? '')
       const sections = reference.split(/^## /m).slice(1)
       const bad = [
@@ -106,10 +114,10 @@ test('the research skill documents real tools and their real input fields', () =
         ...sections.flatMap((sec) => {
           const name = sec.split('\n')[0] ?? ''
           if (name === 'Connect' || name === 'Errors') return []
-          if (!(name in schemas)) return [`tools.md: ## ${name} is not a tool`]
+          if (!(name in shapes)) return [`tools.md: ## ${name} is not a tool`]
           const line = /^- Input: (.+)$/m.exec(sec)?.[1] ?? ''
           const named = spans(line.replace(/\([^)]*\)/g, '')).sort()
-          const real = Object.keys(schemas[name as keyof typeof schemas].shape).sort()
+          const real = Object.keys(shapes[name] ?? {}).sort()
           return named.join() === real.join() ? [] : [`tools.md ${name}: [${named}] vs [${real}]`]
         }),
       ]

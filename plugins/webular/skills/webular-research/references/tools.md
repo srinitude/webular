@@ -52,7 +52,7 @@
 ## machine.next
 
 - `webular mcp` serves it, next to the `web.*` tools.
-- Input: `machine` (`cliDispatch`, `commandLifecycle`, or `fetch`, required) and `events` (the events already sent, up to 64).
+- Input: `machine` (`cliDispatch`, `commandLifecycle`, `fetch`, `mcpServe`, or `scrapeFallback`, required) and `events` (the events already sent, up to 64).
 - Output: `state`, `next` (the only events allowed at this step), `done`, and `tags`. When the machine is done, an `exit-<code>` tag names its exit code.
 - Call it before you send a webular command an event, when you aren't sure the step is legal. Pass the machine and the events already sent.
 - Choose only from `next`. If `done` is true, stop and read the exit code from `tags`.

@@ -25,7 +25,14 @@ const HTML = '<html><head><title>T</title></head><body><h1>Hi</h1><a href="/a">a
 
 // CLI flags a tool leaves out on purpose, each with the reason.
 const CLI_ONLY: Record<string, Record<string, string>> = {
-  monitor: { db: 'The server picks the per-project database; an agent path could write anywhere.' },
+  monitor: {
+    db: 'The server picks the per-project database; an agent path could write anywhere.',
+    'watch-for':
+      'The tools/list token budget (tests/commands/tokens.test.ts) leaves no room for it.',
+  },
+  search: {
+    variant: 'The tools/list token budget (tests/commands/tokens.test.ts) leaves no room for it.',
+  },
 }
 
 // Tools with no fixture call, each with the reason.
@@ -37,6 +44,7 @@ const SKIP: Record<string, string> = {
   doctor: 'Checks host binaries and the network.',
   media: 'Saves files and may drive a host browser; tests/e2e covers it.',
   monitor: 'Writes a per-project database on this computer.',
+  jev: 'Reads and writes the recorded Jev calls on this computer; tests/jev covers it.',
   audit: 'Runs the repo audit, which is slow and reads the whole checkout.',
 }
 
@@ -55,6 +63,7 @@ const CALLS: Record<string, (o: string) => Record<string, unknown>> = {
   parse: () => ({ file: `${ROOT}package.json` }),
   diagram: () => ({}),
   tasks: () => ({}),
+  'machine.next': () => ({ machine: 'fetch', events: [] }),
 }
 
 const connected = Effect.acquireRelease(
@@ -81,7 +90,7 @@ const decodeLinks = Schema.decodeUnknownEffect(
 const decodeMore = Schema.decodeUnknownEffect(
   Schema.fromJsonString(Schema.Struct({ nextCursor: Schema.String })),
 )
-const isCommand = (name: string) => !name.startsWith('web.')
+const isCommand = (name: string) => !name.startsWith('web.') && name !== 'machine.next'
 const textOf = (r: Record<string, unknown>) =>
   ((r['content'] ?? []) as { text?: string }[]).map((c) => c.text ?? '').join('\n')
 
