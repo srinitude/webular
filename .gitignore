@@ -49,3 +49,6 @@ docs/usecase-results.md
 # Per-platform npm packages written by mise run package:platforms
 npm/
 .cache/
+
+# Landing scratch (patches, bench results)
+.land/
