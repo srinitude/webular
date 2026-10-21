@@ -45,7 +45,7 @@ const readTexts = (fs: FileSystem.FileSystem, dir: string) =>
   fs.readDirectory(dir, { recursive: true }).pipe(
     Effect.flatMap((paths) =>
       Effect.forEach(
-        paths.filter(isFile),
+        paths.map((path) => path.replaceAll('\\', '/')).filter(isFile),
         (path) =>
           fs.readFileString(`${dir}/${path}`).pipe(Effect.map((text) => [path, text] as const)),
         { concurrency: 4 },
