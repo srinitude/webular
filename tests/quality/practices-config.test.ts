@@ -40,7 +40,7 @@ describe('best practices: CI workflow', () => {
     'dependabot keeps action and npm pins current',
     Effect.map(read('.github/dependabot.yml'), (yml) => {
       expect(yml).toContain('package-ecosystem: github-actions')
-      expect(yml).toContain('package-ecosystem: npm')
+      expect(yml).toContain('package-ecosystem: bun')
     }),
   )
 })

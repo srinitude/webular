@@ -1,0 +1,15 @@
+{
+  "name": "webular-plugin",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Runtime dependencies of the webular agent plugin, so the plugin folder runs on its own.",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@effect/platform-bun": "4.0.5",
+    "@mastra/core": "^1.78.0",
+    "@mastra/mcp": "^2.4.1",
+    "effect": "4.0.5",
+    "zod": "^4.6.7"
+  }
+}

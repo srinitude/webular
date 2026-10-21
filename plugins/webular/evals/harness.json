@@ -7,10 +7,52 @@
       "grader": "bun test: schema decode and equality"
     },
     {
-      "assertion": "mcp.json starts the server over stdio and names its portless HTTP URL",
-      "source": "tests/plugin.test.ts",
+      "assertion": "mcp.json and .mcp.json start only the plugin server, from inside the plugin",
+      "source": "tests/manifests.test.ts",
       "kind": "deterministic",
       "grader": "bun test: schema decode and equality"
+    },
+    {
+      "assertion": "no shipped manifest names the portless dev URL",
+      "source": "tests/manifests.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: manifest text match"
+    },
+    {
+      "assertion": "the Claude Code manifest and marketplace entry match the plugin and the package",
+      "source": "tests/manifests.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: schema decode and equality"
+    },
+    {
+      "assertion": "plugin code never reaches outside the plugin folder",
+      "source": "tests/manifests.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: source text match"
+    },
+    {
+      "assertion": "the cap stays under every host limit and a cursor pages through the rest",
+      "source": "tests/server.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: page count and joined text equality"
+    },
+    {
+      "assertion": "a tool takes a cursor and returns the same page the cap gives",
+      "source": "tests/server.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: tool result text"
+    },
+    {
+      "assertion": "every described tool has a title and an input schema, and nothing else does",
+      "source": "tests/descriptions.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: key set equality"
+    },
+    {
+      "assertion": "every described tool is a CLI command with a mise run task",
+      "source": "tests/descriptions.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: name parity across descriptions.json, mise.toml, and src/cli/commands.ts"
     },
     {
       "assertion": "every reference file opens with a table of contents whose links resolve",

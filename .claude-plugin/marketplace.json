@@ -1,0 +1,11 @@
+{
+  "name": "webular",
+  "owner": { "name": "Kiren Srinivasan", "email": "kiren@fantasymetals.com" },
+  "plugins": [
+    {
+      "name": "webular",
+      "source": "./plugins/webular",
+      "description": "Web research for agents: search the web, read a page as Markdown, map a site, and summarize text, through typed MCP tools and two skills."
+    }
+  ]
+}

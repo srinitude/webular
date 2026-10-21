@@ -25,12 +25,6 @@ const readJson = <S extends Schema.Top>(path: string, schema: S) =>
   )
 
 const Manifest = Schema.Struct({ $schema: Schema.String, name: Schema.String })
-const McpConfig = Schema.Struct({
-  mcpServers: Schema.Struct({
-    webular: Schema.Struct({ command: Schema.String }),
-    'webular-http': Schema.Struct({ url: Schema.String }),
-  }),
-})
 const Evals = Schema.Struct({
   skill_name: Schema.String,
   evals: Schema.Array(Schema.Struct({ id: Schema.String, query: Schema.String })),
@@ -115,16 +109,6 @@ test('plugin.json names the plugin and the spec schema', () =>
       verify((manifest) => {
         expect(manifest.$schema).toBe('https://agent-plugins.org/schemas/1.0.0/plugin.schema.json')
         expect(manifest.name).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/)
-      }),
-    ),
-  ))
-
-test('mcp.json starts the server over stdio and names its portless HTTP URL', () =>
-  Effect.runPromise(
-    readJson('mcp.json', McpConfig).pipe(
-      verify(({ mcpServers }) => {
-        expect(mcpServers.webular.command).toBe('bun')
-        expect(mcpServers['webular-http'].url).toMatch(/^https?:\/\/webular-mcp\.localhost\b/)
       }),
     ),
   ))

@@ -15,5 +15,21 @@
     "batch": "Scrape many URLs in one call. Use it when you already have a list of pages. Returns one result per URL, each marked ok or not.",
     "act": "Open a page in a real browser and read it, with an optional screenshot. Use it for pages that need JavaScript to show their content. Returns the page text.",
     "feed": "Read an RSS or Atom feed. Use it to get the newest posts from a site. Returns each item's title, link, and date."
+  },
+  "titles": {
+    "search": "Search the web",
+    "scrape": "Scrape a page",
+    "map": "Map a site",
+    "summarize": "Summarize text or a page",
+    "crawl": "Crawl a site",
+    "extract": "Extract by CSS selector",
+    "answer": "Answer a question from the web",
+    "research": "Research a topic",
+    "parse": "Parse a local file",
+    "media": "Save page media to a file",
+    "monitor": "Check a page for changes",
+    "batch": "Scrape many pages",
+    "act": "Open a page in a browser",
+    "feed": "Read a feed"
   }
 }

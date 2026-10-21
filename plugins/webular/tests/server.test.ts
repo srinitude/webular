@@ -117,3 +117,26 @@ test('an over-cap result is cut and marked truncated', () => {
   expect(out.text.length).toBe(MAX_OUTPUT_CHARS)
   expect(cap({ ok: 1 })).toEqual({ ok: 1 })
 })
+
+test('the cap stays under every host limit and a cursor pages through the rest', () => {
+  expect(MAX_OUTPUT_CHARS).toBeLessThan(40_000)
+  expect(MAX_OUTPUT_CHARS / 0.91).toBeLessThan(10_000)
+  const big = { text: 'y'.repeat(MAX_OUTPUT_CHARS * 2) }
+  const json = JSON.stringify(big)
+  const pages: string[] = []
+  let page = cap(big) as { cursor?: number; text: string }
+  pages.push(page.text)
+  while (page.cursor !== undefined) {
+    page = cap(big, 'scrape', page.cursor) as { cursor?: number; text: string }
+    pages.push(page.text)
+  }
+  expect(pages.length).toBe(3)
+  expect(pages.join('')).toBe(json)
+})
+
+test('a tool takes a cursor and returns the same page the cap gives', () =>
+  run((tools) =>
+    call(tools, 'summarize', { text: 'Webular reads pages.', sentences: 1, cursor: 0 }).pipe(
+      Effect.map((result) => expect(result).toContain('Webular')),
+    ),
+  ))

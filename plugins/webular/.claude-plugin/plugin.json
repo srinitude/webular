@@ -1,0 +1,10 @@
+{
+  "name": "webular",
+  "version": "0.2.0",
+  "description": "Web research for agents: search the web, read a page as Markdown, map a site, and summarize text, through typed MCP tools and two skills.",
+  "author": { "name": "Kiren Srinivasan", "email": "kiren@fantasymetals.com" },
+  "homepage": "https://github.com/srinitude/webular",
+  "repository": "https://github.com/srinitude/webular",
+  "license": "Apache-2.0",
+  "keywords": ["web", "research", "scrape", "search", "mcp", "mastra", "bun"]
+}

@@ -6,6 +6,11 @@ import { Effect, Random } from 'effect'
 import { runtime } from '../src/runtime.ts'
 
 const serverPath = fileURLToPath(new URL('../src/server.ts', import.meta.url))
+// The server runs the checkout's own commands from source, so tests need no
+// build and no global install. Mastra adds this to the stdio client's safe env.
+const env = {
+  WEBULAR_COMMANDS_DIR: fileURLToPath(new URL('../../../src/commands', import.meta.url)),
+}
 const page = `<html><head><title>Webular test page</title>
 <link rel="alternate" type="application/rss+xml" href="/posts.xml"></head><body><article>
 <h1>Webular test page</h1><p>Webular turns web pages into clean text for agents.</p>
@@ -33,7 +38,7 @@ const open = (n: number) =>
     // A unique id per client, so a client left behind never blocks the next one.
     client: new MCPClient({
       id: `webular-test-${n}`,
-      servers: { webular: { command: 'bun', args: [serverPath] } },
+      servers: { webular: { command: 'bun', args: [serverPath], env } },
     }),
   }))
 

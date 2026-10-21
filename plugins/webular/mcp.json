@@ -3,9 +3,6 @@
     "webular": {
       "command": "bun",
       "args": ["./src/server.ts"]
-    },
-    "webular-http": {
-      "url": "https://webular-mcp.localhost/mcp"
     }
   }
 }

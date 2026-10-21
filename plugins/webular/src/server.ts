@@ -3,38 +3,32 @@
 // portless sets when it runs this file (see `mise run plugin:dev`).
 // The HTTP side uses Bun's built-in node:http server, because
 // MCPServer.startHTTP takes node IncomingMessage/ServerResponse objects.
+// Self-contained: nothing here reaches outside the plugin folder, so a host
+// that copies only this folder still runs it.
 import { createServer } from 'node:http'
-import { fileURLToPath } from 'node:url'
 import { BunRuntime } from '@effect/platform-bun'
 import { createTool } from '@mastra/core/tools'
 import { MCPServer } from '@mastra/mcp'
-import { Config, Data, Effect, FileSystem, Stream } from 'effect'
+import { Config, Data, Effect, Stream } from 'effect'
 import { ChildProcess, ChildProcessSpawner } from 'effect/process'
 import { z } from 'zod'
-import pkg from '../../../package.json' with { type: 'json' }
+import manifest from '../.claude-plugin/plugin.json' with { type: 'json' }
 import { cap } from './budget.ts'
 import descriptions from './descriptions.json' with { type: 'json' }
 import { runtime } from './runtime.ts'
 import { outputs, schemas } from './schemas.ts'
 
-const repo = fileURLToPath(new URL('../../../', import.meta.url))
-
-// The file a tool call runs. `mise run build` bundles each command to
-// dist/commands/<command>.js, one file that starts in about half a second; the
-// source form re-imports Mastra's module tree on every call, which takes seconds
-// on a cold or busy disk. Without a build, the source form still works; after
-// a source change, rebuild so the bundle matches. WEBULAR_DEV set (as in
-// mise.toml) always runs the source form.
+// The process a tool call runs: `webular <command>`, from WEBULAR_BIN or PATH.
+// WEBULAR_COMMANDS_DIR (a checkout's src/commands, for tests and development)
+// runs `bun <dir>/<command>.ts` directly and skips the CLI's mise routing.
 // ponytail: one child process per call; swap for the CLI's shared dispatch
 // (commandFor) and the OS/CPU executable resolver when they land.
-const commandEntry = (command: string) =>
+const commandLine = (command: string, args: ReadonlyArray<string>) =>
   Effect.gen(function* () {
-    const source = `${repo}src/commands/${command}.ts`
-    const dev = yield* Config.String('WEBULAR_DEV').pipe(Config.withDefault(''))
-    if (dev !== '') return source
-    const fs = yield* FileSystem.FileSystem
-    const bundle = `${repo}dist/commands/${command}.js`
-    return (yield* fs.exists(bundle)) ? bundle : source
+    const dir = yield* Config.String('WEBULAR_COMMANDS_DIR').pipe(Config.withDefault(''))
+    if (dir !== '') return ChildProcess.make('bun', [`${dir}/${command}.ts`, ...args])
+    const bin = yield* Config.String('WEBULAR_BIN').pipe(Config.withDefault('webular'))
+    return ChildProcess.make(bin, [command, ...args])
   })
 
 class CommandFailed extends Data.TaggedError('CommandFailed')<{ readonly message: string }> {}
@@ -60,15 +54,13 @@ const failure = (command: string, code: number, err: string) => {
   })
 }
 
-// Runs `webular <command> --json` with the tool input as flags; stdout is the result.
-const runCommand = (command: string, input: Record<string, unknown>) =>
+// Runs `webular <command> --json` with the tool input as flags; stdout is the
+// result, cut to one page that starts at `from`.
+const runCommand = (command: string, input: Record<string, unknown>, from = 0) =>
   Effect.scoped(
     Effect.gen(function* () {
       const spawner = yield* ChildProcessSpawner.ChildProcessSpawner
-      const entry = yield* commandEntry(command)
-      const proc = yield* spawner.spawn(
-        ChildProcess.make('bun', [entry, ...toFlags(input), '--json']),
-      )
+      const proc = yield* spawner.spawn(yield* commandLine(command, [...toFlags(input), '--json']))
       const [out, err, code] = yield* Effect.all(
         [decode(proc.stdout), decode(proc.stderr), proc.exitCode],
         { concurrency: 3 },
@@ -80,39 +72,29 @@ const runCommand = (command: string, input: Record<string, unknown>) =>
           new CommandFailed({
             message: `webular ${command} returned output that is not JSON. This is a webular bug. Do not retry. Tell the user, and include the tool name.`,
           }),
-      }).pipe(Effect.map((result) => cap(result, command)))
+      }).pipe(Effect.map((result) => cap(result, command, from)))
     }),
   ).pipe(
     Effect.mapError((e) =>
       e instanceof CommandFailed
         ? e
         : new CommandFailed({
-            message: `webular ${command} could not start: ${String(e)}. Check that Bun is installed and the plugin folder is intact, then restart the MCP server.`,
+            message: `webular ${command} could not start: ${String(e)}. Check that webular is installed and on PATH (or WEBULAR_BIN names it), then restart the MCP server.`,
           }),
     ),
   )
 
 type Command = keyof typeof schemas
 
-const titles: Record<Command, string> = {
-  search: 'Search the web',
-  scrape: 'Scrape a page',
-  map: 'Map a site',
-  summarize: 'Summarize text or a page',
-  crawl: 'Crawl a site',
-  extract: 'Extract by CSS selector',
-  answer: 'Answer a question from the web',
-  research: 'Research a topic',
-  parse: 'Parse a local file',
-  media: 'Save page media to a file',
-  monitor: 'Check a page for changes',
-  batch: 'Scrape many pages',
-  act: 'Open a page in a browser',
-  feed: 'Read a feed',
-}
 const writesFiles = new Set<Command>(['media', 'act'])
 // Every command result is a JSON object; cap() keeps it one.
 const outputSchema = z.looseObject({})
+const cursor = z
+  .number()
+  .int()
+  .min(0)
+  .optional()
+  .describe('Where to resume a cut result: the cursor value it returned')
 
 // Mastra's MCP server turns a validation-error shaped result into an isError
 // result with this plain message, so a failed command never throws.
@@ -122,21 +104,21 @@ const asToolError = (e: CommandFailed) =>
 const tool = (id: Command) =>
   createTool({
     id,
-    title: titles[id],
+    title: descriptions.titles[id],
     description: descriptions.tools[id],
-    inputSchema: schemas[id],
+    inputSchema: z.strictObject({ ...schemas[id].shape, cursor }),
     outputSchema: outputs[id] ?? outputSchema,
     mcp: {
       annotations: {
-        title: titles[id],
+        title: descriptions.titles[id],
         readOnlyHint: !writesFiles.has(id),
         openWorldHint: id !== 'parse',
       },
     },
     // The SDK already checked input against inputSchema; it is passed through as is.
-    execute: (input, context) =>
+    execute: ({ cursor: from, ...input }, context) =>
       runtime.runPromise(
-        runCommand(id, input).pipe(Effect.catchTag('CommandFailed', asToolError)),
+        runCommand(id, input, from).pipe(Effect.catchTag('CommandFailed', asToolError)),
         { signal: context?.abortSignal },
       ),
   })
@@ -146,7 +128,7 @@ const ids = Object.keys(schemas) as Command[]
 export const server = new MCPServer({
   id: 'webular',
   name: 'webular',
-  version: pkg.version,
+  version: manifest.version,
   description: descriptions.server,
   tools: Object.fromEntries(ids.map((id) => [id, tool(id)])),
 })

@@ -32,12 +32,17 @@
   "bin": {
     "webular": "./bin/webular.ts"
   },
+  "exports": {
+    ".": "./src/cli/route.ts",
+    "./package.json": "./package.json"
+  },
   "files": [
     "bin",
     "dist/commands",
     "dist/chunks",
     "src",
     "mise.toml",
+    "mise.lock",
     "bun.lock",
     "README.md",
     "CHANGELOG.md",
