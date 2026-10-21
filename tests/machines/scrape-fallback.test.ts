@@ -1,9 +1,13 @@
 // Model-based test: every path of the scrape-fallback machine, replayed against
 // the real withFallbacks. The render paths run in a child process whose PATH
 // starts with a stub `agent-browser` (a recorded page, or a failure), so no
-// browser starts. The PDF paths use a real local server.
+// browser starts. The stub is a compiled Bun executable, so it runs on Windows
+// too, where a shell script has no interpreter and a .cmd needs a shell.
+// The PDF paths use a real local server.
 import { describe, expect, test } from 'bun:test'
-import { Effect, FileSystem } from 'effect'
+import { platform } from 'node:os'
+import { delimiter } from 'node:path'
+import { Config, Effect, FileSystem, Schema } from 'effect'
 import { runProc } from '../../src/core/proc.ts'
 import { scrapeFallbackMachine } from '../../src/machines/scrape-fallback.ts'
 import { withFallbacks } from '../../src/workflows/scrape-fallback.ts'
@@ -23,18 +27,38 @@ const html = await Bun.file(process.argv[1]).text()
 const page = await Effect.runPromise(withFallbacks('${URL_}', Effect.succeed({ html }), 'agent-browser'))
 console.log(JSON.stringify(page))`
 
-// The shell page rendered in a child whose `agent-browser` is the given stub script.
+const EXE = platform() === 'win32' ? '.exe' : ''
+const Page = Schema.fromJsonString(
+  Schema.Struct({ html: Schema.String, renderedBy: Schema.optional(Schema.String) }),
+)
+// Stub bodies: drain the batch on stdin, then print the recorded page or fail.
+const STUB_OK = `await Bun.stdin.text()
+process.stdout.write(await Bun.file(${JSON.stringify(`${dir}/agent-browser-raw.txt`)}).text())`
+const STUB_FAIL = 'await Bun.stdin.text()\nprocess.exit(1)'
+
+// The shell page rendered in a child whose `agent-browser` is the given stub, compiled.
 const renderWithStub = (stub: string) =>
   Effect.gen(function* () {
     const stubs = yield* tmpDir('webular-stub-')
-    const fs = yield* FileSystem.FileSystem
-    yield* fs.writeFileString(`${stubs}/agent-browser`, stub, { mode: 0o755 })
-    const env: [string, ...string[]] = ['env', `PATH=${stubs}:${process.env['PATH']}`, 'bun', '-e']
-    const { stdout } = yield* runProc([...env, CHILD, `${dir}/spa-shell.html`], {
+    yield* (yield* FileSystem.FileSystem).writeFileString(`${stubs}/stub.ts`, stub)
+    const out = `${stubs}/agent-browser${EXE}`
+    const build = yield* runProc(
+      ['bun', 'build', '--compile', `${stubs}/stub.ts`, '--outfile', out],
+      {
+        timeoutMs: 60_000,
+        cwd: ROOT,
+      },
+    )
+    expect([build.code, build.stderr]).toEqual([0, ''])
+    // Windows spells the variable `Path`; the separator is `;` there and `:` elsewhere.
+    const PATH = yield* Config.String('PATH').pipe(Config.orElse(() => Config.String('Path')))
+    const { stdout } = yield* runProc(['bun', '-e', CHILD, `${dir}/spa-shell.html`], {
       timeoutMs: 30_000,
       cwd: ROOT,
+      env: { PATH: `${stubs}${delimiter}${PATH}` },
+      extendEnv: true,
     })
-    return JSON.parse(stdout) as { html: string; renderedBy?: string }
+    return yield* Schema.decodeUnknownEffect(Page)(stdout)
   })
 
 // The fallback for a fetch refused as a PDF, which then reads from a local server.
@@ -66,13 +90,12 @@ const FETCHED_SCENARIOS: Record<string, Scenario> = {
     expect(yield* withFallbacks(URL_, Effect.succeed({ html }), 'off')).toEqual({ html })
   }),
   'FETCHED SHELL_RENDER_ON RENDER_OK': Effect.gen(function* () {
-    const stub = `#!/bin/sh\ncat >/dev/null\ncat ${dir}/agent-browser-raw.txt\n`
-    const page = yield* renderWithStub(stub)
+    const page = yield* renderWithStub(STUB_OK)
     expect(page.renderedBy).toBe('agent-browser')
     expect(page.html).toContain('AURORA-7')
   }),
   'FETCHED SHELL_RENDER_ON RENDER_FAILED': Effect.gen(function* () {
-    const page = yield* renderWithStub('#!/bin/sh\ncat >/dev/null\nexit 1\n')
+    const page = yield* renderWithStub(STUB_FAIL)
     expect(page).toEqual({ html: yield* text('spa-shell.html') })
   }),
 }

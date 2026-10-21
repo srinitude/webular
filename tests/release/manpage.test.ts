@@ -21,6 +21,10 @@ test(
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem
       const file = yield* writeManpage(DIR)
+      const page = yield* fs.readFileString(file)
+      for (const name of COMMAND_NAMES) expect(page).toContain(name)
+      // Windows runners ship no mandoc; the page is still written and checked above.
+      if (!Bun.which(MANDOC)) return yield* fs.remove(DIR, { recursive: true, force: true })
       const lint = yield* mandoc(['-T', 'lint', '-W', 'warning', file])
       const bad = lint.stderr
         .toString()

@@ -21,6 +21,8 @@ interface ProcOptions {
   stdin?: string
   // Replaces the inherited environment when set; absent inherits ours.
   env?: Record<string, string>
+  // Merges env over ours instead of replacing it.
+  extendEnv?: boolean
 }
 
 const SIGTERM_CODE = 128 + constants.signals.SIGTERM
@@ -35,18 +37,22 @@ const signalCode = (err: unknown): number => {
 const text = <E>(s: Stream.Stream<Uint8Array, E>) => Stream.mkString(Stream.decodeText(s))
 
 // detached: false keeps the child in our process group, so Ctrl-C reaches it.
+const toCommand = ([cmd, ...args]: [string, ...string[]], opts: ProcOptions) =>
+  ChildProcess.make(cmd, args, {
+    cwd: opts.cwd,
+    env: opts.env,
+    extendEnv: opts.extendEnv,
+    detached: false,
+    stdin: opts.stdin === undefined ? 'ignore' : Stream.make(new TextEncoder().encode(opts.stdin)),
+  })
+
 // Closing the scope (timeout or interruption) kills a child still running.
 export function runProc(
   argv: [string, ...string[]],
   opts: ProcOptions,
 ): Effect.Effect<ProcResult, ProcError, ChildProcessSpawner.ChildProcessSpawner> {
-  const [cmd, ...args] = argv
-  const command = ChildProcess.make(cmd, args, {
-    cwd: opts.cwd,
-    env: opts.env,
-    detached: false,
-    stdin: opts.stdin === undefined ? 'ignore' : Stream.make(new TextEncoder().encode(opts.stdin)),
-  })
+  const cmd = argv[0]
+  const command = toCommand(argv, opts)
   const run = Effect.gen(function* () {
     const spawner = yield* ChildProcessSpawner.ChildProcessSpawner
     const handle = yield* spawner.spawn(command)

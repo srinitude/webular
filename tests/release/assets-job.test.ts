@@ -9,6 +9,7 @@ import { Effect, FileSystem } from 'effect'
 import release from '../../.github/workflows/release.yml'
 import { assetName, TARGETS } from '../../src/core/platform.ts'
 import { runProc } from '../../src/core/proc.ts'
+import { parseSums } from '../../src/release/distribution.ts'
 import { loadGraph } from '../_support/graph.ts'
 import { eff, tmpDir } from '../_support/run.ts'
 
@@ -54,16 +55,15 @@ test(
       yield* fs.makeDirectory(bin, { recursive: true })
       const names = [...TARGETS.map(assetName), 'webular-completions.tar.gz']
       yield* Effect.forEach(names, (name) => fs.writeFileString(join(bin, name), name), {
+        concurrency: 4,
         discard: true,
       })
       yield* fs.writeFileString(join(bin, 'webular'), 'host build, not a release file')
       const run = steps('assets').find((s) => s.run?.includes('sha256sum webular-*'))?.run ?? ''
       expect((yield* runProc(['sh', '-c', run], { cwd: dir, timeoutMs: 20_000 })).code).toBe(0)
       const sums = yield* fs.readFileString(join(bin, 'SHA256SUMS'))
-      const listed = sums
-        .trim()
-        .split('\n')
-        .map((line) => line.split(/\s+/)[1])
+      // The parser the release uses: Windows sha256sum marks binary mode with "*".
+      const listed = [...parseSums(sums).keys()]
       expect(listed.sort()).toEqual(names.sort())
     }),
   ),
@@ -82,9 +82,7 @@ test(
       yield* Effect.forEach(
         ['webular-linux-x64', 'webular-linux-x64.map'],
         (n) => fs.writeFileString(join(bin, n), n),
-        {
-          discard: true,
-        },
+        { concurrency: 2, discard: true },
       )
       const run = steps('assets')[cleanup]?.run ?? ''
       expect(

@@ -117,7 +117,8 @@ const store = (dir: string, file: string, entry: Entry, max: Limits) =>
 const touch = (file: string) =>
   Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem
-    const now = yield* Clock.currentTimeMillis
+    // A Date, not a number: Node reads a bare number as seconds, and NTFS refuses the result.
+    const now = new Date(yield* Clock.currentTimeMillis)
     yield* fs.utimes(file, now, now)
   }).pipe(Effect.ignore)
 

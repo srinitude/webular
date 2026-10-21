@@ -4,12 +4,10 @@
 // result with a message, and command tools share the paging cursor.
 import { describe, expect, test } from 'bun:test'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
-import {
-  getDefaultEnvironment,
-  StdioClientTransport,
-} from '@modelcontextprotocol/sdk/client/stdio.js'
+import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { Effect, Schema } from 'effect'
 import { useFixture } from '../_support/fixture.ts'
+import { mcpHostEnv } from '../_support/mcp-env.ts'
 import { ROOT } from '../_support/root.ts'
 import { defaultRoutes } from '../_support/routes.ts'
 import { eff, io } from '../_support/run.ts'
@@ -66,16 +64,17 @@ const CALLS: Record<string, (o: string) => Record<string, unknown>> = {
 }
 
 const connected = Effect.acquireRelease(
-  Effect.suspend(() => {
+  Effect.gen(function* () {
+    const host = yield* mcpHostEnv
     const client = new Client({ name: 'webular-contract', version: '0.0.0' })
     const transport = new StdioClientTransport({
       command: process.execPath,
       args: [`${ROOT}src/commands/mcp.ts`],
       cwd: ROOT,
-      env: { ...getDefaultEnvironment(), WEBULAR_NO_CACHE: '1', WEBULAR_SOURCE_ORIGIN: fx.origin },
+      env: { ...host, WEBULAR_NO_CACHE: '1', WEBULAR_SOURCE_ORIGIN: fx.origin },
       stderr: 'ignore',
     })
-    return io(() => client.connect(transport)).pipe(Effect.as(client))
+    return yield* io(() => client.connect(transport)).pipe(Effect.as(client))
   }),
   (client) => Effect.promise(() => client.close()),
 )

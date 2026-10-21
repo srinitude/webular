@@ -12,21 +12,22 @@ export const available = (): Effect.Effect<boolean, never, Path.Path> =>
 
 // A named session keeps its browser warm between batches; its daemon shuts
 // itself down after IDLE_MS with no command, so nothing outlives the work.
+// The variable goes through the spawn env, not /usr/bin/env, which Windows lacks.
 const IDLE_MS = 120_000
-const sessionArgv = (bin: string, session?: string): [string, ...string[]] =>
-  session
-    ? ['/usr/bin/env', `AGENT_BROWSER_IDLE_TIMEOUT_MS=${IDLE_MS}`, bin, '--session', session]
-    : [bin]
+const sessionArgs = (session?: string) => (session ? ['--session', session] : [])
+const sessionEnv = (session?: string) =>
+  session ? { env: { AGENT_BROWSER_IDLE_TIMEOUT_MS: String(IDLE_MS) }, extendEnv: true } : {}
 
 export const runBatch = Effect.fn('runBatch')(function* (commands: string[][], session?: string) {
   const bin = yield* resolveBin('agent-browser')
   if (!bin)
     return { stdout: '', stderr: 'agent-browser unavailable — reinstall webular', code: 127 }
   const { stdout, stderr, code } = yield* runProc(
-    [...sessionArgv(bin, session), 'batch', '--bail'],
+    [bin, ...sessionArgs(session), 'batch', '--bail'],
     {
       timeoutMs: 60_000,
       stdin: JSON.stringify(commands),
+      ...sessionEnv(session),
     },
   )
   return { stdout, stderr, code }

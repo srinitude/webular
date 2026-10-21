@@ -5,10 +5,7 @@
 // tools/list names every CLI command except the recorded NOT_ON_MCP ones (clause 7).
 import { describe, expect, test } from 'bun:test'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
-import {
-  getDefaultEnvironment,
-  StdioClientTransport,
-} from '@modelcontextprotocol/sdk/client/stdio.js'
+import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { Effect } from 'effect'
 import type { z } from 'zod'
 import { commandTools } from '../../plugins/webular/src/commands.ts'
@@ -16,6 +13,7 @@ import { COMMAND_NAMES } from '../../src/cli/commands.ts'
 import { NOT_ON_MCP, webTools } from '../../src/tools/web.ts'
 import { runCli } from '../_support/cli.ts'
 import { useFixture } from '../_support/fixture.ts'
+import { mcpHostEnv } from '../_support/mcp-env.ts'
 import { ROOT } from '../_support/root.ts'
 import { defaultRoutes } from '../_support/routes.ts'
 import { eff, io } from '../_support/run.ts'
@@ -49,16 +47,17 @@ const BAD: Record<string, Record<string, unknown>> = {
 }
 
 const connected = Effect.acquireRelease(
-  Effect.suspend(() => {
+  Effect.gen(function* () {
+    const host = yield* mcpHostEnv
     const client = new Client({ name: 'webular-contract-gaps', version: '0.0.0' })
     const transport = new StdioClientTransport({
       command: process.execPath,
       args: [`${ROOT}src/commands/mcp.ts`],
       cwd: ROOT,
-      env: { ...getDefaultEnvironment(), WEBULAR_NO_CACHE: '1', WEBULAR_JEV: 'off' },
+      env: { ...host, WEBULAR_NO_CACHE: '1', WEBULAR_JEV: 'off' },
       stderr: 'ignore',
     })
-    return io(() => client.connect(transport)).pipe(Effect.as(client))
+    return yield* io(() => client.connect(transport)).pipe(Effect.as(client))
   }),
   (client) => Effect.promise(() => client.close()),
 )

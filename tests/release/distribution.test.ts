@@ -103,6 +103,16 @@ test('a missing checksum fails generation', () =>
     }),
   ))
 
+// GNU sha256sum on Windows writes binary mode by default: "<hex> *<name>".
+test('a checksum line reads the same in text and binary mode, with LF or CRLF', () => {
+  const hex = shaOf('x')
+  const text = `${hex}  webular-linux-x64\r\n${hex} *webular-windows-x64.exe\n`
+  expect([...parseSums(text)]).toEqual([
+    ['webular-linux-x64', hex],
+    ['webular-windows-x64.exe', hex],
+  ])
+})
+
 test('release attests, drafts, publishes npm, then un-drafts', () => {
   const text = JSON.stringify(release)
   const order = [

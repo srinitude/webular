@@ -40,7 +40,11 @@ test(
         ['zsh', '-n', file('_webular')],
         ['fish', '--no-execute', file('webular.fish')],
       ] as const
+      const fs = yield* FileSystem.FileSystem
       for (const argv of checks) {
+        expect([argv[2], yield* fs.exists(argv[2])]).toEqual([argv[2], true])
+        // Windows runners ship no zsh or fish; each shell parses where it is installed.
+        if (!Bun.which(argv[0])) continue
         const out = yield* run([...argv])
         expect([argv[0], out.code, out.stderr]).toEqual([argv[0], 0, ''])
       }

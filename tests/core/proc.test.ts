@@ -37,6 +37,21 @@ describe('runProc — spawn with drain + timeout', () => {
   )
 
   test(
+    'extendEnv merges env over the inherited environment',
+    eff(
+      Effect.gen(function* () {
+        const script = 'console.log(process.env.ADDED, typeof process.env.PATH)'
+        const { stdout } = yield* runProc([process.execPath, '-e', script], {
+          timeoutMs: 10_000,
+          env: { ADDED: 'yes' },
+          extendEnv: true,
+        })
+        expect(stdout.trim()).toBe('yes string')
+      }),
+    ),
+  )
+
+  test(
     'drains >64KB of stderr without deadlocking',
     eff(
       Effect.gen(function* () {
