@@ -17,15 +17,16 @@ interface Flow {
 }
 
 const runFlow = <A>(flow: unknown, schema: Schema.Codec<A>, inputData: unknown) =>
-  Effect.tryPromise({
-    try: async () => {
-      const run = await (flow as Flow).createRun()
-      const o = await run.start({ inputData })
-      if (o.status !== 'success') throw new Error(o.error?.message ?? o.status)
-      return o.result
-    },
-    catch: fail,
-  }).pipe(Effect.flatMap((r) => Schema.decodeUnknownEffect(schema)(r).pipe(Effect.mapError(fail))))
+  Effect.tryPromise({ try: () => (flow as Flow).createRun(), catch: fail }).pipe(
+    Effect.flatMap((run) =>
+      Effect.tryPromise({ try: () => run.start({ inputData }), catch: fail }),
+    ),
+    Effect.filterOrFail(
+      (o) => o.status === 'success',
+      (o) => fail(o.error?.message ?? o.status),
+    ),
+    Effect.flatMap((o) => Schema.decodeUnknownEffect(schema)(o.result).pipe(Effect.mapError(fail))),
+  )
 
 const Ref = Schema.Struct({ title: Schema.String, url: Schema.String })
 const SearchOut = Schema.Struct({

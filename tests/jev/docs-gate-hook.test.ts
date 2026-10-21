@@ -59,16 +59,14 @@ test('malformed hashes or no bytes are malformed; no decomposer, time, or matchi
 // Each case writes its saved copy into its own scoped temp dir, deleted after.
 const TEXT = 'line one\nline two\nline three'
 const withCopy = (write: boolean, body: string) =>
-  Effect.runPromise(
-    Effect.scoped(
-      Effect.gen(function* () {
-        const fs = yield* FileSystem.FileSystem
-        const dir = yield* fs.makeTempDirectoryScoped({ prefix: 'jev-receipt-' })
-        if (write) yield* fs.writeFileString(`${dir}/llms-full.txt`, body)
-        return yield* savedCopy(`${dir}/llms-full.txt`)
-      }),
-    ).pipe(Effect.provide(BunServices.layer)),
-  )
+  Effect.scoped(
+    Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem
+      const dir = yield* fs.makeTempDirectoryScoped({ prefix: 'jev-receipt-' })
+      if (write) yield* fs.writeFileString(`${dir}/llms-full.txt`, body)
+      return yield* savedCopy(`${dir}/llms-full.txt`)
+    }),
+  ).pipe(Effect.provide(BunServices.layer))
 const fresh = {
   llms_bytes: TEXT.length,
   llms_sha256: new Bun.CryptoHasher('sha256').update(TEXT).digest('hex'),
@@ -78,17 +76,23 @@ const fresh = {
 const check = (c: Copy | undefined) =>
   receiptRefusal({ ...receipt, ...fresh }, 's1', fresh.llms_sha256, true, c)
 
-test('a fresh receipt whose saved copy matches bytes, hash, and lines is accepted', async () => {
-  const c = await withCopy(true, TEXT)
-  expect(c).toEqual({ bytes: fresh.llms_bytes, sha256: fresh.llms_sha256, lines: 3 })
-  expect(check(c)).toBeUndefined()
-  expect((await withCopy(true, `${TEXT}\n`))?.lines).toBe(3)
-})
+test('a fresh receipt whose saved copy matches bytes, hash, and lines is accepted', () =>
+  Effect.runPromise(
+    Effect.gen(function* () {
+      const c = yield* withCopy(true, TEXT)
+      expect(c).toEqual({ bytes: fresh.llms_bytes, sha256: fresh.llms_sha256, lines: 3 })
+      expect(check(c)).toBeUndefined()
+      expect((yield* withCopy(true, `${TEXT}\n`))?.lines).toBe(3)
+    }),
+  ))
 
-test('a receipt whose saved copy is missing or differs is refused as unproven', async () => {
-  expect(check(await withCopy(false, TEXT))).toBe('fetch_unproven')
-  expect(check(await withCopy(true, `${TEXT}!`))).toBe('fetch_unproven')
-})
+test('a receipt whose saved copy is missing or differs is refused as unproven', () =>
+  Effect.runPromise(
+    Effect.gen(function* () {
+      expect(check(yield* withCopy(false, TEXT))).toBe('fetch_unproven')
+      expect(check(yield* withCopy(true, `${TEXT}!`))).toBe('fetch_unproven')
+    }),
+  ))
 
 const now = 10 * PROOF_TTL_MS
 const good: Proof = {

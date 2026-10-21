@@ -4,23 +4,19 @@
 // never moves `latest` backwards, waits for npm in parallel, and pushes the
 // Homebrew tap and Scoop bucket only when TAP_TOKEN is set.
 import { afterAll, expect, test } from 'bun:test'
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { BunServices } from '@effect/platform-bun'
-import { ManagedRuntime } from 'effect'
+import { Effect, FileSystem, ManagedRuntime } from 'effect'
 import release from '../../.github/workflows/release.yml'
 import pkg from '../../package.json'
 import { exeName, hostFacts, packageName, type Target, targetFor } from '../../src/core/platform.ts'
+import { runProc } from '../../src/core/proc.ts'
 import { distTag } from '../../src/release/dist-tag.ts'
 import { ROOT } from '../_support/root.ts'
 
+const BUILD_TIMEOUT_MS = 25_000
 const runtime = ManagedRuntime.make(BunServices.layer)
-const tmp = mkdtempSync(join(tmpdir(), 'webular-launcher-'))
-afterAll(() => {
-  rmSync(tmp, { recursive: true, force: true })
-  return runtime.dispose()
-})
+afterAll(() => runtime.dispose())
 
 type Step = { name?: string; run?: string; if?: string }
 type Job = { 'timeout-minutes': number; environment?: string; if?: string; steps: Step[] }
@@ -30,60 +26,84 @@ const at = (job: string, text: string) => runs(job).findIndex((r) => r.includes(
 
 // A fake native package that echoes its arguments and exits 7. Windows runs
 // no shebang script, so there the fake is a real compiled .exe.
-const writeFakeNative = (dir: string, target: Target) => {
-  const native = join(dir, 'node_modules', packageName(target))
-  mkdirSync(join(native, 'bin'), { recursive: true })
-  writeFileSync(join(native, 'package.json'), '{"name":"x","version":"0.0.0"}')
-  const exe = join(native, 'bin', exeName(target))
-  if (target.os !== 'win32') {
-    writeFileSync(exe, '#!/bin/sh\necho "native $*"\nexit 7\n', { mode: 0o755 })
-    return
-  }
-  const source = join(dir, 'fake-native.ts')
-  writeFileSync(
-    source,
-    "console.log('native ' + process.argv.slice(2).join(' '))\nprocess.exit(7)\n",
-  )
-  expect(Bun.spawnSync(['bun', 'build', '--compile', source, `--outfile=${exe}`]).exitCode).toBe(0)
-}
+const writeFakeNative = (dir: string, target: Target) =>
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem
+    const native = join(dir, 'node_modules', packageName(target))
+    yield* fs.makeDirectory(join(native, 'bin'), { recursive: true })
+    yield* fs.writeFileString(join(native, 'package.json'), '{"name":"x","version":"0.0.0"}')
+    const exe = join(native, 'bin', exeName(target))
+    if (target.os !== 'win32') {
+      return yield* fs.writeFileString(exe, '#!/bin/sh\necho "native $*"\nexit 7\n', {
+        mode: 0o755,
+      })
+    }
+    const source = join(dir, 'fake-native.ts')
+    yield* fs.writeFileString(
+      source,
+      "console.log('native ' + process.argv.slice(2).join(' '))\nprocess.exit(7)\n",
+    )
+    const compiled = yield* runProc(['bun', 'build', '--compile', source, `--outfile=${exe}`], {
+      timeoutMs: BUILD_TIMEOUT_MS,
+    })
+    expect(compiled.code).toBe(0)
+  })
 
-// Lays out a global install: node_modules/webular/dist/webular.js plus,
-// when asked, the fake native package.
-const install = async (withNative: boolean) => {
-  const dir = mkdtempSync(join(tmp, 'install-'))
-  const launcher = join(dir, 'node_modules', 'webular', 'dist', 'webular.js')
-  const built = Bun.spawnSync([
-    'bun',
-    'build',
-    join(ROOT, 'src/release/node-launcher.ts'),
-    '--target=node',
-    '--format=esm',
-    `--outfile=${launcher}`,
-  ])
-  expect(built.exitCode).toBe(0)
-  const target = targetFor(await runtime.runPromise(hostFacts)) as Target
-  expect(target).toBeDefined()
-  if (withNative) writeFakeNative(dir, target)
-  return { launcher, name: packageName(target) }
-}
+// Lays out a global install in a scoped temp folder:
+// node_modules/webular/dist/webular.js plus, when asked, the fake native package.
+const install = (withNative: boolean) =>
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem
+    const dir = yield* fs.makeTempDirectoryScoped({ prefix: 'webular-launcher-' })
+    const launcher = join(dir, 'node_modules', 'webular', 'dist', 'webular.js')
+    const built = yield* runProc(
+      [
+        'bun',
+        'build',
+        join(ROOT, 'src/release/node-launcher.ts'),
+        '--target=node',
+        '--format=esm',
+        `--outfile=${launcher}`,
+      ],
+      { timeoutMs: BUILD_TIMEOUT_MS },
+    )
+    expect(built.code).toBe(0)
+    const target = targetFor(yield* hostFacts) as Target
+    expect(target).toBeDefined()
+    if (withNative) yield* writeFakeNative(dir, target)
+    return { launcher, name: packageName(target) }
+  })
 // Node without Bun on PATH.
 const node = Bun.which('node') ?? 'node'
 const runLauncher = (launcher: string) =>
-  Bun.spawnSync([node, launcher, 'scrape', 'x'], { env: { PATH: '/usr/bin:/bin' } })
+  runProc([node, launcher, 'scrape', 'x'], {
+    timeoutMs: BUILD_TIMEOUT_MS,
+    env: { PATH: '/usr/bin:/bin' },
+  })
 
-test('the Node launcher runs the native package with no Bun on PATH', async () => {
-  const { launcher } = await install(true)
-  const result = runLauncher(launcher)
-  expect(result.stdout.toString().trim()).toBe('native scrape x')
-  expect(result.exitCode).toBe(7)
-}, 30_000) // a Windows run compiles the fake .exe first
+test(
+  'the Node launcher runs the native package with no Bun on PATH',
+  () =>
+    runtime.runPromise(
+      Effect.gen(function* () {
+        const { launcher } = yield* install(true)
+        const result = yield* runLauncher(launcher)
+        expect(result.stdout.trim()).toBe('native scrape x')
+        expect(result.code).toBe(7)
+      }).pipe(Effect.scoped),
+    ),
+  30_000,
+) // a Windows run compiles the fake .exe first
 
-test('without the native package or Bun, the launcher names the missing package', async () => {
-  const { launcher, name } = await install(false)
-  const result = runLauncher(launcher)
-  expect(result.exitCode).toBe(1)
-  expect(result.stderr.toString()).toContain(name)
-})
+test('without the native package or Bun, the launcher names the missing package', () =>
+  runtime.runPromise(
+    Effect.gen(function* () {
+      const { launcher, name } = yield* install(false)
+      const result = yield* runLauncher(launcher)
+      expect(result.code).toBe(1)
+      expect(result.stderr).toContain(name)
+    }).pipe(Effect.scoped),
+  ))
 
 test('the npm bin is the generated Node launcher and ships in the package', () => {
   expect(pkg.bin.webular).toBe('./dist/webular.js')

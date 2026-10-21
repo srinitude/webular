@@ -92,9 +92,12 @@ export function runCommand(name: CommandName, args: ReadonlyArray<string>) {
       )
       return yield* exitOf(handle).pipe(
         Effect.onInterrupt(() =>
-          handle
-            .kill({ killSignal: receivedSignal(), forceKillAfter: '5 seconds' })
-            .pipe(Effect.ignore),
+          receivedSignal.pipe(
+            Effect.flatMap((killSignal) =>
+              handle.kill({ killSignal, forceKillAfter: '5 seconds' }),
+            ),
+            Effect.ignore,
+          ),
         ),
       )
     }),

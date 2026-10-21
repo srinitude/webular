@@ -4,7 +4,7 @@ import { constants } from 'node:os'
 import { basename, extname } from 'node:path'
 import { runMain as bunRunMain } from '@effect/platform-bun/BunRuntime'
 import * as BunServices from '@effect/platform-bun/BunServices'
-import { Cause, Data, Effect, Exit, Match, type Runtime } from 'effect'
+import { Cause, Data, Effect, Exit, Match, MutableRef, type Runtime } from 'effect'
 import { COMMANDS } from '../cli/commands.ts'
 import { EXIT } from '../cli/exit-codes.ts'
 import { errMsg } from './output.ts'
@@ -19,8 +19,8 @@ type StopSignal = 'SIGINT' | 'SIGTERM'
 
 // The signal that stopped this process, so a parent can forward that exact
 // signal to its child and both exit 128 + its number (SIGTERM 143, not 130).
-const stop: { signal: StopSignal | undefined } = { signal: undefined }
-export const receivedSignal = (): StopSignal => stop.signal ?? 'SIGTERM'
+const stop = MutableRef.make<StopSignal | undefined>(undefined)
+export const receivedSignal = Effect.sync((): StopSignal => MutableRef.get(stop) ?? 'SIGTERM')
 
 export const signalExit = (signal: string): number =>
   128 + (constants.signals[signal as NodeJS.Signals] ?? 0)
@@ -30,7 +30,7 @@ export const signalExit = (signal: string): number =>
 const recordSignals = Effect.acquireRelease(
   Effect.sync(() => {
     const onSignal = (signal: StopSignal) => {
-      stop.signal = signal
+      MutableRef.set(stop, signal)
     }
     process.on('SIGINT', onSignal)
     process.on('SIGTERM', onSignal)
@@ -55,7 +55,7 @@ export const failureOf = (err: unknown): { message: string; exitCode: number } =
 
 const failureOfCause = (cause: Cause.Cause<unknown>): { message: string; exitCode: number } =>
   Cause.hasInterruptsOnly(cause)
-    ? { message: '', exitCode: signalExit(stop.signal ?? 'SIGINT') }
+    ? { message: '', exitCode: signalExit(MutableRef.get(stop) ?? 'SIGINT') }
     : failureOf(Cause.squash(cause))
 
 // The command name is the entry file's stem (src/commands/<name>.ts or

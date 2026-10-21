@@ -1,6 +1,6 @@
 // Bytes → text: charset detection (BOM > Content-Type > meta prescan > utf-8)
 // and a streaming, byte-capped decode — no whole-body double buffering.
-import { Data, Effect, Stream } from 'effect'
+import { Data, Effect, Option, Stream } from 'effect'
 import { errMsg } from './output.ts'
 
 export class FetchError extends Data.TaggedError('FetchError')<{
@@ -41,13 +41,9 @@ export function pickCharset(contentType: string | null, prefix: Uint8Array): str
 
 // Labels Bun's TextDecoder does not support fall back to utf-8 — deterministic
 // under the pinned runtime.
-function makeDecoder(label: string): TextDecoder {
-  try {
-    return new TextDecoder(label)
-  } catch {
-    return new TextDecoder()
-  }
-}
+const decoderFor = Option.liftThrowable((label: string) => new TextDecoder(label))
+const makeDecoder = (label: string): TextDecoder =>
+  Option.getOrElse(decoderFor(label), () => new TextDecoder())
 
 function concat(chunks: Uint8Array[]): Uint8Array {
   const out = new Uint8Array(chunks.reduce((n, c) => n + c.byteLength, 0))

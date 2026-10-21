@@ -102,10 +102,10 @@ export function runWorkflow<M>(
   inputData: unknown,
   opts: RunOpts,
 ): Effect.Effect<number, OutputError | SandboxError, FileSystem.FileSystem | Path.Path> {
-  return Effect.tryPromise({
-    try: () => load().then((mod) => pick(mod).createRun({ runId: name })),
-    catch: errMsg,
-  }).pipe(
+  return Effect.tryPromise({ try: load, catch: errMsg }).pipe(
+    Effect.flatMap((mod) =>
+      Effect.tryPromise({ try: () => pick(mod).createRun({ runId: name }), catch: errMsg }),
+    ),
     Effect.flatMap((run) =>
       Effect.tryPromise({ try: () => run.start({ inputData }), catch: errMsg }),
     ),

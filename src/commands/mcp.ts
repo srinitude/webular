@@ -14,10 +14,7 @@ const serverError = (cause: unknown) =>
   new CliError({ message: `mcp: the server failed (${String(cause)})`, exitCode: EXIT.failure })
 
 // The tool table (zod schemas, HTML parsing) loads after the flags parse.
-const loadTools = Effect.tryPromise({ try: () => import('../tools/web.ts'), catch: serverError })
-
-// The --list path needs only the id list, so it picks that one export.
-const pick = <M, T>(load: () => Promise<M>, from: (m: M) => T) => load().then(from)
+const lazy = <M>(load: () => Promise<M>) => Effect.tryPromise({ try: load, catch: serverError })
 
 const loadSdk = Effect.all(
   [
@@ -30,7 +27,7 @@ const loadSdk = Effect.all(
       catch: serverError,
     }),
   ],
-  { concurrency: 'unbounded' },
+  { concurrency: 2 },
 )
 
 // Owns the server for the scope: connect on acquire, close on release, and
@@ -41,7 +38,7 @@ const sibling = (command: string) => join(import.meta.dir, `${command}${extname(
 
 const serve = Effect.gen(function* () {
   const [{ McpServer }, { StdioServerTransport }] = yield* loadSdk
-  const { registerAll } = yield* loadTools
+  const { registerAll } = yield* lazy(() => import('../tools/web.ts'))
   const server = yield* Effect.acquireRelease(
     Effect.sync(() => new McpServer({ name: 'webular', version: pkg.version })),
     (s) => Effect.tryPromise(() => s.close()).pipe(Effect.ignore),
@@ -66,14 +63,7 @@ const main = Effect.gen(function* () {
     list: { type: 'boolean', default: false },
   })
   if (!values['list']) return yield* serve
-  const mcpToolIds = yield* Effect.tryPromise({
-    try: () =>
-      pick(
-        () => import('../tools/web.ts'),
-        (m) => m.mcpToolIds,
-      ),
-    catch: serverError,
-  })
+  const { mcpToolIds } = yield* lazy(() => import('../tools/web.ts'))
   yield* emit(
     { count: mcpToolIds.length, tools: mcpToolIds },
     { ...emitOpts(values), render: renderFor('mcp') },

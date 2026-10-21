@@ -96,27 +96,35 @@ test('fuseRanked sums 1/(k+rank) by URL and keeps first-seen items', () => {
   expect(fuseRanked([])).toEqual([])
 })
 
-test('searchLocalIndex: the search step reads the shared index and fuses it after web hits', async () => {
-  const dir = `${tmpdir()}/search-local-${process.pid}`
-  const saved = { off: process.env['WEBULAR_NO_CACHE'], dir: process.env['WEBULAR_CACHE_DIR'] }
-  process.env['WEBULAR_NO_CACHE'] = '0'
-  process.env['WEBULAR_CACHE_DIR'] = dir
-  try {
-    await Effect.runPromise(
-      Effect.scoped(
+// The cache env vars are set for the test and put back on every exit path.
+const cacheEnv = Effect.acquireRelease(
+  Effect.sync(() => {
+    const saved = { off: process.env['WEBULAR_NO_CACHE'], dir: process.env['WEBULAR_CACHE_DIR'] }
+    process.env['WEBULAR_NO_CACHE'] = '0'
+    process.env['WEBULAR_CACHE_DIR'] = `${tmpdir()}/search-local-${process.pid}`
+    return saved
+  }),
+  (saved) =>
+    Effect.sync(() => {
+      process.env['WEBULAR_NO_CACHE'] = saved.off ?? '1'
+      if (saved.dir === undefined) delete process.env['WEBULAR_CACHE_DIR']
+      else process.env['WEBULAR_CACHE_DIR'] = saved.dir
+    }),
+)
+
+test('searchLocalIndex: the search step reads the shared index and fuses it after web hits', () =>
+  Effect.runPromise(
+    Effect.gen(function* () {
+      yield* cacheEnv
+      yield* Effect.scoped(
         Effect.flatMap(Effect.flatMap(localIndexPath, openLocalIndex), (i) => addPages(i, [tides])),
-      ),
-    )
-    const local = await Effect.runPromise(searchLocalIndex('Fundy tides', 5))
-    expect(local.map((h) => h.url)).toEqual([tides.url])
-    const web = [{ url: 'https://w.test/1', title: 'w', description: '' }]
-    expect(fuseRanked([web, local]).map((h) => h.url)).toEqual(['https://w.test/1', tides.url])
-  } finally {
-    process.env['WEBULAR_NO_CACHE'] = saved.off ?? '1'
-    if (saved.dir === undefined) delete process.env['WEBULAR_CACHE_DIR']
-    else process.env['WEBULAR_CACHE_DIR'] = saved.dir
-  }
-})
+      )
+      const local = yield* searchLocalIndex('Fundy tides', 5)
+      expect(local.map((h) => h.url)).toEqual([tides.url])
+      const web = [{ url: 'https://w.test/1', title: 'w', description: '' }]
+      expect(fuseRanked([web, local]).map((h) => h.url)).toEqual(['https://w.test/1', tides.url])
+    }).pipe(Effect.scoped),
+  ))
 
 const guide = {
   url: 'https://c.test/guide',

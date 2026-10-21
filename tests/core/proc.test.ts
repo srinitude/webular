@@ -23,6 +23,20 @@ describe('runProc — spawn with drain + timeout', () => {
   )
 
   test(
+    'env replaces the inherited environment',
+    eff(
+      Effect.gen(function* () {
+        const script = 'console.log(process.env.ONLY, process.env.HOME)'
+        const { stdout } = yield* runProc([process.execPath, '-e', script], {
+          timeoutMs: 10_000,
+          env: { ONLY: 'yes' },
+        })
+        expect(stdout.trim()).toBe('yes undefined')
+      }),
+    ),
+  )
+
+  test(
     'drains >64KB of stderr without deadlocking',
     eff(
       Effect.gen(function* () {

@@ -19,6 +19,8 @@ interface ProcOptions {
   timeoutMs: number
   cwd?: string
   stdin?: string
+  // Replaces the inherited environment when set; absent inherits ours.
+  env?: Record<string, string>
 }
 
 const SIGTERM_CODE = 128 + constants.signals.SIGTERM
@@ -41,6 +43,7 @@ export function runProc(
   const [cmd, ...args] = argv
   const command = ChildProcess.make(cmd, args, {
     cwd: opts.cwd,
+    env: opts.env,
     detached: false,
     stdin: opts.stdin === undefined ? 'ignore' : Stream.make(new TextEncoder().encode(opts.stdin)),
   })
