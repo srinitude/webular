@@ -83,6 +83,18 @@ run = [
   'bun build "{{config_root}}/bin/webular.ts" --compile --minify --sourcemap --bytecode --format=esm --target=bun-windows-arm64 --outfile="{{config_root}}/dist/bin/webular-windows-arm64.exe"',
 ]
 
+[tasks."package:platforms"]
+description = "Write one npm package per executable target into npm/ and list them as optionalDependencies (release path, after compile:all)"
+depends = ["compile:all"]
+run = 'bun "{{config_root}}/src/release/platform-packages.ts"'
+
+[tasks."test:file"]
+description = "Run the named test files only (targeted check while editing)"
+depends = ["setup"]
+usage = 'arg "<files>" var=#true help="Test files or folders to run"'
+# Tera, not $usage_files: the Windows task shell does not expand $VARS.
+run = 'bun test --timeout 30000{% for file in usage.files %} "{{ file }}"{% endfor %}'
+
 [tasks.test]
 description = "Run the bun test suite (CI/CD graph + contracts + integration)"
 depends = ["build"]

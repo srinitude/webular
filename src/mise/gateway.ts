@@ -33,7 +33,11 @@ function gatewayEnv(): Record<string, string | undefined> {
   }
 }
 
-export async function runTask(task: string, args: string[]): Promise<RunResult> {
+export async function runTask(
+  task: string,
+  args: string[],
+  extraEnv: Record<string, string> = {},
+): Promise<RunResult> {
   const mise = resolveMise()
   if (!mise) {
     logErr(
@@ -44,7 +48,7 @@ export async function runTask(task: string, args: string[]): Promise<RunResult> 
   try {
     const proc = Bun.spawn([mise, 'run', task, '--', ...args], {
       cwd: PACKAGE_ROOT,
-      env: gatewayEnv(),
+      env: { ...gatewayEnv(), ...extraEnv },
       stdout: 'inherit',
       stderr: 'inherit',
       stdin: 'inherit',

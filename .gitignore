@@ -41,3 +41,6 @@ docs/usecase-results.md
 
 # agent tooling state
 .serena/
+
+# Per-platform npm packages written by mise run package:platforms
+npm/

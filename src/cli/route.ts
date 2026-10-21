@@ -8,7 +8,10 @@ function isCommand(value: string): value is CommandName {
   return (COMMAND_NAMES as string[]).includes(value)
 }
 
-export async function route(argv: string[]): Promise<number> {
+export async function route(
+  argv: string[],
+  extraEnv: Record<string, string> = {},
+): Promise<number> {
   const [command, ...rest] = argv
   if (!command || command === '--help' || command === '-h') return printHelp()
   if (command === '--version' || command === '-V') return printVersion()
@@ -16,5 +19,5 @@ export async function route(argv: string[]): Promise<number> {
     process.stderr.write(`webular: unknown command '${command}'. Run 'webular --help'.\n`)
     return 1
   }
-  return (await runTask(`run:${command}`, rest)).exitCode
+  return (await runTask(`run:${command}`, rest, extraEnv)).exitCode
 }
