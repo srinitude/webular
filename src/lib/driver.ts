@@ -105,7 +105,13 @@ const batch = (commands: string[][]) =>
 // One process opens (open returns after the load event, so inline scripts have
 // run) and reads, so get html never races a separate open. An extra
 // `wait --load load` after open stalls about 25 s, so there is none. A cold
-// daemon can refuse the second command ("Failed to connect"): retry once.
+// daemon can refuse the second command ("Failed to connect"): retry once, but
+// only what a retry can fix: a dropped connection, a timeout (a killed run
+// prints no stderr, so its message is "exit 143"), 429 or a 5xx. A 404, an
+// unknown command, or a bad selector fails at once.
+const TRANSIENT =
+  /ECONN(?:RESET|REFUSED)|EPIPE|Failed to connect|time(?:d )?out|exit 143|\b(?:429|5\d\d)\b/i
+
 const readHtml = (url: string) =>
   Effect.flatMap(
     Effect.flatMap(
@@ -114,7 +120,7 @@ const readHtml = (url: string) =>
           ['open', url],
           ['get', 'html', 'html'],
         ]),
-        { times: 1 },
+        { times: 1, while: (err) => TRANSIENT.test(err.message) },
       ),
       htmlFromAgentBrowser,
     ),
