@@ -55,7 +55,7 @@
       "grader": "bun test: name parity across descriptions.json, mise.toml, and src/cli/commands.ts"
     },
     {
-      "assertion": "the list holds the 18 command tools, with unique names",
+      "assertion": "the list holds the 19 command tools, with unique names",
       "source": "tests/commands.test.ts",
       "kind": "deterministic",
       "grader": "bun test: count and uniqueness of the command tool ids"

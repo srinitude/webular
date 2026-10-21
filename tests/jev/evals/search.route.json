@@ -1,0 +1,11 @@
+{
+  "decision": "search.route",
+  "baseline-wins": [{ "input": { "query": "best pizza places in brooklyn" }, "label": "web" }],
+  "baseline-loses": [
+    {
+      "input": { "query": "arxiv preprint on diffusion models for image generation" },
+      "label": "arxiv"
+    },
+    { "input": { "query": "Marie Curie early life and family" }, "label": "wikipedia" }
+  ]
+}

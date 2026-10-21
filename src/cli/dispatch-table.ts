@@ -9,6 +9,7 @@ export const DISPATCH = {
   doctor: 'doctor',
   extract: 'extract',
   feed: 'feed',
+  jev: 'jev',
   map: 'map',
   mcp: 'mcp',
   media: 'media',

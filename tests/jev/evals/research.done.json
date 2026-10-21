@@ -1,0 +1,51 @@
+{
+  "decision": "research.done",
+  "baseline-wins": [
+    {
+      "input": {
+        "s": {
+          "topic": "SQLite in Bun",
+          "round": 1,
+          "maxRounds": 3,
+          "subQuestions": [
+            {
+              "question": "Does it support WAL mode?",
+              "bestEvidence": "Bun is a fast JavaScript runtime."
+            }
+          ]
+        },
+        "part": [
+          {
+            "question": "Does it support WAL mode?",
+            "bestEvidence": "Bun is a fast JavaScript runtime."
+          }
+        ]
+      },
+      "label": false
+    }
+  ],
+  "baseline-loses": [
+    {
+      "input": {
+        "s": {
+          "topic": "SQLite in Bun",
+          "round": 1,
+          "maxRounds": 3,
+          "subQuestions": [
+            {
+              "question": "Which module gives SQLite in Bun?",
+              "bestEvidence": "Bun ships bun:sqlite, a built-in SQLite driver."
+            }
+          ]
+        },
+        "part": [
+          {
+            "question": "Which module gives SQLite in Bun?",
+            "bestEvidence": "Bun ships bun:sqlite, a built-in SQLite driver."
+          }
+        ]
+      },
+      "label": true
+    }
+  ]
+}

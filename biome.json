@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["**", "!!.claude"]
+    "includes": ["**", "!!.claude", "!!bench/recordings", "!!bench/results"]
   },
   "formatter": {
     "enabled": true,

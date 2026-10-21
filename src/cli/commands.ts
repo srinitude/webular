@@ -20,6 +20,7 @@ export const COMMANDS = {
   audit: 'Show whether deepsec is installed and the scan plan (no key needed)',
   act: 'Control a real browser: open, snapshot, screenshot, interact (agent-browser)',
   feed: 'Read an RSS or Atom feed and list its items',
+  jev: 'Learn from recorded Jev calls (learn) or label one as an eval case (correct)',
 } as const
 
 export type CommandName = keyof typeof COMMANDS

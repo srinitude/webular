@@ -43,6 +43,7 @@ const main = Effect.gen(function* () {
   const { values, positionals } = yield* parseFlags(Bun.argv.slice(2), {
     url: { type: 'string' },
     db: { type: 'string' },
+    'watch-for': { type: 'string' },
   })
   const url = (values['url'] as string) ?? positionals[0]
   if (!url) {
@@ -53,6 +54,7 @@ const main = Effect.gen(function* () {
     url,
     dbPath: yield* dbPathFor(values['db']),
     timeoutMs: yield* timeoutFlag('monitor', values),
+    watchFor: typeof values['watch-for'] === 'string' ? values['watch-for'] : undefined,
   }
   return yield* runWorkflow(
     'monitor',

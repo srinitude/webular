@@ -20,7 +20,8 @@ function buildInput(
     }
     if (!values['fields'] && !values['selector']) {
       return yield* new CliError({
-        message: 'extract: missing fields. Pass --fields "name:selector[,...]" or --selector <css>',
+        message:
+          'extract: missing fields. Pass --fields "name[:selector][,...]" or --selector <css>',
         exitCode: EXIT.usage,
       })
     }

@@ -1,0 +1,29 @@
+{
+  "decision": "extract.pick",
+  "baseline-wins": [
+    {
+      "input": {
+        "url": "https://docs.example.dev/config",
+        "outputs": {
+          "readability": "Configure the CLI with a config file named example.toml in the project root. Each key sets one flag.",
+          "raw": "Configure the CLI."
+        },
+        "names": ["readability", "raw"]
+      },
+      "label": "readability"
+    }
+  ],
+  "baseline-loses": [
+    {
+      "input": {
+        "url": "https://docs.example.dev/config",
+        "outputs": {
+          "readability": "Configure the CLI with example.toml.",
+          "raw": "Home Docs Blog Pricing Sign in Configure the CLI with example.toml. Cookie settings Footer links Twitter GitHub Copyright"
+        },
+        "names": ["readability", "raw"]
+      },
+      "label": "readability"
+    }
+  ]
+}

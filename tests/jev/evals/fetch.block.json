@@ -1,0 +1,21 @@
+{
+  "decision": "fetch.block",
+  "baseline-wins": [
+    {
+      "input": {
+        "url": "https://blog.example.dev/post",
+        "html": "<article><h1>How we cut build time</h1><p>We moved the test suite to parallel workers and cut the wall time in half.</p></article>"
+      },
+      "label": "real_content"
+    }
+  ],
+  "baseline-loses": [
+    {
+      "input": {
+        "url": "https://shop.example.dev/item",
+        "html": "<h1>Just a moment...</h1><p>Verify you are human to continue.</p>"
+      },
+      "label": "captcha"
+    }
+  ]
+}

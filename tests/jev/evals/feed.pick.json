@@ -1,0 +1,39 @@
+{
+  "decision": "feed.pick",
+  "baseline-wins": [
+    {
+      "input": {
+        "site": "https://blog.example.dev",
+        "candidates": [
+          {
+            "url": "https://blog.example.dev/feed",
+            "title": "Posts feed"
+          },
+          {
+            "url": "https://blog.example.dev/comments/feed",
+            "title": "Comments feed"
+          }
+        ]
+      },
+      "label": "https://blog.example.dev/feed"
+    }
+  ],
+  "baseline-loses": [
+    {
+      "input": {
+        "site": "https://blog.example.dev",
+        "candidates": [
+          {
+            "url": "https://blog.example.dev/comments/feed",
+            "title": "Comments feed"
+          },
+          {
+            "url": "https://blog.example.dev/feed",
+            "title": "Posts feed"
+          }
+        ]
+      },
+      "label": "https://blog.example.dev/feed"
+    }
+  ]
+}

@@ -4,6 +4,7 @@
 import { Effect } from 'effect'
 import { parseHTML } from 'linkedom'
 import { fetchText } from '../core/http.ts'
+import { onJevRuntime, searchRank } from './jev/decisions/search.ts'
 import { endpoint, SOURCE_TIMEOUT_MS } from './sources-search.ts'
 
 interface SearchHit {
@@ -42,9 +43,10 @@ export const webSearch = Effect.fn('webSearch')(function* (query: string, limit:
   for (const el of document.querySelectorAll('.result')) {
     const hit = toHit(el as unknown as Element)
     if (hit) hits.push(hit)
-    if (hits.length >= limit) break
   }
-  return hits
+  // Jev re-ranks by relevance before the limit cut; below 0.95 the engine order stays.
+  const ranked = yield* onJevRuntime(searchRank, { query, hits })
+  return ranked.slice(0, limit)
 })
 
 // Dedupe key: host without www, no trailing slash, no utm_* params, no hash.

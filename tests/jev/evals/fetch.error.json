@@ -1,0 +1,23 @@
+{
+  "decision": "fetch.error",
+  "baseline-wins": [
+    {
+      "input": { "url": "https://api.example.dev/a", "status": 503, "body": "Service Unavailable" },
+      "label": "retry_later"
+    },
+    {
+      "input": { "url": "https://blog.example.dev/old", "status": 410, "body": "Gone" },
+      "label": "try_archive"
+    }
+  ],
+  "baseline-loses": [
+    {
+      "input": {
+        "url": "https://news.example.dev/story",
+        "status": 403,
+        "body": "<p>Please sign in to keep reading.</p>"
+      },
+      "label": "needs_login"
+    }
+  ]
+}

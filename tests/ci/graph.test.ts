@@ -24,6 +24,7 @@ const COMMANDS = [
   'audit',
   'act',
   'feed',
+  'jev',
 ]
 const graph = loadGraph()
 

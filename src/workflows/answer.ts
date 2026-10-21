@@ -1,8 +1,15 @@
 // ANSWER workflow: search -> fetch -> extractive synthesize, composed as a
 // Mastra non-model workflow over FOSS tools (keyless search + readability + summarizer).
+// Jev picks which hits to fetch, drops off-topic sources, and picks the lead
+// sentence, each at the 0.95 bar; below it the plain rule decides.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
+import { answerSentences } from '../lib/jev/decisions/answer.ts'
+import { citedSources } from '../lib/jev/decisions/answer-citation.ts'
+import { onJevRuntime } from '../lib/jev/decisions/search.ts'
+import { decisions } from '../lib/jev/decisions.ts'
+import { decisionStep } from '../lib/jev/steps.ts'
 import { searchEffect } from '../lib/search-chain.ts'
 import { mainEntity } from '../lib/search-hop.ts'
 import { subjectSources } from '../lib/source-subject.ts'
@@ -35,69 +42,93 @@ const answerOutput = z.object({
   errors: fetchErrorsSchema,
 })
 
-const hitsSchema = z.object({
+const evidenceSchema = z.object({
   query: z.string(),
   sentences: z.number(),
-  timeoutMs: z.number().optional(),
-  hits: z.array(sourceRef),
+  // The lead hit names the entity when the question does not (a bridge hop).
+  entity: z.string().optional(),
+  used: z.array(sourceRef.extend({ text: z.string() })),
+  errors: fetchErrorsSchema,
 })
+type Evidence = z.infer<typeof evidenceSchema>
 
-const searchHits = (query: string, sources: number) =>
+const searchHits = (query: string, n: number) =>
   Effect.map(
-    searchEffect('web', query, sources, { hop: true, deadlineMs: ANSWER_SEARCH_MS }),
-    ({ results }) => results.map((h) => ({ title: h.title, url: h.url })),
+    searchEffect('web', query, n, { hop: true, deadlineMs: ANSWER_SEARCH_MS }),
+    ({ results }) => results,
   )
+
+// --urls reads exactly those pages, no search. Otherwise over-fetch 3x so Jev can
+// pick which hits to fetch (else the engine's first N). Namesake pages (a TV
+// series named after the novel) drop out, then Jev keeps only the fetched
+// sources that hold facts answering the query.
+const gather = Effect.fn('answer.gather')(function* (input: z.infer<typeof answerInput>) {
+  const hits = input.urls
+    ? input.urls.map((url) => ({ title: url, url }))
+    : yield* onJevRuntime(decisions.answerHits, {
+        question: input.query,
+        hits: yield* searchHits(input.query, input.sources * 3),
+        n: input.sources,
+      })
+  const fetched = yield* fetchSources(
+    hits.map((h) => ({ title: h.title, url: h.url })),
+    input.timeoutMs ?? ANSWER_FETCH_MS,
+    ANSWER_MAX_HTML,
+  )
+  const withText = yield* subjectSources(
+    input.query,
+    fetched.entries.filter((e) => e.text.length > 0),
+  )
+  const used =
+    withText.length === 0
+      ? withText
+      : yield* onJevRuntime(decisions.answerSources, { question: input.query, sources: withText })
+  const entity = mainEntity(input.query) ?? hits[0]?.title
+  const { query, sentences } = input
+  return { query, sentences, entity, used: [...used], errors: fetched.errors }
+})
 
 const searchStep = createStep({
   id: 'search',
   inputSchema: answerInput,
-  outputSchema: hitsSchema,
-  execute: ({ inputData }) =>
-    stepRuntime.runPromise(
-      Effect.map(
-        // --urls: read exactly those pages, no search.
-        inputData.urls
-          ? Effect.succeed(inputData.urls.map((url) => ({ title: url, url })))
-          : searchHits(inputData.query, inputData.sources),
-        (hits) => ({
-          query: inputData.query,
-          sentences: inputData.sentences,
-          timeoutMs: inputData.timeoutMs,
-          hits,
-        }),
-      ),
-    ),
+  outputSchema: evidenceSchema,
+  execute: ({ inputData }) => stepRuntime.runPromise(gather(inputData)),
 })
 
-const synthesize = Effect.fn('answer.synthesize')(function* (input: z.infer<typeof hitsSchema>) {
-  const fetched = yield* fetchSources(
-    input.hits,
-    input.timeoutMs ?? ANSWER_FETCH_MS,
-    ANSWER_MAX_HTML,
-  )
-  // Cite only sources whose text actually fed the answer.
-  // Namesake pages (a TV series named after the novel) drop out first.
-  const used = yield* subjectSources(
-    input.query,
-    fetched.entries.filter((e) => e.text.length > 0),
-  )
-  const combined = used.map((e) => e.text).join('\n\n')
-  // The lead hit names the entity when the question does not (a bridge hop).
-  const entity = mainEntity(input.query) ?? input.hits[0]?.title
-  const { summary } = summarizeText(combined, input.sentences, { query: input.query, entity })
-  return {
-    query: input.query,
-    answer: summary,
-    sources: used.map((e) => ({ title: e.title, url: e.url })),
-    errors: fetched.errors,
-  }
-})
+const topSentences = (text: string, data: Pick<Evidence, 'query' | 'sentences' | 'entity'>) =>
+  summarizeText(text, data.sentences, { query: data.query, entity: data.entity }).sentences
 
-const synthStep = createStep({
+// The summarizer's top sentences, led by the sentence Jev picks as the direct answer.
+// Cited sources are those that back one of the summarizer's top sentences (answer.citation).
+// ponytail: Jev sees only the first 18 sentences; rank more when pages run long.
+// ponytail: citations are checked against the summarizer's top sentences, not the Jev lead.
+const prepareSynth = Effect.fn('answer.prepare')(function* (data: Evidence) {
+  const text = data.used.map((e) => e.text).join('\n\n')
+  const cited = yield* citedSources(topSentences(text, data), data.used, (c) =>
+    onJevRuntime(decisions.answerCitation, c),
+  )
+  return { ...data, text, cited }
+})
+const synthStep = decisionStep({
   id: 'fetch-and-summarize',
-  inputSchema: hitsSchema,
+  inputSchema: evidenceSchema,
   outputSchema: answerOutput,
-  execute: ({ inputData }) => stepRuntime.runPromise(synthesize(inputData)),
+  decide: decisions.answerSentence,
+  prepare: (data: Evidence) => stepRuntime.runPromise(prepareSynth(data)),
+  pick: ({ query, text }) => (text ? { question: query, text } : undefined),
+  output: (data, lead) => {
+    const { query, text, sentences, cited, errors } = data
+    const top = topSentences(text, data)
+    const first = lead === undefined ? undefined : answerSentences(text)[lead]
+    const chosen =
+      first === undefined || top.includes(first) ? top : [first, ...top.slice(0, sentences - 1)]
+    return {
+      query,
+      answer: chosen.join(' '),
+      sources: cited.map((e) => ({ title: e.title, url: e.url })),
+      errors,
+    }
+  },
 })
 
 export const answerWorkflow = createWorkflow({

@@ -1,0 +1,47 @@
+{
+  "decision": "act.next",
+  "baseline-wins": [
+    {
+      "input": {
+        "goal": "read the pricing plans",
+        "candidates": [
+          { "ref": "e1", "role": "link", "name": "Docs" },
+          { "ref": "e2", "role": "link", "name": "Pricing" }
+        ]
+      },
+      "label": "e2"
+    },
+    {
+      "input": {
+        "goal": "find the contact email",
+        "candidates": [
+          { "ref": "e1", "role": "link", "name": "Blog" },
+          { "ref": "e2", "role": "link", "name": "Contact us" }
+        ]
+      },
+      "label": "e2"
+    }
+  ],
+  "baseline-loses": [
+    {
+      "input": {
+        "goal": "see how much the team plan costs",
+        "candidates": [
+          { "ref": "e1", "role": "link", "name": "Meet the team" },
+          { "ref": "e2", "role": "link", "name": "Pricing" }
+        ]
+      },
+      "label": "e2"
+    },
+    {
+      "input": {
+        "goal": "read the install guide",
+        "candidates": [
+          { "ref": "e1", "role": "link", "name": "Home" },
+          { "ref": "e2", "role": "link", "name": "Getting started" }
+        ]
+      },
+      "label": "e2"
+    }
+  ]
+}

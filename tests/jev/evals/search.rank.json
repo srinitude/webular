@@ -1,0 +1,65 @@
+{
+  "decision": "search.rank",
+  "baseline-wins": [
+    {
+      "input": {
+        "query": "python list comprehension",
+        "hits": [
+          {
+            "title": "List comprehensions in Python",
+            "url": "https://docs.python.org/3/tutorial/datastructures.html",
+            "description": "Concise way to create lists."
+          },
+          {
+            "title": "Python snake care guide",
+            "url": "https://pets.example.com/python",
+            "description": "Feeding and housing a ball python."
+          }
+        ]
+      },
+      "label": [
+        {
+          "title": "List comprehensions in Python",
+          "url": "https://docs.python.org/3/tutorial/datastructures.html",
+          "description": "Concise way to create lists."
+        },
+        {
+          "title": "Python snake care guide",
+          "url": "https://pets.example.com/python",
+          "description": "Feeding and housing a ball python."
+        }
+      ]
+    }
+  ],
+  "baseline-loses": [
+    {
+      "input": {
+        "query": "python list comprehension",
+        "hits": [
+          {
+            "title": "Python snake care guide",
+            "url": "https://pets.example.com/python",
+            "description": "Feeding and housing a ball python."
+          },
+          {
+            "title": "List comprehensions in Python",
+            "url": "https://docs.python.org/3/tutorial/datastructures.html",
+            "description": "Concise way to create lists."
+          }
+        ]
+      },
+      "label": [
+        {
+          "title": "List comprehensions in Python",
+          "url": "https://docs.python.org/3/tutorial/datastructures.html",
+          "description": "Concise way to create lists."
+        },
+        {
+          "title": "Python snake care guide",
+          "url": "https://pets.example.com/python",
+          "description": "Feeding and housing a ball python."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "decision": "answer.sentence",
+  "baseline-wins": [
+    {
+      "input": {
+        "question": "what sqlite driver does bun ship",
+        "text": "Bun ships a built-in SQLite driver called bun:sqlite. The weather was nice today."
+      },
+      "label": 0
+    }
+  ],
+  "baseline-loses": [
+    {
+      "input": {
+        "question": "what sqlite driver does bun ship",
+        "text": "Bun Bun Bun is loved by Bun fans of Bun. Bun ships a SQLite driver called bun:sqlite."
+      },
+      "label": 1
+    }
+  ]
+}

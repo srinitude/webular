@@ -1,0 +1,23 @@
+{
+  "decision": "scrape.main",
+  "baseline-wins": [
+    {
+      "input": {
+        "url": "https://docs.example.dev/config",
+        "article": "Configure the CLI with a config file named webular.json. Set timeoutMs to change the fetch timeout.",
+        "page": "Home Docs Pricing Login Configure the CLI with a config file named webular.json. Set timeoutMs to change the fetch timeout. Copyright 2026 Example Inc. Terms Privacy"
+      },
+      "label": "article"
+    }
+  ],
+  "baseline-loses": [
+    {
+      "input": {
+        "url": "https://shop.example.com/kettle",
+        "article": "We use cookies to improve your experience. Accept all cookies.",
+        "page": "We use cookies. Accept. Steel Kettle: holds 1.7 liters, boils in three minutes, and switches off by itself when the water boils. Price 49 dollars."
+      },
+      "label": "page"
+    }
+  ]
+}

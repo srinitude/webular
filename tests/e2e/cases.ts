@@ -107,6 +107,7 @@ export const CLI_CASES: CliCase[] = [
   usage('media screenshot needs a url', 'media', ['--screenshot'], 'url'),
   usage('media pdf needs a url', 'media', ['--pdf'], 'url'),
   ok('monitor a url', 'monitor', ['--url', '{origin}/a', '--db', '{tmp}/monitor.db']),
+  ok('monitor watch-for', 'monitor', ['{origin}/a', '--db', '{tmp}/mw.db', '--watch-for', 'price']),
   ok('batch urls', 'batch', ['--urls', '{origin}/a,{origin}/b', '--concurrency', '2']),
   ok('batch input file', 'batch', ['--input', '{tmp}/urls.txt']),
   ok('doctor', 'doctor', [], 6000, 15000),
@@ -118,6 +119,7 @@ export const CLI_CASES: CliCase[] = [
   usage('act empty url', 'act', ['--url', ''], 'url'),
   usage('act goal needs a window', 'act', ['--goal', 'click "Save"'], 'WEBULAR_CUA_WINDOW'),
   ok('feed items', 'feed', ['--url', '{origin}/feed.xml', '--limit', '2', '--archive']),
+  usage('jev needs a known subcommand', 'jev', ['bogus'], 'jev'),
   // Shared flags, each once: they are one parser for every command.
   { ...ok('ndjson output', 'map', ['--url', '{origin}/', '--ndjson']), json: false },
   ok('select fields', 'map', ['--url', '{origin}/', '--select', 'count']),

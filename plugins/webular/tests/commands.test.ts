@@ -7,10 +7,10 @@ import { commandTools } from '../src/commands.ts'
 
 const ids: string[] = commandTools.map((tool) => tool.id)
 
-test('the list holds the 18 command tools, with unique names', () =>
+test('the list holds the 19 command tools, with unique names', () =>
   Effect.runPromise(
     Effect.sync(() => {
-      expect(ids).toHaveLength(18)
+      expect(ids).toHaveLength(19)
       expect(new Set(ids).size).toBe(ids.length)
     }),
   ))

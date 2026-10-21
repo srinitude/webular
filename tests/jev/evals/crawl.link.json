@@ -1,0 +1,63 @@
+{
+  "decision": "crawl.link",
+  "baseline-wins": [
+    {
+      "input": {
+        "goal": "how to configure the Example CLI",
+        "page": {
+          "url": "https://docs.example.dev/",
+          "title": "Example docs"
+        },
+        "link": {
+          "url": "https://docs.example.dev/login",
+          "anchor": "Sign in"
+        }
+      },
+      "label": false
+    },
+    {
+      "input": {
+        "goal": "how to configure the Example CLI",
+        "page": {
+          "url": "https://docs.example.dev/",
+          "title": "Example docs"
+        },
+        "link": {
+          "url": "https://docs.example.dev/config",
+          "anchor": "Configuration"
+        }
+      },
+      "label": true
+    }
+  ],
+  "baseline-loses": [
+    {
+      "input": {
+        "goal": "how to configure the Example CLI",
+        "page": {
+          "url": "https://docs.example.dev/",
+          "title": "Example docs"
+        },
+        "link": {
+          "url": "https://docs.example.dev/careers",
+          "anchor": "We are hiring"
+        }
+      },
+      "label": false
+    },
+    {
+      "input": {
+        "goal": "how to configure the Example CLI",
+        "page": {
+          "url": "https://docs.example.dev/",
+          "title": "Example docs"
+        },
+        "link": {
+          "url": "https://docs.example.dev/blog/company-picnic",
+          "anchor": "Our company picnic"
+        }
+      },
+      "label": false
+    }
+  ]
+}

@@ -8,6 +8,8 @@ import { z } from 'zod'
 import { fetchTextOrArchive } from '../core/archive.ts'
 import { fetchText } from '../core/http.ts'
 import { htmlToMarkdown, parsePage } from '../lib/html.ts'
+import { decisions } from '../lib/jev/decisions.ts'
+import { decisionStep } from '../lib/jev/steps.ts'
 import { stepRuntime } from './runtime.ts'
 import { withFallbacks } from './scrape-fallback.ts'
 
@@ -46,7 +48,7 @@ const staticFetch = ({ url, timeoutMs, archive }: z.infer<typeof scrapeInput>) =
     : Effect.map(fetchText(url, { timeoutMs }), (html) => ({ html }))
 
 const fetchPage = (input: z.infer<typeof scrapeInput>) =>
-  withFallbacks(input.url, staticFetch(input), input.render ?? 'agent-browser')
+  withFallbacks(input.url, staticFetch(input), input.render ?? 'agent-browser', input.timeoutMs)
 
 const fetchStep = createStep({
   id: 'fetch',
@@ -64,27 +66,44 @@ const pdfResult = (url: string, markdown: string): z.infer<typeof scrapeOutput> 
   links: [],
 })
 
-function toScrapeResult(input: z.infer<typeof fetched>): z.infer<typeof scrapeOutput> {
-  const { url, html, archivedFrom, markdown, renderedBy } = input
-  if (markdown !== undefined) return pdfResult(url, markdown)
-  const page = parsePage(html, url)
-  const body = htmlToMarkdown(page.article.contentHtml || html)
+// The parsed page plus both Markdown candidates; `main` picks which one the result keeps.
+const prepareScrape = (input: z.infer<typeof fetched>) => {
+  if (input.markdown !== undefined) return { input, page: undefined, article: '', full: '' }
+  const page = parsePage(input.html, input.url)
+  const article = page.article.contentHtml ? htmlToMarkdown(page.article.contentHtml) : ''
+  return { input, page, article, full: htmlToMarkdown(input.html) }
+}
+
+function toScrapeResult(
+  p: ReturnType<typeof prepareScrape>,
+  main: 'article' | 'page' | undefined,
+): z.infer<typeof scrapeOutput> {
+  const { url, archivedFrom, markdown, renderedBy } = p.input
+  if (markdown !== undefined || p.page === undefined) return pdfResult(url, markdown ?? '')
+  const body = (main ?? (p.article ? 'article' : 'page')) === 'article' ? p.article : p.full
   return {
     url,
-    title: page.title,
-    markdown: page.title ? `# ${page.title}\n\n${body}` : body,
-    text: page.article.text,
-    links: page.links,
+    title: p.page.title,
+    markdown: p.page.title ? `# ${p.page.title}\n\n${body}` : body,
+    text: p.page.article.text,
+    links: p.page.links,
     ...(archivedFrom ? { archivedFrom } : {}),
     ...(renderedBy ? { renderedBy } : {}),
   }
 }
 
-const extractStep = createStep({
+const extractStep = decisionStep({
   id: 'extract',
   inputSchema: fetched,
   outputSchema: scrapeOutput,
-  execute: ({ inputData }) => stepRuntime.runPromise(Effect.sync(() => toScrapeResult(inputData))),
+  decide: decisions.main,
+  prepare: prepareScrape,
+  // PDFs and pages without both candidates skip Jev.
+  pick: (p) =>
+    p.page && p.article && p.full
+      ? { url: p.input.url, article: p.article, page: p.full }
+      : undefined,
+  output: toScrapeResult,
 })
 
 export const scrapeWorkflow = createWorkflow({

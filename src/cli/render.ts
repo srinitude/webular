@@ -77,6 +77,7 @@ const RENDERERS: Record<CommandName, Renderer> = {
     str(r, 'screenshot')
       ? `${str(r, 'snapshot')}\nscreenshot: ${str(r, 'screenshot')}`
       : str(r, 'snapshot'),
+  jev: (r) => str(r, 'summary'),
   feed: (r) =>
     arr(r, 'items')
       .map((x) => `${str(x, 'published')}\t${str(x, 'title')}\n  ${str(x, 'url')}`)

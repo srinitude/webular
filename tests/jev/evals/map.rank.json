@@ -1,0 +1,28 @@
+{
+  "decision": "map.rank",
+  "baseline-wins": [
+    {
+      "input": {
+        "site": "https://docs.example.dev",
+        "url": "https://docs.example.dev/guides/caching"
+      },
+      "label": 0.5
+    }
+  ],
+  "baseline-loses": [
+    {
+      "input": {
+        "site": "https://docs.example.dev",
+        "url": "https://docs.example.dev/pricing"
+      },
+      "label": 1
+    },
+    {
+      "input": {
+        "site": "https://docs.example.dev",
+        "url": "https://docs.example.dev/tag/misc?page=9"
+      },
+      "label": 0
+    }
+  ]
+}

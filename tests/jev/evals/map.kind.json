@@ -1,0 +1,29 @@
+{
+  "decision": "map.kind",
+  "baseline-wins": [
+    {
+      "input": {
+        "site": "https://docs.example.dev/",
+        "url": "https://docs.example.dev/guides/config"
+      },
+      "label": "content"
+    },
+    {
+      "input": { "site": "https://shop.example.com/", "url": "https://shop.example.com/cart" },
+      "label": "junk"
+    }
+  ],
+  "baseline-loses": [
+    {
+      "input": { "site": "https://docs.example.dev/", "url": "https://docs.example.dev/pricing" },
+      "label": "main"
+    },
+    {
+      "input": {
+        "site": "https://blog.example.com/",
+        "url": "https://blog.example.com/2019/03/archive-index-print-version"
+      },
+      "label": "junk"
+    }
+  ]
+}

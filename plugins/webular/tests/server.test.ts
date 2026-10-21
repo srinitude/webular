@@ -16,6 +16,7 @@ const toolNames = [
   'doctor',
   'extract',
   'feed',
+  'jev',
   'map',
   'media',
   'monitor',

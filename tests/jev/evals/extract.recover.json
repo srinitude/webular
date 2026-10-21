@@ -1,0 +1,31 @@
+{
+  "decision": "extract.recover",
+  "baseline-wins": [
+    {
+      "input": {
+        "name": "title",
+        "selector": "h1",
+        "matched": true,
+        "candidates": [
+          { "tag": "h1", "hint": "product-title", "text": "Trail Running Shoe" },
+          { "tag": "h1", "hint": "related", "text": "You may also like" }
+        ]
+      },
+      "label": "Trail Running Shoe"
+    }
+  ],
+  "baseline-loses": [
+    {
+      "input": {
+        "name": "price",
+        "selector": ".cost",
+        "matched": false,
+        "candidates": [
+          { "tag": "a", "hint": "nav", "text": "Pricing" },
+          { "tag": "span", "hint": "product-price", "text": "$19.99" }
+        ]
+      },
+      "label": "$19.99"
+    }
+  ]
+}

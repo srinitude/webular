@@ -1,0 +1,39 @@
+{
+  "sha256": "88a6a003018eaea50167565a766a0d4a91d039cf93cc7dc2965d3ceba3a72caf",
+  "lines": 24598,
+  "bytes": 1047658,
+  "url": "https://docs.typesafe.ai/llms-full.txt",
+  "chunks": [
+    [
+      1,
+      4100
+    ],
+    [
+      4101,
+      8200
+    ],
+    [
+      8201,
+      12300
+    ],
+    [
+      12301,
+      16400
+    ],
+    [
+      16401,
+      20500
+    ],
+    [
+      20501,
+      24598
+    ]
+  ],
+  "mappedAt": 1792561660000,
+  "readAt": 1792561852951,
+  "readers": 6,
+  "oversizeLines": {
+    "9980": "playground share link, 33707 chars, over the Read tool cap; checked by prefix",
+    "11807": "playground share link, 27150 chars, over the Read tool cap; checked by prefix"
+  }
+}

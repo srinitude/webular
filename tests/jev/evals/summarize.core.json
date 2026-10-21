@@ -1,0 +1,28 @@
+{
+  "decision": "summarize.core",
+  "baseline-wins": [
+    {
+      "input": {
+        "text": "Bun ships a built-in SQLite driver. Some readers may find this interesting. It supports WAL mode.",
+        "i": 1
+      },
+      "label": "unsure"
+    }
+  ],
+  "baseline-loses": [
+    {
+      "input": {
+        "text": "Hello Bun fans, welcome to the Bun Bun Bun blog about Bun! Bun ships a built-in SQLite driver called bun:sqlite.",
+        "i": 1
+      },
+      "label": "core"
+    },
+    {
+      "input": {
+        "text": "Hello Bun fans, welcome to the Bun Bun Bun blog about Bun! Bun ships a built-in SQLite driver called bun:sqlite.",
+        "i": 0
+      },
+      "label": "filler"
+    }
+  ]
+}

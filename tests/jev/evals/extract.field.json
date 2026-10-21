@@ -1,0 +1,27 @@
+{
+  "decision": "extract.field",
+  "baseline-wins": [
+    {
+      "input": {
+        "name": "price",
+        "candidates": [
+          { "tag": "a", "hint": "nav", "text": "Pricing" },
+          { "tag": "span", "hint": "product-price", "text": "$19.99" }
+        ]
+      },
+      "label": "$19.99"
+    }
+  ],
+  "baseline-loses": [
+    {
+      "input": {
+        "name": "price",
+        "candidates": [
+          { "tag": "span", "hint": "price-label", "text": "Price:" },
+          { "tag": "strong", "hint": "amount", "text": "$19.99" }
+        ]
+      },
+      "label": "$19.99"
+    }
+  ]
+}

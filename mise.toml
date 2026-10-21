@@ -30,7 +30,7 @@ bun = "{{ get_env(name='WEBULAR_BUN', default='bun') }}"
 commands = "{% if get_env(name='WEBULAR_DEV', default='') != '' %}src{% else %}dist{% endif %}/commands"
 ext = "{% if get_env(name='WEBULAR_DEV', default='') != '' %}ts{% else %}js{% endif %}"
 # Listed, not globbed: the Windows task shell does not expand globs.
-entries = '"{{config_root}}/src/commands/act.ts" "{{config_root}}/src/commands/answer.ts" "{{config_root}}/src/commands/audit.ts" "{{config_root}}/src/commands/batch.ts" "{{config_root}}/src/commands/crawl.ts" "{{config_root}}/src/commands/diagram.ts" "{{config_root}}/src/commands/doctor.ts" "{{config_root}}/src/commands/extract.ts" "{{config_root}}/src/commands/feed.ts" "{{config_root}}/src/commands/map.ts" "{{config_root}}/src/commands/mcp.ts" "{{config_root}}/src/commands/media.ts" "{{config_root}}/src/commands/monitor.ts" "{{config_root}}/src/commands/parse.ts" "{{config_root}}/src/commands/research.ts" "{{config_root}}/src/commands/scrape.ts" "{{config_root}}/src/commands/search.ts" "{{config_root}}/src/commands/summarize.ts" "{{config_root}}/src/commands/tasks.ts" "{{config_root}}/src/lib/parse-worker.ts"'
+entries = '"{{config_root}}/src/commands/act.ts" "{{config_root}}/src/commands/answer.ts" "{{config_root}}/src/commands/audit.ts" "{{config_root}}/src/commands/batch.ts" "{{config_root}}/src/commands/crawl.ts" "{{config_root}}/src/commands/diagram.ts" "{{config_root}}/src/commands/doctor.ts" "{{config_root}}/src/commands/extract.ts" "{{config_root}}/src/commands/feed.ts" "{{config_root}}/src/commands/jev.ts" "{{config_root}}/src/commands/map.ts" "{{config_root}}/src/commands/mcp.ts" "{{config_root}}/src/commands/media.ts" "{{config_root}}/src/commands/monitor.ts" "{{config_root}}/src/commands/parse.ts" "{{config_root}}/src/commands/research.ts" "{{config_root}}/src/commands/scrape.ts" "{{config_root}}/src/commands/search.ts" "{{config_root}}/src/commands/summarize.ts" "{{config_root}}/src/commands/tasks.ts" "{{config_root}}/src/lib/parse-worker.ts"'
 
 # ───────────────────────── Quality / CI spine ─────────────────────────
 # Single linear default dependency path. Each task depends on exactly one
@@ -107,6 +107,18 @@ run = 'bun test --timeout 30000{% for file in usage.files %} "{{ file }}"{% endf
 description = "Run the bun test suite (CI/CD graph + contracts + integration)"
 depends = ["build"]
 run = "bun test --timeout 30000"
+
+[tasks."jev:check"]
+description = "Jev framework checks (off the linear spine; the test task runs them too): payload caps and flat cost, canonical bytes, the 0.95 bar, machine-only moves, record and replay, the raw-call lint, and the evals"
+depends = ["setup"]
+# A drifted answering model (lines in this file) makes the evals a required live rerun.
+env = { WEBULAR_JEV_DRIFT_FILE = "{{ get_env(name='WEBULAR_JEV_DRIFT_FILE', default=config_root ~ '/.cache/jev-drift.jsonl') }}" }
+run = "bun test ./tests/jev --timeout 30000"
+
+[tasks."jev:docs"]
+description = "Refresh and verify the Jev docs snapshot: conditional GET of docs.typesafe.ai/llms-full.txt (a 304 when unchanged), proof (sha256, line count, chunk boundaries) written to src/lib/jev/docs-snapshot.json; pass --replay to re-prove the committed recording offline"
+depends = ["setup"]
+run = "bun scripts/jev-docs.ts"
 
 [tasks.validate]
 description = "Validate gate — aggregates the full quality spine"
@@ -224,6 +236,11 @@ description = "FEED — read an RSS 2.0 or Atom 1.0 feed (fetch + linkedom XML)"
 depends = ["setup"]
 run = '"{{vars.bun}}" "{{config_root}}/{{vars.commands}}/feed.{{vars.ext}}"'
 
+[tasks."run:jev"]
+description = "JEV — learn from recorded Jev calls, or label one call as an eval case"
+depends = ["setup"]
+run = '"{{vars.bun}}" "{{config_root}}/{{vars.commands}}/jev.{{vars.ext}}"'
+
 # ───────────────────────── Agent plugin (plugins/webular) ─────────────────────────
 
 [tasks."plugin:lint"]
@@ -324,3 +341,13 @@ hyperfine -N --warmup 1 --runs ${BENCH_RUNS:-10} --style basic \
   -n bare-bun 'bun scripts/bench/bare-bun.ts'
 bun tests/bench/complexity.ts
 """
+
+[tasks."bench:peers"]
+description = "Peer benchmark from recordings: webular vs Firecrawl, Exa, Tavily, Perplexity, Parallel; free and deterministic (off the CI spine)"
+depends = ["setup"]
+run = "bun scripts/bench/peers/run.ts"
+
+[tasks."bench:peers:live"]
+description = "Peer benchmark live: calls each keyed provider (at most 20 calls per peer), records responses, writes bench/results (off the CI spine)"
+depends = ["setup"]
+run = "bun scripts/bench/peers/run.ts --live"

@@ -1,0 +1,21 @@
+{
+  "decision": "summarize.lead",
+  "baseline-wins": [
+    {
+      "input": {
+        "text": "Bun ships a built-in SQLite driver called bun:sqlite. It supports prepared statements and WAL mode. The weather was nice today.",
+        "topN": 2
+      },
+      "label": [0, 1]
+    }
+  ],
+  "baseline-loses": [
+    {
+      "input": {
+        "text": "Hello Bun fans, welcome to the Bun Bun Bun blog about Bun! Bun ships a built-in SQLite driver. Thanks Bun fans for reading the Bun blog!",
+        "topN": 1
+      },
+      "label": [1]
+    }
+  ]
+}

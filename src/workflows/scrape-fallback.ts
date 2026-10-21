@@ -7,6 +7,10 @@ import { httpGet } from '../core/http.ts'
 import { AgentBrowserLive, type Backend, Driver } from '../lib/driver.ts'
 import { CuaLive } from '../lib/driver-cua.ts'
 import { htmlToArticle } from '../lib/html.ts'
+import { withJev } from '../lib/jev/budget.ts'
+import { Jev } from '../lib/jev/client.ts'
+import { isSoftBlock } from '../lib/jev/fetch.ts'
+import { needsBrowser } from '../lib/jev/fetch-browser.ts'
 import { pdfText } from '../lib/parse.ts'
 
 const MIN_MAIN_TEXT = 200
@@ -48,26 +52,49 @@ interface Page {
   archivedFrom?: string
 }
 
-// A failed render keeps the fetched page, so a render never loses content.
-const rendered = (url: string, page: Page, render: Backend | 'off') =>
-  render === 'off' || !needsJs(page.html)
-    ? Effect.succeed(page)
-    : Effect.orElseSucceed(
-        Effect.map(renderInBackground(url, render), (html) => ({
-          ...page,
-          html,
-          renderedBy: render,
-        })),
-        () => page,
+// Jev may add a render the length rule misses: a 200 that is really a block page
+// (fetch.block), or a page it reads as a shell or bot check (fetch.browser). With
+// Jev off only needsJs decides.
+export const wantsRender = (url: string, html: string, timeoutMs: number) =>
+  needsJs(html)
+    ? Effect.succeed(true)
+    : withJev(
+        Effect.gen(function* () {
+          if (!(yield* Jev).available) return false
+          const [blocked, browser] = yield* Effect.all(
+            [isSoftBlock(url, html, timeoutMs), needsBrowser(url, html, timeoutMs)],
+            { concurrency: 2 },
+          )
+          return blocked || browser
+        }),
       )
+
+// A failed render keeps the fetched page, so a render never loses content.
+const rendered = (url: string, page: Page, render: Backend | 'off', timeoutMs: number) =>
+  render === 'off'
+    ? Effect.succeed(page)
+    : Effect.flatMap(wantsRender(url, page.html, timeoutMs), (want) =>
+        want ? renderPage(url, page, render) : Effect.succeed(page),
+      )
+
+const renderPage = (url: string, page: Page, render: Backend) =>
+  Effect.orElseSucceed(
+    Effect.map(renderInBackground(url, render), (html) => ({
+      ...page,
+      html,
+      renderedBy: render,
+    })),
+    () => page,
+  )
 
 export const withFallbacks = <E>(
   url: string,
   fetch: Effect.Effect<Page, E>,
   render: Backend | 'off',
+  timeoutMs = 30_000,
 ) =>
   Effect.catchIf(
-    Effect.flatMap(fetch, (page) => rendered(url, page, render)),
+    Effect.flatMap(fetch, (page) => rendered(url, page, render, timeoutMs)),
     isPdfRefusal,
     () => Effect.map(readPdf(url), (markdown) => ({ html: '', markdown })),
   )

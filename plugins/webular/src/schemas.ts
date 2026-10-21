@@ -88,6 +88,12 @@ export const schemas = {
     limit: count(500, 'Most items to return (default 20)'),
     archive,
   }),
+  jev: z.strictObject({
+    action: z.enum(['learn', 'correct']).describe('learn tests lessons; correct labels one call'),
+    id: words('The recorded call id, for correct').optional(),
+    label: words('The right answer, for correct').optional(),
+    input: words('Path to a JSON file with the call input, for correct').optional(),
+  }),
   // These four take no input: each reports on webular itself.
   doctor: z.strictObject({}),
   tasks: z.strictObject({}),

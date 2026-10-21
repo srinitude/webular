@@ -3,6 +3,8 @@
 // a timeout. A content-type refusal never does, and when the archive has no
 // capture the original error stands.
 import { Effect, Schema } from 'effect'
+import { withJev } from '../lib/jev/budget.ts'
+import { classifyHttpError } from '../lib/jev/fetch.ts'
 import type { FetchError } from './decode.ts'
 import { type FetchOptions, fetchText } from './http.ts'
 import { HttpStatusError } from './http-body.ts'
@@ -70,8 +72,23 @@ const fromArchive = (url: string, opts: ArchiveOptions, original: FetchFailure) 
     ),
   )
 
+// Jev (fetch.error) may send a live-looking failure such as a 403 to the archive
+// too. Its baseline never picks try_archive for a status that is not dead, so with
+// Jev off only dead pages fall back. ponytail: the error body is not kept, so Jev
+// sees the status only; keep the body on HttpStatusError if picks need it.
+const jevSaysArchive = (url: string, err: HttpStatusError, opts: ArchiveOptions) =>
+  withJev(classifyHttpError({ url, status: err.status, body: '' }, opts.timeoutMs ?? 30_000))
+
 export const fetchTextOrArchive = (url: string, opts: ArchiveOptions = {}) =>
   fetchText(url, opts).pipe(
     Effect.map((html) => ({ html, archivedFrom: undefined as string | undefined })),
-    Effect.catch((err) => (isDeadPage(err) ? fromArchive(url, opts, err) : Effect.fail(err))),
+    Effect.catch((err) =>
+      isDeadPage(err)
+        ? fromArchive(url, opts, err)
+        : err instanceof HttpStatusError
+          ? Effect.flatMap(jevSaysArchive(url, err, opts), (next) =>
+              next === 'try_archive' ? fromArchive(url, opts, err) : Effect.fail(err),
+            )
+          : Effect.fail(err),
+    ),
   )

@@ -5,6 +5,9 @@ import { Effect } from 'effect'
 import { z } from 'zod'
 import { fetchText } from '../core/http.ts'
 import { htmlToArticle } from '../lib/html.ts'
+import { allSentences, summaryFollowUp } from '../lib/jev/decisions/summarize.ts'
+import { decisions } from '../lib/jev/decisions.ts'
+import { decisionStep } from '../lib/jev/steps.ts'
 import { freeSourceFallback } from '../lib/sources/registry.ts'
 import { summarizeText } from '../lib/summarize.ts'
 import { stepRuntime } from './runtime.ts'
@@ -47,12 +50,21 @@ const resolveStep = createStep({
   },
 })
 
-const extractStep = createStep({
+// The word-frequency rule picks; Jev's agreed lead sentence may replace its weakest pick.
+const extractStep = decisionStep({
   id: 'extract',
   inputSchema: z.object({ text: z.string(), sentences: z.number() }),
   outputSchema: summarizeOutput,
-  execute: ({ inputData }) =>
-    stepRuntime.runPromise(Effect.sync(() => summarizeText(inputData.text, inputData.sentences))),
+  decide: (input: { text: string; topN: number }) =>
+    Effect.flatMap(decisions.summary(input), (picks) => summaryFollowUp(input, picks)),
+  prepare: (data: { text: string; sentences: number }) => data,
+  pick: ({ text, sentences }) => ({ text, topN: sentences }),
+  output: ({ text, sentences }, picks) => {
+    if (picks === undefined) return summarizeText(text, sentences)
+    const all = allSentences(text)
+    const chosen = picks.flatMap((i) => all[i] ?? [])
+    return { sentences: chosen, summary: chosen.join(' ') }
+  },
 })
 
 export const summarizeWorkflow = createWorkflow({

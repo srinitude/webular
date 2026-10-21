@@ -1,0 +1,147 @@
+{
+  "decision": "answer.citation",
+  "baseline-wins": [
+    {
+      "input": {
+        "claim": "The Eiffel Tower is painted every seven years.",
+        "source": {
+          "title": "Eiffel Tower history",
+          "text": "Construction of the Eiffel Tower began in 1887 and finished in March 1889 for the World's Fair."
+        }
+      },
+      "label": "not_addressed"
+    },
+    {
+      "input": {
+        "claim": "An adult human has 206 bones.",
+        "source": {
+          "title": "The skeleton",
+          "text": "An adult human has 206 bones."
+        }
+      },
+      "label": "supported"
+    },
+    {
+      "input": {
+        "claim": "Calcium keeps bones strong.",
+        "source": {
+          "title": "The skeleton",
+          "text": "An adult human skeleton has 206 bones, while babies are born with about 270 that later fuse."
+        }
+      },
+      "label": "not_addressed"
+    },
+    {
+      "input": {
+        "claim": "Canberra is the capital of Australia.",
+        "source": {
+          "title": "Australia",
+          "text": "Canberra is the capital of Australia, chosen in 1908 as a compromise between Sydney and Melbourne."
+        }
+      },
+      "label": "supported"
+    },
+    {
+      "input": {
+        "claim": "Canberra has a population of about 450,000.",
+        "source": {
+          "title": "Australia",
+          "text": "Canberra is the capital of Australia, chosen in 1908 as a compromise between Sydney and Melbourne."
+        }
+      },
+      "label": "not_addressed"
+    },
+    {
+      "input": {
+        "claim": "Jupiter is the largest planet in our solar system.",
+        "source": {
+          "title": "Jupiter",
+          "text": "Jupiter is the largest planet in our solar system, more than twice as massive as all the others combined."
+        }
+      },
+      "label": "supported"
+    }
+  ],
+  "baseline-loses": [
+    {
+      "input": {
+        "claim": "Construction of the Eiffel Tower finished in March 1889.",
+        "source": {
+          "title": "Eiffel Tower history",
+          "text": "Construction of the Eiffel Tower began in 1887 and finished in March 1889 for the World's Fair."
+        }
+      },
+      "label": "supported"
+    },
+    {
+      "input": {
+        "claim": "The Eiffel Tower was completed in 1889.",
+        "source": {
+          "title": "Eiffel Tower history",
+          "text": "Work on the tower began in 1887. It opened to the public in March 1889, in time for the World's Fair."
+        }
+      },
+      "label": "supported"
+    },
+    {
+      "input": {
+        "claim": "The Eiffel Tower was completed in 1925.",
+        "source": {
+          "title": "Eiffel Tower history",
+          "text": "Construction of the Eiffel Tower began in 1887 and finished in March 1889 for the World's Fair."
+        }
+      },
+      "label": "contradicted"
+    },
+    {
+      "input": {
+        "claim": "Adults have about 300 bones.",
+        "source": {
+          "title": "The skeleton",
+          "text": "An adult human skeleton has 206 bones, while babies are born with about 270 that later fuse."
+        }
+      },
+      "label": "contradicted"
+    },
+    {
+      "input": {
+        "claim": "Grown-ups have 206 bones in their skeleton.",
+        "source": {
+          "title": "The skeleton",
+          "text": "An adult human skeleton has 206 bones, while babies are born with about 270 that later fuse."
+        }
+      },
+      "label": "supported"
+    },
+    {
+      "input": {
+        "claim": "Sydney is the capital of Australia.",
+        "source": {
+          "title": "Australia",
+          "text": "Canberra is the capital of Australia, chosen in 1908 as a compromise between Sydney and Melbourne."
+        }
+      },
+      "label": "contradicted"
+    },
+    {
+      "input": {
+        "claim": "Australia's capital was picked as a middle ground between its two biggest cities.",
+        "source": {
+          "title": "Australia",
+          "text": "Canberra is the capital of Australia, chosen in 1908 as a compromise between Sydney and Melbourne."
+        }
+      },
+      "label": "supported"
+    },
+    {
+      "input": {
+        "claim": "Saturn is bigger than Jupiter.",
+        "source": {
+          "title": "Jupiter",
+          "text": "Jupiter is the largest planet in our solar system, more than twice as massive as all the others combined."
+        }
+      },
+      "label": "contradicted"
+    }
+  ]
+}

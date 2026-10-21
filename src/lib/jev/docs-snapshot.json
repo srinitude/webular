@@ -1,0 +1,17 @@
+{
+  "model": "typesafe",
+  "url": "https://docs.typesafe.ai/llms-full.txt",
+  "lastModified": "Wed, 21 Oct 2026 01:17:25 GMT",
+  "sha256": "88a6a003018eaea50167565a766a0d4a91d039cf93cc7dc2965d3ceba3a72caf",
+  "lines": 24598,
+  "chunks": [[1, 8200], [8201, 16400], [16401, 24598]],
+  "limits": {
+    "bodyBytes": 33554432,
+    "nesting": 64,
+    "choiceMax": 255,
+    "scoreMin": 2,
+    "scoreMax": 10,
+    "types": ["noul", "choice", "score", "box"]
+  },
+  "verified": true
+}

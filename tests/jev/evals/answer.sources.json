@@ -1,0 +1,51 @@
+{
+  "decision": "answer.sources",
+  "baseline-wins": [
+    {
+      "input": {
+        "question": "what sqlite driver does bun ship",
+        "sources": [
+          {
+            "title": "Bun SQLite",
+            "url": "https://bun.sh/docs/api/sqlite",
+            "text": "Bun ships bun:sqlite, a built-in SQLite driver."
+          },
+          { "title": "Empty", "url": "https://empty.example", "text": "" }
+        ]
+      },
+      "label": [
+        {
+          "title": "Bun SQLite",
+          "url": "https://bun.sh/docs/api/sqlite",
+          "text": "Bun ships bun:sqlite, a built-in SQLite driver."
+        }
+      ]
+    }
+  ],
+  "baseline-loses": [
+    {
+      "input": {
+        "question": "what sqlite driver does bun ship",
+        "sources": [
+          {
+            "title": "Bun SQLite",
+            "url": "https://bun.sh/docs/api/sqlite",
+            "text": "Bun ships bun:sqlite, a built-in SQLite driver."
+          },
+          {
+            "title": "Shoe sale",
+            "url": "https://shop.example",
+            "text": "Buy running shoes today at half price."
+          }
+        ]
+      },
+      "label": [
+        {
+          "title": "Bun SQLite",
+          "url": "https://bun.sh/docs/api/sqlite",
+          "text": "Bun ships bun:sqlite, a built-in SQLite driver."
+        }
+      ]
+    }
+  ]
+}

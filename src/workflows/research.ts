@@ -3,6 +3,7 @@
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
+import { searchRounds } from '../lib/jev/decisions/research.ts'
 import { searchEffect } from '../lib/search-chain.ts'
 import { fetchErrorsSchema, fetchSources, type SourceEntry } from '../lib/sources.ts'
 import { summarizeText } from '../lib/summarize.ts'
@@ -42,14 +43,20 @@ const searchStep = createStep({
   id: 'search',
   inputSchema: researchInput,
   outputSchema: foundSchema,
+  // Bounded rounds: research.done asks for another search only when the hits miss the topic.
   execute: ({ inputData }) =>
     stepRuntime.runPromise(
-      Effect.map(searchEffect('web', inputData.topic, inputData.depth), ({ results: found }) => ({
-        topic: inputData.topic,
-        sentences: inputData.sentences,
-        timeoutMs: inputData.timeoutMs,
-        sources: found.map((h) => ({ title: h.title, url: h.url })),
-      })),
+      Effect.map(
+        searchRounds(inputData.topic, inputData.depth, (q, n) =>
+          Effect.map(searchEffect('web', q, n), (r) => r.results),
+        ),
+        (found) => ({
+          topic: inputData.topic,
+          sentences: inputData.sentences,
+          timeoutMs: inputData.timeoutMs,
+          sources: found.map((h) => ({ title: h.title, url: h.url })),
+        }),
+      ),
     ),
 })
 

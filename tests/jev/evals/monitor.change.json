@@ -1,0 +1,39 @@
+{
+  "decision": "monitor.change",
+  "baseline-wins": [
+    {
+      "input": {
+        "url": "https://shop.example.dev/plan",
+        "watchFor": "price",
+        "diff": "-Price: $49 per month\n+Price: $59 per month"
+      },
+      "label": true
+    },
+    {
+      "input": {
+        "url": "https://shop.example.dev/plan",
+        "watchFor": "price",
+        "diff": "-Status: in stock\n+Status: sold out"
+      },
+      "label": true
+    }
+  ],
+  "baseline-loses": [
+    {
+      "input": {
+        "url": "https://shop.example.dev/plan",
+        "watchFor": "price",
+        "diff": "-Copyright 2025\n+Copyright 2026"
+      },
+      "label": false
+    },
+    {
+      "input": {
+        "url": "https://shop.example.dev/plan",
+        "watchFor": "price",
+        "diff": "-Updated 2026-10-20 09:14\n+Updated 2026-10-21 08:02"
+      },
+      "label": false
+    }
+  ]
+}

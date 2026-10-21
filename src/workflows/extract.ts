@@ -63,10 +63,9 @@ function select(inputData: {
 }): Effect.Effect<z.infer<typeof extractOutput>, InvalidFieldSpecError> {
   const { url, html, fields, selector } = inputData
   if (fields) {
-    return Effect.map(parseFieldSpecs(fields), (specs) => ({
-      url,
-      data: selectFields(html, specs),
-    }))
+    return Effect.flatMap(parseFieldSpecs(fields), (specs) =>
+      Effect.map(selectFields(html, specs), (data) => ({ url, data })),
+    )
   }
   if (selector) {
     return Effect.succeed({ url, matches: selectMatches(html, selector) })

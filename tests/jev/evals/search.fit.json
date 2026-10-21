@@ -1,0 +1,38 @@
+{
+  "decision": "search.fit",
+  "baseline-wins": [
+    {
+      "input": {
+        "query": "rust borrow checker",
+        "hits": [
+          {
+            "title": "Understanding the Rust borrow checker",
+            "url": "https://blog.example.dev/rust-borrowck",
+            "description": "How Rust checks references and lifetimes at compile time."
+          }
+        ]
+      },
+      "label": true
+    }
+  ],
+  "baseline-loses": [
+    {
+      "input": {
+        "query": "rust borrow checker",
+        "hits": [
+          {
+            "title": "How to remove rust from a bike chain",
+            "url": "https://diy.example.com/bike-rust",
+            "description": "Vinegar and steel wool clean a rusty chain."
+          },
+          {
+            "title": "Borrow a cup of sugar: neighbor etiquette",
+            "url": "https://home.example.com/borrow",
+            "description": "Tips for asking neighbors for help."
+          }
+        ]
+      },
+      "label": false
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "decision": "machine.next",
+  "baseline-wins": [
+    {
+      "input": {
+        "goal": "finish the command",
+        "observed": {
+          "type": "GO"
+        },
+        "allowed": ["GO", "STOP"]
+      },
+      "label": "GO"
+    }
+  ],
+  "baseline-loses": [
+    {
+      "input": {
+        "goal": "finish the command",
+        "observed": {
+          "type": "GO"
+        },
+        "allowed": ["STOP", "RETRY"]
+      },
+      "label": "RETRY"
+    }
+  ]
+}

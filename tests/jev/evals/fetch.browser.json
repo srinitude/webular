@@ -1,0 +1,28 @@
+{
+  "decision": "fetch.browser",
+  "baseline-wins": [
+    {
+      "input": {
+        "url": "https://app.example.dev/",
+        "html": "<div id=\"root\">Loading...</div><script src=\"/app.js\"></script>"
+      },
+      "label": "js_shell"
+    },
+    {
+      "input": {
+        "url": "https://shop.example.dev/",
+        "html": "<title>Just a moment...</title><script src=\"/cdn-cgi/challenge-platform/x.js\"></script>"
+      },
+      "label": "bot_challenge"
+    }
+  ],
+  "baseline-loses": [
+    {
+      "input": {
+        "url": "https://cafe.example.dev/contact",
+        "html": "<h1>Contact</h1><p>Call us at 555-0100. Open 8 to 4.</p><script src=\"https://www.googletagmanager.com/gtag.js\"></script>"
+      },
+      "label": "static_ok"
+    }
+  ]
+}
