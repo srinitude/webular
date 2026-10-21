@@ -36,6 +36,26 @@ const rank = (s: SourceStatus) => (s === 'ok' ? 0 : s === 'no-results' ? 1 : 2)
 // Measured: the useful sources answer within ~500 ms of the first hit.
 export const SETTLE_GRACE_MS = 750
 
+// One query variant: capped at SOURCE_TIMEOUT_MS, `onHit` runs when it has
+// hits, and `cut` ends it at the settle cutoff.
+const runVariant = (
+  run: Effect.Effect<Hit[], unknown>,
+  onHit: Effect.Effect<void>,
+  cut: Effect.Effect<Outcome>,
+) =>
+  run.pipe(
+    Effect.timeout(SOURCE_TIMEOUT_MS),
+    Effect.match({ onFailure: failed, onSuccess: found }),
+    Effect.tap((o) => (o.hits.length ? onHit : Effect.void)),
+    Effect.raceFirst(cut),
+  )
+
+const bestStatus = (outcomes: ReadonlyArray<Outcome>) =>
+  outcomes.reduce<SourceStatus>(
+    (best, o) => (rank(o.status) < rank(best) ? o.status : best),
+    outcomes[0]?.status ?? 'no-results',
+  )
+
 // One source, every query variant at once; the best variant status wins.
 // `hit` fires on the first variant with hits; `cutoff` ends the stragglers.
 export const querySource = Effect.fn('querySource')(function* (
@@ -47,27 +67,19 @@ export const querySource = Effect.fn('querySource')(function* (
 ) {
   const start = yield* Clock.currentTimeMillis
   const firstHit = yield* Ref.make<number | null>(null)
-  const markHit = Effect.flatMap(Clock.currentTimeMillis, (at) => Ref.update(firstHit, (t) => t ?? at))
+  const markHit = Effect.flatMap(Clock.currentTimeMillis, (at) =>
+    Ref.update(firstHit, (t) => t ?? at),
+  )
+  const onHit = Effect.andThen(markHit, Deferred.succeed(settle.hit, undefined))
   const cut = Effect.as(settle.cutoff, { status: 'timeout', hits: [] } as Outcome)
   const outcomes = yield* Effect.forEach(
     queries,
-    (q) =>
-      runSource(source, q, limit).pipe(
-        Effect.timeout(SOURCE_TIMEOUT_MS),
-        Effect.match({ onFailure: failed, onSuccess: found }),
-        Effect.tap((o) =>
-          o.hits.length ? Effect.andThen(markHit, Deferred.succeed(settle.hit, undefined)) : Effect.void,
-        ),
-        Effect.raceFirst(cut),
-      ),
+    (q) => runVariant(runSource(source, q, limit), onHit, cut),
     { concurrency: MAX_VARIANTS + 1 },
   )
   const endedAt = yield* Clock.currentTimeMillis
   const ms = endedAt - start
-  const status = outcomes.reduce<SourceStatus>(
-    (best, o) => (rank(o.status) < rank(best) ? o.status : best),
-    outcomes[0]?.status ?? 'no-results',
-  )
+  const status = bestStatus(outcomes)
   const firstHitAt = yield* Ref.get(firstHit)
   return { source, status, ms, firstHitAt, endedAt, lists: outcomes.map((o) => o.hits) }
 })
