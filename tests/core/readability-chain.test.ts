@@ -36,7 +36,10 @@ const source = (name: string) =>
 test('answer and research output go through the chain', () =>
   Effect.runPromise(
     Effect.gen(function* () {
-      expect(yield* source('answer.ts')).toContain("Effect.flatMap(withReadability('answer'))")
+      // The answer workflow runs the chain as its own last step, after the Jev decision step.
+      const answer = yield* source('answer.ts')
+      expect(answer).toContain("withReadability('answer')")
+      expect(answer).toContain('.then(synthStep)\n  .then(readabilityStep)')
       expect(yield* source('research.ts')).toContain("Effect.flatMap(withReadability('report'))")
     }).pipe(Effect.provide(BunServices.layer)),
   ))
