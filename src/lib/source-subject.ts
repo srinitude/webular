@@ -4,11 +4,9 @@
 // question's main subject, and pages with the same base title drop out. When
 // Jev is unsure, slow, or unreachable, a code rule drops pages whose
 // "(qualifier)" words the question never uses.
-import { Config, Effect, type Redacted } from 'effect'
-import { FetchHttpClient, HttpClient, HttpClientRequest, HttpClientResponse } from 'effect/http'
+import { Effect } from 'effect'
+import { askAnswers } from './jev/answers.ts'
 
-const JEV_URL = 'https://api.typesafe.ai/v1/systemone'
-const JEV_MODEL = 'jev-1.13.0'
 const JEV_TIMEOUT_MS = 2_500
 const MIN_CONFIDENCE = 0.95
 const NONE = 'none'
@@ -69,27 +67,19 @@ export function agreedIndex(
 
 // Both option orders ride in one request: questions in a request run in
 // parallel against the same state, so the order check costs no extra trip.
-const askJev = (key: Redacted.Redacted, state: unknown, orders: Record<string, string>[]) =>
-  HttpClientRequest.post(JEV_URL).pipe(
-    HttpClientRequest.bearerToken(key),
-    HttpClientRequest.bodyJsonUnsafe({
-      model: JEV_MODEL,
-      state,
-      questions: Object.fromEntries(
-        orders.map((criteria, i) => [
-          `order_${i}`,
-          { type: 'choice', instructions: INSTRUCTIONS, criteria },
-        ]),
-      ),
-    }),
-    HttpClient.execute,
-    Effect.flatMap(HttpClientResponse.filterStatusOk),
-    Effect.flatMap((res) => res.json),
-    Effect.map((body) => (body as { answers?: Record<string, JevPick> }).answers ?? {}),
-  )
+const askJev = (state: unknown, orders: Record<string, string>[]) =>
+  askAnswers('answer.subject', {
+    state,
+    questions: Object.fromEntries(
+      orders.map((criteria, i) => [
+        `order_${i}`,
+        { type: 'choice', instructions: INSTRUCTIONS, criteria },
+      ]),
+    ),
+  }) as Effect.Effect<Record<string, JevPick>, unknown>
 
 // Index of the source Jev confidently names as the question's subject, or
-// undefined. Never fails: a missing key, an error, or a timeout gives undefined.
+// undefined. Never fails: Jev off, an error, or a timeout gives undefined.
 export const jevSubject = (query: string, titles: string[]): Effect.Effect<number | undefined> => {
   if (titles.length < 2) return Effect.succeed(undefined)
   const labels = titles.map((_, i) => `source_${i + 1}`)
@@ -99,12 +89,10 @@ export const jevSubject = (query: string, titles: string[]): Effect.Effect<numbe
   const forward = Object.fromEntries([...options, noneOption])
   const reverse = Object.fromEntries([...options].reverse().concat([noneOption]))
   return Effect.gen(function* () {
-    const key = yield* Config.Redacted('TYPESAFE_API_KEY')
-    const answers = yield* askJev(key, state, [forward, reverse])
+    const answers = yield* askJev(state, [forward, reverse])
     return agreedIndex(labels, answers['order_0'], answers['order_1'])
   }).pipe(
     Effect.timeout(JEV_TIMEOUT_MS),
-    Effect.provide(FetchHttpClient.layer),
     Effect.orElseSucceed(() => undefined),
   )
 }

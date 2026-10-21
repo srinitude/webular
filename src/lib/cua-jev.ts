@@ -6,13 +6,11 @@
 // candidate matches, since a bare "none" option is unreliable. Every other
 // case (an HTTP error, a timeout, a disagreement, a "none") falls back to
 // codeDecisions.
-import { Config, Effect, Option, type Redacted, Schema } from 'effect'
-import { FetchHttpClient, HttpClient, HttpClientRequest } from 'effect/http'
+import { Config, Effect, Option, Schema } from 'effect'
 import { codeDecisions, type Decisions, type Intent } from './cua-ground.ts'
 import type { AxElement } from './cua-tree.ts'
+import { askAnswers } from './jev/answers.ts'
 
-const ENDPOINT = 'https://api.typesafe.ai/v1/systemone'
-const MODEL = 'jev-1.13.0'
 const BAR = 0.95
 const TIMEOUT_MS = 5_000
 const DATA_ONLY =
@@ -36,17 +34,14 @@ type Answers = (typeof Reply.Type)['answers']
 // One Jev call: the request body in, the raw JSON reply out.
 export type Post = (body: unknown) => Effect.Effect<unknown, unknown>
 
-export const postJev =
-  (key: Redacted.Redacted<string>): Post =>
-  (body) =>
-    Effect.gen(function* () {
-      const client = HttpClient.filterStatusOk(yield* HttpClient.HttpClient)
-      const request = HttpClientRequest.post(ENDPOINT).pipe(
-        HttpClientRequest.bearerToken(key),
-        HttpClientRequest.bodyJsonUnsafe(body),
-      )
-      return yield* (yield* client.execute(request)).json
-    }).pipe(Effect.timeout(TIMEOUT_MS), Effect.provide(FetchHttpClient.layer))
+// The live post goes through the shared Jev client, which resolves its own key
+// (TYPESAFE_API_KEY, then the Keychain) and runs the docs guard. The reply keeps
+// the { answers } shape that `ask` decodes.
+export const postJev: Post = (body) =>
+  askAnswers('cua.ground', body as { state: unknown; questions: unknown }).pipe(
+    Effect.map((answers) => ({ answers })),
+    Effect.timeout(TIMEOUT_MS),
+  )
 
 const describe = (e: AxElement) =>
   `${e.role} "${e.label}"${e.value ? ` with value "${e.value}"` : ''}`
@@ -77,7 +72,7 @@ const agreed = (a: Answers): Option.Option<string> => {
 }
 
 const ask = (post: Post, state: unknown, questions: unknown) =>
-  post({ model: MODEL, state, questions }).pipe(
+  post({ state, questions }).pipe(
     Effect.flatMap(Schema.decodeUnknownEffect(Reply)),
     Effect.map((r) => r.answers),
   )
@@ -152,10 +147,10 @@ export const jevDecisions = (post: Post, fallback: Decisions = codeDecisions): D
     ),
 })
 
-// WEBULAR_CUA_JEV=true turns Jev on (default off). A missing TYPESAFE_API_KEY
-// keeps the code decisions.
+// WEBULAR_CUA_JEV=true turns Jev on (default off). With no TypeSafe key, every
+// Jev call fails and the code decisions answer.
 export const decisionsFromEnv: Effect.Effect<Decisions> = Effect.gen(function* () {
   if (!(yield* Config.Boolean('WEBULAR_CUA_JEV').pipe(Config.withDefault(false))))
     return codeDecisions
-  return jevDecisions(postJev(yield* Config.Redacted('TYPESAFE_API_KEY')))
+  return jevDecisions(postJev)
 }).pipe(Effect.orElseSucceed(() => codeDecisions))

@@ -89,7 +89,7 @@ const main = Effect.gen(function* () {
     return 0
   }
   const { fell, fallback } = counting()
-  yield* report('jev', yield* score(jevDecisions(postJev(key.value), fallback)))
+  yield* report('jev', yield* score(jevDecisions(postJev, fallback)))
   const n = cases.length
   yield* Console.log(
     `  jev answers used: pickTarget ${n - fell.pickTarget}/${n}, feasible ${n - fell.feasible}/${n} (rest fell back to code)`,

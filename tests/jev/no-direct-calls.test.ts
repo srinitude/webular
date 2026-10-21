@@ -29,10 +29,21 @@ const CLIENT_IMPORTERS: Readonly<Record<string, string>> = {
   'commands/jev.ts': 'provides the live layer to the recorder CLI',
 }
 
+// Files that may load a model SDK, and only that ('calls a model SDK'); every
+// other ALWAYS rule still applies.
+const MODEL_SDK_LOADERS: Readonly<Record<string, string>> = {
+  // The Stately agent planner: @statelyai/agent takes an AI SDK model object
+  // (WEBULAR_AGENT_MODEL=anthropic:... or openai:...), which defineDecision, a
+  // Jev-only door, cannot stand in for. Its Jev provider goes through lib/jev/answers.ts.
+  'machines/agent-model.ts': 'Stately agent planner needs an AI SDK model',
+}
+
 const isCode = (line: string) => !/^\s*(\/\/|\*|\/\*)/.test(line)
 const offences = (file: string, text: string) => {
   const code = text.split('\n').filter(isCode).join('\n')
-  const bad = ALWAYS.filter(([, re]) => re.test(code)).map(([why]) => why)
+  const bad = ALWAYS.filter(
+    ([why, re]) => re.test(code) && !(why === 'calls a model SDK' && file in MODEL_SDK_LOADERS),
+  ).map(([why]) => why)
   if (CLIENT_IMPORT.test(code) && !(file in CLIENT_IMPORTERS)) bad.push('imports the Jev client')
   return bad.map((why) => `${file}: ${why}`)
 }

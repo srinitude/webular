@@ -10,7 +10,6 @@ import {
   type JevRequest,
   jevPick,
   jevRequest,
-  pinnedModel,
 } from '../../src/machines/agent-jev.ts'
 import { fetchMachine } from '../../src/machines/fetch.ts'
 import { eff } from '../_support/run.ts'
@@ -47,11 +46,6 @@ describe('jev planner', () => {
     const req = jevRequest('retry or give up', start, choices)
     expect(Object.keys(req.questions['next']?.criteria ?? {})).toEqual(choices)
     expect(req.questions['next']?.type).toBe('choice')
-  })
-
-  test('the floating jev-latest alias is sent as the pinned version', () => {
-    expect(pinnedModel('jev-latest')).toBe('jev-1.13.0')
-    expect(pinnedModel('jev-1.13.0')).toBe('jev-1.13.0')
   })
 
   test('a pick counts only when allowed and at the bar', () => {
