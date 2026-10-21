@@ -37,6 +37,7 @@ export const moveLabels: Record<LifecycleEvent['type'], string> = {
   NO_ERRORS: 'every source is read',
   SOME_ERRORS: 'some sources fail',
   EMPTY_WITH_ERRORS: 'no source can be read',
+  PARTIAL: 'some named pages fail',
 }
 
 const eventTypes = commandLifecycleMachine.root.events as LifecycleEvent['type'][]

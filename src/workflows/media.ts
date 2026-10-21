@@ -1,8 +1,10 @@
 // MEDIA workflow: download bytes (capped), or capture screenshot/PDF via
 // agent-browser. Non-model Mastra workflow composed of FOSS tools only.
+
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
+import { EXIT } from '../cli/exit-codes.ts'
 import { CliError } from '../core/effect.ts'
 import { outPath } from '../core/safepath.ts'
 import { runBatch } from '../lib/agentbrowser.ts'
@@ -25,7 +27,7 @@ const mediaOutput = z.object({
   action: z.string(),
 })
 
-const fail = (message: string) => new CliError({ message, exitCode: 1 })
+const fail = (message: string) => new CliError({ message, exitCode: EXIT.failure })
 
 const browserCapture = Effect.fn('media.browserCapture')(function* (
   url: string,

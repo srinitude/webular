@@ -1,5 +1,7 @@
 // Model-based test: the shortest path to every final state and context of
 // the fetch machine, replayed against the real fetchTextWithinHost over real sockets.
+// The run's timeout is the server's signal, fired when the hung request
+// arrives (tests/_support/scripted-server.ts), so no path races wall time.
 import { describe, expect, test } from 'bun:test'
 import { Effect } from 'effect'
 import { getShortestPaths } from 'xstate/graph'
@@ -30,14 +32,9 @@ const OUTCOME_FOR_FINAL: Record<string, RegExp> = {
 
 const paths = finalPaths(fetchMachine, Object.keys(REPLY_FOR_EVENT), getShortestPaths)
 
-// Per-request budget. Every request that answers must beat it even on a loaded
-// CI runner (a 150 ms budget let a loopback 302 or 404 time out there); only a
-// 'hang' reply may reach it. Each of the 15 timedOut cases waits it out once.
-const REQUEST_TIMEOUT_MS = 1_000
-
-const outcome = (origin: string) =>
-  fetchTextWithinHost(`${origin}/start`, '127.0.0.1', { timeoutMs: REQUEST_TIMEOUT_MS }).pipe(
-    Effect.catch((e) => Effect.succeed(String(e))),
+const outcome = (origin: string, signal: AbortSignal) =>
+  fetchTextWithinHost(`${origin}/start`, '127.0.0.1', { signal }).pipe(
+    Effect.catch((e) => Effect.succeed(e.message)),
   )
 
 describe('fetch machine matches fetchTextWithinHost', () => {
@@ -51,13 +48,11 @@ describe('fetch machine matches fetchTextWithinHost', () => {
       eff(
         Effect.gen(function* () {
           const server = yield* startScriptedServer()
-          server.play(path.events.map((e) => REPLY_FOR_EVENT[e] ?? 'drop'))
-          expect(yield* outcome(server.origin)).toMatch(OUTCOME_FOR_FINAL[path.final] ?? /never/)
-          // ponytail: a hung final request can be aborted before its socket is
-          // counted, so timeouts check only the requests before the hang.
-          const minimum = path.final === 'timedOut' ? path.events.length - 1 : path.events.length
-          expect(server.served()).toBeGreaterThanOrEqual(minimum)
-          expect(server.served()).toBeLessThanOrEqual(path.events.length)
+          const signal = server.play(path.events.map((e) => REPLY_FOR_EVENT[e] ?? 'drop'))
+          expect(yield* outcome(server.origin, signal)).toMatch(
+            OUTCOME_FOR_FINAL[path.final] ?? /never/,
+          )
+          expect(server.served()).toBe(path.events.length)
         }),
       )(),
     10_000,

@@ -4,7 +4,8 @@
 // capture the original error stands.
 import { Effect, Schema } from 'effect'
 import type { FetchError } from './decode.ts'
-import { type FetchOptions, fetchText, HttpStatusError } from './http.ts'
+import { type FetchOptions, fetchText } from './http.ts'
+import { HttpStatusError } from './http-body.ts'
 
 const ARCHIVE_ORIGIN = 'https://archive.org'
 

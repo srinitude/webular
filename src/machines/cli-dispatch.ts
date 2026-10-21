@@ -1,8 +1,9 @@
 // CLI dispatch: `webular <argv>` either answers locally (help, version,
 // unknown command) or routes to `mise run run:<command>` and passes the task's
 // exit code through. The CLI never runs capability code itself (bin/webular.ts,
-// src/cli/route.ts). Final states carry an `exit-<code>` tag.
+// src/cli/route.ts). Final states carry an `exit-<code>` tag from src/cli/exit-codes.ts.
 import { setup } from 'xstate'
+import { EXIT, exitTag } from '../cli/exit-codes.ts'
 
 export const cliDispatchMachine = setup({
   types: {
@@ -29,10 +30,10 @@ export const cliDispatchMachine = setup({
     runningMiseTask: {
       on: { TASK_SUCCEEDED: 'taskSucceeded', TASK_FAILED: 'taskFailed' },
     },
-    printedHelp: { type: 'final', tags: ['exit-0'] },
-    printedVersion: { type: 'final', tags: ['exit-0'] },
-    rejected: { type: 'final', tags: ['exit-2'] },
-    taskSucceeded: { type: 'final', tags: ['exit-0'] },
-    taskFailed: { type: 'final', tags: ['exit-1'] },
+    printedHelp: { type: 'final', tags: [exitTag(EXIT.ok)] },
+    printedVersion: { type: 'final', tags: [exitTag(EXIT.ok)] },
+    rejected: { type: 'final', tags: [exitTag(EXIT.usage)] },
+    taskSucceeded: { type: 'final', tags: [exitTag(EXIT.ok)] },
+    taskFailed: { type: 'final', tags: [exitTag(EXIT.failure)] },
   },
 })

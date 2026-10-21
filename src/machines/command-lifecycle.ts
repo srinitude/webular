@@ -1,9 +1,11 @@
 // Command lifecycle inside `mise run run:<command>`: the Mastra workflow
 // validates its input, runs, and its result is rendered (src/cli/run.ts).
 // Discovery commands keep partial failures in the payload: exit 0 with a
-// stderr note, and exit 1 only when the payload is empty and errors exist.
-// Final states carry an `exit-<code>` tag.
+// stderr note, and exit 1 only when the payload is empty and errors exist
+// (payloadExit).
+// Final states carry an `exit-<code>` tag from src/cli/exit-codes.ts.
 import { setup } from 'xstate'
+import { EXIT, exitTag } from '../cli/exit-codes.ts'
 
 export const commandLifecycleMachine = setup({
   types: {
@@ -14,7 +16,8 @@ export const commandLifecycleMachine = setup({
       | { type: 'WORKFLOW_SUCCEEDED' }
       | { type: 'NO_ERRORS' }
       | { type: 'SOME_ERRORS' }
-      | { type: 'EMPTY_WITH_ERRORS' },
+      | { type: 'EMPTY_WITH_ERRORS' }
+      | { type: 'PARTIAL' },
   },
 }).createMachine({
   id: 'commandLifecycle',
@@ -31,12 +34,15 @@ export const commandLifecycleMachine = setup({
         NO_ERRORS: 'completed',
         SOME_ERRORS: 'completedWithPartialFailures',
         EMPTY_WITH_ERRORS: 'emptyWithErrors',
+        // Explicit-target commands (batch): some named targets failed.
+        PARTIAL: 'partial',
       },
     },
-    rejected: { type: 'final', tags: ['exit-1'] },
-    failed: { type: 'final', tags: ['exit-1'] },
-    completed: { type: 'final', tags: ['exit-0'] },
-    completedWithPartialFailures: { type: 'final', tags: ['exit-0', 'stderr-note'] },
-    emptyWithErrors: { type: 'final', tags: ['exit-1', 'stderr-note'] },
+    partial: { type: 'final', tags: [exitTag(EXIT.partial)] },
+    rejected: { type: 'final', tags: [exitTag(EXIT.failure)] },
+    failed: { type: 'final', tags: [exitTag(EXIT.failure)] },
+    completed: { type: 'final', tags: [exitTag(EXIT.ok)] },
+    completedWithPartialFailures: { type: 'final', tags: [exitTag(EXIT.ok), 'stderr-note'] },
+    emptyWithErrors: { type: 'final', tags: [exitTag(EXIT.failure), 'stderr-note'] },
   },
 })

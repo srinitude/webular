@@ -5,6 +5,7 @@ import { join } from 'node:path'
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
+import { EXIT } from '../cli/exit-codes.ts'
 import { CliError } from '../core/effect.ts'
 import { errMsg } from '../core/output.ts'
 import { PACKAGE_ROOT } from '../core/root.ts'
@@ -22,7 +23,7 @@ const diagramListOutput = z.object({
 const listDiagrams = Effect.map(
   Effect.tryPromise({
     try: () => readdir(MACHINES_DIR),
-    catch: (err) => new CliError({ message: errMsg(err), exitCode: 1 }),
+    catch: (err) => new CliError({ message: errMsg(err), exitCode: EXIT.failure }),
   }),
   (entries) => {
     const diagrams = entries

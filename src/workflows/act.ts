@@ -1,8 +1,10 @@
 // ACT workflow: drive a real browser via the agent-browser CLI (open ->
 // snapshot [-> screenshot] -> close), composed as a Mastra non-model workflow.
+
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
+import { EXIT } from '../cli/exit-codes.ts'
 import { CliError } from '../core/effect.ts'
 import { outPath } from '../core/safepath.ts'
 import { runBatch } from '../lib/agentbrowser.ts'
@@ -27,7 +29,7 @@ const act = Effect.fn('act')(function* (input: z.infer<typeof actInput>) {
   if (res.code !== 0)
     return yield* new CliError({
       message: `agent-browser failed: ${res.stderr.trim()}`,
-      exitCode: 1,
+      exitCode: EXIT.failure,
     })
   return { url: input.url, snapshot: res.stdout.trim(), screenshot: input.screenshot }
 })

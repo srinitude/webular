@@ -3,6 +3,7 @@
 import { createHash } from 'node:crypto'
 import { homedir } from 'node:os'
 import { Effect, FileSystem, Path } from 'effect'
+import { EXIT } from '../cli/exit-codes.ts'
 import { runWorkflow } from '../cli/run.ts'
 import { emitOpts, parseFlags, timeoutFlag } from '../core/args.ts'
 import { CliError, runMain } from '../core/effect.ts'
@@ -23,7 +24,8 @@ const defaultDbPath = Effect.fn('monitor.defaultDbPath')(function* () {
   return path.join(dir, `monitor-${key}.db`)
 })
 
-const toCliError = (cause: unknown) => new CliError({ message: errMsg(cause), exitCode: 1 })
+const toCliError = (cause: unknown) =>
+  new CliError({ message: errMsg(cause), exitCode: EXIT.failure })
 
 const resolveDbPath = Effect.fn('monitor.resolveDbPath')(function* (flagValue: unknown) {
   if (typeof flagValue === 'string' && flagValue.length > 0) return flagValue
@@ -45,7 +47,7 @@ const main = Effect.gen(function* () {
   const url = (values['url'] as string) ?? positionals[0]
   if (!url) {
     const message = 'monitor: missing <url>. Pass --url <url> or put the URL after the command.'
-    return yield* new CliError({ message, exitCode: 2 })
+    return yield* new CliError({ message, exitCode: EXIT.usage })
   }
   const inputData = {
     url,

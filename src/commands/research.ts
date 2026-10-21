@@ -1,6 +1,8 @@
 // RESEARCH command entry — invoked by `mise run run:research`. Parses flags,
 // runs the Mastra research workflow, emits the result. No mise logic here.
+
 import { Effect } from 'effect'
+import { EXIT } from '../cli/exit-codes.ts'
 import { discoveryExit, runWorkflow } from '../cli/run.ts'
 import { emitOpts, intFlag, parseFlags, timeoutFlag } from '../core/args.ts'
 import { CliError, runMain } from '../core/effect.ts'
@@ -15,7 +17,7 @@ const main = Effect.gen(function* () {
   if (!topic) {
     return yield* new CliError({
       message: 'research: missing --topic <t>. You can also put the topic after the command.',
-      exitCode: 2,
+      exitCode: EXIT.usage,
     })
   }
   const inputData = {

@@ -13,8 +13,10 @@ import { eff } from '../_support/run.ts'
 
 // toolsList: the four web.* tools fit in 520 tokens. The 18 command tools from
 // plugins/webular/src/commands.ts, the same list the plugin server serves, bring
-// it to a measured 4,385 tokens; 4,500 keeps a small margin over that.
-const BUDGET = { toolsList: 4500, page: estimateTokens('x'.repeat(PAGE_MAX_CHARS)), error: 80 }
+// it to a measured 4,385 tokens. The machine.next tool (name, description,
+// machine enum, events array, paging fields) measures 152 tokens by itself, so
+// the list measures about 4,537; 4,700 keeps a small margin over that.
+const BUDGET = { toolsList: 4700, page: estimateTokens('x'.repeat(PAGE_MAX_CHARS)), error: 80 }
 const parseJson = Schema.decodeUnknownSync(Schema.fromJsonString(Schema.Unknown))
 const parseRec = (text: string): Record<string, unknown> =>
   parseJson(text) as Record<string, unknown>

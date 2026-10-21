@@ -10,17 +10,15 @@ import { errMsg, logErr } from '../core/output.ts'
 import { packageRoot } from '../core/root.ts'
 import type { CommandName } from './commands.ts'
 import { DISPATCH } from './dispatch-table.ts'
+import { EXIT } from './exit-codes.ts'
 
 interface DispatchOpts {
   stdout?: 'inherit' | 'pipe'
 }
 
-const EXIT_START_FAILED = 127
-const EXIT_FAILURE = 1
-
 const noRoot = new CliError({
   message: 'webular: package root not found (no mise.toml above the CLI); reinstall webular.',
-  exitCode: EXIT_START_FAILED,
+  exitCode: EXIT.toolchainMissing,
 })
 
 // The Bun rung of the launcher: WEBULAR_DEV runs src/; otherwise dist/, falling
@@ -69,7 +67,7 @@ const exitOf = (handle: ChildProcessSpawner.ChildProcessHandle) =>
       const signal = KILLED.exec(errMsg(err))?.[1]
       return signal
         ? Effect.succeed(signalExit(signal))
-        : Effect.as(logErr(errMsg(err)), EXIT_FAILURE)
+        : Effect.as(logErr(errMsg(err)), EXIT.failure)
     }),
   )
 
@@ -86,7 +84,7 @@ export function runCommand(name: CommandName, args: ReadonlyArray<string>) {
           (err) =>
             new CliError({
               message: `webular: failed to start ${name} (${errMsg(err)})`,
-              exitCode: EXIT_START_FAILED,
+              exitCode: EXIT.toolchainMissing,
             }),
         ),
       )

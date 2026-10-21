@@ -4,13 +4,14 @@
 import { extname, join } from 'node:path'
 import { Effect } from 'effect'
 import pkg from '../../package.json' with { type: 'json' }
+import { EXIT } from '../cli/exit-codes.ts'
 import { renderFor } from '../cli/render.ts'
 import { emitOpts, parseFlags } from '../core/args.ts'
 import { CliError, runMain } from '../core/effect.ts'
 import { emit } from '../core/output.ts'
 
 const serverError = (cause: unknown) =>
-  new CliError({ message: `mcp: the server failed (${String(cause)})`, exitCode: 1 })
+  new CliError({ message: `mcp: the server failed (${String(cause)})`, exitCode: EXIT.failure })
 
 // The tool table (zod schemas, HTML parsing) loads after the flags parse.
 const loadTools = Effect.tryPromise({ try: () => import('../tools/web.ts'), catch: serverError })

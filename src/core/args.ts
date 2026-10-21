@@ -2,6 +2,7 @@
 // bounds-checked flag accessors shared by every command.
 import { parseArgs } from 'node:util'
 import { Effect } from 'effect'
+import { EXIT } from '../cli/exit-codes.ts'
 import { CliError } from './effect.ts'
 import { logErr, parseFields } from './output.ts'
 
@@ -69,7 +70,7 @@ function toInt(raw: FlagValue): number | null {
 // message and sets the exit code.
 function usageError(cmd: string, name: string, range: IntRange): CliError {
   const message = `${cmd}: --${name} must be an integer between ${range.min} and ${range.max}`
-  return new CliError({ message, exitCode: 2 })
+  return new CliError({ message, exitCode: EXIT.usage })
 }
 
 export function optIntFlag(

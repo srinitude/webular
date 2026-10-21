@@ -1,6 +1,8 @@
 // ANSWER command entry — invoked by `mise run run:answer`. Parses flags,
 // runs the Mastra answer workflow, emits the result. No mise logic here.
+
 import { Effect } from 'effect'
+import { EXIT } from '../cli/exit-codes.ts'
 import { discoveryExit, runWorkflow } from '../cli/run.ts'
 import { emitOpts, intFlag, parseFlags, timeoutFlag } from '../core/args.ts'
 import { CliError, runMain } from '../core/effect.ts'
@@ -32,7 +34,7 @@ const main = Effect.gen(function* () {
   if (!query) {
     return yield* new CliError({
       message: 'answer: missing --query <q>. You can also put the question after the command.',
-      exitCode: 2,
+      exitCode: EXIT.usage,
     })
   }
   const inputData = yield* answerInput(values, query)

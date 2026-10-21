@@ -1,6 +1,8 @@
 // SUMMARIZE command entry — invoked by `mise run run:summarize`. Parses flags,
 // runs the Mastra summarize workflow, emits the result. No mise logic here.
+
 import { Effect } from 'effect'
+import { EXIT } from '../cli/exit-codes.ts'
 import { runWorkflow } from '../cli/run.ts'
 import { emitOpts, intFlag, parseFlags, timeoutFlag } from '../core/args.ts'
 import { CliError, runMain } from '../core/effect.ts'
@@ -16,7 +18,7 @@ const main = Effect.gen(function* () {
   if (!text && !url) {
     return yield* new CliError({
       message: 'summarize: missing input. Pass --text <text> or --url <url>.',
-      exitCode: 2,
+      exitCode: EXIT.usage,
     })
   }
   const inputData = {

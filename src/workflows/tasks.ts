@@ -1,11 +1,13 @@
 // TASKS workflow: introspect webular's OWN task graph. `mise tasks ls --json`
 // carries each task's source config; filtering on our mise.toml keeps user
 // and parent configs from leaking into the report.
+
 import { realpathSync } from 'node:fs'
 import { join } from 'node:path'
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
+import { EXIT } from '../cli/exit-codes.ts'
 import { CliError } from '../core/effect.ts'
 import { errMsg } from '../core/output.ts'
 import { runProc } from '../core/proc.ts'
@@ -13,7 +15,7 @@ import { PACKAGE_ROOT } from '../core/root.ts'
 import { resolveMise } from '../mise/gateway.ts'
 import { stepRuntime } from './runtime.ts'
 
-const fail = (message: string) => new CliError({ message, exitCode: 1 })
+const fail = (message: string) => new CliError({ message, exitCode: EXIT.failure })
 
 // Symlinked installs (bun link, pnpm stores) make mise's reported source path
 // and our import.meta-derived root spell the same file differently.

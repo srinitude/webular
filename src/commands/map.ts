@@ -1,6 +1,8 @@
 // MAP command entry — invoked by `mise run run:map`. Parses flags,
 // runs the Mastra map workflow, emits the result. No mise logic here.
+
 import { Effect } from 'effect'
+import { EXIT } from '../cli/exit-codes.ts'
 import { discoveryExit, runWorkflow } from '../cli/run.ts'
 import { emitOpts, optIntFlag, parseFlags, timeoutFlag } from '../core/args.ts'
 import { CliError, runMain } from '../core/effect.ts'
@@ -14,7 +16,7 @@ const main = Effect.gen(function* () {
   if (!url) {
     return yield* new CliError({
       message: 'map: missing <url>. Pass --url <url> or put the URL after the command.',
-      exitCode: 2,
+      exitCode: EXIT.usage,
     })
   }
   const inputData = {

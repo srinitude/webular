@@ -59,11 +59,13 @@
     "access": "public"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "0.0.56",
     "@effect/platform-bun": "4.0.5",
     "@mastra/core": "^1.78.0",
     "@mastra/mcp": "^2.4.1",
     "@modelcontextprotocol/sdk": "^1.32.1",
     "@mozilla/readability": "^0.6.0",
+    "@statelyai/agent": "1.1.6",
     "@xstate/react": "6.1.0",
     "agent-browser": "^0.39.1",
     "diff": "^9.0.0",

@@ -1,6 +1,7 @@
 // EXTRACT command entry — invoked by `mise run run:extract`. Parses flags,
 // runs the Mastra extract workflow, emits the result. No mise logic here.
 import { Effect } from 'effect'
+import { EXIT } from '../cli/exit-codes.ts'
 import { runWorkflow } from '../cli/run.ts'
 import { emitOpts, parseFlags, timeoutFlag } from '../core/args.ts'
 import { CliError, runMain } from '../core/effect.ts'
@@ -11,13 +12,13 @@ function buildInput(values: Record<string, string | boolean | undefined>, positi
     if (!url) {
       return yield* new CliError({
         message: 'extract: missing <url>. Pass --url <url> or put the URL after the command.',
-        exitCode: 2,
+        exitCode: EXIT.usage,
       })
     }
     if (!values['fields'] && !values['selector']) {
       return yield* new CliError({
         message: 'extract: missing fields. Pass --fields "name:selector[,...]" or --selector <css>',
-        exitCode: 2,
+        exitCode: EXIT.usage,
       })
     }
     return {

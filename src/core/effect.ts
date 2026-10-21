@@ -4,6 +4,7 @@ import { constants } from 'node:os'
 import { runMain as bunRunMain } from '@effect/platform-bun/BunRuntime'
 import * as BunServices from '@effect/platform-bun/BunServices'
 import { Cause, Data, Effect, Exit, Match, type Runtime } from 'effect'
+import { EXIT } from '../cli/exit-codes.ts'
 import { errMsg } from './output.ts'
 import type { ProcError } from './proc.ts'
 
@@ -46,8 +47,8 @@ const recordSignals = Effect.acquireRelease(
 export const failureOf = (err: unknown): { message: string; exitCode: number } =>
   Match.value(err as CliError | ProcError | { readonly _tag?: undefined }).pipe(
     Match.tag('CliError', (e) => ({ message: e.message, exitCode: e.exitCode })),
-    Match.tag('ProcError', (e) => ({ message: e.message, exitCode: 127 })),
-    Match.orElse((e) => ({ message: errMsg(e), exitCode: 1 })),
+    Match.tag('ProcError', (e) => ({ message: e.message, exitCode: EXIT.toolchainMissing })),
+    Match.orElse((e) => ({ message: errMsg(e), exitCode: EXIT.failure })),
   )
 
 const failureOfCause = (cause: Cause.Cause<unknown>): { message: string; exitCode: number } =>

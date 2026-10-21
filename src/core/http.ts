@@ -1,28 +1,21 @@
 // Bun.fetch layer: timeout, user-agent, scoped redirects, textual-content guard,
-// deterministic bounded retry, disk-cache revalidation.
+// deterministic bounded retry, disk-cache revalidation. The fetch machine
+// (src/machines/fetch.ts) decides every retry, redirect, and failure; this
+// file only performs the requests it asks for.
 import { BunServices } from '@effect/platform-bun'
-import { Data, Effect } from 'effect'
+import { Effect } from 'effect'
+import { type EventFromLogic, initialTransition, type SnapshotFrom, transition } from 'xstate'
 import pkg from '../../package.json' with { type: 'json' }
+import { failureEvent, fetchMachine } from '../machines/fetch.ts'
 import { type CacheOptions, cachedGetText } from './cache.ts'
-import { FetchError, readTextCapped } from './decode.ts'
+import { FetchError } from './decode.ts'
+import { FETCH_ERROR, RETRY_BACKOFF_MS, RETRY_STATUS } from './fetch-policy.ts'
+import { dropBody, type HttpStatusError, okText } from './http-body.ts'
+import { errMsg } from './output.ts'
 import { sameHost } from './url.ts'
 
 const USER_AGENT = `webular/${pkg.version} (+https://github.com/srinitude/webular)`
-const MAX_TEXT_BYTES = 25 * 1024 * 1024
 
-// MIME types accepted by text fetches; anything else errors instead of
-// decoding binary bytes into garbage markdown.
-const TEXTUAL_MIMES = new Set([
-  'application/json',
-  'application/xml',
-  'application/javascript',
-  'application/x-javascript',
-  'application/xhtml+xml',
-])
-
-// Deterministic retry policy: fixed backoff (no jitter), fixed attempt count.
-const RETRY_BACKOFF_MS = [250, 750]
-const RETRY_STATUS = new Set([408, 429, 502, 503, 504])
 // A server's Retry-After wins over the fixed backoff, capped so a huge or
 // hostile value cannot stall the CLI.
 const MAX_RETRY_AFTER_MS = 10_000
@@ -34,17 +27,6 @@ export interface FetchOptions extends CacheOptions {
   redirect?: RequestRedirect
 }
 
-// A non-2xx response, typed so callers branch on the status, not the message.
-// The message is an own field, not a getter: Mastra copies a step error's own
-// fields, so a prototype getter reaches the CLI as "failed (undefined)".
-export class HttpStatusError extends Data.TaggedError('HttpStatusError')<{
-  url: string
-  status: number
-  statusText: string
-}> {
-  override message = `fetch ${this.url} failed: ${this.status} ${this.statusText}`
-}
-
 // Retry-After (RFC 9110 section 10.2.3): delay-seconds or an HTTP-date.
 export function retryAfterMs(header: string | null, now = Date.now()): number | undefined {
   if (!header?.trim()) return undefined
@@ -54,95 +36,101 @@ export function retryAfterMs(header: string | null, now = Date.now()): number | 
   return Math.min(ms, MAX_RETRY_AFTER_MS)
 }
 
-const fetchOnce = (url: string, opts: FetchOptions) =>
-  Effect.tryPromise({
-    try: () =>
-      fetch(url, {
-        headers: { 'user-agent': USER_AGENT, ...opts.headers },
-        redirect: opts.redirect ?? 'follow',
-        // A fresh per-attempt budget unless the caller owns the signal lifecycle.
-        signal: opts.signal ?? AbortSignal.timeout(opts.timeoutMs ?? 30_000),
-      }),
-    catch: (err) => err,
-  })
+type FetchSnapshot = SnapshotFrom<typeof fetchMachine>
+type FetchEvent = EventFromLogic<typeof fetchMachine>
 
-const toFetchError = (err: unknown) =>
-  err instanceof FetchError
-    ? err
-    : new FetchError({ message: err instanceof Error ? err.message : String(err) })
+const [START] = initialTransition(fetchMachine)
+const step = (snap: FetchSnapshot, event: FetchEvent) => transition(fetchMachine, snap, event)[0]
 
 function isAbort(err: unknown): boolean {
   return err instanceof DOMException && (err.name === 'TimeoutError' || err.name === 'AbortError')
 }
 
-type Attempt =
-  | { kind: 'response'; res: Response }
-  | { kind: 'retry'; waitMs?: number }
-  | { kind: 'raise'; err: unknown }
+const fetchOnce = (url: string, opts: FetchOptions): Effect.Effect<Response, FetchError> =>
+  Effect.tryPromise({
+    try: (interrupt) =>
+      fetch(url, {
+        headers: { 'user-agent': USER_AGENT, ...opts.headers },
+        redirect: opts.redirect ?? 'follow',
+        // A fresh per-attempt budget unless the caller owns the signal lifecycle.
+        signal: AbortSignal.any([
+          opts.signal ?? AbortSignal.timeout(opts.timeoutMs ?? 30_000),
+          interrupt,
+        ]),
+      }),
+    catch: (err) => new FetchError({ message: errMsg(err), aborted: isAbort(err) }),
+  })
 
-// Release an unread body so the pooled connection is freed at once instead of
-// waiting for GC (Bun guide BUN027). A stream already locked by its reader was
-// cancelled by that reader, so a failed cancel is ignored.
-const dropBody = (res: Response) =>
-  Effect.ignore(
-    Effect.tryPromise({ try: () => res.body?.cancel() ?? Promise.resolve(), catch: (err) => err }),
-  )
+const isRedirect = (status: number) => status >= 300 && status < 400
 
-const attemptGet = (url: string, opts: FetchOptions, last: boolean): Effect.Effect<Attempt> =>
-  fetchOnce(url, opts).pipe(
-    Effect.flatMap((res) =>
-      !RETRY_STATUS.has(res.status) || last
-        ? Effect.succeed<Attempt>({ kind: 'response', res })
-        : Effect.as(dropBody(res), {
-            kind: 'retry',
-            waitMs: retryAfterMs(res.headers.get('retry-after')),
-          } as Attempt),
-    ),
-    // A timeout/abort is the caller's budget — retrying would silently exceed it.
-    Effect.catch((err) =>
-      Effect.succeed<Attempt>(isAbort(err) || last ? { kind: 'raise', err } : { kind: 'retry' }),
-    ),
-  )
-
-// GET with retry: network-level throws and 408/429/502/503/504 responses retry
-// on the fixed backoff (or the server's Retry-After); other statuses return as-is.
-export const httpGet = Effect.fn('httpGet')(function* (url: string, opts: FetchOptions = {}) {
-  for (let attempt = 0; ; attempt++) {
-    const outcome = yield* attemptGet(url, opts, attempt >= RETRY_BACKOFF_MS.length)
-    if (outcome.kind === 'response') return outcome.res
-    if (outcome.kind === 'raise') return yield* Effect.fail(toFetchError(outcome.err))
-    yield* Effect.sleep(outcome.waitMs ?? RETRY_BACKOFF_MS[attempt] ?? 750)
-  }
-})
-
-// The refused MIME type, or undefined when the body is text.
-function refusedMime(res: Response): string | undefined {
-  const header = res.headers.get('content-type')
-  if (!header) return undefined
-  const mime = (header.split(';')[0] ?? '').trim().toLowerCase()
-  const ok =
-    mime === '' ||
-    mime.startsWith('text/') ||
-    mime.endsWith('+xml') ||
-    mime.endsWith('+json') ||
-    TEXTUAL_MIMES.has(mime)
-  return ok ? undefined : mime
+// One fetch run. With `host` set, redirects are followed by hand within it.
+interface Run {
+  origin: string
+  host?: string
+  opts: FetchOptions
 }
 
-const readOk = Effect.fn('readOk')(function* (res: Response, url: string) {
-  if (!res.ok)
-    return yield* new HttpStatusError({ url, status: res.status, statusText: res.statusText })
-  const bad = refusedMime(res)
-  if (bad !== undefined)
-    return yield* new FetchError({
-      message: `fetch ${url}: unsupported content-type "${bad}" — use media --download`,
-    })
-  return yield* readTextCapped(res, url, MAX_TEXT_BYTES)
-})
+interface Landed {
+  res: Response
+  url: string
+}
 
-// Every rejected response releases its body.
-const okText = (res: Response, url: string) =>
-  readOk(res, url).pipe(Effect.tapError(() => dropBody(res)))
+// Names a response as a machine event, with the url the next step uses.
+function responseEvent(run: Run, res: Response, url: string): Landed & { event: FetchEvent } {
+  const settled = { res, url, event: { type: res.ok ? 'OK' : 'HTTP_ERROR' } } as const
+  if (RETRY_STATUS.has(res.status)) return { res, url, event: { type: 'RETRYABLE_STATUS' } }
+  if (run.host === undefined || !isRedirect(res.status)) return settled
+  const location = res.headers.get('location')
+  if (!location) return settled
+  const next = new URL(location, url).toString()
+  const type = sameHost(run.host, next) ? 'REDIRECT_SAME_HOST' : 'REDIRECT_OFF_HOST'
+  return { res, url: next, event: { type } }
+}
+
+const retry = (run: Run, url: string, snap: FetchSnapshot, waitMs?: number) =>
+  Effect.andThen(
+    Effect.sleep(waitMs ?? RETRY_BACKOFF_MS[snap.context.attempt - 1] ?? 750),
+    Effect.suspend(() => drive(run, url, snap)),
+  )
+
+// A rejected redirect's body is never read; free its connection.
+function settle(run: Run, snap: FetchSnapshot, landed: Landed): Effect.Effect<Landed, FetchError> {
+  const blocked = snap.matches('offHostBlocked')
+  if (!blocked && !snap.matches('tooManyRedirects')) return Effect.succeed(landed)
+  const message = blocked
+    ? FETCH_ERROR.offHostBlocked(landed.url)
+    : FETCH_ERROR.tooManyRedirects(run.origin)
+  return Effect.andThen(dropBody(landed.res), Effect.fail(new FetchError({ message })))
+}
+
+// Fetch, name the outcome as an event, and do what the machine's next state says.
+// A retried status waits the server's Retry-After when it sends one.
+function drive(run: Run, url: string, snap: FetchSnapshot): Effect.Effect<Landed, FetchError> {
+  return Effect.matchEffect(fetchOnce(url, run.opts), {
+    onFailure: (err) =>
+      Effect.flatMap(failureEvent(snap, err.aborted === true), (event) => {
+        const next = step(snap, event)
+        return next.status === 'done' ? Effect.fail(err) : retry(run, url, next)
+      }),
+    onSuccess: (res) => {
+      const landed = responseEvent(run, res, url)
+      const next = step(snap, landed.event)
+      if (next.status === 'done') return settle(run, next, landed)
+      if (next.context.hops > snap.context.hops)
+        return Effect.andThen(dropBody(res), drive(run, landed.url, next))
+      const waitMs = retryAfterMs(res.headers.get('retry-after'))
+      return Effect.andThen(dropBody(res), retry(run, url, next, waitMs))
+    },
+  })
+}
+
+// GET with retry: network-level failures and retryable statuses retry on the
+// fixed backoff (or the server's Retry-After); other statuses return as-is.
+export const httpGet = (
+  url: string,
+  opts: FetchOptions = {},
+): Effect.Effect<Response, FetchError> =>
+  Effect.map(drive({ origin: url, opts }, url, START), (landed) => landed.res)
 
 // Text GETs revalidate through the disk cache; a cache config error surfaces
 // as a FetchError, so callers see only HttpStatusError or FetchError.
@@ -156,7 +144,7 @@ export const fetchText = (
     (res) => okText(res, url),
     opts,
   ).pipe(
-    Effect.catchTag('ConfigError', (err) => Effect.fail(toFetchError(err))),
+    Effect.catchTag('ConfigError', (err) => Effect.fail(new FetchError({ message: errMsg(err) }))),
     Effect.provide(BunServices.layer),
   )
 
@@ -167,24 +155,9 @@ export const fetchRoot = Effect.fn('fetchRoot')(function* (url: string, opts: Fe
   return { finalUrl: res.url || url, html: yield* okText(res, url) }
 })
 
-const isRedirect = (status: number) => status >= 300 && status < 400
-
 // Fetch text but follow redirects MANUALLY, blocking any hop that leaves `host`
 // (EXACT hostname match — scope control for crawls, not an IP/SSRF filter).
-export const fetchTextWithinHost = Effect.fn('fetchTextWithinHost')(function* (
-  url: string,
-  host: string,
-  opts: FetchOptions = {},
-) {
-  let current = url
-  for (let hop = 0; hop < 5; hop++) {
-    const res = yield* httpGet(current, { ...opts, redirect: 'manual' })
-    const location = isRedirect(res.status) ? res.headers.get('location') : null
-    if (!location) return yield* okText(res, current)
-    yield* dropBody(res) // the hop's body is never read; free its connection
-    current = new URL(location, current).toString()
-    if (!sameHost(host, current))
-      return yield* new FetchError({ message: `redirect off-site blocked: ${current}` })
-  }
-  return yield* new FetchError({ message: `too many redirects: ${url}` })
-})
+export const fetchTextWithinHost = (url: string, host: string, opts: FetchOptions = {}) => {
+  const run = { origin: url, host, opts: { ...opts, redirect: 'manual' as const } }
+  return Effect.flatMap(drive(run, url, START), (landed) => okText(landed.res, landed.url))
+}

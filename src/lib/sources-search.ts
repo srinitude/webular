@@ -6,7 +6,8 @@
 import { Effect } from 'effect'
 import { DOMParser } from 'linkedom'
 import { FetchError } from '../core/decode.ts'
-import { fetchText, type HttpStatusError } from '../core/http.ts'
+import { fetchText } from '../core/http.ts'
+import type { HttpStatusError } from '../core/http-body.ts'
 
 export { SEARCH_SOURCES, type SearchSource } from './search-source-names.ts'
 

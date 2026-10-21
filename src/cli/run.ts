@@ -4,8 +4,11 @@
 // when a payload carries partial-failure errors.
 import type { AnyWorkflow } from '@mastra/core/workflows'
 import { Effect, type FileSystem, type Path } from 'effect'
+import type { EventFromLogic } from 'xstate'
 import { emit, errMsg, logErr, type OutputError } from '../core/output.ts'
 import type { SandboxError } from '../core/safepath.ts'
+import { commandLifecycleMachine } from '../machines/command-lifecycle.ts'
+import { EXIT, payloadExit, settledExit } from './exit-codes.ts'
 import { renderFor } from './render.ts'
 
 interface RunOpts {
@@ -33,11 +36,21 @@ export function discoveryExit(field: string): (result: unknown) => number {
     const r = result as Record<string, unknown>
     const payload = r[field]
     const empty = Array.isArray(payload) ? payload.length === 0 : !payload
-    return empty && errorCount(result) > 0 ? 1 : 0
+    return payloadExit(empty, errorCount(result))
   }
 }
 
-const failed = (name: string, detail: string) => Effect.as(logErr(`${name}: failed (${detail})`), 1)
+type LifecycleEvent = EventFromLogic<typeof commandLifecycleMachine>
+
+// Every exit below comes from the command-lifecycle machine's final state.
+const failed = (name: string, detail: string, events: LifecycleEvent[]) =>
+  Effect.as(logErr(`${name}: failed (${detail})`), settledExit(commandLifecycleMachine, events))
+
+function rendered(failures: number, policy: number): LifecycleEvent {
+  if (policy === EXIT.partial) return { type: 'PARTIAL' }
+  if (policy !== EXIT.ok) return { type: 'EMPTY_WITH_ERRORS' }
+  return failures > 0 ? { type: 'SOME_ERRORS' } : { type: 'NO_ERRORS' }
+}
 
 function report(
   name: string,
@@ -45,16 +58,24 @@ function report(
   opts: RunOpts,
 ): Effect.Effect<number, OutputError | SandboxError, FileSystem.FileSystem | Path.Path> {
   if (outcome.status !== 'success')
-    return failed(name, outcome.status === 'failed' ? outcome.error.message : outcome.status)
+    return failed(name, outcome.status === 'failed' ? outcome.error.message : outcome.status, [
+      { type: 'INPUT_VALID' },
+      { type: 'WORKFLOW_FAILED' },
+    ])
   const failures = errorCount(outcome.result)
+  const { exitCode, ...emitOpts } = opts
+  const exit = settledExit(commandLifecycleMachine, [
+    { type: 'INPUT_VALID' },
+    { type: 'WORKFLOW_SUCCEEDED' },
+    rendered(failures, exitCode?.(outcome.result) ?? EXIT.ok),
+  ])
   const note =
     failures > 0
       ? logErr(`${name}: ${failures} fetch${failures === 1 ? '' : 'es'} failed`)
       : Effect.void
-  const { exitCode, ...emitOpts } = opts
   return note.pipe(
     Effect.andThen(emit(outcome.result, { ...emitOpts, render: renderFor(name) })),
-    Effect.as(exitCode?.(outcome.result) ?? 0),
+    Effect.as(exit),
   )
 }
 
@@ -79,7 +100,7 @@ export function runWorkflow<M>(
       Effect.tryPromise({ try: () => run.start({ inputData }), catch: errMsg }),
     ),
     Effect.matchEffect({
-      onFailure: (detail) => failed(name, detail),
+      onFailure: (detail) => failed(name, detail, [{ type: 'INPUT_INVALID' }]),
       onSuccess: (outcome) => report(name, outcome, opts),
     }),
   )

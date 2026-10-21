@@ -8,6 +8,7 @@
 | [map](#map) | You need the list of pages on a site. | You need page text. | [scrape](#scrape) |
 | [summarize](#summarize) | You need the key sentences of a text or page. | You need the full text. | [scrape](#scrape) |
 | [feed](#feed) | You need the posts of a site or feed. | You need one page's full text. | [scrape](#scrape) |
+| [machine.next](#machinenext) | You aren't sure the next step of a webular command is legal. | You just ran a command and it worked. | [Errors](#errors) |
 | [Errors](#errors) | A call failed. | The call worked. | [Connect](#connect) |
 
 ## Connect
@@ -47,6 +48,15 @@
 - Output: the feed title and its items, each with a title, link, date, and summary, plus `feedUrl`, the feed it read.
 - A plain page URL works. It reads the feed the page links to. Then it tries `/feed` and `/rss` on the same site.
 - With `archive: true`, a dead URL is read from its closest Wayback Machine copy, and `archivedFrom` names that copy.
+
+## machine.next
+
+- `webular mcp` serves it, next to the `web.*` tools.
+- Input: `machine` (`cliDispatch`, `commandLifecycle`, or `fetch`, required) and `events` (the events already sent, up to 64).
+- Output: `state`, `next` (the only events allowed at this step), `done`, and `tags`. When the machine is done, an `exit-<code>` tag names its exit code.
+- Call it before you send a webular command an event, when you aren't sure the step is legal. Pass the machine and the events already sent.
+- Choose only from `next`. If `done` is true, stop and read the exit code from `tags`.
+- Don't call it after every command.
 
 ## Errors
 

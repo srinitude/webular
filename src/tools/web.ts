@@ -50,6 +50,46 @@ const linksSchema = z.object({
   limit: z.number().int().min(1).max(1000).optional(),
   ...paging,
 })
+const machineSchema = z.object({
+  machine: z.enum(['cliDispatch', 'commandLifecycle', 'fetch']),
+  events: z.array(z.string()).max(64).default([]),
+  ...paging,
+})
+
+const lazy = <T>(load: () => Promise<T>) =>
+  Effect.tryPromise({ try: load, catch: (e) => new ToolArgsError({ message: errMsg(e) }) })
+
+// The Stately agent's view of a machine after replaying events: its state, the
+// events it allows next, and whether it is done. Machines load lazily so
+// `mcp --list` stays fast.
+const machineState = (name: z.infer<typeof machineSchema>['machine'], events: string[]) =>
+  Effect.all(
+    [
+      lazy(() => import('../machines/agent.ts')),
+      lazy(() => import('../machines/cli-dispatch.ts')),
+      lazy(() => import('../machines/command-lifecycle.ts')),
+      lazy(() => import('../machines/fetch.ts')),
+    ],
+    { concurrency: 4 },
+  ).pipe(
+    Effect.map(([agent, cli, lifecycle, fetch]) => {
+      const machine = {
+        cliDispatch: cli.cliDispatchMachine,
+        commandLifecycle: lifecycle.commandLifecycleMachine,
+        fetch: fetch.fetchMachine,
+      }[name]
+      const snapshot = agent.replay(
+        machine,
+        events.map((type) => ({ type })),
+      )
+      return {
+        state: snapshot.value,
+        next: agent.allowedEvents(snapshot),
+        done: snapshot.status === 'done',
+        tags: [...snapshot.tags],
+      }
+    }),
+  )
 
 const parseArgs = <T>(schema: z.ZodType<T>, args: Record<string, unknown>) =>
   Effect.try({
@@ -59,6 +99,16 @@ const parseArgs = <T>(schema: z.ZodType<T>, args: Record<string, unknown>) =>
 
 // Sorted by id: registration order is tools/list order.
 export const webTools: McpToolDef[] = [
+  {
+    id: 'machine.next',
+    description: 'Replay events on a machine; return its state and allowed next events.',
+    schema: machineSchema,
+    run: (args) =>
+      Effect.gen(function* () {
+        const { machine, events } = yield* parseArgs(machineSchema, args)
+        return yield* machineState(machine, events)
+      }),
+  },
   {
     id: 'web.fetch',
     description: 'Fetch a URL and return its raw HTML (Bun.fetch).',
@@ -166,19 +216,33 @@ export const registerAll = Effect.fn('registerAll')(function* (
   const runWith = Effect.runPromiseWith(
     yield* Effect.context<ChildProcessSpawner.ChildProcessSpawner>(),
   )
-  // Every command name sorts before web.*, so this order is tools/list's sorted order.
-  for (const { id, outputSchema: _, ...config } of commandTools) {
-    server.registerTool(id, config, (args: Record<string, unknown>) =>
-      runWith(runTool(id, args, entryOf)),
-    )
-  }
-  for (const tool of webTools) {
-    server.registerTool(
-      tool.id,
-      { description: tool.description, inputSchema: tool.schema.shape },
-      (args: Record<string, unknown>) => runWith(execute(tool, args)),
-    )
-  }
+  // Registration order is tools/list order, so register every tool sorted by id
+  // (machine.next sorts among the command names, web.* after them).
+  const registrations = [
+    ...commandTools.map(
+      ({ id, outputSchema: _, ...config }) =>
+        [
+          id,
+          () =>
+            server.registerTool(id, config, (args: Record<string, unknown>) =>
+              runWith(runTool(id, args, entryOf)),
+            ),
+        ] as const,
+    ),
+    ...webTools.map(
+      (tool) =>
+        [
+          tool.id,
+          () =>
+            server.registerTool(
+              tool.id,
+              { description: tool.description, inputSchema: tool.schema.shape },
+              (args: Record<string, unknown>) => runWith(execute(tool, args)),
+            ),
+        ] as const,
+    ),
+  ].sort(([x], [y]) => (x < y ? -1 : 1))
+  for (const [, register] of registrations) register()
   for (const [uri, app] of Object.entries(appResources)) {
     server.registerResource(
       app.name,

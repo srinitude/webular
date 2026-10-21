@@ -28,7 +28,7 @@ const ToolResult = Schema.fromJsonString(Schema.Struct({ title: Schema.String })
 
 describe('webular mcp — server behavior over a real transport', () => {
   test(
-    'lists the four web tools and every command except the recorded NOT_ON_MCP ones',
+    'lists the four web tools, machine.next, and every command except the recorded NOT_ON_MCP ones',
     eff(
       Effect.gen(function* () {
         const client = yield* connected
@@ -36,7 +36,7 @@ describe('webular mcp — server behavior over a real transport', () => {
         const ids = tools.map((t) => t.name).sort()
         const commands = COMMAND_NAMES.filter((name) => !(name in NOT_ON_MCP))
         const web = ['web.fetch', 'web.links', 'web.markdown', 'web.readability']
-        expect(ids).toEqual([...web, ...commands].sort())
+        expect(ids).toEqual([...web, 'machine.next', ...commands].sort())
       }),
     ),
     15_000,
@@ -48,7 +48,8 @@ describe('webular mcp — server behavior over a real transport', () => {
       Effect.gen(function* () {
         const client = yield* connected
         const { tools } = yield* io(() => client.listTools())
-        const mine = tools.filter((t) => !t.name.startsWith('web.'))
+        // machine.next is a web-server tool, not a plugin command.
+        const mine = tools.filter((t) => !t.name.startsWith('web.') && t.name !== 'machine.next')
         const theirs = (yield* io(async () => plugin.getToolListInfo())).tools
         type Listed = { name: string; description?: string | undefined; inputSchema: unknown }
         const shape = ({ name, description, inputSchema }: Listed) => {

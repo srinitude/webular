@@ -1,6 +1,8 @@
 // SEARCH command entry — invoked by `mise run run:search`. Parses flags,
 // runs the Mastra search workflow, emits the result. No mise logic here.
+
 import { Effect } from 'effect'
+import { EXIT } from '../cli/exit-codes.ts'
 import { runWorkflow } from '../cli/run.ts'
 import { emitOpts, intFlag, parseFlags, strFlag } from '../core/args.ts'
 import { CliError, runMain } from '../core/effect.ts'
@@ -12,14 +14,14 @@ function buildInput(values: Record<string, string | boolean | undefined>, positi
     if (!query) {
       return yield* new CliError({
         message: 'search: missing <query>. Pass --query <q> or put the query after the command.',
-        exitCode: 2,
+        exitCode: EXIT.usage,
       })
     }
     const source = (strFlag(values, 'source') ?? 'web') as SearchSource
     if (!SEARCH_SOURCES.includes(source)) {
       return yield* new CliError({
         message: `search: --source must be one of ${SEARCH_SOURCES.join(', ')}`,
-        exitCode: 2,
+        exitCode: EXIT.usage,
       })
     }
     return {

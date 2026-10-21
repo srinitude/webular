@@ -44,19 +44,34 @@ function collectImports(sf: ts.SourceFile, into: Set<string>): void {
   collectLazyImports(sf, into)
 }
 
-// A call with a lazy loader `() => import('x')` and a picker `(m) => m.name`
-// imports `name` too.
+// A call with a lazy loader `() => import('x')` imports `name` when a picker
+// `(m) => m.name` rides along, or when the result is destructured:
+// `const { name } = yield* load(() => import('x'))`.
 const isImportLoader = (arg: ts.Expression): boolean =>
   ts.isArrowFunction(arg) &&
   ts.isCallExpression(arg.body) &&
   arg.body.expression.kind === ts.SyntaxKind.ImportKeyword
 
+const lazyCall = (node: ts.Node | undefined): boolean =>
+  node !== undefined && ts.isCallExpression(node) && node.arguments.some(isImportLoader)
+
+const unwrap = (init: ts.Expression): ts.Expression =>
+  ts.isYieldExpression(init) || ts.isAwaitExpression(init) ? (init.expression ?? init) : init
+
 function collectLazyImports(node: ts.Node, into: Set<string>): void {
-  if (ts.isCallExpression(node) && node.arguments.some(isImportLoader)) {
-    for (const arg of node.arguments) {
+  if (lazyCall(node)) {
+    for (const arg of (node as ts.CallExpression).arguments) {
       if (ts.isArrowFunction(arg) && ts.isPropertyAccessExpression(arg.body))
         into.add(arg.body.name.text)
     }
+  }
+  if (
+    ts.isVariableDeclaration(node) &&
+    ts.isObjectBindingPattern(node.name) &&
+    node.initializer &&
+    lazyCall(unwrap(node.initializer))
+  ) {
+    for (const el of node.name.elements) into.add((el.propertyName ?? el.name).getText())
   }
   ts.forEachChild(node, (child) => collectLazyImports(child, into))
 }

@@ -2,6 +2,7 @@
 // runs the Mastra batch workflow, emits the result. No mise logic here.
 
 import { Effect } from 'effect'
+import { EXIT } from '../cli/exit-codes.ts'
 import { runWorkflow } from '../cli/run.ts'
 import { emitOpts, optIntFlag, parseFlags, timeoutFlag } from '../core/args.ts'
 import { CliError, runMain } from '../core/effect.ts'
@@ -25,7 +26,7 @@ const loadUrls = Effect.fn('loadUrls')(function* (
     const path = yield* inPath(input)
     const text = yield* Effect.tryPromise({
       try: () => Bun.file(path).text(),
-      catch: (cause) => new CliError({ message: errMsg(cause), exitCode: 1 }),
+      catch: (cause) => new CliError({ message: errMsg(cause), exitCode: EXIT.failure }),
     })
     return splitList(text, '\n')
   }
@@ -50,10 +51,13 @@ const main = Effect.gen(function* () {
   const urls = yield* loadUrls(values, positionals)
   if (!urls || urls.length === 0) {
     const message = 'batch: missing URLs. Pass --urls <url,...> or --input <file>.'
-    return yield* new CliError({ message, exitCode: 2 })
+    return yield* new CliError({ message, exitCode: EXIT.usage })
   }
   if (urls.length > 1000) {
-    return yield* new CliError({ message: 'batch: too many URLs (the max is 1000)', exitCode: 2 })
+    return yield* new CliError({
+      message: 'batch: too many URLs (the max is 1000)',
+      exitCode: EXIT.usage,
+    })
   }
   const inputData = {
     urls,
