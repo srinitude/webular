@@ -138,6 +138,7 @@ export const researchWorkflow = createWorkflow({
   id: 'research',
   inputSchema: researchInput,
   outputSchema: researchOutput,
+  options: { shouldPersistSnapshot: () => false },
 })
   .then(searchStep)
   .then(fetchSourcesStep)

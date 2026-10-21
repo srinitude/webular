@@ -1,7 +1,8 @@
 // Bounded disk cache for text GETs: ETag / Last-Modified revalidation,
-// atomic temp-then-rename writes, oldest-last-use-first eviction under an
-// entry and a byte bound. Cache I/O failures never fail the fetch: they only
-// skip the cache.
+// max-age / Expires freshness (a fresh entry makes no request), atomic
+// temp-then-rename writes, oldest-last-use-first eviction under an entry and a
+// byte bound, and removal of stale temp files. Cache I/O failures never fail
+// the fetch: they only skip the cache.
 import { Clock, Config, Effect, FileSystem, Option, Path, Random, Schema } from 'effect'
 
 export interface CacheOptions {
@@ -13,12 +14,15 @@ const Entry = Schema.Struct({
   etag: Schema.NullOr(Schema.String),
   lastModified: Schema.NullOr(Schema.String),
   contentType: Schema.NullOr(Schema.String),
+  freshUntil: Schema.optional(Schema.Number),
 })
 type Entry = typeof Entry.Type
 const decodeEntry = Schema.decodeUnknownEffect(Schema.fromJsonString(Entry))
 
 const DEFAULT_MAX_BYTES = 64 * 1024 * 1024
 const DEFAULT_MAX_ENTRIES = 4096
+// A live write holds its temp file for milliseconds; an older one is a dead writer's.
+const STALE_TMP_MS = 10 * 60 * 1000
 
 interface Limits {
   bytes: number
@@ -76,6 +80,17 @@ const storable = (res: Response) =>
   (res.headers.has('etag') || res.headers.has('last-modified')) &&
   !/\bno-store\b/i.test(res.headers.get('cache-control') ?? '')
 
+// Epoch ms until which a response may be reused unrequested: max-age wins over
+// Expires, and no-cache (or no usable header) means revalidate every time.
+const freshUntil = (h: Headers, now: number): number | undefined => {
+  const control = h.get('cache-control') ?? ''
+  if (/\bno-cache\b/i.test(control)) return undefined
+  const age = /\bmax-age=(\d+)/i.exec(control)?.[1]
+  if (age !== undefined) return now + Number(age) * 1000
+  const expires = Date.parse(h.get('expires') ?? '')
+  return Number.isNaN(expires) ? undefined : expires
+}
+
 const entryInfo = (file: string) =>
   Effect.gen(function* () {
     const info = yield* (yield* FileSystem.FileSystem).stat(file)
@@ -83,12 +98,33 @@ const entryInfo = (file: string) =>
     return { file, size: Number(info.size), mtime }
   })
 
+// Temp files from a dead writer never reach `.json`; sweep the old ones. A stat
+// or remove that fails (a live writer renamed it first) is not an error.
+const sweepTmp = (dir: string, names: string[], now: number) =>
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem
+    const path = yield* Path.Path
+    yield* Effect.forEach(
+      names.filter((n) => n.endsWith('.tmp')),
+      (n) =>
+        entryInfo(path.join(dir, n)).pipe(
+          Effect.flatMap((f) =>
+            now - f.mtime > STALE_TMP_MS ? fs.remove(f.file, { force: true }) : Effect.void,
+          ),
+          Effect.ignore,
+        ),
+      { concurrency: 8, discard: true },
+    )
+  })
+
 // mtime is the last use: a write or a 304 hit sets it, so the oldest goes first.
 const evict = (dir: string, max: Limits) =>
   Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem
     const path = yield* Path.Path
-    const names = (yield* fs.readDirectory(dir)).filter((n) => n.endsWith('.json'))
+    const all = yield* fs.readDirectory(dir)
+    yield* sweepTmp(dir, all, yield* Clock.currentTimeMillis)
+    const names = all.filter((n) => n.endsWith('.json'))
     const files = yield* Effect.forEach(names, (n) => entryInfo(path.join(dir, n)), {
       concurrency: 8,
     })
@@ -122,8 +158,9 @@ const touch = (file: string) =>
     yield* fs.utimes(file, now, now)
   }).pipe(Effect.ignore)
 
-const toEntry = (body: string, h: Headers): Entry => ({
+const toEntry = (body: string, h: Headers, now: number): Entry => ({
   body,
+  freshUntil: freshUntil(h, now),
   etag: h.get('etag'),
   lastModified: h.get('last-modified'),
   contentType: h.get('content-type'),
@@ -141,6 +178,11 @@ export const cachedGetText = Effect.fn('cachedGetText')(function* <E>(
   const bypass = off || opts.cache === false
   const file = (yield* Path.Path).join(dir, `${keyOf(url)}.json`)
   const entry = bypass ? Option.none<Entry>() : yield* load(file)
+  const now = yield* Clock.currentTimeMillis
+  if (Option.isSome(entry) && (entry.value.freshUntil ?? 0) > now) {
+    yield* touch(file)
+    return entry.value.body
+  }
   const res = yield* get(validators(entry))
   const stream = res.body
   if (res.status === 304 && Option.isSome(entry)) {
@@ -149,6 +191,6 @@ export const cachedGetText = Effect.fn('cachedGetText')(function* <E>(
     return entry.value.body
   }
   const body = yield* read(res)
-  if (!bypass && storable(res)) yield* store(dir, file, toEntry(body, res.headers), limits)
+  if (!bypass && storable(res)) yield* store(dir, file, toEntry(body, res.headers, now), limits)
   return body
 })

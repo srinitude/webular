@@ -160,6 +160,7 @@ export const answerWorkflow = createWorkflow({
   id: 'answer',
   inputSchema: answerInput,
   outputSchema: answerOutput,
+  options: { shouldPersistSnapshot: () => false },
 })
   .then(searchStep)
   .then(synthStep)

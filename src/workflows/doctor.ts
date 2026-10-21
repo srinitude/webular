@@ -28,6 +28,7 @@ export const doctorWorkflow = createWorkflow({
   id: 'doctor',
   inputSchema: doctorInput,
   outputSchema: doctorOutput,
+  options: { shouldPersistSnapshot: () => false },
 })
   .then(checksStep)
   .commit()

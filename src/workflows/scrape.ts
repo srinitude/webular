@@ -56,8 +56,13 @@ const fetchStep = createStep({
   id: 'fetch',
   inputSchema: scrapeInput,
   outputSchema: fetched,
-  execute: ({ inputData }) =>
-    stepRuntime.runPromise(Effect.map(fetchPage(inputData), (r) => ({ url: inputData.url, ...r }))),
+  execute: ({ inputData, abortSignal }) =>
+    stepRuntime.runPromise(
+      Effect.map(fetchPage(inputData), (r) => ({ url: inputData.url, ...r })),
+      {
+        signal: abortSignal,
+      },
+    ),
 })
 
 const pdfResult = (url: string, markdown: string): z.infer<typeof scrapeOutput> => ({
@@ -127,6 +132,7 @@ export const scrapeWorkflow = createWorkflow({
   id: 'scrape',
   inputSchema: scrapeInput,
   outputSchema: scrapeOutput,
+  options: { shouldPersistSnapshot: () => false },
 })
   .then(fetchStep)
   .then(extractStep)

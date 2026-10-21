@@ -64,6 +64,7 @@ export const tasksWorkflow = createWorkflow({
   id: 'tasks',
   inputSchema: tasksInput,
   outputSchema: tasksOutput,
+  options: { shouldPersistSnapshot: () => false },
 })
   .then(listStep)
   .commit()

@@ -66,6 +66,15 @@ const retryAfter = Effect.gen(function* () {
   expect(out.seen.calls).toBe(1)
 })
 
+// Retry-After may be an HTTP-date instead of seconds (RFC 9110); a 403 only
+// counts as spent through it.
+const retryAfterDate = Effect.gen(function* () {
+  const now = yield* Clock.currentTimeMillis
+  const out = yield* twice(403, { 'retry-after': new Date(now + 90_000).toUTCString() })
+  skippedWith429(out.second)
+  expect(out.seen.calls).toBe(1)
+})
+
 const remainingLeft = Effect.gen(function* () {
   const reset = yield* resetIn60
   const out = yield* twice(200, { 'x-ratelimit-remaining': '9', 'x-ratelimit-reset': reset })
@@ -112,6 +121,7 @@ const fallbackSpent = Effect.gen(function* () {
 describe('github search rate limit', () => {
   test('remaining 0 skips GitHub until x-ratelimit-reset', () => run(remainingZero))
   test('403 with retry-after skips GitHub for that long', () => run(retryAfter))
+  test('403 with an HTTP-date retry-after skips GitHub until then', () => run(retryAfterDate))
   test('remaining above 0 keeps asking GitHub', () => run(remainingLeft))
   test('GITHUB_TOKEN or GH_TOKEN goes out as a bearer token', () => run(fresh(tokens)))
   test('search fallback answers from other sources while GitHub is spent', () => run(fallbackSpent))

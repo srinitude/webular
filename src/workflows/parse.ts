@@ -34,6 +34,7 @@ export const parseWorkflow = createWorkflow({
   id: 'parse',
   inputSchema: parseInput,
   outputSchema: parseOutput,
+  options: { shouldPersistSnapshot: () => false },
 })
   .then(parseStep)
   .commit()

@@ -3,12 +3,13 @@
 // fusion so the search step can merge local hits with web hits in one call.
 // Pages are ranked whole (page-level BM25); each returned hit is split at its
 // headings to give its best section.
-import { Database } from 'bun:sqlite'
+import type { Database } from 'bun:sqlite'
 import { Effect, type Scope } from 'effect'
 import { emptyFingerprints, type Fingerprints, isNearDuplicate, remember } from './fingerprints.ts'
 import { bestChunk, queryTerms } from './local-chunks.ts'
 import { LocalIndexError, localIndexPath } from './local-index-path.ts'
 import { halves, simhash64 } from './simhash.ts'
+import { closeSqlite, openSqlite } from './sqlite-open.ts'
 
 export interface IndexedPage {
   readonly url: string
@@ -33,15 +34,13 @@ const attempt = <A>(run: () => A) =>
   Effect.try({ try: run, catch: (cause) => new LocalIndexError({ cause }) })
 
 const SCHEMA = [
-  'PRAGMA journal_mode = WAL',
-  'PRAGMA synchronous = NORMAL',
   `CREATE VIRTUAL TABLE IF NOT EXISTS pages USING fts5(
      url UNINDEXED, title, body, tokenize = 'porter unicode61')`,
   'CREATE TABLE IF NOT EXISTS signatures (url TEXT PRIMARY KEY, simhash TEXT NOT NULL)',
 ]
 
 const load = (path: string): LocalIndex => {
-  const db = new Database(path, { create: true })
+  const db = openSqlite(path, true)
   for (const sql of SCHEMA) db.run(sql)
   const rows = db.query('SELECT simhash FROM signatures').all() as { simhash: string }[]
   const index: LocalIndex = { db, ...emptyFingerprints() }
@@ -55,7 +54,7 @@ export const openLocalIndex = (
 ): Effect.Effect<LocalIndex, LocalIndexError, Scope.Scope> =>
   Effect.acquireRelease(
     attempt(() => load(path)),
-    (index) => Effect.sync(() => index.db.close()),
+    (index) => Effect.sync(() => closeSqlite(index.db)),
   )
 
 interface AddResult {

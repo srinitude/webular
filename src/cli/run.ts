@@ -106,6 +106,13 @@ const checkUrl = (name: string, inputData: unknown): Effect.Effect<void, CliErro
 const startRun = (inputData: unknown) => (created: WorkflowRun) =>
   Effect.tryPromise({ try: () => created.start({ inputData }), catch: errMsg })
 
+// The one-shot command ends its steps' shared runtime with the run, so the
+// parse pool's idle workers stop. The module is cached: the workflow loaded it.
+const disposeSteps = Effect.promise(() => import('../workflows/runtime.ts')).pipe(
+  Effect.flatMap((m) => m.stepRuntime.disposeEffect),
+  Effect.ignore,
+)
+
 // The Mastra run is the Promise edge; it surfaces input-validation failures by
 // rejecting from start, which reports as a plain failure (exit 1). The
 // workflow loads lazily: importing @mastra/core costs seconds of disk reads,
@@ -135,7 +142,7 @@ export function runWorkflow<M>(
         catch: errMsg,
       }),
     ),
-    Effect.flatMap(startRun(inputData)),
+    Effect.flatMap((created) => startRun(inputData)(created).pipe(Effect.ensuring(disposeSteps))),
     Effect.matchEffect({
       onFailure: (detail) => failed(name, detail, [{ type: 'INPUT_INVALID' }]),
       onSuccess: (outcome) => report(name, outcome, opts),

@@ -61,6 +61,7 @@ export const searchWorkflow = createWorkflow({
   id: 'search',
   inputSchema: searchInput,
   outputSchema: searchOutput,
+  options: { shouldPersistSnapshot: () => false },
 })
   .then(searchStep)
   .commit()

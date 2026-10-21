@@ -9,6 +9,7 @@ import * as HttpClient from 'effect/http/HttpClient'
 import { openCache } from './fetch-cache.ts'
 import { type Ctx, escalate, type Gate, httpWithRetry, perHost } from './fetch-http.ts'
 import { type FetchError, type FetchLayerOptions, type FetchPage, fail } from './fetch-types.ts'
+import { closeSqlite } from './sqlite-open.ts'
 
 export {
   type FetchError,
@@ -56,7 +57,7 @@ export const makeFetchLayer = (
         try: () => openCache(path, layer.cacheRows ?? 1024),
         catch: (cause) => fail(path, 'network', 'give-up', { cause }),
       }),
-      (c) => Effect.sync(() => c.db.close()),
+      (c) => Effect.sync(() => closeSqlite(c.db)),
     )
     const client = yield* Effect.provide(
       Effect.gen(function* () {

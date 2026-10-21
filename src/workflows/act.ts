@@ -70,6 +70,7 @@ export const actWorkflow = createWorkflow({
   id: 'act',
   inputSchema: actInput,
   outputSchema: actOutput,
+  options: { shouldPersistSnapshot: () => false },
 })
   .then(actStep)
   .then(nextStep)

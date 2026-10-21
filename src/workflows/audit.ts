@@ -44,6 +44,7 @@ export const auditWorkflow = createWorkflow({
   id: 'audit',
   inputSchema: auditInput,
   outputSchema: auditOutput,
+  options: { shouldPersistSnapshot: () => false },
 })
   .then(detectStep)
   .commit()

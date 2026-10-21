@@ -77,6 +77,7 @@ export const monitorWorkflow = createWorkflow({
   id: 'monitor',
   inputSchema: monitorInput,
   outputSchema: monitorOutput,
+  options: { shouldPersistSnapshot: () => false },
 })
   .then(fetchStep)
   .then(snapshotStep)

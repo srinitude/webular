@@ -97,6 +97,7 @@ export const extractWorkflow = createWorkflow({
   id: 'extract',
   inputSchema: extractInput,
   outputSchema: extractOutput,
+  options: { shouldPersistSnapshot: () => false },
 })
   .then(fetchStep)
   .then(selectStep)

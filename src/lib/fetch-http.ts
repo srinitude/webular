@@ -1,7 +1,8 @@
 // HTTP attempt, retry with jitter, per-host gating, and tier escalation.
-import { Effect, Random, Semaphore } from 'effect'
+import { Effect, Random, Semaphore, Stream } from 'effect'
 import type * as HttpClient from 'effect/http/HttpClient'
 import * as HttpClientRequest from 'effect/http/HttpClientRequest'
+import { readTextCapped } from '../core/decode.ts'
 import type { openCache, Validator } from './fetch-cache.ts'
 import {
   classify,
@@ -59,11 +60,16 @@ const httpOnce = (ctx: Ctx, url: string): Effect.Effect<FetchResult, FetchError>
     const headers: Record<string, string> = { ...res.headers }
     const tooLarge = fail(url, 'too-large', 'give-up', { status: res.status })
     if (Number(headers['content-length'] ?? 0) > ctx.maxBytes) return yield* tooLarge
-    // ponytail: buffers the whole body, then checks size; stream with a byte cap if huge pages matter.
-    const body = yield* Effect.mapError(res.text, (cause) =>
-      fail(url, 'network', 'retry', { cause }),
+    // The capped reader stops pulling at the cap, so a chunked body is never fully buffered.
+    const bytes = Stream.catchIf(
+      res.stream,
+      (e) => e.reason._tag === 'EmptyBodyError', // a 304 or 204 has no body
+      () => Stream.empty,
     )
-    if (body.length > ctx.maxBytes) return yield* tooLarge
+    const web = new Response(Stream.toReadableStream(bytes), { headers })
+    const body = yield* Effect.mapError(readTextCapped(web, url, ctx.maxBytes), (cause) =>
+      /exceeded/.test(cause.message) ? tooLarge : fail(url, 'network', 'retry', { cause }),
+    )
     if (res.status === 304 && cached)
       return { url, status: 200, headers, body: cached.body, fromCache: true, tier: 'http' }
     const result = yield* classify(url, { status: res.status, body, headers }, 'http')

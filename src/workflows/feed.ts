@@ -82,6 +82,7 @@ export const feedWorkflow = createWorkflow({
   id: 'feed',
   inputSchema: feedInput,
   outputSchema: feedOutput,
+  options: { shouldPersistSnapshot: () => false },
 })
   .then(feedStep)
   .commit()

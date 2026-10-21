@@ -27,8 +27,7 @@ const mapOutput = z.object({
   errors: fetchErrorsSchema,
 })
 
-// The spec forbids nested indexes, so one recursion level suffices; the fetch
-// count is capped to keep a hostile index bounded.
+// The spec forbids nested indexes, so one level suffices; a fetch cap bounds a hostile index.
 const MAX_CHILD_SITEMAPS = 10
 const SITEMAP_TIMEOUT_MS = 15_000
 
@@ -194,6 +193,7 @@ export const mapWorkflow = createWorkflow({
   id: 'map',
   inputSchema: mapInput,
   outputSchema: mapOutput,
+  options: { shouldPersistSnapshot: () => false },
 })
   .then(discoverStep)
   .commit()

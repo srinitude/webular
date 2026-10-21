@@ -11,15 +11,13 @@ import pkg from '../../package.json' with { type: 'json' }
 import { failureEvent, fetchMachine } from '../machines/fetch.ts'
 import { type CacheOptions, cachedGetText } from './cache.ts'
 import { FetchError } from './decode.ts'
-import { FETCH_ERROR, RETRY_BACKOFF_MS, RETRY_STATUS } from './fetch-policy.ts'
+import { FETCH_ERROR, RETRY_BACKOFF_MS, RETRY_STATUS, retryPause } from './fetch-policy.ts'
 import { dropBody, type HttpStatusError, okText } from './http-body.ts'
 import { errMsg } from './output.ts'
 import { sameHost } from './url.ts'
 
 const USER_AGENT = `webular/${pkg.version} (+https://github.com/srinitude/webular)`
-
-// A server's Retry-After wins over the fixed backoff, capped so a huge or
-// hostile value cannot stall the CLI.
+// A server's Retry-After wins over the backoff, capped so a hostile value cannot stall the CLI.
 const MAX_RETRY_AFTER_MS = 10_000
 
 export interface FetchOptions extends CacheOptions {
@@ -118,7 +116,9 @@ function responseEvent(run: Run, res: Response, url: string): Landed & { event: 
 
 const retry = (run: Run, url: string, snap: FetchSnapshot, waitMs?: number) =>
   Effect.andThen(
-    Effect.sleep(waitMs ?? RETRY_BACKOFF_MS[snap.context.attempt - 1] ?? 750),
+    waitMs === undefined
+      ? retryPause(RETRY_BACKOFF_MS[snap.context.attempt - 1] ?? 750)
+      : Effect.sleep(waitMs),
     Effect.suspend(() => drive(run, url, snap)),
   )
 

@@ -37,7 +37,10 @@ type ResultItem = z.infer<typeof resultItem>
 const scrapeRun = (url: string, index: number, timeoutMs?: number, archive?: boolean) =>
   Effect.tryPromise(() => scrapeWorkflow.createRun({ runId: `${index}:${url}` })).pipe(
     Effect.flatMap((run) =>
-      Effect.tryPromise(() => run.start({ inputData: { url, timeoutMs, archive } })),
+      Effect.tryPromise(() => run.start({ inputData: { url, timeoutMs, archive } })).pipe(
+        // Interrupting the batch step must also stop the nested scrape run.
+        Effect.onInterrupt(() => Effect.promise(() => run.cancel())),
+      ),
     ),
   )
 
@@ -60,7 +63,7 @@ const runBatchStep = createStep({
   id: 'run-batch',
   inputSchema: batchInput,
   outputSchema: batchOutput,
-  execute: ({ inputData }) =>
+  execute: ({ inputData, abortSignal }) =>
     stepRuntime.runPromise(
       Effect.gen(function* () {
         const concurrency = inputData.concurrency ?? (yield* hostConcurrency)
@@ -71,6 +74,7 @@ const runBatchStep = createStep({
         )
         return { count: results.length, results }
       }),
+      { signal: abortSignal },
     ),
 })
 
@@ -78,6 +82,7 @@ export const batchWorkflow = createWorkflow({
   id: 'batch',
   inputSchema: batchInput,
   outputSchema: batchOutput,
+  options: { shouldPersistSnapshot: () => false },
 })
   .then(runBatchStep)
   .commit()

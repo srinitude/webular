@@ -43,6 +43,7 @@ export const diagramWorkflow = createWorkflow({
   id: 'diagram',
   inputSchema: diagramInput,
   outputSchema: diagramListOutput,
+  options: { shouldPersistSnapshot: () => false },
 })
   .then(listStep)
   .commit()

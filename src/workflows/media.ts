@@ -67,6 +67,7 @@ export const mediaWorkflow = createWorkflow({
   id: 'media',
   inputSchema: mediaInput,
   outputSchema: mediaOutput,
+  options: { shouldPersistSnapshot: () => false },
 })
   .then(mediaStep)
   .commit()

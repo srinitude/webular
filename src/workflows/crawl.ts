@@ -55,6 +55,7 @@ export const crawlWorkflow = createWorkflow({
   id: 'crawl',
   inputSchema: crawlInput,
   outputSchema: crawlOutput,
+  options: { shouldPersistSnapshot: () => false },
 })
   .then(crawlStep)
   .commit()

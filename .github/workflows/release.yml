@@ -34,6 +34,11 @@ on:
 permissions:
   contents: read
 
+# One release at a time per tag; a running publish is never cancelled.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
   # Keep equal to [tools] bun in mise.toml.
   BUN_VERSION: "1.4.3"

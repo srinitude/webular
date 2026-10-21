@@ -1,10 +1,11 @@
 // SNAPSHOT store — sqlite-backed page snapshot storage with unified diff.
 // Uses bun:sqlite (built-in) and the FOSS `diff` package.
-import { Database } from 'bun:sqlite'
+import type { Database } from 'bun:sqlite'
 import { createHash } from 'node:crypto'
 import { createTwoFilesPatch } from 'diff'
 import { Clock, Data, Effect } from 'effect'
 import { errMsg } from '../core/output.ts'
+import { closeSqlite, openSqlite } from './sqlite-open.ts'
 
 type ChangeStatus = 'new' | 'same' | 'changed'
 
@@ -26,7 +27,7 @@ const INSERT = 'INSERT INTO snapshots (url, hash, text, ts) VALUES (?, ?, ?, ?)'
 const UPDATE = 'UPDATE snapshots SET hash = ?, text = ?, ts = ? WHERE url = ?'
 
 function openDb(dbPath: string): Database {
-  const db = new Database(dbPath, { create: true })
+  const db = openSqlite(dbPath, false)
   db.run(
     'CREATE TABLE IF NOT EXISTS snapshots (url TEXT PRIMARY KEY, hash TEXT, text TEXT, ts INTEGER)',
   )
@@ -65,6 +66,6 @@ export const compareAndStore = Effect.fn('compareAndStore')(function* (
         try: () => db.transaction(() => compareInTx(db, url, text, now)).immediate(),
         catch: fail,
       }),
-    (db) => Effect.sync(() => db.close()),
+    (db) => Effect.sync(() => closeSqlite(db)),
   )
 })

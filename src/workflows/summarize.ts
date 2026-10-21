@@ -72,6 +72,7 @@ export const summarizeWorkflow = createWorkflow({
   id: 'summarize',
   inputSchema: summarizeInput,
   outputSchema: summarizeOutput,
+  options: { shouldPersistSnapshot: () => false },
 })
   .then(resolveStep)
   .then(extractStep)
