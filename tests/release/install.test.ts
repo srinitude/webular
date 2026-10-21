@@ -37,13 +37,18 @@ const install = (sum: string) =>
     return { code: Number(code), installed }
   }).pipe(Effect.scoped)
 
-test('installs the host asset when its checksum matches', () =>
+// install.sh is the macOS and Linux path; Windows installs through Scoop, and
+// a file:// URL built from a drive-letter path is not one curl reads.
+const posixOnly = test.skipIf(process.platform === 'win32')
+
+posixOnly('installs the host asset when its checksum matches', () =>
   runtime.runPromise(
     Effect.map(install(sha256(BINARY)), ({ code, installed }) => {
       expect(code).toBe(0)
       expect(installed).toBe(BINARY)
     }),
-  ))
+  ),
+)
 
 test('refuses a download whose checksum does not match', () =>
   runtime.runPromise(
