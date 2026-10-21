@@ -29,6 +29,8 @@ const COMMON: Record<string, OptionSpec> = {
   select: { type: 'string' },
   output: { type: 'string', short: 'o' },
   timeout: { type: 'string' },
+  // Read by dispatch.ts (it sets WEBULAR_NO_CACHE); parsed here so no command rejects it.
+  'no-cache': { type: 'boolean' },
 }
 
 // Retired flags the CLI ignores — still PARSED so a legacy `--format json`

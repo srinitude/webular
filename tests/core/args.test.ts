@@ -31,6 +31,21 @@ describe('parseFlags — common surface', () => {
   )
 })
 
+describe('parseFlags — global flags', () => {
+  test(
+    'accepts --no-cache for a command that does not declare it',
+    eff(
+      Effect.gen(function* () {
+        const { values, positionals } = yield* parseFlags(['https://x', '--no-cache'], {
+          url: { type: 'string' },
+        })
+        expect(values['no-cache']).toBe(true)
+        expect(positionals).toEqual(['https://x'])
+      }),
+    ),
+  )
+})
+
 describe('parseFlags — unknown flags', () => {
   test(
     'an unknown flag close to a known one gets a did-you-mean hint',
