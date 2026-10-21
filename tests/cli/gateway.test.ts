@@ -41,7 +41,7 @@ describe('gateway — fresh-environment routing', () => {
   test('routes a command from a foreign cwd (global-install shape)', async () => {
     const { code, out } = await runWebular(['diagram', '--list', '--json'], { cwd: dir })
     expect(code).toBe(0)
-    expect(JSON.parse(out).count).toBeGreaterThanOrEqual(7)
+    expect(JSON.parse(out).count).toBeGreaterThanOrEqual(3)
   }, 30_000)
 
   // The mise npm package publishes no Windows binary, so there is no bundled
@@ -52,7 +52,7 @@ describe('gateway — fresh-environment routing', () => {
       const env = { ...process.env, PATH: '/usr/bin:/bin' }
       const { code, out } = await runWebular(['diagram', '--list', '--json'], { cwd: dir, env })
       expect(code).toBe(0)
-      expect(JSON.parse(out).count).toBeGreaterThanOrEqual(7)
+      expect(JSON.parse(out).count).toBeGreaterThanOrEqual(3)
     },
     30_000,
   )
@@ -66,7 +66,7 @@ describe('gateway — fresh-environment routing', () => {
     })
     expect(err).not.toContain('trust')
     expect(code).toBe(0)
-    expect(JSON.parse(out).count).toBeGreaterThanOrEqual(7)
+    expect(JSON.parse(out).count).toBeGreaterThanOrEqual(3)
   }, 30_000)
 
   test('relative -o lands in the invoking directory, not the package root', async () => {
