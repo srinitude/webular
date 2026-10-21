@@ -98,7 +98,8 @@ export const runCommand = (
         [decode(proc.stdout), decode(proc.stderr), exitOf(proc.exitCode)],
         { concurrency: 3 },
       )
-      if (code !== 0) return yield* failure(command, code, err)
+      // Exit 3 is the CLI's partial result: stdout holds every item, failed ones named.
+      if (code !== 0 && code !== 3) return yield* failure(command, code, err)
       return yield* Effect.try({
         try: () => JSON.parse(out) as Record<string, unknown>,
         catch: () => notJson(command),

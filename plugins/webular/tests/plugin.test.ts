@@ -182,3 +182,18 @@ test('the interview skill asks one question at a time, outcome before method', (
     expect(rest).toMatch(/read the working folder before the first question/i)
     expect(headings(rest)).toContain('Decisions summary')
   }))
+
+// The model-matrix smoke saw Haiku and Sonnet stop at "the webular server is
+// still connecting" after loading this skill; the next turn has the tools.
+test('the research skill says to wait out a connecting server before the tool table', () =>
+  eachSkill(({ name, rest }) => {
+    if (name !== 'webular-research') return
+    const order = headings(rest)
+    expect(order.indexOf('When the tools are not there yet')).toBe(order.indexOf('Why') + 1)
+    const wait = section(rest, 'When the tools are not there yet')
+    expect(wait).toMatch(/still connecting/)
+    expect(wait).toMatch(/Do not stop there/)
+    expect(wait).toMatch(
+      /^1\. List the webular server's MCP resources once\. If you have no tool for that, load this skill once more\./m,
+    )
+  }))

@@ -46,6 +46,15 @@
       ]
     },
     {
+      "id": "tools-still-connecting",
+      "query": "Read the page https://bun.com/blog and tell me the newest post title, right as the session starts.",
+      "expected_behavior": [
+        "When no webular tool is listed yet, lists the webular server's MCP resources once instead of giving up",
+        "Then calls scrape on the page",
+        "Says the server did not connect only if the tools are still missing after that"
+      ]
+    },
+    {
       "id": "search-falls-back",
       "query": "Find three papers on retrieval-augmented generation, with links.",
       "expected_behavior": [

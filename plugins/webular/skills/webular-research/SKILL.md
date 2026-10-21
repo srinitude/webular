@@ -12,6 +12,14 @@ metadata:
 
 A web answer is only as good as its sources. This skill takes each fact from a page a tool returned. It uses as few tool calls as it can. The user can check every claim.
 
+## When the tools are not there yet
+
+The webular MCP server can take a few seconds to start. If no webular tool is in your tool list yet, the server is still connecting. Do not stop there, and do not answer without the tools.
+
+1. List the webular server's MCP resources once. If you have no tool for that, load this skill once more. Either call gives the server time to connect.
+2. Call the webular tool you need. It is listed by then.
+3. Only if the tools are still missing after that, say the webular server did not connect.
+
 ## Pick the tool
 
 | Goal | Tool |
