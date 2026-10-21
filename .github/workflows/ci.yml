@@ -82,11 +82,14 @@ jobs:
       # has it, the macOS image does not.
       - name: Install fish (macOS)
         if: runner.os == 'macOS'
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: 1
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
         run: brew install fish
       # The manpage test lints webular.1 with mandoc; macOS ships it, Ubuntu does not.
       - name: Install mandoc (Linux)
         if: runner.os == 'Linux'
-        run: sudo apt-get update -q && sudo apt-get install -y -q mandoc
+        run: sudo apt-get update -q && sudo apt-get install -y -q --no-install-recommends mandoc
       - name: Run the single CI dependency path
         env:
           BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
