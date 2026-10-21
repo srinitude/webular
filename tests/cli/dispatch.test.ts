@@ -84,13 +84,18 @@ const stopWith = (signal: 'SIGINT' | 'SIGTERM') =>
     }),
   ).pipe(Effect.provide(BunServices.layer))
 
+// Windows has no POSIX signals: killing a process with SIGINT or SIGTERM ends it
+// from outside (TerminateProcess, exit code 1), so no handler runs and the CLI
+// never sees the signal. Ctrl-C there is a console event this test cannot send.
+const posixOnly = test.skipIf(process.platform === 'win32')
+
 describe('signals', () => {
-  test(
+  posixOnly(
     'SIGINT exits 130',
     eff(Effect.map(stopWith('SIGINT'), (code) => expect(code).toBe(130))),
     30_000,
   )
-  test(
+  posixOnly(
     'SIGTERM exits 143',
     eff(Effect.map(stopWith('SIGTERM'), (code) => expect(code).toBe(143))),
     30_000,
