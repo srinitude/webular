@@ -4,7 +4,7 @@
 // completion-ordered. Readability runs on at most maxHtml characters when the
 // caller caps it (answer mode: it costs 1-3 s of CPU per ~1 MB page).
 import { availableParallelism } from 'node:os'
-import { Effect, Exit, Ref, Semaphore } from 'effect'
+import { Context, Effect, Exit, Layer, Ref, Semaphore } from 'effect'
 import { z } from 'zod'
 import { hostConcurrency } from '../core/budget.ts'
 import { fetchText } from '../core/http.ts'
@@ -23,11 +23,12 @@ export const fetchErrorsSchema = z.array(z.object({ url: z.string(), reason: z.s
 // kills its worker; raise PARSE_POOL_CAP or transfer bytes if parse CPU or
 // copy cost still dominates.
 const PARSE_POOL_CAP = 4
-const parsePermits = Semaphore.makeUnsafe(Math.min(availableParallelism(), PARSE_POOL_CAP))
 // Bun's Worker carries ref/unref; the DOM lib type in scope does not.
 type BunWorker = Worker & { ref(): void; unref(): void }
-const idleWorkers = Ref.makeUnsafe<readonly BunWorker[]>([])
-const workersBroken = Ref.makeUnsafe(typeof Worker === 'undefined')
+interface PoolState {
+  readonly idle: Ref.Ref<readonly BunWorker[]>
+  readonly broken: Ref.Ref<boolean>
+}
 
 // From src this module sits in src/lib beside parse-worker.ts; built, it
 // lands in a dist/chunks chunk and the worker in dist/lib/parse-worker.js.
@@ -38,32 +39,32 @@ const workerUrl = new URL(
 
 const parseInThread = (html: string) => Effect.try(() => htmlToArticle(html).text)
 
-const takeWorker = Ref.modify(
-  idleWorkers,
-  (idle) => [idle.at(-1), idle.slice(0, -1)] as const,
-).pipe(
-  Effect.map((idle) => {
-    const worker = idle ?? (new Worker(workerUrl) as BunWorker) // a missing file surfaces as onerror
-    worker.ref() // a busy worker holds the CLI open until its reply lands
-    return worker
-  }),
-)
+const takeWorker = ({ idle }: PoolState) =>
+  Ref.modify(idle, (workers) => [workers.at(-1), workers.slice(0, -1)] as const).pipe(
+    Effect.map((reused) => {
+      const worker = reused ?? (new Worker(workerUrl) as BunWorker) // a missing file surfaces as onerror
+      worker.ref() // a busy worker holds the CLI open until its reply lands
+      return worker
+    }),
+  )
 
 // A healthy reply (text or a parse error) returns the worker to the pool; a
 // crash (`undefined`) or an interrupt terminates it, and a crash also turns
-// the pool off for the rest of the process.
-const releaseWorker = (worker: BunWorker, exit: Exit.Exit<string | undefined, unknown>) => {
-  const crashed = Exit.isSuccess(exit) && exit.value === undefined
-  if (crashed || Exit.hasInterrupts(exit)) {
-    return Effect.sync(() => worker.terminate()).pipe(
-      Effect.andThen(crashed ? Ref.set(workersBroken, true) : Effect.void),
+// the pool off for the rest of the pool's life.
+const releaseWorker =
+  ({ idle, broken }: PoolState) =>
+  (worker: BunWorker, exit: Exit.Exit<string | undefined, unknown>) => {
+    const crashed = Exit.isSuccess(exit) && exit.value === undefined
+    if (crashed || Exit.hasInterrupts(exit)) {
+      return Effect.sync(() => worker.terminate()).pipe(
+        Effect.andThen(crashed ? Ref.set(broken, true) : Effect.void),
+      )
+    }
+    // idle workers never keep the process alive
+    return Effect.sync(() => worker.unref()).pipe(
+      Effect.andThen(Ref.update(idle, (workers) => [...workers, worker])),
     )
   }
-  // idle workers never keep the process alive
-  return Effect.sync(() => worker.unref()).pipe(
-    Effect.andThen(Ref.update(idleWorkers, (idle) => [...idle, worker])),
-  )
-}
 
 const askWorker = (worker: BunWorker, html: string) =>
   Effect.callback<string | undefined, unknown>((resume) => {
@@ -75,17 +76,46 @@ const askWorker = (worker: BunWorker, html: string) =>
     worker.postMessage(html)
   })
 
-const parseInWorker = (html: string) =>
-  Effect.acquireUseRelease(takeWorker, (worker) => askWorker(worker, html), releaseWorker).pipe(
+const parseInWorker = (state: PoolState, html: string) =>
+  Effect.acquireUseRelease(
+    takeWorker(state),
+    (worker) => askWorker(worker, html),
+    releaseWorker(state),
+  ).pipe(
     Effect.flatMap((text) => (text === undefined ? parseInThread(html) : Effect.succeed(text))),
   )
 
+// The pool's permits and idle workers live as long as the runtime that builds
+// this layer. Building it starts no worker; closing it terminates the idle ones
+// (a busy one is terminated by its interrupted parse).
+const terminateIdle = (idle: PoolState['idle']) =>
+  Effect.flatMap(Ref.get(idle), (workers) =>
+    Effect.forEach(workers, (worker) => Effect.sync(() => worker.terminate()), { discard: true }),
+  )
+
+const makePool = Effect.gen(function* () {
+  const permits = yield* Semaphore.make(Math.min(availableParallelism(), PARSE_POOL_CAP))
+  const state: PoolState = {
+    idle: yield* Effect.acquireRelease(Ref.make<readonly BunWorker[]>([]), terminateIdle),
+    broken: yield* Ref.make(typeof Worker === 'undefined'),
+  }
+  const parse = (html: string) =>
+    Effect.flatMap(Ref.get(state.broken), (broken) =>
+      broken ? parseInThread(html) : permits.withPermit(parseInWorker(state, html)),
+    )
+  return { parse }
+})
+
+export class ParsePool extends Context.Service<
+  ParsePool,
+  { readonly parse: (html: string) => Effect.Effect<string, unknown> }
+>()('webular/lib/ParsePool') {
+  static readonly layer = Layer.effect(ParsePool, makePool)
+}
+
 // Article text for one page, off the main thread when Workers run; an
 // in-thread parse when they are missing or fail.
-export const parseArticleText = (html: string) =>
-  Effect.flatMap(Ref.get(workersBroken), (broken) =>
-    broken ? parseInThread(html) : parsePermits.withPermit(parseInWorker(html)),
-  )
+export const parseArticleText = (html: string) => ParsePool.use((pool) => pool.parse(html))
 
 interface SourceRef {
   title: string
