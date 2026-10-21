@@ -3,6 +3,7 @@
 import { Clock, Effect, Option, Random, Redacted, Schema } from 'effect'
 import type * as HttpClient from 'effect/http/HttpClient'
 import * as HttpClientRequest from 'effect/http/HttpClientRequest'
+import { logErr } from '../../core/output.ts'
 import type { JevRequest } from './client.ts'
 import { committedSnapshot, guarded, httpFetcher } from './docs-guard.ts'
 import { errorKind, JevError, nextAction, retryAfterMs, retryable } from './errors.ts'
@@ -50,7 +51,7 @@ const guardDocs = (
     (l) =>
       l.event === 'unchanged'
         ? Effect.void
-        : Effect.logWarning(`jev docs ${l.event} ${l.reason ?? ''}`),
+        : logErr(`jev docs ${l.event} ${l.reason ?? ''}`),
     Effect.void,
   ).pipe(
     Effect.mapError(
