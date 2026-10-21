@@ -18,7 +18,7 @@ export const allSentences = (text: string) =>
   summarizeText(text, Number.POSITIVE_INFINITY).sentences
 
 // Indexes of the summarizer's top `topN` sentences, in text order.
-const topIndexes = (text: string, topN: number): ReadonlyArray<number> => {
+export const topIndexes = (text: string, topN: number): ReadonlyArray<number> => {
   const all = allSentences(text)
   const used = new Set<number>()
   for (const s of summarizeText(text, topN).sentences) {

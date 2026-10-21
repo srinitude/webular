@@ -4,6 +4,8 @@ import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
 import { searchRounds } from '../lib/jev/decisions/research.ts'
+import { onJevRuntime } from '../lib/jev/decisions/search.ts'
+import { decisions } from '../lib/jev/decisions.ts'
 import { readabilitySchema, withReadability } from '../lib/readability-chain.ts'
 import { searchEffect } from '../lib/search-chain.ts'
 import { fetchErrorsSchema, fetchSources, type SourceEntry } from '../lib/sources.ts'
@@ -62,23 +64,34 @@ const searchStep = createStep({
     ),
 })
 
+// Keep only the fetched sources that hold facts on the topic (answer.sources); none with text skips the call.
+const fetchAndFilter = Effect.fn('research.fetchSources')(function* (
+  input: z.infer<typeof foundSchema>,
+) {
+  const fetched = yield* fetchSources(input.sources, input.timeoutMs)
+  const withText = fetched.entries.filter((e) => e.text.length > 0)
+  const entries =
+    withText.length === 0
+      ? withText
+      : yield* onJevRuntime(decisions.answerSources, { question: input.topic, sources: withText })
+  return {
+    topic: input.topic,
+    sentences: input.sentences,
+    entries: [...entries],
+    errors: fetched.errors,
+  }
+})
+
 const fetchSourcesStep = createStep({
   id: 'fetch-sources',
   inputSchema: foundSchema,
   outputSchema: entriesSchema,
-  execute: ({ inputData }) =>
-    stepRuntime.runPromise(
-      Effect.map(fetchSources(inputData.sources, inputData.timeoutMs), (fetched) => ({
-        topic: inputData.topic,
-        sentences: inputData.sentences,
-        entries: fetched.entries,
-        errors: fetched.errors,
-      })),
-    ),
+  execute: ({ inputData }) => stepRuntime.runPromise(fetchAndFilter(inputData)),
 })
 
-function buildSection(entry: SourceEntry, idx: number, topN: number): string {
-  const { sentences } = summarizeText(entry.text, topN)
+// The topic focuses each section: sentences holding its key terms rank first.
+function buildSection(entry: SourceEntry, idx: number, topN: number, topic: string): string {
+  const { sentences } = summarizeText(entry.text, topN, { query: topic })
   const body = sentences.length > 0 ? sentences.join(' ') : 'No extractable content.'
   return `## ${entry.title || `Source ${idx + 1}`}\n\n${body}\n\n> Source [${idx + 1}]: ${entry.url}`
 }
@@ -94,7 +107,9 @@ const assembleStep = createStep({
 })
 
 function assemble(inputData: z.infer<typeof entriesSchema>) {
-  const sections = inputData.entries.map((e, i) => buildSection(e, i, inputData.sentences))
+  const sections = inputData.entries.map((e, i) =>
+    buildSection(e, i, inputData.sentences, inputData.topic),
+  )
   const report = `# Research: ${inputData.topic}\n\n${sections.join('\n\n')}`
   const sources = inputData.entries.map((e) => ({ title: e.title, url: e.url }))
   return { topic: inputData.topic, report, sources, errors: inputData.errors }

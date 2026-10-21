@@ -6,6 +6,7 @@
 import { BunRuntime, BunServices } from '@effect/platform-bun'
 import { Clock, Config, Console, Effect, FileSystem, Layer, Ref, Schema } from 'effect'
 import { FetchHttpClient } from 'effect/http'
+import { markCase } from './cases.ts'
 import {
   builtinMetrics,
   type MetricDef,
@@ -92,6 +93,7 @@ const runOne = (p: Provider, task: Task, run: number, ctx: Ctx) =>
     const base = { provider: p.id, task: task.id, job: task.job, run, metrics: {} }
     const why = skipReason(p, task)
     if (why) return { ...base, status: why[0], note: why[1] } satisfies RunRecord
+    if (live && p.id === 'webular') yield* markCase(ctx.fs, task.id, run)
     const rec = yield* obtain(p, task, run, ctx)
     if (rec === 'budget')
       return {

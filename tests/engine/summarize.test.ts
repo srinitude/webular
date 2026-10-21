@@ -16,4 +16,10 @@ describe('summarizeText — large inputs and stable ties', () => {
     const { sentences } = summarizeText(text, 2)
     expect(sentences).toEqual(['Alpha beta gamma.', 'Alpha beta gamma.'])
   })
+
+  test('a topic ranks the sentence that matches it first', () => {
+    const text = 'Cats sleep and cats eat. Cats nap and cats purr. Rust compiles fast.'
+    expect(summarizeText(text, 1).sentences).not.toEqual(['Rust compiles fast.'])
+    expect(summarizeText(text, 1, { query: 'rust' }).sentences).toEqual(['Rust compiles fast.'])
+  })
 })

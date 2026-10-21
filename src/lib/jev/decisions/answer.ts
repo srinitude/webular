@@ -14,6 +14,7 @@ import {
   purpose,
   sureYes,
 } from '../payload/index.ts'
+import { topIndexes } from './summarize.ts'
 
 const DOCS = '88a6a003018eaea50167565a766a0d4a91d039cf93cc7dc2965d3ceba3a72caf'
 const MAX_ITEMS = 20 // one call carries at most 20 questions
@@ -100,11 +101,14 @@ const SENTENCE_PURPOSE = purpose(
   'A lead sentence that only repeats the topic wastes the reader time.',
   'Pages often repeat the topic words in sentences that never give the answer.',
 )
+// The summarizer's best 18 sentences in text order; ids keep each one's original index.
+const shortlist = (text: string) => topIndexes(text, MAX_SENTENCES)
 const sentenceText = (k: string) =>
   k === 'none' ? 'Only when no sentence states the answer' : `Sentence \`text.sentences.${k}\``
 const sentencePayload = (input: SentenceInput) => {
-  const items = answerSentences(input.text).slice(0, MAX_SENTENCES)
-  const ids = items.map((_, i) => `s${i}`)
+  const all = answerSentences(input.text)
+  const keep = shortlist(input.text)
+  const ids = keep.map((i) => `s${i}`)
   const base = `s${sentenceBaseline(input)}`
   return {
     state: {
@@ -112,7 +116,9 @@ const sentencePayload = (input: SentenceInput) => {
       question: asked(input.question),
       text: {
         default: base,
-        sentences: Object.fromEntries(items.map((s, i) => [`s${i}`, s.slice(0, MAX_SENTENCE)])),
+        sentences: Object.fromEntries(
+          keep.map((i) => [`s${i}`, (all[i] ?? '').slice(0, MAX_SENTENCE)]),
+        ),
       },
     },
     // Asked in both option orders (position check); the summarizer's pick comes first.
@@ -126,9 +132,8 @@ const sentencePayload = (input: SentenceInput) => {
   }
 }
 
-// A whole index naming one of the sentences Jev saw.
-const sentenceCodeCheck = (i: number, { text }: SentenceInput) =>
-  Number.isInteger(i) && i >= 0 && i < Math.min(MAX_SENTENCES, answerSentences(text).length)
+// An original index naming one of the sentences Jev saw.
+const sentenceCodeCheck = (i: number, { text }: SentenceInput) => shortlist(text).includes(i)
 
 export const answerSentence = defineDecision<SentenceInput, number>({
   name: 'answer.sentence',

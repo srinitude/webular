@@ -111,6 +111,9 @@ const prepareSynth = Effect.fn('answer.prepare')(function* (data: Evidence) {
   )
   return { ...data, text, cited }
 })
+// The direct answer Jev picked always opens the answer, never repeated.
+export const leadFirst = (top: ReadonlyArray<string>, lead: string | undefined, n: number) =>
+  lead === undefined ? [...top] : [lead, ...top.filter((s) => s !== lead)].slice(0, n)
 const synthStep = decisionStep({
   id: 'fetch-and-summarize',
   inputSchema: evidenceSchema,
@@ -122,11 +125,9 @@ const synthStep = decisionStep({
     const { query, text, sentences, cited, errors } = data
     const top = topSentences(text, data)
     const first = lead === undefined ? undefined : answerSentences(text)[lead]
-    const chosen =
-      first === undefined || top.includes(first) ? top : [first, ...top.slice(0, sentences - 1)]
     return {
       query,
-      answer: chosen.join(' '),
+      answer: leadFirst(top, first, sentences).join(' '),
       sources: cited.map((e) => ({ title: e.title, url: e.url })),
       errors,
     }
