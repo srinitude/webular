@@ -6,7 +6,11 @@ import { Config, Effect } from 'effect'
 import { runCli } from '../_support/cli.ts'
 import { eff } from '../_support/run.ts'
 
-const baseEnv = Effect.all({ PATH: Config.String('PATH'), HOME: Config.String('HOME') })
+// Windows names them Path and USERPROFILE.
+const baseEnv = Effect.all({
+  PATH: Config.String('PATH').pipe(Config.orElse(() => Config.String('Path'))),
+  HOME: Config.String('HOME').pipe(Config.orElse(() => Config.String('USERPROFILE'))),
+})
 const piped = (args: string[], extra: Record<string, string> = {}) =>
   Effect.flatMap(baseEnv, (base) =>
     runCli('bin/webular.ts', args, {

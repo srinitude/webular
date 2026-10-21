@@ -23,7 +23,11 @@ const colors = (over: Partial<ColorEnv>): ColorEnv => ({
 })
 
 // PATH and HOME come through Effect Config; each run adds only what it tests.
-const baseEnv = Effect.all({ PATH: Config.String('PATH'), HOME: Config.String('HOME') })
+// Windows names them Path and USERPROFILE.
+const baseEnv = Effect.all({
+  PATH: Config.String('PATH').pipe(Config.orElse(() => Config.String('Path'))),
+  HOME: Config.String('HOME').pipe(Config.orElse(() => Config.String('USERPROFILE'))),
+})
 const piped = (args: string[], extra: Record<string, string> = {}) =>
   Effect.flatMap(baseEnv, (base) =>
     runCli('bin/webular.ts', args, { env: { ...base, ...extra }, exec: process.execPath }),

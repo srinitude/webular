@@ -40,7 +40,7 @@ const withFx = startFixture(() => ({
 // fixture origin.
 const runSearch = (fx: Fixture, args: string[]) =>
   Effect.gen(function* () {
-    const PATH = yield* Config.String('PATH')
+    const PATH = yield* Config.String('PATH').pipe(Config.orElse(() => Config.String('Path')))
     const HOME = yield* Config.String('HOME').pipe(Config.withDefault('.'))
     return yield* runCli('src/commands/search.ts', args, {
       env: { PATH, HOME, WEBULAR_SOURCE_ORIGIN: fx.origin },
