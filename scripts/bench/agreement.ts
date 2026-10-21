@@ -1,5 +1,7 @@
-// Agreement stats for the grader track: Cohen's kappa for one rater against
-// gold, Fleiss' kappa for many raters on the same items. Pure functions.
+// Agreement stats for judge calibration and the grader track: Cohen's kappa
+// for one rater against gold, Fleiss' kappa for many raters on the same items.
+// Pure functions. Report kappa beside raw agreement, since kappa drops under
+// heavy label imbalance even when raters agree.
 
 const share = (labels: readonly string[]) => {
   const n = new Map<string, number>()
@@ -11,13 +13,16 @@ const share = (labels: readonly string[]) => {
 const kappaOf = (observed: number, chance: number) =>
   chance === 1 ? 1 : (observed - chance) / (1 - chance)
 
-export const cohen = (a: readonly string[], b: readonly string[]) => {
-  const n = a.length
-  const observed = a.filter((x, i) => x === b[i]).length / n
-  const sa = share(a)
-  const sb = share(b)
+// Pairs beyond the shorter list are ignored; no pairs gives 0.
+export const cohensKappa = (a: readonly string[], b: readonly string[]) => {
+  const n = Math.min(a.length, b.length)
+  if (n === 0) return 0
+  const xs = a.slice(0, n)
+  const ys = b.slice(0, n)
+  const observed = xs.filter((x, i) => x === ys[i]).length / n
+  const sb = share(ys)
   let chance = 0
-  for (const [label, count] of sa) chance += (count / n) * ((sb.get(label) ?? 0) / n)
+  for (const [label, count] of share(xs)) chance += (count / n) * ((sb.get(label) ?? 0) / n)
   return kappaOf(observed, chance)
 }
 

@@ -3,6 +3,7 @@
 // is used until the judge passes calibration (guard test 20). Judge inputs
 // are blinded: no tool names, seeded answer order, capped length (test 21).
 import { Effect } from 'effect'
+import { cohensKappa } from './agreement.ts'
 import type { JudgeLabel } from './schema.ts'
 
 interface ReferenceInput {
@@ -33,18 +34,6 @@ export interface Calibration {
 const agreement = (judged: readonly JudgeLabel[], human: readonly JudgeLabel[]) => {
   const n = Math.min(judged.length, human.length)
   return { n, rate: n === 0 ? 0 : judged.filter((l, i) => l === human[i]).length / n }
-}
-
-export const cohensKappa = (
-  judged: readonly JudgeLabel[],
-  human: readonly JudgeLabel[],
-): number => {
-  const { n, rate: agree } = agreement(judged, human)
-  if (n === 0) return 0
-  const labels = [...new Set([...judged, ...human])]
-  const share = (xs: readonly JudgeLabel[], l: JudgeLabel) => xs.filter((x) => x === l).length / n
-  const chance = labels.reduce((s, l) => s + share(judged, l) * share(human, l), 0)
-  return chance === 1 ? 1 : (agree - chance) / (1 - chance)
 }
 
 export const calibrate = (

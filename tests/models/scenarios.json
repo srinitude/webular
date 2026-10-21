@@ -6,7 +6,6 @@
   "models": ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"],
   "surfaces": ["cli", "mcp", "plugin"],
   "smoke": "scrape-reads-article",
-  "evalRules": "Every eval is a code check over the final reply: answerContains strings must all appear, answerMatches must match, and the run must call the scenario tool on its surface unless the scenario sets requireTool to false, which grades the reply alone. No scenario needs a judgment call, so none uses a Jev judge.",
   "agentSample": ["scrape-reads-article", "search-finds-pages", "answer-cites-source"],
   "providers": [
     {

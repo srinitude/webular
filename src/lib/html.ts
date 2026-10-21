@@ -42,6 +42,31 @@ const URL_ATTRS = ['href', 'src', 'action', 'formaction', 'xlink:href', 'poster'
 const UNSAFE_ATTRS = ['srcdoc', 'style']
 const UNSAFE_SCHEME = /^(javascript|vbscript|data):/
 
+// Text a reader never sees is a prompt-injection channel for the agent that
+// reads webular's output: hidden elements, comments, and invisible characters.
+// ponytail: inline style and attributes only; stylesheet-hidden text (class
+// rules, off-screen positioning, white-on-white) needs a CSS cascade to catch.
+const NEVER_RENDERED = 'script, style, noscript, template'
+const HIDDEN_CANDIDATES = '[hidden], [aria-hidden], [style]'
+const HIDDEN_STYLE = /display\s*:\s*none|visibility\s*:\s*hidden/i
+const COMMENT = /<!--[\s\S]*?-->/g
+// Zero-width, bidi marks, word joiners, BOM, and Unicode tag characters.
+const INVISIBLE_CHARS = /[​-‏⁠-⁤﻿\u{E0000}-\u{E007F}]/gu
+
+const dropInvisible = (text: string): string => text.replace(INVISIBLE_CHARS, '')
+
+// Removes never-rendered elements and hidden ones in place.
+function dropHidden(root: DomDocument['body']): void {
+  for (const el of Array.from(root.querySelectorAll(NEVER_RENDERED))) el.remove()
+  for (const el of Array.from(root.querySelectorAll(HIDDEN_CANDIDATES))) {
+    const hidden =
+      el.hasAttribute('hidden') ||
+      el.getAttribute('aria-hidden') === 'true' ||
+      HIDDEN_STYLE.test(el.getAttribute('style') ?? '')
+    if (hidden) el.remove()
+  }
+}
+
 const unsafeAttr = (name: string, value: string): boolean => {
   // Browsers ignore control chars/whitespace inside the scheme ("java\tscript:").
   // biome-ignore lint/suspicious/noControlCharactersInRegex: browsers drop C0 control chars inside a URL scheme, so the sanitizer must too.
@@ -55,18 +80,21 @@ const unsafeAttr = (name: string, value: string): boolean => {
 }
 
 // Neither Readability nor mammoth sanitizes its HTML — run this before anyone
-// embeds it. Strips the elements above, on* handlers, srcdoc, inline style, and
-// javascript:, vbscript:, and data: URLs.
+// embeds it. Strips the elements above, hidden elements, comments, invisible
+// characters, on* handlers, srcdoc, inline style, and javascript:, vbscript:,
+// and data: URLs.
 // ponytail: a widened denylist, not an allowlist; DOMPurify if a gap shows up.
 export function sanitizeHtml(html: string): string {
   const { document } = parseHTML(`<!doctype html><html><body>${html}</body></html>`)
+  if (!document.body) return ''
   for (const el of Array.from(document.querySelectorAll(UNSAFE_ELEMENTS))) el.remove()
+  dropHidden(document.body)
   for (const el of Array.from(document.querySelectorAll('*'))) {
     for (const name of el.getAttributeNames()) {
       if (unsafeAttr(name, el.getAttribute(name) ?? '')) el.removeAttribute(name)
     }
   }
-  return document.body?.innerHTML ?? ''
+  return dropInvisible(document.body.innerHTML.replace(COMMENT, ''))
 }
 
 // ponytail: banners matched by class/id substring, so a "cookie-recipe" block
@@ -75,11 +103,12 @@ const PAGE_BOILERPLATE =
   'nav, header, footer, aside, [role=banner], [role=navigation], [role=contentinfo], ' +
   '[class*=cookie], [id*=cookie], [class*=consent], [id*=consent]'
 
-// Plain text of a page Readability skips, read from the already-parsed body.
-// Removes non-text elements in place: no caller reads the document afterwards.
+// Plain text of a page Readability skips, read from a body dropHidden has
+// already cleared of non-text and hidden elements.
 function bodyText(body: DomDocument['body']): string {
-  for (const el of Array.from(body.querySelectorAll('script, style, noscript'))) el.remove()
-  return (body.textContent ?? '').replace(/\s+/g, ' ').trim()
+  return dropInvisible(body.textContent ?? '')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 function articleFrom(document: DomDocument, rawHtml: string): Article {
@@ -87,6 +116,8 @@ function articleFrom(document: DomDocument, rawHtml: string): Article {
   if (!document.documentElement || !document.body)
     return { title: '', contentHtml: sanitizeHtml(rawHtml), text: '' }
   const docTitle = document.title ?? ''
+  // Hidden text goes before Readability and the body-text path read the page.
+  dropHidden(document.body)
   // linkedom's document satisfies the DOM surface Readability touches; the
   // libraries' type worlds don't overlap, hence the one sanctioned cast.
   // Readability mutates its document; no caller reads it afterwards, so no clone.
@@ -106,7 +137,7 @@ function articleFrom(document: DomDocument, rawHtml: string): Article {
   return {
     title: parsed.title ?? docTitle,
     contentHtml: sanitizeHtml(parsed.content ?? ''),
-    text: parsed.textContent ?? '',
+    text: dropInvisible(parsed.textContent ?? ''),
   }
 }
 

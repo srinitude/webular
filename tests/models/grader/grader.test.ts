@@ -3,11 +3,11 @@
 import { expect, test } from 'bun:test'
 import { BunServices } from '@effect/platform-bun'
 import { Effect, Option } from 'effect'
+import { cohensKappa, fleiss } from '../../../scripts/bench/agreement.ts'
 import { ROOT } from '../../_support/root.ts'
 import { blind, bothOrders } from './blind.ts'
 import { crossCheck } from './cross-check.ts'
 import { judgeArgs, parseVerdict } from './judge.ts'
-import { cohen, fleiss } from './kappa.ts'
 
 const repeat = (label: string, n: number) => Array.from({ length: n }, () => label)
 
@@ -15,8 +15,8 @@ test("Cohen's kappa matches the textbook 50-item example (0.4)", () => {
   // A said yes 25 times, B 30 times; 20 yes-yes, 15 no-no.
   const a = [...repeat('y', 20), ...repeat('y', 5), ...repeat('n', 10), ...repeat('n', 15)]
   const b = [...repeat('y', 20), ...repeat('n', 5), ...repeat('y', 10), ...repeat('n', 15)]
-  expect(cohen(a, b)).toBeCloseTo(0.4, 6)
-  expect(cohen(['p', 'f'], ['p', 'f'])).toBe(1)
+  expect(cohensKappa(a, b)).toBeCloseTo(0.4, 6)
+  expect(cohensKappa(['p', 'f'], ['p', 'f'])).toBe(1)
 })
 
 test("Fleiss' kappa matches the textbook 10-item, 14-rater example (0.210)", () => {

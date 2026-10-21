@@ -45,7 +45,6 @@ export const Scenario = Schema.Struct({
   maxTurns: Schema.optional(Schema.Number),
   timeoutSec: Schema.optional(Schema.Number),
   baseline: Schema.optional(Baseline),
-  contractGaps: Schema.optional(Schema.Array(Schema.String)),
 })
 export type Scenario = typeof Scenario.Type
 
@@ -54,7 +53,6 @@ export const ScenarioFile = Schema.Struct({
   models: Schema.Array(Schema.String),
   surfaces: Schema.Array(Schema.Literals(['cli', 'mcp', 'plugin'])),
   smoke: Schema.String,
-  evalRules: Schema.String,
   routes: Schema.Record(Schema.String, Schema.Array(Schema.String)),
   providers: Schema.optional(Schema.Array(Provider)),
   // The inline agent sample, used until bench/tasks holds the frozen set.

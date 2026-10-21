@@ -65,11 +65,7 @@ test('each scenario names a real command, MCP tool and flags (contract first)', 
         const src = shared + (yield* fs.readFileString(`${ROOT}src/commands/${s.tool}.ts`))
         expect([s.id, s.tool in tools.tools]).toEqual([s.id, true])
         for (const flag of flagsOf(s))
-          expect([s.id, flag, src.includes(`${flag.slice(2)}:`)]).toEqual([
-            s.id,
-            flag,
-            !(s.contractGaps ?? []).includes(flag),
-          ])
+          expect([s.id, flag, src.includes(`${flag.slice(2)}:`)]).toEqual([s.id, flag, true])
       }
     }),
   ))

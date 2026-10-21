@@ -11,7 +11,7 @@ import { LocalIndexError, localIndexPath } from './local-index-path.ts'
 import { halves, simhash64 } from './simhash.ts'
 import { closeSqlite, openSqlite } from './sqlite-open.ts'
 
-export interface IndexedPage {
+interface IndexedPage {
   readonly url: string
   readonly title: string
   readonly text: string

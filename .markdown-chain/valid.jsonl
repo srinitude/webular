@@ -222,3 +222,4 @@
 {"path": "tests/fixtures/sources/AGENTS.md", "sha": "e35b28767c6249991d1d7f9e1f123411651cc062cb1a2d658d01d90009d09c0f"}
 {"path": "tests/quality/AGENTS.md", "sha": "99cc1167eca191aa8d6c6fe01c807adedff2163041001a42f375f39702381fd3"}
 {"path": "tests/workflows/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49"}
+{"path": "scripts/bench/AGENTS.md", "sha": "99e4d5bdc6edb9b9d0b854c159705d9d5b3773560067e83a634851d72d2a6733"}

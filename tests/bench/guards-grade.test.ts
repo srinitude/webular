@@ -2,6 +2,7 @@
 // bias and passes the clean case, plus known values for the statistics.
 import { expect, test } from 'bun:test'
 import { Effect } from 'effect'
+import { cohensKappa } from '../../scripts/bench/agreement.ts'
 import { checkClaims, checkStatsPresent } from '../../scripts/bench/claims.ts'
 import * as G from '../../scripts/bench/grade.ts'
 import * as J from '../../scripts/bench/judge.ts'
@@ -65,7 +66,7 @@ test(
       expect(yield* J.useJudge(judge, { n: 200, kappa: 0.85, accuracy: 0.97 })).toBe(judge)
       const human = ['correct', 'incorrect', 'correct', 'not_attempted'] as const
       expect(J.calibrate(human, human)).toEqual({ n: 4, kappa: 1, accuracy: 1 })
-      expect(J.cohensKappa(['correct', 'incorrect'], ['incorrect', 'correct'])).toBe(-1)
+      expect(cohensKappa(['correct', 'incorrect'], ['incorrect', 'correct'])).toBe(-1)
     }),
   ),
 )

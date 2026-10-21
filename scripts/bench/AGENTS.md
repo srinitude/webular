@@ -5,8 +5,8 @@ The benchmarks. The root [AGENTS.md](../../AGENTS.md) holds the repo-wide rules.
 ## What lives here
 
 - `scripts/bench/peers/`: the peer benchmark against other web research tools.
-- [agent/](agent/): MCP wrappers that give a provider with no official MCP server the same tools as the other peer arms.
 - [tasks/](tasks/): the generators that build the task sets in [bench/tasks/](../../bench/tasks/).
+- [agreement.ts](agreement.ts): Cohen's and Fleiss' kappa, as pure functions, shared by the judge and the grader track.
 - The other scripts here are cold-start and scaling probes that `mise run bench` times.
 
 ## Rules
@@ -47,5 +47,4 @@ mise run test:file tests/bench
 ## Children
 
 - [peers/AGENTS.md](peers/AGENTS.md)
-- [agent/AGENTS.md](agent/AGENTS.md)
 - [tasks/AGENTS.md](tasks/AGENTS.md)

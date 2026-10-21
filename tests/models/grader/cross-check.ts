@@ -7,9 +7,9 @@
 //   bun tests/models/grader/cross-check.ts --offline <recorded>  recorded verdicts
 import { BunRuntime, BunServices } from '@effect/platform-bun'
 import { Console, Effect, FileSystem, Schema } from 'effect'
+import { cohensKappa, fleiss } from '../../../scripts/bench/agreement.ts'
 import { ROOT } from '../../_support/root.ts'
 import { judge, MODELS, type Model, type Verdict } from './judge.ts'
-import { cohen, fleiss } from './kappa.ts'
 
 const V = Schema.Literals(['pass', 'fail'])
 const Gold = Schema.fromJsonString(
@@ -47,7 +47,7 @@ const stats = (g: GoldFile, verdicts: Verdicts) => {
     const ownGot = own.map((id) => verdicts[model]?.[id] as Verdict)
     return {
       model,
-      cohenKappa: cohen(got, gold),
+      cohenKappa: cohensKappa(got, gold),
       selfPreferenceGap: passRate(ownGot) - passRate(own.map((id) => g.gold[id] as Verdict)),
       setsHeadline: false as const,
     }

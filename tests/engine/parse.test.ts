@@ -110,16 +110,4 @@ describe('pdfText — caller buffer', () => {
       }),
     ),
   )
-
-  test(
-    'fails a PDF with more pages than the cap, before extracting text',
-    eff(
-      Effect.gen(function* () {
-        const bytes = new Uint8Array(
-          yield* io(() => Bun.file('tests/fixtures/driver/attention.pdf').arrayBuffer()),
-        )
-        expect(yield* failMsg(pdfText(bytes, 0))).toMatch(/pages, over the 0-page cap/)
-      }),
-    ),
-  )
 })

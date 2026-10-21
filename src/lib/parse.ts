@@ -1,7 +1,7 @@
 // FOSS document parsing: detect format by extension, extract markdown/text.
 // pdf/docx parsers load their heavy deps lazily (they never tax a text parse);
 // binary formats we cannot parse fail loudly instead of decoding to garbage.
-import { Data, Effect } from 'effect'
+import { Config, Data, Effect } from 'effect'
 import { errMsg, logErr } from '../core/output.ts'
 import { htmlToMarkdown, sanitizeHtml } from './html.ts'
 
@@ -57,11 +57,20 @@ function detectFormat(file: string): Effect.Effect<DocFormat, ParseError> {
 }
 
 // A page cap and a deadline bound one PDF's text extraction (CPU and memory).
-const MAX_PDF_PAGES = 2_000
-const PDF_TIMEOUT = '60 seconds'
+// unpdf reads a dense text page in about 10 ms on an Apple-silicon Mac, so the
+// 2,000-page cap takes about 20 s and the 60 s deadline leaves 3x headroom for
+// heavier pages and slower hosts. 2,000 pages covers 10-K filings and most long
+// government reports. WEBULAR_PDF_MAX_PAGES and WEBULAR_PDF_TIMEOUT_MS override them.
+const setting = (name: string, fallback: number) =>
+  Config.Int(name).pipe(
+    Config.withDefault(fallback),
+    Effect.mapError((e) => new ParseError({ message: `parse: ${name}: ${errMsg(e)}` })),
+  )
 
 // PDF bytes to text; scrape reads a fetched PDF through this same reader.
-export const pdfText = Effect.fnUntraced(function* (bytes: Uint8Array, maxPages = MAX_PDF_PAGES) {
+export const pdfText = Effect.fnUntraced(function* (bytes: Uint8Array) {
+  const maxPages = yield* setting('WEBULAR_PDF_MAX_PAGES', 2_000)
+  const timeoutMs = yield* setting('WEBULAR_PDF_TIMEOUT_MS', 60_000)
   const { extractText, getDocumentProxy } = yield* attempt(() => import('unpdf'))
   // The pdf.js proxy holds a worker and page buffers: free it on success and failure.
   return yield* Effect.acquireRelease(
@@ -71,14 +80,16 @@ export const pdfText = Effect.fnUntraced(function* (bytes: Uint8Array, maxPages 
   ).pipe(
     Effect.tap((pdf) =>
       pdf.numPages > maxPages
-        ? fail(`parse: PDF has ${pdf.numPages} pages, over the ${maxPages}-page cap`)
+        ? fail(
+            `parse: PDF has ${pdf.numPages} pages, over the ${maxPages}-page cap (WEBULAR_PDF_MAX_PAGES)`,
+          )
         : Effect.void,
     ),
     Effect.flatMap((pdf) =>
       attempt(() => extractText(pdf, { mergePages: true })).pipe(
         Effect.timeoutOrElse({
-          duration: PDF_TIMEOUT,
-          orElse: () => fail(`parse: PDF text took over ${PDF_TIMEOUT}`),
+          duration: timeoutMs,
+          orElse: () => fail(`parse: PDF text took over ${timeoutMs} ms (WEBULAR_PDF_TIMEOUT_MS)`),
         }),
       ),
     ),
