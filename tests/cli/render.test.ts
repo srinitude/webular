@@ -1,9 +1,8 @@
 // Output contract: human text differs from --json, -o writes what stdout carries,
 // partial failures note on stderr, batch maps exit codes 0/1/3.
 import { describe, expect, test } from 'bun:test'
-import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { Effect } from 'effect'
+import { Effect, FileSystem } from 'effect'
 import { renderFor } from '../../src/cli/render.ts'
 import { runCli } from '../_support/cli.ts'
 import { type Routes, startFixture, useFixture } from '../_support/fixture.ts'
@@ -110,7 +109,7 @@ describe('command output contract (integration)', () => {
         const dest = join(yield* tmpDir('webular-'), 'render.md')
         const { code } = yield* runCmd('scrape', ['--url', `${fx.origin}/`, '-o', dest])
         expect(code).toBe(0)
-        const written = readFileSync(dest, 'utf8')
+        const written = yield* (yield* FileSystem.FileSystem).readFileString(dest)
         expect(written).toContain('Fixture Home')
         expect(written.startsWith('{')).toBe(false)
       }),

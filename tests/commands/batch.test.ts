@@ -1,10 +1,9 @@
 // BATCH contract — concurrent scrape against the local fixture (no mocks).
 // Tests the user-facing command behavior that `mise run run:batch` executes.
 import { describe, expect, test } from 'bun:test'
-import { unlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { Effect } from 'effect'
+import { Effect, FileSystem } from 'effect'
 import { runCli } from '../_support/cli.ts'
 import { useFixture } from '../_support/fixture.ts'
 import { defaultRoutes } from '../_support/routes.ts'
@@ -39,13 +38,11 @@ describe('webular batch — concurrent scrape of multiple URLs (real fetch)', ()
     'reads URLs from a file with --input',
     eff(
       Effect.gen(function* () {
+        const fs = yield* FileSystem.FileSystem
+        const f = join(tmpdir(), 'webular-batch-test-urls.txt')
         const tmpFile = yield* Effect.acquireRelease(
-          Effect.sync(() => {
-            const f = join(tmpdir(), 'webular-batch-test-urls.txt')
-            writeFileSync(f, `${fx.origin}/a\n`)
-            return f
-          }),
-          (f) => Effect.sync(() => unlinkSync(f)),
+          Effect.as(fs.writeFileString(f, `${fx.origin}/a\n`), f),
+          () => Effect.ignore(fs.remove(f)),
         )
         const { code, out } = yield* runBatch(['--input', tmpFile, '--json'])
         expect(code).toBe(0)

@@ -1,9 +1,8 @@
 // DIAGRAM workflow: list the XState machines in src/machines, one per CLI
 // flow (dispatch, command lifecycle, fetch).
-import { readdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { createStep, createWorkflow } from '@mastra/core/workflows'
-import { Effect } from 'effect'
+import { Effect, FileSystem } from 'effect'
 import { z } from 'zod'
 import { EXIT } from '../cli/exit-codes.ts'
 import { CliError } from '../core/effect.ts'
@@ -21,10 +20,9 @@ const diagramListOutput = z.object({
 })
 
 const listDiagrams = Effect.map(
-  Effect.tryPromise({
-    try: () => readdir(MACHINES_DIR),
-    catch: (err) => new CliError({ message: errMsg(err), exitCode: EXIT.failure }),
-  }),
+  Effect.flatMap(FileSystem.FileSystem, (fs) => fs.readDirectory(MACHINES_DIR)).pipe(
+    Effect.mapError((err) => new CliError({ message: errMsg(err), exitCode: EXIT.failure })),
+  ),
   (entries) => {
     const diagrams = entries
       .filter((f) => f.endsWith('.ts'))

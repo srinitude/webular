@@ -2,10 +2,9 @@
 // carries each task's source config; filtering on our mise.toml keeps user
 // and parent configs from leaking into the report.
 
-import { realpathSync } from 'node:fs'
 import { join } from 'node:path'
 import { createStep, createWorkflow } from '@mastra/core/workflows'
-import { Effect } from 'effect'
+import { Effect, FileSystem } from 'effect'
 import { z } from 'zod'
 import { EXIT } from '../cli/exit-codes.ts'
 import { CliError } from '../core/effect.ts'
@@ -20,7 +19,7 @@ const fail = (message: string) => new CliError({ message, exitCode: EXIT.failure
 // Symlinked installs (bun link, pnpm stores) make mise's reported source path
 // and our import.meta-derived root spell the same file differently.
 const canonical = (p: string) =>
-  Effect.try(() => realpathSync(p)).pipe(Effect.orElseSucceed(() => p))
+  Effect.flatMap(FileSystem.FileSystem, (fs) => fs.realPath(p)).pipe(Effect.orElseSucceed(() => p))
 
 const tasksInput = z.object({})
 

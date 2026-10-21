@@ -1,23 +1,23 @@
 // Bucket A contract: WEBULAR_SANDBOX=1 confines output paths (opt-in). Real
 // command runs against the local fixture; default behavior is covered elsewhere.
 import { afterAll, describe, expect, test } from 'bun:test'
-import { rmSync, symlinkSync } from 'node:fs'
 import { join } from 'node:path'
-import { Effect } from 'effect'
+import { Effect, FileSystem } from 'effect'
 import { runCli } from '../_support/cli.ts'
 import { useFixture } from '../_support/fixture.ts'
 import { ROOT } from '../_support/root.ts'
 import { defaultRoutes } from '../_support/routes.ts'
-import { eff, io, tmpDir } from '../_support/run.ts'
+import { eff, tmpDir } from '../_support/run.ts'
 
 const OUT = '.tmp-sandbox-out.md'
 
 const fx = useFixture(defaultRoutes)
 afterAll(
   eff(
-    Effect.sync(() => {
-      rmSync(`${ROOT}${OUT}`, { force: true })
-      rmSync(`${ROOT}webular-monitor.db`, { force: true })
+    Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem
+      yield* fs.remove(`${ROOT}${OUT}`, { force: true })
+      yield* fs.remove(`${ROOT}webular-monitor.db`, { force: true })
     }),
   ),
 )
@@ -69,7 +69,7 @@ describe('WEBULAR_SANDBOX confines output paths (opt-in hardening)', () => {
       Effect.gen(function* () {
         const base = yield* tmpDir('webular-sb-')
         const target = yield* tmpDir('webular-tgt-')
-        symlinkSync(target, join(base, 'link'))
+        yield* (yield* FileSystem.FileSystem).symlink(target, join(base, 'link'))
         const { code, err } = yield* runCli(
           'src/commands/scrape.ts',
           ['--url', `${fx.origin}/`, '-o', 'link/evil.md'],
@@ -108,8 +108,9 @@ describe('WEBULAR_SANDBOX confines output paths (opt-in hardening)', () => {
           ['--url', `${fx.origin}/`, '-o', 'inv-out.md'],
           { env: { ...process.env, WEBULAR_SANDBOX: '1', WEBULAR_INVOKE_DIR: base } },
         )
-        const written = yield* io(() => Bun.file(join(base, 'inv-out.md')).exists())
-        rmSync(`${ROOT}inv-out.md`, { force: true })
+        const fs = yield* FileSystem.FileSystem
+        const written = yield* fs.exists(join(base, 'inv-out.md'))
+        yield* fs.remove(`${ROOT}inv-out.md`, { force: true })
         expect(code).toBe(0)
         expect(written).toBe(true)
       }),
@@ -123,7 +124,7 @@ describe('WEBULAR_SANDBOX confines output paths (opt-in hardening)', () => {
       Effect.gen(function* () {
         const dir = yield* tmpDir('webular-sb-read-')
         const file = join(dir, 'note.txt')
-        yield* io(() => Bun.write(file, 'readable sandbox input'))
+        yield* (yield* FileSystem.FileSystem).writeFileString(file, 'readable sandbox input')
         const { code, out } = yield* runCli('src/commands/parse.ts', ['--file', file, '--json'], {
           env: { ...process.env, WEBULAR_SANDBOX: '1' },
         })

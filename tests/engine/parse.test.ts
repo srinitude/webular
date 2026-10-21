@@ -2,9 +2,9 @@
 // garbage at exit 0; CSV/JSON become true markdown (fenced blocks).
 import { describe, expect, test } from 'bun:test'
 import { join } from 'node:path'
-import { Effect } from 'effect'
+import { Effect, FileSystem } from 'effect'
 import { parseDocument } from '../../src/lib/parse.ts'
-import { eff, failMsg, io, tmpDir } from '../_support/run.ts'
+import { eff, failMsg, tmpDir } from '../_support/run.ts'
 
 describe('parseDocument — binary guards and markdown-true output', () => {
   test(
@@ -13,7 +13,10 @@ describe('parseDocument — binary guards and markdown-true output', () => {
       Effect.gen(function* () {
         const dir = yield* tmpDir('webular-parse-')
         const file = join(dir, 'sheet.xlsx')
-        yield* io(() => Bun.write(file, Buffer.from([0x50, 0x4b, 0x03, 0x04, 0x00, 0x01, 0x02])))
+        yield* (yield* FileSystem.FileSystem).writeFile(
+          file,
+          new Uint8Array([0x50, 0x4b, 0x03, 0x04, 0x00, 0x01, 0x02]),
+        )
         expect(yield* failMsg(parseDocument(file))).toMatch(/unsupported binary format .xlsx/)
       }),
     ),
@@ -25,7 +28,10 @@ describe('parseDocument — binary guards and markdown-true output', () => {
       Effect.gen(function* () {
         const dir = yield* tmpDir('webular-parse-')
         const file = join(dir, 'data.log')
-        yield* io(() => Bun.write(file, Buffer.from([0x68, 0x69, 0x00, 0x00, 0x62, 0x79, 0x65])))
+        yield* (yield* FileSystem.FileSystem).writeFile(
+          file,
+          new Uint8Array([0x68, 0x69, 0x00, 0x00, 0x62, 0x79, 0x65]),
+        )
         expect(yield* failMsg(parseDocument(file))).toMatch(/binary/)
       }),
     ),
@@ -37,7 +43,7 @@ describe('parseDocument — binary guards and markdown-true output', () => {
       Effect.gen(function* () {
         const dir = yield* tmpDir('webular-parse-')
         const file = join(dir, 'table.csv')
-        yield* io(() => Bun.write(file, 'a,b\n1,2\n'))
+        yield* (yield* FileSystem.FileSystem).writeFileString(file, 'a,b\n1,2\n')
         const { markdown, format } = yield* parseDocument(file)
         expect(format).toBe('csv')
         expect(markdown).toBe('```csv\na,b\n1,2\n```')
@@ -51,7 +57,7 @@ describe('parseDocument — binary guards and markdown-true output', () => {
       Effect.gen(function* () {
         const dir = yield* tmpDir('webular-parse-')
         const file = join(dir, 'obj.json')
-        yield* io(() => Bun.write(file, '{"value":1}'))
+        yield* (yield* FileSystem.FileSystem).writeFileString(file, '{"value":1}')
         const { markdown } = yield* parseDocument(file)
         expect(markdown).toBe('```json\n{"value":1}\n```')
       }),
@@ -64,11 +70,9 @@ describe('parseDocument — binary guards and markdown-true output', () => {
       Effect.gen(function* () {
         const dir = yield* tmpDir('webular-parse-')
         const file = join(dir, 'page.html')
-        yield* io(() =>
-          Bun.write(
-            file,
-            '<p onclick="x()">hi <a href="javascript:alert(1)">link</a></p><script>alert(2)</script>',
-          ),
+        yield* (yield* FileSystem.FileSystem).writeFileString(
+          file,
+          '<p onclick="x()">hi <a href="javascript:alert(1)">link</a></p><script>alert(2)</script>',
         )
         const { markdown } = yield* parseDocument(file)
         expect(markdown).toContain('hi')
@@ -83,7 +87,7 @@ describe('parseDocument — binary guards and markdown-true output', () => {
       Effect.gen(function* () {
         const dir = yield* tmpDir('webular-parse-')
         const file = join(dir, 'note.txt')
-        yield* io(() => Bun.write(file, 'hello world'))
+        yield* (yield* FileSystem.FileSystem).writeFileString(file, 'hello world')
         const { markdown } = yield* parseDocument(file)
         expect(markdown).toBe('hello world')
       }),

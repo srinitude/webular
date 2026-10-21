@@ -1,13 +1,12 @@
 // PARSE contract — real local file parsing (no network, no mocks).
 // Tests the user-facing command behavior that `mise run run:parse` executes.
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
-import { rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 
-import { Effect } from 'effect'
+import { Effect, FileSystem } from 'effect'
 import { runCli } from '../_support/cli.ts'
-import { eff, io } from '../_support/run.ts'
+import { eff } from '../_support/run.ts'
 
 const TMP = join(tmpdir(), 'webular-parse-test')
 
@@ -20,19 +19,27 @@ const mdFile = join(TMP, 'test.md')
 
 beforeAll(
   eff(
-    Effect.all(
-      [
-        io(() => Bun.write(htmlFile, '<h1>Hello Webular</h1><p>Parsed.</p>')),
-        io(() => Bun.write(txtFile, 'plain text content for webular')),
-        io(() => Bun.write(jsonFile, '{"key":"value","num":42}')),
-        io(() => Bun.write(mdFile, '# Markdown Header\n\nSome paragraph text.')),
-      ],
-      { concurrency: 'unbounded' },
-    ),
+    Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem
+      yield* fs.makeDirectory(TMP, { recursive: true })
+      yield* Effect.all(
+        [
+          fs.writeFileString(htmlFile, '<h1>Hello Webular</h1><p>Parsed.</p>'),
+          fs.writeFileString(txtFile, 'plain text content for webular'),
+          fs.writeFileString(jsonFile, '{"key":"value","num":42}'),
+          fs.writeFileString(mdFile, '# Markdown Header\n\nSome paragraph text.'),
+        ],
+        { concurrency: 'unbounded' },
+      )
+    }),
   ),
 )
 
-afterAll(eff(io(() => rm(TMP, { recursive: true, force: true }))))
+afterAll(
+  eff(
+    Effect.flatMap(FileSystem.FileSystem, (fs) => fs.remove(TMP, { recursive: true, force: true })),
+  ),
+)
 
 describe('webular parse — local document to markdown/text (no network)', () => {
   test(

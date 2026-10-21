@@ -2,9 +2,8 @@
 // <=200 lines/file, <=30 lines/construct, control-flow nesting depth <=3.
 // Nesting counts only control-flow (not function/callback bodies), so test
 // nesting is naturally measured relative to the test() declaration.
-import { readFileSync } from 'node:fs'
 import { Glob } from 'bun'
-import { Effect } from 'effect'
+import { Effect, FileSystem } from 'effect'
 import ts from 'typescript'
 
 export interface Violation {
@@ -100,8 +99,7 @@ function deepest(node: ts.Node, depth: number): number {
   return max
 }
 
-function analyze(file: string, rel: string): Violation[] {
-  const src = readFileSync(file, 'utf8')
+function analyze(file: string, rel: string, src: string): Violation[] {
   const out: Violation[] = []
   const lines = src.split('\n').length
   if (lines > LIMITS.file) out.push({ file: rel, kind: 'file', detail: `${lines} lines` })
@@ -114,4 +112,8 @@ function analyze(file: string, rel: string): Violation[] {
 
 export const listFiles = (repo: string) => Effect.sync(() => scan(repo))
 
-export const analyzeFile = (file: string, rel: string) => Effect.sync(() => analyze(file, rel))
+export const analyzeFile = (file: string, rel: string) =>
+  Effect.gen(function* () {
+    const src = yield* (yield* FileSystem.FileSystem).readFileString(file)
+    return analyze(file, rel, src)
+  })

@@ -1,9 +1,8 @@
 // MONITOR contract — real fetch against the local fixture, temp db (no mocks).
-import { describe, expect, test } from 'bun:test'
-import { mkdtempSync, readdirSync, rmSync } from 'node:fs'
+import { beforeAll, describe, expect, test } from 'bun:test'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { Effect } from 'effect'
+import { Effect, FileSystem } from 'effect'
 import { runCli } from '../_support/cli.ts'
 import { useFixture } from '../_support/fixture.ts'
 import { defaultRoutes } from '../_support/routes.ts'
@@ -14,7 +13,9 @@ const fx = useFixture(defaultRoutes)
 const runMonitor = (args: string[]) => runCli('src/commands/monitor.ts', args)
 
 describe('webular monitor — change tracking across snapshots (real fetch)', () => {
-  const dbDir = mkdtempSync(join(tmpdir(), 'webular-'))
+  // Non-recursive create fails if the path exists, as mkdtemp would.
+  const dbDir = join(tmpdir(), `webular-monitor-${crypto.randomUUID()}`)
+  beforeAll(eff(Effect.flatMap(FileSystem.FileSystem, (fs) => fs.makeDirectory(dbDir))))
   const dbPath = join(dbDir, 'monitor.db')
 
   test(
@@ -64,7 +65,14 @@ describe('webular monitor — change tracking across snapshots (real fetch)', ()
     ),
   )
 
-  test('cleanup db', eff(Effect.sync(() => rmSync(dbDir, { recursive: true, force: true }))))
+  test(
+    'cleanup db',
+    eff(
+      Effect.flatMap(FileSystem.FileSystem, (fs) =>
+        fs.remove(dbDir, { recursive: true, force: true }),
+      ),
+    ),
+  )
 
   test(
     'default db path is per-user, per-project and stable across runs',
@@ -83,7 +91,8 @@ describe('webular monitor — change tracking across snapshots (real fetch)', ()
         expect(first.code).toBe(0)
         expect(JSON.parse(first.out).changeStatus).toBe('new')
         expect(JSON.parse(second.out).changeStatus).toBe('same')
-        const files = readdirSync(join(stateHome, 'webular'))
+        const fs = yield* FileSystem.FileSystem
+        const files = yield* fs.readDirectory(join(stateHome, 'webular'))
         expect(files.length).toBe(1)
         expect(files[0]).toMatch(/^monitor-[0-9a-f]{12}\.db$/)
       }),
@@ -113,7 +122,8 @@ describe('webular monitor — change tracking across snapshots (real fetch)', ()
         const dirB = yield* tmpDir('webular-')
         expect(yield* spawnFrom(dirA)).toBe(0)
         expect(yield* spawnFrom(dirB)).toBe(0)
-        const files = readdirSync(join(stateHome, 'webular'))
+        const fs = yield* FileSystem.FileSystem
+        const files = yield* fs.readDirectory(join(stateHome, 'webular'))
         expect(files.length).toBe(2)
       }),
     ),

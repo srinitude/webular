@@ -19,14 +19,19 @@ const loadTools = Effect.tryPromise({ try: () => import('../tools/web.ts'), catc
 // The --list path needs only the id list, so it picks that one export.
 const pick = <M, T>(load: () => Promise<M>, from: (m: M) => T) => load().then(from)
 
-const loadSdk = Effect.tryPromise({
-  try: () =>
-    Promise.all([
-      import('@modelcontextprotocol/sdk/server/mcp.js'),
-      import('@modelcontextprotocol/sdk/server/stdio.js'),
-    ]),
-  catch: serverError,
-})
+const loadSdk = Effect.all(
+  [
+    Effect.tryPromise({
+      try: () => import('@modelcontextprotocol/sdk/server/mcp.js'),
+      catch: serverError,
+    }),
+    Effect.tryPromise({
+      try: () => import('@modelcontextprotocol/sdk/server/stdio.js'),
+      catch: serverError,
+    }),
+  ],
+  { concurrency: 'unbounded' },
+)
 
 // Owns the server for the scope: connect on acquire, close on release, and
 // stay alive until the stdio transport closes (stdin ends or the client leaves).

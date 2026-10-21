@@ -1,9 +1,8 @@
 // MEDIA contract — real download from the deterministic local fixture (no mocks).
 // Tests user-facing behavior of `media --url ... --download -o <tmp> --json`.
 import { describe, expect, test } from 'bun:test'
-import { existsSync, statSync } from 'node:fs'
 import { join } from 'node:path'
-import { Effect } from 'effect'
+import { Effect, FileSystem } from 'effect'
 import { runCli } from '../_support/cli.ts'
 import { useFixture } from '../_support/fixture.ts'
 import { defaultRoutes } from '../_support/routes.ts'
@@ -31,8 +30,9 @@ describe('webular media — download bytes from a real URL', () => {
         const data = JSON.parse(out)
         expect(data.savedTo).toBe(dest)
         expect(data.bytes).toBe(2048)
-        expect(existsSync(dest)).toBe(true)
-        expect(statSync(dest).size).toBe(2048)
+        const fs = yield* FileSystem.FileSystem
+        expect(yield* fs.exists(dest)).toBe(true)
+        expect(Number((yield* fs.stat(dest)).size)).toBe(2048)
       }),
     ),
     15_000,
