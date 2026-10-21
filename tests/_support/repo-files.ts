@@ -60,6 +60,6 @@ export const matching = Effect.fn('matching')(function* (pattern: RegExp) {
 export const fileChecks = () => {
   const runtime = ManagedRuntime.make(BunServices.layer)
   afterAll(() => runtime.dispose())
-  return <E>(name: string, body: Effect.Effect<void, E, FileSystem.FileSystem>) =>
+  return <E>(name: string, body: Effect.Effect<void, E, BunServices.BunServices>) =>
     test(name, () => runtime.runPromise(body))
 }
