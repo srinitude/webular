@@ -107,4 +107,4 @@ Each task is graded by the cheapest grader that can decide it, in this order:
 
 - Every row ends in one of `ok`, `wrong`, `empty`, `error_4xx`, `error_5xx`, `timeout`, `blocked`, or `rate_limited`.
 - Errors count as wrong in accuracy, and each error rate is also reported on its own.
-- Robustness runs paraphrase 10% of queries and add typos to 5%; the report shows the accuracy drop for each.
+- Robustness runs paraphrase 10% of queries and add typos to 5% of queries. The report shows the accuracy drop for each.

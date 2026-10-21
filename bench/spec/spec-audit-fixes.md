@@ -18,7 +18,8 @@ It builds on [benchmark-spec.md](benchmark-spec.md).
 ## 2. Warm and cold calls are mixed (critical)
 
 - Cold and warm are reported apart and never pooled; the pooled p50 is dropped ([spec-grading-and-stats.md](spec-grading-and-stats.md#latency-protocol)).
-- Each cold call uses a cache-busting variant of its query (a paraphrase or a harmless extra term, checked to keep the same gold), and repeats of a task are spaced at least 30 minutes apart.
+- Each cold call uses a cache-busting variant of its query (a paraphrase or a harmless extra term, checked to keep the same gold).
+  Repeats of a task are spaced at least 30 minutes apart.
 - A repeat-query cache probe runs per provider, and cache evidence from the API is saved.
 - `coldStartMs` is the median of each provider's first call on the same fixed task, not one row.
 
@@ -56,7 +57,8 @@ It builds on [benchmark-spec.md](benchmark-spec.md).
 
 ## 8. Settings and result counts are not equal (medium)
 
-- Every provider gets the same result count N, enforced by cutting results after the call, plus the same timeout, retry policy, and budget.
+- Every provider gets the same result count N, enforced by cutting results after the call.
+  Every provider also gets the same timeout, retry policy, and budget.
 - A settings table lists each peer's default and best-documented settings.
   Both are run, and each request body is saved with its result.
 - Firecrawl `maxAge` and similar caches are turned off for cold runs.

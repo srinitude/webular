@@ -33,7 +33,8 @@ The fixes for each finding of the bias audit are mapped in [spec-audit-fixes.md]
   Any setting that differs from the vendor default is written in the adapter with a reason.
 - A job a peer does not offer is marked `not offered`, never scored as zero.
 - Vendor-run benchmarks supply tasks only, never results.
-  Exa, Parallel, Tavily, and Linkup each rank first on their own tests (the vendor list is in spec-alternatives.md), and two independent boards rank Perplexity and Brave in opposite orders ([AIMultiple](https://aimultiple.com/agentic-search); [OpenBenchmarks](https://openbenchmarks.com/web-search)).
+  Exa, Parallel, Tavily, and Linkup each rank first on their own tests (the vendor list is in spec-alternatives.md).
+  Two independent boards rank Perplexity and Brave in opposite orders ([AIMultiple](https://aimultiple.com/agentic-search); [OpenBenchmarks](https://openbenchmarks.com/web-search)).
 - Peers and webular get byte-identical inputs, in a random task order per round, with the same timeouts.
 
 ## Caching rules
