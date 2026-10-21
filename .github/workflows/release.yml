@@ -105,6 +105,10 @@ jobs:
         run: mise run compile:all
         env:
           BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
+      # bun build --compile --sourcemap leaves a .map beside each executable; the
+      # maps are not release files, so drop them before any webular-* glob.
+      - name: Drop the source maps bun writes beside the executables
+        run: rm -f dist/bin/*.map
       # The completions tarball is a release file: it exists before SHA256SUMS,
       # so the webular-* globs below checksum, attest, and upload it.
       - name: Stage shell completions and the webular(1) man page
@@ -135,6 +139,8 @@ jobs:
         run: cp scripts/install.sh scripts/install.ps1 dist/bin/
       - name: Write the Arch and Nix packaging files from SHA256SUMS
         run: mise run package:distros
+        env:
+          MISE_TASK_SKIP_DEPENDS: "1" # binaries and SHA256SUMS exist above; a rebuild would change the checksummed bytes
       - name: Upload the Arch and Nix packaging files for a manual publish
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
