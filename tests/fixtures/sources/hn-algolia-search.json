@@ -1,0 +1,77 @@
+{
+  "exhaustive": { "nbHits": false, "typo": false },
+  "exhaustiveNbHits": false,
+  "exhaustiveTypo": false,
+  "hits": [
+    {
+      "_highlightResult": {
+        "author": { "matchLevel": "none", "matchedWords": [], "value": "emschwartz" },
+        "title": {
+          "fullyHighlighted": false,
+          "matchLevel": "full",
+          "matchedWords": ["effect", "typescript"],
+          "value": "Exploring <em>Effect</em> in <em>TypeScript</em>: Simplifying Async and Error Handling"
+        },
+        "url": {
+          "fullyHighlighted": false,
+          "matchLevel": "full",
+          "matchedWords": ["effect", "typescript"],
+          "value": "https://www.tweag.io/blog/2024-11-07-<em>typescript</em>-<em>effect</em>/"
+        }
+      },
+      "_tags": ["story", "author_emschwartz", "story_42156722"],
+      "author": "emschwartz",
+      "children": [42157080],
+      "created_at": "2024-11-16T14:55:11Z",
+      "created_at_i": 1731768911,
+      "num_comments": 1,
+      "objectID": "42156722",
+      "points": 3,
+      "story_id": 42156722,
+      "title": "Exploring Effect in TypeScript: Simplifying Async and Error Handling",
+      "updated_at": "2024-11-17T19:38:39Z",
+      "url": "https://www.tweag.io/blog/2024-11-07-typescript-effect/"
+    },
+    {
+      "_highlightResult": {
+        "author": { "matchLevel": "none", "matchedWords": [], "value": "birdinleconey" },
+        "title": {
+          "fullyHighlighted": false,
+          "matchLevel": "full",
+          "matchedWords": ["effect", "typescript"],
+          "value": "Show HN: <em>Effect</em> \u2013 <em>TypeScript</em>'s functional <em>effect</em> system and monorepo toolkit"
+        },
+        "url": {
+          "fullyHighlighted": false,
+          "matchLevel": "partial",
+          "matchedWords": ["effect"],
+          "value": "https://github.com/<em>Effect</em>-TS/<em>effect</em>"
+        }
+      },
+      "_tags": ["story", "author_birdinleconey", "story_44645585", "show_hn"],
+      "author": "birdinleconey",
+      "created_at": "2025-07-22T11:29:35Z",
+      "created_at_i": 1753183775,
+      "num_comments": 0,
+      "objectID": "44645585",
+      "points": 3,
+      "story_id": 44645585,
+      "title": "Show HN: Effect \u2013 TypeScript's functional effect system and monorepo toolkit",
+      "updated_at": "2025-07-22T11:53:39Z",
+      "url": "https://github.com/Effect-TS/effect"
+    }
+  ],
+  "hitsPerPage": 2,
+  "nbHits": 80,
+  "nbPages": 40,
+  "page": 0,
+  "params": "query=effect+typescript&tags=story&hitsPerPage=2&advancedSyntax=true&analyticsTags=backend",
+  "processingTimeMS": 14,
+  "processingTimingsMS": {
+    "_request": { "roundTrip": 18 },
+    "fetch": { "query": 9, "scanning": 3, "total": 13 },
+    "total": 14
+  },
+  "query": "effect typescript",
+  "serverTimeMS": 14
+}

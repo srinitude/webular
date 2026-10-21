@@ -6,6 +6,7 @@
 import { Clock, Data, Duration, Effect } from 'effect'
 import { commonCrawlCdx, libraryOfCongress, waybackAvailable, waybackCdx } from './archives.ts'
 import { bluesky, reddit, stackExchange } from './communities.ts'
+import { gdelt, hnAlgolia } from './news.ts'
 import { type Hit, TIMEOUT_MS } from './polite.ts'
 import { rankHits } from './rank.ts'
 import { europePmc, ncbiEutils } from './scholarly.ts'
@@ -29,6 +30,8 @@ const FREE_SOURCES = {
   loc: libraryOfCongress,
   reddit,
   bluesky,
+  'hn-algolia': hnAlgolia,
+  gdelt,
 } as const satisfies Record<string, (query: string, limit: number) => Effect.Effect<Hit[], unknown>>
 
 export type FreeSource = keyof typeof FREE_SOURCES
@@ -38,10 +41,18 @@ export const FREE_SOURCE_NAMES = Object.keys(FREE_SOURCES) as [FreeSource, ...Fr
 // Reddit and Bluesky answered 403 to keyless calls, so no command lists them;
 // they stay callable by name for a caller that brings its own access.
 const FREE_SOURCE_ORDER = {
-  search: ['wikidata', 'europepmc', 'stackexchange', 'github-search', 'marginalia', 'loc'],
-  answer: ['wikidata', 'stackexchange', 'github-search', 'europepmc'],
+  search: [
+    'wikidata',
+    'europepmc',
+    'stackexchange',
+    'github-search',
+    'hn-algolia',
+    'marginalia',
+    'loc',
+  ],
+  answer: ['wikidata', 'stackexchange', 'github-search', 'hn-algolia', 'europepmc'],
   research: ['europepmc', 'ncbi-eutils', 'wikidata', 'stackexchange', 'loc', 'marginalia'],
-  summarize: ['wikidata'],
+  summarize: ['wikidata', 'hn-algolia', 'gdelt'],
   feed: ['feedsearch'],
   monitor: ['wayback-cdx', 'wayback-available'],
   map: ['wayback-cdx', 'commoncrawl-cdx'],
@@ -65,6 +76,8 @@ const SOURCE_TRUST: Record<FreeSource, number> = {
   stackexchange: 0.6,
   'github-search': 0.5,
   feedsearch: 0.5,
+  'hn-algolia': 0.5,
+  gdelt: 0.5,
   marginalia: 0.4,
   reddit: 0.3,
   bluesky: 0.3,
