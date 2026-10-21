@@ -103,6 +103,9 @@ const checkUrl = (name: string, inputData: unknown): Effect.Effect<void, CliErro
   return Effect.fail(new CliError({ message, exitCode: EXIT.usage }))
 }
 
+const startRun = (inputData: unknown) => (created: WorkflowRun) =>
+  Effect.tryPromise({ try: () => created.start({ inputData }), catch: errMsg })
+
 // The Mastra run is the Promise edge; it surfaces input-validation failures by
 // rejecting from start, which reports as a plain failure (exit 1). The
 // workflow loads lazily: importing @mastra/core costs seconds of disk reads,
@@ -132,9 +135,7 @@ export function runWorkflow<M>(
         catch: errMsg,
       }),
     ),
-    Effect.flatMap((created) =>
-      Effect.tryPromise({ try: () => created.start({ inputData }), catch: errMsg }),
-    ),
+    Effect.flatMap(startRun(inputData)),
     Effect.matchEffect({
       onFailure: (detail) => failed(name, detail, [{ type: 'INPUT_INVALID' }]),
       onSuccess: (outcome) => report(name, outcome, opts),

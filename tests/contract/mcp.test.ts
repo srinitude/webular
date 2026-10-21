@@ -24,18 +24,14 @@ const fx = useFixture((o) => ({
 const HTML = '<html><head><title>T</title></head><body><h1>Hi</h1><a href="/a">a</a></body></html>'
 
 // CLI flags a tool leaves out on purpose, each with the reason.
+const BUDGET = 'The tools/list token budget (tests/commands/tokens.test.ts) leaves no room for it.'
 const CLI_ONLY: Record<string, Record<string, string>> = {
-  batch: {
-    archive: 'The tools/list token budget (tests/commands/tokens.test.ts) leaves no room for it.',
-  },
+  batch: { archive: BUDGET },
   monitor: {
     db: 'The server picks the per-project database; an agent path could write anywhere.',
-    'watch-for':
-      'The tools/list token budget (tests/commands/tokens.test.ts) leaves no room for it.',
+    'watch-for': BUDGET,
   },
-  search: {
-    variant: 'The tools/list token budget (tests/commands/tokens.test.ts) leaves no room for it.',
-  },
+  search: { variant: BUDGET },
 }
 
 // Tools with no fixture call, each with the reason.

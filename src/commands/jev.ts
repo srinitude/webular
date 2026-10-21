@@ -49,13 +49,13 @@ const main = Effect.gen(function* () {
   const rest = named === undefined ? positionals.slice(1) : positionals
   const id = strFlag(values, 'id') ?? rest[0]
   const label = strFlag(values, 'label') ?? rest[1]
-  const cli = () => import('../lib/jev/learn/cli.ts')
   if (cmd === 'learn') {
-    yield* yield* load(cli, (m) => m.learn)
+    yield* yield* load(() => import('../lib/jev/learn/cli.ts'), (m) => m.learn)
     return exitFor('LEARN', 'SUCCEEDED')
   }
   if (cmd === 'correct' && id && label) {
-    yield* (yield* load(cli, (m) => m.correctCall))(id, label, strFlag(values, 'input'))
+    const correct = yield* load(() => import('../lib/jev/learn/cli.ts'), (m) => m.correctCall)
+    yield* correct(id, label, strFlag(values, 'input'))
     return exitFor('CORRECT', 'SUCCEEDED')
   }
   if (cmd === 'correct')

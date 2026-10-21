@@ -12,7 +12,7 @@ const ARGV_FOR_PATH: Record<string, string[]> = {
   VERSION: ['--version'],
   UNKNOWN_COMMAND: ['no-such-command'],
   'KNOWN_COMMAND TASK_SUCCEEDED': ['diagram', '--json'],
-  'KNOWN_COMMAND TASK_FAILED': ['scrape', '--url', 'not a url'],
+  'KNOWN_COMMAND TASK_FAILED': ['scrape', '--url', 'http://127.0.0.1:9/'],
 }
 
 const paths = finalPaths(cliDispatchMachine, [
