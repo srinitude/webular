@@ -1,9 +1,11 @@
-// Bun.fetch layer: timeout, user-agent, scoped redirects, textual-content guard,
+// HttpClient layer: timeout, user-agent, scoped redirects, textual-content guard,
 // deterministic bounded retry, disk-cache revalidation. The fetch machine
 // (src/machines/fetch.ts) decides every retry, redirect, and failure; this
 // file only performs the requests it asks for.
 import { BunServices } from '@effect/platform-bun'
-import { Clock, Effect } from 'effect'
+import { Clock, Effect, Exit, Scope } from 'effect'
+import * as FetchHttpClient from 'effect/http/FetchHttpClient'
+import * as HttpClient from 'effect/http/HttpClient'
 import { type EventFromLogic, initialTransition, type SnapshotFrom, transition } from 'xstate'
 import pkg from '../../package.json' with { type: 'json' }
 import { failureEvent, fetchMachine } from '../machines/fetch.ts'
@@ -49,20 +51,37 @@ function isAbort(err: unknown): boolean {
   return err instanceof DOMException && (err.name === 'TimeoutError' || err.name === 'AbortError')
 }
 
+// HttpClient over FetchHttpClient, scoped so no GC hook aborts a body mid-read.
+// The caller signal or a per-attempt timeout covers headers and body; fiber
+// interrupt closes the scope, aborting only while headers are pending.
+const send = Effect.fn('send')(function* (url: string, opts: FetchOptions) {
+  const base = yield* FetchHttpClient.Fetch
+  const own = opts.signal ?? AbortSignal.timeout(opts.timeoutMs ?? 30_000)
+  let pending: Promise<Response> | undefined
+  const both = (s?: AbortSignal | null) => (s ? AbortSignal.any([own, s]) : own)
+  const viaOwn = ((input: RequestInfo | URL, init: RequestInit) =>
+    (pending = base(input, { ...init, signal: both(init.signal) }))) as typeof globalThis.fetch
+  const scope = yield* Scope.make()
+  const client = HttpClient.withScope(yield* HttpClient.HttpClient)
+  yield* client.get(url, { headers: { 'user-agent': USER_AGENT, ...opts.headers } }).pipe(
+    Scope.provide(scope),
+    Effect.onInterrupt(() => Scope.close(scope, Exit.void)),
+    Effect.provideService(FetchHttpClient.Fetch, viaOwn),
+    Effect.provideService(FetchHttpClient.RequestInit, { redirect: opts.redirect ?? 'follow' }),
+    Effect.provideService(HttpClient.TracerDisabledWhen, () => true), // no spans, no trace headers
+  )
+  return yield* Effect.promise(() => pending as Promise<Response>) // settled: the client resolved it
+}, Effect.provide(FetchHttpClient.layer))
+
+// Every response, retries included, reaches onResponse before its body is read.
 const fetchOnce = (url: string, opts: FetchOptions): Effect.Effect<Response, FetchError> =>
-  Effect.tryPromise({
-    try: (interrupt) =>
-      fetch(url, {
-        headers: { 'user-agent': USER_AGENT, ...opts.headers },
-        redirect: opts.redirect ?? 'follow',
-        // A fresh per-attempt budget unless the caller owns the signal lifecycle.
-        signal: AbortSignal.any([
-          opts.signal ?? AbortSignal.timeout(opts.timeoutMs ?? 30_000),
-          interrupt,
-        ]),
-      }),
-    catch: (err) => new FetchError({ message: errMsg(err), aborted: isAbort(err) }),
-  }).pipe(Effect.tap((res) => Effect.sync(() => opts.onResponse?.(res))))
+  send(url, opts).pipe(
+    Effect.mapError((err) => {
+      const cause = 'cause' in err.reason ? err.reason.cause : err
+      return new FetchError({ message: errMsg(cause), aborted: isAbort(cause) })
+    }),
+    Effect.tap((res) => Effect.sync(() => opts.onResponse?.(res))),
+  )
 
 const isRedirect = (status: number) => status >= 300 && status < 400
 
@@ -76,15 +95,10 @@ interface Run {
 }
 
 const startRun = (origin: string, opts: FetchOptions, host?: string) =>
-  Effect.map(
-    Clock.currentTimeMillis,
-    (now): Run => ({
-      origin,
-      host,
-      opts,
-      deadline: now + (opts.timeoutMs ?? Number.POSITIVE_INFINITY),
-    }),
-  )
+  Effect.map(Clock.currentTimeMillis, (now): Run => {
+    const deadline = now + (opts.timeoutMs ?? Number.POSITIVE_INFINITY)
+    return { origin, host, opts, deadline }
+  })
 
 interface Landed {
   res: Response
