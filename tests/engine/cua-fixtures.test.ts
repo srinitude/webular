@@ -35,6 +35,16 @@ describe('captured cua-driver replies', () => {
       }),
     ))
 
+  // Captured from a native Calculator window inside a named session: a
+  // satisfied predicate carries unknown_reason null.
+  test('verify_state satisfied on a native window passes with no tree read', () =>
+    Effect.runPromise(
+      Effect.gen(function* () {
+        const got = yield* verifyWith(yield* raw('verify-state-satisfied.json'), '7')
+        expect(got).toEqual({ ok: true, calls: ['verify_state'] })
+      }),
+    ))
+
   test('parse_visual_regions without the perception extension yields no regions', () =>
     Effect.runPromise(
       Effect.gen(function* () {

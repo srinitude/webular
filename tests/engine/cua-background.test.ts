@@ -91,6 +91,15 @@ describe('Cua background-only contract', () => {
     eff(Effect.map(allCode, checkAllowlist)),
   )
   test('Cua code never runs open without -g', eff(Effect.map(allCode, checkOpen)))
+  test(
+    'act --goal opens its named session and always ends it',
+    eff(
+      Effect.map(code('src/commands/act.ts'), (text) => {
+        expect(text).toMatch(/acquireUseRelease\(\s*cuaCall\('start_session'/)
+        expect(text).toContain("cuaCall('end_session', { session })")
+      }),
+    ),
+  )
   test('the scan catches a focus-taking call', () => {
     expect(() => checkAllowlist("cuaCall('bring_to_front', {})")).toThrow()
     expect(() => checkOpen("runProc(['open', '-a', 'Calculator'])")).toThrow()

@@ -23,11 +23,18 @@ const actGoal = Effect.fnUntraced(function* (goal: string) {
   if (intents.length === 0)
     return yield* bad('act --goal: name what to click, such as: click "Save" until it says "Saved"')
   // One session label for the whole run: element tokens and captures live
-  // only inside the session that took the snapshot.
+  // only inside the session that took the snapshot. start_session opens it
+  // (the path the live native check proves) and end_session always closes
+  // it, so no session stays open in the cua-driver daemon.
   const session = `webular-goal-${yield* Random.nextInt}`
   const call = (tool: string, args: Record<string, unknown>) => cuaCall(tool, { ...args, session })
+  const decisions = yield* decisionsFromEnv
   return yield* Effect.mapError(
-    runGoal(call, target, goal, intents, yield* decisionsFromEnv),
+    Effect.acquireUseRelease(
+      cuaCall('start_session', { session }),
+      () => runGoal(call, target, goal, intents, decisions),
+      () => Effect.ignore(cuaCall('end_session', { session })),
+    ),
     (err) => new CliError({ message: `act --goal: ${err.message}`, exitCode: EXIT.failure }),
   )
 })

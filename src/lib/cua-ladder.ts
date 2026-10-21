@@ -104,10 +104,12 @@ const rungs: ReadonlyArray<readonly [Rung, typeof axRung]> = [
 
 // verify_state reply (tests/fixtures/cua/verify-state.json): one overall
 // status plus per-predicate reasons. unknown is never success on its own.
+// A satisfied predicate carries unknown_reason null
+// (tests/fixtures/cua/verify-state-satisfied.json).
 export const Verified = Schema.Struct({
   status: Schema.Literals(['satisfied', 'unsatisfied', 'unknown']),
   predicates: Schema.optional(
-    Schema.Array(Schema.Struct({ unknown_reason: Schema.optional(Schema.String) })),
+    Schema.Array(Schema.Struct({ unknown_reason: Schema.optional(Schema.NullOr(Schema.String)) })),
   ),
 })
 const decodeVerified = Schema.decodeUnknownEffect(Verified)
