@@ -30,7 +30,7 @@
     "bun"
   ],
   "bin": {
-    "webular": "./bin/webular.ts"
+    "webular": "./dist/webular.js"
   },
   "exports": {
     ".": "./src/cli/route.ts",
@@ -38,6 +38,7 @@
   },
   "files": [
     "bin",
+    "dist/webular.js",
     "dist/commands",
     "dist/chunks",
     "src",

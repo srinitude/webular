@@ -6,7 +6,7 @@ import { afterAll, expect, test } from 'bun:test'
 import { BunServices } from '@effect/platform-bun'
 import { Effect, FileSystem, ManagedRuntime, Schema } from 'effect'
 import release from '../../.github/workflows/release.yml'
-import { assetName, packageName, TARGETS } from '../../src/core/platform.ts'
+import { assetName, exeName, packageName, TARGETS } from '../../src/core/platform.ts'
 import {
   brewTargets,
   homebrewFormula,
@@ -15,6 +15,7 @@ import {
   scoopManifest,
   scoopTargets,
 } from '../../src/release/distribution.ts'
+import { packageCopies } from '../../src/release/platform-packages.ts'
 import { ROOT } from '../_support/root.ts'
 
 const runtime = ManagedRuntime.make(BunServices.layer)
@@ -115,7 +116,18 @@ test('release attests, drafts, publishes npm, then un-drafts', () => {
   ].map((needle) => text.indexOf(needle))
   expect(order.every((at) => at >= 0)).toBe(true)
   expect([...order].sort((a, b) => a - b)).toEqual(order)
-  expect(text).toContain('--tag \\"$tag\\"')
+  expect(text).toContain('--tag \\"$DIST_TAG\\"')
   expect(text).toContain('--provenance')
   expect(text).toContain('"attestations":"write"')
+})
+
+test('every platform package ships the Apache-2.0 LICENSE beside its binary', () => {
+  for (const target of TARGETS) {
+    const copies = packageCopies('/r', target)
+    expect(copies).toContainEqual(['/r/LICENSE', `/r/npm/${packageName(target)}/LICENSE`])
+    expect(copies).toContainEqual([
+      `/r/dist/bin/${assetName(target)}`,
+      `/r/npm/${packageName(target)}/bin/${exeName(target)}`,
+    ])
+  }
 })

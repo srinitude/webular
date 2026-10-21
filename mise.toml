@@ -66,10 +66,11 @@ run = [
   'bun scripts/clean.ts',
   'bun build {{vars.entries}} --target=bun --minify --splitting --root="{{config_root}}/src" --outdir="{{config_root}}/dist" --chunk-naming=chunks/[name]-[hash].[ext]',
   'bun build "{{config_root}}/bin/webular.ts" --compile --minify --sourcemap --bytecode --format=esm --outfile="{{config_root}}/dist/bin/webular"',
+  'bun build "{{config_root}}/src/release/node-launcher.ts" --target=node --format=esm --minify --outfile="{{config_root}}/dist/webular.js"',
   { task = "plugin:ui" },
 ]
 sources = ["src/**/*.ts", "bin/**/*.ts", "scripts/**/*.ts", "mise.toml", "package.json", "tsconfig.json"]
-outputs = ["dist/commands/search.js", "dist/bin/webular"]
+outputs = ["dist/commands/search.js", "dist/bin/webular", "dist/webular.js"]
 
 [tasks."compile:all"]
 description = "Cross-compile the webular executable for every Bun target into dist/bin (release path, off the check-only spine)"

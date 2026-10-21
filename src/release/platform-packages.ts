@@ -22,13 +22,23 @@ const platformManifest = (target: Target, version: string) => ({
   preferUnplugged: true,
 })
 
+// [source, destination] copies into one package: its binary, plus the LICENSE
+// that Apache-2.0 section 4(a) requires with every redistribution.
+export const packageCopies = (root: string, target: Target): ReadonlyArray<[string, string]> => {
+  const dir = join(root, 'npm', packageName(target))
+  return [
+    [join(root, 'dist', 'bin', assetName(target)), join(dir, 'bin', exeName(target))],
+    [join(root, 'LICENSE'), join(dir, 'LICENSE')],
+  ]
+}
+
 const writePackage = (target: Target, version: string) =>
   Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem
     const dir = join(PACKAGE_ROOT, 'npm', packageName(target))
     const exe = join(dir, 'bin', exeName(target))
     yield* fs.makeDirectory(join(dir, 'bin'), { recursive: true })
-    yield* fs.copyFile(join(PACKAGE_ROOT, 'dist', 'bin', assetName(target)), exe)
+    for (const [from, to] of packageCopies(PACKAGE_ROOT, target)) yield* fs.copyFile(from, to)
     if (target.os !== 'win32') yield* fs.chmod(exe, 0o755)
     const manifest = `${JSON.stringify(platformManifest(target, version), null, 2)}\n`
     yield* fs.writeFileString(join(dir, 'package.json'), manifest)
