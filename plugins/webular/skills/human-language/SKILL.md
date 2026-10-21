@@ -87,6 +87,13 @@ Run this on every output, scaled to its size. For a long piece, check the whole,
 - Do not print this checklist in normal work. When rewriting, return the text with only notes that explain a material limit.
 - Treat user feedback as evidence: fix the cause, then recheck the whole piece.
 
+## Gotchas
+
+- `proseIssues` skips text inside backticks. Put exact names, such as the flag `--limit`, in backticks. Outside backticks, a name that matches a cut word gets flagged.
+- A cut word is flagged even when it is literal ("just" as in "just cause"). Rephrase, or put the literal term in backticks.
+- A sentence ends only at `.`, `!`, or `?` followed by a space. A long list joined by commas or semicolons counts as one sentence against the word limit in [words.json](scripts/words.json).
+- A clean `proseIssues` result is not a pass. It checks words only; the five checks above still apply.
+
 ## When to read more
 
 Read [situations.md](references/situations.md) in these cases:

@@ -10,6 +10,7 @@ import { citedSources } from '../lib/jev/decisions/answer-citation.ts'
 import { onJevRuntime } from '../lib/jev/decisions/search.ts'
 import { decisions } from '../lib/jev/decisions.ts'
 import { decisionStep } from '../lib/jev/steps.ts'
+import { readabilitySchema, withReadability } from '../lib/readability-chain.ts'
 import { searchEffect } from '../lib/search-chain.ts'
 import { mainEntity } from '../lib/search-hop.ts'
 import { subjectSources } from '../lib/source-subject.ts'
@@ -35,12 +36,13 @@ const ANSWER_MAX_HTML = 400_000
 
 const sourceRef = z.object({ title: z.string(), url: z.string() })
 
-const answerOutput = z.object({
+const answerBody = z.object({
   query: z.string(),
   answer: z.string(),
   sources: z.array(sourceRef),
   errors: fetchErrorsSchema,
 })
+const answerOutput = answerBody.extend({ readability: readabilitySchema })
 
 const evidenceSchema = z.object({
   query: z.string(),
@@ -112,7 +114,7 @@ const prepareSynth = Effect.fn('answer.prepare')(function* (data: Evidence) {
 const synthStep = decisionStep({
   id: 'fetch-and-summarize',
   inputSchema: evidenceSchema,
-  outputSchema: answerOutput,
+  outputSchema: answerBody,
   decide: decisions.answerSentence,
   prepare: (data: Evidence) => stepRuntime.runPromise(prepareSynth(data)),
   pick: ({ query, text }) => (text ? { question: query, text } : undefined),
@@ -131,6 +133,14 @@ const synthStep = decisionStep({
   },
 })
 
+// The readability chain checks the finished answer text; the text stays as is.
+const readabilityStep = createStep({
+  id: 'readability',
+  inputSchema: answerBody,
+  outputSchema: answerOutput,
+  execute: ({ inputData }) => stepRuntime.runPromise(withReadability('answer')(inputData)),
+})
+
 export const answerWorkflow = createWorkflow({
   id: 'answer',
   inputSchema: answerInput,
@@ -138,4 +148,5 @@ export const answerWorkflow = createWorkflow({
 })
   .then(searchStep)
   .then(synthStep)
+  .then(readabilityStep)
   .commit()

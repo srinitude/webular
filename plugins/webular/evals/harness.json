@@ -355,6 +355,18 @@
       "grader": "bun test: sha256 of normalized rule lines"
     },
     {
+      "assertion": "${name} copy rules match the reviewed hash",
+      "source": "tests/readability-drift.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: sha256 of normalized rule lines in the shipped copy"
+    },
+    {
+      "assertion": "the built-in readability skills are real files, never symlinks",
+      "source": "tests/readability-drift.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: readLink fails on every skill folder and SKILL.md"
+    },
+    {
       "assertion": "ruleHash ignores formatting but not wording",
       "source": "tests/readability-drift.test.ts",
       "kind": "deterministic",
@@ -365,6 +377,42 @@
       "source": "tests/readability-lint.test.ts",
       "kind": "deterministic",
       "grader": "bun test: proseIssues over every shipped string"
+    },
+    {
+      "assertion": "human-language eval rewrite-mcp-scrape-tool-description passes plain.ts",
+      "source": "tests/human-language-evals.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: proseIssues on stored good and bad text"
+    },
+    {
+      "assertion": "human-language eval write-cli-help-for-map-command passes plain.ts",
+      "source": "tests/human-language-evals.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: proseIssues on stored good and bad text"
+    },
+    {
+      "assertion": "human-language eval write-jev-payload-question-text passes plain.ts",
+      "source": "tests/human-language-evals.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: proseIssues on stored good and bad text"
+    },
+    {
+      "assertion": "human-language eval rewrite-schema-field-description-limit passes plain.ts",
+      "source": "tests/human-language-evals.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: proseIssues on stored good and bad text"
+    },
+    {
+      "assertion": "human-language eval report-partial-crawl-result-honestly passes plain.ts",
+      "source": "tests/human-language-evals.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: proseIssues on stored good and bad text"
+    },
+    {
+      "assertion": "human-language eval leave-fixed-wording-and-quote-alone passes plain.ts",
+      "source": "tests/human-language-evals.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: proseIssues on stored good and bad text"
     },
     {
       "assertion": "the lint reads the MCP command tool messages and descriptions",
@@ -413,6 +461,36 @@
       "source": "tests/jev.test.ts",
       "kind": "deterministic",
       "grader": "bun test: plainText output equality"
+    },
+    {
+      "assertion": "scrape-output-keeps-quote-and-source-url: check.ts passes good and flags bad",
+      "source": "tests/markdown-evals.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: check.ts findings on stored good and bad Markdown"
+    },
+    {
+      "assertion": "research-report-marks-unsourced-claims: check.ts passes good and flags bad",
+      "source": "tests/markdown-evals.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: check.ts findings on stored good and bad Markdown"
+    },
+    {
+      "assertion": "readme-over-limit-splits-into-linked-files: check.ts passes good and flags bad",
+      "source": "tests/markdown-evals.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: check.ts findings on stored good and bad Markdown"
+    },
+    {
+      "assertion": "prompt-text-stays-data-not-orders: check.ts passes good and flags bad",
+      "source": "tests/markdown-evals.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: check.ts findings on stored good and bad Markdown"
+    },
+    {
+      "assertion": "skill-file-needs-linked-references: check.ts passes good and flags bad",
+      "source": "tests/markdown-evals.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: check.ts findings on stored good and bad Markdown"
     },
     {
       "assertion": "each Jev scorer agrees with its calibration labels",

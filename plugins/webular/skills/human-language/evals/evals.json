@@ -3,27 +3,87 @@
   "evals": [
     {
       "id": "rewrite-mcp-scrape-tool-description",
-      "query": "Rewrite this MCP tool description for the webular scrape tool: \"A powerful, seamless solution that leverages cutting-edge technology to unlock all of your web content needs.\" Keep the tool name and the `archive` field exact."
+      "query": "Rewrite this MCP tool description for the webular scrape tool: \"A powerful, seamless solution that leverages cutting-edge technology to unlock all of your web content needs.\" Keep the tool name and the `archive` field exact.",
+      "expected_output": "A plain description that says what `scrape` does, what it returns, what `archive` does, and when to pick another tool, with no hype words.",
+      "assertions": [
+        "The output names the tool `scrape` exactly",
+        "The output names the field `archive` exactly",
+        "The output says what the tool returns",
+        "The output contains none of: powerful, seamless, leverages, cutting-edge"
+      ],
+      "good": "`scrape` fetches one page and returns its text as Markdown. Set `archive` to true to also save a copy. Use `map` instead when you need a list of pages.",
+      "bad": "A powerful, seamless solution that leverages cutting-edge technology to unlock all of your web content needs.",
+      "bad_issues": ["filler: leverages", "cut: seamless", "cut: cutting-edge", "cut: powerful"]
     },
     {
       "id": "write-cli-help-for-map-command",
-      "query": "Write the CLI help text for `webular map`. It lists the pages on one site from its sitemap, then robots.txt, then link crawling. It takes --url and --limit (default 50). Make it clear for a person who reads it once."
+      "query": "Write the CLI help text for `webular map`. It lists the pages on one site from its sitemap, then robots.txt, then link crawling. It takes --url and --limit (default 50). Make it clear for a person who reads it once.",
+      "expected_output": "One line on what `webular map` does, the sitemap then robots.txt then links order, and one line per flag with its default.",
+      "assertions": [
+        "The first line says the command lists the pages on one site",
+        "The output gives the order: sitemap, then robots.txt, then links",
+        "The output names `--url` and `--limit` exactly",
+        "The output gives the `--limit` default as 50"
+      ],
+      "good": "`webular map` lists the pages on one site. It reads the sitemap first, then robots.txt, then follows links. `--url`: the site to map. `--limit`: the most pages to list (default 50).",
+      "bad": "Simply run this very helpful command in order to basically get a list of pages.",
+      "bad_issues": ["filler: in order to", "cut: simply", "cut: basically", "cut: very"]
     },
     {
       "id": "write-jev-payload-question-text",
-      "query": "Write the state and question text for a Jev payload that asks whether a scraped page states the price of the 2026 model. Keep the JSON keys and the yes/no enum values exact, and put every decisive fact in the state."
+      "query": "Write the state and question text for a Jev payload that asks whether a scraped page states the price of the 2026 model. Keep the JSON keys and the yes/no enum values exact, and put every decisive fact in the state.",
+      "expected_output": "State text that says what page was scraped and why, and a question that asks for `yes` or `no` on whether the page states the 2026 model's price.",
+      "assertions": [
+        "The state says a product page was scraped",
+        "The question asks only whether the page states the 2026 model's price",
+        "The enum values `yes` and `no` appear exactly",
+        "Every sentence has 28 words or fewer"
+      ],
+      "good": "State: we scraped one product page. We want to know if it gives the price of the 2026 model. Question: does the page state that price? Answer `yes` or `no`.",
+      "bad": "We would really like to know whether or not the page that we scraped earlier today happens to state the price of the 2026 model anywhere in a number of places on it.",
+      "bad_issues": ["filler: a number of", "cut: really", "long sentence: 33 words"]
     },
     {
       "id": "rewrite-schema-field-description-limit",
-      "query": "Rewrite the description of the `limit` field in the search tool schema, which says \"Allows the caller to optionally specify a desired quantity of results\". The default is 5 and the most is 20."
+      "query": "Rewrite the description of the `limit` field in the search tool schema, which says \"Allows the caller to optionally specify a desired quantity of results\". The default is 5 and the most is 20.",
+      "expected_output": "One sentence that says `limit` is the most results to return, with default 5 and max 20.",
+      "assertions": [
+        "The output is one or two short sentences",
+        "The output gives the default as 5",
+        "The output gives the max as 20",
+        "The output drops \"allows the caller to optionally specify\""
+      ],
+      "good": "The most results to return. Default 5, max 20.",
+      "bad": "Allows the caller to optionally specify a desired quantity of results in the event that they want to facilitate a smaller response.",
+      "bad_issues": ["filler: in the event that", "filler: facilitate"]
     },
     {
       "id": "report-partial-crawl-result-honestly",
-      "query": "A crawl read 40 of 120 pages before it hit the time limit. Write the status line for the user. Do not say it is done, and do not invent a cause."
+      "query": "A crawl read 40 of 120 pages before it hit the time limit. Write the status line for the user. Do not say it is done, and do not invent a cause.",
+      "expected_output": "A status line that says the crawl stopped at the time limit after 40 of 120 pages, that 80 were not read, and how to read the rest.",
+      "assertions": [
+        "The output says 40 of 120 pages were read",
+        "The output does not say the crawl is done or complete",
+        "The output names the time limit as the reason it stopped",
+        "The output names no other cause"
+      ],
+      "good": "The crawl stopped at the time limit after 40 of 120 pages. 80 pages were not read. Run it again to read the rest.",
+      "bad": "The crawl is basically done, due to the fact that it read a number of pages.",
+      "bad_issues": ["filler: due to the fact that", "filler: a number of", "cut: basically"]
     },
     {
       "id": "leave-fixed-wording-and-quote-alone",
-      "query": "Tidy this error text but keep the quoted string exact: Failed to fetch \"https://example.com/a?b=1\": ECONNRESET. Add a plain next step."
+      "query": "Tidy this error text but keep the quoted string exact: Failed to fetch \"https://example.com/a?b=1\": ECONNRESET. Add a plain next step.",
+      "expected_output": "The error line with the quoted URL and ECONNRESET unchanged, followed by one plain next step.",
+      "assertions": [
+        "The string \"https://example.com/a?b=1\" appears exactly",
+        "ECONNRESET appears exactly",
+        "The output gives one next step the user can take",
+        "The output does not promise the retry will work"
+      ],
+      "good": "Failed to fetch \"https://example.com/a?b=1\": ECONNRESET. The server closed the connection. Check the URL, then try again.",
+      "bad": "Failed to fetch \"https://example.com/a?b=1\": ECONNRESET. Just retry it at this point in time and it will really work seamlessly.",
+      "bad_issues": ["filler: at this point in time", "cut: seamlessly", "cut: just", "cut: really"]
     }
   ]
 }

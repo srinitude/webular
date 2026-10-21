@@ -74,6 +74,7 @@ metadata:
 - Read [file checks and evidence limits](references/checks.md) before running the checker.
 - [check.ts](scripts/check.ts) checks file size, local links and anchors, and the reading graph (cycles, reachability). It does not check the heading outline or paragraphs; check those by hand. Run it with `bun skills/rich-and-native-markdown/scripts/check.ts <files...>` from the plugin folder.
 - The checker never judges clear writing, kept meaning, true reading needs, or support in every Markdown app. Review those by hand.
+- Gotchas: the checker reads lines, not a syntax tree. It misses links with nested parentheses and links in indented code blocks. It sends site-root links (`/path`) and anchors into non-Markdown files to review instead of failing them. It finds cycles and unreachable files only when you pass `--manifest` with entrypoints and edges.
 - Check every output file for meaning, logic, language, syntax, links, anchors, line counts, and required-read cycles.
 - At the end of every run, review the **entire skill package** and the **entire output set**, Markdown and non-Markdown. Use bounded passes for large sets. Samples and changed-line checks never replace the full review.
 - Keep a brief record of final file versions, exact text kept out of rewriting, checks run, faults, and repairs.

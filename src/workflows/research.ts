@@ -4,6 +4,7 @@ import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
 import { searchRounds } from '../lib/jev/decisions/research.ts'
+import { readabilitySchema, withReadability } from '../lib/readability-chain.ts'
 import { searchEffect } from '../lib/search-chain.ts'
 import { fetchErrorsSchema, fetchSources, type SourceEntry } from '../lib/sources.ts'
 import { summarizeText } from '../lib/summarize.ts'
@@ -23,6 +24,7 @@ const researchOutput = z.object({
   report: z.string(),
   sources: z.array(sourceItem),
   errors: fetchErrorsSchema,
+  readability: readabilitySchema,
 })
 
 const foundSchema = z.object({
@@ -85,10 +87,13 @@ const assembleStep = createStep({
   id: 'assemble',
   inputSchema: entriesSchema,
   outputSchema: researchOutput,
-  execute: ({ inputData }) => stepRuntime.runPromise(Effect.sync(() => assemble(inputData))),
+  execute: ({ inputData }) =>
+    stepRuntime.runPromise(
+      Effect.sync(() => assemble(inputData)).pipe(Effect.flatMap(withReadability('report'))),
+    ),
 })
 
-function assemble(inputData: z.infer<typeof entriesSchema>): z.infer<typeof researchOutput> {
+function assemble(inputData: z.infer<typeof entriesSchema>) {
   const sections = inputData.entries.map((e, i) => buildSection(e, i, inputData.sentences))
   const report = `# Research: ${inputData.topic}\n\n${sections.join('\n\n')}`
   const sources = inputData.entries.map((e) => ({ title: e.title, url: e.url }))
