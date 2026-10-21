@@ -1,0 +1,83 @@
+# webular release: runs on a v* tag push.
+# test -> compile 5 executables + GitHub release assets -> npm publish with provenance.
+# npm auth is trusted publishing (OIDC): no NPM_TOKEN. Before the first run, add this
+# repo + workflow filename "release.yml" as a trusted publisher on npmjs.com.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+env:
+  # Keep equal to [tools] bun in mise.toml.
+  BUN_VERSION: "1.4.3"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+      - uses: jdx/mise-action@fc42bcc7ddbf51124c30f95a877a0c5168a3bfde # v5.2.1
+        with:
+          experimental: true
+      - name: Tag must match package.json version
+        run: test "v$(node -p "require('./package.json').version")" = "${GITHUB_REF_NAME}"
+      # mise.toml defines tasks.test (depends on setup -> lint -> typecheck -> build).
+      - run: mise run test
+
+  assets:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # gh release create / upload
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+      - run: bun install --frozen-lockfile
+      - name: Compile one executable per platform
+        run: |
+          mkdir -p out
+          for t in linux-x64 linux-arm64 darwin-x64 darwin-arm64 windows-x64; do
+            ext=""; [ "$t" = windows-x64 ] && ext=".exe"
+            bun build --compile --target="bun-$t" ./bin/webular.ts --outfile "out/webular-$t$ext"
+          done
+          (cd out && sha256sum * > SHA256SUMS)
+      - name: Upload release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --generate-notes --verify-tag out/* \
+            || gh release upload "$GITHUB_REF_NAME" out/* --clobber
+
+  publish:
+    needs: assets
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm trusted publishing (OIDC) + provenance
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24" # ships npm >= 11.5.1, required for OIDC publishing
+          registry-url: https://registry.npmjs.org
+      - run: npm --version
+      - run: bun install --frozen-lockfile
+      - run: npm publish --provenance --access public
