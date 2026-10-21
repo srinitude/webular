@@ -20,13 +20,42 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # One commit, one CI run: a push to a branch with an open pull request into
+  # main is already checked by that pull request's run (same head commit,
+  # merged onto main). Every other push runs the full matrix. Any lookup
+  # failure leaves `covered` false, so the matrix runs.
+  push-covered-by-pr:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    permissions:
+      pull-requests: read
+    outputs:
+      covered: ${{ steps.lookup.outputs.covered }}
+    steps:
+      - id: lookup
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          n=$(gh pr list -R "$GITHUB_REPOSITORY" --head "$GITHUB_REF_NAME" --base main --state open --json number --jq length || echo 0)
+          echo "covered=$([ "${n:-0}" -gt 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
   ci:
+    needs: push-covered-by-pr
+    if: ${{ !cancelled() && needs.push-covered-by-pr.outputs.covered != 'true' }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        # timeout = about 3x the job's cold-cache time.
+        include:
+          - os: ubuntu-latest
+            timeout: 4
+          - os: macos-latest
+            timeout: 5
+          - os: windows-latest
+            timeout: 11
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
+    timeout-minutes: ${{ matrix.timeout }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -34,5 +63,13 @@ jobs:
       - uses: jdx/mise-action@fc42bcc7ddbf51124c30f95a877a0c5168a3bfde # v5.2.1
         with:
           experimental: true
+      # Bun's package cache (tarballs), keyed on the exact lockfile + toolchain.
+      # `bun install --frozen-lockfile` still runs and verifies every package.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/bun-install-cache
+          key: bun-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('mise.toml', 'bun.lock') }}
       - name: Run the single CI dependency path
+        env:
+          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
         run: mise run ci
