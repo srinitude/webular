@@ -47,7 +47,7 @@ const getJson = Effect.fn('scholarlyGet')(function* <A>(
   params: Record<string, string>,
 ) {
   const mailto = yield* Config.String('WEBULAR_MAILTO').pipe(Config.withDefault(''))
-  const url = endpoint(base, mailto ? { ...params, mailto } : params)
+  const url = yield* endpoint(base, mailto ? { ...params, mailto } : params)
   const body = yield* fetchText(url, { timeoutMs: SOURCE_TIMEOUT_MS })
   return yield* Schema.decodeUnknownEffect(schema)(body)
 })

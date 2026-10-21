@@ -3,7 +3,7 @@
 // Crossref, OpenAlex, and npm live in scholarly.ts.
 // All public, documented, no account. WEBULAR_SOURCE_ORIGIN swaps each
 // endpoint's origin (path kept) so tests run against the local fixture.
-import { Effect } from 'effect'
+import { Config, Effect } from 'effect'
 import { DOMParser } from 'linkedom'
 import { FetchError } from '../core/decode.ts'
 import { fetchText } from '../core/http.ts'
@@ -21,13 +21,17 @@ interface SourceHit {
   description: string
 }
 
-export function endpoint(base: string, params: Record<string, string>): string {
-  const url = new URL(base)
-  const override = process.env['WEBULAR_SOURCE_ORIGIN']
-  const target = override ? new URL(url.pathname, override) : url
-  target.search = new URLSearchParams(params).toString()
-  return target.toString()
-}
+export const endpoint = (base: string, params: Record<string, string>) =>
+  Config.String('WEBULAR_SOURCE_ORIGIN').pipe(
+    Config.withDefault(''),
+    Effect.orDie,
+    Effect.map((override) => {
+      const url = new URL(base)
+      const target = override ? new URL(url.pathname, override) : url
+      target.search = new URLSearchParams(params).toString()
+      return target.toString()
+    }),
+  )
 
 // ponytail: tag strip + the five XML entities only; snippets are short and
 // display-only, so a full HTML parse is not worth it.
@@ -75,7 +79,7 @@ function wikipedia(
   limit: number,
 ): Effect.Effect<SourceHit[], FetchError | HttpStatusError> {
   return Effect.map(
-    getJson(
+    Effect.flatMap(
       endpoint('https://en.wikipedia.org/w/api.php', {
         action: 'query',
         list: 'search',
@@ -83,6 +87,7 @@ function wikipedia(
         srlimit: String(limit),
         format: 'json',
       }),
+      getJson,
     ),
     (data) =>
       (((data['query'] as Rec | undefined)?.['search'] ?? []) as Rec[]).map((h) => ({
@@ -98,12 +103,13 @@ function hackernews(
   limit: number,
 ): Effect.Effect<SourceHit[], FetchError | HttpStatusError> {
   return Effect.map(
-    getJson(
+    Effect.flatMap(
       endpoint('https://hn.algolia.com/api/v1/search', {
         query,
         tags: 'story',
         hitsPerPage: String(limit),
       }),
+      getJson,
     ),
     (data) =>
       ((data['hits'] ?? []) as Rec[]).map((h) => {
@@ -133,12 +139,12 @@ function arxiv(
   limit: number,
 ): Effect.Effect<SourceHit[], FetchError | HttpStatusError> {
   return Effect.map(
-    fetchText(
+    Effect.flatMap(
       endpoint('https://export.arxiv.org/api/query', {
         search_query: `all:${query}`,
         max_results: String(limit),
       }),
-      { timeoutMs: SOURCE_TIMEOUT_MS },
+      (url) => fetchText(url, { timeoutMs: SOURCE_TIMEOUT_MS }),
     ),
     parseArxiv,
   )

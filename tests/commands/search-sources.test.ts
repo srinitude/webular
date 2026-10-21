@@ -2,7 +2,7 @@
 // the local fixture (WEBULAR_SOURCE_ORIGIN swaps the endpoint origin; real
 // fetch, no mocks). Fixture bodies follow each API's documented response shape.
 import { describe, expect, test } from 'bun:test'
-import { Effect } from 'effect'
+import { Config, Effect } from 'effect'
 import { runCli } from '../_support/cli.ts'
 import { type Fixture, startFixture } from '../_support/fixture.ts'
 import { eff } from '../_support/run.ts'
@@ -36,9 +36,15 @@ const withFx = startFixture(() => ({
     ),
 }))
 
+// The child gets the host's PATH and HOME (read through Config) plus the
+// fixture origin.
 const runSearch = (fx: Fixture, args: string[]) =>
-  runCli('src/commands/search.ts', args, {
-    env: { ...process.env, WEBULAR_SOURCE_ORIGIN: fx.origin },
+  Effect.gen(function* () {
+    const PATH = yield* Config.String('PATH')
+    const HOME = yield* Config.String('HOME').pipe(Config.withDefault('.'))
+    return yield* runCli('src/commands/search.ts', args, {
+      env: { PATH, HOME, WEBULAR_SOURCE_ORIGIN: fx.origin },
+    })
   })
 
 describe('webular search --source — keyless specialized sources', () => {

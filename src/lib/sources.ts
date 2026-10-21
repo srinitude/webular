@@ -22,13 +22,11 @@ export const fetchErrorsSchema = z.array(z.object({ url: z.string(), reason: z.s
 // kills its worker; raise PARSE_POOL_CAP or transfer bytes if parse CPU or
 // copy cost still dominates.
 const PARSE_POOL_CAP = 4
-const parsePermits = Effect.runSync(
-  Semaphore.make(Math.min(availableParallelism(), PARSE_POOL_CAP)),
-)
+const parsePermits = Semaphore.makeUnsafe(Math.min(availableParallelism(), PARSE_POOL_CAP))
 // Bun's Worker carries ref/unref; the DOM lib type in scope does not.
 type BunWorker = Worker & { ref(): void; unref(): void }
-const idleWorkers = Effect.runSync(Ref.make<readonly BunWorker[]>([]))
-const workersBroken = Effect.runSync(Ref.make(typeof Worker === 'undefined'))
+const idleWorkers = Ref.makeUnsafe<readonly BunWorker[]>([])
+const workersBroken = Ref.makeUnsafe(typeof Worker === 'undefined')
 
 // From src this module sits in src/lib beside parse-worker.ts; built, it
 // lands in a dist/chunks chunk and the worker in dist/lib/parse-worker.js.

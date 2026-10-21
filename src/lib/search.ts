@@ -34,10 +34,13 @@ function toHit(el: Element): SearchHit | null {
 }
 
 export const webSearch = Effect.fn('webSearch')(function* (query: string, limit: number) {
-  const html = yield* fetchText(endpoint('https://html.duckduckgo.com/html/', { q: query }), {
-    timeoutMs: SOURCE_TIMEOUT_MS,
-    headers: { 'user-agent': UA, accept: 'text/html,application/xhtml+xml' },
-  })
+  const html = yield* fetchText(
+    yield* endpoint('https://html.duckduckgo.com/html/', { q: query }),
+    {
+      timeoutMs: SOURCE_TIMEOUT_MS,
+      headers: { 'user-agent': UA, accept: 'text/html,application/xhtml+xml' },
+    },
+  )
   const { document } = parseHTML(html)
   const hits: SearchHit[] = []
   for (const el of document.querySelectorAll('.result')) {

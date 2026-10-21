@@ -76,15 +76,8 @@ const userAgent = Effect.map(
     `webular/${pkg.version} (+https://github.com/srinitude/webular${mailto ? `; mailto:${mailto}` : ''})`,
 )
 
-// base + params, with WEBULAR_SOURCE_ORIGIN (from Config, else endpoint()'s
-// own environment read) swapping the origin so tests hit a local fixture.
-export const sourceUrl = (base: string, params: Record<string, string>) =>
-  Effect.map(Config.String('WEBULAR_SOURCE_ORIGIN').pipe(Config.withDefault('')), (origin) => {
-    if (!origin) return endpoint(base, params)
-    const target = new URL(new URL(base).pathname, origin)
-    target.search = new URLSearchParams(params).toString()
-    return target.toString()
-  })
+// base + params, with WEBULAR_SOURCE_ORIGIN swapping the origin so tests hit a local fixture.
+export const sourceUrl = endpoint
 
 // GET base + params as JSON, politely, and decode it with `schema`.
 export const getJson = Effect.fn('sourceGet')(function* <A>(
