@@ -74,9 +74,9 @@ describe('best practices: package dependencies', () => {
   )
   check(
     'effect packages share one exact version',
-    Effect.map(packageJson, ({ dependencies, devDependencies }) => {
+    Effect.map(packageJson, ({ dependencies }) => {
       expect(dependencies.effect).toMatch(/^\d+\.\d+\.\d+$/)
-      expect(devDependencies['@effect/platform-bun']).toBe(dependencies.effect)
+      expect(dependencies['@effect/platform-bun']).toBe(dependencies.effect)
     }),
   )
 })

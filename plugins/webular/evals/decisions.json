@@ -1,0 +1,131 @@
+{
+  "decisions": [
+    {
+      "id": "research-skill-triggers-for-query",
+      "question": "Should a web research skill (search the web, scrape a page, map a site, summarize a page) handle the request in `input`?",
+      "labels": ["yes", "no"],
+      "scoring": { "yes": 1, "no": 0 },
+      "cases": [
+        { "input": "search the web for the latest Mastra release notes", "expected": "yes" },
+        { "input": "scrape https://example.com and give me the text", "expected": "yes" },
+        { "input": "map the site at https://bun.com", "expected": "yes" },
+        { "input": "rename this variable in my code", "expected": "no" },
+        { "input": "what is 17 times 23?", "expected": "no" },
+        { "input": "commit my changes", "expected": "no" }
+      ]
+    },
+    {
+      "id": "interview-skill-triggers-for-query",
+      "question": "Does the request in `input` ask to be interviewed or asked questions one at a time before web research starts?",
+      "labels": ["yes", "no"],
+      "scoring": { "yes": 1, "no": 0 },
+      "cases": [
+        {
+          "input": "interview me about what I want researched before you search",
+          "expected": "yes"
+        },
+        { "input": "ask me questions to narrow down my research topic", "expected": "yes" },
+        {
+          "input": "help me decide what to look up on the web by asking me questions",
+          "expected": "yes"
+        },
+        { "input": "scrape https://example.com and give me the text", "expected": "no" },
+        { "input": "format this JSON file", "expected": "no" },
+        { "input": "translate this sentence to Spanish", "expected": "no" }
+      ]
+    },
+    {
+      "id": "tool-result-on-topic-for-query",
+      "question": "Does the tool result in `input.result` answer or relate to the query in `input.query`?",
+      "labels": ["yes", "no"],
+      "scoring": { "yes": 1, "no": 0 },
+      "cases": [
+        {
+          "input": {
+            "query": "Bun install guide",
+            "result": "# Installation\nRun curl -fsSL https://bun.sh/install | bash to install Bun."
+          },
+          "expected": "yes"
+        },
+        {
+          "input": {
+            "query": "Effect 4 services",
+            "result": "Services in Effect 4 are defined with Context.Service and provided with Layer."
+          },
+          "expected": "yes"
+        },
+        {
+          "input": {
+            "query": "Mastra release notes",
+            "result": "Mastra 1.2 adds workflow suspend and resume, plus new memory processors."
+          },
+          "expected": "yes"
+        },
+        {
+          "input": {
+            "query": "Bun install guide",
+            "result": "Our cookie policy explains how we use tracking cookies."
+          },
+          "expected": "no"
+        },
+        {
+          "input": {
+            "query": "Effect 4 services",
+            "result": "Top 10 pasta recipes for busy weeknights."
+          },
+          "expected": "no"
+        },
+        {
+          "input": { "query": "Mastra release notes", "result": "404 Not Found" },
+          "expected": "no"
+        }
+      ]
+    },
+    {
+      "id": "tool-error-message-is-actionable",
+      "question": "Does the error message in `input` tell the caller a concrete next step to fix the problem?",
+      "labels": ["yes", "no"],
+      "scoring": { "yes": 1, "no": 0 },
+      "cases": [
+        {
+          "input": "Invalid URL: pass a full address that starts with https://, like https://bun.com/blog",
+          "expected": "yes"
+        },
+        { "input": "limit must be between 1 and 50; try limit: 10", "expected": "yes" },
+        {
+          "input": "The page took too long to load. Retry once, or pick a smaller page.",
+          "expected": "yes"
+        },
+        { "input": "Error: undefined", "expected": "no" },
+        { "input": "Something went wrong", "expected": "no" },
+        { "input": "TypeError: Cannot read properties of null (reading 'href')", "expected": "no" }
+      ]
+    },
+    {
+      "id": "tool-description-says-when-to-use",
+      "question": "Does the tool description in `input` say when or for what kind of request to use the tool?",
+      "labels": ["yes", "no"],
+      "scoring": { "yes": 1, "no": 0 },
+      "cases": [
+        {
+          "input": "Turns a web page into clean Markdown. Use when you need the text of one URL.",
+          "expected": "yes"
+        },
+        {
+          "input": "Finds the links on a site. Use before scraping to pick the right page.",
+          "expected": "yes"
+        },
+        {
+          "input": "Searches the web. Use when the user asks a question that needs current sources.",
+          "expected": "yes"
+        },
+        { "input": "Scrape tool.", "expected": "no" },
+        { "input": "Returns a string.", "expected": "no" },
+        {
+          "input": "Calls the internal fetch handler with the given options object.",
+          "expected": "no"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "skill_name": "webular-research",
+  "evals": [
+    {
+      "id": "answer-with-sources",
+      "query": "What does the Bun 1.3 release add? Give sources.",
+      "expected_behavior": [
+        "Calls search with a plain query, then scrape on two or three result URLs",
+        "Every fact in the answer sits next to a URL that a tool returned",
+        "Invents no URL"
+      ]
+    },
+    {
+      "id": "map-before-scrape",
+      "query": "List the guide pages on https://bun.com/docs and summarize the install guide.",
+      "expected_behavior": [
+        "Calls map on the site before any scrape",
+        "Scrapes or summarizes only the install guide page",
+        "Keeps limit small unless asked for more"
+      ]
+    },
+    {
+      "id": "recover-from-bad-url",
+      "query": "Read the page at bun.com/blog",
+      "expected_behavior": [
+        "Passes the full https:// URL, or retries once with it after an Invalid URL error",
+        "Does not guess the page content when a call fails"
+      ]
+    },
+    {
+      "id": "feed-from-page-url",
+      "query": "What are the newest posts on https://bun.com/blog?",
+      "expected_behavior": [
+        "Calls feed with the plain page URL, without guessing a feed path first",
+        "Names the feedUrl the tool returned",
+        "Lists only items the tool returned"
+      ]
+    },
+    {
+      "id": "archive-for-dead-page",
+      "query": "The page https://example.com/old-post is gone now. What did it say?",
+      "expected_behavior": [
+        "Calls scrape with archive set to true",
+        "Says the text came from the Wayback Machine copy that archivedFrom names",
+        "Does not guess the text when no archived copy comes back"
+      ]
+    },
+    {
+      "id": "search-falls-back",
+      "query": "Find three papers on retrieval-augmented generation, with links.",
+      "expected_behavior": [
+        "Calls search once, with the default source or with crossref or openalex",
+        "Names the source the result says answered",
+        "Makes no extra search call just to try another source after one succeeded"
+      ]
+    }
+  ],
+  "trigger_queries": {
+    "should_trigger": [
+      "search the web for the latest Mastra release notes",
+      "scrape https://example.com and give me the text",
+      "what pages are on docs.example.com?",
+      "summarize this article for me: https://example.com/post",
+      "find three sources on Effect 4 services",
+      "read this URL and pull out the pricing",
+      "map the site at https://bun.com",
+      "research what people use for MCP servers on Bun",
+      "find the RSS feed for https://example.com/blog",
+      "this page is dead now, can you get the archived copy?"
+    ],
+    "should_not_trigger": [
+      "rename this variable in my code",
+      "write a unit test for the parser",
+      "what is 17 times 23?",
+      "format this JSON file",
+      "explain what a monad is",
+      "commit my changes",
+      "draw a diagram of the architecture",
+      "translate this sentence to Spanish"
+    ]
+  }
+}

@@ -53,7 +53,9 @@
     "access": "public"
   },
   "dependencies": {
+    "@effect/platform-bun": "4.0.5",
     "@mastra/core": "^1.78.0",
+    "@mastra/mcp": "^2.4.1",
     "@modelcontextprotocol/sdk": "^1.32.1",
     "@mozilla/readability": "^0.6.0",
     "agent-browser": "^0.39.1",
@@ -72,10 +74,10 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
-    "@effect/platform-bun": "4.0.5",
     "@types/bun": "^1.4.3",
     "@types/turndown": "^5.0.6",
     "deepsec": "^2.3.10",
+    "portless": "0.15.8",
     "typescript": "6.0.3"
   },
   "trustedDependencies": [

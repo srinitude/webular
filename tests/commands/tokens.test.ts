@@ -85,7 +85,7 @@ describe('MCP — compact, paged, deterministic results', () => {
       }),
     ))
 
-  test('fields and limit narrow the result', () =>
+  test('select and limit narrow the result', () =>
     run(
       Effect.gen(function* () {
         const client = yield* connected
@@ -94,7 +94,7 @@ describe('MCP — compact, paged, deterministic results', () => {
         expect(parseRec(texts(links)[0] ?? '')).toEqual({ links: ['https://e.test/a'] })
         const picked = yield* call(client, 'web.readability', {
           html: smallHtml,
-          fields: ['title'],
+          select: ['title'],
         })
         expect(Object.keys(parseRec(texts(picked)[0] ?? ''))).toEqual(['title'])
       }),

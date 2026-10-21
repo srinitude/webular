@@ -6,7 +6,7 @@
 //
 // Token rules: tools sorted by id with static descriptions (a byte-stable
 // tools/list keeps client prompt caches warm); results are sorted-key compact
-// JSON, narrowed by `fields`, paged under PAGE_MAX_CHARS with an opaque
+// JSON, narrowed by `select`, paged under PAGE_MAX_CHARS with an opaque
 // `cursor`; errors are one short line.
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
@@ -23,7 +23,7 @@ interface McpToolDef {
 
 const paging = {
   cursor: z.string().optional().describe('nextCursor from the previous page'),
-  fields: z.array(z.string()).optional().describe('Top-level result fields to keep'),
+  select: z.array(z.string()).optional().describe('Top-level result select to keep'),
 }
 const pagingSchema = z.object(paging)
 const fetchSchema = z.object({
@@ -85,8 +85,8 @@ const failure = (text: string): McpText => ({ content: [{ type: 'text', text }],
 // ponytail: each page re-runs the tool; web.fetch pages lean on the HTTP cache.
 async function execute(tool: McpToolDef, args: Record<string, unknown>): Promise<McpText> {
   try {
-    const { cursor, fields } = pagingSchema.parse(args)
-    const page = pageText(stableJson(selectFields(await tool.run(args), fields)), cursor)
+    const { cursor, select } = pagingSchema.parse(args)
+    const page = pageText(stableJson(selectFields(await tool.run(args), select)), cursor)
     if (!page.ok) return failure(page.error)
     const content: McpText['content'] = [{ type: 'text', text: page.text }]
     if (page.nextCursor) {

@@ -1,0 +1,33 @@
+# webular plugin — remote CI. One job runs the plugin chain on Linux, macOS and Windows:
+# mise run plugin:ci pulls lint -> typecheck -> six checks -> test -> ci.
+# mise owns the toolchain + graph, so tool versions come from mise.toml.
+name: Plugin
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: plugin-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  plugin:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: jdx/mise-action@fc42bcc7ddbf51124c30f95a877a0c5168a3bfde # v5.2.1
+        with:
+          experimental: true
+      - name: Run the plugin chain
+        run: mise run plugin:ci

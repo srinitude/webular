@@ -204,11 +204,68 @@ description = "FEED — read an RSS 2.0 or Atom 1.0 feed (fetch + linkedom XML)"
 depends = ["setup"]
 run = '"{{vars.bun}}" "{{config_root}}/{{vars.commands}}/feed.{{vars.ext}}"'
 
+# ───────────────────────── Agent plugin (plugins/webular) ─────────────────────────
+
+[tasks."plugin:lint"]
+description = "Plugin: lint and format-check the webular agent plugin"
+depends = ["setup"]
+run = "bunx biome check plugins/webular"
+
+[tasks."plugin:typecheck"]
+description = "Plugin: strict TypeScript typecheck of plugins/webular"
+depends = ["plugin:lint"]
+run = "bunx tsc --noEmit -p plugins/webular"
+
+[tasks."plugin:check-test-first"]
+description = "Plugin: each src file has a test that names or imports it"
+depends = ["plugin:typecheck"]
+run = 'bun "{{config_root}}/plugins/webular/scripts/check-test-first.ts"'
+
+[tasks."plugin:check-evals"]
+description = "Plugin: each skill has at least 3 eval cases and the harness config parses"
+depends = ["plugin:check-test-first"]
+run = 'bun "{{config_root}}/plugins/webular/scripts/check-evals.ts"'
+
+[tasks."plugin:code-limits"]
+description = "Plugin: files at most 200 lines, functions at most 30 lines, nesting at most 3"
+depends = ["plugin:check-evals"]
+run = 'bun "{{config_root}}/plugins/webular/scripts/code-limits.ts"'
+
+[tasks."plugin:check-links"]
+description = "Plugin: every relative Markdown link and anchor resolves"
+depends = ["plugin:code-limits"]
+run = 'bun "{{config_root}}/plugins/webular/scripts/check-links.ts"'
+
+[tasks."plugin:check-reachable"]
+description = "Plugin: every skill file is linked from its SKILL.md"
+depends = ["plugin:check-links"]
+run = 'bun "{{config_root}}/plugins/webular/scripts/check-reachable.ts"'
+
+[tasks."plugin:check-timeless"]
+description = "Plugin: no time-anchored wording in Markdown"
+depends = ["plugin:check-reachable"]
+run = 'bun "{{config_root}}/plugins/webular/scripts/check-timeless.ts"'
+
+[tasks."plugin:test"]
+description = "Plugin: run the webular agent plugin's outcome evals and tests"
+depends = ["plugin:check-timeless"]
+run = "bun test --timeout 30000 plugins/webular"
+
+[tasks."plugin:ci"]
+description = "Plugin chain: lint, typecheck, six checks, evals, and tests of plugins/webular"
+depends = ["plugin:test"]
+run = "echo 'webular plugin: ci complete'"
+
+[tasks."plugin:dev"]
+description = "Plugin: serve MCP over HTTPS at a stable portless URL (webular-mcp.localhost)"
+depends = ["setup"]
+run = 'bunx portless webular-mcp bun "{{config_root}}/plugins/webular/src/server.ts" --http'
+
 # ───────────────────────── Default + benchmark ─────────────────────────
 
 [tasks.default]
-description = "Default path: a bare `mise run` runs the whole CI spine"
-depends = ["ci"]
+description = "Default path: a bare `mise run` runs the repo CI spine and the plugin chain"
+depends = ["ci", "plugin:ci"]
 run = "echo webular: default complete"
 
 [tasks.bench]

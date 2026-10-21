@@ -1,0 +1,19 @@
+{
+  "server": "Web research tools for agents: search, read, crawl, extract, and watch web pages, with typed inputs and capped output. No API key needed.",
+  "tools": {
+    "search": "Search the web, Wikipedia, Hacker News, or arXiv without an API key. Use it to find pages on a topic. Returns titles, URLs, and snippets.",
+    "scrape": "Read one web page as clean Markdown, without menus or ads. Use it when you have a URL and need its text. Returns the page title and Markdown.",
+    "map": "List the URLs on a site from its sitemap and links. Use it to see what pages a site has before you scrape. Returns a list of URLs.",
+    "summarize": "Pull the key sentences out of a text or a web page, with no model call. Pass text or url. Returns the top sentences.",
+    "crawl": "Visit a page and the pages it links to, up to a depth and a page limit. Use it to read a small part of a site at once. Returns each page's URL and Markdown.",
+    "extract": "Pull named parts of a page with CSS selectors. Use it when you need set fields, like a price or a title. Pass fields as name:selector pairs, or one selector. Returns the matched text.",
+    "answer": "Answer a question from a few web sources, with no model call. Use it for a quick fact with sources. Returns the key sentences and the URLs they came from.",
+    "research": "Dig into a topic across many web sources. Use it when one search is not enough. Returns key points with their source URLs.",
+    "parse": "Turn a local file, such as a PDF or an HTML file, into clean text. Use it when the content is on disk, not on the web. Returns the text.",
+    "media": "Save a page's media to a file: download it, take a screenshot, or print a PDF. Use it when you need the file itself. Returns where the file was saved and its size.",
+    "monitor": "Check a page for changes since the last check. Use it to watch a page over time. Returns whether it changed and what changed.",
+    "batch": "Scrape many URLs in one call. Use it when you already have a list of pages. Returns one result per URL, each marked ok or not.",
+    "act": "Open a page in a real browser and read it, with an optional screenshot. Use it for pages that need JavaScript to show their content. Returns the page text.",
+    "feed": "Read an RSS or Atom feed. Use it to get the newest posts from a site. Returns each item's title, link, and date."
+  }
+}

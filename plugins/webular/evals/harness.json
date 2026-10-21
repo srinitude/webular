@@ -1,0 +1,280 @@
+{
+  "entries": [
+    {
+      "assertion": "plugin.json names the plugin and the spec schema",
+      "source": "tests/plugin.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: schema decode and equality"
+    },
+    {
+      "assertion": "mcp.json starts the server over stdio and names its portless HTTP URL",
+      "source": "tests/plugin.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: schema decode and equality"
+    },
+    {
+      "assertion": "every reference file opens with a table of contents whose links resolve",
+      "source": "tests/plugin.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: heading and link resolution"
+    },
+    {
+      "assertion": "an agent sees one typed tool per webular outcome",
+      "source": "tests/server.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: tool name list"
+    },
+    {
+      "assertion": "a site that cannot be read comes back as an error result with a next step",
+      "source": "tests/server.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: isError text contains the next step"
+    },
+    {
+      "assertion": "every tool carries a title, read-only and open-world hints",
+      "source": "tests/server.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: tool annotation equality"
+    },
+    {
+      "assertion": "an input with an unknown key is refused",
+      "source": "tests/schemas.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: strict schema safeParse"
+    },
+    {
+      "assertion": "scrape turns a web page into clean Markdown",
+      "source": "tests/server.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: Markdown string match"
+    },
+    {
+      "assertion": "summarize returns the key sentence of a text",
+      "source": "tests/server.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: string match"
+    },
+    {
+      "assertion": "map finds the links on a site",
+      "source": "tests/server.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: link list"
+    },
+    {
+      "assertion": "a bad input is refused with a plain next step, not a crash",
+      "source": "tests/server.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: error text match"
+    },
+    {
+      "assertion": "HTTP mode answers MCP requests on the port it is given",
+      "source": "tests/http.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: live MCP tool listing"
+    },
+    {
+      "assertion": "every decision has at least three yes cases, three no cases, and a scorer",
+      "source": "tests/jev.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: case counts and scorer presence"
+    },
+    {
+      "assertion": "every test name in the tests folder has a harness entry",
+      "source": "tests/harness.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: name set coverage"
+    },
+    {
+      "assertion": "every skill eval id has a harness entry",
+      "source": "tests/harness.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: id set coverage"
+    },
+    {
+      "assertion": "deterministic entries come before jev entries",
+      "source": "tests/harness.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: order check"
+    },
+    {
+      "assertion": "every skill meets the agentskills.io name and description rules",
+      "source": "tests/plugin.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: deterministic expect() checks"
+    },
+    {
+      "assertion": "every skill lists frontmatter keys as name, description, compatibility, metadata",
+      "source": "tests/plugin.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: deterministic expect() checks"
+    },
+    {
+      "assertion": "every skill body opens with the why, right under its title",
+      "source": "tests/plugin.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: deterministic expect() checks"
+    },
+    {
+      "assertion": "every skill ends with a \"Done when\" checklist",
+      "source": "tests/plugin.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: deterministic expect() checks"
+    },
+    {
+      "assertion": "every file in a skill folder is linked from SKILL.md, one level deep",
+      "source": "tests/plugin.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: deterministic expect() checks"
+    },
+    {
+      "assertion": "every skill file stays host-agnostic",
+      "source": "tests/plugin.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: deterministic expect() checks"
+    },
+    {
+      "assertion": "every skill ships at least three evals for its own name",
+      "source": "tests/plugin.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: deterministic expect() checks"
+    },
+    {
+      "assertion": "the interview skill asks one question at a time, outcome before method",
+      "source": "tests/plugin.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: deterministic expect() checks"
+    },
+    {
+      "assertion": "every tool has one description and no description is orphaned",
+      "source": "tests/server.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: deterministic expect() checks"
+    },
+    {
+      "assertion": "crawl follows links from the start page",
+      "source": "tests/server.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: deterministic expect() checks"
+    },
+    {
+      "assertion": "extract pulls the text a CSS selector points at",
+      "source": "tests/server.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: deterministic expect() checks"
+    },
+    {
+      "assertion": "an over-cap result is cut and marked truncated",
+      "source": "tests/server.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: deterministic expect() checks"
+    },
+    {
+      "assertion": "HTTP mode answers at its stable portless URL",
+      "source": "tests/http.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: real portless process, MCP tool listing"
+    },
+    {
+      "assertion": "every described tool has exactly one input schema",
+      "source": "tests/schemas.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: deterministic expect() checks"
+    },
+    {
+      "assertion": "a URL input refuses a non-web scheme",
+      "source": "tests/schemas.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: deterministic expect() checks"
+    },
+    {
+      "assertion": "the shared runtime runs an effect",
+      "source": "tests/schemas.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: deterministic expect() checks"
+    },
+    {
+      "assertion": "scrape and feed take archive; search takes crossref and openalex",
+      "source": "tests/schemas.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: schema safeParse results"
+    },
+    {
+      "assertion": "scrape, feed, and search name the output fields they add only sometimes",
+      "source": "tests/schemas.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: output schema keys and safeParse"
+    },
+    {
+      "assertion": "scrape with archive on reads the live page and names no archive copy",
+      "source": "tests/cli-features.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: tool result text over a local site"
+    },
+    {
+      "assertion": "feed finds the feed a plain page links to and names it",
+      "source": "tests/cli-features.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: tool result text over a local site and feed"
+    },
+    {
+      "assertion": "each Jev scorer agrees with its calibration labels",
+      "source": "tests/jev.test.ts",
+      "kind": "jev",
+      "grader": "evals/jev.ts scorers on evals/decisions.json cases"
+    },
+    {
+      "assertion": "answer-with-sources",
+      "source": "skills/webular-research/evals/evals.json",
+      "kind": "jev",
+      "grader": "Jev yes/no per expected_behavior line, against the run transcript"
+    },
+    {
+      "assertion": "map-before-scrape",
+      "source": "skills/webular-research/evals/evals.json",
+      "kind": "jev",
+      "grader": "Jev yes/no per expected_behavior line, against the run transcript"
+    },
+    {
+      "assertion": "recover-from-bad-url",
+      "source": "skills/webular-research/evals/evals.json",
+      "kind": "jev",
+      "grader": "Jev yes/no per expected_behavior line, against the run transcript"
+    },
+    {
+      "assertion": "outcome-before-method",
+      "source": "skills/webular-interview/evals/evals.json",
+      "kind": "jev",
+      "grader": "Jev yes/no per expected_behavior line against the run transcript"
+    },
+    {
+      "assertion": "one-question-at-a-time",
+      "source": "skills/webular-interview/evals/evals.json",
+      "kind": "jev",
+      "grader": "Jev yes/no per expected_behavior line against the run transcript"
+    },
+    {
+      "assertion": "ends-with-decisions",
+      "source": "skills/webular-interview/evals/evals.json",
+      "kind": "jev",
+      "grader": "Jev yes/no per expected_behavior line against the run transcript"
+    },
+    {
+      "assertion": "feed-from-page-url",
+      "source": "skills/webular-research/evals/evals.json",
+      "kind": "jev",
+      "grader": "Jev yes/no per expected_behavior line, against the run transcript"
+    },
+    {
+      "assertion": "archive-for-dead-page",
+      "source": "skills/webular-research/evals/evals.json",
+      "kind": "jev",
+      "grader": "Jev yes/no per expected_behavior line, against the run transcript"
+    },
+    {
+      "assertion": "search-falls-back",
+      "source": "skills/webular-research/evals/evals.json",
+      "kind": "jev",
+      "grader": "Jev yes/no per expected_behavior line, against the run transcript"
+    }
+  ]
+}
