@@ -7,6 +7,7 @@ import { Effect } from 'effect'
 import { z } from 'zod'
 import { nameCountry } from '../lib/answer-country.ts'
 import { answerPassage } from '../lib/answer-passage.ts'
+import { asOfDate } from '../lib/as-of.ts'
 import { answerSentences } from '../lib/jev/decisions/answer.ts'
 import { citedSources } from '../lib/jev/decisions/answer-citation.ts'
 import { answerCandidates } from '../lib/jev/decisions/answer-sentences.ts'
@@ -41,6 +42,8 @@ const sourceRef = z.object({ title: z.string(), url: z.string() })
 const answerBody = z.object({
   query: z.string(),
   answer: z.string(),
+  // Run date the answer is grounded on (WEBULAR_AS_OF or the clock).
+  asOf: z.string(),
   sources: z.array(sourceRef),
   errors: fetchErrorsSchema,
 })
@@ -138,7 +141,7 @@ const prepareSynth = Effect.fn('answer.prepare')(function* (data: Evidence) {
   const cited = yield* citedSources(top, data.used, (c) =>
     onJevRuntime(decisions.answerCitation, c),
   )
-  return { ...data, text, top, cited }
+  return { ...data, text, top, cited, asOf: yield* asOfDate }
 })
 // The direct answer Jev picked always opens the answer, never repeated.
 export const leadFirst = (top: ReadonlyArray<string>, lead: string | undefined, n: number) =>
@@ -150,11 +153,12 @@ const synthStep = decisionStep({
   decide: decisions.answerSentence,
   prepare: (data: Evidence) => stepRuntime.runPromise(prepareSynth(data)),
   pick: ({ query, text }) => (text ? { question: query, text } : undefined),
-  output: ({ query, text, sentences, top, cited, errors }, lead) => {
+  output: ({ query, text, sentences, top, cited, errors, asOf }, lead) => {
     const first = lead === undefined ? undefined : answerSentences(text)[lead]
     return {
       query,
       answer: nameCountry(query, leadFirst(top, first, sentences).join(' ')),
+      asOf,
       sources: cited.map((e) => ({ title: e.title, url: e.url })),
       errors,
     }
