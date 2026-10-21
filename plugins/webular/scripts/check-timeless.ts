@@ -3,7 +3,7 @@ import { Effect } from 'effect'
 import { files, pluginDir, proseLines, read, rel, run } from './lib.ts'
 
 const MONTH = '(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\\.?'
-export const patterns: ReadonlyArray<readonly [string, RegExp]> = [
+const patterns: ReadonlyArray<readonly [string, RegExp]> = [
   ['time word', /\b(currently|now|new|latest|recently|nowadays|these days)\b/i],
   ['time phrase', /\b(as of|will soon|coming soon|used to|no longer)\b/i],
   ['version talk', /\bv\d+\.\d+|\bversion \d+(\.\d+)*\b/i],

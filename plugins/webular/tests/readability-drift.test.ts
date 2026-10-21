@@ -23,7 +23,7 @@ const pinnedCopies: Record<string, string> = {
 }
 
 // Rule lines only, with Markdown marks, case, and spacing removed.
-export const ruleHash = (text: string) =>
+const ruleHash = (text: string) =>
   createHash('sha256')
     .update(
       text

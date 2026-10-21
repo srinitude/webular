@@ -4,8 +4,8 @@ import { dirname, resolve } from 'node:path'
 import { BunRuntime, BunServices } from '@effect/platform-bun'
 import { Console, Effect, FileSystem, Schema } from 'effect'
 
-export const HARD_LIMIT = 200
-export const REVIEW_AT = 150
+const HARD_LIMIT = 200
+const REVIEW_AT = 150
 
 // Reading graph: entrypoints plus declared edges; only "required" edges can form a cycle.
 const Edge = Schema.Struct({

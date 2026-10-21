@@ -4,7 +4,7 @@ import { BunRuntime, BunServices } from '@effect/platform-bun'
 import { Console, Data, Effect, FileSystem } from 'effect'
 
 const slash = (p: string) => p.replaceAll('\\', '/')
-export const repoRoot = slash(fileURLToPath(new URL('../../../', import.meta.url)))
+const repoRoot = slash(fileURLToPath(new URL('../../../', import.meta.url)))
 export const pluginDir = `${repoRoot}plugins/webular`
 export const rel = (p: string) => (p.startsWith(repoRoot) ? p.slice(repoRoot.length) : p)
 
@@ -57,6 +57,16 @@ export const links = (text: string) =>
   )
 
 export const isExternal = (target: string) => /^[a-z][a-z0-9+.-]*:/i.test(target)
+
+// Resolves a relative link target against the file that holds it.
+export const resolve = (from: string, target: string) => {
+  const parts = from.split('/').slice(0, -1)
+  for (const seg of target.split('/')) {
+    if (seg === '..') parts.pop()
+    else if (seg !== '.' && seg !== '') parts.push(seg)
+  }
+  return parts.join('/')
+}
 
 // Runs a check. The program returns one "file:line: message" string per violation.
 export const run = (

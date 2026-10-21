@@ -50,8 +50,6 @@ export const typesafeKey = Config.option(Config.Redacted('TYPESAFE_API_KEY')).pi
 
 // Build-time plain-language pass on payload free text, from the built-in
 // human-language skill's word list (one source of truth).
-export { plainText }
-
 const body = (decision: Decision, input: unknown) => ({
   model: 'jev-1.13.0',
   state: { input },

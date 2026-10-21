@@ -1,6 +1,17 @@
 // Links: every relative Markdown link and #anchor under plugins/webular resolves.
 import { Effect } from 'effect'
-import { exists, files, isExternal, links, pluginDir, proseLines, read, rel, run } from './lib.ts'
+import {
+  exists,
+  files,
+  isExternal,
+  links,
+  pluginDir,
+  proseLines,
+  read,
+  rel,
+  resolve,
+  run,
+} from './lib.ts'
 
 // GitHub-style heading slug.
 export const slug = (heading: string) =>
@@ -17,15 +28,6 @@ export const anchors = (text: string) =>
       /^#{1,6}\s+(.*)$/.exec(t) ? [slug(t.replace(/^#+\s+/, ''))] : [],
     ),
   )
-
-const resolve = (from: string, target: string) => {
-  const parts = from.split('/').slice(0, -1)
-  for (const seg of target.split('/')) {
-    if (seg === '..') parts.pop()
-    else if (seg !== '.' && seg !== '') parts.push(seg)
-  }
-  return parts.join('/')
-}
 
 const checkFile = (file: string) =>
   Effect.gen(function* () {
