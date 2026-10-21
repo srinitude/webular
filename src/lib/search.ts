@@ -6,6 +6,7 @@ import { parseHTML } from 'linkedom'
 import { fetchText } from '../core/http.ts'
 import { searchRank } from './jev/decisions/search.ts'
 import { onJevRuntime } from './jev/run.ts'
+import { hostRole, hostTrust, NEUTRAL_TRUST } from './sources/roles.ts'
 import { endpoint, SOURCE_TIMEOUT_MS } from './sources-search.ts'
 
 interface SearchHit {
@@ -93,17 +94,33 @@ export function domainSignal(raw: string, query: string): number {
   return names.some((n) => want.has(squash(n))) ? OFFICIAL_BOOST : 0
 }
 
+// ponytail: a wh-word lead marks a factoid lookup; a Jev intent label would
+// catch phrasings without one.
+export const isFactoid = (query: string) => /^\s*(what|who|when|where|which)\b/i.test(query)
+
+// Source trust (SOURCE_TRUST by host) around the neutral middle, kept below
+// one top RRF rank step (1/61 - 1/62 = 0.00026) so list agreement still wins.
+const TRUST_WEIGHT = 0.0004
+// Factoid lookups: forum and other validation-role hits go below every other hit.
+const FORUM_DROP = 1
+
+const sourceSignal = (url: string, factoid: boolean) =>
+  TRUST_WEIGHT * (hostTrust(url) - NEUTRAL_TRUST) -
+  (factoid && hostRole(url) === 'validation' ? FORUM_DROP : 0)
+
 // Reciprocal rank fusion, sum(1/(60+rank)), over every ranked list, plus the
-// domain signal once per URL; deduped by hitKey, ties keep first-seen order.
+// domain and source signals once per URL; deduped by hitKey, ties keep first-seen order.
 export function scoreHits<H extends SearchHit>(
   lists: ReadonlyArray<ReadonlyArray<H>>,
   query: string,
 ): Array<{ hit: H; score: number }> {
   const seen = new Map<string, { hit: H; score: number }>()
+  const factoid = isFactoid(query)
+  const signal = (url: string) => domainSignal(url, query) + sourceSignal(url, factoid)
   for (const list of lists) {
     list.forEach((hit, i) => {
       const key = hitKey(hit.url)
-      const entry = seen.get(key) ?? { hit, score: domainSignal(hit.url, query) }
+      const entry = seen.get(key) ?? { hit, score: signal(hit.url) }
       entry.score += 1 / (RRF_K + i + 1)
       seen.set(key, entry)
     })

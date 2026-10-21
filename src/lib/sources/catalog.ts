@@ -63,3 +63,21 @@ export const SOURCE_TRUST: Record<FreeSource, number> = {
   reddit: 0.3,
   bluesky: 0.3,
 }
+
+// Stable sources answer a question; validation sources (forums, open web
+// indexes, news streams) only cross-check what a stable source said.
+const VALIDATION: ReadonlyArray<FreeSource> = [
+  'stackexchange',
+  'github-search',
+  'hn-algolia',
+  'marginalia',
+  'reddit',
+  'bluesky',
+  'gdelt',
+]
+export const SOURCE_ROLE = Object.fromEntries(
+  Object.keys(SOURCE_TRUST).map((s) => [
+    s,
+    VALIDATION.includes(s as FreeSource) ? 'validation' : 'stable',
+  ]),
+) as Record<FreeSource, 'stable' | 'validation'>

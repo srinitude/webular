@@ -70,13 +70,13 @@ const statusCase = Effect.gen(function* () {
   expect(rows.map((r) => [r.source, r.ok])).toEqual([
     ['wikidata', true],
     ['wikidata-sparql', false],
+    ['europepmc', false],
+    ['openlibrary', false],
     ['stackexchange', false],
     ['github-search', true],
     ['hn-algolia', false],
-    ['europepmc', false],
-    ['openlibrary', false],
   ])
-  expect(rows[3]?.hits.length).toBe(2)
+  expect(rows[5]?.hits.length).toBe(2)
   expect(rows[1]?.error?.length).toBeGreaterThan(0)
 })
 
