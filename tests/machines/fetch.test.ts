@@ -30,8 +30,13 @@ const OUTCOME_FOR_FINAL: Record<string, RegExp> = {
 
 const paths = finalPaths(fetchMachine, Object.keys(REPLY_FOR_EVENT), getShortestPaths)
 
+// Per-request budget. Every request that answers must beat it even on a loaded
+// CI runner (a 150 ms budget let a loopback 302 or 404 time out there); only a
+// 'hang' reply may reach it. Each of the 15 timedOut cases waits it out once.
+const REQUEST_TIMEOUT_MS = 1_000
+
 const outcome = (origin: string) =>
-  fetchTextWithinHost(`${origin}/start`, '127.0.0.1', { timeoutMs: 150 }).pipe(
+  fetchTextWithinHost(`${origin}/start`, '127.0.0.1', { timeoutMs: REQUEST_TIMEOUT_MS }).pipe(
     Effect.catch((e) => Effect.succeed(String(e))),
   )
 
