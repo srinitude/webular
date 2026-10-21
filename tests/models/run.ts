@@ -111,8 +111,8 @@ type Keys = Record<string, string>
 // A public-web task has no local reference call, so webular reaches the real
 // web instead of the 127.0.0.1 fixture.
 const armEnv = (job: Job, ctx: Ctx) => {
-  const { WEBULAR_SOURCE_ORIGIN, ...web } = webularEnv(ctx.origin, ctx.tmp)
-  return job.s.reference.length ? { ...web, WEBULAR_SOURCE_ORIGIN } : web
+  const { WEBULAR_SOURCE_ORIGIN: _, ...web } = webularEnv(ctx.origin, ctx.tmp)
+  return job.s.reference.length ? { ...web, WEBULAR_SOURCE_ORIGIN: ctx.origin } : web
 }
 
 const runOne = (job: Job, keys: Keys) =>
