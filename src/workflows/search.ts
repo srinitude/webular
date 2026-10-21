@@ -1,11 +1,12 @@
 // SEARCH workflow: keyless web search (DuckDuckGo HTML endpoint via fetch) or a
 // specialized keyless source (--source wikipedia|hackernews|arxiv|crossref|
 // openalex). The default web source falls back through the others in order;
-// `source` names the one that answered.
+// `source` names the one that answered. Local index hits fuse in after web hits.
 // composed as a Mastra non-model workflow over the FOSS search lib.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
+import { fuseRanked, searchLocalIndex } from '../lib/local-index.ts'
 import { searchWithSource } from '../lib/search-chain.ts'
 import { SEARCH_SOURCES } from '../lib/sources-search.ts'
 import { stepRuntime } from './runtime.ts'
@@ -33,17 +34,17 @@ const searchStep = createStep({
   id: 'search',
   inputSchema: searchInput,
   outputSchema: searchOutput,
-  execute: ({ inputData }) => {
-    const { query, limit, source } = inputData
-    return stepRuntime.runPromise(
-      Effect.map(searchWithSource(source, query, limit), ({ source: answered, results }) => ({
-        query,
-        count: results.length,
-        ...(answered && { source: answered }),
-        results,
-      })),
-    )
-  },
+  execute: ({ inputData }) =>
+    stepRuntime.runPromise(
+      Effect.gen(function* () {
+        const { query, limit, source } = inputData
+        const web = yield* searchWithSource(source, query, limit)
+        // Local BM25 hits answer alongside the free APIs: one SQLite query, a few ms.
+        const local = yield* searchLocalIndex(query, limit)
+        const results = fuseRanked([web.results, local]).slice(0, limit)
+        return { query, count: results.length, ...(web.source && { source: web.source }), results }
+      }),
+    ),
 })
 
 export const searchWorkflow = createWorkflow({
