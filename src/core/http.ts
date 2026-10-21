@@ -26,6 +26,8 @@ export interface FetchOptions extends CacheOptions {
   headers?: Record<string, string>
   signal?: AbortSignal
   redirect?: RequestRedirect
+  // Sees every response, retries included, before its body is read (rate-limit headers).
+  onResponse?: (res: Response) => void
 }
 
 // Retry-After (RFC 9110 section 10.2.3): delay-seconds or an HTTP-date.
@@ -60,7 +62,7 @@ const fetchOnce = (url: string, opts: FetchOptions): Effect.Effect<Response, Fet
         ]),
       }),
     catch: (err) => new FetchError({ message: errMsg(err), aborted: isAbort(err) }),
-  })
+  }).pipe(Effect.tap((res) => Effect.sync(() => opts.onResponse?.(res))))
 
 const isRedirect = (status: number) => status >= 300 && status < 400
 

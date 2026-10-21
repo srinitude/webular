@@ -6,7 +6,7 @@
 // is not fetched; each host's terms and limits are in benchmarks/free-sources.md.
 import { Clock, Config, Context, Effect, Schema, Semaphore } from 'effect'
 import pkg from '../../../package.json' with { type: 'json' }
-import { fetchText } from '../../core/http.ts'
+import { type FetchOptions, fetchText } from '../../core/http.ts'
 import { endpoint } from '../sources-search.ts'
 
 export interface Hit {
@@ -79,14 +79,17 @@ const userAgent = Effect.map(
 // base + params, with WEBULAR_SOURCE_ORIGIN swapping the origin so tests hit a local fixture.
 export const sourceUrl = endpoint
 
-// GET base + params as JSON, politely, and decode it with `schema`.
+// GET base + params as JSON, politely, and decode it with `schema`. `extra`
+// adds headers or a response observer for one source.
 export const getJson = Effect.fn('sourceGet')(function* <A>(
   schema: Schema.Codec<A, string>,
   base: string,
   params: Record<string, string>,
+  extra: FetchOptions = {},
 ) {
-  const headers = { 'user-agent': yield* userAgent, accept: 'application/json' }
-  const get = fetchText(yield* sourceUrl(base, params), { timeoutMs: TIMEOUT_MS, headers })
+  const headers = { 'user-agent': yield* userAgent, accept: 'application/json', ...extra.headers }
+  const opts = { ...extra, timeoutMs: TIMEOUT_MS, headers }
+  const get = fetchText(yield* sourceUrl(base, params), opts)
   const body = yield* politely(new URL(base).host, get)
   return yield* Schema.decodeUnknownEffect(schema)(body)
 })
