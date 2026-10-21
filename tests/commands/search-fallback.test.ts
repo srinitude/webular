@@ -1,4 +1,4 @@
-// SEARCH fallback chain + Crossref/OpenAlex contract, against a real local
+// SEARCH free-APIs-at-once + DuckDuckGo fallback + Crossref/OpenAlex contract, against a real local
 // Bun.serve fixture (WEBULAR_SOURCE_ORIGIN swaps every endpoint origin, the
 // DuckDuckGo one included). Crossref and OpenAlex bodies are recorded live
 // responses, trimmed to two items. No mocks.
@@ -12,6 +12,11 @@ const Output = Schema.fromJsonString(
   Schema.Struct({
     count: Schema.Number,
     source: Schema.optional(Schema.String),
+    meta: Schema.optional(
+      Schema.Struct({
+        sources: Schema.Record(Schema.String, Schema.Struct({ status: Schema.String })),
+      }),
+    ),
     results: Schema.Array(
       Schema.Struct({ title: Schema.String, url: Schema.String, description: Schema.String }),
     ),
@@ -69,21 +74,19 @@ const search = (
     }),
   )()
 
-describe('webular search — fallback chain for the default web source', () => {
+describe('webular search — free APIs at once for the default web source', () => {
   test(
-    'falls through failing and empty sources to crossref',
+    'asks wikipedia, hackernews, openalex together; openalex hits, so DuckDuckGo is skipped',
     () =>
       search(['--limit', '2'], true, (data, webHits) => {
-        expect(webHits).toBeGreaterThan(0)
-        expect(data.source).toBe('crossref')
+        expect(webHits).toBe(0)
         expect(data.count).toBe(2)
+        expect(data.meta?.sources).toEqual({
+          wikipedia: expect.objectContaining({ status: 'no-results' }),
+          hackernews: expect.objectContaining({ status: 'blocked:500' }),
+          openalex: expect.objectContaining({ status: 'ok' }),
+        })
       }),
-    30_000,
-  )
-
-  test(
-    'an empty crossref answer falls through to openalex',
-    () => search([], false, (data) => expect(data.source).toBe('openalex')),
     30_000,
   )
 })
@@ -92,12 +95,14 @@ describe('webular search — fallback chain for the default web source', () => {
 // falls back to the free sources instead of failing the command.
 describe('webular search — free-source fallback', () => {
   test(
-    'every search source failing falls back to the free sources',
+    'no free API has hits: DuckDuckGo, then the free sources answer',
     () =>
       search(
         ['--limit', '2'],
         false,
-        (data) => {
+        (data, webHits) => {
+          expect(webHits).toBeGreaterThan(0)
+          expect(data.meta?.sources['web']?.status).toBe('blocked:404')
           expect(data.source).toBe('wikidata')
           expect(data.results[0]?.url).toStartWith('http://www.wikidata.org/entity/Q')
         },

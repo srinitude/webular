@@ -12,7 +12,7 @@ function resolveAction(values: Record<string, unknown>): 'download' | 'screensho
   return 'download'
 }
 
-function buildInput(values: Record<string, string | boolean | undefined>) {
+function buildInput(values: Record<string, string | boolean | string[] | undefined>) {
   return Effect.gen(function* () {
     const url = values['url'] as string | undefined
     if (!url) {

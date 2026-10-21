@@ -3,7 +3,9 @@
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
-import { searchWithSource } from '../lib/search-chain.ts'
+import { searchEffect } from '../lib/search-chain.ts'
+import { mainEntity } from '../lib/search-hop.ts'
+import { subjectSources } from '../lib/source-subject.ts'
 import { fetchErrorsSchema, fetchSources } from '../lib/sources.ts'
 import { summarizeText } from '../lib/summarize.ts'
 import { stepRuntime } from './runtime.ts'
@@ -15,6 +17,14 @@ const answerInput = z.object({
   timeoutMs: z.number().int().positive().optional(),
   urls: z.array(z.string()).min(1).optional(),
 })
+
+// Answer budgets: search (hop included) and each page fetch stop early, so a
+// slow source costs a citation, not the whole answer. Pages fetch in parallel
+// under fetchSources' fixed pool.
+const ANSWER_SEARCH_MS = 4_000
+const ANSWER_FETCH_MS = 3_000
+// HTML cap before Readability: ~400 KB parses in about 1 s and keeps the lead.
+const ANSWER_MAX_HTML = 400_000
 
 const sourceRef = z.object({ title: z.string(), url: z.string() })
 
@@ -32,6 +42,12 @@ const hitsSchema = z.object({
   hits: z.array(sourceRef),
 })
 
+const searchHits = (query: string, sources: number) =>
+  Effect.map(
+    searchEffect('web', query, sources, { hop: true, deadlineMs: ANSWER_SEARCH_MS }),
+    ({ results }) => results.map((h) => ({ title: h.title, url: h.url })),
+  )
+
 const searchStep = createStep({
   id: 'search',
   inputSchema: answerInput,
@@ -42,10 +58,7 @@ const searchStep = createStep({
         // --urls: read exactly those pages, no search.
         inputData.urls
           ? Effect.succeed(inputData.urls.map((url) => ({ title: url, url })))
-          : Effect.map(
-              searchWithSource('web', inputData.query, inputData.sources),
-              ({ results: found }) => found.map((h) => ({ title: h.title, url: h.url })),
-            ),
+          : searchHits(inputData.query, inputData.sources),
         (hits) => ({
           query: inputData.query,
           sentences: inputData.sentences,
@@ -57,11 +70,21 @@ const searchStep = createStep({
 })
 
 const synthesize = Effect.fn('answer.synthesize')(function* (input: z.infer<typeof hitsSchema>) {
-  const fetched = yield* fetchSources(input.hits, input.timeoutMs)
+  const fetched = yield* fetchSources(
+    input.hits,
+    input.timeoutMs ?? ANSWER_FETCH_MS,
+    ANSWER_MAX_HTML,
+  )
   // Cite only sources whose text actually fed the answer.
-  const used = fetched.entries.filter((e) => e.text.length > 0)
+  // Namesake pages (a TV series named after the novel) drop out first.
+  const used = yield* subjectSources(
+    input.query,
+    fetched.entries.filter((e) => e.text.length > 0),
+  )
   const combined = used.map((e) => e.text).join('\n\n')
-  const { summary } = summarizeText(combined, input.sentences)
+  // The lead hit names the entity when the question does not (a bridge hop).
+  const entity = mainEntity(input.query) ?? input.hits[0]?.title
+  const { summary } = summarizeText(combined, input.sentences, { query: input.query, entity })
   return {
     query: input.query,
     answer: summary,

@@ -6,13 +6,18 @@ import { EXIT } from '../cli/exit-codes.ts'
 import { CliError } from './effect.ts'
 import { logErr, parseFields } from './output.ts'
 
-type FlagValue = string | boolean | undefined
+type FlagValue = string | boolean | string[] | undefined
 interface ParsedArgs {
   values: Record<string, FlagValue>
   positionals: string[]
 }
 
-type OptionSpec = { type: 'string' | 'boolean'; short?: string; default?: string | boolean }
+type OptionSpec = {
+  type: 'string' | 'boolean'
+  short?: string
+  multiple?: boolean
+  default?: string | boolean
+}
 
 const COMMON: Record<string, OptionSpec> = {
   json: { type: 'boolean', default: false },

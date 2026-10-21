@@ -49,7 +49,8 @@ describe('webular search --source — keyless specialized sources', () => {
         const fx = yield* withFx
         const { code, out } = yield* runSearch(fx, ['bun', '--source', 'wikipedia', '--json'])
         expect(code).toBe(0)
-        const data = JSON.parse(out)
+        const { meta, ...data } = JSON.parse(out)
+        expect(meta.sources.wikipedia.status).toBe('ok')
         expect(data).toEqual({
           query: 'bun',
           count: 1,

@@ -1,14 +1,16 @@
-// SEARCH workflow: keyless web search (DuckDuckGo HTML endpoint via fetch) or a
-// specialized keyless source (--source wikipedia|hackernews|arxiv|crossref|
-// openalex). The default web source falls back through the others in order,
-// then through the free sources; `source` names the one that answered. Local
-// index hits fuse in after web hits.
+// SEARCH workflow: the default web source asks the free APIs that fit the
+// query at once and fuses their lists, with scraped DuckDuckGo HTML as the
+// fallback and the free sources after it (`source` names the one that
+// answered); --source wikipedia|hackernews|arxiv|crossref|openalex|npm asks
+// just that source. `meta` gives each source's status and ms plus
+// degraded/weak. Local index hits fuse in after web hits.
 // composed as a Mastra non-model workflow over the FOSS search lib.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
 import { fuseRanked, searchLocalIndex } from '../lib/local-index.ts'
-import { searchWithSource } from '../lib/search-chain.ts'
+import { searchEffect } from '../lib/search-chain.ts'
+import { MAX_VARIANTS } from '../lib/search-source-names.ts'
 import { FREE_SOURCE_NAMES } from '../lib/sources/registry.ts'
 import { SEARCH_SOURCES } from '../lib/sources-search.ts'
 import { stepRuntime } from './runtime.ts'
@@ -17,6 +19,7 @@ const searchInput = z.object({
   query: z.string().min(1),
   limit: z.number().int().positive().default(10),
   source: z.enum(SEARCH_SOURCES).default('web'),
+  variants: z.array(z.string().min(1)).max(MAX_VARIANTS).optional(),
 })
 
 const resultItem = z.object({
@@ -30,21 +33,26 @@ const searchOutput = z.object({
   count: z.number(),
   source: z.enum([...SEARCH_SOURCES, ...FREE_SOURCE_NAMES]).optional(),
   results: z.array(resultItem),
+  meta: z.object({
+    sources: z.record(z.string(), z.object({ status: z.string(), ms: z.number() })),
+    degraded: z.boolean(),
+    weak: z.boolean(),
+  }),
 })
 
 const searchStep = createStep({
   id: 'search',
   inputSchema: searchInput,
   outputSchema: searchOutput,
-  execute: ({ inputData }) =>
+  execute: ({ inputData: { query, limit, source, variants } }) =>
     stepRuntime.runPromise(
       Effect.gen(function* () {
-        const { query, limit, source } = inputData
-        const web = yield* searchWithSource(source, query, limit)
+        const web = yield* searchEffect(source, query, limit, { variants: variants ?? [] })
         // Local BM25 hits answer alongside the free APIs: one SQLite query, a few ms.
         const local = yield* searchLocalIndex(query, limit)
         const results = fuseRanked([web.results, local]).slice(0, limit)
-        return { query, count: results.length, ...(web.source && { source: web.source }), results }
+        const answered = web.source && { source: web.source }
+        return { query, count: results.length, ...answered, results, meta: web.meta }
       }),
     ),
 })

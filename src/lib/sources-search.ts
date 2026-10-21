@@ -1,6 +1,6 @@
 // Keyless specialized search sources for `search --source`: Wikipedia
 // (MediaWiki Action API), Hacker News (Algolia), and arXiv (Atom export API);
-// Crossref and OpenAlex live in search-chain.ts.
+// Crossref, OpenAlex, and npm live in scholarly.ts.
 // All public, documented, no account. WEBULAR_SOURCE_ORIGIN swaps each
 // endpoint's origin (path kept) so tests run against the local fixture.
 import { Effect } from 'effect'
@@ -10,6 +10,10 @@ import { fetchText } from '../core/http.ts'
 import type { HttpStatusError } from '../core/http-body.ts'
 
 export { SEARCH_SOURCES, type SearchSource } from './search-source-names.ts'
+
+// Per-attempt fetch budget for every search source. free-sources.json probes
+// put these APIs at 0.35-0.97 s from this Mac; 2.5 s leaves 2.5x headroom.
+export const SOURCE_TIMEOUT_MS = 2_500
 
 interface SourceHit {
   title: string
@@ -41,7 +45,7 @@ export function plain(html: string): string {
 function getJson(
   url: string,
 ): Effect.Effect<Record<string, unknown>, FetchError | HttpStatusError> {
-  return Effect.flatMap(fetchText(url, { timeoutMs: 20_000 }), (body) =>
+  return Effect.flatMap(fetchText(url, { timeoutMs: SOURCE_TIMEOUT_MS }), (body) =>
     Effect.try({
       try: () => JSON.parse(body) as Record<string, unknown>,
       catch: () => new FetchError({ message: `fetch ${url}: response is not JSON` }),
@@ -120,7 +124,7 @@ function arxiv(
         search_query: `all:${query}`,
         max_results: String(limit),
       }),
-      { timeoutMs: 20_000 },
+      { timeoutMs: SOURCE_TIMEOUT_MS },
     ),
     parseArxiv,
   )

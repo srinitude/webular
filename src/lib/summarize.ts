@@ -158,13 +158,38 @@ interface SummarizeResult {
   summary: string
 }
 
-export function summarizeText(text: string, topN: number): SummarizeResult {
+// Question focus: key terms are the question's words minus question words.
+// Each sentence scores the inverse sentence frequency of the key terms it
+// holds, so a rare term ("born") beats one the page repeats ("uncertainty"),
+// times 1.5 when it names the entity. Frequency only breaks ties.
+// ponytail: lexical picker; a Jev Score over candidates could replace it.
+const QUESTION_WORDS = new Set(['what', 'how', 'why', 'whose', 'whom'])
+interface Focus {
+  query: string
+  entity?: string | undefined
+}
+function focusScores(text: string, spans: Spans, focus: Focus): number[] {
+  const keys = new Set(tokenize(focus.query).filter((w) => !QUESTION_WORDS.has(w)))
+  const entity = new Set(tokenize(focus.entity ?? '').filter((w) => !keys.has(w)))
+  const sets = spans.starts.map((from, i) => new Set(tokenize(text.slice(from, spans.ends[i]))))
+  const df = new Map<string, number>()
+  for (const set of sets) for (const k of keys) if (set.has(k)) df.set(k, (df.get(k) ?? 0) + 1)
+  return sets.map((set) => {
+    let score = 0
+    for (const [k, n] of df) if (set.has(k)) score += Math.log((sets.length + 1) / n)
+    for (const e of entity) if (set.has(e)) return score * 1.5
+    return score
+  })
+}
+export function summarizeText(text: string, topN: number, focus?: Focus): SummarizeResult {
   const spans = splitSentences(text)
   if (spans.starts.length === 0) return { sentences: [], summary: '' }
   const score = scores(tokenIds(text, spans))
-
+  const key = focus ? focusScores(text, spans, focus) : undefined
   // A stable sort of indices keeps tied sentences in document order.
-  const order = Array.from(score, (_, i) => i).sort((a, b) => (score[b] ?? 0) - (score[a] ?? 0))
+  const order = Array.from(score, (_, i) => i).sort(
+    (a, b) => (key?.[b] ?? 0) - (key?.[a] ?? 0) || (score[b] ?? 0) - (score[a] ?? 0),
+  )
   const picked = order
     .slice(0, topN)
     .sort((a, b) => a - b)

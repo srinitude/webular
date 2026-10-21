@@ -1,18 +1,17 @@
-// Search with a fallback chain: the default web source tries each keyless
-// source in SEARCH_SOURCES order, one at a time, until one returns hits.
-// Also home of the scholarly backends: Crossref and OpenAlex (keyless REST
-// APIs; WEBULAR_MAILTO joins their polite pool).
-import { Config, Data, Effect, Schema } from 'effect'
-import { fetchText } from '../core/http.ts'
-import { webSearch } from './search.ts'
+// Search across keyless sources. The default web source asks the free APIs
+// that fit the query's intent all at once, each under SOURCE_TIMEOUT_MS, and
+// fuses their lists (plus query variants and a local index list) with RRF +
+// the official-domain signal. Scraped DuckDuckGo HTML runs only when no free
+// API had hits; when that finds nothing too, the free sources answer.
+// Crossref and OpenAlex live in scholarly.ts.
+import { Cause, Clock, Effect } from 'effect'
+import { HttpStatusError } from '../core/http-body.ts'
+import { crossref, npm, openalex } from './scholarly.ts'
+import { scoreHits, WEAK_SCORE, webSearch } from './search.ts'
+import { secondHop } from './search-hop.ts'
+import { MAX_VARIANTS } from './search-source-names.ts'
 import { type FreeSource, freeSourceFallback } from './sources/registry.ts'
-import {
-  endpoint,
-  plain,
-  SEARCH_SOURCES,
-  type SearchSource,
-  sourceSearch,
-} from './sources-search.ts'
+import { type SearchSource, SOURCE_TIMEOUT_MS, sourceSearch } from './sources-search.ts'
 
 interface Hit {
   title: string
@@ -20,130 +19,178 @@ interface Hit {
   description: string
 }
 
-interface Answer {
-  source?: SearchSource | FreeSource
-  results: Hit[]
-}
+// One DuckDuckGo request returns its whole page whatever the limit; fusion
+// ranks the full page and the caller's slice keeps the best hits.
+const WEB_PAGE = 30
 
-class SearchSourceError extends Data.TaggedError('SearchSourceError')<{
-  source: SearchSource
-  cause: unknown
-}> {}
-
-class EmptySearchError extends Data.TaggedError('EmptySearchError')<{
-  source: SearchSource
-}> {}
-
-const Crossref = Schema.fromJsonString(
-  Schema.Struct({
-    message: Schema.Struct({
-      items: Schema.Array(
-        Schema.Struct({
-          URL: Schema.String,
-          title: Schema.optional(Schema.Array(Schema.String)),
-          abstract: Schema.optional(Schema.String),
-        }),
-      ),
-    }),
-  }),
-)
-
-const OpenAlex = Schema.fromJsonString(
-  Schema.Struct({
-    results: Schema.Array(
-      Schema.Struct({
-        id: Schema.String,
-        doi: Schema.NullOr(Schema.String),
-        display_name: Schema.NullOr(Schema.String),
-        abstract_inverted_index: Schema.optional(
-          Schema.NullOr(Schema.Record(Schema.String, Schema.Array(Schema.Number))),
-        ),
-      }),
-    ),
-  }),
-)
-
-// OpenAlex ships abstracts as word -> positions; put each word back in place.
-function unInvert(index: Readonly<Record<string, ReadonlyArray<number>>>): string {
-  const words: string[] = []
-  for (const [word, positions] of Object.entries(index)) for (const p of positions) words[p] = word
-  return words.filter(Boolean).join(' ')
-}
-
-// Fetch base + params (+ mailto when set) and decode the JSON body.
-const getJson = Effect.fn('scholarlyGet')(function* <A>(
-  schema: Schema.Codec<A, string>,
-  base: string,
-  params: Record<string, string>,
-) {
-  const mailto = yield* Config.String('WEBULAR_MAILTO').pipe(Config.withDefault(''))
-  const url = endpoint(base, mailto ? { ...params, mailto } : params)
-  const body = yield* fetchText(url, { timeoutMs: 20_000 })
-  return yield* Schema.decodeUnknownEffect(schema)(body)
-})
-
-const crossref = (query: string, limit: number) =>
-  getJson(Crossref, 'https://api.crossref.org/works', { query, rows: String(limit) }).pipe(
-    Effect.map(({ message }) =>
-      message.items.map((w) => ({
-        title: w.title?.[0] ?? '',
-        url: w.URL,
-        description: plain(w.abstract ?? ''),
-      })),
-    ),
-  )
-
-const openalex = (query: string, limit: number) =>
-  getJson(OpenAlex, 'https://api.openalex.org/works', {
-    search: query,
-    'per-page': String(limit),
-  }).pipe(
-    Effect.map(({ results }) =>
-      results.map((w) => ({
-        title: w.display_name ?? '',
-        url: w.doi ?? w.id,
-        description: w.abstract_inverted_index ? unInvert(w.abstract_inverted_index) : '',
-      })),
-    ),
-  )
-
-const one = (source: SearchSource, query: string, limit: number) => {
-  if (source === 'crossref') return crossref(query, limit)
-  if (source === 'openalex') return openalex(query, limit)
-  return source === 'web' ? webSearch(query, limit) : sourceSearch(source, query, limit)
-}
-
-const searchSourceEffect = (source: SearchSource, query: string, limit: number) =>
-  one(source, query, limit).pipe(
-    Effect.map((hits) => hits.slice(0, limit)),
-    Effect.mapError((cause) => new SearchSourceError({ source, cause })),
-  )
-
-// Sequential by construction: firstSuccessOf runs the next source only after
-// the previous one failed. An empty answer counts as a failure. When every
-// search source fails, the free sources answer instead (2603.01548).
-const fallbackSearchEffect = (query: string, limit: number) =>
-  Effect.firstSuccessOf(
-    SEARCH_SOURCES.map((source) =>
-      searchSourceEffect(source, query, limit).pipe(
-        Effect.filterOrFail(
-          (results) => results.length > 0,
-          () => new EmptySearchError({ source }),
-        ),
-        Effect.map((results): Answer => ({ source, results })),
-      ),
-    ),
-  ).pipe(Effect.catch(() => freeSourceFallback('search', query, limit)))
-
-type FreeSourcesFailed = Effect.Error<ReturnType<typeof freeSourceFallback>>
-
-// The default web source runs the chain; an explicit source queries just that
-// source.
-export const searchWithSource = (
+export type SourceRunner = (
   source: SearchSource,
   query: string,
   limit: number,
-): Effect.Effect<Answer, SearchSourceError | FreeSourcesFailed> =>
-  source === 'web'
-    ? fallbackSearchEffect(query, limit)
-    : Effect.map(searchSourceEffect(source, query, limit), (results): Answer => ({ results }))
+) => Effect.Effect<Hit[], unknown>
+
+const one: SourceRunner = (source, query, limit) => {
+  if (source === 'crossref') return crossref(query, limit)
+  if (source === 'openalex') return openalex(query, limit)
+  if (source === 'npm') return npm(query, limit)
+  if (source === 'web') return webSearch(query, WEB_PAGE)
+  return sourceSearch(source, query, limit)
+}
+
+// Whole-search budget: the free-API round and the scraped fallback each stop
+// at SOURCE_TIMEOUT_MS, so this only trips if something ignores its timeout.
+// A caller can pass a shorter deadlineMs (answer mode does).
+const SEARCH_DEADLINE_MS = 3 * SOURCE_TIMEOUT_MS
+
+// Free APIs per query intent; scraped engines (web = DuckDuckGo HTML) are the
+// last fallback only, since from this IP they mostly answer 403/429/captcha.
+// ponytail: keyword intent; swap in a Jev classifier if intent misses matter.
+// "survey" stays out: land surveys (Everest 2020) are factual, not scholarly.
+const SCHOLARLY =
+  /\b(paper|papers|study|studies|research|journal|doi|arxiv|preprint|theorem|citations?)\b/i
+// Navigational software queries also ask npm, whose package homepages are
+// official sites the other free APIs never return.
+const SOFTWARE = /\b(official|website|homepage|docs?|documentation|library|framework|github|npm)\b/i
+export const pickSources = (query: string): SearchSource[] =>
+  SCHOLARLY.test(query)
+    ? ['openalex', 'arxiv', 'crossref', 'wikipedia']
+    : SOFTWARE.test(query)
+      ? ['wikipedia', 'hackernews', 'openalex', 'npm']
+      : ['wikipedia', 'hackernews', 'openalex']
+
+type SourceStatus = 'ok' | 'no-results' | 'timeout' | `blocked:${number}` | 'error'
+interface SearchMeta {
+  sources: Record<string, { status: SourceStatus; ms: number }>
+  degraded: boolean
+  weak: boolean
+}
+type Outcome = { status: SourceStatus; hits: Hit[] }
+
+const failed = (cause: unknown): Outcome => ({
+  hits: [],
+  status: Cause.isTimeoutError(cause)
+    ? 'timeout'
+    : cause instanceof HttpStatusError
+      ? `blocked:${cause.status}`
+      : 'error',
+})
+const found = (hits: Hit[]): Outcome => ({ hits, status: hits.length ? 'ok' : 'no-results' })
+const rank = (s: SourceStatus) => (s === 'ok' ? 0 : s === 'no-results' ? 1 : 2)
+
+// One source, every query variant at once; the best variant status wins.
+const querySource = Effect.fn('querySource')(function* (
+  source: SearchSource,
+  queries: ReadonlyArray<string>,
+  limit: number,
+  runSource: SourceRunner,
+) {
+  const start = yield* Clock.currentTimeMillis
+  const outcomes = yield* Effect.forEach(
+    queries,
+    (q) =>
+      runSource(source, q, limit).pipe(
+        Effect.timeout(SOURCE_TIMEOUT_MS),
+        Effect.match({ onFailure: failed, onSuccess: found }),
+      ),
+    { concurrency: MAX_VARIANTS + 1 },
+  )
+  const ms = (yield* Clock.currentTimeMillis) - start
+  const status = outcomes.reduce<SourceStatus>(
+    (best, o) => (rank(o.status) < rank(best) ? o.status : best),
+    outcomes[0]?.status ?? 'no-results',
+  )
+  return { source, status, ms, lists: outcomes.map((o) => o.hits) }
+})
+
+export interface SearchOptions {
+  variants?: ReadonlyArray<string>
+  // Ranked list from the local BM25 index; fused like any source.
+  local?: ReadonlyArray<Hit>
+  runSource?: SourceRunner | undefined
+  // Answer mode: allow one entity-then-fact hop when the entity page is missing.
+  hop?: boolean
+  // Whole-search budget, hop included; defaults to SEARCH_DEADLINE_MS.
+  deadlineMs?: number
+}
+
+const timedOut = () =>
+  Effect.succeed({
+    results: [] as Hit[],
+    meta: { sources: {}, degraded: true, weak: true } as SearchMeta,
+  })
+
+// web: the intent's free APIs at once, then DuckDuckGo only if none had hits.
+// An explicit source queries just that source.
+const searchOnce = Effect.fn('searchOnce')(function* (
+  source: SearchSource,
+  query: string,
+  limit: number,
+  opts: SearchOptions = {},
+) {
+  const queries = [query, ...(opts.variants ?? []).slice(0, MAX_VARIANTS)]
+  const runSource = opts.runSource ?? one
+  const chosen = source === 'web' ? pickSources(query) : [source]
+  const ran = yield* Effect.forEach(chosen, (s) => querySource(s, queries, limit, runSource), {
+    concurrency: chosen.length,
+  })
+  if (source === 'web' && !ran.some((r) => r.status === 'ok'))
+    ran.push(yield* querySource('web', queries, limit, runSource))
+  const scored = scoreHits(
+    [...ran.flatMap((r) => r.lists), ...(opts.local ? [opts.local] : [])],
+    query,
+  )
+  const ok = ran.filter((r) => r.status === 'ok').length
+  const meta: SearchMeta = {
+    sources: Object.fromEntries(ran.map((r) => [r.source, { status: r.status, ms: r.ms }])),
+    degraded: ok * 2 < ran.length,
+    weak: (scored[0]?.score ?? 0) < WEAK_SCORE,
+  }
+  return { results: scored.slice(0, limit).map((e) => e.hit), meta }
+})
+
+interface Found {
+  results: Hit[]
+  meta: SearchMeta
+}
+type Searched = Found & { source?: FreeSource }
+
+// Nothing found, DuckDuckGo included: the free sources answer and `source`
+// names the one that did. If they all fail, the empty round stands.
+const withFreeSources = (query: string, limit: number, found: Found): Effect.Effect<Searched> =>
+  found.results.length > 0
+    ? Effect.succeed(found)
+    : freeSourceFallback('search', query, limit).pipe(
+        Effect.map(({ source, results }) => ({
+          ...found,
+          source,
+          results: results.map(({ title, url, description }) => ({ title, url, description })),
+        })),
+        Effect.catch(() => Effect.succeed(found)),
+      )
+
+// The whole search, second hop included, stays inside SEARCH_DEADLINE_MS; a
+// hop that runs out of time keeps the first round's results. An injected
+// runSource owns every source, so the free-source fallback stays out.
+export const searchEffect = Effect.fn('search')(function* (
+  source: SearchSource,
+  query: string,
+  limit: number,
+  opts: SearchOptions = {},
+) {
+  const deadline = opts.deadlineMs ?? SEARCH_DEADLINE_MS
+  const start = yield* Clock.currentTimeMillis
+  const first = yield* searchOnce(source, query, limit, opts).pipe(
+    Effect.timeoutOrElse({ duration: deadline, orElse: timedOut }),
+  )
+  const free = (found: Found): Effect.Effect<Searched> =>
+    source === 'web' && !opts.runSource
+      ? withFreeSources(query, limit, found)
+      : Effect.succeed(found)
+  if (!opts.hop || source !== 'web') return yield* free(first)
+  const left = deadline - ((yield* Clock.currentTimeMillis) - start)
+  const round = (q: string, n: number) => searchOnce('web', q, n, { runSource: opts.runSource })
+  return yield* secondHop(query, limit, first, round).pipe(
+    Effect.timeoutOrElse({ duration: Math.max(0, left), orElse: () => Effect.succeed(first) }),
+    Effect.flatMap(free),
+  )
+})

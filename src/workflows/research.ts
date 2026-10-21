@@ -3,7 +3,7 @@
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
-import { searchWithSource } from '../lib/search-chain.ts'
+import { searchEffect } from '../lib/search-chain.ts'
 import { fetchErrorsSchema, fetchSources, type SourceEntry } from '../lib/sources.ts'
 import { summarizeText } from '../lib/summarize.ts'
 import { stepRuntime } from './runtime.ts'
@@ -44,15 +44,12 @@ const searchStep = createStep({
   outputSchema: foundSchema,
   execute: ({ inputData }) =>
     stepRuntime.runPromise(
-      Effect.map(
-        searchWithSource('web', inputData.topic, inputData.depth),
-        ({ results: found }) => ({
-          topic: inputData.topic,
-          sentences: inputData.sentences,
-          timeoutMs: inputData.timeoutMs,
-          sources: found.map((h) => ({ title: h.title, url: h.url })),
-        }),
-      ),
+      Effect.map(searchEffect('web', inputData.topic, inputData.depth), ({ results: found }) => ({
+        topic: inputData.topic,
+        sentences: inputData.sentences,
+        timeoutMs: inputData.timeoutMs,
+        sources: found.map((h) => ({ title: h.title, url: h.url })),
+      })),
     ),
 })
 

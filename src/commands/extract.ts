@@ -6,7 +6,10 @@ import { runWorkflow } from '../cli/run.ts'
 import { emitOpts, parseFlags, timeoutFlag } from '../core/args.ts'
 import { CliError, runMain } from '../core/effect.ts'
 
-function buildInput(values: Record<string, string | boolean | undefined>, positionals: string[]) {
+function buildInput(
+  values: Record<string, string | boolean | string[] | undefined>,
+  positionals: string[],
+) {
   return Effect.gen(function* () {
     const url = (values['url'] as string) ?? positionals[0]
     if (!url) {
