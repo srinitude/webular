@@ -44,7 +44,9 @@ const fetched = z.object({
 
 const staticFetch = ({ url, timeoutMs, archive }: z.infer<typeof scrapeInput>) =>
   archive
-    ? fetchTextOrArchive(url, { timeoutMs })
+    ? Effect.map(fetchTextOrArchive(url, { timeoutMs }), ({ html, archivedFrom }) =>
+        archivedFrom ? { html, archivedFrom } : { html },
+      )
     : Effect.map(fetchText(url, { timeoutMs }), (html) => ({ html }))
 
 const fetchPage = (input: z.infer<typeof scrapeInput>) =>
