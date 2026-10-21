@@ -18,26 +18,25 @@ export const FREE_SOURCE_NAMES = Object.keys(FREE_SOURCES) as [FreeSource, ...Fr
 
 // Reddit and Bluesky answered 403 to keyless calls, so no command lists them;
 // they stay callable by name for a caller that brings its own access.
-// Stable sources first in every order, then the validation sources.
-export const FREE_SOURCE_ORDER = {
+const FREE_SOURCE_ORDER = {
   search: [
     'wikidata',
     'europepmc',
-    'loc',
-    'openlibrary',
     'stackexchange',
     'github-search',
     'hn-algolia',
     'marginalia',
+    'loc',
+    'openlibrary',
   ],
   answer: [
     'wikidata',
     'wikidata-sparql',
-    'europepmc',
-    'openlibrary',
     'stackexchange',
     'github-search',
     'hn-algolia',
+    'europepmc',
+    'openlibrary',
   ],
   research: [
     'europepmc',
@@ -45,8 +44,8 @@ export const FREE_SOURCE_ORDER = {
     'crossref',
     'openalex',
     'wikidata',
-    'loc',
     'stackexchange',
+    'loc',
     'marginalia',
   ],
   summarize: ['wikidata', 'wikidata-sparql', 'hn-algolia', 'gdelt'],

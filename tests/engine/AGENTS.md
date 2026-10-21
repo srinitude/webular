@@ -6,7 +6,7 @@ Tests for the engine that fetches, parses, and ranks pages. The parent rules are
 
 - Fetch and parse: `http.test.ts`, `scrape.test.ts`, `parse.test.ts`, `parse-pool.test.ts`, `html.test.ts`, `decode.test.ts`, `download.test.ts`.
 - Crawl and map: `crawl.test.ts`, `crawl-limit.test.ts`, `map.test.ts`, `map-order.test.ts`, `map-dedupe.test.ts`.
-- Search: files that start with `search-`, plus `sources.test.ts`, `source-subject.test.ts`, and `source-roles.test.ts`.
+- Search: files that start with `search-`, plus `sources.test.ts` and `source-subject.test.ts`.
 - Answer and summarize: `answer-passage.test.ts` and files that start with `summarize-`.
 - Cua (background GUI driver): files that start with `cua-`, plus `driver.test.ts`.
 

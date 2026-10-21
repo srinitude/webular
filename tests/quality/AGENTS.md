@@ -9,7 +9,7 @@ The code gates. The parent rules are in [tests/AGENTS.md](../AGENTS.md). The rul
 - Best practices from `docs/best-practices.md`: `practices-config.test.ts` (CI workflow and package metadata), `practices-source.test.ts` (compiler flags, docs, source patterns).
 - The AGENTS.md tree: `agents-md.test.ts` (coverage, shape, size, paths, and tasks), `claude-md-bridges.test.ts` (a real CLAUDE.md beside each AGENTS.md), `rule-greps.test.ts` (rules that one grep can decide), `rule-files.test.ts` (rules that one file read can decide but one grep cannot).
 - Coverage and safety: `e2e-parity.test.ts`, `sandbox.test.ts`.
-- Code scorers for search and answer factors: `source-trust.eval.test.ts`, `date-recency-scorers.test.ts`, `search-determinism.test.ts`.
+- Code scorers for search and answer factors: `date-recency-scorers.test.ts` and `search-determinism.test.ts`.
 
 ## Rules
 

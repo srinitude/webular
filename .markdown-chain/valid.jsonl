@@ -224,3 +224,4 @@
 {"path": "tests/workflows/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49"}
 {"path": "scripts/bench/AGENTS.md", "sha": "99e4d5bdc6edb9b9d0b854c159705d9d5b3773560067e83a634851d72d2a6733"}
 {"path": "tests/models/grader/AGENTS.md", "sha": "f5131a22af7400e4d8cfba6409c8de6eb869a85aee04ecd90cd569235f78050c"}
+{"path": "tests/quality/AGENTS.md", "sha": "cca8a587fe05cb5f1be08f8024d910bc77cf1438f1e65b2016aa6a4f257fc43a"}

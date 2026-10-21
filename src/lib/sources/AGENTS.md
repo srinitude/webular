@@ -5,9 +5,8 @@ Rules for the free source adapters, under [src/lib/AGENTS.md](../AGENTS.md).
 ## What lives here
 
 - Adapters, one topic per file: `web.ts`, `news.ts`, `books.ts`, `scholarly.ts`, `communities.ts`, `archives.ts`, `feeds.ts`, `documents.ts`, and `wikidata-facts.ts`.
-- `catalog.ts` names every adapter, says how far its hits can be believed, and gives each one a role: stable or validation.
-- `roles.ts` maps a site to its free source, and gives the trust and role of a hit's host.
-- `registry.ts` is the one entry point. It routes a command to adapters and sets the fallback order, with stable sources first.
+- `catalog.ts` names every adapter and says how far its hits can be believed.
+- `registry.ts` is the one entry point. It routes a command to adapters and sets the fallback order.
 - `rank.ts` orders merged hits by trust times recency.
 - `polite.ts` is the shared plumbing: one request in flight per host, a minimum gap, a contact User-Agent, and a schema-checked JSON GET.
 - `archive-copy.ts` fetches an archive capture when a live page is dead.
