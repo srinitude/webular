@@ -115,9 +115,7 @@ export const kindDecision = defineDecision<KindInput, Kind>({
         {
           task: 'Judge what kind of page `facts.link.url` is for a visitor of the site at `facts.link.site`.',
           answer_wanted: 'Pick the one page kind that fits best.',
-          rules: [
-            'Read the words in `facts.link.path_words`: they name what the page holds.',
-          ],
+          rules: ['Read the words in `facts.link.path_words`: they name what the page holds.'],
         },
         menu('content', ['main', 'junk'], (k) => KINDS[k] ?? null),
       ),

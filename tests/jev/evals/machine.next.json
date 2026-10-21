@@ -8,7 +8,10 @@
         "goal": "finish the command",
         "observed": { "type": "GO" },
         "allowed": ["GO", "STOP"],
-        "facts": { "command": "scrape https://example.com", "pending_work": "the page is not fetched yet" }
+        "facts": {
+          "command": "scrape https://example.com",
+          "pending_work": "the page is not fetched yet"
+        }
       },
       "label": "GO"
     }

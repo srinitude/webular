@@ -50,11 +50,17 @@ const main = Effect.gen(function* () {
   const id = strFlag(values, 'id') ?? rest[0]
   const label = strFlag(values, 'label') ?? rest[1]
   if (cmd === 'learn') {
-    yield* yield* load(() => import('../lib/jev/learn/cli.ts'), (m) => m.learn)
+    yield* yield* load(
+      () => import('../lib/jev/learn/cli.ts'),
+      (m) => m.learn,
+    )
     return exitFor('LEARN', 'SUCCEEDED')
   }
   if (cmd === 'correct' && id && label) {
-    const correct = yield* load(() => import('../lib/jev/learn/cli.ts'), (m) => m.correctCall)
+    const correct = yield* load(
+      () => import('../lib/jev/learn/cli.ts'),
+      (m) => m.correctCall,
+    )
     yield* correct(id, label, strFlag(values, 'input'))
     return exitFor('CORRECT', 'SUCCEEDED')
   }
