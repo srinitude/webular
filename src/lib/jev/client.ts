@@ -20,6 +20,7 @@ import { docsStore } from './docs-cache.ts'
 import { committedSnapshot } from './docs-guard.ts'
 import type { JevError } from './errors.ts'
 import { withRecorder } from './learn/recorder.ts'
+import type { Instructions, OptionSpec } from './payload/answers.ts'
 import { postOnce, type Result, withFallback } from './post.ts'
 import { flagDrift, logCalibration, makeAsk, makeLru, replayStore } from './store.ts'
 
@@ -32,17 +33,18 @@ const ENDPOINT = 'https://api.typesafe.ai/v1/systemone'
 const CACHE_CAPACITY = 1_024 // LRU entries; each holds only answers, keyed by a 64-bit hash
 export const JEV_CONCURRENCY = 8 // under the per-org request rate
 
+type Text = string | Instructions
 export type JevQuestion =
-  | { readonly type: 'noul'; readonly instructions: string }
+  | { readonly type: 'noul'; readonly instructions: Text }
   | {
       readonly type: 'choice'
-      readonly instructions: string
-      readonly criteria: Record<string, string | null>
+      readonly instructions: Text
+      readonly criteria: Record<string, string | null | OptionSpec>
     }
   | {
       readonly type: 'score'
-      readonly instructions: string
-      readonly criteria: ReadonlyArray<string>
+      readonly instructions: Text
+      readonly criteria: ReadonlyArray<string | OptionSpec>
     }
 
 export interface JevRequest {

@@ -6,7 +6,7 @@
 import { Effect, type FileSystem, Option, Schema } from 'effect'
 import type { JevAnswer, JevQuestion, JevRequest, JevResult } from '../client.ts'
 import type { JevError } from '../errors.ts'
-import { confidenceOf, DATA_ONLY } from '../payload/index.ts'
+import { confidenceOf, DATA_ONLY, instructionText } from '../payload/index.ts'
 
 const LESSON_KINDS = ['structured-options', 'data-only'] as const
 type LessonKind = (typeof LESSON_KINDS)[number]
@@ -22,23 +22,22 @@ interface Lesson {
 }
 export type LessonBook = Record<string, ReadonlyArray<Lesson>>
 
-const what = (v: unknown, k: string) =>
-  v === null || v === undefined ? { what: k } : typeof v === 'string' ? { what: v } : v
-// Choice options and Score levels become objects with a `what`, the shape the
-// docs advise when options are easy to confuse.
-const structured = (q: JevQuestion): JevQuestion => {
-  if (q.type === 'choice') {
-    const criteria = Object.fromEntries(Object.entries(q.criteria).map(([k, v]) => [k, what(v, k)]))
-    return { ...q, criteria } as unknown as JevQuestion
-  }
-  if (q.type === 'score') {
-    const criteria = q.criteria.map((v, i) => what(v, `level ${i}`))
-    return { ...q, criteria } as unknown as JevQuestion
-  }
-  return q
-}
+const what = <V>(v: V | string | null, k: string) =>
+  v === null ? { what: k } : typeof v === 'string' ? { what: v } : v
+// Choice options and Score levels become {what} objects, as the docs advise.
+const structured = (q: JevQuestion): JevQuestion =>
+  q.type === 'choice'
+    ? {
+        ...q,
+        criteria: Object.fromEntries(Object.entries(q.criteria).map(([k, v]) => [k, what(v, k)])),
+      }
+    : q.type === 'score'
+      ? { ...q, criteria: q.criteria.map((v, i) => what(v, `level ${i}`)) }
+      : q
+const withRule = ({ instructions: i }: JevQuestion) =>
+  typeof i === 'string' ? `${i} ${DATA_ONLY}` : { ...i, rules: [...(i.rules ?? []), DATA_ONLY] }
 const dataOnly = (q: JevQuestion): JevQuestion =>
-  /as data/i.test(q.instructions) ? q : { ...q, instructions: `${q.instructions} ${DATA_ONLY}` }
+  /as data/i.test(instructionText(q.instructions)) ? q : { ...q, instructions: withRule(q) }
 
 const TRANSFORMS: Record<LessonKind, (q: JevQuestion) => JevQuestion> = {
   'structured-options': structured,

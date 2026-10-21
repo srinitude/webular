@@ -24,7 +24,7 @@ const LINK_PURPOSE = purpose(
 )
 const LINK_QUESTIONS = {
   content: noul(
-    'Does `link`, found on `crawl.from_page`, lead to a page with real content a reader of `crawl.goal` would want, not a login, cart, share, legal, or tracking page?',
+    'Does `facts.link`, found on `facts.crawl.from_page`, lead to a page with real content a reader of `facts.crawl.goal` would want, not a login, cart, share, legal, or tracking page?',
   ),
 }
 interface LinkInput {
@@ -37,8 +37,10 @@ export const linkDecision = defineDecision<LinkInput, boolean>({
   payload: ({ goal, page, link }) => ({
     state: {
       purpose: LINK_PURPOSE,
-      link: { url: link.url, anchor_text: link.anchor },
-      crawl: { goal, from_page: page },
+      facts: {
+        link: { url: link.url, anchor_text: link.anchor },
+        crawl: { goal, from_page: page },
+      },
     },
     questions: LINK_QUESTIONS,
   }),

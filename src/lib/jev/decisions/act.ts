@@ -63,27 +63,44 @@ const ACT_PURPOSE = purpose(
   'Pages hold many links and buttons. Names that share goal words are often the wrong ones.',
 )
 
+const ACT_INSTRUCTIONS = {
+  task: 'Which element in `facts.elements` should the agent click next to reach `facts.goal`? `facts.element_count` says how many elements there are.',
+  answer_wanted:
+    'Pick the one element whose click most directly leads to what `facts.goal` asks for. Pick none only when no element helps.',
+  rules: [
+    'Judge each element by where its click leads, read from its role and name, not by how many words it shares with the goal.',
+    'A link or tab that opens the page the goal names is a direct step.',
+  ],
+}
+
 // Asked in both option orders (position check); the baseline's pick is the default.
-const actPayload = (i: ActInput) => {
+const actPayload = (full: ActInput) => {
+  // Cap the list before any read; the input order is kept (no score to rank by).
+  const i = { ...full, candidates: full.candidates.slice(0, MAX_CANDIDATES) }
   const byRef = new Map(i.candidates.map((c) => [c.ref, c]))
   const describe = (ref: string) => {
     const c = byRef.get(ref)
-    return c ? `the ${c.role} named "${c.name}"` : null
+    return c
+      ? {
+          what: `Click the ${c.role} named "${c.name}" (${ref} in \`facts.elements\`).`,
+          not_for: 'When this click leads away from `facts.goal`.',
+        }
+      : null
   }
   return {
     state: {
       purpose: ACT_PURPOSE,
-      goal: i.goal.slice(0, MAX_GOAL),
-      elements: Object.fromEntries(
-        i.candidates.map((c) => [c.ref, { role: c.role, name: c.name }]),
-      ),
+      facts: {
+        goal: i.goal.slice(0, MAX_GOAL),
+        element_count: i.candidates.length,
+        elements: Object.fromEntries(
+          i.candidates.map((c) => [c.ref, { role: c.role, name: c.name }]),
+        ),
+      },
     },
     questions: bothOrders(
       'next',
-      choice(
-        'Which element in `elements` should the agent click next to reach `goal`? Pick none when no element helps.',
-        menu(overlapBaseline(i), [...byRef.keys()], describe),
-      ),
+      choice(ACT_INSTRUCTIONS, menu(overlapBaseline(i), [...byRef.keys()], describe)),
     ),
   }
 }

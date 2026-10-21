@@ -64,18 +64,20 @@ const errorState = (p: FetchedPage) => ({
     'The wrong step wastes time or gives up on a page we could get.',
     'Status codes often mislead: some sites send 403 for bot walls and 404 for login pages. Text that asks the reader to sign in, log in, or subscribe means a login is needed, whatever the status.',
   ),
-  response: {
-    url: p.url,
-    status: p.status,
-    retry_after: p.retryAfter ?? null,
-    body: visibleText(p.body).slice(0, MAX_BODY),
+  facts: {
+    response: {
+      url: p.url,
+      status: p.status,
+      retry_after: p.retryAfter ?? null,
+      body: visibleText(p.body).slice(0, MAX_BODY),
+    },
   },
 })
 export const fetchErrorDecision = defineDecision<FetchedPage, NextAction>({
   name: 'fetch.error',
   payload: (p) => ({
     state: errorState(p),
-    questions: bothOrders('Which next step fits `response` best?', ERROR_OPTIONS),
+    questions: bothOrders('Which next step fits `facts.response` best?', ERROR_OPTIONS),
   }),
   sample: () => ({
     url: 'https://news.example.dev/story',
@@ -119,14 +121,14 @@ const blockState = ({ url, html }: Page) => {
       'A block page saved as content gives the reader junk.',
       'Many sites send 200 with a captcha, a cookie wall, or a not-found message.',
     ),
-    page: { url, visible_text: text.slice(0, MAX_BODY), visible_chars: text.length },
+    facts: { page: { url, visible_text: text.slice(0, MAX_BODY), visible_chars: text.length } },
   }
 }
 export const fetchBlockDecision = defineDecision<Page, BlockKind>({
   name: 'fetch.block',
   payload: (p) => ({
     state: blockState(p),
-    questions: bothOrders('What does `page` show?', BLOCK_OPTIONS),
+    questions: bothOrders('What does `facts.page` show?', BLOCK_OPTIONS),
   }),
   sample: () => ({
     url: 'https://shop.example.dev/item',

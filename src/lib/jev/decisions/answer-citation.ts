@@ -47,14 +47,16 @@ const VERDICT_TEXT: Record<string, string> = {
 const citationPayload = ({ claim, source }: CitationInput) => ({
   state: {
     purpose: CITATION_PURPOSE,
-    claim: { text: claim.slice(0, MAX_CLAIM) },
-    source: { title: source.title, text: source.text.slice(0, MAX_SOURCE) },
+    facts: {
+      claim: { text: claim.slice(0, MAX_CLAIM) },
+      source: { title: source.title, text: source.text.slice(0, MAX_SOURCE) },
+    },
   },
   // Asked in both option orders (position check); the baseline's own verdict comes first.
   questions: bothOrders(
     'verdict',
     choice(
-      'What does `source.text` of the page titled `source.title` say about `claim.text`?',
+      'What does `facts.source.text` of the page titled `facts.source.title` say about `facts.claim.text`?',
       menu('not_addressed', VERDICTS, (k) => VERDICT_TEXT[k] ?? null),
     ),
   ),

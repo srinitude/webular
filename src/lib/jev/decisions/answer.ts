@@ -42,19 +42,26 @@ const SOURCES_PURPOSE = purpose(
   'Search results mix answer pages with related topics, ads, and site chrome.',
 )
 const sourcesPayload = (input: SourcesInput) => {
-  const items = sourcesBaseline(input).slice(0, MAX_ITEMS)
+  // Lazy: stops after MAX_ITEMS kept, so reads do not grow with the list.
+  const items = input.sources
+    .values()
+    .filter((s) => s.text.length > 0)
+    .take(MAX_ITEMS)
+    .toArray()
   return {
     state: {
       purpose: SOURCES_PURPOSE,
-      question: asked(input.question),
-      sources: Object.fromEntries(
-        items.map((s, i) => [`p${i}`, { title: s.title, text: s.text.slice(0, MAX_SOURCE) }]),
-      ),
+      facts: {
+        question: asked(input.question),
+        sources: Object.fromEntries(
+          items.map((s, i) => [`p${i}`, { title: s.title, text: s.text.slice(0, MAX_SOURCE) }]),
+        ),
+      },
     },
     questions: Object.fromEntries(
       items.map((_, i) => [
         `p${i}`,
-        noul(`Does \`sources.p${i}\` hold facts that answer \`question.text\`?`),
+        noul(`Does \`facts.sources.p${i}\` hold facts that answer \`facts.question.text\`?`),
       ]),
     ),
   }
@@ -104,7 +111,9 @@ const SENTENCE_PURPOSE = purpose(
 // The summarizer's best 18 sentences in text order; ids keep each one's original index.
 const shortlist = (text: string) => topIndexes(text, MAX_SENTENCES)
 const sentenceText = (k: string) =>
-  k === 'none' ? 'Only when no sentence states the answer' : `Sentence \`text.sentences.${k}\``
+  k === 'none'
+    ? 'Only when no sentence states the answer'
+    : `Sentence \`facts.text.sentences.${k}\``
 const sentencePayload = (input: SentenceInput) => {
   const all = answerSentences(input.text)
   const keep = shortlist(input.text)
@@ -113,19 +122,21 @@ const sentencePayload = (input: SentenceInput) => {
   return {
     state: {
       purpose: SENTENCE_PURPOSE,
-      question: asked(input.question),
-      text: {
-        default: base,
-        sentences: Object.fromEntries(
-          keep.map((i) => [`s${i}`, (all[i] ?? '').slice(0, MAX_SENTENCE)]),
-        ),
+      facts: {
+        question: asked(input.question),
+        text: {
+          default: base,
+          sentences: Object.fromEntries(
+            keep.map((i) => [`s${i}`, (all[i] ?? '').slice(0, MAX_SENTENCE)]),
+          ),
+        },
       },
     },
     // Asked in both option orders (position check); the summarizer's pick comes first.
     questions: bothOrders(
       'lead',
       choice(
-        'Which entry of `text.sentences` states the answer to `question.text` itself?',
+        'Which entry of `facts.text.sentences` states the answer to `facts.question.text` itself?',
         menu(base, ids, sentenceText),
       ),
     ),

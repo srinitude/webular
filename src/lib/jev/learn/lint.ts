@@ -5,6 +5,7 @@
 // 3. No part appears twice: no repeated long state string, no repeated instructions.
 // 4. No writing or math step goes to Jev: it judges; code and LLMs write and count.
 import type { JevRequest } from '../client.ts'
+import { instructionText } from '../payload/answers.ts'
 
 interface Finding {
   readonly rule: 'model-pin' | 'structured-options' | 'duplicate-part' | 'not-a-judgment'
@@ -62,7 +63,7 @@ const duplicates = (req: JevRequest): Finding[] => {
   const parts: Array<[string, string]> = []
   longStrings(req.state, 'state', parts)
   for (const [id, q] of Object.entries(req.questions))
-    parts.push([`questions.${id}.instructions`, q.instructions])
+    parts.push([`questions.${id}.instructions`, instructionText(q.instructions)])
   const seen = new Map<string, string>()
   return parts.flatMap(([where, s]) => {
     const first = seen.get(s)
@@ -82,7 +83,7 @@ const WRITING_OR_MATH =
 
 const judgments = (req: JevRequest): Finding[] =>
   Object.entries(req.questions)
-    .filter(([, q]) => WRITING_OR_MATH.test(q.instructions))
+    .filter(([, q]) => WRITING_OR_MATH.test(instructionText(q.instructions)))
     .map(([id]) => ({
       rule: 'not-a-judgment' as const,
       where: `questions.${id}.instructions`,

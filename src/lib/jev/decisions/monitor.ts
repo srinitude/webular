@@ -19,10 +19,10 @@ const CHANGE_PURPOSE = purpose(
 // Noul per noise kind scored 0.375, so the compound question stays.
 const CHANGE_QUESTIONS = {
   noise: noul(
-    'Do the lines in `change.added` differ from the lines in `change.removed` only in a date, a timestamp, a view or visitor count, a session or tracking id, a copyright year, or ad or sponsor text?',
+    'Do the lines in `facts.change.added` differ from the lines in `facts.change.removed` only in a date, a timestamp, a view or visitor count, a session or tracking id, a copyright year, or ad or sponsor text?',
   ),
   matters: noul(
-    'Do the lines in `change.added` change what the page at `page.url` says or offers, compared with `change.removed`, in a way a person watching for `page.watch_for` would want to know?',
+    'Do the lines in `facts.change.added` change what the page at `facts.page.url` says or offers, compared with `facts.change.removed`, in a way a person watching for `facts.page.watch_for` would want to know?',
   ),
 }
 // Decisive facts first: the removed and added lines, split from the diff.
@@ -52,8 +52,10 @@ export const changeDecision = defineDecision<ChangeInput, boolean>({
   payload: ({ url, watchFor, diff }) => ({
     state: {
       purpose: CHANGE_PURPOSE,
-      change: { removed: changedLines(diff, '-'), added: changedLines(diff, '+') },
-      page: { url, watch_for: watchFor || 'any change in what the page says or offers' },
+      facts: {
+        change: { removed: changedLines(diff, '-'), added: changedLines(diff, '+') },
+        page: { url, watch_for: watchFor || 'any change in what the page says or offers' },
+      },
     },
     questions: CHANGE_QUESTIONS,
   }),

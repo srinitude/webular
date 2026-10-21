@@ -92,6 +92,12 @@ const checkEvals = (d: Declared['def']) =>
       expect([d.name, fallback(c.input)]).toEqual([d.name, c.label])
     for (const c of e['baseline-loses'])
       expect([d.name, Bun.deepEquals(fallback(c.input), c.label)]).toEqual([d.name, false])
+    // Every case holds the input the payload builder reads; a mismatched case is a live-eval miss.
+    for (const c of [...e['baseline-wins'], ...e['baseline-loses']])
+      expect([d.name, typeof (d.payload as (i: unknown) => Built)(c.input).state]).toEqual([
+        d.name,
+        'object',
+      ])
   })
 
 test('every defineDecision call in src is declared here, once per name', () =>

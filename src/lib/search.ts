@@ -4,7 +4,8 @@
 import { Effect } from 'effect'
 import { parseHTML } from 'linkedom'
 import { fetchText } from '../core/http.ts'
-import { onJevRuntime, searchRank } from './jev/decisions/search.ts'
+import { searchRank } from './jev/decisions/search.ts'
+import { onJevRuntime } from './jev/run.ts'
 import { endpoint, SOURCE_TIMEOUT_MS } from './sources-search.ts'
 
 interface SearchHit {

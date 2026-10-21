@@ -52,32 +52,32 @@ const observedIfAllowed = (i: MachineInput, allowed: ReadonlyArray<string>) =>
 
 // The cache key covers the machine id, its state, the allowed events, and the
 // facts, since all of them are in the canonical bytes.
-export const machinePayload = (i: Allowed): JevRequest => ({
-  state: {
-    purpose: MACHINE_PURPOSE,
-    goal: i.goal,
-    machine: {
-      id: i.machine.id,
-      state: canonical(i.snapshot.value),
-      allowed_events: i.allowed,
-      observed_event: i.observed.type,
-    },
-    facts: i.facts ?? {},
-    context: canonical(i.snapshot.context),
+const machineFacts = (i: Allowed) => ({
+  goal: i.goal,
+  machine: {
+    id: i.machine.id,
+    state: canonical(i.snapshot.value),
+    allowed_events: i.allowed,
+    observed_event: i.observed.type,
   },
+  details: i.facts ?? {},
+  context: canonical(i.snapshot.context),
+})
+export const machinePayload = (i: Allowed): JevRequest => ({
+  state: { purpose: MACHINE_PURPOSE, facts: machineFacts(i) },
   questions: {
     // Asked in both option orders (position check); the observed event, when
     // allowed, is the default and comes first in the main order.
     ...bothOrders(
       'next',
       choice(
-        'Machine `machine.id` is in state `machine.state`. Which event in `machine.allowed_events` should it take next to reach `goal`, given `facts`?',
+        'Machine `facts.machine.id` is in state `facts.machine.state`. Which event in `facts.machine.allowed_events` should it take next to reach `facts.goal`, given `facts.details`?',
         menu(observedIfAllowed(i, i.allowed) ?? i.allowed[0] ?? '', i.allowed),
       ),
     ),
     // Companion check on the move the code saw.
     observed_is_right: noul(
-      'Is `machine.observed_event` the right next event for machine `machine.id` in state `machine.state` to reach `goal`, given `facts`?',
+      'Is `facts.machine.observed_event` the right next event for machine `facts.machine.id` in state `facts.machine.state` to reach `facts.goal`, given `facts.details`?',
     ),
   },
 })

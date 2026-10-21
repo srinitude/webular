@@ -115,8 +115,8 @@ export const canonical = (
 
 interface JevQuestionShape {
   readonly type: 'noul' | 'choice' | 'score'
-  readonly instructions: string
-  readonly criteria?: Record<string, string | null> | ReadonlyArray<string>
+  readonly instructions: unknown
+  readonly criteria?: unknown
 }
 
 // The request body Jev gets. `model` is required by the API, so it is always

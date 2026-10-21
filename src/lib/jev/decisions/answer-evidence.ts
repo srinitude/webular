@@ -42,14 +42,14 @@ const HIT_LEVELS = [
   'The page likely holds the full answer',
 ]
 const hitText = (k: string) =>
-  k === 'none' ? 'Only when no hit looks likely to answer' : `The page behind \`hits.${k}\``
+  k === 'none' ? 'Only when no hit looks likely to answer' : `The page behind \`facts.hits.${k}\``
 
 const hitScores = (ids: ReadonlyArray<string>) =>
   Object.fromEntries(
     ids.map((k) => [
       k,
       score(
-        `Judging only its title, url, and snippet, how likely is the page behind \`hits.${k}\` to answer \`question.text\`?`,
+        `Judging only its title, url, and snippet, how likely is the page behind \`facts.hits.${k}\` to answer \`facts.question.text\`?`,
         HIT_LEVELS,
       ),
     ]),
@@ -61,14 +61,16 @@ const hitsPayload = (input: HitsInput) => {
   return {
     state: {
       purpose: HITS_PURPOSE,
-      question: { text: input.question.slice(0, MAX_QUESTION) },
-      fetch: { count: input.n, default: ids.slice(0, input.n) },
-      hits: Object.fromEntries(
-        items.map((h, i) => [
-          `h${i}`,
-          { title: h.title, url: h.url, snippet: h.description.slice(0, MAX_SNIPPET) },
-        ]),
-      ),
+      facts: {
+        question: { text: input.question.slice(0, MAX_QUESTION) },
+        fetch: { count: input.n, default: ids.slice(0, input.n) },
+        hits: Object.fromEntries(
+          items.map((h, i) => [
+            `h${i}`,
+            { title: h.title, url: h.url, snippet: h.description.slice(0, MAX_SNIPPET) },
+          ]),
+        ),
+      },
     },
     questions: {
       ...hitScores(ids),
@@ -76,7 +78,7 @@ const hitsPayload = (input: HitsInput) => {
       ...bothOrders(
         'lead',
         choice(
-          'Which hit most likely leads to a page that answers `question.text`?',
+          'Which hit most likely leads to a page that answers `facts.question.text`?',
           menu('h0', ids, hitText),
         ),
       ),

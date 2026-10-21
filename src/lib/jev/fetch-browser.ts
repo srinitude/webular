@@ -46,13 +46,15 @@ const browserState = ({ url, html }: Page) => {
       'The browser is slow; skipping it on a shell page loses the content.',
       'Single-page apps send a near-empty body; bot checks send a challenge page. Menus, footers, and a Loading note are not content. Analytics scripts do not build content.',
     ),
-    page: {
-      url,
-      visible_text: text.slice(0, MAX_BODY),
-      visible_chars: text.length,
-      main_text_without_menus: mainText(html).slice(0, MAX_BODY),
-      script_tags: scriptCount(html),
-      script_sources: scriptSources(html),
+    facts: {
+      page: {
+        url,
+        visible_text: text.slice(0, MAX_BODY),
+        visible_chars: text.length,
+        main_text_without_menus: mainText(html).slice(0, MAX_BODY),
+        script_tags: scriptCount(html),
+        script_sources: scriptSources(html),
+      },
     },
   }
 }
@@ -60,7 +62,7 @@ export const fetchBrowserDecision = defineDecision<Page, BrowserKind>({
   name: 'fetch.browser',
   payload: (p) => ({
     state: browserState(p),
-    questions: bothOrders('What does the HTML in `page` hold?', BROWSER_OPTIONS),
+    questions: bothOrders('What does the HTML in `facts.page` hold?', BROWSER_OPTIONS),
   }),
   sample: () => ({
     url: 'https://app.example.dev/',

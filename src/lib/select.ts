@@ -5,7 +5,7 @@ import { Data, Effect } from 'effect'
 import { parseHTML } from 'linkedom'
 import { JEV_CONCURRENCY } from './jev/client.ts'
 import { type Candidate, fieldDecision, recoverDecision } from './jev/decisions/extract.ts'
-import { onJevRuntime } from './jev/decisions/search.ts'
+import { onJevRuntime } from './jev/run.ts'
 
 interface FieldSpec {
   name: string

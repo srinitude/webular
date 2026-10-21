@@ -1,10 +1,10 @@
 // Page reading and answer helpers for the Jev fetch decisions in fetch.ts.
 import type { JevAnswer } from './client.ts'
-import { choice, picked } from './payload/index.ts'
+import { choice, type OptionSpec, picked } from './payload/index.ts'
 
 export const MAX_BODY = 2_000
 export const DOCS = '88a6a003018eaea50167565a766a0d4a91d039cf93cc7dc2965d3ceba3a72caf'
-export type Options = ReadonlyArray<readonly [string, string]>
+export type Options = ReadonlyArray<readonly [string, string | OptionSpec]>
 
 // Visible text: tags, scripts, and styles stripped.
 export const visibleText = (html: string) =>

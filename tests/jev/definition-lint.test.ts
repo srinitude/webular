@@ -173,24 +173,13 @@ test('definition: lint covers every defineDecision call in src', () =>
     ),
   ))
 
-// The five payload-shape rules below are open debt: today's payloads use bare-string
-// instructions and options, flat state, and unfilled subtask payloads. Each decision
-// is held to every other rule now (model pin, box model, size caps, nesting). Remove
-// a rule from this list as the payloads are fixed; an empty list is the end state.
-const SHAPE_DEBT: ReadonlySet<string> = new Set([
-  'instructions-object',
-  'choice-criteria',
-  'score-levels',
-  'state-shape',
-  'subtask-shape',
-])
-
-test('definition: every decision payload and subtask list has no new lint errors', () => {
+// Every decision is held to every definition rule, payload shape included.
+test('definition: every decision payload and subtask list has no lint errors', () => {
   for (const { def } of ALL) {
     const built = (def.payload as (i: unknown) => JevRequest)(def.sample())
     const req = { ...built, model: def.model ?? JEV_MODEL_DEFAULT }
     const errors = [...lintDefinition(req), ...lintSubtasks(def.subtasks)]
-      .filter((f) => f.level === 'error' && !SHAPE_DEBT.has(f.rule))
+      .filter((f) => f.level === 'error')
       .map((f) => `${f.rule} ${f.where}`)
     expect([def.name, errors]).toEqual([def.name, []])
   }

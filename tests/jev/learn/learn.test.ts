@@ -16,12 +16,17 @@ import {
 } from '../../../src/lib/jev/learn/lessons.ts'
 import { lintPayload } from '../../../src/lib/jev/learn/lint.ts'
 import { type CallRow, withRecorder } from '../../../src/lib/jev/learn/recorder.ts'
-import { choice } from '../../../src/lib/jev/payload/index.ts'
 
 const SECRET_PAGE = 'secret page text that must never reach the log'
 const req: JevRequest = {
   state: { page: { text: SECRET_PAGE } },
-  questions: { kind: choice('What kind of page is `page`?', { docs: null, blog: 'a dated post' }) },
+  questions: {
+    kind: {
+      type: 'choice',
+      instructions: 'What kind of page is `page`?',
+      criteria: { docs: null, blog: 'a dated post' },
+    },
+  },
 }
 const answer: JevResult = {
   answers: { kind: { type: 'choice', choice: 'docs', confidence: 0.9 } },

@@ -52,15 +52,17 @@ export const extractDecision = defineDecision<ExtractInput, string>({
     return {
       state: {
         purpose: EXTRACT_PURPOSE,
-        outputs: Object.fromEntries(names.map((n) => [n, outputs[n]?.slice(0, 4_000) ?? ''])),
-        page: { url },
+        facts: {
+          outputs: Object.fromEntries(names.map((n) => [n, outputs[n]?.slice(0, 4_000) ?? ''])),
+          page: { url },
+        },
       },
       // Asked in both option orders (position check); the rule's pick, the
       // longest output, is the default and comes first in the main order.
       questions: bothOrders(
         'best',
         choice(
-          'Which entry of `outputs`, all taken from the page at `page.url`, keeps the most main content with the least menu, ad, or footer text?',
+          'Which entry of `facts.outputs`, all taken from the page at `facts.page.url`, keeps the most main content with the least menu, ad, or footer text?',
           menu(longest({ url, outputs, names }), names),
         ),
       ),
@@ -107,12 +109,12 @@ export const feedDecision = defineDecision<FeedInput, string>({
   payload: ({ site, candidates: all }) => {
     const candidates = all.slice(0, CAPS.fields - 1)
     return {
-      state: { purpose: FEED_PURPOSE, candidates, site },
+      state: { purpose: FEED_PURPOSE, facts: { candidates, site } },
       // Asked in both option orders (position check).
       questions: bothOrders(
         'main',
         choice(
-          'Which entry of `candidates` is the main posts feed of `site`?',
+          'Which entry of `facts.candidates` is the main posts feed of `facts.site`?',
           menu(
             firstFeed({ site, candidates }),
             candidates.map((c) => c.url),

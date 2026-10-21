@@ -8,9 +8,10 @@ import {
   bothOrders,
   CONFIDENCE_BAR,
   choice,
-  DATA_ONLY,
   menu,
+  type OptionSpec,
   purpose,
+  score,
   scored,
 } from '../payload/index.ts'
 
@@ -35,13 +36,9 @@ export const mapDecision = defineDecision<{ readonly site: string; readonly url:
     { name: 'useful', primitive: 'score', pattern: 'none', payload: { question: 'useful' } },
   ],
   payload: ({ site, url }) => ({
-    state: { purpose: MAP_PURPOSE, url, site },
+    state: { purpose: MAP_PURPOSE, facts: { url, site } },
     questions: {
-      useful: {
-        type: 'score',
-        instructions: `How useful is \`url\` to a visitor of \`site\`? ${DATA_ONLY}`,
-        criteria: MAP_LEVELS,
-      },
+      useful: score('How useful is `facts.url` to a visitor of `facts.site`?', MAP_LEVELS),
     },
   }),
   read: (a, t) => scored(a['useful'], t, 1.5) / 3,
@@ -69,12 +66,27 @@ const KIND_PURPOSE = purpose(
   'The list is cut at a limit, so the order decides which pages the reader gets.',
   'Most pages are normal content. Login, cart, legal, tag, page-number, and tracking copies add nothing.',
 )
-const KINDS: Record<string, string> = {
-  content: 'A normal content page at `link.url`: an article, guide, post, or product detail',
-  main: 'Only when `link.url` is a page a visitor of `link.site` looks for first: home, docs index, product, pricing, or about',
-  junk: 'Only when `link.url` is login, cart, share, legal, a tag list, a page number, or a tracking copy',
-  none: 'Only when `link.url` is not a web page at all',
+const KINDS: Record<string, OptionSpec> = {
+  content: {
+    what: 'A normal page with its own content: one article, guide, post, or product detail',
+    not_for: 'A top page of the site, or a copy, list, or utility page',
+  },
+  main: {
+    what: 'Only when the page is one a visitor of `facts.link.site` looks for first: home, docs index, product, pricing, or about',
+    not_for: 'A single article, guide, or post deeper in the site',
+  },
+  junk: {
+    what: 'Only when the page adds nothing for a reader: login, cart, share, legal, a tag or date list, a page number, or a print, tracking, or other copy of a page',
+    not_for: 'A page with its own article, guide, or product text',
+  },
+  none: { what: 'Only when `facts.link.url` is not a web page at all' },
 }
+// The URL path as plain words (scheme, host, query, and hash dropped).
+const pathWords = (url: string): string[] =>
+  (url.replace(/^[a-z][a-z0-9+.-]*:\/\/[^/]*/i, '').split(/[?#]/)[0] ?? '')
+    .split(/[/\-_.]+/)
+    .filter(Boolean)
+    .slice(0, 20)
 // A URL the junk rule matches never ranks as a main page.
 const codeCheck = (kind: Kind, input: KindInput): boolean =>
   kind !== 'main' || !JUNK.test(input.url)
@@ -91,11 +103,22 @@ export const kindDecision = defineDecision<KindInput, Kind>({
     },
   ],
   payload: ({ site, url }) => ({
-    state: { purpose: KIND_PURPOSE, link: { site, url: url.slice(0, MAX_URL) } },
+    state: {
+      purpose: KIND_PURPOSE,
+      facts: {
+        link: { site, url: url.slice(0, MAX_URL), path_words: pathWords(url.slice(0, MAX_URL)) },
+      },
+    },
     questions: bothOrders(
       'kind',
       choice(
-        'What kind of page is `link.url` for a visitor of the site at `link.site`?',
+        {
+          task: 'Judge what kind of page `facts.link.url` is for a visitor of the site at `facts.link.site`.',
+          answer_wanted: 'Pick the one page kind that fits best.',
+          rules: [
+            'Read the words in `facts.link.path_words`: they name what the page holds.',
+          ],
+        },
         menu('content', ['main', 'junk'], (k) => KINDS[k] ?? null),
       ),
     ),

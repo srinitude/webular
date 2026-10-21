@@ -74,27 +74,11 @@ const steps = Object.entries(decisions as unknown as Record<string, Partial<Step
     typeof e[1].def?.payload === 'function' && typeof e[1].def.sample === 'function',
 )
 
-// Builders that map their whole input list before any cap, so input reads grow
-// with the list (src/lib/jev/decisions: research.ts `part.map`, act.ts and
-// extract.ts `candidates.map`, answer-evidence.ts `items.map`). `test.failing`
-// keeps them visible: once a builder caps its list first, its test turns red
-// here and the name comes off this list.
-const KNOWN_LINEAR = new Set([
-  'researchPart',
-  'act',
-  'answerSources',
-  'extractField',
-  'extractRecover',
-])
-
 for (const [name, step] of steps)
-  (KNOWN_LINEAR.has(name) ? test.failing : test)(
-    `${name}: cost per step stays flat at 10x and 100x input`,
-    () => {
-      const r = flatness(step)
-      expect({ name, ...r }).toMatchObject({ name, ok: true })
-    },
-  )
+  test(`${name}: cost per step stays flat at 10x and 100x input`, () => {
+    const r = flatness(step)
+    expect({ name, ...r }).toMatchObject({ name, ok: true })
+  })
 
 // A deliberately linear builder: it copies every item into the payload, so its
 // input reads grow with the list. The check must reject it.

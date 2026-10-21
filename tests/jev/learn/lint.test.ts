@@ -8,14 +8,12 @@ import { linkDecision } from '../../../src/lib/jev/decisions/crawl.ts'
 import { changeDecision } from '../../../src/lib/jev/decisions/monitor.ts'
 import { applyLessons } from '../../../src/lib/jev/learn/lessons.ts'
 import { lintModel, lintPayload, sendsLatest } from '../../../src/lib/jev/learn/lint.ts'
-import { noul, score } from '../../../src/lib/jev/payload/index.ts'
+import { instructionText, noul } from '../../../src/lib/jev/payload/index.ts'
 
 test('applyLessons: data-only adds the data rule once', () => {
-  const once = applyLessons({ state: {}, questions: { q: noul('Is `x` a login page?') } }, [
-    'data-only',
-    'data-only',
-  ])
-  expect(once.questions['q']?.instructions.match(/as data/g)?.length).toBe(1)
+  const q = { type: 'noul', instructions: 'Is `x` a login page?' } as const
+  const once = applyLessons({ state: {}, questions: { q } }, ['data-only', 'data-only'])
+  expect(instructionText(once.questions['q']?.instructions ?? '').match(/as data/g)?.length).toBe(1)
 })
 
 test('lint: model pin, bare options, duplicates, and writing or math', () => {
@@ -25,7 +23,7 @@ test('lint: model pin, bare options, duplicates, and writing or math', () => {
   const bad: JevRequest = {
     state: { a: long, b: { c: long } },
     questions: {
-      lvl: score('How severe is `a`?', ['low', 'high']),
+      lvl: { type: 'score', instructions: 'How severe is `a`?', criteria: ['low', 'high'] },
       sum: noul('Write a summary of `a`.'),
       twice: noul('Write a summary of `a`.'),
       fact: noul('Does `a` show only a view count?'),

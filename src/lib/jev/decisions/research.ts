@@ -21,8 +21,26 @@ const RESEARCH_PURPOSE = purpose(
   'Evidence that only describes the topic, without the specific answer, does not count.',
 )
 const RESEARCH_OPTIONS: Options = [
-  ['keep_searching', 'At least one sub-question has no evidence that states its specific answer.'],
-  ['done', 'Every sub-question has evidence that states its specific answer.'],
+  [
+    'keep_searching',
+    {
+      what: 'At least one sub-question has evidence that does not name its answer.',
+      not_for: 'Evidence that names the answer, even in a few words.',
+      examples: [
+        'question "Does Redis support streams?", evidence "Redis is an in-memory data store."',
+      ],
+    },
+  ],
+  [
+    'done',
+    {
+      what: 'Every sub-question has evidence that names its answer.',
+      not_for: 'Evidence that only says what the topic is, with no answer to the question.',
+      examples: [
+        'question "Which tool formats Go code?", evidence "Go ships gofmt, a code formatter."',
+      ],
+    },
+  ],
   [NONE_OPTION, 'None of these fit the evidence.'],
 ]
 const RESEARCH_KINDS = ['keep_searching', 'done'] as const
@@ -38,16 +56,17 @@ export const researchPart = defineDecision<ResearchPart, boolean>({
   payload: ({ s, part }) => ({
     state: {
       purpose: RESEARCH_PURPOSE,
-      research: {
+      // Flat under facts: one level, like the base `research` block that scored best.
+      facts: {
         topic: s.topic,
-        sub_questions: part.map((q) => ({
+        sub_questions: part.slice(0, CAPS.fields).map((q) => ({
           question: q.question,
           best_evidence: q.bestEvidence.slice(0, 800),
         })),
       },
     },
     questions: bothOrders(
-      'Does every `research.sub_questions` entry have `best_evidence` that states the specific answer to its `question` about `research.topic`, not just describes the topic?',
+      'Does every `facts.sub_questions` entry have `best_evidence` that names the answer to its `question` about `facts.topic`? A short phrase that names the answer counts, even when the sentence also describes the topic.',
       RESEARCH_OPTIONS,
     ),
   }),

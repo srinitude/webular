@@ -5,7 +5,15 @@
 // selector matched zero or several elements (rule: the first match, or '').
 import type { JevAnswer } from '../client.ts'
 import { defineDecision } from '../define.ts'
-import { agreedPick, bothOrders, CONFIDENCE_BAR, choice, menu, purpose } from '../payload/index.ts'
+import {
+  agreedPick,
+  bothOrders,
+  CAPS,
+  CONFIDENCE_BAR,
+  choice,
+  menu,
+  purpose,
+} from '../payload/index.ts'
 
 export interface Candidate {
   readonly tag: string
@@ -35,30 +43,53 @@ const EXTRACT_PURPOSE = purpose(
   'Pages hold many text bits: menus, labels, ads, and related items.',
 )
 
-const describe = (k: string) =>
-  k === 'none' ? 'Only when no element holds this field' : `Element \`candidates.${k}\``
+const NONE_SPEC = {
+  what: 'No element has text that is the value of the field',
+  not_for: 'A page where one element holds the value itself',
+}
+const describe = (cands: ReadonlyArray<Candidate>) => (k: string) => {
+  if (k === 'none') return NONE_SPEC
+  const c = cands[Number(k.slice(1))]
+  return {
+    what: `Element \`facts.candidates.${k}\` (<${c?.tag ?? ''}> "${c?.text.slice(0, MAX_TEXT) ?? ''}"): its text is the value of the field`,
+    not_for: 'Text that only names or labels the field, a menu or nav link, or a related item',
+  }
+}
+const INSTRUCTIONS = {
+  task: 'Find the entry of `facts.candidates` whose `text` is the value of the field named `facts.field.name`.',
+  answer_wanted: 'Pick the one element whose text is the field value itself.',
+  rules: [
+    'The value is the data a reader wants, such as an amount, a name, or a date. A label that names the field is not its value.',
+    'Judge each element by its own `text` first, then its `tag` and `hint`.',
+    '`facts.field.default` is only the text a simple code rule found, and it can be wrong.',
+    '`facts.field.selector` is the CSS selector the user gave, empty when none. It may match no element or the wrong ones.',
+  ],
+}
 
-const payload = (input: FieldInput, rule: string, selector?: string) => {
+// The payload sees the first CAPS.fields candidates (the canonical object cap),
+// so its reads stay flat; the rule runs on that same head.
+const payload = <I extends FieldInput>(full: I, ruleOf: (i: I) => string, selector?: string) => {
+  const input = { ...full, candidates: full.candidates.slice(0, CAPS.fields) }
+  const rule = ruleOf(input)
   const ids = input.candidates.map((_, i) => `e${i}`)
   const first = ids[input.candidates.findIndex((c) => c.text === rule)] ?? ids[0] ?? 'e0'
   return {
     state: {
       purpose: EXTRACT_PURPOSE,
-      field: { name: input.name, selector: selector ?? '', default: rule || 'none' },
-      candidates: Object.fromEntries(
-        input.candidates.map((c, i) => [
-          `e${i}`,
-          { tag: c.tag, hint: c.hint, text: c.text.slice(0, MAX_TEXT) },
-        ]),
-      ),
+      facts: {
+        field: { name: input.name, selector: selector ?? '', default: rule || 'none' },
+        candidates: Object.fromEntries(
+          input.candidates.map((c, i) => [
+            `e${i}`,
+            { tag: c.tag, hint: c.hint, text: c.text.slice(0, MAX_TEXT) },
+          ]),
+        ),
+      },
     },
     // Asked in both option orders (position check); the rule's pick comes first.
     questions: bothOrders(
       'field',
-      choice(
-        'Which entry of `candidates` has text that is the value of the field `field.name`? `field.selector` is the CSS selector the user gave, empty when none; `field.default` is the text the code rule found.',
-        menu(first, ids, describe),
-      ),
+      choice(INSTRUCTIONS, menu(first, ids, describe(input.candidates))),
     ),
   }
 }
@@ -92,7 +123,7 @@ export const fieldDecision = defineDecision<FieldInput, string>({
   name: 'extract.field',
   sample: () => ({ name: 'price', candidates: SAMPLE }),
   subtasks: SUBTASKS,
-  payload: (input) => payload(input, hintRule(input)),
+  payload: (input) => payload(input, hintRule),
   read,
   bar: CONFIDENCE_BAR,
   fallback: hintRule,
@@ -105,7 +136,7 @@ export const recoverDecision = defineDecision<RecoverInput, string>({
   name: 'extract.recover',
   sample: () => ({ name: 'price', selector: '.cost', matched: false, candidates: SAMPLE }),
   subtasks: SUBTASKS,
-  payload: (input) => payload(input, recoverRule(input), input.selector),
+  payload: (input) => payload(input, recoverRule, input.selector),
   read,
   bar: CONFIDENCE_BAR,
   fallback: recoverRule,

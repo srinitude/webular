@@ -1,16 +1,23 @@
 // summarize: which sentence is the text's most central one? Jev's agreed pick
 // joins the word-frequency summarizer's top picks; the rule alone is the fallback.
-import { Effect } from 'effect'
 import { summarizeText } from '../../summarize.ts'
-import { JEV_CONCURRENCY, type JevAnswer } from '../client.ts'
+import type { JevAnswer } from '../client.ts'
 import { defineDecision } from '../define.ts'
-import { agreedPick, bothOrders, CONFIDENCE_BAR, choice, menu, purpose } from '../payload/index.ts'
+import {
+  agreedPick,
+  bothOrders,
+  CONFIDENCE_BAR,
+  choice,
+  menu,
+  type OptionSpec,
+  purpose,
+} from '../payload/index.ts'
 
-interface SummaryInput {
+export interface SummaryInput {
   readonly text: string
   readonly topN: number
 }
-const MAX_ITEMS = 20 // ponytail: texts past 20 sentences always keep the rule's picks
+export const MAX_ITEMS = 20 // ponytail: texts past 20 sentences always keep the rule's picks
 const MAX_SENTENCE = 600
 
 // Every sentence of `text` in text order, split the way summarizeText splits it.
@@ -50,7 +57,7 @@ const SUMMARY_PURPOSE = purpose(
 const describe = (k: string) =>
   k === 'none'
     ? 'Only when every sentence is a greeting, sign-off, ad, or aside'
-    : `Sentence \`text.sentences.${k}\``
+    : `Sentence \`facts.text.sentences.${k}\``
 
 const summaryPayload = (input: SummaryInput) => {
   const items = allSentences(input.text).slice(0, MAX_ITEMS)
@@ -59,16 +66,18 @@ const summaryPayload = (input: SummaryInput) => {
   return {
     state: {
       purpose: SUMMARY_PURPOSE,
-      default: { picks: base },
-      text: {
-        sentences: Object.fromEntries(items.map((s, i) => [`s${i}`, s.slice(0, MAX_SENTENCE)])),
+      facts: {
+        default: { picks: base },
+        text: {
+          sentences: Object.fromEntries(items.map((s, i) => [`s${i}`, s.slice(0, MAX_SENTENCE)])),
+        },
       },
     },
     // Asked in both option orders (position check); the rule's first pick comes first.
     questions: bothOrders(
       'lead',
       choice(
-        'If the summary could keep only one sentence, which entry of `text.sentences` should it keep so a reader learns what the text says?',
+        'If the summary could keep only one sentence, which entry of `facts.text.sentences` should it keep so a reader learns what the text says?',
         menu(base[0] ?? 's0', ids, describe),
       ),
     ),
@@ -111,41 +120,60 @@ export const summaryDecision = defineDecision<SummaryInput, ReadonlyArray<number
 })
 
 // Per-sentence follow-up: is sentence `i` a core point or filler? 'unsure' keeps the picks.
-type Verdict = 'core' | 'filler' | 'unsure'
+export type Verdict = 'core' | 'filler' | 'unsure'
 interface CoreInput {
   readonly text: string
   readonly i: number
 }
-const describeCore = (k: string) =>
-  k === 'core'
-    ? 'It states a point the text makes'
-    : k === 'filler'
-      ? 'Only when it is a greeting, sign-off, ad, aside, or a repeat of topic words'
-      : 'Only when no other option fits'
+const CORE_OPTIONS: Record<string, OptionSpec> = {
+  core: {
+    what: 'The sentence states a fact, claim, or step that the text is about',
+    not_for: 'A sentence that only names the topic while greeting, thanking, or selling',
+    examples: ['Deno runs TypeScript files without a build step.'],
+  },
+  filler: {
+    what: 'Only when the sentence is a greeting, welcome, sign-off, thanks, ad, or topic words said again',
+    not_for:
+      'A fact, even a short one, or a side remark that is neither a fact nor a greeting, sign-off, or ad',
+    examples: ['Hi there, Deno lovers, and welcome to our Deno news page!'],
+  },
+  none: {
+    what: 'Only when the sentence is a side remark or opinion: not a fact of the topic, and not a greeting, sign-off, ad, or repeat',
+  },
+}
+const describeCore = (k: string) => CORE_OPTIONS[k] ?? null
+const CORE_ASK = {
+  task: 'Decide if `facts.sentence.text` (the entry of `facts.text.sentences` named by `facts.sentence.id`) is a core point of the whole text or filler.',
+  answer_wanted:
+    'Pick core if it tells the reader a fact, filler if it only greets, thanks, sells, or repeats topic words.',
+  rules: [
+    'Judge what the sentence says, not how often it uses the topic words.',
+    'Read the other entries of `facts.text.sentences` only to see what the text is about.',
+  ],
+}
 const codeCheck = (_v: Verdict, { text, i }: CoreInput) =>
   Number.isInteger(i) && i >= 0 && i < Math.min(allSentences(text).length, MAX_ITEMS)
 
-const corePayload = ({ text, i }: CoreInput) => ({
-  state: {
-    purpose: SUMMARY_PURPOSE,
-    text: {
-      sentences: Object.fromEntries(
-        allSentences(text)
-          .slice(0, MAX_ITEMS)
-          .map((s, j) => [`s${j}`, s.slice(0, MAX_SENTENCE)]),
-      ),
+const corePayload = ({ text, i }: CoreInput) => {
+  const items = allSentences(text).slice(0, MAX_ITEMS)
+  return {
+    state: {
+      purpose: SUMMARY_PURPOSE,
+      facts: {
+        text: {
+          sentences: Object.fromEntries(items.map((s, j) => [`s${j}`, s.slice(0, MAX_SENTENCE)])),
+        },
+        sentence: {
+          id: `s${i}`,
+          text: (items[i] ?? '').slice(0, MAX_SENTENCE),
+          position: `${i + 1} of ${items.length}`,
+        },
+      },
     },
-    sentence: { id: `s${i}` },
-  },
-  // Asked in both option orders (position check); code acts only when both agree.
-  questions: bothOrders(
-    'core',
-    choice(
-      'Is the entry of `text.sentences` named by `sentence.id` a core point of the whole text?',
-      menu('core', ['filler'], describeCore),
-    ),
-  ),
-})
+    // Asked in both option orders (position check); code acts only when both agree.
+    questions: bothOrders('core', choice(CORE_ASK, menu('core', ['filler'], describeCore))),
+  }
+}
 
 export const coreDecision = defineDecision<CoreInput, Verdict>({
   name: 'summarize.core',
@@ -167,23 +195,3 @@ export const coreDecision = defineDecision<CoreInput, Verdict>({
   evals: 'tests/jev/evals/summarize.core.json',
   docs: '88a6a003018eaea50167565a766a0d4a91d039cf93cc7dc2965d3ceba3a72caf',
 })
-
-// Picks Jev surely calls filler give way to unpicked sentences it surely calls core;
-// the picks stay when there are too few replacements.
-export const followUp = (picks: ReadonlyArray<number>, verdicts: ReadonlyArray<Verdict>) => {
-  const kept = picks.filter((i) => verdicts[i] !== 'filler')
-  const extra = verdicts.flatMap((v, i) => (v === 'core' && !picks.includes(i) ? [i] : []))
-  const out = [...kept, ...extra.slice(0, picks.length - kept.length)].sort((a, b) => a - b)
-  return out.length === picks.length ? out : picks
-}
-
-// The follow-up after summarize.lead: one summarize.core call per sentence.
-export const summaryFollowUp = (input: SummaryInput, picks: ReadonlyArray<number>) => {
-  const n = allSentences(input.text).length
-  if (n > MAX_ITEMS || picks.length >= n) return Effect.succeed(picks)
-  return Effect.forEach(
-    Array.from({ length: n }, (_, i) => i),
-    (i) => coreDecision({ text: input.text, i }),
-    { concurrency: JEV_CONCURRENCY },
-  ).pipe(Effect.map((verdicts) => followUp(picks, verdicts)))
-}

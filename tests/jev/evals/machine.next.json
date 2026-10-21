@@ -3,11 +3,12 @@
   "baseline-wins": [
     {
       "input": {
+        "machine": { "id": "agent" },
+        "snapshot": { "value": "ready", "context": { "steps": 0 } },
         "goal": "finish the command",
-        "observed": {
-          "type": "GO"
-        },
-        "allowed": ["GO", "STOP"]
+        "observed": { "type": "GO" },
+        "allowed": ["GO", "STOP"],
+        "facts": { "command": "scrape https://example.com", "pending_work": "the page is not fetched yet" }
       },
       "label": "GO"
     }
@@ -15,11 +16,16 @@
   "baseline-loses": [
     {
       "input": {
+        "machine": { "id": "agent" },
+        "snapshot": { "value": "failed", "context": { "attempts": 1, "max_attempts": 3 } },
         "goal": "finish the command",
-        "observed": {
-          "type": "GO"
-        },
-        "allowed": ["STOP", "RETRY"]
+        "observed": { "type": "GO" },
+        "allowed": ["STOP", "RETRY"],
+        "facts": {
+          "command": "scrape https://example.com",
+          "last_error": "network timeout while fetching the page; the site answers again",
+          "attempts_left": 2
+        }
       },
       "label": "RETRY"
     }

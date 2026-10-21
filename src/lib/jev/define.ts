@@ -84,6 +84,26 @@ export const askJev = <R>(
   req: JevRequest,
 ) => svc.ask(decision, req)
 
+// Each subtask's payload gets the full {model, state, questions} it sends, built from
+// the definition's own sample, so lintSubtasks checks the real request. A getter, so
+// sample() and payload() run only when a check reads the subtasks, never at import.
+const withPayloads = <I, A>(def: DecisionDef<I, A>): DecisionDef<I, A> => ({
+  ...def,
+  get subtasks() {
+    const built = def.payload(def.sample())
+    const model = def.model ?? JEV_MODEL_DEFAULT
+    return def.subtasks.map((s) => ({
+      ...s,
+      payload: {
+        ...s.payload,
+        model,
+        state: built.state,
+        questions: { [s.payload.question]: built.questions[s.payload.question] },
+      },
+    })) as unknown as DecisionDef<I, A>['subtasks']
+  },
+})
+
 export const defineDecision = <I, A>(def: DecisionDef<I, A>) =>
   Object.assign(
     (input: I) =>
@@ -101,5 +121,5 @@ export const defineDecision = <I, A>(def: DecisionDef<I, A>) =>
             }),
           ),
       ),
-    { def },
+    { def: withPayloads(def) },
   )

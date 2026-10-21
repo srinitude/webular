@@ -1,7 +1,14 @@
 // Choice menus and read-every-fact checks: default-first menus ending with
 // `none`, the both-orders position check, and request batching.
 
-import { type choice, NONE_OPTION, picked } from './answers.ts'
+import {
+  type choice,
+  type Instructions,
+  instructionText,
+  NONE_OPTION,
+  type OptionSpec,
+  picked,
+} from './answers.ts'
 import { CAPS } from './canonical.ts'
 
 // Choice criteria with one default first: Jev reads a list of equal options as
@@ -12,8 +19,8 @@ const NONE_TEXT = 'Only when no other option fits'
 export const menu = (
   first: string,
   rest: ReadonlyArray<string>,
-  describe: (key: string) => string | null = () => null,
-): Record<string, string | null> =>
+  describe: (key: string) => string | OptionSpec | null = () => null,
+): Record<string, string | OptionSpec | null> =>
   Object.fromEntries([
     ...[first, ...rest.filter((k) => k !== first)]
       .filter((k) => k !== NONE_OPTION)
@@ -36,7 +43,7 @@ export const bothOrders = (key: string, q: ChoiceShape): Record<string, ChoiceSh
     [key]: q,
     [`${key}${SWAPPED}`]: {
       ...q,
-      criteria: Object.fromEntries(order.map((k) => [k, q.criteria[k] ?? null])),
+      criteria: Object.fromEntries(order.map((k) => [k, q.criteria[k] ?? { what: k }])),
     },
   }
 }
@@ -54,10 +61,10 @@ export const agreedPick = (
 // appear as a backticked path, or a prefix of one, in some instruction.
 export const unreadFacts = (req: {
   readonly state: Record<string, unknown>
-  readonly questions: Record<string, { readonly instructions: string }>
+  readonly questions: Record<string, { readonly instructions: string | Instructions }>
 }): string[] => {
   const text = Object.values(req.questions)
-    .map((q) => q.instructions)
+    .map((q) => instructionText(q.instructions))
     .join('\n')
   const read = (path: string) =>
     text.includes(`\`${path}\``) || text.includes(`\`${path}.`) || text.includes(`\`${path}[`)

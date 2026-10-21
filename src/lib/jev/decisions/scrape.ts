@@ -19,8 +19,8 @@ const MAIN_PURPOSE = purpose(
   'The article is what a readability pass kept; it can miss the content or keep only a banner.',
 )
 const DESCRIBE: Record<string, string> = {
-  article: 'The readability article in `texts.article` holds the main content',
-  page: 'Only when `texts.article` misses the main content that `texts.page` holds',
+  article: 'The readability article in `facts.texts.article` holds the main content',
+  page: 'Only when `facts.texts.article` misses the main content that `facts.texts.page` holds',
   none: 'Only when neither text holds any main content',
 }
 
@@ -42,14 +42,16 @@ export const mainDecision = defineDecision<MainInput, Main>({
   payload: (input) => ({
     state: {
       purpose: MAIN_PURPOSE,
-      page: { url: input.url, default: mainBaseline(input) },
-      texts: { article: input.article.slice(0, MAX_TEXT), page: input.page.slice(0, MAX_TEXT) },
+      facts: {
+        page: { url: input.url, default: mainBaseline(input) },
+        texts: { article: input.article.slice(0, MAX_TEXT), page: input.page.slice(0, MAX_TEXT) },
+      },
     },
     // Asked in both option orders (position check); the rule's pick comes first.
     questions: bothOrders(
       'main',
       choice(
-        'Which text, taken from the page at `page.url`, keeps its main content with the least menu, ad, or footer text?',
+        'Which text, taken from the page at `facts.page.url`, keeps its main content with the least menu, ad, or footer text?',
         menu(mainBaseline(input), ['article', 'page'], (k) => DESCRIBE[k] ?? null),
       ),
     ),
