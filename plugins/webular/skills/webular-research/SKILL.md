@@ -30,6 +30,10 @@ A web answer is only as good as its sources. This skill takes each fact from a p
 | Run one tool on many inputs at once | `batch` |
 | Click, type, or fill a form on a page | `act` |
 | Read an RSS or Atom feed, even from a plain page URL | `feed` |
+| Check that webular and its tools are set up | `doctor` |
+| List the mise tasks webular runs | `tasks` |
+| List the state machines that model the flows | `diagram` |
+| See whether the security scan tool is installed | `audit` |
 
 For the input fields, output shape, and errors of `search`, `scrape`, `map`, `summarize`, and `feed`, read [the tool reference](references/tools.md).
 

@@ -1,9 +1,11 @@
 // The one Effect edge for every process entry: a typed CLI failure carries
 // its own message and exit code, and runMain maps each failure to both.
 import { constants } from 'node:os'
+import { basename, extname } from 'node:path'
 import { runMain as bunRunMain } from '@effect/platform-bun/BunRuntime'
 import * as BunServices from '@effect/platform-bun/BunServices'
 import { Cause, Data, Effect, Exit, Match, type Runtime } from 'effect'
+import { COMMANDS } from '../cli/commands.ts'
 import { EXIT } from '../cli/exit-codes.ts'
 import { errMsg } from './output.ts'
 import type { ProcError } from './proc.ts'
@@ -56,10 +58,24 @@ const failureOfCause = (cause: Cause.Cause<unknown>): { message: string; exitCod
     ? { message: '', exitCode: signalExit(stop.signal ?? 'SIGINT') }
     : failureOf(Cause.squash(cause))
 
+// The command name is the entry file's stem (src/commands/<name>.ts or
+// dist/commands/<name>.js), the same name the CLI dispatched on.
+export const commandName = (): string =>
+  basename(process.argv[1] ?? '', extname(process.argv[1] ?? ''))
+
+// A usage error (exit 2) always ends by pointing at the help that explains it.
+const withHelpHint = (message: string, exitCode: number): string => {
+  if (exitCode !== 2 || message === '' || message.includes('--help')) return message
+  const cmd = commandName()
+  const help = cmd in COMMANDS ? `webular ${cmd} --help` : 'webular --help'
+  return `${message} Run '${help}' to see how to use it.`
+}
+
 // The teardown runs outside any fiber, so it writes stderr directly.
 const teardown: Runtime.Teardown = (exit, onExit) => {
   if (Exit.isSuccess(exit)) return onExit(Number(exit.value ?? 0))
-  const { message, exitCode } = failureOfCause(exit.cause)
+  const { message: raw, exitCode } = failureOfCause(exit.cause)
+  const message = withHelpHint(raw, exitCode)
   if (message !== '') process.stderr.write(`${message}\n`)
   onExit(exitCode)
 }

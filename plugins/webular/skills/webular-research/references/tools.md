@@ -27,7 +27,7 @@
 
 ## scrape
 
-- Input: `url` (a full http or https URL, required) and `archive` (true or false).
+- Input: `url` (a full http or https URL, required), `archive` (true or false), and `render` (`agent-browser`, `cua`, or `off`; renders the page in a browser first).
 - Output: the page title and its main content as Markdown, with no menus or ads.
 - With `archive: true`, a page that fails live is read from its closest Wayback Machine copy, and `archivedFrom` names that copy.
 

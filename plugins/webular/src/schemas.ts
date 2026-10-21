@@ -21,7 +21,14 @@ export const schemas = {
       .optional()
       .describe('Where to search (default web; if web fails, it tries the others in order)'),
   }),
-  scrape: z.strictObject({ url, archive }),
+  scrape: z.strictObject({
+    url,
+    archive,
+    render: z
+      .enum(['agent-browser', 'cua', 'off'])
+      .optional()
+      .describe('Render the page in a browser first: agent-browser, cua, or off'),
+  }),
   map: z.strictObject({ url, limit: count(10_000, 'Most URLs to return') }),
   summarize: z.strictObject({
     text: words('Text to summarize').optional(),

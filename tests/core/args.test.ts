@@ -31,6 +31,21 @@ describe('parseFlags — common surface', () => {
   )
 })
 
+describe('parseFlags — unknown flags', () => {
+  test(
+    'an unknown flag close to a known one gets a did-you-mean hint',
+    eff(
+      Effect.gen(function* () {
+        const near = yield* Effect.flip(parseFlags(['--jsn'], { url: { type: 'string' } }))
+        expect(near.exitCode).toBe(2)
+        expect(near.message).toContain("Did you mean '--json'?")
+        const far = yield* Effect.flip(parseFlags(['--no-such-flag']))
+        expect(far.message).not.toContain('Did you mean')
+      }),
+    ),
+  )
+})
+
 describe('intFlag — bounds-checked with default', () => {
   const bounds = { def: 2, min: 0, max: 10 }
 

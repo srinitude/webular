@@ -11,4 +11,14 @@ export const FLAG_CASES: CliCase[] = [
     maxMs: 8000,
     via: 'bin',
   },
+  {
+    name: 'scrape unknown flag',
+    cmd: 'scrape',
+    args: ['{origin}/a', '--no-such-flag'],
+    code: 2,
+    err: 'unknown option',
+    maxChars: 400,
+    maxMs: 3000,
+  },
+  { name: 'scrape help', cmd: 'scrape', args: ['--help'], maxChars: 2000, maxMs: 3000 },
 ]

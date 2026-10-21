@@ -2,8 +2,10 @@
 // bounds-checked flag accessors shared by every command.
 import { parseArgs } from 'node:util'
 import { Effect } from 'effect'
+import { COMMANDS } from '../cli/commands.ts'
 import { EXIT } from '../cli/exit-codes.ts'
-import { CliError } from './effect.ts'
+import { GLOBAL_OPTIONS } from '../cli/help.ts'
+import { CliError, commandName } from './effect.ts'
 import { logErr, parseFields } from './output.ts'
 
 type FlagValue = string | boolean | string[] | undefined
@@ -20,6 +22,7 @@ type OptionSpec = {
 }
 
 const COMMON: Record<string, OptionSpec> = {
+  help: { type: 'boolean', short: 'h' },
   json: { type: 'boolean', default: false },
   ndjson: { type: 'boolean', default: false },
   select: { type: 'string' },
@@ -43,19 +46,70 @@ function warnRemoved(values: Record<string, FlagValue>): Effect.Effect<void> {
   })
 }
 
+// Levenshtein distance over one rolling row; flag names are short.
+const distance = (a: string, b: string): number => {
+  let row = Array.from({ length: b.length + 1 }, (_, j) => j)
+  for (let i = 1; i <= a.length; i++) {
+    const next = [i]
+    for (let j = 1; j <= b.length; j++) {
+      const swap = (row[j - 1] ?? 0) + (a[i - 1] === b[j - 1] ? 0 : 1)
+      next[j] = Math.min((row[j] ?? 0) + 1, (next[j - 1] ?? 0) + 1, swap)
+    }
+    row = next
+  }
+  return row[b.length] ?? 0
+}
+
+type Near = { name: string; d: number }
+
+// The declared flag at most 2 edits away from a mistyped one, if any.
+const didYouMean = (unknown: string, known: string[]): string => {
+  const near = known.reduce<Near | undefined>((best, name) => {
+    const d = distance(unknown, name)
+    const fits = d <= 2 && d < name.length
+    return fits && (best === undefined || d < best.d) ? { name, d } : best
+  }, undefined)
+  return near === undefined ? '' : ` Did you mean '--${near.name}'?`
+}
+
+const usageFor = (cmd: string, own: string[]): string => {
+  const desc = (COMMANDS as Record<string, string>)[cmd] ?? ''
+  const head = [`webular ${cmd} — ${desc}`, '', 'USAGE', `  webular ${cmd} [options]`, '']
+  return [...head, 'OPTIONS', ...own.map((name) => `  --${name}`), ...GLOBAL_OPTIONS].join('\n')
+}
+
+// --help prints usage on stdout and ends with exit 0 (an empty CliError
+// message prints nothing); an unknown flag is a usage error (exit 2).
+function checkFlags(
+  values: Record<string, FlagValue>,
+  known: Record<string, OptionSpec>,
+  own: string[],
+): Effect.Effect<void, CliError> {
+  const cmd = commandName()
+  if (values['help'] === true) {
+    return Effect.sync(() => process.stdout.write(`${usageFor(cmd, own)}\n`)).pipe(
+      Effect.andThen(Effect.fail(new CliError({ message: '', exitCode: 0 }))),
+    )
+  }
+  const unknown = Object.keys(values).find((name) => !(name in known))
+  if (unknown === undefined) return Effect.void
+  const hint = didYouMean(unknown, Object.keys(known))
+  const message = `${cmd}: unknown option '--${unknown}'.${hint} Run 'webular ${cmd} --help' for usage.`
+  return Effect.fail(new CliError({ message, exitCode: 2 }))
+}
+
 export function parseFlags(
   argv: string[],
   extra: Record<string, OptionSpec> = {},
-): Effect.Effect<ParsedArgs> {
+): Effect.Effect<ParsedArgs, CliError> {
   return Effect.suspend(() => {
-    const parsed = parseArgs({
-      args: argv,
-      options: { ...COMMON, ...REMOVED, ...extra },
-      allowPositionals: true,
-      strict: false,
-    })
+    const options = { ...COMMON, ...REMOVED, ...extra }
+    const parsed = parseArgs({ args: argv, options, allowPositionals: true, strict: false })
     const values = parsed.values as Record<string, FlagValue>
-    return Effect.as(warnRemoved(values), { values, positionals: parsed.positionals })
+    return checkFlags(values, options, Object.keys(extra)).pipe(
+      Effect.andThen(warnRemoved(values)),
+      Effect.as({ values, positionals: parsed.positionals }),
+    )
   })
 }
 

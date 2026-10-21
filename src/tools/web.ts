@@ -138,7 +138,12 @@ export const mcpToolIds = [...webTools.map((t) => t.id), ...commandTools.map((t)
 const runTool = (id: string, args: Record<string, unknown>, entryOf?: EntryOf) => {
   const { cursor, ...input } = args
   return runCommand(id, input, typeof cursor === 'number' ? cursor : 0, entryOf).pipe(
-    Effect.map((result): McpText => ({ content: [{ type: 'text', text: stableJson(result) }] })),
+    Effect.map(
+      (result): McpText => ({
+        content: [{ type: 'text', text: stableJson(result) }],
+        structuredContent: result,
+      }),
+    ),
     Effect.catch((e) =>
       Effect.succeed(failure(e instanceof CommandFailed ? e.message : shortError(e))),
     ),
