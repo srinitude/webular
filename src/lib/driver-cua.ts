@@ -5,6 +5,9 @@
 // Safety contract:
 // - It drives one window the user named for webular in WEBULAR_CUA_WINDOW
 //   ("<pid>:<window_id>"). It never picks the active tab on its own.
+// - That window's browser must run a throwaway profile (--user-data-dir
+//   outside the browsers' default folders); the user's own browser is
+//   refused before any bind.
 // - It calls only start_session, get_browser_state (bind), browser_navigate,
 //   get_window_state (the accessibility tree, without a screenshot), page
 //   get_text (when the tree has no text), and end_session. It never calls bring_to_front,
@@ -89,6 +92,32 @@ export const cuaCall = (tool: string, args: Record<string, unknown>) =>
         ),
   ).pipe(Effect.provide(BunServices.layer))
 
+const DEFAULT_PROFILE =
+  /\/Library\/Application Support\/(Google\/Chrome|Chromium|Microsoft Edge|BraveSoftware\/Brave-Browser)\/?$/
+
+// `command` is the browser's full command line, as `ps -o command=` prints it.
+export const throwawayProfile = (command: string) => {
+  const dir = /--user-data-dir=(.+?)(?= --|$)/.exec(command.trim())?.[1]?.trim()
+  return dir !== undefined && dir !== '' && !DEFAULT_PROFILE.test(dir)
+}
+
+export const requireThrowaway = (pid: number) =>
+  Effect.flatMap(
+    Effect.orElseSucceed(
+      Effect.map(
+        runProc(['ps', '-ww', '-o', 'command=', '-p', String(pid)], { timeoutMs: 5_000 }),
+        (res) => res.stdout,
+      ),
+      () => '',
+    ),
+    (command) =>
+      throwawayProfile(command)
+        ? Effect.void
+        : Effect.fail(
+            driverError('cua', `pid ${pid} is not a throwaway browser profile (--user-data-dir)`),
+          ),
+  ).pipe(Effect.provide(BunServices.layer))
+
 interface Opened extends CuaTarget {
   session: string
 }
@@ -100,6 +129,7 @@ const open = Effect.fnUntraced(function* (url: string) {
       'cua',
       'set WEBULAR_CUA_WINDOW=<pid>:<window_id> to a window kept for webular',
     )
+  yield* requireThrowaway(target.pid)
   const session = `webular-${yield* Random.nextInt}`
   yield* cuaCall('start_session', { session })
   const ids = yield* idsFromBind(yield* cuaCall('get_browser_state', { ...target, session }))
