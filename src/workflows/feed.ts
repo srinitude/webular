@@ -1,14 +1,17 @@
 // FEED workflow: fetch an RSS 2.0 or Atom 1.0 feed and return its items
 // (title, link, date, summary), parsed as XML with linkedom. No model, no key.
+// A url that is not a feed falls back through core/feed-source.ts.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { DOMParser } from 'linkedom'
 import { z } from 'zod'
-import { fetchText } from '../core/http.ts'
+import { resolveFeed } from '../core/feed-source.ts'
+import { runtime } from '../core/runtime.ts'
 
 const feedInput = z.object({
   url: z.string().url(),
   limit: z.number().int().positive().default(20),
   timeoutMs: z.number().int().positive().optional(),
+  archive: z.boolean().optional(),
 })
 
 const feedItem = z.object({
@@ -20,6 +23,8 @@ const feedItem = z.object({
 
 const feedOutput = z.object({
   url: z.string(),
+  feedUrl: z.string().optional(),
+  archivedFrom: z.string().optional(),
   title: z.string(),
   count: z.number(),
   items: z.array(feedItem),
@@ -62,9 +67,11 @@ const feedStep = createStep({
   inputSchema: feedInput,
   outputSchema: feedOutput,
   execute: async ({ inputData }) => {
-    const xml = await fetchText(inputData.url, { timeoutMs: inputData.timeoutMs })
-    const { title, items } = parseFeed(xml, inputData.limit)
-    return { url: inputData.url, title, count: items.length, items }
+    const { url, timeoutMs, limit, archive } = inputData
+    const found = await runtime.runPromise(resolveFeed(url, { timeoutMs, archive }))
+    const { xml, feedUrl, archivedFrom } = found
+    const { title, items } = parseFeed(xml, limit)
+    return { url, feedUrl, archivedFrom, title, count: items.length, items }
   },
 })
 

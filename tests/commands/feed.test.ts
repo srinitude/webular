@@ -1,8 +1,8 @@
 // FEED contract — RSS 2.0 and Atom 1.0 parsing against the deterministic local
 // fixture (real fetch, no mocks). Tests what `mise run run:feed` executes.
-import { afterAll, beforeAll, describe, expect, test } from 'bun:test'
+import { afterAll, describe, expect, test } from 'bun:test'
 import { runCli } from '../_support/cli.ts'
-import { type Fixture, startFixture } from '../_support/fixture.ts'
+import { startFixture } from '../_support/fixture.ts'
 
 const RSS = `<?xml version="1.0"?><rss version="2.0"><channel><title>Fixture RSS</title>
 <item><title>First &amp; best</title><link>https://example.com/1</link><pubDate>Mon, 19 Oct 2026 10:00:00 GMT</pubDate><description>One</description></item>
@@ -16,14 +16,16 @@ const ATOM = `<?xml version="1.0"?><feed xmlns="http://www.w3.org/2005/Atom"><ti
 const xml = (body: string, type: string) => () =>
   new Response(body, { headers: { 'content-type': type } })
 
-let fx: Fixture
-beforeAll(() => {
-  fx = startFixture(() => ({
-    '/rss.xml': xml(RSS, 'application/rss+xml'),
-    '/atom.xml': xml(ATOM, 'application/atom+xml'),
-  }))
+const fx = startFixture(() => ({
+  '/rss.xml': xml(RSS, 'application/rss+xml'),
+  '/atom.xml': xml(ATOM, 'application/atom+xml'),
+}))
+// No feed paths at all, so the same-origin guesses fail too.
+const empty = startFixture(() => ({}))
+afterAll(() => {
+  fx.stop()
+  empty.stop()
 })
-afterAll(() => fx.stop())
 
 const runFeed = (args: string[]) => runCli('src/commands/feed.ts', args)
 
@@ -65,7 +67,7 @@ describe('webular feed — read an RSS or Atom feed (real fetch)', () => {
   })
 
   test('exits with code 1 on a fetch failure', async () => {
-    const { code } = await runFeed([`${fx.origin}/nope.xml`, '--json'])
+    const { code } = await runFeed([`${empty.origin}/nope.xml`, '--json'])
     expect(code).toBe(1)
   }, 15_000)
 })

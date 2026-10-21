@@ -72,6 +72,8 @@ webular --help
 
 **Exit codes:** `0` success · `1` failure · `2` usage error · `3` partial failure (`batch`) · `127` toolchain missing.
 
+**Reliability:** every fetch retries 408, 429, 502, 503, and 504 on a fixed backoff, or waits the server's `Retry-After` (capped at 10 s). `scrape --archive` falls back to the Wayback Machine's raw capture when the page is dead (404, 410, 5xx, network error, or timeout), and reports the capture as `archivedFrom`.
+
 ```bash
 webular scrape https://example.com --json
 webular search "bun javascript runtime" --json

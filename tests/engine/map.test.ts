@@ -92,3 +92,54 @@ describe('map — sitemap discovery', () => {
     }
   }, 15_000)
 })
+
+const text = (body: string): Response =>
+  new Response(body, { headers: { 'content-type': 'text/plain' } })
+
+describe('map — robots.txt Sitemap: fallback', () => {
+  test('uses robots.txt Sitemap: entries when /sitemap.xml is missing', async () => {
+    const fx = startFixture(
+      (origin): Routes => ({
+        '/robots.txt': () =>
+          text(`User-agent: *\nDisallow:\nSITEMAP: ${origin}/custom-sitemap.xml\n`),
+        '/custom-sitemap.xml': () => xml(urlset([`${origin}/r1`, `${origin}/r2`])),
+        '/': () => page(['/crawled']),
+      }),
+    )
+    try {
+      const { links, errors } = await runMap(fx.origin)
+      expect(links).toEqual([`${fx.origin}/r1`, `${fx.origin}/r2`])
+      expect(errors).toEqual([])
+      expect(fx.hits('/sitemap.xml')).toBe(1)
+    } finally {
+      fx.stop()
+    }
+  }, 15_000)
+
+  test('ignores off-host robots.txt sitemaps and falls back to page links', async () => {
+    const fx = startFixture(
+      (): Routes => ({
+        '/robots.txt': () => text('Sitemap: http://elsewhere.invalid/sitemap.xml\n'),
+        '/': () => page(['/crawled']),
+      }),
+    )
+    try {
+      const { links, errors } = await runMap(fx.origin)
+      expect(links).toEqual([`${fx.origin}/crawled`])
+      expect(errors).toEqual([])
+    } finally {
+      fx.stop()
+    }
+  }, 15_000)
+
+  test('falls back to link crawl when neither sitemap nor robots.txt exists', async () => {
+    const fx = startFixture((): Routes => ({ '/': () => page(['/only']) }))
+    try {
+      const { links } = await runMap(fx.origin)
+      expect(links).toEqual([`${fx.origin}/only`])
+      expect(fx.hits('/robots.txt')).toBe(1)
+    } finally {
+      fx.stop()
+    }
+  }, 15_000)
+})

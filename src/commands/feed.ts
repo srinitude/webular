@@ -9,6 +9,7 @@ async function main(): Promise<number> {
   const { values, positionals } = parseFlags(Bun.argv.slice(2), {
     url: { type: 'string' },
     limit: { type: 'string' },
+    archive: { type: 'boolean' },
   })
   const url = (values.url as string) ?? positionals[0]
   if (!url) {
@@ -19,6 +20,7 @@ async function main(): Promise<number> {
     url,
     limit: intFlag('feed', values, 'limit', { def: 20, min: 1, max: 500 }),
     timeoutMs: timeoutFlag('feed', values),
+    archive: values.archive === true,
   }
   return runWorkflow('feed', feedWorkflow, inputData, emitOpts(values))
 }

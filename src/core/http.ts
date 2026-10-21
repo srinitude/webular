@@ -1,7 +1,10 @@
 // FOSS fetch layer built on Bun.fetch: timeout, user-agent, scoped redirects,
-// textual-content guard, and deterministic bounded retry.
+// textual-content guard, and deterministic bounded retry. The core is Effect;
+// the Promise exports run it on the shared runtime for non-Effect callers.
+import { Data, Effect } from 'effect'
 import pkg from '../../package.json' with { type: 'json' }
 import { readTextCapped } from './decode.ts'
+import { runtime } from './runtime.ts'
 import { sameHost } from './url.ts'
 
 const USER_AGENT = `webular/${pkg.version} (+https://github.com/srinitude/webular)`
@@ -19,23 +22,49 @@ const TEXTUAL_MIMES = new Set([
 
 // Deterministic retry policy: fixed backoff (no jitter), fixed attempt count.
 const RETRY_BACKOFF_MS = [250, 750]
-const RETRY_STATUS = new Set([429, 502, 503, 504])
+const RETRY_STATUS = new Set([408, 429, 502, 503, 504])
+// A server's Retry-After wins over the fixed backoff, capped so a huge or
+// hostile value cannot stall the CLI.
+const MAX_RETRY_AFTER_MS = 10_000
 
-interface FetchOptions {
+export interface FetchOptions {
   timeoutMs?: number
   headers?: Record<string, string>
   signal?: AbortSignal
   redirect?: RequestRedirect
 }
 
-async function fetchOnce(url: string, opts: FetchOptions): Promise<Response> {
-  return await fetch(url, {
-    headers: { 'user-agent': USER_AGENT, ...opts.headers },
-    redirect: opts.redirect ?? 'follow',
-    // A fresh per-attempt budget unless the caller owns the signal lifecycle.
-    signal: opts.signal ?? AbortSignal.timeout(opts.timeoutMs ?? 30_000),
-  })
+// A non-2xx response, typed so callers branch on the status, not the message.
+export class HttpStatusError extends Data.TaggedError('HttpStatusError')<{
+  url: string
+  status: number
+  statusText: string
+}> {
+  override get message(): string {
+    return `fetch ${this.url} failed: ${this.status} ${this.statusText}`
+  }
 }
+
+// Retry-After (RFC 9110 section 10.2.3): delay-seconds or an HTTP-date.
+export function retryAfterMs(header: string | null, now = Date.now()): number | undefined {
+  if (!header?.trim()) return undefined
+  const secs = Number(header)
+  const ms = Number.isFinite(secs) ? secs * 1000 : Date.parse(header) - now
+  if (!Number.isFinite(ms) || ms < 0) return undefined
+  return Math.min(ms, MAX_RETRY_AFTER_MS)
+}
+
+const fetchOnce = (url: string, opts: FetchOptions) =>
+  Effect.tryPromise({
+    try: () =>
+      fetch(url, {
+        headers: { 'user-agent': USER_AGENT, ...opts.headers },
+        redirect: opts.redirect ?? 'follow',
+        // A fresh per-attempt budget unless the caller owns the signal lifecycle.
+        signal: opts.signal ?? AbortSignal.timeout(opts.timeoutMs ?? 30_000),
+      }),
+    catch: (err) => err,
+  })
 
 function isAbort(err: unknown): boolean {
   return err instanceof DOMException && (err.name === 'TimeoutError' || err.name === 'AbortError')
@@ -43,36 +72,48 @@ function isAbort(err: unknown): boolean {
 
 type Attempt =
   | { kind: 'response'; res: Response }
-  | { kind: 'retry' }
+  | { kind: 'retry'; waitMs?: number }
   | { kind: 'raise'; err: unknown }
 
-async function attemptGet(url: string, opts: FetchOptions, last: boolean): Promise<Attempt> {
-  try {
-    const res = await fetchOnce(url, opts)
-    if (!RETRY_STATUS.has(res.status) || last) return { kind: 'response', res }
-    await res.body?.cancel()
-    return { kind: 'retry' }
-  } catch (err) {
+// Release an unread body so the pooled connection is freed at once instead of
+// waiting for GC (Bun guide BUN027). A stream already locked by its reader was
+// cancelled by that reader, so a failed cancel is ignored.
+const dropBody = (res: Response) =>
+  Effect.ignore(
+    Effect.tryPromise({ try: () => res.body?.cancel() ?? Promise.resolve(), catch: (err) => err }),
+  )
+
+const attemptGet = (url: string, opts: FetchOptions, last: boolean): Effect.Effect<Attempt> =>
+  fetchOnce(url, opts).pipe(
+    Effect.flatMap((res) =>
+      !RETRY_STATUS.has(res.status) || last
+        ? Effect.succeed<Attempt>({ kind: 'response', res })
+        : Effect.as(dropBody(res), {
+            kind: 'retry',
+            waitMs: retryAfterMs(res.headers.get('retry-after')),
+          } as Attempt),
+    ),
     // A timeout/abort is the caller's budget — retrying would silently exceed it.
-    if (isAbort(err) || last) return { kind: 'raise', err }
-    return { kind: 'retry' }
-  }
-}
+    Effect.catch((err) =>
+      Effect.succeed<Attempt>(isAbort(err) || last ? { kind: 'raise', err } : { kind: 'retry' }),
+    ),
+  )
 
-// GET with retry: network-level throws and 429/502/503/504 responses retry on
-// the fixed backoff; other statuses return as-is.
-export async function httpGet(url: string, opts: FetchOptions = {}): Promise<Response> {
+// GET with retry: network-level throws and 408/429/502/503/504 responses retry
+// on the fixed backoff (or the server's Retry-After); other statuses return as-is.
+const httpGetEffect = Effect.fn('httpGet')(function* (url: string, opts: FetchOptions = {}) {
   for (let attempt = 0; ; attempt++) {
-    const outcome = await attemptGet(url, opts, attempt >= RETRY_BACKOFF_MS.length)
+    const outcome = yield* attemptGet(url, opts, attempt >= RETRY_BACKOFF_MS.length)
     if (outcome.kind === 'response') return outcome.res
-    if (outcome.kind === 'raise') throw outcome.err
-    await Bun.sleep(RETRY_BACKOFF_MS[attempt] ?? 750)
+    if (outcome.kind === 'raise') return yield* Effect.fail(outcome.err)
+    yield* Effect.sleep(outcome.waitMs ?? RETRY_BACKOFF_MS[attempt] ?? 750)
   }
-}
+})
 
-function assertTextual(res: Response, url: string): void {
+// The refused MIME type, or undefined when the body is text.
+function refusedMime(res: Response): string | undefined {
   const header = res.headers.get('content-type')
-  if (!header) return
+  if (!header) return undefined
   const mime = (header.split(';')[0] ?? '').trim().toLowerCase()
   const ok =
     mime === '' ||
@@ -80,38 +121,37 @@ function assertTextual(res: Response, url: string): void {
     mime.endsWith('+xml') ||
     mime.endsWith('+json') ||
     TEXTUAL_MIMES.has(mime)
-  if (!ok)
-    throw new Error(`fetch ${url}: unsupported content-type "${mime}" — use media --download`)
+  return ok ? undefined : mime
 }
 
-// Every rejected response releases its body, so the pooled connection is
-// freed at once instead of waiting for GC (Bun guide BUN027).
-async function okText(res: Response, url: string): Promise<string> {
-  try {
-    if (!res.ok) throw new Error(`fetch ${url} failed: ${res.status} ${res.statusText}`)
-    assertTextual(res, url)
-    return await readTextCapped(res, url, MAX_TEXT_BYTES)
-  } catch (err) {
-    // A stream already locked by the reader was cancelled by its iterator.
-    await res.body?.cancel().catch(() => undefined)
-    throw err
-  }
-}
+const readOk = Effect.fn('readOk')(function* (res: Response, url: string) {
+  if (!res.ok)
+    return yield* new HttpStatusError({ url, status: res.status, statusText: res.statusText })
+  const bad = refusedMime(res)
+  if (bad !== undefined)
+    return yield* Effect.fail(
+      new Error(`fetch ${url}: unsupported content-type "${bad}" — use media --download`),
+    )
+  return yield* Effect.tryPromise({
+    try: () => readTextCapped(res, url, MAX_TEXT_BYTES),
+    catch: (err) => err,
+  })
+})
 
-export async function fetchText(url: string, opts: FetchOptions = {}): Promise<string> {
-  return okText(await httpGet(url, opts), url)
-}
+// Every rejected response releases its body.
+const okText = (res: Response, url: string) =>
+  readOk(res, url).pipe(Effect.tapError(() => dropBody(res)))
+
+export const fetchTextEffect = (url: string, opts: FetchOptions = {}) =>
+  Effect.flatMap(httpGetEffect(url, opts), (res) => okText(res, url))
 
 // The ROOT of a crawl/map is the user's explicit target: follow its redirects
 // freely (apex→www is ubiquitous) and report the FINAL url so callers can
 // re-anchor their host scope on it.
-export async function fetchRoot(
-  url: string,
-  opts: FetchOptions = {},
-): Promise<{ finalUrl: string; html: string }> {
-  const res = await httpGet(url, opts)
-  return { finalUrl: res.url || url, html: await okText(res, url) }
-}
+const fetchRootEffect = Effect.fn('fetchRoot')(function* (url: string, opts: FetchOptions) {
+  const res = yield* httpGetEffect(url, opts)
+  return { finalUrl: res.url || url, html: yield* okText(res, url) }
+})
 
 function isRedirect(status: number): boolean {
   return status >= 300 && status < 400
@@ -119,20 +159,35 @@ function isRedirect(status: number): boolean {
 
 // Fetch text but follow redirects MANUALLY, blocking any hop that leaves `host`
 // (EXACT hostname match — scope control for crawls, not an IP/SSRF filter).
-export async function fetchTextWithinHost(
+const withinHostEffect = Effect.fn('fetchTextWithinHost')(function* (
+  url: string,
+  host: string,
+  opts: FetchOptions,
+) {
+  let current = url
+  for (let hop = 0; hop < 5; hop++) {
+    const res = yield* httpGetEffect(current, { ...opts, redirect: 'manual' })
+    const location = isRedirect(res.status) ? res.headers.get('location') : null
+    if (!location) return yield* okText(res, current)
+    yield* dropBody(res) // the hop's body is never read; free its connection
+    current = new URL(location, current).toString()
+    if (!sameHost(host, current))
+      return yield* Effect.fail(new Error(`redirect off-site blocked: ${current}`))
+  }
+  return yield* Effect.fail(new Error(`too many redirects: ${url}`))
+})
+
+// Promise boundary for callers that are not Effect code yet.
+export const httpGet = (url: string, opts: FetchOptions = {}): Promise<Response> =>
+  runtime.runPromise(httpGetEffect(url, opts))
+export const fetchText = (url: string, opts: FetchOptions = {}): Promise<string> =>
+  runtime.runPromise(fetchTextEffect(url, opts))
+export const fetchRoot = (
+  url: string,
+  opts: FetchOptions = {},
+): Promise<{ finalUrl: string; html: string }> => runtime.runPromise(fetchRootEffect(url, opts))
+export const fetchTextWithinHost = (
   url: string,
   host: string,
   opts: FetchOptions = {},
-): Promise<string> {
-  let current = url
-  for (let hop = 0; hop < 5; hop++) {
-    const res = await httpGet(current, { ...opts, redirect: 'manual' })
-    if (!isRedirect(res.status)) return okText(res, current)
-    const location = res.headers.get('location')
-    if (!location) return okText(res, current)
-    await res.body?.cancel() // the hop's body is never read; free its connection
-    current = new URL(location, current).toString()
-    if (!sameHost(host, current)) throw new Error(`redirect off-site blocked: ${current}`)
-  }
-  throw new Error(`too many redirects: ${url}`)
-}
+): Promise<string> => runtime.runPromise(withinHostEffect(url, host, opts))

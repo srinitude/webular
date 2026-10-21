@@ -1,5 +1,6 @@
 // Keyless specialized search sources for `search --source`: Wikipedia
-// (MediaWiki Action API), Hacker News (Algolia), and arXiv (Atom export API).
+// (MediaWiki Action API), Hacker News (Algolia), and arXiv (Atom export API);
+// Crossref and OpenAlex live in search-chain.ts.
 // All public, documented, no account. WEBULAR_SOURCE_ORIGIN swaps each
 // endpoint's origin (path kept) so tests run against the local fixture.
 import { DOMParser } from 'linkedom'
@@ -11,10 +12,18 @@ interface SourceHit {
   description: string
 }
 
-export const SEARCH_SOURCES = ['web', 'wikipedia', 'hackernews', 'arxiv'] as const
+// Also the fallback order for the default web source.
+export const SEARCH_SOURCES = [
+  'web',
+  'wikipedia',
+  'hackernews',
+  'arxiv',
+  'crossref',
+  'openalex',
+] as const
 export type SearchSource = (typeof SEARCH_SOURCES)[number]
 
-function endpoint(base: string, params: Record<string, string>): string {
+export function endpoint(base: string, params: Record<string, string>): string {
   const url = new URL(base)
   const override = process.env.WEBULAR_SOURCE_ORIGIN
   const target = override ? new URL(url.pathname, override) : url
@@ -24,7 +33,7 @@ function endpoint(base: string, params: Record<string, string>): string {
 
 // ponytail: tag strip + the five XML entities only; snippets are short and
 // display-only, so a full HTML parse is not worth it.
-function plain(html: string): string {
+export function plain(html: string): string {
   return html
     .replace(/<[^>]+>/g, '')
     .replace(/&quot;/g, '"')
@@ -97,14 +106,14 @@ async function arxiv(query: string, limit: number): Promise<SourceHit[]> {
   }))
 }
 
-const BACKENDS: Record<Exclude<SearchSource, 'web'>, typeof wikipedia> = {
+const BACKENDS = {
   wikipedia,
   hackernews,
   arxiv,
-}
+} satisfies Record<string, typeof wikipedia>
 
 export async function sourceSearch(
-  source: Exclude<SearchSource, 'web'>,
+  source: keyof typeof BACKENDS,
   query: string,
   limit: number,
 ): Promise<SourceHit[]> {

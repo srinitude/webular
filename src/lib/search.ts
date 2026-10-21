@@ -2,6 +2,7 @@
 // Headless and CI-safe — no browser, no API key. Shared by search/answer/research.
 import { parseHTML } from 'linkedom'
 import { fetchText } from '../core/http.ts'
+import { endpoint } from './sources-search.ts'
 
 interface SearchHit {
   title: string
@@ -36,8 +37,7 @@ function toHit(el: Element): SearchHit | null {
 }
 
 export async function webSearch(query: string, limit: number): Promise<SearchHit[]> {
-  const qs = new URLSearchParams({ q: query })
-  const html = await fetchText(`https://html.duckduckgo.com/html/?${qs}`, {
+  const html = await fetchText(endpoint('https://html.duckduckgo.com/html/', { q: query }), {
     timeoutMs: 20_000,
     headers: { 'user-agent': UA, accept: 'text/html,application/xhtml+xml' },
   })

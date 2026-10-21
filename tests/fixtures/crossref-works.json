@@ -1,0 +1,29 @@
+{
+  "status": "ok",
+  "message-type": "work-list",
+  "message-version": "1.0.0",
+  "message": {
+    "facets": {},
+    "total-results": 12599,
+    "items": [
+      {
+        "title": [
+          "IMPROVING MICROINTERFACE PERFORMANCE BY EXECUTING C CODE IN JAVASCRIPT EXECUTION ENVIRONMENTS USING BUN"
+        ],
+        "URL": "https:\/\/doi.org\/10.23939\/csn2025.01.272",
+        "abstract": "<jats:p>Abstract: This paper explores a new feature introduced in Bun that allows for direct compilation and execution of native C code from JavaScript, opening up new horizons for integrating system libraries and improving the performance of JavaScript applications. We analyze the limitations of existing methods such as N-API and WebAssembly, focusing on their complexity and performance impact, especially in the context of using microinterfaces. Bun's approach, based on direct compilation and the use of a lightweight wrapper, is seen as a potentially more efficient alternative. Although detailed information on the performance of Bun's C is not yet available, we propose a comprehensive research plan that will cover various usage scenarios, including microinterface performance analysis, data transfer, and integration with popular C libraries. This research will allow us to evaluate the effectiveness of Bun's C and its potential for developing JavaScript applications on both the server side (Node.js) and, possibly, the client side. Special attention will be paid to the ability to create highly efficient and safe microinterfaces between JavaScript and C using Bun, which opens up new possibilities for developing modular and flexible applications.\nKeywords: compilation, performance, micro-interface, JacaScript, N-API, WebAssembly, Bun.<\/jats:p>",
+        "DOI": "10.23939\/csn2025.01.272"
+      },
+      {
+        "title": [
+          "A comparative analysis of the performance of JavaScript code execution environments: Node.js, Deno and Bun"
+        ],
+        "URL": "https:\/\/doi.org\/10.7256\/2454-0714.2024.4.72206",
+        "abstract": "<jats:p>\n The subject of the study was the performance of JavaScript program execution in modern environments Node.js, Deno and Bun. These platforms are used to develop server applications and have significant differences in architecture, functionality and performance. Node.js is the most mature and widespread solution and is actively used in most modern web applications. Deno is a newer environment developed by the creator of Node.js, offering improved security, TypeScript support, and other innovations. Bun, on the other hand, is a modern and high-performance alternative focused on the speed of server-side applications. The purpose of the study is to identify the performance differences between the major modern runtime environments (Node.js, Deno and Bun) for further utilization of these environments in web application development. A computer experiment method using Docker containers and process automation using Ansible was used for the study. The execution time of different scenarios in each of the execution environments was measured. The scientific novelty of this study lies in the fact that for the first time a holistic and valid methodology for measuring and comparing JavaScript code performance in modern runtime environments has been proposed, which will allow researchers to build on the proposed approach in further experiments and extend it to new runtime environments. The results show that Bun shows the best performance in synchronous computations (sorting, JSON processing), but is behind Node.js and Deno in checking for prime numbers. Deno showed high performance in asynchronous operations, thanks to the use of Rust and the Tokio library. Node.js, despite lower results in synchronous tasks, showed stable performance in tests and remains a solid choice for large projects. In the course of the study, recommendations were developed for selecting the appropriate server-side JavaScript code execution environment for various tasks.\n\t<\/jats:p>",
+        "DOI": "10.7256\/2454-0714.2024.4.72206"
+      }
+    ],
+    "items-per-page": 2,
+    "query": { "start-index": 0, "search-terms": "bun javascript" }
+  }
+}

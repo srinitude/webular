@@ -1,5 +1,5 @@
 // MAP workflow: discover URLs via the origin-root sitemap (with one-level
-// <sitemapindex> recursion) or page links. Same-host scoped, byte-capped, and
+// <sitemapindex> recursion), then robots.txt Sitemap: entries, then page links. Same-host scoped, byte-capped, and
 // deterministic: children fetch with bounded concurrency but merge in child
 // order; dedup happens on normalized URLs after ordering.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
@@ -64,20 +64,60 @@ async function childLinks(locs: string[], host: string, timeoutMs: number): Prom
   return out
 }
 
-// null means "no sitemap" — the normal fallback path, not an error.
-async function fetchSitemap(site: string, timeoutMs?: number): Promise<Discovery | null> {
-  const host = new URL(site).hostname
-  const sitemapUrl = new URL('/sitemap.xml', site).toString()
-  const budget = timeoutMs ?? SITEMAP_TIMEOUT_MS
-  let xml: string
-  try {
-    xml = await fetchTextWithinHost(sitemapUrl, host, { timeoutMs: budget })
-  } catch {
-    return null
-  }
+// One sitemap URL: a <urlset>, or a one-level <sitemapindex>. Throws when the
+// fetch fails; callers decide whether that is a fallback or a reported error.
+async function sitemapAt(sitemapUrl: string, host: string, budget: number): Promise<Discovery> {
+  const xml = await fetchTextWithinHost(sitemapUrl, host, { timeoutMs: budget })
   const sameHostLocs = locsOf(xml).filter((u) => sameHost(host, u))
   if (/<sitemapindex[\s>]/i.test(xml)) return childLinks(sameHostLocs, host, budget)
   return { links: sameHostLocs, errors: [] }
+}
+
+async function namedSitemap(loc: string, host: string, budget: number): Promise<Discovery> {
+  try {
+    return await sitemapAt(loc, host, budget)
+  } catch (err) {
+    return { links: [], errors: [{ url: loc, reason: errMsg(err) }] }
+  }
+}
+
+// robots.txt `Sitemap:` lines (key matched case-insensitively), same-host
+// only, capped like index children. A missing robots.txt is a fallback (null);
+// a named sitemap that fails is a reported error.
+async function robotsSitemaps(
+  site: string,
+  host: string,
+  budget: number,
+): Promise<Discovery | null> {
+  let txt: string
+  try {
+    txt = await fetchTextWithinHost(new URL('/robots.txt', site).toString(), host, {
+      timeoutMs: budget,
+    })
+  } catch {
+    return null
+  }
+  const locs = [...txt.matchAll(/^\s*sitemap\s*:\s*(\S+)/gim)]
+    .map((m) => m[1] ?? '')
+    .filter((u) => sameHost(host, u))
+    .slice(0, MAX_CHILD_SITEMAPS)
+  const pool = pLimit(4)
+  const results = await Promise.all(locs.map((loc) => pool(() => namedSitemap(loc, host, budget))))
+  return { links: results.flatMap((r) => r.links), errors: results.flatMap((r) => r.errors) }
+}
+
+// Chain: /sitemap.xml, then robots.txt Sitemap: entries. null means "no
+// sitemap" — the caller falls back to page links, which is not an error.
+async function fetchSitemap(site: string, timeoutMs?: number): Promise<Discovery | null> {
+  const host = new URL(site).hostname
+  const budget = timeoutMs ?? SITEMAP_TIMEOUT_MS
+  const primary = await sitemapAt(new URL('/sitemap.xml', site).toString(), host, budget).catch(
+    () => null,
+  )
+  if (primary && primary.links.length > 0) return primary
+  const robots = await robotsSitemaps(site, host, budget)
+  if (!robots) return primary
+  return { links: robots.links, errors: [...(primary?.errors ?? []), ...robots.errors] }
 }
 
 function dedupe(links: string[], limit: number): string[] {

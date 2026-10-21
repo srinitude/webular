@@ -6,7 +6,10 @@ import { logErr } from '../core/output.ts'
 import { scrapeWorkflow } from '../workflows/scrape.ts'
 
 async function main(): Promise<number> {
-  const { values, positionals } = parseFlags(Bun.argv.slice(2), { url: { type: 'string' } })
+  const { values, positionals } = parseFlags(Bun.argv.slice(2), {
+    url: { type: 'string' },
+    archive: { type: 'boolean' },
+  })
   const url = (values.url as string) ?? positionals[0]
   if (!url) {
     logErr('scrape: missing --url <url>')
@@ -15,6 +18,7 @@ async function main(): Promise<number> {
   const inputData = {
     url,
     timeoutMs: timeoutFlag('scrape', values),
+    archive: values.archive === true,
   }
   return runWorkflow('scrape', scrapeWorkflow, inputData, emitOpts(values))
 }
