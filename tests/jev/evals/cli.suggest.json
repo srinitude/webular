@@ -1,0 +1,31 @@
+{
+  "decision": "cli.suggest",
+  "baseline-wins": [
+    { "input": { "command": "serch" }, "label": "search" },
+    { "input": { "command": "scrap" }, "label": "scrape" },
+    { "input": { "command": "crawel" }, "label": "crawl" },
+    { "input": { "command": "anser" }, "label": "answer" },
+    { "input": { "command": "reserch" }, "label": "research" },
+    { "input": { "command": "summarise" }, "label": "summarize" },
+    { "input": { "command": "moniter" }, "label": "monitor" },
+    { "input": { "command": "docter" }, "label": "doctor" },
+    { "input": { "command": "extarct" }, "label": "extract" },
+    { "input": { "command": "hello" }, "label": null },
+    { "input": { "command": "install" }, "label": null },
+    { "input": { "command": "deploy" }, "label": null }
+  ],
+  "baseline-loses": [
+    { "input": { "command": "fetch" }, "label": "scrape" },
+    { "input": { "command": "sitemap" }, "label": "map" },
+    { "input": { "command": "ask" }, "label": "answer" },
+    { "input": { "command": "screenshot" }, "label": "media" },
+    { "input": { "command": "watch" }, "label": "monitor" },
+    { "input": { "command": "find" }, "label": "search" },
+    { "input": { "command": "rss" }, "label": "feed" },
+    { "input": { "command": "summary" }, "label": "summarize" },
+    { "input": { "command": "browser" }, "label": "act" },
+    { "input": { "command": "crawling" }, "label": "crawl" },
+    { "input": { "command": "download" }, "label": "media" },
+    { "input": { "command": "question" }, "label": "answer" }
+  ]
+}

@@ -5,13 +5,16 @@ import { actDecision } from './decisions/act.ts'
 import { answerSentence, answerSources } from './decisions/answer.ts'
 import { answerCitation } from './decisions/answer-citation.ts'
 import { answerHits } from './decisions/answer-evidence.ts'
+import { suggestDecision } from './decisions/cli-suggest.ts'
 import { linkDecision, linkWorthFollowing } from './decisions/crawl.ts'
 import { fieldDecision, recoverDecision } from './decisions/extract.ts'
 import { kindDecision, mapDecision, mapOrder } from './decisions/map.ts'
 import { changeDecision } from './decisions/monitor.ts'
+import { titleDecision } from './decisions/page-title.ts'
 import { researchDone, researchPart } from './decisions/research.ts'
 import { mainDecision } from './decisions/scrape.ts'
 import { searchRank } from './decisions/search.ts'
+import { intentDecision } from './decisions/search-intent.ts'
 import { coreDecision, summaryDecision } from './decisions/summarize.ts'
 import { extractDecision, feedDecision } from './picks.ts'
 
@@ -27,6 +30,9 @@ export const decisions = {
   summary: summaryDecision,
   main: mainDecision,
   searchRank,
+  searchIntent: intentDecision,
+  cliSuggest: suggestDecision,
+  pageTitle: titleDecision,
   act: actDecision,
   answerHits,
   answerSources,

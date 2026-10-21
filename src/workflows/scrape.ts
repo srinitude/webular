@@ -76,17 +76,19 @@ const prepareScrape = (input: z.infer<typeof fetched>) => {
   return { input, page, article, full: htmlToMarkdown(input.html) }
 }
 
-function toScrapeResult(
-  p: ReturnType<typeof prepareScrape>,
-  main: 'article' | 'page' | undefined,
-): z.infer<typeof scrapeOutput> {
+type Prepared = ReturnType<typeof prepareScrape>
+type Picks = readonly ['article' | 'page' | undefined, string | undefined]
+
+function toScrapeResult(p: Prepared, picks: Picks | undefined): z.infer<typeof scrapeOutput> {
   const { url, archivedFrom, markdown, renderedBy } = p.input
   if (markdown !== undefined || p.page === undefined) return pdfResult(url, markdown ?? '')
+  const [main, judgedTitle] = picks ?? [undefined, undefined]
   const body = (main ?? (p.article ? 'article' : 'page')) === 'article' ? p.article : p.full
+  const title = judgedTitle ?? p.page.title
   return {
     url,
-    title: p.page.title,
-    markdown: p.page.title ? `# ${p.page.title}\n\n${body}` : body,
+    title,
+    markdown: title ? `# ${title}\n\n${body}` : body,
     text: p.page.article.text,
     links: p.page.links,
     ...(archivedFrom ? { archivedFrom } : {}),
@@ -94,17 +96,30 @@ function toScrapeResult(
   }
 }
 
+// PDFs skip Jev. The main pick needs both Markdown candidates; the title pick
+// runs only when some candidate differs from the rule's title.
+const scrapePicks = (p: Prepared) => {
+  if (!p.page) return undefined
+  const { title, titles } = p.page
+  const main =
+    p.article && p.full ? { url: p.input.url, article: p.article, page: p.full } : undefined
+  const differs = Object.values(titles).some((t) => t.trim() !== '' && t.trim() !== title.trim())
+  const titleIn = differs ? { url: p.input.url, candidates: titles } : undefined
+  return main || titleIn ? { main, title: titleIn } : undefined
+}
+
 const extractStep = decisionStep({
   id: 'extract',
   inputSchema: fetched,
   outputSchema: scrapeOutput,
-  decide: decisions.main,
+  // The main-content pick and the title pick run at once, so the title adds no wait.
+  decide: ({ main, title }: NonNullable<ReturnType<typeof scrapePicks>>) =>
+    Effect.all([
+      main ? decisions.main(main) : Effect.succeed(undefined),
+      title ? decisions.pageTitle(title) : Effect.succeed(undefined),
+    ] as const),
   prepare: prepareScrape,
-  // PDFs and pages without both candidates skip Jev.
-  pick: (p) =>
-    p.page && p.article && p.full
-      ? { url: p.input.url, article: p.article, page: p.full }
-      : undefined,
+  pick: scrapePicks,
   output: toScrapeResult,
 })
 

@@ -4,6 +4,7 @@ import { isProbablyReaderable, Readability } from '@mozilla/readability'
 import { parseHTML } from 'linkedom'
 import TurndownService from 'turndown'
 import { addTableRule } from './html-table.ts'
+import { type TitleCandidates, titleBaseline } from './jev/decisions/page-title.ts'
 
 interface Article {
   title: string
@@ -13,6 +14,7 @@ interface Article {
 
 interface PageDoc {
   title: string
+  titles: TitleCandidates
   links: string[]
   article: Article
 }
@@ -96,14 +98,21 @@ function articleFrom(document: DomDocument, rawHtml: string): Article {
   }
 }
 
-// ONE linkedom parse per page: title and links are read BEFORE Readability
-// runs because Readability mutates the document it is given.
+const textOf = (el: { textContent: string | null } | null): string =>
+  (el?.textContent ?? '').replace(/\s+/g, ' ').trim()
+
+// ONE linkedom parse per page: titles and links are read BEFORE Readability
+// runs because Readability mutates the document it is given. `title` is the
+// rule's pick; the page.title Jev decision may pick another of `titles`.
 export function parsePage(html: string, base: string): PageDoc {
   const { document } = parseHTML(html)
   const docTitle = document.title ?? ''
+  const og = document.querySelector('meta[property="og:title"]')?.getAttribute('content') ?? ''
+  const h1 = textOf(document.querySelector('h1'))
   const links = linksFrom(document, base)
   const article = articleFrom(document, html)
-  return { title: article.title || docTitle, links, article }
+  const titles = { readability: article.title, document: docTitle, og: og.trim(), h1 }
+  return { title: titleBaseline({ url: base, candidates: titles }), titles, links, article }
 }
 
 // Crawling needs only the title and links — skipping Readability here saves

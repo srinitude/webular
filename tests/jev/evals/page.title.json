@@ -1,0 +1,215 @@
+{
+  "decision": "page.title",
+  "baseline-wins": [
+    {
+      "input": {
+        "url": "https://en.wikipedia.org/wiki/Alan_Turing",
+        "candidates": {
+          "readability": "Alan Turing",
+          "document": "Alan Turing - Wikipedia",
+          "og": "Alan Turing",
+          "h1": "Alan Turing"
+        }
+      },
+      "label": "Alan Turing",
+      "ok": ["Alan Turing"]
+    },
+    {
+      "input": {
+        "url": "https://bun.sh/docs/api/sqlite",
+        "candidates": {
+          "readability": "SQLite",
+          "document": "SQLite – API | Bun Docs",
+          "og": "SQLite – API | Bun Docs",
+          "h1": "SQLite"
+        }
+      },
+      "label": "SQLite",
+      "ok": ["SQLite"]
+    },
+    {
+      "input": {
+        "url": "https://www.bbc.com/news/science-environment-1",
+        "candidates": {
+          "readability": "Webb telescope spots the most distant galaxy yet",
+          "document": "Webb telescope spots the most distant galaxy yet - BBC News",
+          "og": "Webb telescope spots the most distant galaxy yet",
+          "h1": "Webb telescope spots the most distant galaxy yet"
+        }
+      },
+      "label": "Webb telescope spots the most distant galaxy yet",
+      "ok": ["Webb telescope spots the most distant galaxy yet"]
+    },
+    {
+      "input": {
+        "url": "https://react.dev/learn/thinking-in-react",
+        "candidates": {
+          "readability": "Thinking in React",
+          "document": "Thinking in React – React",
+          "og": "Thinking in React – React",
+          "h1": "Thinking in React"
+        }
+      },
+      "label": "Thinking in React",
+      "ok": ["Thinking in React"]
+    },
+    {
+      "input": {
+        "url": "https://blog.rust-lang.org/2024/07/25/Rust-1.80.0.html",
+        "candidates": {
+          "readability": "Announcing Rust 1.80.0",
+          "document": "Announcing Rust 1.80.0 | Rust Blog",
+          "og": "Announcing Rust 1.80.0 | Rust Blog",
+          "h1": "Announcing Rust 1.80.0"
+        }
+      },
+      "label": "Announcing Rust 1.80.0",
+      "ok": ["Announcing Rust 1.80.0"]
+    },
+    {
+      "input": {
+        "url": "https://example.org/notes/sql-joins",
+        "candidates": {
+          "readability": "",
+          "document": "A visual guide to SQL joins",
+          "og": "",
+          "h1": ""
+        }
+      },
+      "label": "A visual guide to SQL joins",
+      "ok": ["A visual guide to SQL joins"]
+    },
+    {
+      "input": {
+        "url": "https://www.nature.com/articles/nature14539",
+        "candidates": {
+          "readability": "Deep learning",
+          "document": "Deep learning | Nature",
+          "og": "Deep learning",
+          "h1": "Deep learning"
+        }
+      },
+      "label": "Deep learning",
+      "ok": ["Deep learning"]
+    },
+    {
+      "input": {
+        "url": "https://www.allrecipes.com/recipe/10813/best-chocolate-chip-cookies/",
+        "candidates": {
+          "readability": "Best Chocolate Chip Cookies",
+          "document": "Best Chocolate Chip Cookies Recipe (with Video)",
+          "og": "Best Chocolate Chip Cookies",
+          "h1": "Best Chocolate Chip Cookies"
+        }
+      },
+      "label": "Best Chocolate Chip Cookies",
+      "ok": ["Best Chocolate Chip Cookies"]
+    }
+  ],
+  "baseline-loses": [
+    {
+      "input": {
+        "url": "https://www.kingarthurbaking.com/recipes/sourdough-bread-recipe",
+        "candidates": {
+          "readability": "Menu",
+          "document": "Sourdough Bread Recipe | King Arthur Baking",
+          "og": "Sourdough Bread Recipe",
+          "h1": "Sourdough Bread"
+        }
+      },
+      "label": "Sourdough Bread Recipe",
+      "ok": ["Sourdough Bread Recipe", "Sourdough Bread"]
+    },
+    {
+      "input": {
+        "url": "https://www.theverge.com/2024/5/14/google-io-ai-search",
+        "candidates": {
+          "readability": "We use cookies to improve your experience",
+          "document": "Google is redesigning its search engine around AI - The Verge",
+          "og": "Google is redesigning its search engine around AI",
+          "h1": "Google is redesigning its search engine around AI"
+        }
+      },
+      "label": "Google is redesigning its search engine around AI",
+      "ok": ["Google is redesigning its search engine around AI"]
+    },
+    {
+      "input": {
+        "url": "https://acme-tools.com/products/cordless-drill-20v",
+        "candidates": {
+          "readability": "Acme Tools",
+          "document": "Acme Tools",
+          "og": "20V Cordless Drill Kit",
+          "h1": "20V Cordless Drill Kit"
+        }
+      },
+      "label": "20V Cordless Drill Kit",
+      "ok": ["20V Cordless Drill Kit"]
+    },
+    {
+      "input": {
+        "url": "https://medium.com/@jane/why-we-moved-to-postgres-3f2a",
+        "candidates": {
+          "readability": "Sign in",
+          "document": "Why we moved to Postgres | by Jane Doe | Medium",
+          "og": "Why we moved to Postgres",
+          "h1": "Why we moved to Postgres"
+        }
+      },
+      "label": "Why we moved to Postgres",
+      "ok": ["Why we moved to Postgres"]
+    },
+    {
+      "input": {
+        "url": "https://news.example.com/world/flood-relief-2024",
+        "candidates": {
+          "readability": "",
+          "document": "Home | Example News",
+          "og": "Flood relief reaches cut-off villages",
+          "h1": "Flood relief reaches cut-off villages"
+        }
+      },
+      "label": "Flood relief reaches cut-off villages",
+      "ok": ["Flood relief reaches cut-off villages"]
+    },
+    {
+      "input": {
+        "url": "https://shop.example.com/p/merino-wool-sweater",
+        "candidates": {
+          "readability": "Skip to content",
+          "document": "Untitled",
+          "og": "Merino Wool Crew Sweater",
+          "h1": "Merino Wool Crew Sweater"
+        }
+      },
+      "label": "Merino Wool Crew Sweater",
+      "ok": ["Merino Wool Crew Sweater"]
+    },
+    {
+      "input": {
+        "url": "https://docs.example.dev/guides/rate-limits",
+        "candidates": {
+          "readability": "Navigation",
+          "document": "Docs",
+          "og": "",
+          "h1": "Rate limits"
+        }
+      },
+      "label": "Rate limits",
+      "ok": ["Rate limits"]
+    },
+    {
+      "input": {
+        "url": "https://www.example-recipes.com/lemon-bars",
+        "candidates": {
+          "readability": "Jump to Recipe",
+          "document": "Easy Lemon Bars - Example Recipes",
+          "og": "Easy Lemon Bars",
+          "h1": "Easy Lemon Bars"
+        }
+      },
+      "label": "Easy Lemon Bars",
+      "ok": ["Easy Lemon Bars"]
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "decision": "search.intent",
+  "baseline-wins": [
+    { "input": { "query": "arxiv attention is all you need" }, "label": "scholarly" },
+    {
+      "input": { "query": "systematic review of intermittent fasting studies" },
+      "label": "scholarly"
+    },
+    { "input": { "query": "doi 10.1038/nature14539 deep learning" }, "label": "scholarly" },
+    { "input": { "query": "effect typescript library docs" }, "label": "software" },
+    { "input": { "query": "bun sqlite documentation" }, "label": "software" },
+    { "input": { "query": "react official website" }, "label": "software" },
+    { "input": { "query": "height of mount everest" }, "label": "general" },
+    { "input": { "query": "who won the 2022 world cup" }, "label": "general" },
+    { "input": { "query": "best time to visit kyoto" }, "label": "general" },
+    { "input": { "query": "mount everest survey 2020 height" }, "label": "general" }
+  ],
+  "baseline-loses": [
+    { "input": { "query": "CRISPR off-target effects in human embryos" }, "label": "scholarly" },
+    { "input": { "query": "transformer scaling laws kaplan 2020" }, "label": "scholarly" },
+    {
+      "input": { "query": "semaglutide weight loss clinical trial results" },
+      "label": "scholarly"
+    },
+    { "input": { "query": "how to install zod" }, "label": "software" },
+    { "input": { "query": "fastapi pydantic v2 migration" }, "label": "software" },
+    { "input": { "query": "rust tokio async runtime spawn blocking" }, "label": "software" },
+    { "input": { "query": "research triangle park restaurants" }, "label": "general" },
+    { "input": { "query": "paper towel price comparison" }, "label": "general" },
+    { "input": { "query": "doc martens boots sale" }, "label": "general" },
+    { "input": { "query": "public library hours near me" }, "label": "general" }
+  ]
+}
