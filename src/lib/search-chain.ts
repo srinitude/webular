@@ -2,7 +2,8 @@
 // SOURCE_TIMEOUT_MS, and fuses their lists (plus variants and a local index list)
 // by RRF + the official-domain signal. DuckDuckGo HTML runs only when no free API
 // had hits, then the free sources answer. Crossref and OpenAlex: scholarly.ts.
-import { Clock, Deferred, Effect } from 'effect'
+import { Clock, Config, Deferred, Effect } from 'effect'
+import { logErr } from '../core/output.ts'
 import { crossref, npm, openalex } from './scholarly.ts'
 import { scoreHits, WEAK_SCORE, webSearch } from './search.ts'
 import { secondHop } from './search-hop.ts'
@@ -14,6 +15,7 @@ import {
   SETTLE_GRACE_MS,
   type SourceRunner,
   type SourceStatus,
+  traceLine,
 } from './search-source-run.ts'
 import { type FreeSource, freeSourceFallback } from './sources/registry.ts'
 import { type SearchSource, SOURCE_TIMEOUT_MS, sourceSearch } from './sources-search.ts'
@@ -85,10 +87,13 @@ const fanOut = Effect.fn('fanOut')(function* (
   const late = judge
     ? Effect.raceFirst(judge(query), Effect.as(settle.cutoff, keyword))
     : Effect.succeed(keyword)
-  const more = Effect.flatMap(late, (picked) => run(picked.filter((s) => !keyword.includes(s))))
-  const ran = (yield* Effect.all([run(keyword), more], { concurrency: 2 })).flat()
+  const more = Effect.flatMap(late, (picked) =>
+    Effect.all([Clock.currentTimeMillis, run(picked.filter((s) => !keyword.includes(s)))]),
+  )
+  const [first, [judgedAt, added]] = yield* Effect.all([run(keyword), more], { concurrency: 2 })
+  const ran = [...first, ...added]
   if (source === 'web' && !ran.some((r) => r.status === 'ok')) ran.push(yield* query1('web'))
-  return ran
+  return { ran, judgeAt: judge ? judgedAt : null }
 })
 
 const searchOnce = Effect.fn('searchOnce')(function* (
@@ -97,7 +102,10 @@ const searchOnce = Effect.fn('searchOnce')(function* (
   limit: number,
   opts: SearchOptions = {},
 ) {
-  const ran = yield* fanOut(source, query, limit, opts)
+  const start = yield* Clock.currentTimeMillis
+  const traced = yield* Config.String('WEBULAR_TRACE').pipe(Config.withDefault(''), Effect.orDie)
+  const { ran, judgeAt } = yield* fanOut(source, query, limit, opts)
+  if (traced === '1') yield* logErr(traceLine(start, ran, judgeAt))
   const scored = scoreHits(
     [...ran.flatMap((r) => r.lists), ...(opts.local ? [opts.local] : [])],
     query,
