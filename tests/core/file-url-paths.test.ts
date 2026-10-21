@@ -9,7 +9,9 @@ import { Effect, FileSystem } from 'effect'
 import { ROOT } from '../_support/root.ts'
 
 const DIRS = ['src', 'tests', 'scripts', 'plugins/webular/src', 'plugins/webular/tests']
-const URL_PATHNAME = /import\.meta\.url\)\.pathname/
+// A module URL read as a pathname, or a URL pathname handed to a file call.
+const URL_PATHNAME =
+  /import\.meta\.url\)\.pathname|\b(?:readDirectory|readFileString|readFile|exists|access|stat|remove)\(.*\.pathname\b/
 
 const offenders = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem

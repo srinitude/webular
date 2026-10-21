@@ -4,6 +4,7 @@
 // article text back. A worker that cannot start would make the answer path
 // fall back to in-thread parsing without a word.
 import { expect, test } from 'bun:test'
+import { fileURLToPath } from 'node:url'
 import { BunServices } from '@effect/platform-bun'
 import { Console, Effect, FileSystem } from 'effect'
 
@@ -29,12 +30,12 @@ test(
     Effect.runPromise(
       Effect.gen(function* () {
         const fs = yield* FileSystem.FileSystem
-        const names = yield* fs.readDirectory(chunks.pathname)
+        const names = yield* fs.readDirectory(fileURLToPath(chunks))
         const sources = yield* Effect.forEach(
           names,
           (name) =>
             fs
-              .readFileString(new URL(name, chunks).pathname)
+              .readFileString(fileURLToPath(new URL(name, chunks)))
               .pipe(Effect.map((src) => ({ name, src }))),
           { concurrency: 4 },
         )

@@ -2,6 +2,7 @@
 // and can only take an event the machine allows from its current state.
 // Every model answer is recorded: a planner or a mock language model. No live call.
 import { describe, expect, test } from 'bun:test'
+import { fileURLToPath } from 'node:url'
 import { createAgent } from '@statelyai/agent'
 import { MockLanguageModelV1 } from 'ai/test'
 import { Effect, FileSystem } from 'effect'
@@ -18,7 +19,7 @@ const DIR = new URL('../../src/machines/', import.meta.url)
 // Every state machine exported from src/machines, found by scanning the folder.
 const allMachines = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem
-  const files = (yield* fs.readDirectory(DIR.pathname)).filter((file) => file.endsWith('.ts'))
+  const files = (yield* fs.readDirectory(fileURLToPath(DIR))).filter((file) => file.endsWith('.ts'))
   const mods = yield* Effect.forEach(
     files,
     (file) => Effect.tryPromise(() => import(new URL(file, DIR).href)),
