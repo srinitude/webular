@@ -48,8 +48,8 @@ const DECIDE_LIMITS = {
   cached: 256,
 } as const
 
-// Answers keyed by the stable prompt (machine, goal, state, context, allowed events).
-// ponytail: whole-cache reset at DECIDE_LIMITS.cached; an LRU only if hit rates call for it.
+// Answers keyed by the stable prompt (machine, goal, state, context, allowed events),
+// in least-used-first order: a hit moves its key to the back, a full cache drops the front.
 export const AgentAnswers = Context.Reference<Map<string, string>>('webular/AgentAnswers', {
   defaultValue: () => new Map(),
 })
@@ -142,18 +142,17 @@ const proposeEvent = (ask: Ask) =>
 const askModel = (ask: Ask, fallback: Decision) =>
   Effect.gen(function* () {
     const answers = yield* AgentAnswers
-    const key = JSON.stringify([
-      ask.machine.id,
-      ask.goal,
-      ask.snapshot.value,
-      ask.snapshot.context,
-      ask.allowed,
-    ])
+    const { machine, goal, snapshot, allowed } = ask
+    const key = JSON.stringify([machine.id, goal, snapshot.value, snapshot.context, allowed])
     const cached = answers.get(key)
-    if (cached) return { event: cached, source: 'cache' } satisfies Decision
+    if (cached) {
+      answers.delete(key)
+      answers.set(key, cached)
+      return { event: cached, source: 'cache' } satisfies Decision
+    }
     const type = yield* proposeEvent(ask)
-    if (!type || !ask.allowed.includes(type)) return fallback
-    if (answers.size >= DECIDE_LIMITS.cached) answers.clear()
+    if (!type || !allowed.includes(type)) return fallback
+    if (answers.size >= DECIDE_LIMITS.cached) answers.delete(answers.keys().next().value ?? key)
     answers.set(key, type)
     return { event: type, source: 'model' } satisfies Decision
   }).pipe(Effect.orElseSucceed(() => fallback))
