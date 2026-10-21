@@ -57,6 +57,31 @@ async function pump(
 // processes) on separate temps; the suffix never reaches output (savedTo=dest).
 let tempSeq = 0
 
+// Windows: a rename onto a dest that another rename is replacing (or a reader
+// holds open) fails EPERM/EBUSY/EACCES for a moment, so retry briefly. POSIX
+// renames are atomic and never hit this path.
+const RENAME_BUSY = new Set(['EPERM', 'EBUSY', 'EACCES'])
+const RENAME_TRIES = 10
+
+// true = renamed; false = dest busy, worth a retry; any other error rethrows.
+async function tryRename(from: string, to: string): Promise<boolean> {
+  try {
+    await rename(from, to)
+    return true
+  } catch (err) {
+    if (!RENAME_BUSY.has((err as NodeJS.ErrnoException).code ?? '')) throw err
+    return false
+  }
+}
+
+async function renameOver(from: string, to: string): Promise<void> {
+  for (let attempt = 1; attempt < RENAME_TRIES; attempt += 1) {
+    if (await tryRename(from, to)) return
+    await Bun.sleep(attempt * 10)
+  }
+  await rename(from, to)
+}
+
 async function streamToFile(
   body: ReadableStream<Uint8Array>,
   outPath: string,
@@ -70,7 +95,7 @@ async function streamToFile(
   try {
     const total = await pump(reader, writer, maxBytes, idleMs)
     await writer.end()
-    await rename(tmp, outPath)
+    await renameOver(tmp, outPath)
     return total
   } catch (err) {
     await reader.cancel().catch(() => {})
