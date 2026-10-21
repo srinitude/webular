@@ -26,8 +26,7 @@ export const answerCandidates = (question: string, text: string) => {
   }
   return [...used].sort((a, b) => a - b).map((i) => all[i] ?? '')
 }
-const shown = ({ candidates }: Candidates) =>
-  candidates.slice(0, MAX_SENTENCES).map((_, i) => i)
+const shown = ({ candidates }: Candidates) => candidates.slice(0, MAX_SENTENCES).map((_, i) => i)
 const PURPOSE = purpose(
   'We answer a reader question with sentences taken from the web pages we fetched.',
   'Keep only the sentences that tell the reader something real that helps answer it.',

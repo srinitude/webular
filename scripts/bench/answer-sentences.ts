@@ -10,10 +10,7 @@ import { BunRuntime, BunServices } from '@effect/platform-bun'
 import { Console, Effect, FileSystem, Layer, Schema } from 'effect'
 import { Jev } from '../../src/lib/jev/client.ts'
 import { answerSentences } from '../../src/lib/jev/decisions/answer.ts'
-import {
-  answerCandidates,
-  answerFollowers,
-} from '../../src/lib/jev/decisions/answer-sentences.ts'
+import { answerCandidates, answerFollowers } from '../../src/lib/jev/decisions/answer-sentences.ts'
 import { summarizeText } from '../../src/lib/summarize.ts'
 import { builtinTasks } from './peers/tasks.ts'
 
@@ -65,7 +62,11 @@ const onTopic = (question: string, text: string) => {
 // Sentences are cut to what Jev sees, which keeps the file small; equality still holds.
 const cut = (xs: ReadonlyArray<string>) => xs.map((s) => s.slice(0, 600))
 // One answer over `pages`: Jev's candidates stand in for the whole text.
-const caseFor = (question: string, answers: ReadonlyArray<string>, pages: ReadonlyArray<string>) => {
+const caseFor = (
+  question: string,
+  answers: ReadonlyArray<string>,
+  pages: ReadonlyArray<string>,
+) => {
   const full = pages.join('\n\n')
   const all = answerSentences(full)
   const needed = cut(all.filter((s) => answers.some((a) => norm(s).includes(norm(a)))))

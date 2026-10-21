@@ -114,10 +114,7 @@ const prepareSynth = Effect.fn('answer.prepare')(function* (data: Evidence) {
       ? []
       : yield* onJevRuntime(decisions.answerFollowers, { question: data.query, candidates })
   const top = [
-    ...new Set([
-      ...kept.map((i) => candidates[i] ?? ''),
-      ...topSentences(text, data),
-    ]),
+    ...new Set([...kept.map((i) => candidates[i] ?? ''), ...topSentences(text, data)]),
   ].slice(0, data.sentences)
   const cited = yield* citedSources(top, data.used, (c) =>
     onJevRuntime(decisions.answerCitation, c),
