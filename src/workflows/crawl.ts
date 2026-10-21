@@ -21,6 +21,8 @@ const pageSchema = z.object({ url: z.string(), title: z.string() })
 const crawlOutput = z.object({
   root: z.string(),
   count: z.number(),
+  // True when the page count reached --limit: more pages may exist, so raise --limit.
+  limitReached: z.boolean(),
   pages: z.array(pageSchema),
   errors: fetchErrorsSchema,
 })
@@ -38,7 +40,13 @@ const crawlStep = createStep({
           concurrency: inputData.concurrency ?? (yield* hostConcurrency),
           timeoutMs: inputData.timeoutMs,
         })
-        return { root, count: pages.length, pages, errors }
+        return {
+          root,
+          count: pages.length,
+          limitReached: pages.length >= inputData.limit,
+          pages,
+          errors,
+        }
       }),
     ),
 })
