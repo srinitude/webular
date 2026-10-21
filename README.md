@@ -57,7 +57,7 @@ webular --help
 | `map`       | Discover all URLs for a domain (sitemap + link BFS) |
 | `extract`   | Structured extraction via CSS selectors / schema |
 | `summarize` | Extractive summary (no model) |
-| `answer`    | Grounded answer (search → fetch → synthesize) |
+| `answer`    | Grounded answer (search → fetch → synthesize; `--urls <a,b>` reads only those pages) |
 | `research`  | Multi-step research loop → cited markdown report |
 | `parse`     | Local docs → markdown (PDF/DOCX/HTML/CSV/JSON/TXT) |
 | `media`     | Download media; screenshot/PDF via a real browser (agent-browser) |

@@ -7,7 +7,7 @@ export const COMMANDS = {
   map: 'Discover all URLs for a domain (sitemap + links)',
   extract: 'Extract structured data from pages via a schema',
   summarize: 'Summarize a page or text (extractive, no model)',
-  answer: 'Answer a question grounded in fresh web results',
+  answer: 'Answer a question grounded in fresh web results (--urls <a,b> reads only those pages)',
   research: 'Run a multi-step research loop and synthesize',
   parse: 'Parse local documents (PDF/DOCX/HTML/MD/CSV/JSON/TXT) to markdown',
   media: 'Capture screenshots/PDFs or download media',

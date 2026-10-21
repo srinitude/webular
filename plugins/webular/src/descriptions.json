@@ -7,7 +7,7 @@
     "summarize": "Pull the key sentences out of a text or a web page, with no model call. Pass text or url. Returns the top sentences.",
     "crawl": "Visit a page and the pages it links to, up to a depth and a page limit. Use it to read a small part of a site at once. Returns each page's URL and Markdown.",
     "extract": "Pull named parts of a page with CSS selectors. Use it when you need set fields, like a price or a title. Pass fields as name:selector pairs, or one selector. Returns the matched text.",
-    "answer": "Answer a question from a few web sources, with no model call. Use it for a quick fact with sources. Returns the key sentences and the URLs they came from.",
+    "answer": "Answer a question from a few web sources, with no model call. Use it for a quick fact with sources. Pass urls to read only those pages, with no search. Returns the key sentences and the URLs they came from.",
     "research": "Dig into a topic across many web sources. Use it when one search is not enough. Returns key points with their source URLs.",
     "parse": "Turn a local file, such as a PDF or an HTML file, into clean text. Use it when the content is on disk, not on the web. Returns the text.",
     "media": "Save a page's media to a file: download it, take a screenshot, or print a PDF. Use it when you need the file itself. Returns where the file was saved and its size.",

@@ -28,6 +28,19 @@ describe('webular map — discover all URLs for a domain (real fetch)', () => {
   )
 
   test(
+    'merges sitemap URLs with same-host page links, sitemap order first',
+    eff(
+      Effect.gen(function* () {
+        const { code, out } = yield* runMap(['--url', `${fx.origin}/`, '--json'])
+        expect(code).toBe(0)
+        const { links } = JSON.parse(out)
+        expect(links).toEqual([`${fx.origin}/a`, `${fx.origin}/b`, `${fx.origin}/c`])
+      }),
+    ),
+    15_000,
+  )
+
+  test(
     'count equals links.length',
     eff(
       Effect.gen(function* () {

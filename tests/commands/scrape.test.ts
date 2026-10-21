@@ -3,11 +3,12 @@
 import { describe, expect, test } from 'bun:test'
 import { Effect } from 'effect'
 import { runCli } from '../_support/cli.ts'
-import { useFixture } from '../_support/fixture.ts'
+import { startFixture } from '../_support/fixture.ts'
 import { defaultRoutes } from '../_support/routes.ts'
 import { eff } from '../_support/run.ts'
 
-const fx = useFixture(defaultRoutes)
+// Each test acquires its own fixture; the test scope stops it.
+const withFx = startFixture(defaultRoutes)
 
 const runScrape = (args: string[]) => runCli('src/commands/scrape.ts', args)
 
@@ -16,6 +17,7 @@ describe('webular scrape — single URL to clean content (real fetch)', () => {
     'returns markdown for a fixture page',
     eff(
       Effect.gen(function* () {
+        const fx = yield* withFx
         const { code, out } = yield* runScrape(['--url', `${fx.origin}/`])
         expect(code).toBe(0)
         expect(out).toContain('Fixture Home')
@@ -28,6 +30,7 @@ describe('webular scrape — single URL to clean content (real fetch)', () => {
     'emits structured JSON with --json',
     eff(
       Effect.gen(function* () {
+        const fx = yield* withFx
         const { code, out } = yield* runScrape(['--url', `${fx.origin}/`, '--json'])
         expect(code).toBe(0)
         const data = JSON.parse(out)
@@ -59,5 +62,20 @@ describe('webular scrape — single URL to clean content (real fetch)', () => {
         expect(err).toContain('missing')
       }),
     ),
+  )
+
+  test(
+    'a missing page names its status and URL',
+    eff(
+      Effect.gen(function* () {
+        const fx = yield* withFx
+        const url = `${fx.origin}/gone`
+        const { code, err } = yield* runScrape(['--url', url, '--render', 'off'])
+        expect(code).toBe(1)
+        expect(err).toContain(`${url} failed: 404 Not Found`)
+        expect(err).not.toContain('undefined')
+      }),
+    ),
+    15_000,
   )
 })

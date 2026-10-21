@@ -10,6 +10,7 @@ const main = Effect.gen(function* () {
     query: { type: 'string' },
     sources: { type: 'string' },
     sentences: { type: 'string' },
+    urls: { type: 'string' },
   })
   const query = (values['query'] as string) ?? positionals[0]
   if (!query) {
@@ -23,6 +24,10 @@ const main = Effect.gen(function* () {
     sources: yield* intFlag('answer', values, 'sources', { def: 3, min: 1, max: 10 }),
     sentences: yield* intFlag('answer', values, 'sentences', { def: 3, min: 1, max: 25 }),
     timeoutMs: yield* timeoutFlag('answer', values),
+    urls: (values['urls'] as string | undefined)
+      ?.split(',')
+      .map((u) => u.trim())
+      .filter(Boolean),
   }
   return yield* runWorkflow(
     'answer',

@@ -35,14 +35,14 @@ export interface FetchOptions extends CacheOptions {
 }
 
 // A non-2xx response, typed so callers branch on the status, not the message.
+// The message is an own field, not a getter: Mastra copies a step error's own
+// fields, so a prototype getter reaches the CLI as "failed (undefined)".
 export class HttpStatusError extends Data.TaggedError('HttpStatusError')<{
   url: string
   status: number
   statusText: string
 }> {
-  override get message(): string {
-    return `fetch ${this.url} failed: ${this.status} ${this.statusText}`
-  }
+  override message = `fetch ${this.url} failed: ${this.status} ${this.statusText}`
 }
 
 // Retry-After (RFC 9110 section 10.2.3): delay-seconds or an HTTP-date.

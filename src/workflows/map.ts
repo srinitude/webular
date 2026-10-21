@@ -1,5 +1,6 @@
 // MAP workflow: discover URLs via the origin-root sitemap (one-level <sitemapindex>
-// recursion), then robots.txt Sitemap: entries, then page links. Same-host, byte-capped,
+// recursion), then robots.txt Sitemap: entries, merged with the root page's same-host
+// links (sitemap order first). Same-host, byte-capped,
 // deterministic: children fetch concurrently but merge in order; dedup on normalized URLs.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect, type FileSystem } from 'effect'
@@ -171,13 +172,14 @@ const fetchRootFor = (url: string, timeoutMs?: number): Effect.Effect<RootFetch>
 const discover = Effect.fn('map.discover')(function* (input: z.infer<typeof mapInput>) {
   const { url, limit = 1000, timeoutMs } = input
   const root = yield* fetchRootFor(url, timeoutMs)
+  const host = new URL(root.final).hostname
   const sitemap = yield* fetchSitemap(root.final, timeoutMs)
-  const links =
-    sitemap && sitemap.links.length > 0
-      ? sitemap.links
-      : root.rootHtml
-        ? extractLinks(root.rootHtml, root.final)
-        : []
+  const links = [
+    ...(sitemap?.links ?? []),
+    ...(root.rootHtml
+      ? extractLinks(root.rootHtml, root.final).filter((u) => sameHost(host, u))
+      : []),
+  ]
   const deduped = dedupe(links, limit)
   const errors = [...(deduped.length === 0 ? root.errors : []), ...(sitemap?.errors ?? [])]
   return { url, count: deduped.length, links: deduped, errors }

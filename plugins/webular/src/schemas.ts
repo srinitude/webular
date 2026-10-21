@@ -51,6 +51,12 @@ export const schemas = {
     query: words('The question to answer'),
     sources: count(10, 'Web sources to read (default 3)'),
     sentences: count(25, 'Sentences in the answer (default 3)'),
+    urls: z
+      .array(url)
+      .min(1)
+      .max(10)
+      .optional()
+      .describe('Read only these pages, with no web search, and cite them'),
   }),
   research: z.strictObject({
     topic: words('The topic to research'),

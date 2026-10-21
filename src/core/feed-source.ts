@@ -12,10 +12,9 @@ interface SourceOptions extends FetchOptions {
 }
 
 // A live page that is not a feed and links to none that works.
+// An own message field, as HttpStatusError explains.
 class NotAFeed extends Data.TaggedError('NotAFeed')<{ url: string }> {
-  override get message(): string {
-    return `no feed found at ${this.url}`
-  }
+  override message = `no feed found at ${this.url}`
 }
 
 const MAX_ALTERNATES = 3

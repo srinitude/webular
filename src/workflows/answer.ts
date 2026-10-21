@@ -13,6 +13,7 @@ const answerInput = z.object({
   sources: z.number().int().min(1).max(10).default(3),
   sentences: z.number().int().min(1).max(25).default(3),
   timeoutMs: z.number().int().positive().optional(),
+  urls: z.array(z.string()).min(1).optional(),
 })
 
 const sourceRef = z.object({ title: z.string(), url: z.string() })
@@ -38,12 +39,18 @@ const searchStep = createStep({
   execute: ({ inputData }) =>
     stepRuntime.runPromise(
       Effect.map(
-        searchWithSource('web', inputData.query, inputData.sources),
-        ({ results: found }) => ({
+        // --urls: read exactly those pages, no search.
+        inputData.urls
+          ? Effect.succeed(inputData.urls.map((url) => ({ title: url, url })))
+          : Effect.map(
+              searchWithSource('web', inputData.query, inputData.sources),
+              ({ results: found }) => found.map((h) => ({ title: h.title, url: h.url })),
+            ),
+        (hits) => ({
           query: inputData.query,
           sentences: inputData.sentences,
           timeoutMs: inputData.timeoutMs,
-          hits: found.map((h) => ({ title: h.title, url: h.url })),
+          hits,
         }),
       ),
     ),

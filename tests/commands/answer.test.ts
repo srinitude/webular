@@ -4,7 +4,11 @@ import { describe, expect, test } from 'bun:test'
 
 import { Effect } from 'effect'
 import { runCli } from '../_support/cli.ts'
+import { useFixture } from '../_support/fixture.ts'
+import { defaultRoutes } from '../_support/routes.ts'
 import { eff } from '../_support/run.ts'
+
+const fx = useFixture(defaultRoutes)
 
 // Live DDG search is blocked from datacenter IPs and inherently varies run to
 // run; opt in with WEBULAR_TEST_LIVE=1. The missing-arg contract always runs.
@@ -55,5 +59,20 @@ describe('webular answer — grounded answer from real search + fetch', () => {
         expect(err).toContain('--sources')
       }),
     ),
+  )
+
+  test(
+    'with --urls reads only the given pages and cites them',
+    eff(
+      Effect.gen(function* () {
+        const url = `${fx.origin}/a`
+        const { code, out } = yield* runAnswer(['--query', 'anything', '--urls', url, '--json'])
+        expect(code).toBe(0)
+        const data = JSON.parse(out)
+        expect(data.sources.map((s: { url: string }) => s.url)).toEqual([url])
+        expect(data.answer.length).toBeGreaterThan(0)
+      }),
+    ),
+    20_000,
   )
 })
