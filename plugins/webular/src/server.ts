@@ -4,6 +4,7 @@
 // The HTTP side uses Bun's built-in node:http server, because
 // MCPServer.startHTTP takes node IncomingMessage/ServerResponse objects.
 import { createServer } from 'node:http'
+import { fileURLToPath } from 'node:url'
 import { BunRuntime } from '@effect/platform-bun'
 import { createTool } from '@mastra/core/tools'
 import { MCPServer } from '@mastra/mcp'
@@ -16,7 +17,7 @@ import descriptions from './descriptions.json' with { type: 'json' }
 import { runtime } from './runtime.ts'
 import { outputs, schemas } from './schemas.ts'
 
-const repo = new URL('../../../', import.meta.url).pathname
+const repo = fileURLToPath(new URL('../../../', import.meta.url))
 
 // The file a tool call runs. `mise run build` bundles each command to
 // dist/commands/<command>.js, one file that starts in about half a second; the

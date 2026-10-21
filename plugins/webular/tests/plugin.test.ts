@@ -1,9 +1,10 @@
 // Outcome evals: the manifest, and every skill against agentskills.io and best practices.
 import { expect, test } from 'bun:test'
+import { fileURLToPath } from 'node:url'
 import { BunServices } from '@effect/platform-bun'
 import { Effect, FileSystem, Schema } from 'effect'
 
-const root = new URL('..', import.meta.url).pathname
+const root = fileURLToPath(new URL('..', import.meta.url))
 const hostWords = /\bClaude\b|AskUserQuestion|\.claude\/|\bBash tool\b|\bRead tool\b|CLAUDE_/
 const frontKeys = ['name', 'description', 'compatibility', 'metadata']
 const questionOrder = ['Intent', 'Outcome', 'Criteria', 'Proof', 'Boundaries', 'Method']

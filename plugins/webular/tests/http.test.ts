@@ -2,12 +2,13 @@
 // on the port it is given, and at its stable portless name when portless is
 // installed. Real processes, real HTTP, no mocks.
 import { expect, test } from 'bun:test'
+import { fileURLToPath } from 'node:url'
 import { BunServices } from '@effect/platform-bun'
 import { MCPClient } from '@mastra/mcp'
 import { Effect, Random, Schedule } from 'effect'
 import { ChildProcess, ChildProcessSpawner } from 'effect/process'
 
-const serverPath = new URL('../src/server.ts', import.meta.url).pathname
+const serverPath = fileURLToPath(new URL('../src/server.ts', import.meta.url))
 
 const toolNamesAt = (url: string) =>
   Effect.acquireUseRelease(

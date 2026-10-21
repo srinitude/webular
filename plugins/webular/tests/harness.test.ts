@@ -2,10 +2,11 @@
 // grader, deterministic entries first. Files are read at run time, so a new
 // test or eval id fails here until it is mapped.
 import { expect, test } from 'bun:test'
+import { fileURLToPath } from 'node:url'
 import { BunServices } from '@effect/platform-bun'
 import { Effect, FileSystem, Schema } from 'effect'
 
-const root = new URL('..', import.meta.url).pathname
+const root = fileURLToPath(new URL('..', import.meta.url))
 // ponytail: regex scan of test( calls, one level of nested parens in a modifier
 const testName = /\btest(?:\.\w+\((?:[^()]|\([^()]*\))*\))?\(\s*(['"`])(.+?)\1/g
 

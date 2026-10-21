@@ -1,10 +1,11 @@
 // Shared harness for the MCP outcome evals: one local site and one real stdio
 // MCP client talking to the real server. No mocks.
+import { fileURLToPath } from 'node:url'
 import { MCPClient } from '@mastra/mcp'
 import { Effect, Random } from 'effect'
 import { runtime } from '../src/runtime.ts'
 
-const serverPath = new URL('../src/server.ts', import.meta.url).pathname
+const serverPath = fileURLToPath(new URL('../src/server.ts', import.meta.url))
 const page = `<html><head><title>Webular test page</title>
 <link rel="alternate" type="application/rss+xml" href="/posts.xml"></head><body><article>
 <h1>Webular test page</h1><p>Webular turns web pages into clean text for agents.</p>
