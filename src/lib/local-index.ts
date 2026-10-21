@@ -16,7 +16,7 @@ export interface IndexedPage {
   readonly text: string
 }
 
-export interface LocalHit {
+interface LocalHit {
   readonly url: string
   readonly title: string
   readonly description: string
@@ -58,7 +58,7 @@ export const openLocalIndex = (
     (index) => Effect.sync(() => index.db.close()),
   )
 
-export interface AddResult {
+interface AddResult {
   readonly added: number
   readonly duplicates: number
 }
@@ -87,7 +87,7 @@ export const addPages = (index: LocalIndex, pages: ReadonlyArray<IndexedPage>) =
   attempt(() => insertAll(index, pages))
 
 /** Any-term FTS5 query: each word quoted, so user text never parses as syntax. */
-export const ftsQuery = (query: string): string =>
+const ftsQuery = (query: string): string =>
   queryTerms(query)
     .map((w) => `"${w}"`)
     .join(' OR ')

@@ -1,14 +1,8 @@
 // Fetch layer types, typed errors, backoff math, and reply classification.
 import { Clock, Data, Effect } from 'effect'
 
-export type FetchErrorKind =
-  | 'timeout'
-  | 'network'
-  | 'http'
-  | 'blocked'
-  | 'too-large'
-  | 'invalid-url'
-export type NextAction = 'retry' | 'escalate' | 'give-up' | 'slow-down'
+type FetchErrorKind = 'timeout' | 'network' | 'http' | 'blocked' | 'too-large' | 'invalid-url'
+type NextAction = 'retry' | 'escalate' | 'give-up' | 'slow-down'
 
 export class FetchError extends Data.TaggedError('FetchError')<{
   readonly kind: FetchErrorKind
@@ -36,7 +30,7 @@ export interface RenderTier {
   ) => Effect.Effect<{ status: number; body: string; headers?: Record<string, string> }, unknown>
 }
 
-export interface CallOptions {
+interface CallOptions {
   readonly deadlineMs?: number | undefined
   readonly tiers?: ReadonlyArray<RenderTier>
 }
@@ -57,7 +51,7 @@ export const fullJitterDelay = (attempt: number, baseMs: number, capMs: number, 
   u * Math.min(capMs, baseMs * 2 ** attempt)
 
 /** `Retry-After` as delta-seconds or HTTP-date (RFC 9110), in ms; undefined when absent or bad. */
-export const parseRetryAfter = (value: string | undefined, now: number): number | undefined => {
+const parseRetryAfter = (value: string | undefined, now: number): number | undefined => {
   if (!value) return undefined
   const seconds = Number(value)
   if (Number.isFinite(seconds)) return Math.max(0, seconds * 1000)
@@ -65,7 +59,7 @@ export const parseRetryAfter = (value: string | undefined, now: number): number 
   return Number.isNaN(at) ? undefined : Math.max(0, at - now)
 }
 
-export const CHALLENGE = /cf-chl|captcha|enable javascript|checking your browser/i
+const CHALLENGE = /cf-chl|captcha|enable javascript|checking your browser/i
 
 export interface Reply {
   readonly status: number

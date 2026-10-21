@@ -30,7 +30,6 @@ import { isAllowed, type Robots, robotsFromResponse } from './robots-txt.ts'
 import { halves, simhash64 } from './simhash.ts'
 
 export {
-  type CrawledPage,
   type CrawlOptions,
   type CrawlResult,
   extractLinks,
@@ -41,7 +40,6 @@ export {
   MAX_DELAY_MS,
   MIN_DELAY_MS,
   nextDelay,
-  type SkipReason,
   textOf,
 } from './crawl-types.ts'
 

@@ -1,5 +1,5 @@
 // Binary min-heap of hosts keyed by next-allowed time.
-export interface Slot {
+interface Slot {
   readonly host: string
   readonly at: number
 }

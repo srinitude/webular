@@ -12,8 +12,8 @@ export class CrawlError extends Data.TaggedError('CrawlError')<{ readonly cause:
 export const attempt = <A>(run: () => A) =>
   Effect.try({ try: run, catch: (cause) => new CrawlError({ cause }) })
 
-export const PRIORITIES = 3
-export type Popped = { readonly url: string; readonly host: string } | { readonly waitMs: number }
+const PRIORITIES = 3
+type Popped = { readonly url: string; readonly host: string } | { readonly waitMs: number }
 const hostOf = (url: string) => URL.parse(url)?.host ?? ''
 const emptyFront = () => Array.from({ length: PRIORITIES }, (): string[] => [])
 type SpillRow = { seq: number; url: string; priority: number }

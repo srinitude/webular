@@ -2,7 +2,7 @@
 // with `*` and `$`, Crawl-delay, a 500 KiB parse cap, and the status rules
 // (4xx = allow all, 5xx or network error = disallow all).
 
-export interface RobotsRule {
+interface RobotsRule {
   readonly allow: boolean
   readonly pattern: string
 }
@@ -12,8 +12,8 @@ export interface Robots {
   readonly crawlDelayMs: number
 }
 
-export const ALLOW_ALL: Robots = { rules: [], crawlDelayMs: 0 }
-export const DISALLOW_ALL: Robots = { rules: [{ allow: false, pattern: '/' }], crawlDelayMs: 0 }
+const ALLOW_ALL: Robots = { rules: [], crawlDelayMs: 0 }
+const DISALLOW_ALL: Robots = { rules: [{ allow: false, pattern: '/' }], crawlDelayMs: 0 }
 
 /** RFC 9309 section 2.5: parsers must read at least 500 KiB. */
 export const MAX_ROBOTS_BYTES = 500 * 1024

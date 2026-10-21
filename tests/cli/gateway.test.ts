@@ -3,6 +3,7 @@
 // a relative -o lands where the user is standing.
 import { describe, expect, test } from 'bun:test'
 import { Effect, FileSystem, Path } from 'effect'
+import { GLOBAL_OPTIONS } from '../../src/cli/help.ts'
 import { runCli } from '../_support/cli.ts'
 import { useFixture } from '../_support/fixture.ts'
 import { ROOT } from '../_support/root.ts'
@@ -21,6 +22,7 @@ const helpCase = Effect.gen(function* () {
   const help = yield* runWebular(['--help'])
   expect(help.code).toBe(0)
   expect(help.out).toContain('USAGE')
+  for (const line of GLOBAL_OPTIONS) expect(help.out).toContain(line)
   const version = yield* runWebular(['--version'])
   expect(version.code).toBe(0)
   expect(version.out).toContain('webular')

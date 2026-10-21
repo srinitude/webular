@@ -71,12 +71,12 @@ export interface CrawlOptions {
   readonly now?: () => number
   readonly sleep?: (ms: number) => Effect.Effect<void>
 }
-export interface CrawledPage {
+interface CrawledPage {
   readonly url: string
   readonly status: number
   readonly body: string
 }
-export type SkipReason = 'robots' | 'near-duplicate' | 'fetch-error'
+type SkipReason = 'robots' | 'near-duplicate' | 'fetch-error'
 export interface CrawlResult {
   readonly pages: CrawledPage[]
   readonly skipped: { url: string; reason: SkipReason }[]
