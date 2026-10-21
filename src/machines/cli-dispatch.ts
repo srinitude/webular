@@ -31,7 +31,7 @@ export const cliDispatchMachine = setup({
     },
     printedHelp: { type: 'final', tags: ['exit-0'] },
     printedVersion: { type: 'final', tags: ['exit-0'] },
-    rejected: { type: 'final', tags: ['exit-1'] },
+    rejected: { type: 'final', tags: ['exit-2'] },
     taskSucceeded: { type: 'final', tags: ['exit-0'] },
     taskFailed: { type: 'final', tags: ['exit-1'] },
   },
