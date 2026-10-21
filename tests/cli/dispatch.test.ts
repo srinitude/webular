@@ -2,7 +2,7 @@
 // command list, and the CLI passes each child's exit code straight through.
 import { describe, expect, test } from 'bun:test'
 import * as BunServices from '@effect/platform-bun/BunServices'
-import { Effect } from 'effect'
+import { Effect, Stream } from 'effect'
 import { ChildProcess, ChildProcessSpawner } from 'effect/process'
 import { readTable } from '../../scripts/gen-dispatch.ts'
 import { COMMAND_NAMES } from '../../src/cli/commands.ts'
@@ -77,7 +77,22 @@ describe('exit codes pass straight through', () => {
   )
 })
 
+// One initialize request; the server's first reply proves its signal handlers are in.
+const INIT = new TextEncoder().encode(
+  `${JSON.stringify({
+    jsonrpc: '2.0',
+    id: 0,
+    method: 'initialize',
+    params: {
+      protocolVersion: '2025-06-18',
+      capabilities: {},
+      clientInfo: { name: 'signals-test', version: '0.0.0' },
+    },
+  })}\n`,
+)
+
 // The CLI forwards the exact signal it gets, so each exits 128 + its number.
+// Stdin stays open (Stream.never) so the server does not stop on end of input.
 const stopWith = (signal: 'SIGINT' | 'SIGTERM') =>
   Effect.scoped(
     Effect.gen(function* () {
@@ -85,12 +100,12 @@ const stopWith = (signal: 'SIGINT' | 'SIGTERM') =>
       const handle = yield* spawner.spawn(
         ChildProcess.make(process.execPath, [`${ROOT}bin/webular.ts`, 'mcp'], {
           cwd: ROOT,
-          stdin: 'pipe',
-          stdout: 'ignore',
+          stdin: Stream.concat(Stream.make(INIT), Stream.never),
+          stdout: 'pipe',
           stderr: 'ignore',
         }),
       )
-      yield* Effect.sleep('3 seconds')
+      yield* Stream.runHead(handle.stdout)
       yield* handle.kill({ killSignal: signal })
       return Number(yield* handle.exitCode)
     }),
