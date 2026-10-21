@@ -62,7 +62,15 @@ test.skipIf(!Bun.which('portless'))(
     Effect.runPromise(
       Effect.gen(function* () {
         const names = yield* whileRunning(
-          ChildProcess.make('portless', ['webular-mcp-test', 'bun', serverPath, '--http']),
+          // `run --name` adds the worktree/branch prefix, matching what `portless get` prints.
+          ChildProcess.make('portless', [
+            'run',
+            '--name',
+            'webular-mcp-test',
+            'bun',
+            serverPath,
+            '--http',
+          ]),
           ChildProcessSpawner.ChildProcessSpawner.pipe(
             Effect.flatMap((spawner) =>
               spawner.string(ChildProcess.make('portless', ['get', 'webular-mcp-test'])),
