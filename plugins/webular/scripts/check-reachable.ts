@@ -32,7 +32,9 @@ if (import.meta.main)
       const out: string[] = []
       for (const dir of dirs) {
         const seen = yield* reachable(dir, set)
-        for (const f of all.filter((f) => f.startsWith(`${dir}/`) && !seen.has(f))) {
+        const stray = (f: string) =>
+          f.startsWith(`${dir}/`) && !seen.has(f) && !/\/(AGENTS|CLAUDE)\.md$/.test(f)
+        for (const f of all.filter(stray)) {
           out.push(`${rel(f)}:1: not linked from ${rel(dir)}/SKILL.md`)
         }
       }
