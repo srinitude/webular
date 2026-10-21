@@ -1,0 +1,1 @@
+"<html lang=\"en\"><head><title>JS fixture</title></head><body><main><article><div id=\"app\"><h1>Client Rendered</h1><p>Rendered by script: the launch code is AURORA-7.</p></div></article></main></body></html>"

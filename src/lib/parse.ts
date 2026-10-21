@@ -56,12 +56,17 @@ function detectFormat(file: string): Effect.Effect<DocFormat, ParseError> {
   return Effect.succeed(EXT_FORMATS[ext] ?? 'txt')
 }
 
-const parsePdf = Effect.fnUntraced(function* (file: string) {
+// PDF bytes to text; scrape reads a fetched PDF through this same reader.
+export const pdfText = Effect.fnUntraced(function* (bytes: Uint8Array) {
   const { extractText, getDocumentProxy } = yield* attempt(() => import('unpdf'))
-  const buf = yield* attempt(() => Bun.file(file).arrayBuffer())
-  const pdf = yield* attempt(() => getDocumentProxy(new Uint8Array(buf)))
+  const pdf = yield* attempt(() => getDocumentProxy(bytes))
   const { text } = yield* attempt(() => extractText(pdf, { mergePages: true }))
   return typeof text === 'string' ? text : (text as string[]).join('\n')
+})
+
+const parsePdf = Effect.fnUntraced(function* (file: string) {
+  const buf = yield* attempt(() => Bun.file(file).arrayBuffer())
+  return yield* pdfText(new Uint8Array(buf))
 })
 
 const parseDocx = Effect.fnUntraced(function* (file: string) {

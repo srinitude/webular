@@ -9,15 +9,24 @@ const main = Effect.gen(function* () {
   const { values, positionals } = yield* parseFlags(Bun.argv.slice(2), {
     url: { type: 'string' },
     archive: { type: 'boolean' },
+    render: { type: 'string' },
   })
   const url = (values.url as string) ?? positionals[0]
   if (!url) {
     return yield* new CliError({ message: 'scrape: missing --url <url>', exitCode: 2 })
   }
+  const render = values.render as string | undefined
+  if (render !== undefined && !['agent-browser', 'cua', 'off'].includes(render)) {
+    return yield* new CliError({
+      message: 'scrape: --render takes agent-browser, cua, or off',
+      exitCode: 2,
+    })
+  }
   const inputData = {
     url,
     timeoutMs: yield* timeoutFlag('scrape', values),
     archive: values.archive === true,
+    ...(render ? { render } : {}),
   }
   return yield* runWorkflow(
     'scrape',

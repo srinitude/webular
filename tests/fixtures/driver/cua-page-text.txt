@@ -1,0 +1,3 @@
+Client Rendered
+
+Rendered by script: the launch code is AURORA-7.
