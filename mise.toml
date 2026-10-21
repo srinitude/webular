@@ -125,7 +125,9 @@ run = 'bun test --timeout 30000{% for file in usage.files %} "{{ file }}"{% endf
 [tasks.test]
 description = "Run the bun test suite (CI/CD graph + contracts + integration)"
 depends = ["build"]
-run = "bun test --timeout 30000"
+# One worker per core: most test time is waiting (timeouts, retries, child
+# processes), so files run side by side. Each file still gets a fresh global.
+run = "bun test --timeout 30000 --parallel"
 
 [tasks."jev:check"]
 description = "Jev framework checks (off the linear spine; the test task runs them too): payload caps and flat cost, canonical bytes, the 0.95 bar, machine-only moves, record and replay, the raw-call lint, and the evals"
