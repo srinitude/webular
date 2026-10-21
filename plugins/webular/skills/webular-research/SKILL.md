@@ -26,6 +26,7 @@ The webular MCP server can take a few seconds to start. If no webular tool is in
 | --- | --- |
 | Find pages on a topic | `search` |
 | Read one page as Markdown | `scrape` |
+| Read two or more URLs in one call, never one `scrape` per URL | `batch` |
 | List the pages on a site | `map` |
 | Shorten a text or a page | `summarize` |
 | Read many pages of one site | `crawl` |
@@ -35,7 +36,6 @@ The webular MCP server can take a few seconds to start. If no webular tool is in
 | Turn a file into text | `parse` |
 | Get text or details from an image, audio, or video | `media` |
 | Watch a page for changes | `monitor` |
-| Run one tool on many inputs at once | `batch` |
 | Click, type, or fill a form on a page | `act` |
 | Read an RSS or Atom feed, even from a plain page URL | `feed` |
 | Check that webular and its tools are set up | `doctor` |
@@ -64,8 +64,8 @@ Copy this checklist. Tick each step.
 ```text
 - [ ] 1. Write the question in one sentence, and what a good answer holds.
 - [ ] 2. search, or map when you already know the site.
-- [ ] 3. scrape the two or three best URLs.
-- [ ] 4. Check that each fact you keep appears in a scraped page.
+- [ ] 3. Read the two or three best URLs in one batch call.
+- [ ] 4. Check that each fact you keep appears in a page a tool returned.
 - [ ] 5. Answer with each fact next to its source URL.
 ```
 
@@ -79,7 +79,7 @@ Copy this checklist. Tick each step.
 
 - Quote only text a tool returned. Never invent a URL.
 - Keep `limit` small (5 to 10) unless the user asks for more.
-- When a fact matters, use `scrape` rather than a search snippet.
+- When a fact matters, read the page with `scrape` or `batch` rather than trust a search snippet.
 
 ## Evals
 

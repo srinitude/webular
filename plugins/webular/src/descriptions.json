@@ -13,7 +13,7 @@
     "parse": "Turn a local file on disk, like a PDF or HTML file, into clean text. Returns the text.",
     "media": "Save a page's media to a file: download it, screenshot it, or print a PDF. Returns the saved path and size.",
     "monitor": "Check a page for changes since the last check. Returns whether and what it changed.",
-    "batch": "Scrape a list of URLs in one call. Returns one result per URL, each marked ok or not.",
+    "batch": "Read two or more URLs in one call. Returns one result per URL, each marked ok or not.",
     "act": "Read a page in a real browser, for pages that need JavaScript, with an optional screenshot. Returns the page text. Or pass goal instead of url to act in the Cua window named by WEBULAR_CUA_WINDOW (goal: click \"Press me\" until it says \"Done\"). It returns status (done or infeasible), at (the step it could not reach), and rungs (how each step was clicked: ax, ocr, or pixel).",
     "feed": "Read an RSS or Atom feed's newest posts. Returns each item's title, link, and date.",
     "doctor": "Check that webular can run here, when a tool fails for no clear reason. Returns each check, pass or fail, and a note.",

@@ -2,7 +2,7 @@
   "mcpServers": {
     "webular": {
       "command": "bun",
-      "args": ["./src/server.ts"]
+      "args": ["./dist/server.js"]
     }
   }
 }

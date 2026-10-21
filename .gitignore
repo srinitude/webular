@@ -3,6 +3,10 @@ node_modules/
 
 # Build output
 dist/
+# The plugin's bundled MCP server ships in git: mcp.json starts it.
+!plugins/webular/dist/
+plugins/webular/dist/*
+!plugins/webular/dist/server.js
 out/
 /bin/webular
 *.tsbuildinfo

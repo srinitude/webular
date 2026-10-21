@@ -4,7 +4,7 @@
 import { expect, test } from 'bun:test'
 import { Effect } from 'effect'
 
-const SERVER = new URL('../src/server.ts', import.meta.url).pathname
+const SERVER = new URL('../dist/server.js', import.meta.url).pathname
 const requests = [
   {
     jsonrpc: '2.0',

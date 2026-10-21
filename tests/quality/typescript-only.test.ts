@@ -9,7 +9,7 @@ import { ChildProcess, ChildProcessSpawner } from 'effect/process'
 import { ROOT } from '../_support/root.ts'
 
 const JS_FILE = /\.(js|mjs|cjs)$/
-const BUILD_OUTPUT = /^(node_modules|dist|out|coverage|\.deepsec)\//
+const BUILD_OUTPUT = /^((plugins\/[^/]+\/)?dist|node_modules|out|coverage|\.deepsec)\//
 const INLINE_JS = /\b(bun|node)\s+(-e|-p|--eval|--print)\b/
 const LS_FILES = ['ls-files', '--cached', '--others', '--exclude-standard']
 

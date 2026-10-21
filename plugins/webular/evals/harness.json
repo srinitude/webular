@@ -517,6 +517,12 @@
       "grader": "bun test: partial batch result equality"
     },
     {
+      "assertion": "the committed plugin bundle equals a fresh build of the plugin source",
+      "source": "tests/bundle-fresh.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: byte equality"
+    },
+    {
       "assertion": "the research skill says to wait out a connecting server before the tool table",
       "source": "tests/plugin.test.ts",
       "kind": "deterministic",

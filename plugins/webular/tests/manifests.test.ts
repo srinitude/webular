@@ -55,8 +55,8 @@ test('mcp.json and .mcp.json start only the plugin server, from inside the plugi
   Effect.runPromise(
     Effect.all([serverArgs('mcp.json'), serverArgs('.mcp.json')], { concurrency: 2 }).pipe(
       verify(([spec, claude]) => {
-        expect(spec).toEqual([['webular', 'bun', './src/server.ts']])
-        expect(claude).toEqual([['webular', 'bun', `${claudeRoot}/src/server.ts`]])
+        expect(spec).toEqual([['webular', 'bun', './dist/server.js']])
+        expect(claude).toEqual([['webular', 'bun', `${claudeRoot}/dist/server.js`]])
       }),
     ),
   ))
