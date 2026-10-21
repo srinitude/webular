@@ -125,7 +125,7 @@ const topSentences = (data: Evidence) =>
 // The sentences Jev keeps as stating facts that answer the query (answer.sentences),
 // then the summarizer's top ones, led by the sentence Jev picks as the direct answer.
 // Cited sources are those that back one of these top sentences (answer.citation).
-// ponytail: Jev sees only the first 18 sentences; rank more when pages run long.
+// Jev sees the summarizer's best 18 sentences, ranked over the whole page.
 // ponytail: citations are checked against the top sentences, not the Jev lead.
 const prepareSynth = Effect.fn('answer.prepare')(function* (data: Evidence) {
   const text = data.used.map((e) => e.text).join('\n\n')

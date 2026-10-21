@@ -56,6 +56,14 @@ export interface SearchOptions {
   judge?: ((query: string) => Effect.Effect<SearchSource[]>) | undefined
 }
 
+// Deterministic mode (WEBULAR_DETERMINISTIC=1): no settle cutoff, so source
+// timing never changes the hits; each source still stops at SOURCE_TIMEOUT_MS.
+const deterministic = Config.String('WEBULAR_DETERMINISTIC').pipe(
+  Config.withDefault(''),
+  Effect.map((v) => v === '1'),
+  Effect.orDie,
+)
+
 const timedOut = () =>
   Effect.succeed({
     results: [] as Hit[],
@@ -75,8 +83,9 @@ const fanOut = Effect.fn('fanOut')(function* (
   const queries = [query, ...(opts.variants ?? []).slice(0, MAX_VARIANTS)]
   const runSource = opts.runSource ?? one
   const hit = yield* Deferred.make<void>()
-  const settle = { hit, cutoff: Effect.andThen(Deferred.await(hit), Effect.sleep(SETTLE_GRACE_MS)) }
   const uncut = { hit, cutoff: Effect.never }
+  const grace = Effect.andThen(Deferred.await(hit), Effect.sleep(SETTLE_GRACE_MS))
+  const settle = (yield* deterministic) ? uncut : { hit, cutoff: grace }
   const keyword = source === 'web' ? pickSources(query) : [source]
   const query1 = (s: SearchSource) =>
     querySource(s, queries, limit, runSource, s === 'npm' && keyword.includes(s) ? uncut : settle)
@@ -119,10 +128,7 @@ const searchOnce = Effect.fn('searchOnce')(function* (
   return { results: scored.slice(0, limit).map((e) => e.hit), meta }
 })
 
-interface Found {
-  results: Hit[]
-  meta: SearchMeta
-}
+type Found = Effect.Success<ReturnType<typeof searchOnce>>
 type Searched = Found & { source?: FreeSource }
 
 // Nothing found, DuckDuckGo included: the free sources answer and `source`
