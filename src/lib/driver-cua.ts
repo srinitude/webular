@@ -121,7 +121,7 @@ export const throwawayProfile = (command: string) => {
 }
 
 // Windows has no `ps`; its command line comes from the process table.
-export const commandLineArgv = (os: string, pid: number) =>
+export const commandLineArgv = (os: string, pid: number): [string, ...string[]] =>
   os === 'win32'
     ? [
         'powershell',

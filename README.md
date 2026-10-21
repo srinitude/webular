@@ -129,7 +129,7 @@ webular --help
 | `mcp`       | Serves webular's features as an MCP server |
 | `diagram`   | Lists the XState machines that model the CLI flows (src/machines) |
 | `audit`     | Reports whether `deepsec` is there, plus a scan plan (keyless; scans need LLM keys) |
-| `act`       | Drives a real browser: open, snapshot, screenshot, interact (agent-browser) |
+| `act`       | Drives a real browser: open, snapshot, screenshot, interact (agent-browser). With `--goal`, it drives a Cua window (see Browser mode) |
 | `feed`      | Reads an RSS 2.0 or Atom 1.0 feed and lists its items (title, link, date, summary) |
 
 **Global options:** `--json`, `-o/--output <file>`, `--timeout <ms>` (per request attempt), `-h/--help`, `-V/--version`.
@@ -159,6 +159,16 @@ webular feed https://hnrss.org/frontpage --limit 5
 webular map https://example.com
 webular research "web scraping in 2026" --depth 3 -o report.md
 ```
+
+### Browser mode (Cua)
+
+Cua browser mode keeps your own browser safe. Webular drives only a throwaway window, never your everyday browser. It covers `scrape --render cua` and `act --goal`.
+
+1. Let cua-driver start the window itself, with `browser_prepare {allow_launch:true, profile:{mode:"isolated_new"}}`. A Chrome you start yourself with `--user-data-dir` is refused with `browser_consent_required`.
+2. Name that window in `WEBULAR_CUA_WINDOW` as `<pid>:<window_id>`.
+3. Run `webular scrape <url> --render cua`, or `webular act --goal "<plain goal>"`.
+
+Webular also refuses any window whose profile is not a throwaway one, for both `--render cua` and `act --goal`. Your default browser profile is never driven.
 
 ## Architecture
 

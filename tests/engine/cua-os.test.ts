@@ -9,7 +9,7 @@ const quoted = (dir: string) => `${WIN_CHROME} --user-data-dir="${dir}" --no-fir
 
 describe('the command line is read per OS', () => {
   test('darwin and linux use ps, win32 uses PowerShell', () => {
-    const ps = ['ps', '-ww', '-o', 'command=', '-p', '42']
+    const ps: [string, ...string[]] = ['ps', '-ww', '-o', 'command=', '-p', '42']
     expect(commandLineArgv('darwin', 42)).toEqual(ps)
     expect(commandLineArgv('linux', 42)).toEqual(ps)
     expect(commandLineArgv('win32', 42)).toEqual([

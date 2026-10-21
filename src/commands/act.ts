@@ -8,6 +8,7 @@ import { runWorkflow } from '../cli/run.ts'
 import { emitOpts, parseFlags } from '../core/args.ts'
 import { CliError, runMain } from '../core/effect.ts'
 import { emit } from '../core/output.ts'
+import { requireSafeActWindow } from '../lib/cua-act-guard.ts'
 import { planGoal } from '../lib/cua-goal.ts'
 import { runGoal } from '../lib/cua-ground.ts'
 import { decisionsFromEnv } from '../lib/cua-jev.ts'
@@ -30,10 +31,14 @@ const actGoal = Effect.fnUntraced(function* (goal: string) {
   const call = (tool: string, args: Record<string, unknown>) => cuaCall(tool, { ...args, session })
   const decisions = yield* decisionsFromEnv
   return yield* Effect.mapError(
-    Effect.acquireUseRelease(
-      cuaCall('start_session', { session }),
-      () => runGoal(call, target, goal, intents, decisions),
-      () => Effect.ignore(cuaCall('end_session', { session })),
+    Effect.andThen(
+      // Refuse a browser window on a non-throwaway profile before any session opens.
+      requireSafeActWindow(target.pid),
+      Effect.acquireUseRelease(
+        cuaCall('start_session', { session }),
+        () => runGoal(call, target, goal, intents, decisions),
+        () => Effect.ignore(cuaCall('end_session', { session })),
+      ),
     ),
     (err) => new CliError({ message: `act --goal: ${err.message}`, exitCode: EXIT.failure }),
   )
