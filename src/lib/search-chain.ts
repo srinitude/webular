@@ -127,9 +127,10 @@ const searchOnce = Effect.fn('searchOnce')(function* (
   const chosen = source === 'web' ? pickSources(query) : [source]
   const hit = yield* Deferred.make<void>()
   const settle = { hit, cutoff: Effect.andThen(Deferred.await(hit), Effect.sleep(SETTLE_GRACE_MS)) }
+  const uncut = { hit, cutoff: Effect.never } // npm: official homepages; only its own cap stops it
   const ran = yield* Effect.forEach(
     chosen,
-    (s) => querySource(s, queries, limit, runSource, settle),
+    (s) => querySource(s, queries, limit, runSource, s === 'npm' ? uncut : settle),
     { concurrency: chosen.length },
   )
   if (source === 'web' && !ran.some((r) => r.status === 'ok'))
