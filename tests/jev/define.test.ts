@@ -45,6 +45,7 @@ const DECLARED: ReadonlyArray<Declared> = [
   decisions.answerHits,
   decisions.answerSources,
   decisions.answerSentence,
+  decisions.answerFollowers,
   decisions.answerCitation,
   decisions.extractField,
   decisions.extractRecover,

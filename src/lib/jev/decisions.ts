@@ -5,6 +5,7 @@ import { actDecision } from './decisions/act.ts'
 import { answerSentence, answerSources } from './decisions/answer.ts'
 import { answerCitation } from './decisions/answer-citation.ts'
 import { answerHits } from './decisions/answer-evidence.ts'
+import { answerFollowers } from './decisions/answer-sentences.ts'
 import { suggestDecision } from './decisions/cli-suggest.ts'
 import { linkDecision, linkWorthFollowing } from './decisions/crawl.ts'
 import { fieldDecision, recoverDecision } from './decisions/extract.ts'
@@ -39,6 +40,7 @@ export const decisions = {
   answerHits,
   answerSources,
   answerSentence,
+  answerFollowers,
   answerCitation,
   extractField: fieldDecision,
   extractRecover: recoverDecision,

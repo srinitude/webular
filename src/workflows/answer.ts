@@ -7,6 +7,7 @@ import { Effect } from 'effect'
 import { z } from 'zod'
 import { answerSentences } from '../lib/jev/decisions/answer.ts'
 import { citedSources } from '../lib/jev/decisions/answer-citation.ts'
+import { answerCandidates } from '../lib/jev/decisions/answer-sentences.ts'
 import { decisions } from '../lib/jev/decisions.ts'
 import { onJevRuntime } from '../lib/jev/run.ts'
 import { decisionStep } from '../lib/jev/steps.ts'
@@ -100,16 +101,28 @@ const searchStep = createStep({
 const topSentences = (text: string, data: Pick<Evidence, 'query' | 'sentences' | 'entity'>) =>
   summarizeText(text, data.sentences, { query: data.query, entity: data.entity }).sentences
 
-// The summarizer's top sentences, led by the sentence Jev picks as the direct answer.
-// Cited sources are those that back one of the summarizer's top sentences (answer.citation).
+// The sentences Jev keeps as stating facts that answer the query (answer.sentences),
+// then the summarizer's top ones, led by the sentence Jev picks as the direct answer.
+// Cited sources are those that back one of these top sentences (answer.citation).
 // ponytail: Jev sees only the first 18 sentences; rank more when pages run long.
-// ponytail: citations are checked against the summarizer's top sentences, not the Jev lead.
+// ponytail: citations are checked against the top sentences, not the Jev lead.
 const prepareSynth = Effect.fn('answer.prepare')(function* (data: Evidence) {
   const text = data.used.map((e) => e.text).join('\n\n')
-  const cited = yield* citedSources(topSentences(text, data), data.used, (c) =>
+  const candidates = answerCandidates(data.query, text)
+  const kept =
+    candidates.length === 0
+      ? []
+      : yield* onJevRuntime(decisions.answerFollowers, { question: data.query, candidates })
+  const top = [
+    ...new Set([
+      ...kept.map((i) => candidates[i] ?? ''),
+      ...topSentences(text, data),
+    ]),
+  ].slice(0, data.sentences)
+  const cited = yield* citedSources(top, data.used, (c) =>
     onJevRuntime(decisions.answerCitation, c),
   )
-  return { ...data, text, cited }
+  return { ...data, text, top, cited }
 })
 // The direct answer Jev picked always opens the answer, never repeated.
 export const leadFirst = (top: ReadonlyArray<string>, lead: string | undefined, n: number) =>
@@ -121,9 +134,7 @@ const synthStep = decisionStep({
   decide: decisions.answerSentence,
   prepare: (data: Evidence) => stepRuntime.runPromise(prepareSynth(data)),
   pick: ({ query, text }) => (text ? { question: query, text } : undefined),
-  output: (data, lead) => {
-    const { query, text, sentences, cited, errors } = data
-    const top = topSentences(text, data)
+  output: ({ query, text, sentences, top, cited, errors }, lead) => {
     const first = lead === undefined ? undefined : answerSentences(text)[lead]
     return {
       query,
