@@ -66,14 +66,20 @@ export const manifestMismatches = (dir: string) =>
     return { manifest, mismatches: entries.filter((_, i) => flags[i]).map(([p]) => p) }
   })
 
-export const loadTaskFile = (dir: string, name: string) =>
+// Refuses unless name is in manifest.json and every listed hash matches.
+const requireManifest = (dir: string, name: string) =>
   Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem
     const { manifest, mismatches } = yield* manifestMismatches(dir)
     if (!(name in manifest.files)) return yield* refuse(`${name}: not in manifest.json`)
     if (mismatches.length > 0) {
       return yield* refuse(`sha256 differs from manifest.json: ${mismatches.join(', ')}`)
     }
+  })
+
+export const loadTaskFile = (dir: string, name: string) =>
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem
+    yield* requireManifest(dir, name)
     const file = yield* fs.readFileString(`${dir}/${name}`).pipe(
       Effect.flatMap(Schema.decodeUnknownEffect(Schema.fromJsonString(TaskFile))),
       Effect.mapError((e) => new BenchError({ message: `${name}: ${String(e)}` })),
@@ -93,11 +99,7 @@ const decodeSet = Schema.decodeUnknownEffect(SetLines)
 export const loadSetFile = (dir: string, name: string) =>
   Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem
-    const { manifest, mismatches } = yield* manifestMismatches(dir)
-    if (!(name in manifest.files)) return yield* refuse(`${name}: not in manifest.json`)
-    if (mismatches.length > 0) {
-      return yield* refuse(`sha256 differs from manifest.json: ${mismatches.join(', ')}`)
-    }
+    yield* requireManifest(dir, name)
     const [head = '', ...lines] = (yield* fs.readFileString(`${dir}/${name}`)).trimEnd().split('\n')
     const [{ canary }, tasks] = yield* decodeSet([head, lines]).pipe(
       Effect.mapError((e) => new BenchError({ message: `${name}: ${String(e)}` })),
