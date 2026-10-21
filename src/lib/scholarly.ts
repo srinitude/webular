@@ -2,7 +2,7 @@
 // (WEBULAR_MAILTO joins their polite pool).
 import { Config, Effect, Schema } from 'effect'
 import { fetchText } from '../core/http.ts'
-import { sourceUrl } from './sources/polite.ts'
+import { rateLimit, sourceUrl, unlessLimited } from './sources/polite.ts'
 import { plain, SOURCE_TIMEOUT_MS } from './sources-search.ts'
 
 const Crossref = Schema.fromJsonString(
@@ -46,10 +46,11 @@ const getJson = Effect.fn('scholarlyGet')(function* <A>(
   schema: Schema.Codec<A, string>,
   base: string,
   params: Record<string, string>,
+  onResponse: (res: Response) => void = () => {},
 ) {
   const mailto = yield* Config.String('WEBULAR_MAILTO').pipe(Config.withDefault(''))
   const url = yield* sourceUrl(base, mailto ? { ...params, mailto } : params)
-  const body = yield* fetchText(url, { timeoutMs: SOURCE_TIMEOUT_MS })
+  const body = yield* fetchText(url, { timeoutMs: SOURCE_TIMEOUT_MS, onResponse })
   return yield* Schema.decodeUnknownEffect(schema)(body)
 })
 
@@ -64,11 +65,16 @@ export const crossref = (query: string, limit: number) =>
     ),
   )
 
+const OPENALEX = 'https://api.openalex.org/works'
+
+// Epoch ms before which OpenAlex is skipped: a 429 blocks it for its
+// retry-after, else a minute, so a spent pool costs no request.
+export const OpenAlexLimit = rateLimit('OpenAlex')
+
 export const openalex = (query: string, limit: number) =>
-  getJson(OpenAlex, 'https://api.openalex.org/works', {
-    search: query,
-    'per-page': String(limit),
-  }).pipe(
+  unlessLimited(OpenAlexLimit, OPENALEX, (onResponse) =>
+    getJson(OpenAlex, OPENALEX, { search: query, 'per-page': String(limit) }, onResponse),
+  ).pipe(
     Effect.map(({ results }) =>
       results.map((w) => ({
         title: w.display_name ?? '',
