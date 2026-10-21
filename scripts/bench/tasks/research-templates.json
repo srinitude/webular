@@ -1,0 +1,215 @@
+[
+  {
+    "sub": "multihop",
+    "domain": "sports",
+    "lang": "ko",
+    "hops": 2,
+    "fresh": false,
+    "take": 8,
+    "body": "?item wdt:P106 wd:Q937857 ; wdt:P27 wd:Q884 ; wdt:P19 ?b . ?b wdt:P131 ?a .",
+    "q": "축구 선수 {l}이(가) 태어난 곳은 어느 행정 구역에 속합니까?"
+  },
+  {
+    "sub": "multihop",
+    "domain": "sports",
+    "lang": "zh",
+    "hops": 2,
+    "fresh": false,
+    "take": 8,
+    "body": "?item wdt:P106 wd:Q937857 ; wdt:P27 wd:Q148 ; wdt:P19 ?b . ?b wdt:P131 ?a .",
+    "q": "足球运动员{l}的出生地属于哪个行政区？"
+  },
+  {
+    "sub": "multihop",
+    "domain": "science",
+    "lang": "en",
+    "hops": 2,
+    "fresh": false,
+    "take": 15,
+    "body": "?item wdt:P31 wd:Q3863 ; wdt:P61 ?d . ?d wdt:P31 wd:Q5 ; wdt:P27 ?a .",
+    "q": "Which country was the discoverer of the minor planet {l} a citizen of?"
+  },
+  {
+    "sub": "multihop",
+    "domain": "health",
+    "lang": "en",
+    "hops": 2,
+    "fresh": false,
+    "take": 10,
+    "body": "?item wdt:P31 wd:Q12140 ; wdt:P176 ?m . ?m wdt:P17 ?a .",
+    "q": "In which country is the manufacturer of the medication {l} based?"
+  },
+  {
+    "sub": "multihop",
+    "domain": "health",
+    "lang": "de",
+    "hops": 2,
+    "fresh": false,
+    "take": 8,
+    "body": "?item wdt:P31 wd:Q12140 ; wdt:P176 ?m . ?m wdt:P17 ?a .",
+    "q": "In welchem Land hat der Hersteller des Medikaments {l} seinen Sitz?"
+  },
+  {
+    "sub": "multihop",
+    "domain": "health",
+    "lang": "es",
+    "hops": 2,
+    "fresh": false,
+    "take": 8,
+    "body": "?item wdt:P31 wd:Q12140 ; wdt:P176 ?m . ?m wdt:P17 ?a .",
+    "q": "¿En qué país tiene su sede el fabricante del medicamento {l}?"
+  },
+  {
+    "sub": "multihop",
+    "domain": "health",
+    "lang": "fr",
+    "hops": 2,
+    "fresh": false,
+    "take": 8,
+    "body": "?item wdt:P31 wd:Q12140 ; wdt:P176 ?m . ?m wdt:P17 ?a .",
+    "q": "Dans quel pays se trouve le fabricant du médicament {l} ?"
+  },
+  {
+    "sub": "multihop",
+    "domain": "law",
+    "lang": "en",
+    "hops": 2,
+    "fresh": false,
+    "take": 15,
+    "body": "?item wdt:P31 wd:Q613142 ; wdt:P159 ?c . ?c wdt:P17 ?a .",
+    "q": "In which country is the city where the law firm {l} has its headquarters?"
+  },
+  {
+    "sub": "multihop",
+    "domain": "finance",
+    "lang": "en",
+    "hops": 2,
+    "fresh": false,
+    "take": 15,
+    "body": "?item wdt:P31 wd:Q891723 ; wdt:P414 ?x . ?x wdt:P131 ?a .",
+    "q": "In which city is the stock exchange that lists {l} located?"
+  },
+  {
+    "sub": "multihop",
+    "domain": "culture",
+    "lang": "zh",
+    "hops": 2,
+    "fresh": false,
+    "take": 8,
+    "body": "?item wdt:P31 wd:Q11424 ; wdt:P495 wd:Q148 ; wdt:P57 ?d . ?d wdt:P19 ?a .",
+    "q": "电影《{l}》的导演出生在哪里？"
+  },
+  {
+    "sub": "multihop",
+    "domain": "culture",
+    "lang": "ko",
+    "hops": 2,
+    "fresh": false,
+    "take": 8,
+    "body": "?item wdt:P31 wd:Q11424 ; wdt:P495 wd:Q884 ; wdt:P57 ?d . ?d wdt:P19 ?a .",
+    "q": "영화 「{l}」의 감독은 어디에서 태어났습니까?"
+  },
+  {
+    "sub": "multihop",
+    "domain": "culture",
+    "lang": "ja",
+    "hops": 2,
+    "fresh": false,
+    "take": 8,
+    "body": "?item wdt:P31 wd:Q11424 ; wdt:P495 wd:Q17 ; wdt:P57 ?d . ?d wdt:P19 ?a .",
+    "q": "映画『{l}』の監督はどこで生まれましたか？"
+  },
+  {
+    "sub": "multihop",
+    "domain": "sports",
+    "lang": "en",
+    "hops": 1,
+    "fresh": true,
+    "take": 22,
+    "body": "?item wdt:P106 wd:Q937857 ; p:P54 ?s . ?s ps:P54 ?a ; pq:P580 ?t . FILTER(?t >= \"2026-07-23T00:00:00Z\"^^xsd:dateTime && ?t <= \"2026-10-21T23:59:59Z\"^^xsd:dateTime)",
+    "q": "Which club did the footballer {l} join on {d}?"
+  },
+  {
+    "sub": "multihop",
+    "domain": "local-government",
+    "lang": "en",
+    "hops": 1,
+    "fresh": true,
+    "take": 16,
+    "body": "?item p:P6 ?s . ?s ps:P6 ?a ; pq:P580 ?t . FILTER(?t >= \"2026-07-23T00:00:00Z\"^^xsd:dateTime && ?t <= \"2026-10-21T23:59:59Z\"^^xsd:dateTime)",
+    "q": "Who became head of government of {l} on {d}?"
+  },
+  {
+    "sub": "multihop",
+    "domain": "software",
+    "lang": "en",
+    "hops": 1,
+    "fresh": true,
+    "take": 15,
+    "body": "?item p:P348 ?s . ?s ps:P348 ?a ; pq:P577 ?t . FILTER(?t >= \"2026-07-23T00:00:00Z\"^^xsd:dateTime && ?t <= \"2026-10-21T23:59:59Z\"^^xsd:dateTime)",
+    "q": "Which version of {l} was published on {d}?"
+  },
+  {
+    "sub": "wide",
+    "domain": "science",
+    "lang": "en",
+    "hops": 1,
+    "fresh": false,
+    "take": 10,
+    "body": "{ SELECT ?item WHERE { ?e wdt:P31 wd:Q11344 ; wdt:P61 ?item } GROUP BY ?item HAVING(COUNT(?e) >= 2) } ?a wdt:P31 wd:Q11344 ; wdt:P61 ?item .",
+    "q": "List every chemical element whose discovery is credited to {l}, with a source URL for each."
+  },
+  {
+    "sub": "wide",
+    "domain": "culture",
+    "lang": "en",
+    "hops": 1,
+    "fresh": false,
+    "take": 10,
+    "body": "{ SELECT ?item WHERE { ?f wdt:P31 wd:Q11424 ; wdt:P57 ?item . ?item wdt:P27 wd:Q29 } GROUP BY ?item HAVING(COUNT(?f) >= 5 && COUNT(?f) <= 15) LIMIT 30 } ?a wdt:P31 wd:Q11424 ; wdt:P57 ?item .",
+    "q": "List every feature film directed by {l}, with a source URL for each."
+  },
+  {
+    "sub": "wide",
+    "domain": "local-government",
+    "lang": "en",
+    "hops": 1,
+    "fresh": false,
+    "take": 10,
+    "body": "{ SELECT ?item WHERE { ?m wdt:P31 wd:Q262166 ; wdt:P131 ?item } GROUP BY ?item HAVING(COUNT(?m) >= 5 && COUNT(?m) <= 20) LIMIT 30 } ?a wdt:P31 wd:Q262166 ; wdt:P131 ?item .",
+    "q": "List every municipality that lies directly in {l}, with a source URL for each."
+  },
+  {
+    "sub": "report",
+    "domain": "software",
+    "lang": "en",
+    "hops": 2,
+    "fresh": false,
+    "take": 10,
+    "body": "?item wdt:P31 wd:Q341 ; wdt:P178 ?a ; wdt:P275 ?b ; wdt:P277 ?c ; wdt:P856 ?site .",
+    "q": "Write a cited report on the software {l}: who builds it, its license, and its main programming language.",
+    "rubric": ["Names the developer", "Names the license", "Names a programming language"]
+  },
+  {
+    "sub": "report",
+    "domain": "finance",
+    "lang": "en",
+    "hops": 2,
+    "fresh": false,
+    "take": 10,
+    "body": "?item wdt:P31 wd:Q891723 ; wdt:P159 ?a ; wdt:P414 ?b ; wdt:P452 ?c ; wdt:P856 ?site .",
+    "q": "Write a cited report on the public company {l}: where it is based, where it trades, and its industry.",
+    "rubric": ["Names the headquarters location", "Names a stock exchange", "Names an industry"]
+  },
+  {
+    "sub": "report",
+    "domain": "local-government",
+    "lang": "en",
+    "hops": 2,
+    "fresh": false,
+    "take": 10,
+    "body": "?item wdt:P31 wd:Q515 ; wdt:P6 ?a ; wdt:P17 ?b ; wdt:P131 ?c ; wdt:P856 ?site .",
+    "q": "Write a cited report on how the city of {l} is governed: its leader, its country, and its parent region.",
+    "rubric": ["Names the head of government", "Names the country", "Names the parent region"]
+  }
+]

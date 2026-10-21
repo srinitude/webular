@@ -12,6 +12,8 @@
       "!!.claude/worktrees",
       "!!.claude/*.json",
       "!!bench/recordings",
+      "!!bench/fixtures/pages",
+      "!!bench/fixtures/sites",
       "!!bench/results",
       "!!tests/jev/replay"
     ]

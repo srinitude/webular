@@ -6,9 +6,26 @@ import { HttpClient } from 'effect/http'
 import { answerWorkflow } from '../../../src/workflows/answer.ts'
 import { scrapeWorkflow } from '../../../src/workflows/scrape.ts'
 import { searchWorkflow } from '../../../src/workflows/search.ts'
+import { apify } from './apify.ts'
+import { awaitingApproval } from './awaiting-approval.ts'
+import { baselines } from './baselines.ts'
+import { brightdata } from './brightdata.ts'
+import { browserbase } from './browserbase.ts'
+import { contextdev } from './contextdev.ts'
+import { gemini } from './gemini.ts'
+import { jina } from './jina.ts'
 import { readKey } from './keys.ts'
+import { linkup } from './linkup.ts'
 import type { Provider } from './model.ts'
-import { bytes, exa, fail, firecrawl, perplexity, poster, tavily } from './peers.ts'
+import { nimble } from './nimble.ts'
+import { parallel } from './parallel.ts'
+import { bytes, exa, fail, firecrawl, type Post, perplexity, poster, tavily } from './peers.ts'
+import { scrapegraph } from './scrapegraph.ts'
+import { serpapi } from './serpapi.ts'
+import { serper } from './serper.ts'
+import { tinyfish } from './tinyfish.ts'
+import { valyu } from './valyu.ts'
+import { youcom } from './youcom.ts'
 
 interface Flow {
   createRun(): Promise<{
@@ -74,15 +91,17 @@ export const webular: Provider = {
   },
 }
 
-type Make = (post: ReturnType<typeof poster>, key: string) => Provider['jobs']
+type Make = (post: Post, key: string, client: HttpClient.HttpClient) => Provider['jobs']
 
-const peer = (id: string, env: string, item: string, make: Make) =>
+// `keyless` peers (Jina Reader) still run with no key, on their free limits.
+const peer = (id: string, env: string, item: string, make: Make, keyless = false) =>
   Effect.gen(function* () {
     const client = yield* HttpClient.HttpClient
     const key = yield* readKey(env, item)
     const base = { id, local: false, keyNames: [item] }
-    if (!key) return { ...base, jobs: {}, skip: `no key (env ${env} or Keychain ${item})` }
-    return { ...base, jobs: make(poster(client), key) }
+    if (!key && !keyless)
+      return { ...base, jobs: {}, skip: `no key (env ${env} or Keychain ${item})` }
+    return { ...base, jobs: make(poster(client), key ?? '', client) }
   })
 
 export class Peers extends Context.Service<Peers, readonly Provider[]>()('bench/Peers') {}
@@ -95,6 +114,20 @@ export const PeersLive = Layer.effect(
     peer('exa', 'EXA_API_KEY', 'exa-api-key', exa),
     peer('tavily', 'TAVILY_API_KEY', 'tavily-api-key', tavily),
     peer('perplexity', 'PERPLEXITY_API_KEY', 'perplexity-api-key', perplexity),
-    peer('parallel', 'PARALLEL_API_KEY', 'parallel-api-key', () => ({})),
-  ]),
+    peer('parallel', 'PARALLEL_API_KEY', 'parallel-api-key', parallel),
+    peer('youcom', 'YOUCOM_API_KEY', 'youcom-api-key', youcom),
+    peer('linkup', 'LINKUP_API_KEY', 'linkup-api-key', linkup),
+    peer('valyu', 'VALYU_API_KEY', 'valyu-api-key', valyu),
+    peer('jina', 'JINA_API_KEY', 'jina-api-key', jina, true),
+    peer('tinyfish', 'TINYFISH_API_KEY', 'tinyfish-api-key', tinyfish),
+    peer('browserbase', 'BROWSERBASE_API_KEY', 'browserbase-api-key', browserbase),
+    peer('gemini', 'GEMINI_API_KEY', 'gemini-api-key', gemini),
+    peer('serpapi', 'SERPAPI_API_KEY', 'serpapi-api-key', serpapi),
+    peer('serper', 'SERPER_API_KEY', 'serper-api-key', serper),
+    peer('brightdata', 'BRIGHTDATA_API_KEY', 'brightdata-api-key', brightdata),
+    peer('scrapegraph', 'SCRAPEGRAPH_API_KEY', 'scrapegraph-api-key', scrapegraph),
+    peer('apify', 'APIFY_TOKEN', 'apify-api-key', apify),
+    peer('nimble', 'NIMBLE_API_KEY', 'nimble-api-key', nimble),
+    peer('contextdev', 'CONTEXTDEV_API_KEY', 'contextdev-api-key', contextdev),
+  ]).pipe(Effect.zipWith(baselines, (peers, local) => [...peers, ...local, ...awaitingApproval])),
 )
