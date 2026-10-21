@@ -61,7 +61,7 @@ export const pdfText = Effect.fnUntraced(function* (bytes: Uint8Array) {
   const { extractText, getDocumentProxy } = yield* attempt(() => import('unpdf'))
   // The pdf.js proxy holds a worker and page buffers: free it on success and failure.
   return yield* Effect.acquireRelease(
-    attempt(() => getDocumentProxy(bytes)),
+    attempt(() => getDocumentProxy(bytes.slice())), // pdf.js detaches its input: pass a copy
     (pdf) =>
       Effect.ignore(attempt(() => (pdf as unknown as { destroy(): Promise<void> }).destroy())),
   ).pipe(

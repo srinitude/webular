@@ -3,8 +3,8 @@
 import { describe, expect, test } from 'bun:test'
 import { join } from 'node:path'
 import { Effect, FileSystem } from 'effect'
-import { parseDocument } from '../../src/lib/parse.ts'
-import { eff, failMsg, tmpDir } from '../_support/run.ts'
+import { parseDocument, pdfText } from '../../src/lib/parse.ts'
+import { eff, failMsg, io, tmpDir } from '../_support/run.ts'
 
 describe('parseDocument — binary guards and markdown-true output', () => {
   test(
@@ -90,6 +90,23 @@ describe('parseDocument — binary guards and markdown-true output', () => {
         yield* (yield* FileSystem.FileSystem).writeFileString(file, 'hello world')
         const { markdown } = yield* parseDocument(file)
         expect(markdown).toBe('hello world')
+      }),
+    ),
+  )
+})
+
+describe('pdfText — caller buffer', () => {
+  test(
+    'reads the same bytes twice (the caller buffer is not detached)',
+    eff(
+      Effect.gen(function* () {
+        const bytes = new Uint8Array(
+          yield* io(() => Bun.file('tests/fixtures/driver/attention.pdf').arrayBuffer()),
+        )
+        const first = yield* pdfText(bytes)
+        expect(bytes.byteLength).toBeGreaterThan(0)
+        expect(yield* pdfText(bytes)).toBe(first)
+        expect(first.length).toBeGreaterThan(0)
       }),
     ),
   )

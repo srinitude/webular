@@ -4,11 +4,12 @@
 // the official-domain signal. Scraped DuckDuckGo HTML runs only when no free
 // API had hits; when that finds nothing too, the free sources answer.
 // Crossref and OpenAlex live in scholarly.ts.
-import { Cause, Clock, Effect } from 'effect'
+import { Cause, Clock, Deferred, Effect } from 'effect'
 import { HttpStatusError } from '../core/http-body.ts'
 import { crossref, npm, openalex } from './scholarly.ts'
 import { scoreHits, WEAK_SCORE, webSearch } from './search.ts'
 import { secondHop } from './search-hop.ts'
+import { pickSources } from './search-intent.ts'
 import { MAX_VARIANTS } from './search-source-names.ts'
 import { type FreeSource, freeSourceFallback } from './sources/registry.ts'
 import { type SearchSource, SOURCE_TIMEOUT_MS, sourceSearch } from './sources-search.ts'
@@ -42,22 +43,6 @@ const one: SourceRunner = (source, query, limit) => {
 // A caller can pass a shorter deadlineMs (answer mode does).
 const SEARCH_DEADLINE_MS = 3 * SOURCE_TIMEOUT_MS
 
-// Free APIs per query intent; scraped engines (web = DuckDuckGo HTML) are the
-// last fallback only, since from this IP they mostly answer 403/429/captcha.
-// ponytail: keyword intent; swap in a Jev classifier if intent misses matter.
-// "survey" stays out: land surveys (Everest 2020) are factual, not scholarly.
-const SCHOLARLY =
-  /\b(paper|papers|study|studies|research|journal|doi|arxiv|preprint|theorem|citations?)\b/i
-// Navigational software queries also ask npm, whose package homepages are
-// official sites the other free APIs never return.
-const SOFTWARE = /\b(official|website|homepage|docs?|documentation|library|framework|github|npm)\b/i
-export const pickSources = (query: string): SearchSource[] =>
-  SCHOLARLY.test(query)
-    ? ['openalex', 'arxiv', 'crossref', 'wikipedia']
-    : SOFTWARE.test(query)
-      ? ['wikipedia', 'hackernews', 'openalex', 'npm']
-      : ['wikipedia', 'hackernews', 'openalex']
-
 type SourceStatus = 'ok' | 'no-results' | 'timeout' | `blocked:${number}` | 'error'
 interface SearchMeta {
   sources: Record<string, { status: SourceStatus; ms: number }>
@@ -77,20 +62,30 @@ const failed = (cause: unknown): Outcome => ({
 const found = (hits: Hit[]): Outcome => ({ hits, status: hits.length ? 'ok' : 'no-results' })
 const rank = (s: SourceStatus) => (s === 'ok' ? 0 : s === 'no-results' ? 1 : 2)
 
+// Once any source has hits, the rest get SETTLE_GRACE_MS more, then count as
+// timed out, so a stalled API (OpenAlex) costs the grace, not SOURCE_TIMEOUT_MS.
+// Measured: the useful sources answer within ~500 ms of the first hit.
+export const SETTLE_GRACE_MS = 750
+
 // One source, every query variant at once; the best variant status wins.
+// `hit` fires on the first variant with hits; `cutoff` ends the stragglers.
 const querySource = Effect.fn('querySource')(function* (
   source: SearchSource,
   queries: ReadonlyArray<string>,
   limit: number,
   runSource: SourceRunner,
+  settle: { hit: Deferred.Deferred<void>; cutoff: Effect.Effect<void> },
 ) {
   const start = yield* Clock.currentTimeMillis
+  const cut = Effect.as(settle.cutoff, { status: 'timeout', hits: [] } as Outcome)
   const outcomes = yield* Effect.forEach(
     queries,
     (q) =>
       runSource(source, q, limit).pipe(
         Effect.timeout(SOURCE_TIMEOUT_MS),
         Effect.match({ onFailure: failed, onSuccess: found }),
+        Effect.tap((o) => (o.hits.length ? Deferred.succeed(settle.hit, undefined) : Effect.void)),
+        Effect.raceFirst(cut),
       ),
     { concurrency: MAX_VARIANTS + 1 },
   )
@@ -130,11 +125,15 @@ const searchOnce = Effect.fn('searchOnce')(function* (
   const queries = [query, ...(opts.variants ?? []).slice(0, MAX_VARIANTS)]
   const runSource = opts.runSource ?? one
   const chosen = source === 'web' ? pickSources(query) : [source]
-  const ran = yield* Effect.forEach(chosen, (s) => querySource(s, queries, limit, runSource), {
-    concurrency: chosen.length,
-  })
+  const hit = yield* Deferred.make<void>()
+  const settle = { hit, cutoff: Effect.andThen(Deferred.await(hit), Effect.sleep(SETTLE_GRACE_MS)) }
+  const ran = yield* Effect.forEach(
+    chosen,
+    (s) => querySource(s, queries, limit, runSource, settle),
+    { concurrency: chosen.length },
+  )
   if (source === 'web' && !ran.some((r) => r.status === 'ok'))
-    ran.push(yield* querySource('web', queries, limit, runSource))
+    ran.push(yield* querySource('web', queries, limit, runSource, settle))
   const scored = scoreHits(
     [...ran.flatMap((r) => r.lists), ...(opts.local ? [opts.local] : [])],
     query,
@@ -194,3 +193,5 @@ export const searchEffect = Effect.fn('search')(function* (
     Effect.flatMap(free),
   )
 })
+
+export { pickSources }

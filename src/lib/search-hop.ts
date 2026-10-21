@@ -69,7 +69,11 @@ export const secondHop = Effect.fn('secondHop')(function* <M extends { weak: boo
   // An entity page has a short title ending in its name ("Werner Heisenberg").
   const named = (h: Hit) =>
     h.title.split(/\s+/).length <= 4 && h.title.toLowerCase().endsWith(entity?.toLowerCase() ?? '')
-  if (!entity || first.results.slice(0, HOP_TOP).some(named)) return first
+  if (!entity) return first
+  // The entity page is already near the top: lead with it, since the answer
+  // step takes the lead hit's title as the entity of a nameless question.
+  const here = first.results.slice(0, HOP_TOP).find(named)
+  if (here) return { ...first, results: [here, ...first.results.filter((h) => h !== here)] }
   const page = yield* search(entity, HOP_PAGE_LIMIT)
   const name = page.results.find(named)?.title ?? entity
   // A bridge entity is not in the question, so its page is the fact source.
