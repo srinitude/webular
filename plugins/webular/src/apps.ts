@@ -2,6 +2,7 @@
 // `mise run plugin:ui` into one self-contained HTML file, and the tools whose
 // results each renders. Hosts without MCP Apps ignore the link and read the
 // same result as text.
+import { existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
 export const SESSION_VIEW = 'ui://webular/session'
@@ -10,7 +11,7 @@ export const MONITOR_VIEW = 'ui://webular/monitor'
 
 const built = (file: string) => fileURLToPath(new URL(`../dist/ui/${file}`, import.meta.url))
 
-export const appResources = {
+const allResources = {
   [SESSION_VIEW]: {
     name: 'webular session',
     description:
@@ -29,6 +30,12 @@ export const appResources = {
     htmlPath: built('monitor.html'),
   },
 }
+
+// A checkout that never ran `mise run plugin:ui` has no built views. The server
+// still starts and serves text results, so only built views are registered.
+export const appResources = Object.fromEntries(
+  Object.entries(allResources).filter(([, view]) => existsSync(view.htmlPath)),
+)
 
 const links: Record<string, string> = {
   research: SESSION_VIEW,
