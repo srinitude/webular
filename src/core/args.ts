@@ -2,7 +2,7 @@
 // bounds-checked flag accessors shared by every command.
 import { parseArgs } from 'node:util'
 import { Effect } from 'effect'
-import { COMMANDS } from '../cli/commands.ts'
+import { ARGUMENTS, COMMANDS, EXAMPLES } from '../cli/commands.ts'
 import { EXIT } from '../cli/exit-codes.ts'
 import { GLOBAL_OPTIONS } from '../cli/help.ts'
 import { distance } from '../cli/style.ts'
@@ -63,8 +63,14 @@ const didYouMean = (unknown: string, known: string[]): string => {
 
 const usageFor = (cmd: string, own: string[]): string => {
   const desc = (COMMANDS as Record<string, string>)[cmd] ?? ''
-  const head = [`webular ${cmd} — ${desc}`, '', 'USAGE', `  webular ${cmd} [options]`, '']
-  return [...head, 'OPTIONS', ...own.map((name) => `  --${name}`), ...GLOBAL_OPTIONS].join('\n')
+  const main = (ARGUMENTS as Record<string, string>)[cmd]
+  const usage = `  webular ${cmd}${main ? ` ${main}` : ''} [options]`
+  const head = [`webular ${cmd} — ${desc}`, '', 'USAGE', usage, '']
+  const example = (EXAMPLES as Record<string, string>)[cmd]
+  const tail = example ? ['', 'EXAMPLE', `  ${example}`] : []
+  return [...head, 'OPTIONS', ...own.map((name) => `  --${name}`), ...GLOBAL_OPTIONS, ...tail].join(
+    '\n',
+  )
 }
 
 // --help prints usage on stdout and ends with exit 0 (an empty CliError
@@ -83,7 +89,7 @@ function checkFlags(
   const unknown = Object.keys(values).find((name) => !(name in known))
   if (unknown === undefined) return Effect.void
   const hint = didYouMean(unknown, Object.keys(known))
-  const message = `${cmd}: unknown option '--${unknown}'.${hint} Run 'webular ${cmd} --help' for usage.`
+  const message = `${cmd}: unknown option '--${unknown}'.${hint} Run 'webular ${cmd} --help' to see how to use it.`
   return Effect.fail(new CliError({ message, exitCode: 2 }))
 }
 

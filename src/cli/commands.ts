@@ -24,4 +24,46 @@ export const COMMANDS = {
 } as const
 
 export type CommandName = keyof typeof COMMANDS
+
+// The main argument each command takes, shown on its usage line.
+export const ARGUMENTS: Partial<Record<CommandName, string>> = {
+  search: '<query>',
+  scrape: '<url>',
+  crawl: '<url>',
+  map: '<url>',
+  extract: '<url>',
+  summarize: '<url>',
+  answer: '<question>',
+  research: '<topic>',
+  parse: '<file>',
+  media: '--url <url>',
+  monitor: '<url>',
+  batch: '<url>...',
+  act: '<url>',
+  feed: '<url>',
+}
+
+// One real call per command, shown under EXAMPLE in its --help.
+export const EXAMPLES: Record<CommandName, string> = {
+  search: 'webular search "bun vs node"',
+  scrape: 'webular scrape --url https://example.com',
+  crawl: 'webular crawl --url https://example.com --limit 10',
+  map: 'webular map https://example.com',
+  extract: 'webular extract https://example.com --fields title,price',
+  summarize: 'webular summarize --url https://example.com',
+  answer: 'webular answer "what is bun?"',
+  research: 'webular research "home solar panels"',
+  parse: 'webular parse report.pdf',
+  media: 'webular media --url https://example.com --screenshot',
+  monitor: 'webular monitor https://example.com',
+  batch: 'webular batch --urls https://example.com,https://example.org',
+  doctor: 'webular doctor',
+  tasks: 'webular tasks',
+  mcp: 'webular mcp',
+  diagram: 'webular diagram',
+  audit: 'webular audit',
+  act: 'webular act https://example.com',
+  feed: 'webular feed https://example.com/feed.xml',
+  jev: 'webular jev learn',
+}
 export const COMMAND_NAMES = Object.keys(COMMANDS) as CommandName[]

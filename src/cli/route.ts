@@ -19,10 +19,11 @@ function isCommand(value: string): value is CommandName {
 function unknownCommand(command: string): Effect.Effect<number> {
   const guess = closest(command, COMMAND_NAMES)
   const hint = guess ? ` Did you mean '${guess}'?` : ''
+  const kind = command.startsWith('-') ? 'option' : 'command'
   return errorLabel.pipe(
     Effect.flatMap((label) =>
       logErr(
-        `${label} unknown command '${safeText(command)}'.${hint}\nRun 'webular --help' to see all commands.`,
+        `${label} unknown ${kind} '${safeText(command)}'.${hint}\nRun 'webular --help' to see all commands.`,
       ),
     ),
     Effect.as(settledExit(cliDispatchMachine, [{ type: 'UNKNOWN_COMMAND' }])),

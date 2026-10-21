@@ -7,6 +7,7 @@ import * as BunServices from '@effect/platform-bun/BunServices'
 import { Cause, Data, Effect, Exit, Match, MutableRef, type Runtime } from 'effect'
 import { COMMANDS } from '../cli/commands.ts'
 import { EXIT } from '../cli/exit-codes.ts'
+import { errorPrefix } from '../cli/style.ts'
 import { errMsg } from './output.ts'
 import type { ProcError } from './proc.ts'
 
@@ -68,7 +69,7 @@ const withHelpHint = (message: string, exitCode: number): string => {
   if (exitCode !== 2 || message === '' || message.includes('--help')) return message
   const cmd = commandName()
   const help = cmd in COMMANDS ? `webular ${cmd} --help` : 'webular --help'
-  return `${message} Run '${help}' to see how to use it.`
+  return `${message}\nRun '${help}' to see how to use it.`
 }
 
 // The teardown runs outside any fiber, so it writes stderr directly.
@@ -76,7 +77,7 @@ const teardown: Runtime.Teardown = (exit, onExit) => {
   if (Exit.isSuccess(exit)) return onExit(Number(exit.value ?? 0))
   const { message: raw, exitCode } = failureOfCause(exit.cause)
   const message = withHelpHint(raw, exitCode)
-  if (message !== '') process.stderr.write(`${message}\n`)
+  if (message !== '') process.stderr.write(`${Effect.runSync(errorPrefix)}${message}\n`)
   onExit(exitCode)
 }
 

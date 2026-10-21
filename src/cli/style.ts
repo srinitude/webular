@@ -24,11 +24,21 @@ const colorEnv = Config.all({
   term: envVar('TERM'),
 })
 
+const RED_ERROR = '\x1b[31merror:\x1b[0m'
+const colorOn: Effect.Effect<boolean> = Effect.map(colorEnv, (env) =>
+  useColor(process.stderr.isTTY === true, env),
+).pipe(Effect.orElseSucceed(() => false))
+
 // The "error:" label for stderr, red when the color rule allows it.
-export const errorLabel: Effect.Effect<string> = Effect.gen(function* () {
-  const env = yield* colorEnv
-  return useColor(process.stderr.isTTY === true, env) ? '\x1b[31merror:\x1b[0m' : 'error:'
-}).pipe(Effect.orElseSucceed(() => 'error:'))
+export const errorLabel: Effect.Effect<string> = Effect.map(colorOn, (on) =>
+  on ? RED_ERROR : 'error:',
+)
+
+// A usage error already starts with "<cmd>:", so the label joins it only when
+// color is on; piped, NO_COLOR, FORCE_COLOR=0, and TERM=dumb keep the plain line.
+export const errorPrefix: Effect.Effect<string> = Effect.map(colorOn, (on) =>
+  on ? `${RED_ERROR} ` : '',
+)
 
 // Control characters (C0, DEL, C1) except tab, newline, and the CR of a CRLF,
 // plus the bidi overrides that reorder what a reader sees (CWE-150).
