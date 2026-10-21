@@ -15,6 +15,7 @@ export const stateLabels: Record<string, string> = {
   completed: 'Done',
   completedWithPartialFailures: 'Done, some failed',
   emptyWithErrors: 'No results',
+  partial: 'Done, some pages failed',
   rejected: 'Input rejected',
   failed: 'Run failed',
 }
