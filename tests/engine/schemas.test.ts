@@ -19,18 +19,26 @@ async function rejected(result: Promise<{ status: string }>): Promise<boolean> {
 describe('workflow input bounds reject before any fetch', () => {
   test('answer caps sources at 10', async () => {
     const run = await answerWorkflow.createRun({ runId: 'schema-test' })
-    expect(await rejected(run.start({ inputData: { query: 'q', sources: 99 } }))).toBe(true)
+    expect(
+      await rejected(run.start({ inputData: { query: 'q', sources: 99, sentences: 3 } })),
+    ).toBe(true)
   })
 
   test('research caps depth at 10', async () => {
     const run = await researchWorkflow.createRun({ runId: 'schema-test' })
-    expect(await rejected(run.start({ inputData: { topic: 't', depth: 99 } }))).toBe(true)
+    expect(await rejected(run.start({ inputData: { topic: 't', depth: 99, sentences: 2 } }))).toBe(
+      true,
+    )
   })
 
   test('crawl caps limit at 1000', async () => {
     const run = await crawlWorkflow.createRun({ runId: 'schema-test' })
     expect(
-      await rejected(run.start({ inputData: { url: 'https://example.com', limit: 99_999 } })),
+      await rejected(
+        run.start({
+          inputData: { url: 'https://example.com', limit: 99_999, depth: 2, concurrency: 4 },
+        }),
+      ),
     ).toBe(true)
   })
 

@@ -42,32 +42,32 @@
     "LICENSE"
   ],
   "engines": {
-    "bun": ">=1.3.14"
+    "bun": ">=1.4.3"
   },
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
-    "@mastra/core": "^1.37.1",
-    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@mastra/core": "^1.78.0",
+    "@modelcontextprotocol/sdk": "^1.32.1",
     "@mozilla/readability": "^0.6.0",
-    "agent-browser": "^0.27.1",
+    "agent-browser": "^0.39.1",
     "diff": "^9.0.0",
-    "linkedom": "^0.18.12",
-    "mammoth": "^1.12.0",
-    "mise": "2026.6.14",
-    "p-limit": "^7.3.0",
+    "linkedom": "^0.18.13",
+    "mammoth": "^1.13.0",
+    "mise": "2026.10.15",
+    "p-limit": "^7.3.3",
     "turndown": "^7.2.4",
-    "unpdf": "^1.6.2",
-    "zod": "^4.4.3"
+    "unpdf": "^1.9.1",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.16",
-    "@mermaid-js/mermaid-cli": "^11.15.0",
-    "@types/bun": "^1.3.14",
+    "@biomejs/biome": "^2.5.15",
+    "@mermaid-js/mermaid-cli": "^12.0.0",
+    "@types/bun": "^1.4.3",
     "@types/diff": "^8.0.0",
     "@types/turndown": "^5.0.6",
-    "deepsec": "^2.0.12",
+    "deepsec": "^2.3.10",
     "typescript": "6.0.3"
   },
   "trustedDependencies": [
