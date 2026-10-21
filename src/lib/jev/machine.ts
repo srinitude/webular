@@ -8,6 +8,7 @@ import {
   type EventObject,
   getInitialSnapshot,
 } from 'xstate'
+import { allowedEvents as agentAllowedEvents } from '../../machines/agent.ts'
 import type { JevRequest } from './client.ts'
 import { defineDecision } from './define.ts'
 import {
@@ -25,12 +26,8 @@ import {
 
 // The machine says which moves are allowed; Jev picks one of them; the machine
 // takes it. The fallback is the observed event when the machine allows it.
-// Mirrors allowedEvents in src/machines/agent.ts (stately-agent-on-final-port);
-// import it from there once that branch lands.
 export const allowedEvents = (snapshot: AnyMachineSnapshot): string[] =>
-  [...new Set(snapshot._nodes.flatMap((node) => node.ownEvents))]
-    .filter((type) => snapshot.can({ type }))
-    .slice(0, CAPS.fields)
+  agentAllowedEvents(snapshot).slice(0, CAPS.fields)
 
 const MACHINE_PURPOSE = purpose(
   'A webular command runs as a state machine, one move at a time.',
