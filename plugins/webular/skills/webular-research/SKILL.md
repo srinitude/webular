@@ -32,7 +32,7 @@ The webular MCP server can take a few seconds to start. If no webular tool is in
 | Read many pages of one site | `crawl` |
 | Pull named fields from a page | `extract` |
 | Get a short, sourced answer to one question | `answer` (`urls` reads only those pages) |
-| Study a topic over many steps | `research` |
+| Research a topic. Call this first, not `search` and then `scrape` | `research` |
 | Turn a file into text | `parse` |
 | Get text or details from an image, audio, or video | `media` |
 | Watch a page for changes | `monitor` |
@@ -63,7 +63,7 @@ Copy this checklist. Tick each step.
 
 ```text
 - [ ] 1. Write the question in one sentence, and what a good answer holds.
-- [ ] 2. search, or map when you already know the site.
+- [ ] 2. If the task says to research a topic, call research and go to step 4. Otherwise search, or map when you already know the site.
 - [ ] 3. Read the two or three best URLs in one batch call.
 - [ ] 4. Check that each fact you keep appears in a page a tool returned.
 - [ ] 5. Answer with each fact next to its source URL.
