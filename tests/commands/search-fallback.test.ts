@@ -47,7 +47,8 @@ const fixture = Effect.fn('fixture')(function* (crossrefUp: boolean) {
 const search = (args: string[], crossrefUp: boolean, check: (d: Output, webHits: number) => void) =>
   Effect.gen(function* () {
     const fx = yield* fixture(crossrefUp)
-    const PATH = yield* Config.String('PATH')
+    // Windows spells the variable `Path`.
+    const PATH = yield* Config.String('PATH').pipe(Config.orElse(() => Config.String('Path')))
     const HOME = yield* Config.String('HOME').pipe(Config.withDefault('/tmp'))
     const env = { PATH, HOME, WEBULAR_SOURCE_ORIGIN: fx.origin }
     const run = yield* Effect.promise(() =>
