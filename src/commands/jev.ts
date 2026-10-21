@@ -1,6 +1,6 @@
 // JEV command entry — invoked by `mise run run:jev`. `learn` tests lessons on the
 // recorded Jev calls; `correct` labels one recorded call as an eval case. No mise logic here.
-import { Console, Effect } from 'effect'
+import { Effect } from 'effect'
 import { parseFlags, strFlag } from '../core/args.ts'
 import { CliError, runMain } from '../core/effect.ts'
 import { Jev } from '../lib/jev/client.ts'
