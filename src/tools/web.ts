@@ -75,7 +75,7 @@ export const webTools: McpToolDef[] = [
   },
   {
     id: 'web.links',
-    description: 'Extract absolute links from HTML (linkedom document parse).',
+    description: 'Extract absolute links from HTML (linkedom).',
     schema: linksSchema,
     run: (args) =>
       parseArgs(linksSchema, args).pipe(

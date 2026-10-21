@@ -25,6 +25,9 @@ const HTML = '<html><head><title>T</title></head><body><h1>Hi</h1><a href="/a">a
 
 // CLI flags a tool leaves out on purpose, each with the reason.
 const CLI_ONLY: Record<string, Record<string, string>> = {
+  batch: {
+    archive: 'The tools/list token budget (tests/commands/tokens.test.ts) leaves no room for it.',
+  },
   monitor: {
     db: 'The server picks the per-project database; an agent path could write anywhere.',
     'watch-for':

@@ -13,10 +13,14 @@ export const commonFlags = read('src/core/args.ts').pipe(
   Effect.map((src) => keysIn(src.split('const COMMON')[1]?.split('}\n')[0] ?? '')),
 )
 
-// The flags one command declares in its parseFlags call.
+// The flags one command declares in its parseFlags call, inline or as a FLAGS const.
 export const cliFlags = (command: string) =>
   read(`src/commands/${command}.ts`).pipe(
     Effect.map((src) =>
-      keysIn(src.split('parseFlags(Bun.argv.slice(2), {')[1]?.split('})')[0] ?? ''),
+      keysIn(
+        src.split('parseFlags(Bun.argv.slice(2), {')[1]?.split('})')[0] ??
+          src.split('const FLAGS = {')[1]?.split('} as const')[0] ??
+          '',
+      ),
     ),
   )
