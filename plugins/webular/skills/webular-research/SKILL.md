@@ -22,7 +22,7 @@ A web answer is only as good as its sources. This skill takes each fact from a p
 | Shorten a text or a page | `summarize` |
 | Read many pages of one site | `crawl` |
 | Pull named fields from a page | `extract` |
-| Get a short, sourced answer to one question | `answer` |
+| Get a short, sourced answer to one question | `answer` (`--urls a,b` reads only those pages) |
 | Study a topic over many steps | `research` |
 | Turn a file into text | `parse` |
 | Get text or details from an image, audio, or video | `media` |
