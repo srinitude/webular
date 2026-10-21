@@ -116,6 +116,16 @@ describe('render fallback trigger', () => {
       }),
     ))
 
+  // example.com ships one analytics script and two short sentences: a full
+  // page, not a shell, so it must not wait on a cold browser.
+  test('a short static page with real sentences and a script needs no render', () => {
+    const page =
+      '<html><head><script src=/s.js></script></head><body><div><h1>Example Domain</h1>' +
+      '<p>This domain is for use in documentation examples without needing permission.</p>' +
+      '<p><a href="https://iana.org/domains/example">Learn more</a></p></div></body></html>'
+    expect(needsJs(page)).toBe(false)
+  })
+
   test('render off keeps the fetched page and starts no browser', () =>
     Effect.runPromise(
       Effect.gen(function* () {

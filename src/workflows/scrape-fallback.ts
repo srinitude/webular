@@ -17,10 +17,15 @@ const MIN_MAIN_TEXT = 200
 // ponytail: a PDF is buffered whole; stream it to disk if larger files matter.
 const PDF_MAX_BYTES = 50 * 1024 * 1024
 
+// A full sentence (40+ characters ending in . ! or ?) is real content, so a
+// short static page with an analytics script (example.com) skips the render.
+const SENTENCE = /\w[^.!?]{39,}[.!?]/
 // ponytail: length heuristic on the readable main text; a page that ships
-// scripts and under MIN_MAIN_TEXT characters of article text gets a render.
-export const needsJs = (html: string) =>
-  /<script\b/i.test(html) && htmlToArticle(html).text.trim().length < MIN_MAIN_TEXT
+// scripts, under MIN_MAIN_TEXT characters of article text, and no full
+// sentence gets a render.
+const isShell = (html: string, text: string) =>
+  /<script\b/i.test(html) && text.trim().length < MIN_MAIN_TEXT && !SENTENCE.test(text)
+export const needsJs = (html: string) => isShell(html, htmlToArticle(html).text)
 
 const renderInBackground = (url: string, backend: Backend) =>
   Effect.provide(

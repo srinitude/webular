@@ -82,9 +82,17 @@ export const htmlFromAgentBrowser = (stdout: string) =>
     },
   )
 
+// Renders share one warm session: a cold Chrome start costs 8-20 s, a warm
+// open about 1 s, and a per-render close another 5 s. The session's daemon
+// exits on its own when idle (agentbrowser.ts).
+// ponytail: concurrent renders (batch, crawl) share the session's tab, as
+// they shared the default session before; give each render its own tab if
+// concurrent JS renders matter.
+const SESSION = 'webular-render'
+
 const batch = (commands: string[][]) =>
   Effect.flatMap(
-    runBatch(commands).pipe(
+    runBatch(commands, SESSION).pipe(
       Effect.mapError((err) => driverError('agent-browser', err.message)),
       Effect.provide(BunServices.layer),
     ),
@@ -94,15 +102,30 @@ const batch = (commands: string[][]) =>
         : Effect.fail(driverError('agent-browser', res.stderr.trim() || `exit ${res.code}`)),
   )
 
-const readHtml = () =>
-  Effect.flatMap(Effect.flatMap(batch([['get', 'html', 'html']]), htmlFromAgentBrowser), (html) =>
-    html ? Effect.succeed(html) : Effect.fail(driverError('agent-browser', 'empty page')),
+// One process opens (open returns after the load event, so inline scripts have
+// run) and reads, so get html never races a separate open. An extra
+// `wait --load load` after open stalls about 25 s, so there is none. A cold
+// daemon can refuse the second command ("Failed to connect"): retry once.
+const readHtml = (url: string) =>
+  Effect.flatMap(
+    Effect.flatMap(
+      Effect.retry(
+        batch([
+          ['open', url],
+          ['get', 'html', 'html'],
+        ]),
+        { times: 1 },
+      ),
+      htmlFromAgentBrowser,
+    ),
+    (html) =>
+      html ? Effect.succeed(html) : Effect.fail(driverError('agent-browser', 'empty page')),
   )
 
 const agentBrowserSteps: Steps = {
-  open: (url) => batch([['open', url]]),
+  open: () => Effect.void,
   read: readHtml,
-  close: () => Effect.ignore(batch([['close']])),
+  close: () => Effect.void,
 }
 
 export const AgentBrowserLive = Layer.effect(Driver, makeDriver('agent-browser', agentBrowserSteps))
