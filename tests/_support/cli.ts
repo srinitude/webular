@@ -21,6 +21,8 @@ const text = <E>(s: Stream.Stream<Uint8Array, E>) => Stream.mkString(Stream.deco
 // An explicit env replaces the parent's; no env inherits it. A child skips the
 // HTTP disk cache unless the caller sets WEBULAR_NO_CACHE, so no command test
 // writes .cache/webular (into HOME, or into the repo when HOME is unset).
+// A child runs with Jev off unless the caller's env sets WEBULAR_JEV, so no
+// command test reads the Keychain key or waits on a live docs guard and Jev call.
 export const runCli = (
   entry: string,
   args: string[],
@@ -32,7 +34,7 @@ export const runCli = (
       const handle = yield* spawner.spawn(
         ChildProcess.make(opts.exec ?? 'bun', [`${ROOT}${entry}`, ...args], {
           cwd: opts.cwd ?? ROOT,
-          env: opts.env && { WEBULAR_NO_CACHE: '1', ...opts.env },
+          env: { WEBULAR_JEV: 'off', ...(opts.env && { WEBULAR_NO_CACHE: '1', ...opts.env }) },
           extendEnv: opts.env === undefined,
           detached: false,
         }),
