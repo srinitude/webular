@@ -5,6 +5,7 @@
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
+import { answerPassage } from '../lib/answer-passage.ts'
 import { answerSentences } from '../lib/jev/decisions/answer.ts'
 import { citedSources } from '../lib/jev/decisions/answer-citation.ts'
 import { answerCandidates } from '../lib/jev/decisions/answer-sentences.ts'
@@ -16,7 +17,6 @@ import { searchEffect } from '../lib/search-chain.ts'
 import { mainEntity } from '../lib/search-hop.ts'
 import { subjectSources } from '../lib/source-subject.ts'
 import { fetchErrorsSchema, fetchSources } from '../lib/sources.ts'
-import { summarizeText } from '../lib/summarize.ts'
 import { stepRuntime } from './runtime.ts'
 
 const answerInput = z.object({
@@ -98,8 +98,12 @@ const searchStep = createStep({
   execute: ({ inputData }) => stepRuntime.runPromise(gather(inputData)),
 })
 
-const topSentences = (text: string, data: Pick<Evidence, 'query' | 'sentences' | 'entity'>) =>
-  summarizeText(text, data.sentences, { query: data.query, entity: data.entity }).sentences
+const topSentences = (data: Evidence) =>
+  answerPassage(
+    data.used.map((e) => e.text),
+    data.sentences,
+    { query: data.query, entity: data.entity },
+  )
 
 // The sentences Jev keeps as stating facts that answer the query (answer.sentences),
 // then the summarizer's top ones, led by the sentence Jev picks as the direct answer.
@@ -113,9 +117,10 @@ const prepareSynth = Effect.fn('answer.prepare')(function* (data: Evidence) {
     candidates.length === 0
       ? []
       : yield* onJevRuntime(decisions.answerFollowers, { question: data.query, candidates })
-  const top = [
-    ...new Set([...kept.map((i) => candidates[i] ?? ''), ...topSentences(text, data)]),
-  ].slice(0, data.sentences)
+  const top = [...new Set([...kept.map((i) => candidates[i] ?? ''), ...topSentences(data)])].slice(
+    0,
+    data.sentences,
+  )
   const cited = yield* citedSources(top, data.used, (c) =>
     onJevRuntime(decisions.answerCitation, c),
   )
