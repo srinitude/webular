@@ -50,7 +50,8 @@ const searchStep = createStep({
         const web = yield* searchEffect(source, query, limit, { variants: variants ?? [] })
         // Local BM25 hits answer alongside the free APIs: one SQLite query, a few ms.
         const local = yield* searchLocalIndex(query, limit)
-        const results = dropPrivateHosts(query, fuseRanked([web.results, local])).slice(0, limit)
+        const fused = yield* dropPrivateHosts(query, fuseRanked([web.results, local]))
+        const results = fused.slice(0, limit)
         const answered = web.source && { source: web.source }
         return { query, count: results.length, ...answered, results, meta: web.meta }
       }),

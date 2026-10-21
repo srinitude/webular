@@ -4,7 +4,7 @@
 // Pages are ranked whole (page-level BM25); each returned hit is split at its
 // headings to give its best section.
 import type { Database } from 'bun:sqlite'
-import { Effect, type Scope } from 'effect'
+import { Config, Effect, type Scope } from 'effect'
 import { emptyFingerprints, type Fingerprints, isNearDuplicate, remember } from './fingerprints.ts'
 import { bestChunk, queryTerms } from './local-chunks.ts'
 import { LocalIndexError, localIndexPath } from './local-index-path.ts'
@@ -149,17 +149,28 @@ export const fuseRanked = <T extends { readonly url: string }>(
 const PRIVATE_HOST =
   /^(localhost|\[::1\]|.*\.local|127(\.\d+){3}|10(\.\d+){3}|192\.168(\.\d+){2}|169\.254(\.\d+){2}|172\.(1[6-9]|2\d|3[01])(\.\d+){2})$/
 
-/** Drops hits on loopback or private hosts unless the query names that host (bench fixtures must not answer web queries). */
-export const dropPrivateHosts = <T extends { readonly url: string }>(
-  query: string,
-  hits: T[],
-): T[] => {
-  const q = query.toLowerCase()
-  return hits.filter(({ url }) => {
-    const host = URL.canParse(url) ? new URL(url).hostname : ''
-    return !PRIVATE_HOST.test(host) || q.includes(host.replace(/^\[|\]$/g, ''))
-  })
-}
+const originOf = (url: string) => (URL.canParse(url) ? new URL(url).origin : '')
+
+/**
+ * Drops hits on loopback or private hosts (bench fixtures must not answer web
+ * queries) unless the query names that host or the hit is on the configured
+ * local source origin, WEBULAR_SOURCE_ORIGIN, that exact origin only.
+ */
+export const dropPrivateHosts = <T extends { readonly url: string }>(query: string, hits: T[]) =>
+  Config.String('WEBULAR_SOURCE_ORIGIN').pipe(
+    Config.withDefault(''),
+    Effect.orDie,
+    Effect.map((source) => {
+      const allowed = originOf(source)
+      const q = query.toLowerCase()
+      return hits.filter(({ url }) => {
+        const host = URL.canParse(url) ? new URL(url).hostname : ''
+        if (!PRIVATE_HOST.test(host)) return true
+        if (allowed !== '' && originOf(url) === allowed) return true
+        return q.includes(host.replace(/^\[|\]$/g, ''))
+      })
+    }),
+  )
 
 /** The search step's local list for fuseRanked: {title, url, description}; empty on any index error. */
 export const searchLocalIndex = (query: string, limit: number) =>
