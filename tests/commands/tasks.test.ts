@@ -29,7 +29,12 @@ describe('webular tasks — introspect the mise task graph (real mise)', () => {
     const { code, out } = await runTasks(['--json'])
     expect(code).toBe(0)
     const data = JSON.parse(out) as { tasks: string[] }
-    const foreign = data.tasks.filter((t) => t.includes(':') && !t.startsWith('run:'))
+    const own = (
+      Bun.TOML.parse(await Bun.file(`${ROOT}/mise.toml`).text()) as {
+        tasks: Record<string, unknown>
+      }
+    ).tasks
+    const foreign = data.tasks.filter((t) => !(t in own))
     expect(foreign).toEqual([])
   }, 30_000)
 })

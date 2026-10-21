@@ -23,6 +23,22 @@ dependency, and a mise install on your PATH is used when present. The first
 command after a fresh install sets up the toolchain once, with no prompts,
 using the versions locked in the shipped `bun.lock`. Later runs skip this step.
 
+Commands run from minified bundles in `dist/commands`. These use about half
+the startup CPU of the TypeScript sources. `mise run build` makes them. Set
+`WEBULAR_DEV=1` to run straight from `src/` while you edit, with no build step.
+
+### Standalone executable
+
+`mise run build` also compiles a native `dist/bin/webular` (`webular.exe` on
+Windows). `mise run compile:all` builds one for every Bun target: macOS arm64
+and x64, Linux x64 and arm64 with glibc or musl, and Windows x64 and arm64.
+
+The executable starts faster and uses less CPU than `bun bin/webular.ts`. It
+runs each command with itself as the Bun runtime, so you need no separate Bun.
+Commands still go through mise, so keep the executable inside the package
+folder, next to `mise.toml` and `dist/commands`. The default spot is
+`dist/bin/webular`.
+
 ## Usage
 
 ```bash

@@ -27,6 +27,9 @@ function gatewayEnv(): Record<string, string | undefined> {
     // Configs above the package must not affect task runs (deterministic graph).
     MISE_CEILING_PATHS: dirname(PACKAGE_ROOT),
     WEBULAR_INVOKE_DIR: process.cwd(),
+    // A compiled webular runs each command with itself as the bun runtime
+    // (BUN_BE_BUN=1 makes the executable act as the bun CLI), still via mise.
+    ...(Bun.isStandaloneExecutable ? { WEBULAR_BUN: process.execPath, BUN_BE_BUN: '1' } : {}),
   }
 }
 

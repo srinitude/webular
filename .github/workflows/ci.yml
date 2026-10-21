@@ -73,3 +73,41 @@ jobs:
         env:
           BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
         run: mise run ci
+
+  # Standalone executable: each runner builds its native target (mise run
+  # build) and smoke-tests it. Same 3-OS matrix, gate, and timeouts as ci.
+  executable:
+    needs: push-covered-by-pr
+    if: ${{ !cancelled() && needs.push-covered-by-pr.outputs.covered != 'true' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            timeout: 4
+          - os: macos-latest
+            timeout: 5
+          - os: windows-latest
+            timeout: 11
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: ${{ matrix.timeout }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@fc42bcc7ddbf51124c30f95a877a0c5168a3bfde # v5.2.1
+        with:
+          experimental: true
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/bun-install-cache
+          key: bun-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('mise.toml', 'bun.lock') }}
+      - name: Build bundles and the native executable
+        env:
+          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
+        run: mise run build
+      - name: Smoke test the executable
+        run: |
+          ./dist/bin/webular --version
+          ./dist/bin/webular --help
+          ./dist/bin/webular diagram --json
