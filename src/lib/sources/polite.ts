@@ -73,7 +73,7 @@ export const politely = <A, E, R>(host: string, eff: Effect.Effect<A, E, R>) =>
 
 // Process-wide: epoch ms before which a rate-limited source is skipped, one
 // Reference per source, so every caller shares it unless a test gives its own.
-export type Limit = Context.Reference<{ until: number }>
+type Limit = Context.Reference<{ until: number }>
 export const rateLimit = (name: string): Limit =>
   Context.Reference(`webular/sources/${name}Limit`, { defaultValue: () => ({ until: 0 }) })
 
