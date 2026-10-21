@@ -11,7 +11,7 @@ import { BunServices } from '@effect/platform-bun'
 import { ManagedRuntime } from 'effect'
 import release from '../../.github/workflows/release.yml'
 import pkg from '../../package.json'
-import { hostFacts, packageName, type Target, targetFor } from '../../src/core/platform.ts'
+import { exeName, hostFacts, packageName, type Target, targetFor } from '../../src/core/platform.ts'
 import { distTag } from '../../src/release/dist-tag.ts'
 import { ROOT } from '../_support/root.ts'
 
@@ -48,9 +48,18 @@ const install = async (withNative: boolean) => {
     const native = join(dir, 'node_modules', packageName(target))
     mkdirSync(join(native, 'bin'), { recursive: true })
     writeFileSync(join(native, 'package.json'), '{"name":"x","version":"0.0.0"}')
-    writeFileSync(join(native, 'bin', 'webular'), '#!/bin/sh\necho "native $*"\nexit 7\n', {
-      mode: 0o755,
-    })
+    const exe = join(native, 'bin', exeName(target))
+    if (target.os === 'win32') {
+      // Windows runs no shebang script, so the fake is a real compiled .exe.
+      const source = join(dir, 'fake-native.ts')
+      writeFileSync(
+        source,
+        "console.log('native ' + process.argv.slice(2).join(' '))\nprocess.exit(7)\n",
+      )
+      expect(
+        Bun.spawnSync(['bun', 'build', '--compile', source, `--outfile=${exe}`]).exitCode,
+      ).toBe(0)
+    } else writeFileSync(exe, '#!/bin/sh\necho "native $*"\nexit 7\n', { mode: 0o755 })
   }
   return { launcher, name: packageName(target) }
 }
@@ -64,7 +73,7 @@ test('the Node launcher runs the native package with no Bun on PATH', async () =
   const result = runLauncher(launcher)
   expect(result.stdout.toString().trim()).toBe('native scrape x')
   expect(result.exitCode).toBe(7)
-})
+}, 30_000) // a Windows run compiles the fake .exe first
 
 test('without the native package or Bun, the launcher names the missing package', async () => {
   const { launcher, name } = await install(false)

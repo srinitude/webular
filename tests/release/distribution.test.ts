@@ -3,6 +3,7 @@
 // the generated formula and manifest carry the right URL and checksum per
 // target, and a missing checksum fails the release instead of shipping a gap.
 import { afterAll, expect, test } from 'bun:test'
+import { join } from 'node:path'
 import { BunServices } from '@effect/platform-bun'
 import { Effect, FileSystem, ManagedRuntime, Schema } from 'effect'
 import release from '../../.github/workflows/release.yml'
@@ -124,10 +125,11 @@ test('release attests, drafts, publishes npm, then un-drafts', () => {
 test('every platform package ships the Apache-2.0 LICENSE beside its binary', () => {
   for (const target of TARGETS) {
     const copies = packageCopies('/r', target)
-    expect(copies).toContainEqual(['/r/LICENSE', `/r/npm/${packageName(target)}/LICENSE`])
+    const dir = join('/r', 'npm', packageName(target))
+    expect(copies).toContainEqual([join('/r', 'LICENSE'), join(dir, 'LICENSE')])
     expect(copies).toContainEqual([
-      `/r/dist/bin/${assetName(target)}`,
-      `/r/npm/${packageName(target)}/bin/${exeName(target)}`,
+      join('/r', 'dist', 'bin', assetName(target)),
+      join(dir, 'bin', exeName(target)),
     ])
   }
 })
