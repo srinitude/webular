@@ -3,7 +3,7 @@
 
 import { Effect } from 'effect'
 import { runWorkflow } from '../cli/run.ts'
-import { emitOpts, intFlag, parseFlags, timeoutFlag } from '../core/args.ts'
+import { emitOpts, optIntFlag, parseFlags, timeoutFlag } from '../core/args.ts'
 import { CliError, runMain } from '../core/effect.ts'
 import { errMsg } from '../core/output.ts'
 import { inPath } from '../core/safepath.ts'
@@ -57,7 +57,7 @@ const main = Effect.gen(function* () {
   }
   const inputData = {
     urls,
-    concurrency: yield* intFlag('batch', values, 'concurrency', { def: 4, min: 1, max: 32 }),
+    concurrency: yield* optIntFlag('batch', values, 'concurrency', { min: 1, max: 32 }),
     timeoutMs: yield* timeoutFlag('batch', values),
   }
   return yield* runWorkflow(

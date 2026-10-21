@@ -43,9 +43,10 @@ interface CrawlCtx {
 
 class CrawlError extends Data.TaggedError('CrawlError')<{ readonly message: string }> {}
 
-function fetchPage(url: string, ctx: CrawlCtx): Effect.Effect<FetchOutcome> {
+// withLinks is false on the last level: those links are never enqueued.
+function fetchPage(url: string, ctx: CrawlCtx, withLinks: boolean): Effect.Effect<FetchOutcome> {
   return fetchTextWithinHost(url, ctx.host, { timeoutMs: ctx.timeoutMs }).pipe(
-    Effect.map((html): FetchOutcome => ({ url, ok: true, ...titleAndLinks(html, url) })),
+    Effect.map((html): FetchOutcome => ({ url, ok: true, ...titleAndLinks(html, url, withLinks) })),
     Effect.catch((err) => Effect.succeed<FetchOutcome>({ url, ok: false, reason: errMsg(err) })),
   )
 }
@@ -56,13 +57,17 @@ type RootOutcome =
 
 // The root is the user's explicit target — its redirects are followed freely
 // and the crawl scope re-anchors on the FINAL host (apex→www).
-function fetchRootPage(url: string, timeoutMs?: number): Effect.Effect<RootOutcome> {
+function fetchRootPage(
+  url: string,
+  withLinks: boolean,
+  timeoutMs?: number,
+): Effect.Effect<RootOutcome> {
   return fetchRoot(url, { timeoutMs }).pipe(
     Effect.map(
       ({ finalUrl, html }): RootOutcome => ({
         ok: true,
         finalUrl,
-        ...titleAndLinks(html, finalUrl),
+        ...titleAndLinks(html, finalUrl, withLinks),
       }),
     ),
     Effect.catch((err) => Effect.succeed<RootOutcome>({ ok: false, reason: errMsg(err) })),
@@ -99,10 +104,11 @@ const crawlLevel = Effect.fnUntraced(function* (level: string[], depth: number, 
   while (cursor < level.length && ctx.pages.length < ctx.limit) {
     const take = level.slice(cursor, cursor + (ctx.limit - ctx.pages.length))
     cursor += take.length
-    const outcomes = yield* Effect.forEach(take, (url) => fetchPage(url, ctx), {
+    const mayEnqueue = depth < ctx.maxDepth
+    const outcomes = yield* Effect.forEach(take, (url) => fetchPage(url, ctx, mayEnqueue), {
       concurrency: ctx.concurrency,
     })
-    fold(outcomes, depth < ctx.maxDepth, ctx, next)
+    fold(outcomes, mayEnqueue, ctx, next)
   }
   return next
 })
@@ -110,7 +116,7 @@ const crawlLevel = Effect.fnUntraced(function* (level: string[], depth: number, 
 export const bfsCrawl = Effect.fn('bfsCrawl')(function* (root: string, opts: CrawlOptions) {
   const rootUrl = normalizeUrl(root)
   if (!rootUrl) return yield* Effect.fail(new CrawlError({ message: `crawl: invalid URL ${root}` }))
-  const entry = yield* fetchRootPage(rootUrl, opts.timeoutMs)
+  const entry = yield* fetchRootPage(rootUrl, opts.depth > 0, opts.timeoutMs)
   if (!entry.ok)
     return { root: rootUrl, pages: [], errors: [{ url: rootUrl, reason: entry.reason }] }
   const anchored = normalizeUrl(entry.finalUrl) ?? rootUrl

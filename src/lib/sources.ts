@@ -1,8 +1,9 @@
 // Bounded, index-ordered source fetching shared by answer/research: fetch each
-// URL with concurrency 4, extract article text, keep successes in INPUT order
+// URL with host-sized concurrency, extract article text, keep successes in INPUT order
 // and surface failures as attempt-ordered errors — never completion-ordered.
 import { Effect } from 'effect'
 import { z } from 'zod'
+import { hostConcurrency } from '../core/budget.ts'
 import { fetchText } from '../core/http.ts'
 import { errMsg } from '../core/output.ts'
 import { htmlToArticle } from './html.ts'
@@ -46,7 +47,7 @@ export const fetchSources = Effect.fn('fetchSources')(function* (
   timeoutMs = 15_000,
 ) {
   const outcomes = yield* Effect.forEach(sources, (src) => fetchOne(src, timeoutMs), {
-    concurrency: 4,
+    concurrency: yield* hostConcurrency,
   })
   const out: FetchedSources = { entries: [], errors: [] }
   for (const outcome of outcomes) {

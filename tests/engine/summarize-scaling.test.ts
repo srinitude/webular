@@ -41,6 +41,8 @@ const CORPUS = [
   'no capital after this. Then One more sentence?  Spaces   Galore.\nNewline Starts here.',
   "Punctuation... Ellipsis Works. Ünïcode Words Stay. 'Single quote' starts this.",
   'Sentence one has web and map words. Sentence two has crawl and link words.',
+  // Offsets must trim exactly like String.prototype.trim, Unicode spaces included.
+  '  \tLeading space web here.  Trailing web map too.　 ',
 ]
 
 describe('summarizeText — same picks as the original algorithm', () => {

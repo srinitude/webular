@@ -70,37 +70,87 @@ function tokenize(text: string): string[] {
   )
 }
 
-function pushTrimmed(out: string[], piece: string): void {
+// Sentences are kept as [start, end) offsets into the text, not as strings:
+// holding one string per sentence plus its token strings makes every GC walk
+// a heap that grows with the page, so total time goes superlinear.
+interface Spans {
+  starts: number[]
+  ends: number[]
+}
+
+function pushTrimmed(spans: Spans, text: string, from: number, to: number): void {
+  const piece = text.slice(from, to)
   const trimmed = piece.trim()
-  if (trimmed.length > 0) out.push(trimmed)
+  if (trimmed.length === 0) return
+  const start = from + piece.length - piece.trimStart().length
+  spans.starts.push(start)
+  spans.ends.push(start + trimmed.length)
 }
 
 // A sentence ends at [.!?] plus whitespace before an uppercase letter or a
-// quote. One forward scan, O(B): the lookbehind split it replaces went
-// superlinear on big pages (100,000 sentences took about 6 s).
+// quote. One forward scan, O(B), with no lookbehind.
 const BOUNDARY = /[.!?]\s+(?=[A-Z"'])/g
 
-function splitSentences(text: string): string[] {
-  const out: string[] = []
+function splitSentences(text: string): Spans {
+  const spans: Spans = { starts: [], ends: [] }
   let last = 0
   for (const m of text.matchAll(BOUNDARY)) {
-    pushTrimmed(out, text.slice(last, m.index + 1))
+    pushTrimmed(spans, text, last, m.index + 1)
     last = m.index + m[0].length
   }
-  pushTrimmed(out, text.slice(last))
+  pushTrimmed(spans, text, last, text.length)
+  return spans
+}
+
+// Each sentence is tokenized once; tokens become small-integer word ids in
+// one flat array, so the only strings that outlive a sentence are the
+// distinct words. Sentence cuts fall on whitespace, so the joined sentence
+// tokens equal the whole text's tokens.
+interface TokenIds {
+  ids: number[]
+  offsets: number[]
+  freq: number[]
+}
+
+function tokenIds(text: string, spans: Spans): TokenIds {
+  const vocab = new Map<string, number>()
+  const out: TokenIds = { ids: [], offsets: [0], freq: [] }
+  for (let i = 0; i < spans.starts.length; i++) {
+    for (const w of tokenize(text.slice(spans.starts[i], spans.ends[i]))) {
+      let id = vocab.get(w)
+      if (id === undefined) {
+        id = out.freq.length
+        vocab.set(w, id)
+        out.freq.push(0)
+      }
+      out.freq[id] = (out.freq[id] ?? 0) + 1
+      out.ids.push(id)
+    }
+    out.offsets.push(out.ids.length)
+  }
   return out
 }
 
-function buildFreqMap(lists: string[][]): Map<string, number> {
-  const freq = new Map<string, number>()
-  for (const words of lists) for (const w of words) freq.set(w, (freq.get(w) ?? 0) + 1)
-  return freq
+// Loop, not Math.max(...spread): spreading a large vocabulary as arguments
+// overflows the engine's argument limit on big pages.
+function maxFrequency(freq: number[]): number {
+  let max = 0
+  for (const count of freq) if (count > max) max = count
+  return max
 }
 
-function scoreTokens(words: string[], freq: Map<string, number>, maxFreq: number): number {
-  if (words.length === 0 || maxFreq === 0) return 0
-  const total = words.reduce((sum, w) => sum + (freq.get(w) ?? 0), 0)
-  return total / (words.length * maxFreq)
+function scores(t: TokenIds): Float64Array {
+  const maxFreq = maxFrequency(t.freq)
+  const out = new Float64Array(t.offsets.length - 1)
+  for (let i = 0; i < out.length; i++) {
+    const from = t.offsets[i] ?? 0
+    const len = (t.offsets[i + 1] ?? 0) - from
+    if (len === 0 || maxFreq === 0) continue
+    let total = 0
+    for (let k = from; k < from + len; k++) total += t.freq[t.ids[k] ?? 0] ?? 0
+    out[i] = total / (len * maxFreq)
+  }
+  return out
 }
 
 interface SummarizeResult {
@@ -108,34 +158,17 @@ interface SummarizeResult {
   summary: string
 }
 
-// Loop, not Math.max(...spread): spreading a large vocabulary as arguments
-// overflows the engine's argument limit on big pages.
-function maxFrequency(freq: Map<string, number>): number {
-  let max = 0
-  for (const count of freq.values()) if (count > max) max = count
-  return max
-}
-
 export function summarizeText(text: string, topN: number): SummarizeResult {
-  const sentences = splitSentences(text)
-  if (sentences.length === 0) return { sentences: [], summary: '' }
+  const spans = splitSentences(text)
+  if (spans.starts.length === 0) return { sentences: [], summary: '' }
+  const score = scores(tokenIds(text, spans))
 
-  // Tokenize each sentence once and reuse it for counting and scoring.
-  // Sentence cuts fall on whitespace, so the joined sentence tokens equal
-  // the whole text's tokens.
-  const tokens = sentences.map(tokenize)
-  const freq = buildFreqMap(tokens)
-  const maxFreq = maxFrequency(freq)
-
-  const scored = sentences.map((s, i) => ({
-    s,
-    i,
-    score: scoreTokens(tokens[i] ?? [], freq, maxFreq),
-  }))
-  scored.sort((a, b) => b.score - a.score)
-
-  const top = scored.slice(0, topN).sort((a, b) => a.i - b.i)
-  const picked = top.map((x) => x.s)
+  // A stable sort of indices keeps tied sentences in document order.
+  const order = Array.from(score, (_, i) => i).sort((a, b) => (score[b] ?? 0) - (score[a] ?? 0))
+  const picked = order
+    .slice(0, topN)
+    .sort((a, b) => a - b)
+    .map((i) => text.slice(spans.starts[i], spans.ends[i]))
 
   return { sentences: picked, summary: picked.join(' ') }
 }

@@ -2,6 +2,7 @@
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
+import { hostConcurrency } from '../core/budget.ts'
 import { bfsCrawl } from '../lib/crawl.ts'
 import { fetchErrorsSchema } from '../lib/sources.ts'
 import { stepRuntime } from './runtime.ts'
@@ -10,7 +11,8 @@ const crawlInput = z.object({
   url: z.string().url(),
   limit: z.number().int().min(1).max(1000).default(5),
   depth: z.number().int().min(0).max(10).default(2),
-  concurrency: z.number().int().min(1).max(32).default(4),
+  // Unset means host-sized (core/budget.ts).
+  concurrency: z.number().int().min(1).max(32).optional(),
   timeoutMs: z.number().int().positive().optional(),
 })
 
@@ -29,15 +31,15 @@ const crawlStep = createStep({
   outputSchema: crawlOutput,
   execute: ({ inputData }) =>
     stepRuntime.runPromise(
-      Effect.map(
-        bfsCrawl(inputData.url, {
+      Effect.gen(function* () {
+        const { root, pages, errors } = yield* bfsCrawl(inputData.url, {
           limit: inputData.limit,
           depth: inputData.depth,
-          concurrency: inputData.concurrency,
+          concurrency: inputData.concurrency ?? (yield* hostConcurrency),
           timeoutMs: inputData.timeoutMs,
-        }),
-        ({ root, pages, errors }) => ({ root, count: pages.length, pages, errors }),
-      ),
+        })
+        return { root, count: pages.length, pages, errors }
+      }),
     ),
 })
 

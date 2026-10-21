@@ -137,3 +137,44 @@ describe('httpGet retry — deterministic and bounded', () => {
     15_000,
   )
 })
+
+// A rejected body left unread pins its pooled connection until GC. Measured on
+// these four paths: 0 server-side cancels without the cancel, 4 with it.
+function cancelTrackingRoutes(cancels: { n: number }) {
+  const tracked = () =>
+    new ReadableStream<Uint8Array>({
+      start: (c) => c.enqueue(new TextEncoder().encode('x'.repeat(1024))),
+      cancel: () => {
+        cancels.n++
+      },
+    })
+  return () => ({
+    '/gone': () => new Response(tracked(), { status: 410 }),
+    '/png': () => new Response(tracked(), { headers: { 'content-type': 'image/png' } }),
+    '/hop': () => new Response(tracked(), { status: 302, headers: { location: '/end' } }),
+    '/away': () =>
+      new Response(tracked(), { status: 302, headers: { location: 'http://offsite.invalid/x' } }),
+    '/end': () => new Response('end page', { headers: { 'content-type': 'text/plain' } }),
+  })
+}
+
+describe('rejected responses free their bodies', () => {
+  test(
+    'non-ok, non-text, followed and blocked redirect hops each cancel the body',
+    eff(
+      Effect.gen(function* () {
+        const cancels = { n: 0 }
+        const local = yield* startFixture(cancelTrackingRoutes(cancels))
+        expect(yield* failMsg(fetchText(`${local.origin}/gone`))).toMatch(/410/)
+        expect(yield* failMsg(fetchText(`${local.origin}/png`))).toMatch(/unsupported content-type/)
+        expect(yield* fetchTextWithinHost(`${local.origin}/hop`, '127.0.0.1')).toBe('end page')
+        expect(yield* failMsg(fetchTextWithinHost(`${local.origin}/away`, '127.0.0.1'))).toMatch(
+          /off-site/,
+        )
+        yield* Effect.sleep(300)
+        expect(cancels.n).toBe(4)
+      }),
+    ),
+    15_000,
+  )
+})

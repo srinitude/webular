@@ -91,3 +91,9 @@ const cachedBudget = Effect.runSync(
 )
 
 export const hostBudget = (): Effect.Effect<Budget, never, FileSystem.FileSystem> => cachedBudget
+
+// The fan-out bound for Effect callers: the same memoized host read.
+export const hostConcurrency: Effect.Effect<number, never, FileSystem.FileSystem> = Effect.map(
+  cachedBudget,
+  (b) => b.concurrency,
+)

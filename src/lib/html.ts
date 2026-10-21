@@ -24,7 +24,7 @@ function addLink(out: Set<string>, href: string | null, base: string): void {
 
 function linksFrom(document: DomDocument, base: string): string[] {
   const out = new Set<string>()
-  for (const anchor of Array.from(document.querySelectorAll('a[href]'))) {
+  for (const anchor of document.querySelectorAll('a[href]')) {
     addLink(out, anchor.getAttribute('href'), base)
   }
   return [...out]
@@ -55,9 +55,15 @@ export function parsePage(html: string, base: string): PageDoc {
 
 // Crawling needs only the title and links — skipping Readability here saves
 // its full-document scoring pass on every crawled page.
-export function titleAndLinks(html: string, base: string): { title: string; links: string[] } {
+// withLinks=false skips the anchor scan for pages whose links are never used
+// (the crawl's last level).
+export function titleAndLinks(
+  html: string,
+  base: string,
+  withLinks = true,
+): { title: string; links: string[] } {
   const { document } = parseHTML(html)
-  return { title: document.title ?? '', links: linksFrom(document, base) }
+  return { title: document.title ?? '', links: withLinks ? linksFrom(document, base) : [] }
 }
 
 export function htmlToArticle(html: string): Article {

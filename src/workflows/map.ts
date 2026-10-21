@@ -3,8 +3,9 @@
 // deterministic: children fetch with bounded concurrency but merge in child
 // order; dedup happens on normalized URLs after ordering.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
-import { Effect } from 'effect'
+import { Effect, type FileSystem } from 'effect'
 import { z } from 'zod'
+import { hostConcurrency } from '../core/budget.ts'
 import { fetchRoot, fetchTextWithinHost } from '../core/http.ts'
 import { errMsg } from '../core/output.ts'
 import { normalizeUrl, sameHost } from '../core/url.ts'
@@ -52,19 +53,26 @@ const fetchChild = (loc: string, host: string, timeoutMs: number): Effect.Effect
 function mergeChildren(host: string, results: ChildResult[]): Discovery {
   const out: Discovery = { links: [], errors: [] }
   for (const result of results) {
-    if (result.ok) out.links.push(...result.locs.filter((u) => sameHost(host, u)))
-    else out.errors.push({ url: result.loc, reason: result.reason })
+    // A loop, not push(...spread): a big child sitemap would overflow the
+    // engine's argument limit and copy every loc twice.
+    if (!result.ok) {
+      out.errors.push({ url: result.loc, reason: result.reason })
+      continue
+    }
+    for (const u of result.locs) if (sameHost(host, u)) out.links.push(u)
   }
   return out
 }
 
-const childLinks = (locs: string[], host: string, timeoutMs: number) =>
-  Effect.map(
-    Effect.forEach(locs.slice(0, MAX_CHILD_SITEMAPS), (loc) => fetchChild(loc, host, timeoutMs), {
-      concurrency: 4,
-    }),
-    (results) => mergeChildren(host, results),
+const childLinks = Effect.fnUntraced(function* (locs: string[], host: string, timeoutMs: number) {
+  const concurrency = yield* hostConcurrency
+  const results = yield* Effect.forEach(
+    locs.slice(0, MAX_CHILD_SITEMAPS),
+    (loc) => fetchChild(loc, host, timeoutMs),
+    { concurrency },
   )
+  return mergeChildren(host, results)
+})
 
 // One sitemap URL: a <urlset>, or a one-level <sitemapindex>. Fails when the
 // fetch fails; callers decide whether that is a fallback or a reported error.
@@ -79,7 +87,11 @@ const sitemapAt = Effect.fn('map.sitemapAt')(function* (
   return { links: sameHostLocs, errors: [] } satisfies Discovery
 })
 
-const namedSitemap = (loc: string, host: string, budget: number): Effect.Effect<Discovery> =>
+const namedSitemap = (
+  loc: string,
+  host: string,
+  budget: number,
+): Effect.Effect<Discovery, never, FileSystem.FileSystem> =>
   Effect.catch(sitemapAt(loc, host, budget), (err) =>
     Effect.succeed({ links: [], errors: [{ url: loc, reason: errMsg(err) }] }),
   )
@@ -101,7 +113,7 @@ const robotsSitemaps = Effect.fn('map.robotsSitemaps')(function* (
     .filter((u) => sameHost(host, u))
     .slice(0, MAX_CHILD_SITEMAPS)
   const results = yield* Effect.forEach(locs, (loc) => namedSitemap(loc, host, budget), {
-    concurrency: 4,
+    concurrency: yield* hostConcurrency,
   })
   return {
     links: results.flatMap((r) => r.links),
@@ -124,16 +136,19 @@ const fetchSitemap = Effect.fn('map.fetchSitemap')(function* (site: string, time
   return { links: robots.links, errors: [...(primary?.errors ?? []), ...robots.errors] }
 })
 
-function dedupe(links: string[], limit: number): string[] {
+// Stops at `limit` kept links: work and memory are O(links read until the
+// limit fills), not O(all sitemap links).
+export function dedupe(links: string[], limit: number): string[] {
   const seen = new Set<string>()
   const out: string[] = []
   for (const link of links) {
+    if (out.length >= limit) break
     const normalized = normalizeUrl(link)
     if (!normalized || seen.has(normalized)) continue
     seen.add(normalized)
     out.push(normalized)
   }
-  return out.slice(0, limit)
+  return out
 }
 
 interface RootFetch {

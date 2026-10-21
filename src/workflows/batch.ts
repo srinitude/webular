@@ -4,13 +4,15 @@
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
+import { hostConcurrency } from '../core/budget.ts'
 import { errMsg } from '../core/output.ts'
 import { stepRuntime } from './runtime.ts'
 import { scrapeWorkflow } from './scrape.ts'
 
 const batchInput = z.object({
   urls: z.array(z.string().url()).max(1000),
-  concurrency: z.number().int().positive().max(32).default(4),
+  // Unset means host-sized (core/budget.ts).
+  concurrency: z.number().int().positive().max(32).optional(),
   timeoutMs: z.number().int().positive().optional(),
 })
 
@@ -51,12 +53,15 @@ const runBatchStep = createStep({
   outputSchema: batchOutput,
   execute: ({ inputData }) =>
     stepRuntime.runPromise(
-      Effect.map(
-        Effect.forEach(inputData.urls, (url, index) => scrapeOne(url, index, inputData.timeoutMs), {
-          concurrency: inputData.concurrency,
-        }),
-        (results) => ({ count: results.length, results }),
-      ),
+      Effect.gen(function* () {
+        const concurrency = inputData.concurrency ?? (yield* hostConcurrency)
+        const results = yield* Effect.forEach(
+          inputData.urls,
+          (url, index) => scrapeOne(url, index, inputData.timeoutMs),
+          { concurrency },
+        )
+        return { count: results.length, results }
+      }),
     ),
 })
 
