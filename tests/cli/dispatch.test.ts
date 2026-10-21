@@ -29,6 +29,18 @@ test(
   ),
 )
 
+test(
+  '--no-cache turns the disk cache off in the command process',
+  eff(
+    Effect.gen(function* () {
+      const off = yield* commandFor('scrape', ['--no-cache'])
+      const on = yield* commandFor('scrape', [])
+      expect(off).toMatchObject({ options: { env: { WEBULAR_NO_CACHE: '1' } } })
+      expect(on).not.toMatchObject({ options: { env: { WEBULAR_NO_CACHE: '1' } } })
+    }),
+  ),
+)
+
 describe('dispatch table', () => {
   test(
     'matches the run:* tasks in mise.toml',

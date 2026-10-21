@@ -5,6 +5,7 @@
 // are a measured macOS run times about 3, rounded up, so slower CI runners
 // still pass.
 import type { CommandName } from '../../src/cli/commands.ts'
+import { FLAG_CASES } from './flag-cases.ts'
 
 export type Via = 'bundle' | 'bin' | 'exe'
 
@@ -128,6 +129,7 @@ export const CLI_CASES: CliCase[] = [
     json: false,
   },
   ok('timeout flag', 'scrape', ['--url', '{origin}/a', '--timeout', '5000']),
+  ...FLAG_CASES,
   ok('removed format flag warns', 'diagram', ['--format', 'json', '--quiet']),
   // The router (bin/webular.ts through mise) and the standalone executable.
   { ...ok('router diagram', 'diagram', []), via: 'bin', maxMs: 8000 },

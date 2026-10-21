@@ -19,6 +19,7 @@ export const GLOBAL_OPTIONS = [
   '  --select <a,b>    Show only these top-level JSON fields',
   '  -o, --output <f>  Write the output to a file',
   '  --timeout <ms>    Time limit for each network try (default 30000)',
+  '  --no-cache        Fetch every page fresh; skip the local page cache',
   '  -h, --help        Show help',
   '  -V, --version     Show version',
 ]

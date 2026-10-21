@@ -48,6 +48,8 @@ export const commandFor = Effect.fn('dispatch.commandFor')(function* (
     env: {
       WEBULAR_INVOKE_DIR: process.cwd(),
       ...(Bun.isStandaloneExecutable ? { BUN_BE_BUN: '1' } : {}),
+      // --no-cache reaches the disk cache as its env switch.
+      ...(args.includes('--no-cache') ? { WEBULAR_NO_CACHE: '1' } : {}),
     },
     extendEnv: true,
     detached: false,
