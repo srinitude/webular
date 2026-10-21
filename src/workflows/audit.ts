@@ -4,7 +4,6 @@
 // never `npx --yes`, which would network-install at runtime.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { z } from 'zod'
-import { runProc } from '../core/proc.ts'
 import { resolveBin } from '../core/root.ts'
 
 const auditInput = z.object({})
@@ -16,19 +15,18 @@ const auditOutput = z.object({
   hint: z.string().optional(),
 })
 
-async function detectDeepsec(): Promise<boolean> {
-  const bin = resolveBin('deepsec')
-  if (!bin) return false
-  const { code } = await runProc([bin, '--version'], { timeoutMs: 10_000 })
-  return code === 0
-}
+// An executable on PATH or in node_modules/.bin counts as available. No
+// `deepsec --version` probe: its CLI loads its whole module graph at start
+// (about 17 s wall, 1.3 s CPU on a loaded disk), which outran the probe's
+// 10 s timeout and reported an installed deepsec as missing.
+const detectDeepsec = (): boolean => resolveBin('deepsec') !== null
 
 const detectStep = createStep({
   id: 'detect',
   inputSchema: auditInput,
   outputSchema: auditOutput,
   execute: async () => {
-    const available = await detectDeepsec()
+    const available = detectDeepsec()
     return {
       tool: 'deepsec' as const,
       available,
