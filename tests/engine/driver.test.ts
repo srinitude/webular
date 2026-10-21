@@ -35,6 +35,18 @@ describe('back-end output parsing (recorded fixtures)', () => {
       }),
     ))
 
+  test('the installed cua-driver names the tab as the active entry of tabs', () =>
+    Effect.runPromise(
+      Effect.gen(function* () {
+        expect(yield* idsFromBind(yield* fixture('cua-bind-tabs.json'))).toEqual({
+          target_id: 'bt-6d347ba7-a24b-47ae-9d81-df7f152feaa1',
+          tab_id: 'tab-8785d649-20ea-4875-a7b6-1ece39980a8e',
+        })
+        const refused = JSON.stringify({ status: 'refused', refusal: { code: 'x' } })
+        expect((yield* Effect.exit(idsFromBind(refused)))._tag).toBe('Failure')
+      }),
+    ))
+
   test('cua target must be named explicitly as pid:window_id', () => {
     expect(cuaTarget('123:456')).toEqual({ pid: 123, window_id: 456 })
     expect(cuaTarget(undefined)).toBeUndefined()

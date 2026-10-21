@@ -1,0 +1,19 @@
+{
+  "binding_quality": "exact",
+  "binding_route": "native_cdp_window",
+  "endpoint_access_class": "driver_owned",
+  "endpoint_transport": "legacy_json_version",
+  "mode": "bind",
+  "mutation_allowed": true,
+  "native_title": "about:blank",
+  "status": "ok",
+  "tabs": [
+    {
+      "active": true,
+      "tab_id": "tab-8785d649-20ea-4875-a7b6-1ece39980a8e",
+      "title": "about:blank",
+      "url": "about:blank"
+    }
+  ],
+  "target_id": "bt-6d347ba7-a24b-47ae-9d81-df7f152feaa1"
+}

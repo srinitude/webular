@@ -42,12 +42,27 @@ export const windowSetting = Effect.orElseSucceed(
   () => '',
 )
 
-const Ids = Schema.Struct({ target_id: Schema.String, tab_id: Schema.String })
-const decodeIds = Schema.decodeUnknownEffect(Ids)
+// cua-driver's bind reply names the tab at the top level or, as the installed
+// driver does (tests/fixtures/driver/cua-bind-tabs.json), as the active entry
+// of `tabs`.
+const Bind = Schema.Struct({
+  target_id: Schema.String,
+  tab_id: Schema.optional(Schema.String),
+  tabs: Schema.optional(
+    Schema.Array(Schema.Struct({ tab_id: Schema.String, active: Schema.Boolean })),
+  ),
+})
+const decodeBind = Schema.decodeUnknownEffect(Bind)
 
 export const idsFromBind = (stdout: string) =>
-  Effect.mapError(Effect.flatMap(fieldsOf(stdout), decodeIds), () =>
-    driverError('cua', 'get_browser_state returned no target_id/tab_id'),
+  Effect.flatMap(
+    Effect.orElseSucceed(Effect.flatMap(fieldsOf(stdout), decodeBind), () => undefined),
+    (bind) => {
+      const tab_id = bind?.tab_id ?? bind?.tabs?.find((t) => t.active)?.tab_id
+      return bind && tab_id
+        ? Effect.succeed({ target_id: bind.target_id, tab_id })
+        : Effect.fail(driverError('cua', 'get_browser_state returned no target_id/tab_id'))
+    },
   )
 
 // page get_text prints the page text; a JSON envelope with a `text` field
@@ -92,20 +107,35 @@ export const cuaCall = (tool: string, args: Record<string, unknown>) =>
         ),
   ).pipe(Effect.provide(BunServices.layer))
 
+// The browsers' default profile folders on macOS, Linux (expanded home), and
+// Windows. Matched on every OS, case-insensitive, after backslashes become slashes.
 const DEFAULT_PROFILE =
-  /\/Library\/Application Support\/(Google\/Chrome|Chromium|Microsoft Edge|BraveSoftware\/Brave-Browser)\/?$/
+  /\/(Library\/Application Support\/(Google\/Chrome|Chromium|Microsoft Edge|BraveSoftware\/Brave-Browser)|\.config\/(google-chrome|chromium|microsoft-edge|BraveSoftware\/Brave-Browser)|AppData\/Local\/(Google\/Chrome|Chromium|Microsoft\/Edge|BraveSoftware\/Brave-Browser)\/User Data)\/*$/i
 
-// `command` is the browser's full command line, as `ps -o command=` prints it.
+// `command` is the browser's full command line (`ps -o command=` or the Windows
+// CommandLine); a quoted --user-data-dir keeps its spaces and loses its quotes.
 export const throwawayProfile = (command: string) => {
-  const dir = /--user-data-dir=(.+?)(?= --|$)/.exec(command.trim())?.[1]?.trim()
-  return dir !== undefined && dir !== '' && !DEFAULT_PROFILE.test(dir)
+  const m = /--user-data-dir=(?:"([^"]*)"|(.+?)(?= --|$))/.exec(command.trim())
+  const dir = (m?.[1] ?? m?.[2])?.trim()
+  return dir !== undefined && dir !== '' && !DEFAULT_PROFILE.test(dir.replace(/\\/g, '/'))
 }
+
+// Windows has no `ps`; its command line comes from the process table.
+export const commandLineArgv = (os: string, pid: number) =>
+  os === 'win32'
+    ? [
+        'powershell',
+        '-NoProfile',
+        '-Command',
+        `(Get-CimInstance Win32_Process -Filter 'ProcessId=${pid}').CommandLine`,
+      ]
+    : ['ps', '-ww', '-o', 'command=', '-p', String(pid)]
 
 export const requireThrowaway = (pid: number) =>
   Effect.flatMap(
     Effect.orElseSucceed(
       Effect.map(
-        runProc(['ps', '-ww', '-o', 'command=', '-p', String(pid)], { timeoutMs: 5_000 }),
+        runProc(commandLineArgv(process.platform, pid), { timeoutMs: 5_000 }),
         (res) => res.stdout,
       ),
       () => '',
