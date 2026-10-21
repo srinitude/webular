@@ -14,7 +14,14 @@ export const paging = {
 }
 
 export const machineSchema = z.object({
-  machine: z.enum(['cliDispatch', 'commandLifecycle', 'fetch', 'mcpServe', 'scrapeFallback']),
+  machine: z.enum([
+    'cliDispatch',
+    'commandLifecycle',
+    'fetch',
+    'jevCommand',
+    'mcpServe',
+    'scrapeFallback',
+  ]),
   events: z.array(z.string()).max(64).default([]),
   ...paging,
 })
@@ -31,6 +38,9 @@ const machines = {
     Effect.map((m) => m.commandLifecycleMachine),
   ),
   fetch: lazy(() => import('../machines/fetch.ts')).pipe(Effect.map((m) => m.fetchMachine)),
+  jevCommand: lazy(() => import('../machines/jev-command.ts')).pipe(
+    Effect.map((m) => m.jevCommandMachine),
+  ),
   mcpServe: lazy(() => import('../machines/mcp-serve.ts')).pipe(
     Effect.map((m) => m.mcpServeMachine),
   ),

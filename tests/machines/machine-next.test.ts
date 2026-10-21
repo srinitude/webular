@@ -24,6 +24,10 @@ const START: Record<string, { state: string; next: string[] }> = {
       'TIMEOUT',
     ],
   },
+  jevCommand: {
+    state: 'parsingArgv',
+    next: ['CORRECT', 'HELP', 'LEARN', 'USAGE_ERROR'],
+  },
   mcpServe: { state: 'serving', next: ['STOP', 'TOOL_INVALID_ARGS', 'TOOL_OK', 'TOOL_UNKNOWN'] },
   scrapeFallback: { state: 'fetching', next: ['FETCHED', 'FETCH_FAILED', 'PDF_REFUSED'] },
 }
