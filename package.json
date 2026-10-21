@@ -38,6 +38,7 @@
     "mise.toml",
     "bun.lock",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "engines": {
@@ -52,6 +53,7 @@
     "@mozilla/readability": "^0.6.0",
     "agent-browser": "^0.39.1",
     "diff": "^9.0.0",
+    "effect": "4.0.5",
     "linkedom": "^0.18.13",
     "mammoth": "^1.13.0",
     "p-limit": "^7.3.3",
@@ -65,8 +67,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
+    "@effect/platform-bun": "4.0.5",
     "@types/bun": "^1.4.3",
-    "@types/diff": "^8.0.0",
     "@types/turndown": "^5.0.6",
     "deepsec": "^2.3.10",
     "typescript": "6.0.3"

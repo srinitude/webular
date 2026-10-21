@@ -1,0 +1,14 @@
+# Keeps SHA-pinned actions and npm dependencies current through reviewed PRs.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      effect:
+        patterns: ['effect', '@effect/*']

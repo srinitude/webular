@@ -1,0 +1,71 @@
+// Best-practices gate (docs/best-practices.md): CI workflow and package metadata.
+import { describe, expect } from 'bun:test'
+import { Effect } from 'effect'
+import { exists, fileChecks, packageJson, read } from '../_support/repo-files.ts'
+
+const check = fileChecks()
+
+const workflow = read('.github/workflows/ci.yml')
+
+describe('best practices: CI workflow', () => {
+  check(
+    'every action is pinned to a full commit SHA',
+    Effect.map(workflow, (yml) => {
+      const uses = [...yml.matchAll(/uses:\s*(\S+)/g)].map((m) => m[1] ?? '')
+      expect(uses.length).toBeGreaterThan(0)
+      for (const ref of uses) expect(ref).toMatch(/@[0-9a-f]{40}$/)
+    }),
+  )
+  check(
+    'token is read-only, not persisted, and the job has a timeout',
+    Effect.map(workflow, (yml) => {
+      expect(yml).toMatch(/permissions:\s*\n\s+contents: read/)
+      expect(yml).toContain('persist-credentials: false')
+      expect(yml).toMatch(/timeout-minutes: \d+/)
+      expect(yml).not.toContain('pull_request_target')
+    }),
+  )
+  check(
+    'dependabot keeps action and npm pins current',
+    Effect.map(read('.github/dependabot.yml'), (yml) => {
+      expect(yml).toContain('package-ecosystem: github-actions')
+      expect(yml).toContain('package-ecosystem: npm')
+    }),
+  )
+})
+
+describe('best practices: package engines and files', () => {
+  check(
+    'engines.bun matches the mise bun pin',
+    Effect.gen(function* () {
+      const pin = (yield* read('mise.toml')).match(/^bun = "([^"]+)"/m)?.[1]
+      expect((yield* packageJson).engines.bun).toBe(`>=${pin}`)
+    }),
+  )
+  check(
+    'every path in files exists and CHANGELOG.md ships',
+    Effect.gen(function* () {
+      const { files } = yield* packageJson
+      expect(files).toContain('CHANGELOG.md')
+      for (const path of files) expect(yield* exists(path)).toBe(true)
+    }),
+  )
+})
+
+describe('best practices: package dependencies', () => {
+  check(
+    'no @types package for a library that ships its own types',
+    Effect.map(packageJson, ({ devDependencies }) => {
+      for (const name of ['diff', 'effect', 'zod', 'mammoth', 'mozilla__readability']) {
+        expect(Object.keys(devDependencies)).not.toContain(`@types/${name}`)
+      }
+    }),
+  )
+  check(
+    'effect packages share one exact version',
+    Effect.map(packageJson, ({ dependencies, devDependencies }) => {
+      expect(dependencies.effect).toMatch(/^\d+\.\d+\.\d+$/)
+      expect(devDependencies['@effect/platform-bun']).toBe(dependencies.effect)
+    }),
+  )
+})
