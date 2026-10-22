@@ -25,5 +25,6 @@ This page links every doc in this folder. The first group is the best place to b
 - [Bug classes](bug-classes.md): each kind of bug webular can hit, where it shows up, and what guards against it.
 - [Mise tasks](tasks.md): every `mise` task, what it does, and what it runs first.
 - [Best practices](best-practices.md): each practice webular follows, with its source and check.
+- [Research ledger](research/README.md): the papers behind webular's design choices, and the ranked changes each topic suggests.
 - [Jev in webular](jev.md): how to set up the Jev key on any OS, and each route webular takes to Jev for its judgment calls.
 - [Docs rules](AGENTS.md): the rules for writing these pages.

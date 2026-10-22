@@ -4,16 +4,16 @@ The benchmark code. The root [AGENTS.md](../../AGENTS.md) holds the repo-wide ru
 
 ## What lives here
 
-- [peers/](peers/): the peer benchmark against other web research tools.
-- [tasks/](tasks/): the generators that build the task sets in [bench/tasks/](../../bench/tasks/).
-- [run.ts](run.ts), [worker-io.ts](worker-io.ts), [loader.ts](loader.ts), [schema.ts](schema.ts), [guards.ts](guards.ts), [recordings.ts](recordings.ts), and [order.ts](order.ts): the live runner and replay path, with the guards every row set must pass.
-- [grade.ts](grade.ts), [judge.ts](judge.ts), [stats.ts](stats.ts), [cost.ts](cost.ts), [claims.ts](claims.ts), and [report.ts](report.ts): grading, statistics, cost, and the report.
-- [agreement.ts](agreement.ts): Cohen's and Fleiss' kappa, as pure functions, shared by the judge and the grader track.
-- [dataset-fetch.ts](dataset-fetch.ts), [dataset-manifest.ts](dataset-manifest.ts), and [dataset-pin.ts](dataset-pin.ts): download and check the public datasets pinned in [bench/datasets/](../../bench/datasets/).
-- [search-gold.ts](search-gold.ts): the search gold-set eval. It runs `webular search` on the first rows of the dev set in [bench/tasks/dev/search.jsonl](../../bench/tasks/dev/search.jsonl), then prints hit@10 and median latency.
-- [bare-bun.ts](bare-bun.ts), [import-feed-workflow.ts](import-feed-workflow.ts), and [import-mastra-workflows.ts](import-mastra-workflows.ts): the cold-start probes that `mise run bench` times.
+- [peers/](peers/) and [tasks/](tasks/) (task set generators).
+- Run and replay: [run.ts](run.ts), [worker-io.ts](worker-io.ts), [loader.ts](loader.ts), [schema.ts](schema.ts), [guards.ts](guards.ts), [recordings.ts](recordings.ts), [order.ts](order.ts).
+- Grading and report: [grade.ts](grade.ts), [judge.ts](judge.ts), [stats.ts](stats.ts), [cost.ts](cost.ts), [claims.ts](claims.ts), [report.ts](report.ts), [agreement.ts](agreement.ts).
+- Search gold set: [search-gold.ts](search-gold.ts) runs `webular search` on the first rows of [the dev set](../../bench/tasks/dev/search.jsonl) and prints hit@10 and median latency.
+- Datasets: [dataset-fetch.ts](dataset-fetch.ts), [dataset-manifest.ts](dataset-manifest.ts), [dataset-pin.ts](dataset-pin.ts). Cold-start probes: [bare-bun.ts](bare-bun.ts), [import-feed-workflow.ts](import-feed-workflow.ts), [import-mastra-workflows.ts](import-mastra-workflows.ts).
 
 ## Rules
+
+- Don't grade a number by exact text match. Give each numeric answer a stated tolerance. Source: [arXiv 2509.07968](https://arxiv.org/abs/2509.07968).
+- Don't report a judge score without its calibration against human labels and a confidence interval. Source: [arXiv 2511.21140](https://arxiv.org/abs/2511.21140).
 
 ### Task sets
 

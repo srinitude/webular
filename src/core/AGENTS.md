@@ -4,15 +4,11 @@ Rules for the shared Effect services, under [src/AGENTS.md](../AGENTS.md).
 
 ## What lives here
 
-- Process edge: [effect](effect.ts) (typed failures and exit codes), [args](args.ts) (flag parsing), [output](output.ts) (stdout, stderr, and the `-o` file).
-- Fetching: [http](http.ts) runs requests, [http-body](http-body.ts) reads bodies, [decode](decode.ts) turns bytes into text, [gunzip](gunzip.ts) inflates gzip sitemaps, [cache](cache.ts) is the disk cache, [archive](archive.ts) is the Wayback fallback.
-- Policy: [fetch-policy](fetch-policy.ts) holds the retry, redirect, and failure rules. [budget](budget.ts) sizes fan-out from real host limits.
-- Scope and safety: [address-guard](address-guard.ts) blocks private addresses. [url](url.ts) sets URL identity and host scope. [safepath](safepath.ts) confines output paths.
-- Host: [proc](proc.ts) runs subprocesses, [root](root.ts) finds the package root, [platform](platform.ts) picks the executable that fits the machine.
-- Small helpers: [auth-headers](auth-headers.ts), [capped-bytes](capped-bytes.ts), [feed-source](feed-source.ts), [retry-after](retry-after.ts), and [utc-date](utc-date.ts).
+[effect.ts](effect.ts), [args.ts](args.ts), [output.ts](output.ts), [http.ts](http.ts), [http-body.ts](http-body.ts), [decode.ts](decode.ts), [gunzip.ts](gunzip.ts), [cache.ts](cache.ts), [archive.ts](archive.ts), [fetch-policy.ts](fetch-policy.ts), [budget.ts](budget.ts), [address-guard.ts](address-guard.ts), [url.ts](url.ts), [safepath.ts](safepath.ts), [proc.ts](proc.ts), [root.ts](root.ts), [platform.ts](platform.ts), [auth-headers.ts](auth-headers.ts), [capped-bytes.ts](capped-bytes.ts), [feed-source.ts](feed-source.ts), [retry-after.ts](retry-after.ts), [utc-date.ts](utc-date.ts).
 
 ## Rules
 
+- Don't write an error that only says what failed. Name the fix and the valid values. Source: [arXiv 2601.15625](https://arxiv.org/abs/2601.15625).
 - Bug classes here ([bug classes](../../docs/bug-classes.md)): fetch timeouts, body caps, shell-free child processes, URL keys, home paths. Guard tasks: `mise run bugs:security`, `bugs:parsing`, `bugs:os`.
 - [`src/machines/fetch.ts`](../machines/fetch.ts) decides every retry, redirect, and failure. [http](http.ts) only performs what it asks. Change the rule in [fetch-policy](fetch-policy.ts), never in [http](http.ts).
 - [url](url.ts) matches the exact host on purpose. Apex and `www` siblings are out of scope.

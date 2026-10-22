@@ -4,11 +4,13 @@ Rules for the XState flow machines, under [src/AGENTS.md](../AGENTS.md).
 
 ## What lives here
 
-- Flows: [`cli-dispatch.ts`](cli-dispatch.ts) (route or answer locally), [`command-lifecycle.ts`](command-lifecycle.ts) (validate, run, render), [`fetch.ts`](fetch.ts) (retry, redirect, failure), [`scrape-fallback.ts`](scrape-fallback.ts) (render or read a PDF), [`jev-command.ts`](jev-command.ts) (the `jev` command), and [`mcp-serve.ts`](mcp-serve.ts) (serve over stdio).
-- Agent: [`agent.ts`](agent.ts) is a Stately agent that picks the next event of a machine. [`agent-model.ts`](agent-model.ts) chooses its model from `WEBULAR_AGENT_MODEL`. [`agent-jev.ts`](agent-jev.ts) lets Jev be the planner.
+- Flows: [cli-dispatch.ts](cli-dispatch.ts), [command-lifecycle.ts](command-lifecycle.ts), [fetch.ts](fetch.ts), [scrape-fallback.ts](scrape-fallback.ts), [jev-command.ts](jev-command.ts), [mcp-serve.ts](mcp-serve.ts).
+- Agent: [agent.ts](agent.ts), [agent-model.ts](agent-model.ts), [agent-jev.ts](agent-jev.ts).
 
 ## Rules
 
+- Don't trust a stated confidence right after a web search. Ask for a second source first. Source: [arXiv 2601.07264](https://arxiv.org/abs/2601.07264).
+- Don't let the agent loop run without a step cap. Most search sessions end within ten steps. Source: [arXiv 2601.17617](https://arxiv.org/abs/2601.17617).
 - Bug classes here ([bug classes](../../docs/bug-classes.md)): machine drift. Guard tasks: `mise run bugs:jev`.
 - A machine is the flow doc. Do not draw a diagram of it.
 - A final state carries an `exit-<code>` tag from [`src/cli/exit-codes.ts`](../cli/exit-codes.ts).

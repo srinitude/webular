@@ -34,6 +34,7 @@ coverage/
 .DS_Store
 
 research/
+!docs/research/
 
 # Internal artifacts — not part of the distributable npm package
 docs/security/

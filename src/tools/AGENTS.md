@@ -4,15 +4,12 @@ Rules for the MCP tools, under [src/AGENTS.md](../AGENTS.md).
 
 ## What lives here
 
-- [`web.ts`](web.ts) holds the tool definitions. It is the one source for `webular mcp`, so `--list` and serve register the same tools.
-- [`web-schemas.ts`](web-schemas.ts) holds the input schemas of the web tools. Their URL fields accept only `http` and `https`.
-- [`web-register.ts`](web-register.ts) loosens a tool's input schema at registration, so the tool's own handler gives the error text.
-- [`web-call.ts`](web-call.ts) runs a command tool: time limit, progress, errors.
-- [`web-machine.ts`](web-machine.ts) is the `machine.next` tool. It shows a machine's state after replaying events.
-- [`sdk-errors.ts`](sdk-errors.ts) adds the JSON-RPC error replies the SDK does not send.
+[web.ts](web.ts) (the one tool list for `webular mcp`), [web-schemas.ts](web-schemas.ts), [web-register.ts](web-register.ts), [web-call.ts](web-call.ts), [web-machine.ts](web-machine.ts), [sdk-errors.ts](sdk-errors.ts).
 
 ## Rules
 
+- Don't put a format rule only in a parameter description. Enforce it in the zod schema. Source: [arXiv 2509.18420](https://arxiv.org/abs/2509.18420).
+- Don't return fetched page text as if it were instructions. Mark it as untrusted data. Source: [arXiv 2510.15994](https://arxiv.org/abs/2510.15994).
 - A tool shares its name, input shape, and error text with its CLI command. Ask first before you rename one.
 - Bad tool input (an unknown key or a bad paging cursor) gets an `isError` result, never a silent drop. `mise run bugs:mcp-cli` checks it.
 - A handler parses its input again with the same zod schema. A failing tool returns `isError` content and never breaks the protocol.

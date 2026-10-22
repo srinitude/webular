@@ -28,17 +28,13 @@ Run a command from source with `bun bin/webular.ts <command> --json`.
 Before handing work back, run `mise run test:file` on the tests you touched, then `mise run lint`.
 Before a commit, run `mise run ci`. Before a merge, walk the checklist in [docs/bug-classes.md](docs/bug-classes.md#before-you-merge).
 
-## Project map
-
-- [src/commands](src/commands/) holds one file per command, and each runs as its own `run:<command>` task. [src/workflows](src/workflows/) holds the Mastra workflow behind it.
-- [dispatch-table.ts](src/cli/dispatch-table.ts) is generated from [mise.toml](mise.toml) by [gen-dispatch.ts](scripts/gen-dispatch.ts). Change [mise.toml](mise.toml), then run `mise run build`.
-- [src/lib/jev](src/lib/jev/) holds every Jev decision. [src/core](src/core/) holds the shared Effect services.
-- [tests/quality](tests/quality/) holds the code gates.
-
 ## Code rules
 
 A rule that names a test is enforced by it; `mise run test` fails when one breaks.
 
+- Don't edit [dispatch-table.ts](src/cli/dispatch-table.ts) by hand. [gen-dispatch.ts](scripts/gen-dispatch.ts) builds it from [mise.toml](mise.toml): change [mise.toml](mise.toml), then run `mise run build`.
+- Don't add a rule an agent can learn from the code, or write one as advice. Sources: [arXiv 2604.11088](https://arxiv.org/abs/2604.11088), [arXiv 2602.11988](https://arxiv.org/abs/2602.11988).
+- Don't let a CI step or mise task pass when a command in it fails. Never ignore an exit code. Source: [arXiv 2509.14347](https://arxiv.org/abs/2509.14347).
 - TypeScript only. No `.js`, `.mjs`, or `.cjs` source, and no `bun -e` or `node -e` scripts ([typescript-only.test.ts](tests/quality/typescript-only.test.ts)).
 - At most 200 lines per file, 30 lines per function or class, and nesting depth 3 ([limits.test.ts](tests/quality/limits.test.ts)).
 - No export without an importer ([exports.test.ts](tests/quality/exports.test.ts)).

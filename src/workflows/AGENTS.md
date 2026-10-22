@@ -4,13 +4,11 @@ Rules for the Mastra workflows, under [src/AGENTS.md](../AGENTS.md).
 
 ## What lives here
 
-- One workflow per command, such as [search](search.ts), [scrape](scrape.ts), [crawl](crawl.ts), [audit](audit.ts), [batch](batch.ts), [diagram](diagram.ts), [doctor](doctor.ts), and [answer](answer.ts). A command in [`src/commands/`](../commands/) runs the workflow with the same name.
-- [runtime](runtime.ts) is the one place where an Effect program meets a Mastra step. Its runtime also holds the per-origin robots.txt cache.
-- [scrape-fallback](scrape-fallback.ts) holds the render and PDF fallbacks around the plain fetch. A PDF is read through `pdfText` in [`src/lib/parse.ts`](../lib/parse.ts), which owns the page cap and the deadline.
-- [answer](answer.ts) stamps its result with `asOf`, the run date from [`src/lib/as-of.ts`](../lib/as-of.ts). `WEBULAR_AS_OF` pins it.
+One workflow per command in [`src/commands/`](../commands/): [act.ts](act.ts), [answer.ts](answer.ts), [audit.ts](audit.ts), [batch.ts](batch.ts), [crawl.ts](crawl.ts), [diagram.ts](diagram.ts), [doctor.ts](doctor.ts), [extract.ts](extract.ts), [feed.ts](feed.ts), [map.ts](map.ts), [media.ts](media.ts), [monitor.ts](monitor.ts), [parse.ts](parse.ts), [research.ts](research.ts), [scrape.ts](scrape.ts), [search.ts](search.ts), [summarize.ts](summarize.ts), [tasks.ts](tasks.ts). Helpers: [runtime.ts](runtime.ts), [scrape-fallback.ts](scrape-fallback.ts), [scrape-schemas.ts](scrape-schemas.ts), [map-xml.ts](map-xml.ts).
 
 ## Rules
 
+- Don't keep a redirect source or a soft-404 end page in map output. Key each link on its final URL. Source: [arXiv 2507.22019](https://arxiv.org/abs/2507.22019).
 - A workflow has no model call of its own. Jev decisions go through `decisionStep` from [`src/lib/jev/steps.ts`](../lib/jev/steps.ts), with a rule-based fallback.
 - Every step runs its Effect program through [runtime](runtime.ts). Mastra needs a Promise here; this is the only Promise edge, so add no other.
 - Keep the real work in [`src/lib/`](../lib/). A step stays short and calls into it.
