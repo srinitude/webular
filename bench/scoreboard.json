@@ -863,5 +863,21 @@
     "status": "gap",
     "eval": null,
     "set": null
+  },
+  {
+    "command": "upgrade",
+    "metric": "test pass rate",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "completions",
+    "metric": "test pass rate",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
   }
 ]

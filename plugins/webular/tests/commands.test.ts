@@ -3,6 +3,7 @@
 import { expect, test } from 'bun:test'
 import { Effect } from 'effect'
 import { COMMAND_NAMES } from '../../../src/cli/commands.ts'
+import { NOT_ON_MCP } from '../../../src/tools/web.ts'
 import { commandTools } from '../src/commands.ts'
 
 const ids: string[] = commandTools.map((tool) => tool.id)
@@ -15,11 +16,12 @@ test('the list holds the 19 command tools, with unique names', () =>
     }),
   ))
 
-test('every tool is a CLI command, and mcp is the only command without one', () =>
+test('every tool is a CLI command, and only the NOT_ON_MCP commands have none', () =>
   Effect.runPromise(
     Effect.sync(() => {
       for (const id of ids) expect(COMMAND_NAMES as string[]).toContain(id)
-      expect(COMMAND_NAMES.filter((name) => !ids.includes(name))).toEqual(['mcp'])
+      const without: string[] = COMMAND_NAMES.filter((name) => !ids.includes(name))
+      expect(without.sort()).toEqual(Object.keys(NOT_ON_MCP).sort())
     }),
   ))
 

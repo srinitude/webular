@@ -5,11 +5,12 @@
 import { Config, Console, Effect } from 'effect'
 import { ChildProcess, ChildProcessSpawner } from 'effect/process'
 import pkg from '../../package.json' with { type: 'json' }
-import { EXIT } from '../cli/exit-codes.ts'
+import { EXIT, settledExit } from '../cli/exit-codes.ts'
 import { parseFlags } from '../core/args.ts'
 import { CliError, runMain } from '../core/effect.ts'
 import { httpGet } from '../core/http.ts'
 import { errMsg } from '../core/output.ts'
+import { commandLifecycleMachine } from '../machines/command-lifecycle.ts'
 import { upgradeFor } from '../release/upgrade.ts'
 
 const WINDOWS = process.platform === 'win32'
@@ -47,18 +48,26 @@ const runShell = (command: string) =>
     return Number(yield* handle.exitCode)
   }).pipe(Effect.scoped)
 
+// A printed answer settles the command lifecycle machine like a rendered result.
+const printed = () =>
+  settledExit(commandLifecycleMachine, [
+    { type: 'INPUT_VALID' },
+    { type: 'WORKFLOW_SUCCEEDED' },
+    { type: 'NO_ERRORS' },
+  ])
+
 const main = Effect.gen(function* () {
   const { values } = yield* parseFlags(Bun.argv.slice(2), { yes: { type: 'boolean' } })
   const latest = yield* latestVersion
   if (latest === pkg.version) {
     yield* Console.log(`webular ${pkg.version} is already on latest`)
-    return EXIT.ok
+    return printed()
   }
   const command = yield* upgradeCommand
   yield* Console.log(`webular ${pkg.version} -> ${latest}\n${command}`)
   if (values['yes'] !== true) {
     yield* Console.error('Run that command, or run `webular upgrade --yes` to run it now.')
-    return EXIT.ok
+    return printed()
   }
   return yield* runShell(command)
 })

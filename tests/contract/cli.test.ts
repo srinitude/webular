@@ -33,7 +33,7 @@ const fx = useFixture(() => ({
 
 // Commands with no required input run real work with no flags, so only the
 // unknown-flag half of the usage check applies to them.
-const NO_REQUIRED_INPUT = new Set(['doctor', 'tasks', 'mcp', 'diagram', 'audit'])
+const NO_REQUIRED_INPUT = new Set(['doctor', 'tasks', 'mcp', 'diagram', 'audit', 'upgrade'])
 
 describe('every command honors --help and usage errors', () => {
   for (const cmd of COMMAND_NAMES) {

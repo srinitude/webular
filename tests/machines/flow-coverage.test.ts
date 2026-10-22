@@ -26,7 +26,9 @@ const commandHasMachine = (cmd: string) =>
   Effect.gen(function* () {
     const own = OWN_MACHINE[cmd]
     if (own === undefined)
-      return expect(yield* read(`src/commands/${cmd}.ts`), cmd).toContain('runWorkflow')
+      return expect(yield* read(`src/commands/${cmd}.ts`), cmd).toMatch(
+        /runWorkflow|commandLifecycleMachine/,
+      )
     expect(yield* exists(`src/machines/${own}.ts`), cmd).toBe(true)
     expect(yield* exists(`tests/machines/${own}.test.ts`), cmd).toBe(true)
   })
@@ -40,7 +42,7 @@ test('every MCP tool is a command, a web tool, or machine.next', () => {
   const served = COMMAND_NAMES.filter((c) => !(c in NOT_ON_MCP)).sort()
   const named = mcpToolIds.filter((id) => !id.startsWith('web.') && id !== 'machine.next')
   expect(named).toEqual(served)
-  expect(Object.keys(NOT_ON_MCP).every((c) => c in OWN_MACHINE)).toBe(true)
+  expect(Object.keys(NOT_ON_MCP).every((c) => (COMMAND_NAMES as string[]).includes(c))).toBe(true)
 })
 
 const machineHasTest = (file: string) =>

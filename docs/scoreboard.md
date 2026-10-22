@@ -123,6 +123,8 @@
 | `feed` | latency p95 ms | gap |  |  |  |  |
 | `jev` | Jev eval pass rate | gap |  |  |  |  |
 | `jev` | test pass rate | gap |  |  |  |  |
+| `upgrade` | test pass rate | gap |  |  |  |  |
+| `completions` | test pass rate | gap |  |  |  |  |
 <!-- scoreboard:end -->
 
 Return to the [command reference](commands.md) (navigation only).

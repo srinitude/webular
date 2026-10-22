@@ -11,6 +11,8 @@ import { loadScenarios } from './scenarios.ts'
 const EXEMPT: Readonly<Record<string, string>> = {
   mcp: 'serves the MCP tools every scenario already calls; it is the transport, not a capability',
   act: 'drives a real browser or Cua window, which no fixture can replay',
+  upgrade: 'changes the local install and is CLI-only (NOT_ON_MCP); no model surface applies',
+  completions: 'prints a shell setup script and is CLI-only (NOT_ON_MCP); no model surface applies',
 }
 
 const Tools = Schema.fromJsonString(

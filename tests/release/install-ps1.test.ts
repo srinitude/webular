@@ -2,7 +2,7 @@
 // WEBULAR_OS and WEBULAR_ARCH force the windows-x64 asset on any OS with pwsh.
 import { afterAll, expect, test } from 'bun:test'
 import { BunServices } from '@effect/platform-bun'
-import { Effect, FileSystem, ManagedRuntime } from 'effect'
+import { Effect, FileSystem, ManagedRuntime, Stream } from 'effect'
 import { ChildProcess, ChildProcessSpawner } from 'effect/process'
 import { assetName, TARGETS } from '../../src/core/platform.ts'
 import { ROOT } from '../_support/root.ts'
@@ -24,9 +24,10 @@ const run = (env: Record<string, string>, script = SCRIPT) =>
       env: { WEBULAR_OS: 'windows', ...env },
       extendEnv: true,
     })
-    const output = yield* spawner.string(command, { includeStderr: true })
-    const code = yield* spawner.exitCode(command)
-    return { code: Number(code), output: output.trim() }
+    // One process: read stdout and stderr together, then its exit code.
+    const handle = yield* spawner.spawn(command)
+    const output = yield* handle.all.pipe(Stream.decodeText(), Stream.mkString)
+    return { code: Number(yield* handle.exitCode), output: output.trim() }
   }).pipe(Effect.scoped)
 
 const QUIET = { WEBULAR_ARCH: 'x64', WEBULAR_NO_MODIFY_PATH: '1', WEBULAR_VERIFY_ATTESTATION: '0' }

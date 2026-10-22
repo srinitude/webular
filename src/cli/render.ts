@@ -79,7 +79,8 @@ const RENDERERS: Record<CommandName, Renderer> = {
       ? `${str(r, 'snapshot')}\nscreenshot: ${str(r, 'screenshot')}`
       : str(r, 'snapshot'),
   jev: (r) => str(r, 'summary'),
-  // Both print plain text themselves and never go through run.ts.
+  // Both print plain text themselves and never go through run.ts; each still
+  // settles the command lifecycle machine for its exit code.
   upgrade: (r) => str(r, 'command'),
   completions: (r) => str(r, 'script'),
   feed: (r) =>

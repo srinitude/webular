@@ -5,10 +5,11 @@ import { join } from 'node:path'
 import { Console, Effect, FileSystem } from 'effect'
 import { COMMAND_NAMES, COMMANDS } from '../cli/commands.ts'
 import { completionFiles } from '../cli/completion-script.ts'
-import { EXIT } from '../cli/exit-codes.ts'
+import { EXIT, settledExit } from '../cli/exit-codes.ts'
 import { parseFlags, strFlag } from '../core/args.ts'
 import { CliError, runMain } from '../core/effect.ts'
 import { PACKAGE_ROOT } from '../core/root.ts'
+import { commandLifecycleMachine } from '../machines/command-lifecycle.ts'
 
 const SHELLS = { bash: 0, zsh: 1, fish: 2, powershell: 3 } as const
 const SPEC = /'?([a-z][a-z-]*)'?: \{ type: '(?:string|boolean)'/g
@@ -42,13 +43,21 @@ const main = Effect.gen(function* () {
     shell: { type: 'string' },
   })
   const shell = strFlag(values, 'shell') ?? positionals[0] ?? ''
+  if (shell === '') {
+    const message = 'completions: missing <shell>. Pass bash, zsh, fish, or powershell.'
+    return yield* new CliError({ message, exitCode: EXIT.usage })
+  }
   if (!Object.hasOwn(SHELLS, shell)) {
     const message = `completions: pick a shell: ${Object.keys(SHELLS).join(', ')} (got "${shell}")`
     return yield* new CliError({ message, exitCode: EXIT.usage })
   }
   const file = completionFiles(yield* spec)[SHELLS[shell as keyof typeof SHELLS]]
   yield* Console.log(file[1].trimEnd())
-  return EXIT.ok
+  return settledExit(commandLifecycleMachine, [
+    { type: 'INPUT_VALID' },
+    { type: 'WORKFLOW_SUCCEEDED' },
+    { type: 'NO_ERRORS' },
+  ])
 })
 
 runMain(main)

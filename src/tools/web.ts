@@ -110,6 +110,9 @@ function execute(tool: McpToolDef, args: Record<string, unknown>): Effect.Effect
 // src/cli/commands.ts is a tool on both MCP servers.
 export const NOT_ON_MCP = {
   mcp: 'It starts the MCP server itself, so it cannot be a tool on that server.',
+  upgrade:
+    'It changes how webular itself is installed on this computer, which a tool call must not do.',
+  completions: 'It only prints a shell setup script, which an MCP client has no use for.',
 } as const
 
 // Every tool `webular mcp` lists, in tools/list order.
