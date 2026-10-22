@@ -2,13 +2,13 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.srinitude/webular",
   "description": "Search, scrape, crawl, and answer with sources, from your own machine",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "repository": { "url": "https://github.com/srinitude/webular", "source": "github" },
   "packages": [
     {
       "registryType": "npm",
       "identifier": "webular",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "runtimeHint": "bunx",
       "transport": { "type": "stdio" },
       "packageArguments": [{ "type": "positional", "value": "mcp" }]

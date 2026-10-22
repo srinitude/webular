@@ -4,6 +4,8 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and 
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-22
+
 ### Added
 
 - Jev is the only key (`TYPESAFE_API_KEY`). Requests go to the direct TypeSafe endpoint, then the Pydantic AI Gateway, and `webular doctor` shows the route. Each request uses the pinned release `jev-1.14.0`.
@@ -67,7 +69,8 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and 
 
 - A universal web research CLI, routed through mise into Mastra workflows built on free and open-source libraries.
 
-[Unreleased]: https://github.com/srinitude/webular/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/srinitude/webular/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/srinitude/webular/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/srinitude/webular/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/srinitude/webular/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/srinitude/webular/releases/tag/v0.1.0
