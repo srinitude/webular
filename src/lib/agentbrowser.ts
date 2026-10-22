@@ -4,7 +4,7 @@
 // Bin resolution is package-rooted, not cwd-rooted, so global installs work
 // from any directory.
 import { dirname, join } from 'node:path'
-import { Effect, FileSystem, type Path } from 'effect'
+import { Context, Effect, FileSystem, type Path } from 'effect'
 import { runProc } from '../core/proc.ts'
 import { resolveBin } from '../core/root.ts'
 
@@ -43,29 +43,50 @@ export const agentBin = Effect.fn('agentBin')(function* () {
   return direct ?? bin
 })
 
-// A named session keeps its browser warm between batches; its daemon shuts
-// itself down after IDLE_MS with no command, so nothing outlives the work.
-// The variable goes through the spawn env, not /usr/bin/env, which Windows lacks.
+// A named session keeps its browser warm between batches of one run. Every
+// batch names a webular session, never agent-browser's `default`, which has no
+// idle timeout and so outlived every run that opened it. The run's end closes
+// each session it opened (closeSessions); the daemon's idle timeout backs that
+// up if the process dies first. The variable goes through the spawn env, not
+// /usr/bin/env, which Windows lacks.
 const IDLE_MS = 120_000
-const sessionArgs = (session?: string) => (session ? ['--session', session] : [])
-const sessionEnv = (session?: string) =>
-  session ? { env: { AGENT_BROWSER_IDLE_TIMEOUT_MS: String(IDLE_MS) }, extendEnv: true } : {}
+
+// The sessions opened since the last closeSessions, shared like ProcPermits.
+// ponytail: one set per process; two runs at once in one process (the MCP
+// server) close each other's warm sessions early: a cold start, never a leak.
+export const OpenSessions = Context.Reference<Set<string>>('webular/lib/OpenSessions', {
+  defaultValue: () => new Set(),
+})
 
 export const runBatch = Effect.fn('runBatch')(function* (
   commands: string[][],
-  session?: string,
+  session = 'webular',
   timeoutMs = 60_000,
 ) {
   const bin = yield* agentBin()
   if (!bin)
     return { stdout: '', stderr: 'agent-browser unavailable — reinstall webular', code: 127 }
-  const { stdout, stderr, code } = yield* runProc(
-    [bin, ...sessionArgs(session), 'batch', '--bail'],
-    {
-      timeoutMs,
-      stdin: JSON.stringify(commands),
-      ...sessionEnv(session),
-    },
-  )
+  ;(yield* OpenSessions).add(session)
+  const { stdout, stderr, code } = yield* runProc([bin, '--session', session, 'batch', '--bail'], {
+    timeoutMs,
+    stdin: JSON.stringify(commands),
+    env: { AGENT_BROWSER_IDLE_TIMEOUT_MS: String(IDLE_MS) },
+    extendEnv: true,
+  })
   return { stdout, stderr, code }
+})
+
+// Closes every session opened since the last call, so no browser outlives the
+// run, command, or test that started it.
+export const closeSessions = Effect.gen(function* () {
+  const open = yield* OpenSessions
+  yield* Effect.forEach(
+    [...open],
+    (session) =>
+      runBatch([['close']], session, 15_000).pipe(
+        Effect.ignore,
+        Effect.ensuring(Effect.sync(() => open.delete(session))),
+      ),
+    { concurrency: 4, discard: true },
+  )
 })

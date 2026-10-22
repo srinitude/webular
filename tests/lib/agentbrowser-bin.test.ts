@@ -2,7 +2,7 @@
 // the node shim that adds a node start (about 250 ms) to each batch.
 import { describe, expect, test } from 'bun:test'
 import { Effect } from 'effect'
-import { agentBin, runBatch } from '../../src/lib/agentbrowser.ts'
+import { agentBin, closeSessions, runBatch } from '../../src/lib/agentbrowser.ts'
 import { eff } from '../_support/run.ts'
 
 describe.skipIf(process.platform === 'linux')('agent-browser binary', () => {
@@ -20,6 +20,7 @@ describe.skipIf(process.platform === 'linux')('agent-browser binary', () => {
         expect(head).not.toBe('#!')
         const res = yield* runBatch([['--version']])
         expect(res.code).not.toBe(127)
+        yield* closeSessions
       }),
     ),
   )

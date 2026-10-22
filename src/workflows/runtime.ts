@@ -6,6 +6,7 @@
 import * as BunServices from '@effect/platform-bun/BunServices'
 import { ConfigProvider, Effect, Layer, ManagedRuntime } from 'effect'
 import { HostBudget } from '../core/budget.ts'
+import { closeSessions } from '../lib/agentbrowser.ts'
 import { requestLog } from '../lib/request-log.ts'
 import { RobotsGate } from '../lib/robots-gate.ts'
 import { ParsePool } from '../lib/sources.ts'
@@ -34,3 +35,7 @@ export const stepRuntime = ManagedRuntime.make(
 export const drainParsePool = Effect.tryPromise(() =>
   stepRuntime.runPromise(ParsePool.use((pool) => pool.drain)),
 )
+
+// Closes the agent-browser sessions the run opened: a warm session serves
+// repeat pages inside one run and never outlives it.
+export const closeBrowserSessions = Effect.tryPromise(() => stepRuntime.runPromise(closeSessions))
