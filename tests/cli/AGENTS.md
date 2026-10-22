@@ -7,6 +7,7 @@ Tests for the CLI edge. The parent rules are in [tests/AGENTS.md](../AGENTS.md).
 - Dispatch: [`dispatch.test.ts`](dispatch.test.ts) (the committed table matches [`mise.toml`](../../mise.toml); exit codes pass through), [`gateway.test.ts`](gateway.test.ts) (starts every command with no `mise` on PATH).
 - Errors and exit codes: [`exit-codes.test.ts`](exit-codes.test.ts) (each tagged error maps to the documented code), [`experience-gaps.test.ts`](experience-gaps.test.ts) (errors name the next step; `--help` ends with an example).
 - Output: [`render.test.ts`](render.test.ts) (human text against `--json`, `-o`, batch exit codes), [`human-output.test.ts`](human-output.test.ts) (color rule, width wrap, "did you mean").
+- Runtime: [`run-dispose.test.ts`](run-dispose.test.ts) (the runtime is disposed after a run), [`run-interrupt.effect.test.ts`](run-interrupt.effect.test.ts) (an interrupt stops the run cleanly).
 
 ## Rules
 

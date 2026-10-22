@@ -2,11 +2,15 @@
 
 One test file per command, run against the local fixture. The parent rules are in [tests/AGENTS.md](../AGENTS.md).
 
-- Each command in [`src/commands/`](../../src/commands/) has a file named for it, such as [`scrape.test.ts`](scrape.test.ts), [`crawl.test.ts`](crawl.test.ts), and [`answer.test.ts`](answer.test.ts).
-- A `-fallback` file, such as [`search-fallback.test.ts`](search-fallback.test.ts), covers the free source chain used when the first source fails.
-- Archive files ([`archive-chain.test.ts`](archive-chain.test.ts), [`crawl-wayback.test.ts`](crawl-wayback.test.ts)) use the stand-in indexes from [`tests/_support/archive-fixture.ts`](../_support/archive-fixture.ts).
-- MCP files ([`mcp.test.ts`](mcp.test.ts), [`mcp-server.test.ts`](mcp-server.test.ts)) check the stdio server's tools.
-- [`act.test.ts`](act.test.ts) drives a real browser tool only when its binary is on PATH.
+- Each command in [`src/commands/`](../../src/commands/) has a file named for it, such as `scrape.test.ts`, `crawl.test.ts`, and `answer.test.ts`.
+- A `-fallback` file, such as `search-fallback.test.ts`, covers the free source chain used when the first source fails.
+- Archive files (`archive-chain.test.ts`, `crawl-wayback.test.ts`) use the stand-in indexes from [`tests/_support/archive-fixture.ts`](../_support/archive-fixture.ts).
+- MCP files (`mcp.test.ts`, `mcp-server.test.ts`) check the stdio server's tools.
+- Per command: `act.test.ts`, `audit.test.ts`, `batch.test.ts`, `diagram.test.ts`, `doctor.test.ts`, `extract.test.ts`, `feed.test.ts`, `jev.test.ts`, `map.test.ts`, `media.test.ts`, `monitor.test.ts`, `parse.test.ts`, `research.test.ts`, `search.test.ts`, `summarize.test.ts`, `tasks.test.ts`, `tokens.test.ts`.
+- Fallbacks: `answer-fallback.test.ts`, `crawl-fallback.test.ts`, `feed-fallback.test.ts`, `map-fallback.test.ts`, `monitor-fallback.test.ts`, `research-fallback.test.ts`, `summarize-fallback.test.ts`, `summarize-extractive.test.ts`, `search-sources.test.ts`.
+- Failures and safety: `batch-http-errors.test.ts`, `batch-schemes.security.test.ts`, `fail-fast.test.ts`, `hardening.test.ts`, `unreachable-host.mcp-cli.test.ts`, `sdk-errors.mcp-cli.test.ts`.
+- MCP and flags: `mcp-tools.test.ts`, `mcp-input.mcp-cli.test.ts`, `mcp-progress.mcp-cli.test.ts`, `list-flags-help.mcp-cli.test.ts`.
+- `act.test.ts` drives a real browser tool only when its binary is on PATH.
 
 ## Rules
 

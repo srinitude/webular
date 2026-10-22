@@ -4,7 +4,7 @@ Rules for the Mastra workflows, under [src/AGENTS.md](../AGENTS.md).
 
 ## What lives here
 
-- One workflow per command, such as [`search.ts`](search.ts), [`scrape.ts`](scrape.ts), [`crawl.ts`](crawl.ts), and [`answer.ts`](answer.ts). A command in [`src/commands/`](../commands/) runs the workflow with the same name.
+- One workflow per command, such as [`search.ts`](search.ts), [`scrape.ts`](scrape.ts), [`crawl.ts`](crawl.ts), [`answer.ts`](answer.ts), `audit.ts`, `batch.ts`, `diagram.ts`, `doctor.ts`, `research.ts`, and `tasks.ts`. A command in [`src/commands/`](../commands/) runs the workflow with the same name.
 - [`runtime.ts`](runtime.ts) is the one place where an Effect program meets a Mastra step. Its runtime also holds the per-origin robots.txt cache.
 - [`scrape-fallback.ts`](scrape-fallback.ts) holds the render and PDF fallbacks around the plain fetch. A PDF is read through `pdfText` in [`src/lib/parse.ts`](../lib/parse.ts), which owns the page cap and the deadline.
 - [`answer.ts`](answer.ts) stamps its result with `asOf`, the run date from [`src/lib/as-of.ts`](../lib/as-of.ts). `WEBULAR_AS_OF` pins it.
@@ -38,7 +38,7 @@ Rules for the Mastra workflows, under [src/AGENTS.md](../AGENTS.md).
 
 ## Checks
 
-- [`scrape.ts`](scrape.ts), [`monitor.ts`](monitor.ts), [`extract.ts`](extract.ts), [`act.ts`](act.ts), [`summarize.ts`](summarize.ts), [`feed.ts`](feed.ts), [`map.ts`](map.ts), [`crawl.ts`](crawl.ts), and [`media.ts`](media.ts) use bare `z.url()`, which also takes `file:`.
+- `scrape.ts`, `monitor.ts`, `extract.ts`, `act.ts`, `summarize.ts`, `feed.ts`, `map.ts`, `crawl.ts`, and `media.ts` use bare `z.url()`, which also takes `file:`.
 - `mise run bugs:security`: http-only batch URLs (SSRF).
 
 ```bash
