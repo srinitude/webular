@@ -8,6 +8,7 @@ import { readTable } from '../../scripts/gen-dispatch.ts'
 import { COMMAND_NAMES } from '../../src/cli/commands.ts'
 import { commandFor } from '../../src/cli/dispatch.ts'
 import { DISPATCH } from '../../src/cli/dispatch-table.ts'
+import { signalExit } from '../../src/core/effect.ts'
 import { runCli } from '../_support/cli.ts'
 import { ROOT } from '../_support/root.ts'
 import { eff } from '../_support/run.ts'
@@ -93,7 +94,17 @@ const INIT = new TextEncoder().encode(
 
 // The CLI forwards the exact signal it gets, so each exits 128 + its number.
 // Stdin stays open (Stream.never) so the server does not stop on end of input.
-const stopWith = (signal: 'SIGINT' | 'SIGTERM') =>
+// A child killed by a signal before its handler is set has no exit code; a
+// shell reports it as 128 + the signal number, so count it the same way.
+const signalCode = (e: { readonly cause?: unknown }) => {
+  const seen = [e, e.cause, (e.cause as { cause?: unknown } | undefined)?.cause]
+  const signal = seen.map((x) => /signal: '(SIG\w+)'/.exec(String((x as Error)?.message))?.[1])
+  const found = signal.find((x) => x !== undefined)
+  return found === undefined ? Effect.fail(e) : Effect.succeed(signalExit(found))
+}
+
+// With ready false the signal lands during startup, before the server answers.
+const stopWith = (signal: 'SIGINT' | 'SIGTERM', ready = true) =>
   Effect.scoped(
     Effect.gen(function* () {
       const spawner = yield* ChildProcessSpawner.ChildProcessSpawner
@@ -105,9 +116,9 @@ const stopWith = (signal: 'SIGINT' | 'SIGTERM') =>
           stderr: 'ignore',
         }),
       )
-      yield* Stream.runHead(handle.stdout)
+      if (ready) yield* Stream.runHead(handle.stdout)
       yield* handle.kill({ killSignal: signal })
-      return Number(yield* handle.exitCode)
+      return yield* handle.exitCode.pipe(Effect.map(Number), Effect.catch(signalCode))
     }),
   ).pipe(Effect.provide(BunServices.layer))
 
@@ -125,6 +136,11 @@ describe('signals', () => {
   posixOnly(
     'SIGTERM exits 143',
     eff(Effect.map(stopWith('SIGTERM'), (code) => expect(code).toBe(143))),
+    30_000,
+  )
+  posixOnly(
+    'SIGTERM during startup still exits 143',
+    eff(Effect.map(stopWith('SIGTERM', false), (code) => expect(code).toBe(143))),
     30_000,
   )
 })
