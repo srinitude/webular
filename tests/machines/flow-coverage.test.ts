@@ -38,12 +38,29 @@ test(
   eff(each(COMMAND_NAMES, commandHasMachine)),
 )
 
-test('every MCP tool is a command, a web tool, or machine.next', () => {
-  const served = COMMAND_NAMES.filter((c) => !(c in NOT_ON_MCP)).sort()
-  const named = mcpToolIds.filter((id) => !id.startsWith('web.') && id !== 'machine.next')
-  expect(named).toEqual(served)
-  expect(Object.keys(NOT_ON_MCP).every((c) => (COMMAND_NAMES as string[]).includes(c))).toBe(true)
-})
+// A command left off MCP still needs a flow: its own machine file, or exits
+// settled through the command lifecycle machine in its source.
+const notOnMcpHasFlow = (cmd: string) =>
+  Effect.gen(function* () {
+    expect(COMMAND_NAMES as readonly string[], cmd).toContain(cmd)
+    const own = OWN_MACHINE[cmd]
+    if (own !== undefined) return expect(yield* exists(`src/machines/${own}.ts`), cmd).toBe(true)
+    expect(yield* read(`src/commands/${cmd}.ts`), cmd).toMatch(
+      /settledExit\(\s*commandLifecycleMachine/,
+    )
+  })
+
+test(
+  'every MCP tool is a command, a web tool, or machine.next',
+  eff(
+    Effect.gen(function* () {
+      const served = COMMAND_NAMES.filter((c) => !(c in NOT_ON_MCP)).sort()
+      const named = mcpToolIds.filter((id) => !id.startsWith('web.') && id !== 'machine.next')
+      expect(named).toEqual(served)
+      yield* each(Object.keys(NOT_ON_MCP), notOnMcpHasFlow)
+    }),
+  ),
+)
 
 const machineHasTest = (file: string) =>
   Effect.gen(function* () {
