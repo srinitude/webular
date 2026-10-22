@@ -261,3 +261,5 @@
 {"path": "tests/workflows/AGENTS.md", "sha": "c982b7dbcbfee7dda301fbf256d951714424c1a55dd05e3b03c7321d38e7df70", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/workflows/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "README.md", "sha": "edbc6af101d0efbaa140220e0df15ae30d042beb4fac93ea48ed991ae5df9b5c", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "tests/release/AGENTS.md", "sha": "d8b883c5c783520e8f7d5123bfb6b60d680f3aa6e0a6bddb8fca812e68648334"}
+{"path": "tests/release/AGENTS.md", "sha": "d8b883c5c783520e8f7d5123bfb6b60d680f3aa6e0a6bddb8fca812e68648334", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}

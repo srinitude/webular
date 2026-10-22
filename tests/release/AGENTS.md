@@ -5,7 +5,7 @@ Tests for packaging and release. The parent rules are in [tests/AGENTS.md](../AG
 ## What lives here
 
 - Package and install: [`npm-pack.test.ts`](npm-pack.test.ts), [`install.test.ts`](install.test.ts), [`install-ps1.test.ts`](install-ps1.test.ts), [`upgrade.test.ts`](upgrade.test.ts).
-- Distribution files: [`distribution.test.ts`](distribution.test.ts), [`distros.test.ts`](distros.test.ts), [`manifests.test.ts`](manifests.test.ts), [`winget.test.ts`](winget.test.ts), [`completions.test.ts`](completions.test.ts), [`manpage.test.ts`](manpage.test.ts), [`description-sync.test.ts`](description-sync.test.ts) (every description surface copies the [`package.json`](../../package.json) description).
+- Distribution files: [`distribution.test.ts`](distribution.test.ts), [`distros.test.ts`](distros.test.ts), [`manifests.test.ts`](manifests.test.ts), [`winget.test.ts`](winget.test.ts), [`completions.test.ts`](completions.test.ts), [`manpage.test.ts`](manpage.test.ts), [`description-sync.test.ts`](description-sync.test.ts) (every description surface copies the [`package.json`](../../package.json) description; the marketplace plugin entry copies [`plugins/webular/plugin.json`](../../plugins/webular/plugin.json)).
 - Plugin and pack files: [`mcp-manifests.test.ts`](mcp-manifests.test.ts), [`pack-list.test.ts`](pack-list.test.ts).
 - Release workflow: [`gates.test.ts`](gates.test.ts) (the Node launcher, build before pack, tag gate), [`assets-job.test.ts`](assets-job.test.ts).
 

@@ -1,5 +1,7 @@
 // One description source: package.json "description". Every other surface
-// copies it, so the text cannot drift. The comparison reads each file; no text
+// copies it, so the text cannot drift. The one exception is the marketplace
+// plugin entry: it copies the plugin manifest (plugins/webular/plugin.json),
+// whose description also names the plugin's skills. The comparison reads each file; no text
 // is hardcoded here. server.json has a registry cap of 100 characters, so its
 // rule is: the source when it fits, else a prefix of the source that ends at a
 // clause break (a dash, comma, colon, semicolon, or period comes next).
@@ -38,15 +40,16 @@ test(
 )
 
 test(
-  'marketplace.json plugin descriptions equal the package description',
+  'marketplace plugin descriptions equal the plugin manifest description',
   eff(
     Effect.gen(function* () {
-      const file = '.claude-plugin/marketplace.json'
-      const { plugins } = yield* readText(file).pipe(Effect.flatMap(decode(Marketplace)))
-      expect(plugins.length).toBeGreaterThan(0)
-      const expected = yield* source
-      for (const plugin of plugins) {
-        expect({ file, description: plugin.description }).toEqual({ file, description: expected })
+      const expected = yield* readDescription('plugins/webular/plugin.json')
+      for (const file of ['.claude-plugin/marketplace.json', '.cursor-plugin/marketplace.json']) {
+        const { plugins } = yield* readText(file).pipe(Effect.flatMap(decode(Marketplace)))
+        expect(plugins.length).toBeGreaterThan(0)
+        for (const plugin of plugins) {
+          expect({ file, description: plugin.description }).toEqual({ file, description: expected })
+        }
       }
     }),
   ),
