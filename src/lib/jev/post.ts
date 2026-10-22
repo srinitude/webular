@@ -1,17 +1,13 @@
 // One Jev HTTP call: docs guard, POST, reply decode, one jittered retry, and the
-// pinned-release fallback. client.ts owns the endpoint and wires this in.
+// same-model retry. client.ts owns the endpoint and wires this in.
 import { Clock, Effect, Option, Random, Redacted, Schema } from 'effect'
 import type * as HttpClient from 'effect/http/HttpClient'
 import * as HttpClientRequest from 'effect/http/HttpClientRequest'
 import { logErr } from '../../core/output.ts'
-import type { JevRequest } from './client.ts'
 import type { DocsState } from './docs-cache.ts'
 import { committedSnapshot, guarded, httpFetcher } from './docs-guard.ts'
 import { errorKind, JevError, nextAction, retryAfterMs, retryable } from './errors.ts'
-import { requestBytes } from './payload/index.ts'
 
-// If the alias call fails, the pinned stable release answers instead.
-const JEV_FALLBACK_MODEL = 'jev-1.13.0'
 const TIMEOUT_MS = 3_000 // Jev's slow tail is about 2 s
 const RETRY_BASE_MS = 200 // full jitter: one retry after a random 0 to 200 ms
 const MAX_RETRY_AFTER_MS = 5_000 // a longer server wait falls back instead of stalling the step
@@ -119,13 +115,6 @@ const retryJitter = <A>(eff: Effect.Effect<A, JevError>) =>
     }),
   )
 
-// The latest model first; on failure, the pinned stable release.
-const FINAL = new Set(['no_key', 'auth', 'forbidden'])
-export const withFallback = (post: Post, model: string) => (body: string, req: JevRequest) =>
-  retryJitter(post(body)).pipe(
-    Effect.catchTag('JevError', (e) =>
-      FINAL.has(e.kind ?? '') || model === JEV_FALLBACK_MODEL
-        ? Effect.fail(e)
-        : post(requestBytes(JEV_FALLBACK_MODEL, req.state, req.questions)),
-    ),
-  )
+// The retry stays on the same model: a failed call never moves to an older
+// release. When the retry fails too, the caller's rule-based fallback answers.
+export const withRetry = (post: Post) => (body: string) => retryJitter(post(body))

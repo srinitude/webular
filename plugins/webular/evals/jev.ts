@@ -7,6 +7,10 @@ import { ChildProcess, ChildProcessSpawner } from 'effect/process'
 import { plainText } from '../skills/human-language/scripts/plain.ts'
 import decisionsFile from './decisions.json' with { type: 'json' }
 
+// The plugin imports nothing from the repo src/, so it mirrors JEV_LATEST_RELEASED
+// from src/lib/jev/model.ts; tests/jev/latest-model.test.ts fails if they differ.
+const JEV_LATEST_RELEASED = 'jev-1.14.0'
+
 const Label = Schema.Literals(['yes', 'no'])
 const Case = Schema.Struct({ input: Schema.Unknown, expected: Label })
 const Decision = Schema.Struct({
@@ -51,7 +55,7 @@ export const typesafeKey = Config.option(Config.Redacted('TYPESAFE_API_KEY')).pi
 // Build-time plain-language pass on payload free text, from the built-in
 // human-language skill's word list (one source of truth).
 const body = (decision: Decision, input: unknown) => ({
-  model: 'jev-1.13.0',
+  model: JEV_LATEST_RELEASED,
   state: { input },
   questions: {
     label: {

@@ -126,6 +126,6 @@ test('HTTP statuses map to error kinds and next actions; 429 reads retry-after',
 
 test('an answering model other than the calibrated one is drift', () => {
   expect(modelDrift(JEV_CALIBRATED_MODEL)).toBe(false)
-  expect(modelDrift('jev-1.14.0')).toBe(true)
+  expect(modelDrift('jev-0.0.1')).toBe(true)
   expect(modelDrift(undefined)).toBe(false)
 })

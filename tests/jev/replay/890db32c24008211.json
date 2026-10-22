@@ -1,0 +1,1 @@
+{"answers":{"title":{"type":"choice","choice":"Deep learning","confidence":0.4,"probabilities":{"Deep learning":0.6,"Deep learning | Nature":0.32,"none":0.08}},"title_swapped":{"type":"choice","choice":"Deep learning","confidence":0.46,"probabilities":{"Deep learning":0.64,"Deep learning | Nature":0.26,"none":0.1}}},"inputTokens":773,"model":"jev-1.14.0","source":"jev"}

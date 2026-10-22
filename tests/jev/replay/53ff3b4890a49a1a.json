@@ -1,0 +1,1 @@
+{"answers":{"pick":{"type":"choice","choice":"done","confidence":0.41,"probabilities":{"done":0.61,"keep_searching":0.39,"none":0}},"pick_reversed":{"type":"choice","choice":"done","confidence":0.45,"probabilities":{"done":0.63,"keep_searching":0.37,"none":0}}},"inputTokens":1040,"model":"jev-1.14.0","source":"jev"}

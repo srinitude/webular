@@ -2,6 +2,8 @@
 // than lintPayload. Webular's JevRequest type still allows bare-string instructions
 // and options, so these rules run here instead of in defineDecision's type.
 // Errors block a definition; warnings advise.
+import { JEV_LATEST_RELEASED } from '../model.ts'
+
 type DefinitionRule =
   | 'instructions-object'
   | 'choice-criteria'
@@ -159,9 +161,7 @@ interface DefinitionPayload {
 export const lintDefinition = (req: DefinitionPayload): DefinitionFinding[] => {
   const out = stateFindings(req.state)
   if (!PINNED.test(req.model))
-    out.push(
-      err('model-pin', 'model', `model ${req.model} is an alias (pin a version like jev-1.13.0)`),
-    )
+    out.push(err('model-pin', 'model', `${req.model} is an alias; pin ${JEV_LATEST_RELEASED}`))
   if (!isObj(req.questions)) out.push(err('instructions-object', 'questions', 'needs a map'))
   else
     for (const [id, q] of Object.entries(req.questions))

@@ -1,10 +1,11 @@
 // Payload lint: the rules the decision-models mod enforces, applied to webular
 // payloads. Each finding names the field and what it needs.
-// 1. The model is a pinned, versioned id (`jev-1.13.0`), never the `jev-latest` alias.
+// 1. The model is a pinned, versioned id (`jev-<major>.<minor>.<patch>`), never the `jev-latest` alias.
 // 2. Choice options and Score levels are objects with a `what`, never bare strings.
 // 3. No part appears twice: no repeated long state string, no repeated instructions.
 // 4. No writing or math step goes to Jev: it judges; code and LLMs write and count.
 import type { JevRequest } from '../client.ts'
+import { JEV_LATEST_RELEASED } from '../model.ts'
 import { instructionText } from '../payload/answers.ts'
 
 interface Finding {
@@ -21,7 +22,7 @@ export const lintModel = (model: string): Finding[] =>
         {
           rule: 'model-pin',
           where: 'model',
-          message: `model ${model} (needs a versioned id like jev-1.13.0)`,
+          message: `model ${model} (needs a versioned id like ${JEV_LATEST_RELEASED})`,
         },
       ]
 

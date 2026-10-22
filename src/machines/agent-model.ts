@@ -1,5 +1,5 @@
 // The Stately agent's model: WEBULAR_AGENT_MODEL names `provider:model`
-// (`anthropic:claude-haiku-5-5`, `openai:gpt-4o-mini`, `jev:jev-1.13.0`), and that
+// (`anthropic:claude-haiku-5-5`, `openai:gpt-4o-mini`, `jev:<released Jev id>`), and that
 // provider's key comes only from the environment, except Jev's, which may also
 // come from the macOS Keychain (./agent-jev.ts). The provider package loads lazily.
 import { Config, Effect, Option } from 'effect'

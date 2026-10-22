@@ -1,0 +1,1 @@
+{"answers":{"intent":{"type":"choice","choice":"scholarly","confidence":1,"probabilities":{"general":0,"none":0,"scholarly":1,"software":0}},"intent_swapped":{"type":"choice","choice":"scholarly","confidence":1,"probabilities":{"general":0,"none":0,"scholarly":1,"software":0}}},"inputTokens":871,"model":"jev-1.14.0","source":"jev"}

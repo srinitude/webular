@@ -1,0 +1,1 @@
+{"answers":{"title":{"type":"choice","choice":"Alan Turing","confidence":0.92,"probabilities":{"Alan Turing":0.95,"Alan Turing - Wikipedia":0.05,"none":0}},"title_swapped":{"type":"choice","choice":"Alan Turing","confidence":0.94,"probabilities":{"Alan Turing":0.96,"Alan Turing - Wikipedia":0.04,"none":0}}},"inputTokens":778,"model":"jev-1.14.0","source":"jev"}

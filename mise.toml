@@ -140,6 +140,11 @@ description = "Refresh and verify the Jev docs snapshot: conditional GET of docs
 depends = ["setup"]
 run = "bun scripts/jev-docs.ts"
 
+[tasks."jev:latest-check"]
+description = "Fails when docs.typesafe.ai lists a Jev release above JEV_LATEST_RELEASED in src/lib/jev/model.ts. No other task depends on it"
+depends = ["setup"]
+run = "bun scripts/jev-latest-check.ts"
+
 [tasks.validate]
 description = "Validate gate — aggregates the full quality spine"
 depends = ["test"]
