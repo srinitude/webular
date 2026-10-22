@@ -9,7 +9,10 @@ import { runProc } from '../../src/core/proc.ts'
 import { ROOT } from '../_support/root.ts'
 import { eff, tmpDir } from '../_support/run.ts'
 
-// The launcher runs the Bun fake driver; Windows finds a `.cmd` through PATHEXT, other systems an sh file.
+// The fake driver must be found and spawned the way the real one is. Windows
+// spawns no `.cmd` without a shell (Node's EINVAL since CVE-2024-27980), and the
+// real cua-driver there is an `.exe`, so Windows compiles the Bun fake to one;
+// other systems get an sh launcher.
 const WIN = process.platform === 'win32'
 
 const writeLauncher = (dir: string) =>
@@ -17,11 +20,16 @@ const writeLauncher = (dir: string) =>
     const fs = yield* FileSystem.FileSystem
     const path = yield* Path.Path
     const driver = `${ROOT}tests/engine/cua-fake-driver.ts`
-    const bin = path.join(dir, WIN ? 'cua-driver.cmd' : 'cua-driver')
-    const body = WIN
-      ? `@"${process.execPath}" "${driver}" %*\r\n`
-      : `#!/bin/sh\nexec "${process.execPath}" "${driver}" "$@"\n`
-    yield* fs.writeFileString(bin, body)
+    if (WIN) {
+      const out = path.join(dir, 'cua-driver.exe')
+      const res = yield* runProc(
+        [process.execPath, 'build', '--compile', driver, '--outfile', out],
+        { timeoutMs: 60_000 },
+      )
+      return expect({ code: res.code, stderr: res.stderr }).toEqual({ code: 0, stderr: '' })
+    }
+    const bin = path.join(dir, 'cua-driver')
+    yield* fs.writeFileString(bin, `#!/bin/sh\nexec "${process.execPath}" "${driver}" "$@"\n`)
     yield* fs.chmod(bin, 0o755)
   })
 
@@ -53,9 +61,21 @@ test(
           WEBULAR_CUA_WINDOW: `${browser.pid}:1`,
         },
       })
-      expect(res.stdout.trim()).toBe('Failure')
-      const calls = (yield* fs.readFileString(path.join(dir, 'calls.log'))).trim().split('\n')
-      expect(calls).toEqual(['start_session', 'get_browser_state', 'end_session'])
+      // stderr carries the open's failure cause, so a wrong failure shows why.
+      const calls = yield* Effect.orElseSucceed(
+        fs.readFileString(path.join(dir, 'calls.log')),
+        () => '',
+      )
+      expect({
+        stdout: res.stdout.trim(),
+        calls: calls.trim().split(/\r?\n/),
+        stderr: res.stderr,
+      }).toEqual({
+        stdout: 'Failure',
+        calls: ['start_session', 'get_browser_state', 'end_session'],
+        stderr: expect.stringContaining('get_browser_state'),
+      })
     }),
   ),
+  60_000,
 )
