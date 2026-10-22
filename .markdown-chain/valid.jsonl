@@ -267,3 +267,10 @@
 {"path": "CHANGELOG.md", "sha": "4266c7315746c28cd456d707c0bf5212194a26d85afcdaffc883458656e029e6", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "README.md", "sha": "ca9d4da77fd3a8752b9ccbcee6e132170259c1c05213d14ebe2a96a605b5d0b9"}
 {"path": "src/lib/AGENTS.md", "sha": "f856577d5a7d4523dfe56d7b4dc26242d4555e70fb0c446f872d17135a0e4af4", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/install.md", "sha": "ad19227c276ce6853f0cf0db0d4b045c5affe38a3044efe1671ac1f8423ea696", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "README.md", "sha": "8b98bb30cacfc52eb1e3cfc9591d923b013674620df4e58e91d93a520270655e", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "src/release/AGENTS.md", "sha": "e1d0d4401235fc20adc797aaed6b76161b74631dc742f641984bc89dd54dce04", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "tests/release/AGENTS.md", "sha": "285195427b9ca334b7ee1be01fb894a3af31fa8dd5e042d92b23488be6702729", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": ".github/workflows/AGENTS.md", "sha": "b619e6f88692f294b2fa80f3974b87faf912146efb7b475c16712993178e8e31", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/tasks.md", "sha": "8011765b5fd9b4c17ccdabe2a163fc2656ab7135acb85e6693952f9a8524acd5", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "tests/ci/AGENTS.md", "sha": "ec8de6efde666f9be042edd2743378dcf9802ecc99265bd0b3daec6264843157", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}

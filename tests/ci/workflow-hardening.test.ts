@@ -52,6 +52,9 @@ test(
   ),
 )
 
+// GitHub Packages takes the run's own short-lived GITHUB_TOKEN; no stored npm token.
+const RUN_TOKEN = /NODE_AUTH_TOKEN: \$\{\{ secrets\.GITHUB_TOKEN \}\}/g
+
 test(
   'npm publishing is trusted publishing: OIDC, provenance, and no stored npm token',
   eff(
@@ -59,12 +62,14 @@ test(
       for (const { path, yml } of yield* workflows)
         expect([
           path,
-          /NPM_TOKEN|NODE_AUTH_TOKEN|secrets\.NPM/.test(yml.replace(/#.*$/gm, '')),
+          /NPM_TOKEN|NODE_AUTH_TOKEN|secrets\.NPM/.test(
+            yml.replace(/#.*$/gm, '').replace(RUN_TOKEN, ''),
+          ),
         ]).toEqual([path, false])
       const release = (yield* workflows).find((w) => w.path.endsWith('release.yml'))?.yml ?? ''
       const publish = release.slice(
         release.indexOf('\n  publish:'),
-        release.indexOf('\n  homebrew:'),
+        release.indexOf('\n  publish-github-packages:'),
       )
       expect(publish).toMatch(/permissions:\n\s+contents: write[^\n]*\n\s+id-token: write/)
       for (const line of publish.match(/npm publish --[^\n]*/g) ?? [])

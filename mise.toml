@@ -175,6 +175,11 @@ description = "Write one npm package per executable target into npm/ and list th
 depends = ["compile:all"]
 run = 'bun "{{config_root}}/src/release/platform-packages.ts"'
 
+[tasks."package:github"]
+description = "Rename the root and npm/ packages to @srinitude/<name> for the GitHub Packages registry (release path, after package:platforms)"
+depends = ["package:platforms"]
+run = 'bun "{{config_root}}/src/release/github-packages.ts"'
+
 [tasks."package:manifests"]
 description = "Write the Homebrew formula and Scoop manifest into dist/bin from dist/bin/SHA256SUMS (release path, after compile:all)"
 depends = ["compile:all"]

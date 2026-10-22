@@ -1,15 +1,15 @@
-// README.md and docs/install.md state facts the code owns: command names,
-// flags, the MCP tool count, env var names, platform targets, and install
-// package names. This test pulls each fact out by pattern (framing text is
-// free to change) and checks it against sets derived from src/ and mise.toml.
-// Full-coverage lists (a "Command" table, a "Platforms" section) must also
-// name every real member. Generated bench blocks are skipped.
+// README.md and docs/install.md state facts the code owns: commands, flags,
+// the MCP tool count, env vars, platforms, and install names (GitHub Packages
+// scope aside), each pulled out by pattern (framing text is free to change)
+// and checked against sets from src/ and mise.toml. Full-coverage lists (a
+// "Command" table, a "Platforms" section) must name every real member.
 import { describe, expect, test } from 'bun:test'
 import { join } from 'node:path'
 import { Glob } from 'bun'
 import { Effect, FileSystem } from 'effect'
 import pkg from '../../package.json' with { type: 'json' }
 import { COMMANDS } from '../../src/cli/commands.ts'
+import { SCOPE } from '../../src/release/github-packages.ts'
 import { WINGET_ID } from '../../src/release/winget.ts'
 import { mcpToolIds } from '../../src/tools/web.ts'
 import { ROOT } from '../_support/root.ts'
@@ -110,7 +110,7 @@ const installProblems = (lines: string[], t: Truth) =>
   INSTALLS.flatMap(([kind, re]) =>
     lines
       .flatMap((l) => all(l, re))
-      .filter((name) => t.installs.get(kind) !== name)
+      .filter((name) => t.installs.get(kind) !== name.replace(`${SCOPE}/`, ''))
       .map((name) => `${kind} installs ${name}, but the build names ${t.installs.get(kind)}`),
   )
 

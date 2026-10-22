@@ -5,7 +5,7 @@ Rules for the release steps, under [src/AGENTS.md](../AGENTS.md).
 ## What lives here
 
 - Package files built from `dist/bin/SHA256SUMS`: [`distribution.ts`](distribution.ts) (Homebrew and Scoop), [`aur.ts`](aur.ts) (Arch), [`nix.ts`](nix.ts) (Nix), [`distros.ts`](distros.ts) (Arch and Nix together), and [`winget.ts`](winget.ts).
-- npm: [`platform-packages.ts`](platform-packages.ts) makes one package per target. [`node-launcher.ts`](node-launcher.ts) is the `bin` behind the root package. [`dist-tag.ts`](dist-tag.ts) picks the npm dist-tag.
+- npm: [`platform-packages.ts`](platform-packages.ts) makes one package per target. [`node-launcher.ts`](node-launcher.ts) is the `bin` behind the root package. [`dist-tag.ts`](dist-tag.ts) picks the npm dist-tag. [`github-packages.ts`](github-packages.ts) renames those packages to `@srinitude/<name>` for GitHub Packages.
 - Docs and shells: [`completions.ts`](completions.ts) writes shell completions. [`manpage.ts`](manpage.ts) writes the manual page.
 - Upgrades: [`upgrade.ts`](upgrade.ts) names the install channel an executable came from and the command that upgrades it.
 

@@ -57,7 +57,7 @@ bun install --frozen-lockfile
 bun bin/webular.ts --help
 ```
 
-[Install channels](docs/install.md) covers every package channel, release binaries with `SHA256SUMS` and provenance, upgrade, uninstall, and shell completions.
+[Install channels](docs/install.md) covers every package channel, [GitHub Packages](docs/install.md#from-github-packages) included, release binaries with `SHA256SUMS` and provenance, upgrade, uninstall, and shell completions.
 
 ## Quickstart
 

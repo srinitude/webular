@@ -433,6 +433,83 @@ jobs:
           latest=; [ "$DIST_TAG" = latest ] || latest=--latest=false
           gh release edit "$GITHUB_REF_NAME" --draft=false $latest
 
+  # GitHub Packages: the same root and per-platform packages as npmjs.com,
+  # renamed @srinitude/<name> for npm.pkg.github.com by package:github
+  # (src/release/github-packages.ts) and published with GITHUB_TOKEN only. It
+  # needs the same gates as publish and runs beside it, so an npmjs.com failure
+  # does not hold it back. The binaries come from the "release-files" run
+  # artifact the assets job attested, so the draft release stays unread. No
+  # --provenance: npm documents provenance for the npm registry only; the
+  # release binaries carry their own attestations. Versions already there are
+  # skipped, so a rerun is safe.
+  publish-github-packages:
+    needs: [assets, smoke]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15 # the build chain plus nine publishes; no registry waits
+    permissions:
+      contents: read
+      packages: write # npm publish to npm.pkg.github.com with GITHUB_TOKEN
+      actions: read # gh run download of the release-files artifact
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          registry-url: https://npm.pkg.github.com
+          scope: "@srinitude"
+          package-manager-cache: false
+      - uses: jdx/mise-action@fc42bcc7ddbf51124c30f95a877a0c5168a3bfde # v5.2.1
+        with:
+          experimental: true
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/bun-install-cache
+          key: bun-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('mise.toml', 'bun.lock') }}
+      - run: bun install --frozen-lockfile
+        env:
+          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
+      # Same order as publish: build first, since the build clears dist/.
+      - name: Build the root package contents
+        run: mise run build
+        env:
+          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
+      - name: Download the attested executables
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" -n release-files -D dist/bin
+      - name: Check the downloads against the release SHA256SUMS
+        run: (cd dist/bin && sha256sum --check --strict SHA256SUMS)
+      - name: Write the per-platform npm packages
+        run: mise run package:platforms
+        env:
+          MISE_TASK_SKIP_DEPENDS: "1" # binaries are downloaded above; skip compile:all
+      - name: Rename every package to @srinitude/<name> for GitHub Packages
+        run: mise run package:github
+        env:
+          MISE_TASK_SKIP_DEPENDS: "1" # package:platforms ran above
+      - name: Publish the per-platform packages, then the root package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          version=$(jq -r .version package.json)
+          latest=$(npm view @srinitude/webular dist-tags.latest 2>/dev/null || true)
+          tag=$(bun src/release/dist-tag.ts "$version" "$latest")
+          publish() {
+            name=$(jq -r .name "$1/package.json")
+            if [ -n "$(npm view "$name@$version" version 2>/dev/null)" ]; then
+              echo "skip $name@$version: already on GitHub Packages"
+            else
+              npm publish --ignore-scripts --tag "$tag" "$1"
+            fi
+          }
+          for dir in npm/webular-*; do publish "$dir"; done
+          publish .
+
   # Copies webular.rb from the release into srinitude/homebrew-webular.
   # TAP_TOKEN is a fine-grained token with Contents read and write on the tap
   # and bucket repos only.

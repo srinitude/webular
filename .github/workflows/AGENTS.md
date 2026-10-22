@@ -6,7 +6,7 @@ The GitHub Actions workflows live here. The parent [AGENTS.md](../AGENTS.md) lis
 
 - `.github/workflows/ci.yml`: runs `mise run ci` and `mise run e2e` on Linux, macOS, and Windows, and builds the executable on each. The x64 Mac is the slowest runner, so its tests run in two shards on two runners. Each test file still runs once there.
 - `.github/workflows/plugin.yml`: runs the plugin chain.
-- `.github/workflows/release.yml`: builds and publishes a release, with an attested SPDX SBOM and npm provenance. The release files build while the tests run. They are attested and attached to the draft release only after every test passes.
+- `.github/workflows/release.yml`: builds a release with an attested SPDX SBOM, then publishes it to npmjs.com, with npm provenance, and to GitHub Packages. The release files build while the tests run. They are attested and attached to the draft release only after every test passes.
 - `.github/workflows/codeql.yml`: CodeQL analysis of the JavaScript and TypeScript sources on push to main, on pull requests, and weekly.
 - `.github/workflows/repo-settings.yml`: read-only weekly check that the GitHub description, homepage, and topics match [`.github/repo-settings.json`](../repo-settings.json). `mise run repo:settings` applies the file by hand.
 - `.github/workflows/bug-hunts.yml`: runs `mise run bugs:check` (every class in [docs/bug-classes.md](../../docs/bug-classes.md)) weekly and on demand on Linux, macOS, and Windows.

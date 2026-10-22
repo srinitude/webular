@@ -42,6 +42,7 @@ lint: Lint + format-verify with Biome (check-only CI gate) [after setup]
 os:check: Every OS, locally: shell completions parse, the e2e parity list, the CLI gateway, and the Jev key lookup on each platform. Linux, macOS, and Windows each run the full suite only in CI (.github/workflows/ci.yml) [after setup]
 package:completions: Write shell completions (bash, zsh, fish, PowerShell) into dist/completions from the command and flag tables (release path, after compile:all) [after compile:all]
 package:distros: Write the AUR PKGBUILD, .SRCINFO, and webular.nix into dist/packaging from dist/bin/SHA256SUMS (release path, after compile:all) [after compile:all]
+package:github: Rename the root and npm/ packages to @srinitude/<name> for the GitHub Packages registry (release path, after package:platforms) [after package:platforms]
 package:man: Write the webular(1) manual page to dist/man/webular.1 (release path)
 package:manifests: Write the Homebrew formula and Scoop manifest into dist/bin from dist/bin/SHA256SUMS (release path, after compile:all) [after compile:all]
 package:platforms: Write one npm package per executable target into npm/ and list them as optionalDependencies (release path, after compile:all) [after compile:all]

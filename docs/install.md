@@ -40,6 +40,10 @@ bun add -g webular
 
 Bun needs Node on your PATH too, because the launcher starts with a Node shebang.
 
+### From GitHub Packages
+
+Each release also goes to the GitHub Packages npm registry as `@srinitude/webular`. GitHub asks for a token to install from it, even for public packages: a personal access token (classic) with the `read:packages` scope. Add `@srinitude:registry=https://npm.pkg.github.com` and `//npm.pkg.github.com/:_authToken=TOKEN` to `~/.npmrc`, with your token in place of `TOKEN`. Then run `npm i -g @srinitude/webular`.
+
 ## Homebrew
 
 Homebrew works on macOS and glibc Linux, including WSL with a glibc distro.
