@@ -86,10 +86,12 @@ const robotsBlocked = (url: string, rule: string): z.infer<typeof scrapeOutput> 
 })
 
 // The parsed page plus both Markdown candidates; `main` picks which one the result keeps.
-const prepareScrape = (input: z.infer<typeof fetched>) => {
+// withMarkdown false (title-only callers) skips both Markdown passes and so the main pick.
+export const prepareScrape = (input: z.infer<typeof fetched>, withMarkdown = true) => {
   if (input.markdown !== undefined || input.blockedBy !== undefined)
     return { input, page: undefined, article: '', full: '' }
   const page = parsePage(input.html, input.url)
+  if (!withMarkdown) return { input, page, article: '', full: '' }
   const article = page.article.contentHtml ? htmlToMarkdown(page.article.contentHtml) : ''
   return { input, page, article, full: htmlToMarkdown(pageBodyHtml(input.html)) }
 }
@@ -120,7 +122,7 @@ function toScrapeResult(p: Prepared, picks: Picks | undefined): z.infer<typeof s
 
 // PDFs skip Jev. The main pick needs both Markdown candidates; the title pick
 // runs only when some candidate differs from the rule's title.
-const scrapePicks = (p: Prepared) => {
+export const scrapePicks = (p: Prepared) => {
   if (!p.page) return undefined
   const { title, titles } = p.page
   const main =
@@ -158,4 +160,25 @@ export const scrapeWorkflow = createWorkflow({
 })
   .then(fetchStep)
   .then(extractStep)
+  .commit()
+
+// Title-only scrape for batch: same fetch, title, and status; the Markdown body stays empty.
+const titleStep = decisionStep({
+  id: 'title',
+  inputSchema: fetched,
+  outputSchema: scrapeOutput,
+  decide: scrapeDecide,
+  prepare: (input: z.infer<typeof fetched>) => prepareScrape(input, false),
+  pick: scrapePicks,
+  output: toScrapeResult,
+})
+
+export const scrapeTitleWorkflow = createWorkflow({
+  id: 'scrape-title',
+  inputSchema: scrapeInput,
+  outputSchema: scrapeOutput,
+  options: { shouldPersistSnapshot: () => false },
+})
+  .then(fetchStep)
+  .then(titleStep)
   .commit()
