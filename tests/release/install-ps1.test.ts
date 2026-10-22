@@ -57,20 +57,25 @@ const install = (sum: string | undefined, baseFor: (dir: string) => string, env 
     return { ...out, installed }
   }).pipe(Effect.scoped)
 
-// pwsh takes seconds to start cold, past the 5 s default under a busy suite.
-const PWSH_TIMEOUT = 30_000
+// A cold pwsh start takes seconds, and `run` spawns it twice; 60 s holds under a busy suite.
+const PWSH_TIMEOUT = 60_000
 const withPwsh = test.skipIf(!Bun.which('pwsh'))
 // A file:// URL built from a drive-letter path is not portable, so the
 // file:// case runs off Windows; the plain-folder case runs everywhere.
 const withPwshOffWindows = test.skipIf(!Bun.which('pwsh') || process.platform === 'win32')
 
-const expectInstalled = (base: (dir: string) => string) => () =>
-  runtime.runPromise(
-    Effect.map(install(sha256(BINARY), base), ({ code, installed }) => {
-      expect(code).toBe(0)
-      expect(installed).toBe(BINARY)
-    }),
-  )
+type Services = ManagedRuntime.ManagedRuntime.Services<typeof runtime>
+// A test body: runs the effect on the runtime, then asserts on its result.
+const outcome =
+  <A, E>(effect: Effect.Effect<A, E, Services>, assert: (result: A) => void) =>
+  () =>
+    runtime.runPromise(Effect.map(effect, assert))
+
+const expectInstalled = (base: (dir: string) => string) =>
+  outcome(install(sha256(BINARY), base), ({ code, installed }) => {
+    expect(code).toBe(0)
+    expect(installed).toBe(BINARY)
+  })
 
 withPwsh(
   'installs the windows asset from a local folder when its checksum matches',
@@ -86,52 +91,50 @@ withPwshOffWindows(
 
 withPwsh(
   'refuses a download that misses the baked checksum, whatever the folder sums say',
-  () =>
-    runtime.runPromise(
-      Effect.map(
-        install('0'.repeat(64), (dir) => dir),
-        ({ code, installed }) => {
-          expect(code).not.toBe(0)
-          expect(installed).toBeUndefined()
-        },
-      ),
-    ),
+  outcome(
+    install('0'.repeat(64), (dir) => dir),
+    ({ code, installed }) => {
+      expect(code).not.toBe(0)
+      expect(installed).toBeUndefined()
+    },
+  ),
   PWSH_TIMEOUT,
 )
 
 withPwsh(
   'an unbaked copy asks the GitHub release for SHA256SUMS, never the mirror',
-  () =>
-    runtime.runPromise(
-      Effect.map(
-        install(undefined, (dir) => dir, { HTTPS_PROXY: 'http://127.0.0.1:9' }),
-        ({ code, output, installed }) => {
-          expect(code).not.toBe(0)
-          expect(output).toContain(
-            'download failed: https://github.com/srinitude/webular/releases/latest/download/SHA256SUMS',
-          )
-          expect(installed).toBeUndefined()
-        },
-      ),
-    ),
+  outcome(
+    install(undefined, (dir) => dir, { HTTPS_PROXY: 'http://127.0.0.1:9' }),
+    ({ code, output, installed }) => {
+      expect(code).not.toBe(0)
+      expect(output).toContain(
+        'download failed: https://github.com/srinitude/webular/releases/latest/download/SHA256SUMS',
+      )
+      expect(installed).toBeUndefined()
+    },
+  ),
+  PWSH_TIMEOUT,
+)
+
+// No gh on PATH: out/ holds no gh, so the attestation step cannot run.
+const NO_GH = { PATH: `${ROOT}out`, WEBULAR_VERIFY_ATTESTATION: '' }
+const noGh = (env = {}) => install(sha256(BINARY), (dir) => dir, { ...NO_GH, ...env })
+
+withPwsh(
+  'with no gh on PATH it notes the skipped attestation',
+  outcome(noGh(), ({ code, output }) => {
+    expect(code).toBe(0)
+    expect(output).toContain('gh is not on PATH, so the build attestation was not checked')
+  }),
   PWSH_TIMEOUT,
 )
 
 withPwsh(
-  'with no gh on PATH it notes the skipped attestation; WEBULAR_VERIFY_ATTESTATION=1 stops',
-  () =>
-    runtime.runPromise(
-      Effect.gen(function* () {
-        const noGh = { PATH: `${ROOT}out`, WEBULAR_VERIFY_ATTESTATION: '' }
-        const ok = yield* install(sha256(BINARY), (dir) => dir, noGh)
-        expect(ok.code).toBe(0)
-        expect(ok.output).toContain('gh is not on PATH, so the build attestation was not checked')
-        const required = { ...noGh, WEBULAR_VERIFY_ATTESTATION: '1' }
-        const stop = yield* install(sha256(BINARY), (dir) => dir, required)
-        expect(stop.output).toContain('WEBULAR_VERIFY_ATTESTATION=1 needs gh')
-        expect(stop.installed).toBeUndefined()
-      }),
-    ),
+  'with no gh on PATH, WEBULAR_VERIFY_ATTESTATION=1 stops',
+  outcome(noGh({ WEBULAR_VERIFY_ATTESTATION: '1' }), ({ output, installed }) => {
+    expect(output).toContain('WEBULAR_VERIFY_ATTESTATION=1 needs gh')
+    expect(installed).toBeUndefined()
+  }),
   PWSH_TIMEOUT,
 )
 
@@ -163,13 +166,10 @@ const REFUSALS: readonly (readonly [Record<string, string>, string])[] = [
 for (const [env, refusal] of REFUSALS) {
   withPwsh(
     `refuses before any download: ${refusal}`,
-    () =>
-      runtime.runPromise(
-        Effect.map(run({ WEBULAR_ARCH: 'x64', ...env }), ({ code, output }) => {
-          expect(code).not.toBe(0)
-          expect(output).toContain(refusal)
-        }),
-      ),
+    outcome(run({ WEBULAR_ARCH: 'x64', ...env }), ({ code, output }) => {
+      expect(code).not.toBe(0)
+      expect(output).toContain(refusal)
+    }),
     PWSH_TIMEOUT,
   )
 }
@@ -185,12 +185,9 @@ const ASSET_CHOICES: readonly (readonly [string, string])[] = [
 for (const [arch, expected] of ASSET_CHOICES) {
   withPwsh(
     `picks ${expected} for arch ${arch}`,
-    () =>
-      runtime.runPromise(
-        Effect.map(run({ WEBULAR_ARCH: arch, WEBULAR_PRINT_ASSET: '1' }), ({ code, output }) => {
-          expect({ code, output }).toEqual({ code: 0, output: expected })
-        }),
-      ),
+    outcome(run({ WEBULAR_ARCH: arch, WEBULAR_PRINT_ASSET: '1' }), (result) => {
+      expect(result).toEqual({ code: 0, output: expected })
+    }),
     PWSH_TIMEOUT,
   )
 }

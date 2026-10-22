@@ -113,8 +113,7 @@ posixOnly(
         const at = Bun.which(tool)
         return at ? [[at, `${bin}/${tool}`] as const] : []
       })
-      const link = ([at, to]: readonly [string, string]) => s.fs.symlink(at, to)
-      yield* Effect.forEach(found, link, { concurrency: 4, discard: true })
+      yield* Effect.forEach(found, ([at, to]) => s.fs.symlink(at, to), { discard: true })
       const env = { ...s.env, PATH: bin, WEBULAR_VERIFY_ATTESTATION: '' }
       const required = yield* sh([s.baked], { ...env, WEBULAR_VERIFY_ATTESTATION: '1' })
       expect(required.stderr).toContain('WEBULAR_VERIFY_ATTESTATION=1 needs gh')
