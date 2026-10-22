@@ -39,6 +39,7 @@ const BY_STATUS: Readonly<Record<number, JevErrorKind>> = {
   401: 'auth',
   403: 'forbidden',
   404: 'not_found',
+  408: 'timeout',
   422: 'invalid',
   429: 'rate_limited',
 }
