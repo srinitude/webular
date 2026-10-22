@@ -266,3 +266,4 @@
 {"path": "CHANGELOG.md", "sha": "4266c7315746c28cd456d707c0bf5212194a26d85afcdaffc883458656e029e6"}
 {"path": "CHANGELOG.md", "sha": "4266c7315746c28cd456d707c0bf5212194a26d85afcdaffc883458656e029e6", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "README.md", "sha": "ca9d4da77fd3a8752b9ccbcee6e132170259c1c05213d14ebe2a96a605b5d0b9"}
+{"path": "src/lib/AGENTS.md", "sha": "f856577d5a7d4523dfe56d7b4dc26242d4555e70fb0c446f872d17135a0e4af4", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
