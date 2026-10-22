@@ -31,7 +31,7 @@ function errorCount(result: unknown): number {
   return Array.isArray(errors) ? errors.length : 0
 }
 
-// Discovery commands (crawl/map/answer/research) share ONE policy: partial
+// Discovery commands (search/crawl/map/answer/research) share ONE policy: partial
 // failures ride in the payload (exit 0 + stderr note); exit 1 only when the
 // primary payload is empty AND errors exist.
 export function discoveryExit(field: string): (result: unknown) => number {
@@ -85,7 +85,17 @@ function report(
           `${name}: ${failures} fetch${failures === 1 ? '' : 'es'} failed. Run again with --json to see each error.`,
         )
       : Effect.void
+  // A page read from an archive is never a fresh check: the payload says so in
+  // `archivedFrom`, and people reading the terminal get the same word here.
+  const archived = (outcome.result as { archivedFrom?: unknown } | null)?.archivedFrom
+  const archiveNote =
+    typeof archived === 'string'
+      ? logErr(
+          `${name}: warning: the live page did not load; this is the archived copy at ${safeText(archived)}`,
+        )
+      : Effect.void
   return note.pipe(
+    Effect.andThen(archiveNote),
     Effect.andThen(emit(outcome.result, { ...emitOpts, render: renderFor(name) })),
     Effect.as(exit),
   )

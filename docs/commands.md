@@ -7,7 +7,7 @@ usage line, the global options, the exit codes, and examples.
 
 | Command | What it does |
 |---|---|
-| `search`    | Searches the web with no key, through DuckDuckGo's no-JS HTML page. `--source wikipedia\|hackernews\|arxiv` searches one of those keyless sources instead |
+| `search`    | Searches the web with no key, through DuckDuckGo's no-JS HTML page. `--source wikipedia\|hackernews\|arxiv` searches one of those keyless sources instead. When every source fails and nothing is found, the JSON lists each failed source in `errors`, stderr says so, and the command exits 1 |
 | `scrape`    | Reads one URL as clean markdown or JSON (Bun.fetch + Readability + Turndown). By default, a page that robots.txt disallows returns status "blocked" with reason "robots". `--ignore-robots` fetches it anyway (single URL only), and the output carries robots: "disallowed". Crawl, map, and batch always honor robots.txt. A host that cannot be reached fails with the network error, not "blocked" |
 | `crawl`     | Reads a site page by page on the same host, breadth first. It obeys robots.txt and paces its requests per host. An unreachable robots.txt, one that answers with a server error, blocks the crawl. A host that cannot be reached fails with the network error |
 | `map`       | Finds all URLs for a domain (sitemap + link BFS) |
@@ -17,7 +17,7 @@ usage line, the global options, the exit codes, and examples.
 | `research`  | Runs a multi-step research loop → cited markdown report |
 | `parse`     | Turns local docs into markdown (PDF/DOCX/HTML/CSV/JSON/TXT) |
 | `media`     | Downloads media; takes a screenshot or PDF in a real browser (agent-browser) |
-| `monitor`   | Tracks changes to a URL over time (diff + bun:sqlite) |
+| `monitor`   | Tracks changes to a URL over time (diff + bun:sqlite). It obeys robots.txt. When the page does not load, it reads the closest archived copy instead: the JSON names that copy in `archivedFrom`, stderr warns, and the exit code stays 0 |
 | `batch`     | Scrapes many URLs at once |
 | `doctor`    | Checks your setup and toolchain |
 | `tasks`     | Lists the mise task graph that defines the commands |

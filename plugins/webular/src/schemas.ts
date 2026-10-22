@@ -120,7 +120,12 @@ export const outputs: Partial<Record<keyof typeof schemas, z.ZodObject>> = {
   }),
   search: z.looseObject({
     source: z.enum(searchSources).optional().describe('The source that answered'),
+    errors: z
+      .array(z.looseObject({ url: z.string(), reason: z.string() }))
+      .optional()
+      .describe('Sent only when every source failed'),
   }),
+  monitor: z.looseObject({ archivedFrom }),
   summarize: z.looseObject({
     picks: z
       .array(

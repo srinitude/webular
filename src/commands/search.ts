@@ -3,7 +3,7 @@
 
 import { Effect } from 'effect'
 import { EXIT } from '../cli/exit-codes.ts'
-import { runWorkflow } from '../cli/run.ts'
+import { discoveryExit, runWorkflow } from '../cli/run.ts'
 import { emitOpts, intFlag, parseFlags, strFlag } from '../core/args.ts'
 import { CliError, runMain } from '../core/effect.ts'
 import { MAX_VARIANTS, SEARCH_SOURCES, type SearchSource } from '../lib/search-source-names.ts'
@@ -63,7 +63,7 @@ const main = Effect.gen(function* () {
     () => import('../workflows/search.ts'),
     (m) => m.searchWorkflow,
     inputData,
-    emitOpts(values),
+    { ...emitOpts(values), exitCode: discoveryExit('results') },
   )
 })
 

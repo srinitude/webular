@@ -1,10 +1,13 @@
 // MONITOR free-source fallback, against a real local Bun.serve fixture
 // (WEBULAR_SOURCE_ORIGIN swaps every free-source endpoint origin). The watched
 // page answers 404, so monitor asks the free sources: only Wayback's
-// availability answers, with a snapshot that lives on the fixture. No mocks.
+// availability answers, with a snapshot that lives on the fixture. The result
+// names that copy in `archivedFrom` and stderr warns that it is archived; the
+// exit stays 0. Only PATH and HOME reach the child, so no key in the caller's
+// environment sends it to a live service. No mocks.
 import { describe, expect, test } from 'bun:test'
 import { join } from 'node:path'
-import { Effect } from 'effect'
+import { Config, Effect, Schema } from 'effect'
 import { runCli } from '../_support/cli.ts'
 import { useFixture } from '../_support/fixture.ts'
 import { eff, tmpDir } from '../_support/run.ts'
@@ -20,9 +23,21 @@ const fx = useFixture((origin) => ({
   '/snap': () => new Response(snapshot, { headers: { 'content-type': 'text/html' } }),
 }))
 
+const Result = Schema.fromJsonString(
+  Schema.Struct({
+    url: Schema.String,
+    changeStatus: Schema.String,
+    archivedFrom: Schema.optional(Schema.String),
+  }),
+)
+
 const monitor = (path: string, dbPath: string) =>
-  runCli('src/commands/monitor.ts', ['--url', `${fx.origin}${path}`, '--db', dbPath, '--json'], {
-    env: { ...process.env, WEBULAR_SOURCE_ORIGIN: fx.origin, WEBULAR_SOURCE_GAP_MS: '0' },
+  Effect.gen(function* () {
+    const PATH = yield* Config.String('PATH').pipe(Config.orElse(() => Config.String('Path')))
+    const HOME = yield* Config.String('HOME').pipe(Config.withDefault('/tmp'))
+    const env = { PATH, HOME, WEBULAR_SOURCE_ORIGIN: fx.origin, WEBULAR_SOURCE_GAP_MS: '0' }
+    const args = ['--url', `${fx.origin}${path}`, '--db', dbPath, '--json']
+    return yield* runCli('src/commands/monitor.ts', args, { env })
   })
 
 describe('webular monitor — free-source fallback', () => {
@@ -32,11 +47,15 @@ describe('webular monitor — free-source fallback', () => {
       Effect.gen(function* () {
         const dir = yield* tmpDir('webular-monitor-fallback-')
         const { code, out, err } = yield* monitor('/dead', join(dir, 'snap.db'))
-        expect(err).toBe('')
         expect(code).toBe(0)
-        expect(JSON.parse(out)).toMatchObject({ url: `${fx.origin}/dead`, changeStatus: 'new' })
+        expect(err).toMatch(/warning: .*archived copy/)
+        expect(yield* Schema.decodeUnknownEffect(Result)(out)).toEqual({
+          url: `${fx.origin}/dead`,
+          changeStatus: 'new',
+          archivedFrom: `${fx.origin}/snap`,
+        })
       }),
     ),
-    20_000,
+    60_000,
   )
 })
