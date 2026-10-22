@@ -30,7 +30,7 @@ const read = (path: string) => FileSystem.FileSystem.use((fs) => fs.readFileStri
 
 const skillDocs = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem
-  const names = yield* fs.readDirectory(`${PLUGIN}skills`)
+  const names = (yield* fs.readDirectory(`${PLUGIN}skills`)).filter((n) => !n.endsWith('.md'))
   const dirs = names.map((name) => `${PLUGIN}skills/${name}`)
   const paths = yield* Effect.forEach(dirs, (dir) =>
     fs

@@ -71,6 +71,24 @@ const ANY_SIDES = {
     not_for: 'A set where even one sentence says a fact about the topic.',
   },
 }
+const ANSWER_WANTED = 'Give the chance, 0 to 1, that the answer is yes.'
+const ANY_QUESTION = noul(
+  {
+    task: 'Does at least one entry of `facts.candidates` state a fact that helps answer `facts.topic.text`?',
+    answer_wanted: ANSWER_WANTED,
+    rules: SENTENCE_RULES,
+  },
+  ANY_SIDES,
+)
+const candidateQuestion = (i: number) =>
+  noul(
+    {
+      task: `Does \`facts.candidates.c${i}\` state a fact that helps answer \`facts.topic.text\`?`,
+      answer_wanted: ANSWER_WANTED,
+      rules: SENTENCE_RULES,
+    },
+    SENTENCE_SIDES,
+  )
 const payload = (input: SourceText) => {
   const all = researchSentences(input.text)
   const keep = best(input, MAX_SENTENCES)
@@ -85,27 +103,8 @@ const payload = (input: SourceText) => {
       },
     },
     questions: {
-      ...Object.fromEntries(
-        keep.map((i) => [
-          `c${i}`,
-          noul(
-            {
-              task: `Does \`facts.candidates.c${i}\` state a fact that helps answer \`facts.topic.text\`?`,
-              answer_wanted: 'Give the chance, 0 to 1, that the answer is yes.',
-              rules: SENTENCE_RULES,
-            },
-            SENTENCE_SIDES,
-          ),
-        ]),
-      ),
-      any: noul(
-        {
-          task: 'Does at least one entry of `facts.candidates` state a fact that helps answer `facts.topic.text`?',
-          answer_wanted: 'Give the chance, 0 to 1, that the answer is yes.',
-          rules: SENTENCE_RULES,
-        },
-        ANY_SIDES,
-      ),
+      ...Object.fromEntries(keep.map((i) => [`c${i}`, candidateQuestion(i)])),
+      any: ANY_QUESTION,
     },
   }
 }
