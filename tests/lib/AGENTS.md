@@ -7,7 +7,7 @@ Tests for helpers in [src/lib/](../../src/lib/). The parent rules are in [tests/
 - [answer-country.test.ts](answer-country.test.ts) checks that an answer to a country question names the country beside the demonym.
 - [as-of.test.ts](as-of.test.ts) checks date grounding: `WEBULAR_AS_OF` pins the run date, and without it the clock gives an ISO date.
 - [home-fallback.test.ts](home-fallback.test.ts) checks that Windows, which sets `USERPROFILE` but not `HOME`, keeps Jev state in the user's folder.
-- [driver.test.ts](driver.test.ts) checks that the `agent-browser` driver retries a failed render once, only when a retry can fix it.
+- [driver.test.ts](driver.test.ts) checks that the `agent-browser` driver retries a failed render once, and only when a retry can fix it.
 - [json-ld.test.ts](json-ld.test.ts) checks JSON-LD facts: valid, `@graph`, malformed, and oversized blocks.
 - [extract-locators.test.ts](extract-locators.test.ts) checks that extract finds a field by name with no model (role, test id, aria-label, then label text), picks one selector for repeated listing records, keeps Legislation and Dataset JSON-LD, and takes date, author, and offer from structured data first.
 - [snapshot-normalize.test.ts](snapshot-normalize.test.ts) checks that monitor snapshots ignore whitespace churn and still catch edits to repeated lines.

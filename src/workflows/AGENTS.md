@@ -10,7 +10,7 @@ One workflow per command in [src/commands/](../commands/): [act](act.ts), [answe
 
 - Don't keep a redirect source or a soft-404 end page in map output. Key each link on its final URL. Source: [arXiv 2507.22019](https://arxiv.org/abs/2507.22019).
 - A workflow has no model call of its own. Jev decisions go through `decisionStep` from [`src/lib/jev/steps.ts`](../lib/jev/steps.ts), with a rule-based fallback.
-- Every step runs its Effect program through [runtime](runtime.ts). Mastra needs a Promise here; this is the only Promise edge, so add no other.
+- Every step runs its Effect program through [runtime](runtime.ts). Mastra needs a Promise here. This is the only Promise edge, so add no other.
 - Keep the real work in [`src/lib/`](../lib/). A step stays short and calls into it.
 - Fan out with a bounded `Effect.forEach` and a size from [`src/core/budget.ts`](../core/budget.ts). Results keep input order.
 - Give a sub-run a stable run id, such as the target URL.
