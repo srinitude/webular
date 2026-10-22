@@ -174,8 +174,8 @@ export const searchRounds = <H extends Hit, E, R>(
       const seen = new Set(hits.map((h) => h.url))
       hits = [...hits, ...more.filter((h) => !seen.has(h.url))]
     }
-    const safe = (q: string) =>
-      search(q, depth).pipe(Effect.orElseSucceed((): ReadonlyArray<H> => []))
+    const safe = (q: string, limit = depth) =>
+      search(q, limit).pipe(Effect.orElseSucceed((): ReadonlyArray<H> => []))
     for (let round = 1; round < RESEARCH_ROUNDS; round++) {
       const bestEvidence = hits.map((h) => `${h.title}: ${h.description}`).join('\n')
       const subQuestions = [{ question: topic, bestEvidence }]
@@ -187,10 +187,12 @@ export const searchRounds = <H extends Hit, E, R>(
         (yield* roundDone({ topic, subQuestions, round, maxRounds: RESEARCH_ROUNDS }))
       )
         break
-      add(yield* safe(keywordQuery(topic)))
+      // A wider search finds the bridge; only its top `depth` hits become sources.
+      const wide = yield* safe(keywordQuery(topic), depth * 2)
+      add(wide.slice(0, depth))
       const bridge = bridgeEntity(
         topic,
-        hits.map((h) => h.description),
+        [...hits, ...wide].map((h) => h.description),
       )
       if (bridge) add(yield* safe(bridge))
     }
