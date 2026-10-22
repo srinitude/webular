@@ -4,7 +4,6 @@ import { expect, test } from 'bun:test'
 import { BunServices } from '@effect/platform-bun'
 import { Effect, FileSystem } from 'effect'
 import { JEV_MODEL_DEFAULT, type JevRequest } from '../../src/lib/jev/client.ts'
-import { JEV_LATEST_RELEASED } from '../../src/lib/jev/model.ts'
 import { decideCropBox } from '../../src/lib/jev/decisions/crop-box.ts'
 import { imageKindDecision } from '../../src/lib/jev/decisions/image-kind.ts'
 import { routeDecision } from '../../src/lib/jev/decisions/image-router.ts'
@@ -15,6 +14,7 @@ import { fetchBrowserDecision } from '../../src/lib/jev/fetch-browser.ts'
 import { estTokens } from '../../src/lib/jev/learn/definition-lint.ts'
 import { lintDefinition, lintSubtasks } from '../../src/lib/jev/learn/lint.ts'
 import { nextEvent } from '../../src/lib/jev/machine.ts'
+import { JEV_LATEST_RELEASED } from '../../src/lib/jev/model.ts'
 
 const GOOD_STATE = {
   purpose: { motivation: 'm', outcome: 'o', why: 'w', background: 'b' },
@@ -67,7 +67,15 @@ test('definition: bare instructions, thin options and levels, and flat state are
 })
 
 test('definition: only the pinned release passes, box questions included, size and nesting caps', () => {
-  for (const model of ['jev', 'jev-latest', 'jev-preview', '~fast', 'jev-1.13', 'jev-1.13.0', 'gpt-5'])
+  for (const model of [
+    'jev',
+    'jev-latest',
+    'jev-preview',
+    '~fast',
+    'jev-1.13',
+    'jev-1.13.0',
+    'gpt-5',
+  ])
     expect(rules({ ...good, model })).toEqual(['model-pin'])
   const box = { b: { type: 'box', instructions: { t: 1 } } }
   expect(rules({ ...good, questions: box })).toEqual([])

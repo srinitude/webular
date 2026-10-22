@@ -51,6 +51,7 @@ export const CLI_CASES: CliCase[] = [
     '--variant',
   ),
   ok('scrape a page', 'scrape', ['--url', '{origin}/a', '--archive']),
+  ok('scrape past robots.txt', 'scrape', ['--url', '{origin}/a', '--ignore-robots']),
   usage('scrape needs a url', 'scrape', [], 'url'),
   usage('scrape bad renderer', 'scrape', ['{origin}/a', '--render', 'x'], '--render'),
   ok('crawl a site', 'crawl', [

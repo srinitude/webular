@@ -4,7 +4,6 @@
 // option orders). Code makes the images sendable first (size, format, repeats) and
 // routes by kind after; Jev only picks the kind. Low confidence reads, never skips.
 import type { JevImage, JevRequest } from '../client.ts'
-import { KIND_SPEC } from './image-kind-spec.ts'
 import { defineDecision } from '../define.ts'
 import {
   agreedPick,
@@ -15,6 +14,7 @@ import {
   menu,
   purpose,
 } from '../payload/index.ts'
+import { KIND_SPEC } from './image-kind-spec.ts'
 
 const IMAGE_KINDS = [
   'chart',

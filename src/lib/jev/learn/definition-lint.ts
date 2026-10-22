@@ -116,11 +116,7 @@ const scoreFindings = (at: string, c: unknown): DefinitionFinding[] => {
   )
 }
 
-const questionFindings = (
-  id: string,
-  q: unknown,
-  state: unknown,
-): DefinitionFinding[] => {
+const questionFindings = (id: string, q: unknown, state: unknown): DefinitionFinding[] => {
   const at = `questions.${id}`
   if (!isObj(q)) return [err('instructions-object', at, 'needs a question object')]
   const out: DefinitionFinding[] = []
@@ -155,7 +151,9 @@ interface DefinitionPayload {
 export const lintDefinition = (req: DefinitionPayload): DefinitionFinding[] => {
   const out = stateFindings(req.state)
   if (req.model !== JEV_LATEST_RELEASED)
-    out.push(err('model-pin', 'model', `${req.model} is not the pinned release ${JEV_LATEST_RELEASED}`))
+    out.push(
+      err('model-pin', 'model', `${req.model} is not the pinned release ${JEV_LATEST_RELEASED}`),
+    )
   if (!isObj(req.questions)) out.push(err('instructions-object', 'questions', 'needs a map'))
   else
     for (const [id, q] of Object.entries(req.questions))
