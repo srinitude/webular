@@ -8,7 +8,7 @@ This folder holds the tests for the Jev framework in [`src/lib/jev/`](../../src/
 - [`answer-figure.eval.test.ts`](answer-figure.eval.test.ts) and [`research-figures.eval.test.ts`](research-figures.eval.test.ts) compare the image arm with the text-only arm, offline.
 - [`key-platform.test.ts`](key-platform.test.ts) checks that `TYPESAFE_API_KEY` works on every system and that the Keychain lookup runs only on macOS.
 - [`tests/jev/evals/`](evals/) holds the cases, and [`tests/jev/replay/`](replay/) holds the recorded Jev answers.
-- [`tests/jev/candidates/`](candidates/) keeps eval cases for a decision that no code makes yet. The segmenter cases stay as data for a later try at `research.sentences`, and the `answer` image arm cases sit there because no decision of their own owns them. The eval check does not scan this folder.
+- [`tests/jev/candidates/`](candidates/) keeps eval cases for decisions that have no code. The segmenter cases stay as data for `research.sentences`, which has no decision, and the `answer` image arm cases sit there because no decision owns them. The eval check does not scan this folder.
 - [`tests/jev/learn/`](learn/) holds the tests for the learning loop.
 - [`tests/jev/docs-guard-support.ts`](docs-guard-support.ts) and [`tests/jev/work-count.ts`](work-count.ts) are helpers. They are not tests.
 - The framework tests: [`define.test.ts`](define.test.ts), [`definition-lint.test.ts`](definition-lint.test.ts), [`framework.test.ts`](framework.test.ts), [`framework-bounds.test.ts`](framework-bounds.test.ts), [`guards.test.ts`](guards.test.ts), [`no-direct-calls.test.ts`](no-direct-calls.test.ts), [`code-check.test.ts`](code-check.test.ts), [`decision-cost.test.ts`](decision-cost.test.ts), and [`route.test.ts`](route.test.ts).

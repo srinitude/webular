@@ -25,8 +25,8 @@ Rules for the Jev client and decision framework, under [src/lib/AGENTS.md](../AG
 
 ## Checks
 
-- `src/lib/jev/machine.ts:31` reads XState's private `_nodes`. Only [`src/machines/agent.ts`](../../machines/agent.ts) may do that.
-- `src/lib/jev/steps.ts:33` and `src/lib/jev/run.ts:12` call `runPromise` outside the allowed process edges.
+- Only [`src/machines/agent.ts`](../../machines/agent.ts) may read XState's private `_nodes`.
+- Only the process edges call `runPromise`. In this folder, that is [`steps.ts`](steps.ts).
 
 ```bash
 mise run jev:check

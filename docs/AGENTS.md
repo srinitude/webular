@@ -1,6 +1,6 @@
 # docs/AGENTS.md
 
-User and developer docs; the root [AGENTS.md](../AGENTS.md) holds the repo-wide rules.
+User and developer docs. The root [AGENTS.md](../AGENTS.md) holds the repo-wide rules.
 
 ## What lives here
 
