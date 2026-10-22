@@ -1,0 +1,29 @@
+---
+// The home page's agent client tabs, each with a copyable setup block. The
+// commands match the /install#agents list.
+import Tabs from './Tabs.astro'
+
+const askAgent =
+  "Install webular with `curl --proto '=https' --tlsv1.2 -fsSL https://webular.dev/install.sh | sh`. Ask me before you run it. Then add it as an MCP server that runs `webular mcp`. Read https://webular.dev/llms.txt first."
+const clients = Object.entries({
+  'Claude Code': 'claude mcp add webular -- webular mcp',
+  'Ask your agent': askAgent,
+  'Codex CLI': 'codex mcp add webular -- webular mcp',
+  Cursor: '{ "mcpServers": { "webular": { "command": "webular", "args": ["mcp"] } } }',
+  'VS Code':
+    '{ "servers": { "webular": { "type": "stdio", "command": "webular", "args": ["mcp"] } } }',
+})
+---
+
+<div data-tabs>
+  <Tabs id="client" label="Your client" tabs={clients.map(([label]) => label)} showLabel={false} />
+  {clients.map(([, text], i) => (
+    <div class="tab-panel" role="tabpanel" id={`client-panel-${i}`} aria-labelledby={`client-tab-${i}`}>
+      <div class="code-row">
+        <pre tabindex="0"><code>{text}</code></pre>
+        <button type="button" class="copy" data-copy={text}>Copy</button>
+      </div>
+    </div>
+  ))}
+  <p class="visually-hidden" aria-live="polite" data-copy-status></p>
+</div>

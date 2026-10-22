@@ -27,17 +27,15 @@ const pages = [
   ['Docs', '/docs'],
 ]
 const current = Astro.url.pathname.replace(/\/$/, '')
+// The footer links, in the design's order.
 const footerLinks = [
-  ['GitHub', github],
-  ['Docs', '/docs'],
-  ['Install', '/install'],
-  ['Agents', '/agents'],
-  ['Tools', '/tools'],
+  ...pages.filter(([label]) => label !== 'Docs').slice(0, 5),
   ['Benchmarks', '/benchmarks'],
   ['Security', '/security'],
   ['Privacy', '/privacy'],
   ['Support', '/support'],
-  ['Releases', `${github}/releases`],
+  ['Docs', '/docs'],
+  ['GitHub', github],
   ['llms.txt', '/llms.txt'],
 ]
 ---
@@ -105,7 +103,7 @@ const footerLinks = [
         <ul>
           {footerLinks.map(([label, href]) => <li><a href={href}>{label}</a></li>)}
         </ul>
-        <p>Open source under Apache-2.0. © Kiren Srinivasan.</p>
+        <p>Open source under Apache-2.0. © Kiren Srinivasan. This site sets no cookies and runs no tracking.</p>
         <p class="muted">Built from commit <code>{sha}</code> on <code>{date}</code></p>
       </div>
     </footer>

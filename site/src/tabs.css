@@ -88,15 +88,20 @@
 .tab-panel p {
   color: var(--color-muted);
 }
-/* Copy sits outside the scrolling box, 8 px from it. */
+/* Copy sits inside the code box, outside its scrolling area, 8 px from it. */
 .code-row {
   display: flex;
   align-items: center;
   gap: var(--space-8);
   min-width: 0;
+  padding-right: var(--space-8);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-box);
 }
 .code-row pre {
   flex: 1;
+  border: 0;
 }
 .copy {
   width: var(--size-copy-button);

@@ -2,6 +2,8 @@
 // The install commands as two tab rows ("Terminal" and "Your agent"). The
 // inline script in Base.astro switches tabs and runs Copy; without it, every
 // panel shows, stacked.
+import Tabs from './Tabs.astro'
+
 interface Props {
   firstId?: string
   agent?: boolean
@@ -19,24 +21,11 @@ const terminal = [
 
 <div class="install-block" data-tabs>
   <div class="tab-rows">
-    <div class="tab-row">
-      <p class="tab-label" id={`${id}-terminal`}>Terminal</p>
-      <div class="scroll-row" role="tablist" aria-labelledby={`${id}-terminal`}>
-        {terminal.map(([label], i) => (
-          <button type="button" role="tab" id={`${id}-tab-${i}`} aria-controls={`${id}-panel-${i}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1}>{label}</button>
-        ))}
-      </div>
-    </div>
+    <Tabs id={id} label="Terminal" tabs={terminal.map(([label]) => label)} />
     {agent && (
-      <div class="tab-row">
-        <p class="tab-label" id={`${id}-agent`}>Your agent</p>
-        <div class="tab-line">
-          <div class="scroll-row" role="tablist" aria-labelledby={`${id}-agent`}>
-            <button type="button" role="tab" id={`${id}-tab-3`} aria-controls={`${id}-panel-3`} aria-selected="false" tabindex="-1">Claude Code</button>
-          </div>
-          <a class="tab-link" href="/install#agents">Other clients →</a>
-        </div>
-      </div>
+      <Tabs id={id} label="Your agent" tabs={['Claude Code']} start={3}>
+        <a class="tab-link" href="/install#agents">Other clients →</a>
+      </Tabs>
     )}
   </div>
   <div class="tab-panel" role="tabpanel" id={`${id}-panel-0`} aria-labelledby={`${id}-tab-0`}>

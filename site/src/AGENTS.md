@@ -8,6 +8,8 @@ The Astro layout, components, and styles, under [site/AGENTS.md](../AGENTS.md).
 - [CommandGroups.astro](CommandGroups.astro): the command list, grouped for the commands page.
 - [DocMeta.astro](DocMeta.astro): the head tags and page links for a doc page.
 - [InstallBlock.astro](InstallBlock.astro): the install commands for each host.
+- [Tabs.astro](Tabs.astro): the one tab row that every tab set uses: install, demo, and agent clients.
+- [AgentClients.astro](AgentClients.astro): the home page's agent client tabs, each with a setup block to copy.
 - [site.css](site.css): the page styles.
 - [sections.css](sections.css): page sections, cards, doc pages, and the comparison table.
 - [widths.css](widths.css): the layout changes at each width from the layout spec.

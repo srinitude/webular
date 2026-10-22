@@ -1,7 +1,9 @@
 ---
+import AgentClients from '../AgentClients.astro'
 import Base from '../Base.astro'
 import CommandGroups from '../CommandGroups.astro'
 import InstallBlock from '../InstallBlock.astro'
+import Tabs from '../Tabs.astro'
 
 const release = import.meta.env.PUBLIC_RELEASE_VERSION ?? '0.3.0'
 const description =
@@ -34,8 +36,7 @@ const scrape = `$ webular scrape https://example.com
 This domain is for use in documentation examples without needing permission. This is not a service; avoid relying on it for testing and monitoring purposes.`
 const summarize = `$ webular summarize --text "Bun is a fast runtime. It runs TypeScript." --sentences 1 --json
 {"figures":[],"picks":[{"end":22,"index":0,"source_url":null,"start":0,"text":"Bun is a fast runtime."}],"sentences":["Bun is a fast runtime."],"source_url":null,"summary":"Bun is a fast runtime."}`
-const askAgent =
-  "Install webular with `curl --proto '=https' --tlsv1.2 -fsSL https://webular.dev/install.sh | sh`. Ask me before you run it. Then add it as an MCP server that runs `webular mcp`. Read https://webular.dev/llms.txt first."
+const samples = Object.entries({ Search: search, Scrape: scrape, Summarize: summarize })
 const keychain = `security add-generic-password -a "$USER" -s typesafe-ai-api-key -w`
 const readKey = 'read -rs TYPESAFE_API_KEY && export TYPESAFE_API_KEY'
 const pin = `curl --proto '=https' --tlsv1.2 -fsSL https://webular.dev/v${release}/install.sh | sh`
@@ -73,11 +74,14 @@ const docCards = [
   <div class="demo-data">
   <section class="section" aria-labelledby="demo">
     <h2 id="demo">That search ran with no key.</h2>
-    <pre tabindex="0"><code>{search}</code></pre>
-    <h3>Scrape</h3>
-    <pre tabindex="0"><code>{scrape}</code></pre>
-    <h3>Summarize</h3>
-    <pre tabindex="0"><code>{summarize}</code></pre>
+    <div data-tabs>
+      <Tabs id="demo" label="Command samples" tabs={samples.map(([label]) => label)} showLabel={false} />
+      {samples.map(([label, text], i) => (
+        <div class="tab-panel" role="tabpanel" id={`demo-panel-${i}`} aria-labelledby={`demo-tab-${i}`}>
+          <pre tabindex="0" aria-label={label}><code>{text}</code></pre>
+        </div>
+      ))}
+    </div>
     <p>Add <code>--json</code> to any command for the same JSON shape every time.</p>
   </section>
 
@@ -95,10 +99,7 @@ const docCards = [
   <section class="section" aria-labelledby="agent">
     <h2 id="agent">Give your agent the web</h2>
     <p><code>webular mcp</code> serves 24 tools over stdio. Install webular first, so <code>webular</code> is on your PATH.</p>
-    <h3>Ask your agent</h3>
-    <pre tabindex="0"><code>{askAgent}</code></pre>
-    <h3>Claude Code</h3>
-    <pre tabindex="0"><code>claude mcp add webular -- webular mcp</code></pre>
+    <AgentClients />
     <p>The plugin bundles an MCP server and four skills: research, interview, plain language, and Markdown. The plugin's own server runs with Bun and has the 19 command tools. <code>webular mcp</code> has those 19 plus five more, for 24.</p>
     <p><a href="/install#agents">Set up your client →</a> <a href="/tools">See all 24 tools →</a></p>
   </section>
