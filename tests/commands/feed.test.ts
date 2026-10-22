@@ -1,7 +1,7 @@
 // FEED contract — RSS 2.0 and Atom 1.0 parsing against the deterministic local
 // fixture (real fetch, no mocks). Tests what `mise run run:feed` executes.
 import { describe, expect, test } from 'bun:test'
-import { Effect } from 'effect'
+import { Config, Effect } from 'effect'
 import { runCli } from '../_support/cli.ts'
 import { startFixture } from '../_support/fixture.ts'
 import { eff } from '../_support/run.ts'
@@ -66,10 +66,17 @@ const missingUrlCase = Effect.gen(function* () {
   expect(err).toContain('missing')
 })
 
+// A failed chain ends at the free feed search. WEBULAR_SOURCE_ORIGIN points it
+// at the same empty fixture, so the run never waits on feedsearch.dev.
 const fetchFailureCase = Effect.gen(function* () {
   const empty = yield* withEmpty
-  const { code } = yield* runFeed([`${empty.origin}/nope.xml`, '--json'])
+  const HOME = yield* Config.String('HOME').pipe(Config.withDefault('/tmp'))
+  const env = { HOME, WEBULAR_SOURCE_ORIGIN: empty.origin, WEBULAR_SOURCE_GAP_MS: '0' }
+  const { code } = yield* runCli('src/commands/feed.ts', [`${empty.origin}/nope.xml`, '--json'], {
+    env,
+  })
   expect(code).toBe(1)
+  expect(empty.hits('/api/v1/search')).toBe(1)
 })
 
 describe('webular feed — read an RSS or Atom feed (real fetch)', () => {
