@@ -77,10 +77,11 @@ const timedOut = () =>
     meta: { sources: {}, degraded: true, weak: true } as SearchMeta,
   })
 
-// web: the keyword pick starts at once; the judge's pick adds the sources it
-// names when it lands, or is dropped at the settle cutoff. DuckDuckGo runs only
-// if no source had hits. npm the keyword pick chose is never cut by the grace
-// (official homepages); sources the judge adds late take the settle cutoff.
+// web: the keyword pick starts at once; the judge's pick joins when it lands or is
+// dropped at the settle cutoff; DuckDuckGo runs only if no source had hits. Keyword
+// npm and navigational Wikipedia (it waits on Wikidata) stop only at their own cap.
+const outlastsGrace = (s: SearchSource, query: string, keyword: ReadonlyArray<SearchSource>) =>
+  (s === 'npm' && keyword.includes(s)) || (s === 'wikipedia' && isNavigational(query))
 const fanOut = Effect.fn('fanOut')(function* (
   source: SearchSource,
   query: string,
@@ -95,7 +96,7 @@ const fanOut = Effect.fn('fanOut')(function* (
   const settle = (yield* deterministic) ? uncut : { hit, cutoff: graceAfter(hit) }
   const keyword = source === 'web' ? pickSources(query) : [source]
   const query1 = (s: SearchSource) =>
-    querySource(s, queries, limit, runSource, s === 'npm' && keyword.includes(s) ? uncut : settle)
+    querySource(s, queries, limit, runSource, outlastsGrace(s, query, keyword) ? uncut : settle)
   const run = (list: ReadonlyArray<SearchSource>) =>
     Effect.forEach(list, query1, { concurrency: Math.max(1, list.length) })
   const judge =
