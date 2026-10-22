@@ -1,18 +1,21 @@
 ---
 // The home page's agent client tabs, each with a copyable setup block. The
-// caller passes each tab's label and text.
+// caller passes each tab's label and text, and the config file for clients
+// whose block goes in a file.
 import Tabs from './Tabs.astro'
 
 interface Props {
   clients: [string, string][]
+  files: Record<string, string>
 }
-const { clients } = Astro.props
+const { clients, files } = Astro.props
 ---
 
 <div data-tabs>
   <Tabs id="client" label="Your client" tabs={clients.map(([label]) => label)} showLabel={false} />
-  {clients.map(([, text], i) => (
+  {clients.map(([label, text], i) => (
     <div class="tab-panel" role="tabpanel" id={`client-panel-${i}`} aria-labelledby={`client-tab-${i}`}>
+      {files[label] && <p>Put this in <code>{files[label]}</code>:</p>}
       <div class="code-row">
         <pre tabindex="0"><code>{text}</code></pre>
         <button type="button" class="copy" data-copy={text}>Copy</button>
