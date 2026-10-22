@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url'
 import { BunServices } from '@effect/platform-bun'
 import { Effect, FileSystem, Option } from 'effect'
 
-const sources = process.env.WEBULAR_READABILITY_SOURCES
+const sources = process.env['WEBULAR_READABILITY_SOURCES']
 const copies = fileURLToPath(new URL('../skills', import.meta.url))
 const pinned: Record<string, string> = {
   'human-language': '605c5e4b8f7f55050c49b40be22519b57779b0fb6621fcb6d337cb535e220955',

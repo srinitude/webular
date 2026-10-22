@@ -33,9 +33,13 @@ const trackedMarkdown = runProc(['git', 'ls-files', '*.md', '*.mdx', '*.markdown
 
 const ledgerRows = read('.markdown-chain/valid.jsonl').pipe(
   Effect.flatMap((text) =>
-    Effect.forEach(text.split('\n').filter(Boolean), Schema.decodeUnknownEffect(Row), {
-      concurrency: 1,
-    }),
+    Effect.forEach(
+      text.split('\n').filter(Boolean),
+      (line) => Schema.decodeUnknownEffect(Row)(line),
+      {
+        concurrency: 1,
+      },
+    ),
   ),
 )
 
