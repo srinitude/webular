@@ -2,6 +2,12 @@
 
 The webular.dev website: a static Astro build served by Cloudflare Workers static assets. The repo rules are in the root [AGENTS.md](../AGENTS.md).
 
+## What lives here
+
+- [astro.config.ts](astro.config.ts): the Astro config, which adds each route file.
+- [.gitignore](.gitignore): keeps build output and installed packages out of git.
+- The design folder holds design/tokens.json, the source of the style tokens. The tokens-css.ts script in the scripts folder turns it into the token style sheet.
+
 ## Rules
 
 - Build, check, and serve only through `mise run site:build`, `mise run site:test`, and `mise run site:dev`. `mise run site:deploy` needs a signed-in wrangler and the user's go-ahead, and it stays off the ci chain.

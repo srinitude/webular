@@ -2,6 +2,10 @@
 
 Files Astro copies to the build as they are, under [site/AGENTS.md](../AGENTS.md).
 
+## What lives here
+
+- `robots.txt`: the crawl rules, served as written.
+
 ## Rules
 
 - [_redirects](_redirects) sends the install scripts and `/latest` to GitHub Release assets with a 302, because the target moves with each release ([Cloudflare redirects](https://developers.cloudflare.com/workers/static-assets/redirects/)).
