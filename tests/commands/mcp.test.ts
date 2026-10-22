@@ -51,8 +51,8 @@ describe('webular mcp — MCP server tool listing', () => {
         expect(code).toBe(0)
         expect(stdout).toContain('"serverInfo"')
         // The client shows these instructions to the model: steer many URLs to batch.
-        expect(JSON.parse(stdout.split('\n')[0] ?? '').result.instructions).toBe(
-          'When you have two or more URLs, call batch once instead of calling scrape for each.',
+        expect(JSON.parse(stdout.split('\n')[0] ?? '').result.instructions).toMatch(
+          /^When you have two or more URLs, call batch once instead of calling scrape for each\. Built on Mastra and Jev: with TYPESAFE_API_KEY set, judgment calls go to Jev; without it, rules decide\.$/,
         )
       }),
     ),

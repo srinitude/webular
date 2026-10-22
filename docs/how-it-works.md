@@ -42,7 +42,7 @@ The flows in [`src/machines/`](../src/machines/) are XState machines: the comman
 These turn a raw page or file into clean text:
 
 - Readability (`@mozilla/readability`) finds the main article on a page.
-- linkedom gives a light, fast page model for Readability to read.
+- linkedom gives Readability a light, fast page model to read.
 - Turndown turns HTML into Markdown.
 - unpdf reads PDF files.
 - mammoth reads Word files.
@@ -65,3 +65,4 @@ The plugin in [`plugins/webular`](../plugins/webular/) adds the MCP server and s
 - [Commands](commands.md)
 - [Architecture](architecture.md)
 - [Why webular](why-webular.md)
+- [Docs index](README.md)

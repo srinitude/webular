@@ -4,6 +4,7 @@ User and developer docs; the root [AGENTS.md](../AGENTS.md) holds the repo-wide 
 
 ## What lives here
 
+- [`docs/README.md`](README.md): the docs index. It links every doc.
 - [`docs/agent-contract.md`](agent-contract.md): what an agent needs from the CLI, MCP server, plugin, and skills. [`tests/contract/`](../tests/contract/) checks each item.
 - [`docs/best-practices.md`](best-practices.md): each practice webular follows, with its source and the test that checks it.
 - [`docs/development.md`](development.md), [`docs/build-and-run.md`](build-and-run.md), and [`docs/install.md`](install.md): how to build, test, and install.

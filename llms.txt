@@ -7,6 +7,9 @@ Jev's key (`TYPESAFE_API_KEY`) is the only API key. Without it, each decision fa
 ## Docs
 
 - [README](https://github.com/srinitude/webular/blob/main/README.md): what webular is, install, usage, and exit codes.
+- [docs/README.md](https://github.com/srinitude/webular/blob/main/docs/README.md): Docs index
+- [docs/how-it-works.md](https://github.com/srinitude/webular/blob/main/docs/how-it-works.md): How webular works
+- [docs/why-webular.md](https://github.com/srinitude/webular/blob/main/docs/why-webular.md): Why webular
 - [docs/commands.md](https://github.com/srinitude/webular/blob/main/docs/commands.md): Command reference
 - [docs/install.md](https://github.com/srinitude/webular/blob/main/docs/install.md): Install channels
 - [docs/build-and-run.md](https://github.com/srinitude/webular/blob/main/docs/build-and-run.md): Build and run

@@ -1,7 +1,7 @@
 {
   "name": "webular",
   "version": "0.2.0",
-  "description": "Web research CLI that sends its judgment calls to Jev, TypeSafe's System One decision model, and does the rest with free and open-source parts: scrape, crawl, map, extract, search, summarize, and gather context as Mastra workflows on Bun, run with Effect and XState from a fixed mise task graph. It runs on your machine, is open source, respects robots.txt by default, and can replay a run with the same result. Jev's key is the only API key, and it works without one.",
+  "description": "Jev, TypeSafe's decision model, makes the judgment calls in this web research CLI. It searches, scrapes, crawls, maps, extracts, summarizes, and answers on your machine. Jev's key is the only key.",
   "author": { "name": "Kiren Srinivasan", "email": "kiren@fantasymetals.com" },
   "homepage": "https://github.com/srinitude/webular",
   "repository": "https://github.com/srinitude/webular",

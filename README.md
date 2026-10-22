@@ -9,17 +9,17 @@
 
 With `--json`, every command prints the same JSON shape. Each command is also an MCP tool with the same name.
 
-Built on [Jev](src/lib/jev/AGENTS.md), TypeSafe's System One decision model, for judgment calls; [Mastra](src/workflows/AGENTS.md) workflows; Effect; [XState](src/machines/AGENTS.md) and the Stately agent; Bun; Readability, linkedom, Turndown, unpdf, mammoth, and anydoc for pages; agent-browser and Cua for computer use; and mise's task graph. [Architecture](docs/architecture.md) has the details.
+[Jev](src/lib/jev/AGENTS.md), TypeSafe's System One decision model, makes the judgment calls. The rest is built on [Mastra](src/workflows/AGENTS.md) workflows, Effect, [XState](src/machines/AGENTS.md) with the Stately agent, and Bun. Readability, linkedom, Turndown, unpdf, mammoth, and anydoc read pages. agent-browser and Cua drive real browsers and apps. mise's task graph runs the builds and checks. [Architecture](docs/architecture.md) has the details.
 
 ## Why it's different
 
 - It runs on your machine, with no webular server in the middle, and it is open source under Apache-2.0.
 - One key: Jev (`TYPESAFE_API_KEY`), reached through the direct TypeSafe endpoint. Without it, each decision falls back to its rule-based baseline.
 - One tool covers search, scrape, crawl, map, extract, summarize, answer, and research, as a CLI, an MCP server, a Claude Code plugin, and skills.
-- It respects robots.txt by default (`scrape --ignore-robots` opts out). Date-pinned replay with recorded Jev answers gives the same output again; live pages still change.
+- It respects robots.txt by default (`scrape --ignore-robots` opts out). A date-pinned replay with recorded Jev answers can give the same output again, but live pages still change.
 - Where others are ahead: Exa gives stronger answers, and Exa, Brave, and Google run their own search indexes. [The benchmark results](docs/benchmarks.md) hold every number.
 
-[How it works](docs/how-it-works.md) and [Why webular](docs/why-webular.md) go deeper. To set up the Jev key on any OS, read [Jev in webular](docs/jev.md).
+[How it works](docs/how-it-works.md) and [Why webular](docs/why-webular.md) go deeper. To set up the Jev key on any OS, read [Jev in webular](docs/jev.md). The [docs index](docs/README.md) links every doc.
 
 ## Why webular
 
