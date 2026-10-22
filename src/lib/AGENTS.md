@@ -5,7 +5,7 @@ Capability code behind the workflows, under [src/AGENTS.md](../AGENTS.md).
 ## What lives here
 
 - Fetching: [layer](fetch-layer.ts) (the only one), [http](fetch-http.ts), [cache](fetch-cache.ts), [types](fetch-types.ts).
-- Search: [search](search.ts), [chain](search-chain.ts), [diversify](search-diversify.ts), [score](search-source-score.ts), [query](search-query.ts), and `search-*.ts` fuse and filter free-source lists. [sources-search](sources-search.ts) and [sources](sources.ts) fetch `answer` and `research` evidence; [figure](answer-figure.ts) and [images](router-images.ts) cite figures.
+- Search: [search](search.ts), [chain](search-chain.ts), [diversify](search-diversify.ts), [score](search-source-score.ts), [query](search-query.ts), [nested](search-nested.ts), and `search-*.ts` fuse and filter free-source lists. [sources-search](sources-search.ts) and [sources](sources.ts) fetch `answer` and `research` evidence; [figure](answer-figure.ts) and [images](router-images.ts) cite figures.
 - Crawl: [crawl](crawl.ts), [root](crawl-root.ts), [frontier](crawl-frontier.ts), [heap](crawl-heap.ts), [rank](crawl-priority.ts), [resume](crawl-resume.ts), [polite](polite-crawler.ts), [tags](robots-tags.ts).
 - robots.txt: [robots](robots-txt.ts) reads it; [gate](robots-gate.ts) checks scrape, batch, and the map ([root](map-root.ts)) and crawl roots, caching rules per origin for `ROBOTS_TTL_MS`.
 - Pages: [html](html.ts), [table](html-table.ts), [parse](parse.ts), [pdf](parse-pdf-layout.ts), [select](select.ts), [summarize](summarize.ts), [sentences](summarize-sentences.ts), [simhash](simhash.ts), [readability](readability-chain.ts), [json-ld](json-ld.ts).

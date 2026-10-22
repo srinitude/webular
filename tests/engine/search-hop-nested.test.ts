@@ -2,7 +2,7 @@
 // the inner clause names becomes the subject of the outer question. Fixed
 // page excerpts, no network; distractor countries sit beside the bridge.
 import { expect, test } from 'bun:test'
-import { nestedBridge } from '../../src/lib/search-hop.ts'
+import { nestedBridge } from '../../src/lib/search-nested.ts'
 
 const cases = [
   {

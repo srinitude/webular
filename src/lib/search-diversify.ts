@@ -44,7 +44,7 @@ const byScore = <H extends Hit>(a: Entry<H>, b: Entry<H>) => b.score - a.score
 // ponytail: O(n^2) pairwise scan; fine for one page of ~30-100 hits, use a
 // shingle index if lists grow far past that. Dates are not on hits, so
 // "newest copy wins" is not applied: the best-scored copy wins.
-export function mergeCopies<H extends Hit>(entries: Entry<H>[]): Entry<H>[] {
+function mergeCopies<H extends Hit>(entries: Entry<H>[]): Entry<H>[] {
   const kept: Entry<H>[] = []
   for (const e of [...entries].sort(byScore)) {
     const twin = kept.find((k) => isCopy(k.hit, e.hit))
@@ -60,7 +60,7 @@ export function mergeCopies<H extends Hit>(entries: Entry<H>[]): Entry<H>[] {
 // Redundant = one host holds more than half of the top window. Then the first
 // hit of each host goes first (MMR with a host-match penalty), the rest follow
 // in score order. A varied top is left alone (arXiv 2610.09412, 2604.13728, 2601.17212).
-export function diversify<H extends Hit>(entries: Entry<H>[]): Entry<H>[] {
+function diversify<H extends Hit>(entries: Entry<H>[]): Entry<H>[] {
   const top = entries.slice(0, TOP_K).map((e) => host(e.hit.url))
   const biggest = Math.max(0, ...top.map((h) => top.filter((x) => x === h).length))
   if (biggest * 2 <= top.length) return entries

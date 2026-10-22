@@ -4,7 +4,7 @@
 // a list in article order, fused like any source list. A query that also names
 // a maker ("created by Rich Hickey") asks for the maker's products in the same
 // call, so Wikidata's one-request-a-second slot never makes the lookup wait.
-import { Deferred, Effect, Fiber, Option, Schema } from 'effect'
+import { Effect, Schema } from 'effect'
 import { navCore, type SourceRunner } from '../search-source-run.ts'
 import {
   creatorOf,
@@ -82,39 +82,6 @@ export const officialSites = (
     Effect.catch(() => Effect.succeed([])),
   )
 }
-
-// Past the fan-out, the longest wait for the lookup; a later answer is dropped.
-const OFFICIAL_WAIT_MS = 200
-
-// The lookup forked beside the fan-out, fed by `runner`'s Wikipedia hits for
-// the main query as the fan-out sends it (navCore cuts trailing "official
-// website" words), never a variant, so one SPARQL call. `take` gives the sites
-// when they land within OFFICIAL_WAIT_MS of the fan-out's end, else none.
-export const officialBeside = Effect.fn('officialBeside')(function* (
-  main: string,
-  runner: SourceRunner,
-  articles: number,
-) {
-  const maker = creatorOf(main)
-  const wiki = yield* Deferred.make<ReadonlyArray<Hit>>()
-  const lookup = yield* Effect.forkChild(
-    Effect.flatMap(Deferred.await(wiki), (hits) => officialSites(hits, articles, main)),
-  )
-  const sent = navCore(main)
-  const run: SourceRunner = (source, query, limit) =>
-    source === 'wikipedia' && query === sent
-      ? Effect.tap(runner(source, query, limit), (hits) => Deferred.succeed(wiki, hits))
-      : runner(source, query, limit)
-  const take = Effect.gen(function* () {
-    if (!(yield* Deferred.isDone(wiki))) return [] as Hit[][]
-    // A named maker's products have no other source, so its call is awaited in
-    // full (the source timeout bounds it); a plain lookup gets the window.
-    const join = Fiber.join(lookup)
-    const lists = yield* maker ? Effect.asSome(join) : Effect.timeoutOption(join, OFFICIAL_WAIT_MS)
-    return Option.getOrElse(lists, (): Hit[][] => [])
-  }).pipe(Effect.ensuring(Fiber.interrupt(lookup)))
-  return { run, take }
-})
 
 // Navigational queries: Wikipedia's list for the main query (as the fan-out
 // sends it, navCore-cut) leads with its articles' official sites, looked up the

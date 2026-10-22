@@ -2,10 +2,8 @@
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect, Ref } from 'effect'
 import { z } from 'zod'
-import { mdHeading } from '../core/output.ts'
 import { pageImageSchema } from '../lib/answer-figure.ts'
 import { searchRounds } from '../lib/jev/decisions/research.ts'
-import { researchSentences } from '../lib/jev/decisions/research-sentences.ts'
 import { decisions } from '../lib/jev/decisions.ts'
 import { onJevRuntime } from '../lib/jev/run.ts'
 import { readabilitySchema, withReadability } from '../lib/readability-chain.ts'
@@ -13,7 +11,14 @@ import { sourceFigures } from '../lib/router-images.ts'
 import { searchEffect } from '../lib/search-chain.ts'
 import { searchErrors } from '../lib/search-errors.ts'
 import { fetchErrorsSchema, fetchSources, type SourceEntry } from '../lib/sources.ts'
-import { coverageLedger, dedupeSentences, findConflicts, gapsSection } from './research-report.ts'
+import {
+  buildSection,
+  coverageLedger,
+  dedupeSentences,
+  findConflicts,
+  gapsSection,
+  renderSection,
+} from './research-report.ts'
 import { stepRuntime } from './runtime.ts'
 
 const researchInput = z.object({
@@ -127,32 +132,6 @@ const fetchSourcesStep = createStep({
   execute: ({ inputData, abortSignal }) =>
     stepRuntime.runPromise(fetchAndFilter(inputData), { signal: abortSignal }),
 })
-
-// Each section opens with the sentences Jev keeps as the source's facts, in page
-// order (research.sentences, one call per source); the topic-focused summarizer
-// fills the rest, so sentences holding the topic's key terms rank first.
-function buildSection(
-  entry: SourceEntry,
-  topN: number,
-  topic: string,
-  kept: ReadonlyArray<number> = [],
-) {
-  const all = researchSentences(entry.text)
-  const top = researchSentences(entry.text, topN, topic)
-  const lead = kept.flatMap((i) => (all[i] === undefined ? [] : [all[i]]))
-  return [...new Set([...lead, ...top])].slice(0, topN)
-}
-
-function renderSection(
-  entry: SourceEntry,
-  idx: number,
-  sentences: ReadonlyArray<string>,
-  figures: ReadonlyArray<string> = [],
-) {
-  const body = sentences.length > 0 ? sentences.join(' ') : 'No extractable content.'
-  const figs = figures.length > 0 ? `\n\n${figures.join('\n')}` : ''
-  return `## ${mdHeading(entry.title) || `Source ${idx + 1}`}\n\n${body}${figs}\n\n> Source [${idx + 1}]: ${entry.url}`
-}
 
 // image.router per source: figures only where the answer sits in a picture.
 const figuresOf = (topic: string, entries: ReadonlyArray<SourceEntry>) =>

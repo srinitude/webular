@@ -11,7 +11,7 @@ export type Constraints = {
   until?: number
   exclude: string[]
 }
-export type ParsedQuery = { keyword: string; constraints: Constraints }
+type ParsedQuery = { keyword: string; constraints: Constraints }
 type Hit = { title: string; url: string; description: string }
 
 const SITE = /(?:^|\s)site:(\S+)/i

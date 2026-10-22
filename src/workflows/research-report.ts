@@ -3,8 +3,12 @@
 // Sources: arXiv 2510.07861 (dedupe), 2512.01948 and 2607.17291 (conflicts),
 // 2602.07549 (coverage ledger), 2610.15459 (gaps section).
 
-export type Conflict = { sourceA: number; sourceB: number; sentenceA: string; sentenceB: string }
-export type LedgerRow = {
+import { mdHeading } from '../core/output.ts'
+import { researchSentences } from '../lib/jev/decisions/research-sentences.ts'
+import type { SourceEntry } from '../lib/sources.ts'
+
+type Conflict = { sourceA: number; sourceB: number; sentenceA: string; sentenceB: string }
+type LedgerRow = {
   url: string
   status: 'answered' | 'failed' | 'no-evidence'
   reason?: string | undefined
@@ -90,4 +94,30 @@ export const gapsSection = (ledger: ReadonlyArray<LedgerRow>, conflicts: Conflic
       (c) => `- [${c.sourceA + 1}] vs [${c.sourceB + 1}]: "${c.sentenceA}" / "${c.sentenceB}"`,
     ),
   ].join('\n')
+}
+
+// Each section opens with the sentences Jev keeps as the source's facts, in page
+// order (research.sentences, one call per source); the topic-focused summarizer
+// fills the rest, so sentences holding the topic's key terms rank first.
+export function buildSection(
+  entry: SourceEntry,
+  topN: number,
+  topic: string,
+  kept: ReadonlyArray<number> = [],
+) {
+  const all = researchSentences(entry.text)
+  const top = researchSentences(entry.text, topN, topic)
+  const lead = kept.flatMap((i) => (all[i] === undefined ? [] : [all[i]]))
+  return [...new Set([...lead, ...top])].slice(0, topN)
+}
+
+export function renderSection(
+  entry: SourceEntry,
+  idx: number,
+  sentences: ReadonlyArray<string>,
+  figures: ReadonlyArray<string> = [],
+) {
+  const body = sentences.length > 0 ? sentences.join(' ') : 'No extractable content.'
+  const figs = figures.length > 0 ? `\n\n${figures.join('\n')}` : ''
+  return `## ${mdHeading(entry.title) || `Source ${idx + 1}`}\n\n${body}${figs}\n\n> Source [${idx + 1}]: ${entry.url}`
 }
