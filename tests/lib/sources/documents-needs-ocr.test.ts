@@ -1,9 +1,10 @@
 // A scanned PDF fails with code needsOcr and keeps anydoc's page list
 // (anydoc issue #144), so the caller knows which pages to send to OCR.
+// anydoc ships no win32-arm64 binary and throws at import there, so the real
+// module loads only on platforms that have one.
 import { afterAll, expect, mock, test } from 'bun:test'
-import * as realAnydoc from '@firecrawl/anydoc'
 import { Effect } from 'effect'
-import { documentToMarkdown } from '../../../src/lib/sources/documents.ts'
+import { anydocUnsupportedPlatform, documentToMarkdown } from '../../../src/lib/sources/documents.ts'
 import { eff } from '../../_support/run.ts'
 
 const needsOcr = Object.assign(new Error('pages need OCR'), {
@@ -12,13 +13,16 @@ const needsOcr = Object.assign(new Error('pages need OCR'), {
   pageCount: 3,
 })
 
-mock.module('@firecrawl/anydoc', () => ({
-  ...realAnydoc,
-  toMarkdownBytes: () => Effect.runPromise(Effect.fail(needsOcr)),
-}))
-afterAll(() => mock.module('@firecrawl/anydoc', () => realAnydoc))
+if (!anydocUnsupportedPlatform) {
+  const realAnydoc: typeof import('@firecrawl/anydoc') = require('@firecrawl/anydoc')
+  mock.module('@firecrawl/anydoc', () => ({
+    ...realAnydoc,
+    toMarkdownBytes: () => Effect.runPromise(Effect.fail(needsOcr)),
+  }))
+  afterAll(() => mock.module('@firecrawl/anydoc', () => realAnydoc))
+}
 
-test(
+test.skipIf(anydocUnsupportedPlatform)(
   'a scanned PDF names the pages that need OCR',
   eff(
     Effect.gen(function* () {
