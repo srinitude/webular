@@ -5,6 +5,7 @@ Rules for the Jev client and decision framework, under [src/lib/AGENTS.md](../AG
 ## What lives here
 
 - Client: [`client.ts`](client.ts) owns the endpoint and `ask`. [`model.ts`](model.ts) holds the one model name every call sends. [`post.ts`](post.ts) makes one HTTP call with a jittered retry. [`run.ts`](run.ts) runs a decision on the shared runtime. [`errors.ts`](errors.ts) maps HTTP failures to next actions.
+- Route: [`route.ts`](route.ts) picks the Jev route in order: off, then the direct key, then the Pydantic AI Gateway. [`doctor-route.ts`](doctor-route.ts) is the `webular doctor` row that shows the active route and checks its key.
 - Framework: [`define.ts`](define.ts) holds `defineDecision`. [`decisions.ts`](decisions.ts) is the registry. [`steps.ts`](steps.ts) is the door from a workflow (`decisionStep`). [`machine.ts`](machine.ts) is the door from an XState machine (`machineDecision`).
 - Docs guard: [`docs-guard.ts`](docs-guard.ts), [`docs-snapshot.ts`](docs-snapshot.ts), [`docs-fetch.ts`](docs-fetch.ts), [`docs-cache.ts`](docs-cache.ts), and [`docs-violations.ts`](docs-violations.ts) check each batch against a verified snapshot of the model's docs. [`docs-snapshot.json`](docs-snapshot.json) is that snapshot.
 - State: [`store.ts`](store.ts) holds the LRU, the replay files, the calibration log, and the drift file. [`budget.ts`](budget.ts) caps a decision at half the caller's fetch timeout.

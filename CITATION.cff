@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: If you use webular, please cite it with this metadata.
 type: software
 title: webular
-abstract: Jev, TypeSafe's decision model, makes the judgment calls in this web research CLI. It searches, scrapes, crawls, maps, extracts, summarizes, and answers on your machine. Jev's key is the only key.
+abstract: "Jev, TypeSafe's decision model, makes the judgment calls in this web research CLI. It searches, scrapes, crawls, maps, extracts, summarizes, and answers on your machine. Jev's key is the only key."
 authors:
   - family-names: Srinivasan
     given-names: Kiren
