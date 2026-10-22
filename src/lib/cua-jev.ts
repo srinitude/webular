@@ -8,6 +8,7 @@
 // codeDecisions.
 import { Config, Effect, Option, Schema } from 'effect'
 import { codeDecisions, type Decisions, type Intent } from './cua-ground.ts'
+import { locateByImage } from './cua-image-locate.ts'
 import type { AxElement } from './cua-tree.ts'
 import { askAnswers } from './jev/answers.ts'
 
@@ -145,6 +146,7 @@ export const jevDecisions = (post: Post, fallback: Decisions = codeDecisions): D
       jevFeasible(post, goal, intent, candidates),
       fallback.feasible(goal, intent, candidates),
     ),
+  locate: (goal, intent, shot) => locateByImage(post, goal, intent, shot),
 })
 
 // WEBULAR_CUA_JEV=true turns Jev on (default off). With no TypeSafe key, every

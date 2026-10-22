@@ -6,6 +6,7 @@ This folder holds the tests for the Jev framework in [`src/lib/jev/`](../../src/
 - A test whose name ends in eval.test.ts runs a decision against its cases.
 - [`evals-sync.test.ts`](evals-sync.test.ts) checks that every file in [evals/](evals/) belongs to exactly one decision.
 - [`answer-figure.eval.test.ts`](answer-figure.eval.test.ts), [`research-figures.eval.test.ts`](research-figures.eval.test.ts), and [`summarize-figure.eval.test.ts`](summarize-figure.eval.test.ts) compare the image arm with the text-only arm, offline.
+- [`act-goal-image.eval.test.ts`](act-goal-image.eval.test.ts) checks that `act --goal` can click a target the element tree does not name. Jev draws a Box on the window screenshot. The test runs offline, and live with `WEBULAR_TEST_LIVE=1`.
 - [`key-platform.test.ts`](key-platform.test.ts) checks that `TYPESAFE_API_KEY` works on every system and that the Keychain lookup runs only on macOS.
 - [`tests/jev/evals/`](evals/) holds the cases, and [`tests/jev/replay/`](replay/) holds the recorded Jev answers.
 - [`tests/jev/candidates/`](candidates/) keeps eval cases for decisions that have no code. The segmenter cases stay as data for `research.sentences`, which has no decision. The `answer` and `summarize` image arm cases sit there because no decision owns them. The eval check does not scan this folder.
