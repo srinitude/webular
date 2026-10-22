@@ -12,7 +12,7 @@ import { startFixture } from '../_support/fixture.ts'
 import { eff, tmpDir } from '../_support/run.ts'
 
 const cli = (cmd: string, args: string[], extra: Record<string, string> = {}) =>
-  Effect.flatMap(Config.String('PATH'), (PATH) =>
+  Effect.flatMap(Config.String('PATH').pipe(Config.orElse(() => Config.String('Path'))), (PATH) =>
     runCli(`src/commands/${cmd}.ts`, args, { env: { PATH, WEBULAR_JEV: 'off', ...extra } }),
   )
 
