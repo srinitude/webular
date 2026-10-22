@@ -21,11 +21,15 @@ const PDF_MAX_BYTES = 50 * 1024 * 1024
 // A full sentence (40+ characters ending in . ! or ?) is real content, so a
 // short static page with an analytics script (example.com) skips the render.
 const SENTENCE = /\w[^.!?]{39,}[.!?]/
+// A short "enable JavaScript" notice is the shell talking, not page content.
+const JS_NOTICE = /enable javascript|javascript (is )?(required|disabled)/i
 // ponytail: length heuristic on the readable main text; a page that ships
 // scripts, under MIN_MAIN_TEXT characters of article text, and no full
-// sentence gets a render.
+// sentence (or only a JavaScript notice) gets a render.
 const isShell = (html: string, text: string) =>
-  /<script\b/i.test(html) && text.trim().length < MIN_MAIN_TEXT && !SENTENCE.test(text)
+  /<script\b/i.test(html) &&
+  text.trim().length < MIN_MAIN_TEXT &&
+  (!SENTENCE.test(text) || JS_NOTICE.test(text))
 export const needsJs = (html: string) => isShell(html, htmlToArticle(html).text)
 
 const renderInBackground = (url: string, backend: Backend) =>

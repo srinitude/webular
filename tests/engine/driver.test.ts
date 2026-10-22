@@ -135,6 +135,14 @@ describe('render fallback trigger', () => {
     expect(needsJs(page)).toBe(false)
   })
 
+  // An app shell whose only text is a full "enable JavaScript" sentence is still a shell.
+  test('a script page whose only text asks for JavaScript needs a render', () => {
+    const page =
+      '<html><head><script src=/app.js></script></head><body><div id="root"></div>' +
+      '<p>You need to enable JavaScript in your browser to run this app.</p></body></html>'
+    expect(needsJs(page)).toBe(true)
+  })
+
   test('render off keeps the fetched page and starts no browser', () =>
     Effect.runPromise(
       Effect.gen(function* () {

@@ -45,6 +45,24 @@ export const ogImageOf = (document: DomDocument, pageUrl: string): string =>
     baseOf(document, pageUrl),
   )
 
+// Every downloadable media URL on the page, absolute and deduped: img src and
+// srcset, picture/video/audio sources, and og:image. data: URIs are not downloads.
+export function mediaUrlsFrom(document: DomDocument, pageUrl: string): string[] {
+  const base = baseOf(document, pageUrl)
+  const out = new Set<string>([ogImageOf(document, pageUrl)])
+  const add = (href: string) => {
+    const abs = absolute(href.trim(), base)
+    if (/^https?:/i.test(abs)) out.add(abs)
+  }
+  for (const el of Array.from(document.querySelectorAll('img, source, video, audio'))) {
+    add(el.getAttribute('src') ?? '')
+    for (const cand of (el.getAttribute('srcset') ?? '').split(','))
+      add(cand.trim().split(/\s+/)[0] ?? '')
+  }
+  out.delete('')
+  return [...out]
+}
+
 // Swaps each <img alt> for its alt text in place, so page text keeps what the
 // images say ("Revenue 2025: $4.2M") where they sit.
 export function inlineAlts(root: Pick<DomDocument['body'], 'querySelectorAll'>): void {

@@ -10,6 +10,7 @@ import { fetchTextObeyingRobots } from '../lib/robots-gate.ts'
 import {
   type InvalidFieldSpecError,
   parseFieldSpecs,
+  repeatedRecordSelector,
   selectFields,
   selectMatches,
 } from '../lib/select.ts'
@@ -105,7 +106,11 @@ function select(inputData: {
   if (selector) {
     return Effect.succeed({ url, matches: selectMatches(html, selector), ...from })
   }
-  return Effect.succeed({ url, data: {}, ...from })
+  // No fields or selector: a listing page's repeated records are the answer.
+  const derived = repeatedRecordSelector(html)
+  return Effect.succeed(
+    derived ? { url, matches: selectMatches(html, derived), ...from } : { url, data: {}, ...from },
+  )
 }
 
 export const extractWorkflow = createWorkflow({

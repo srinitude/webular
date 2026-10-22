@@ -5,6 +5,7 @@
 import type { Database } from 'bun:sqlite'
 import { Data, Effect } from 'effect'
 import { HostHeap } from './crawl-heap.ts'
+import { countVisit, priorityOf, type Yields } from './crawl-priority.ts'
 import { initSchema } from './crawl-schema.ts'
 
 export class CrawlError extends Data.TaggedError('CrawlError')<{ readonly cause: unknown }> {}
@@ -32,6 +33,7 @@ export interface Frontier {
   readonly scheduled: Set<string> // in the heap or in flight
   readonly readyAt: Map<string, number>
   readonly heap: HostHeap
+  readonly yields: Yields // useful-page counts per path pattern and host: O(patterns + H)
   spilled: number
   inMemory: number
   peakInMemory: number
@@ -49,6 +51,7 @@ export const makeFrontier = (db: Database, token: string, memoryCap: number): Fr
     scheduled: new Set(),
     readyAt: new Map(),
     heap: new HostHeap(),
+    yields: new Map(),
     spilled: (row as { n: number }).n,
     inMemory: 0,
     peakInMemory: 0,
@@ -96,16 +99,29 @@ const route = (f: Frontier) => {
   f.front = emptyFront()
 }
 
-/** Adds unseen URLs in one transaction; returns how many were new. */
-export const enqueue = (f: Frontier, urls: ReadonlyArray<string>, priority = 0) =>
+/** Counts one fetched page toward its path pattern's and host's useful-page yield. */
+export const recordVisit = (f: Frontier, url: string, useful: boolean) =>
+  countVisit(f.yields, url, useful)
+
+/**
+ * Adds unseen URLs in one transaction; returns how many were new. Without an
+ * explicit `priority`, each URL's rank comes from yield counts, URL shape, and
+ * the optional `fresh` set (URLs whose sitemap lastmod is fresh).
+ */
+export const enqueue = (
+  f: Frontier,
+  urls: ReadonlyArray<string>,
+  priority?: number,
+  fresh?: ReadonlySet<string>,
+) =>
   attempt(() => {
-    const p = Math.min(PRIORITIES - 1, Math.max(0, priority))
     const mark = f.db.query('INSERT OR IGNORE INTO crawl_seen (token, url) VALUES (?, ?)')
     let added = 0
     f.db.transaction(() => {
       for (const url of urls) {
         if (mark.run(f.token, url).changes !== 1) continue
-        admit(f, url, p)
+        const p = priority ?? priorityOf(f.yields, url, fresh?.has(url))
+        admit(f, url, Math.min(PRIORITIES - 1, Math.max(0, p)))
         added++
       }
     })()

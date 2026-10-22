@@ -18,6 +18,9 @@ const jsonLdFactSchema = z.object({
   datePublished: z.string().optional(),
   author: z.array(z.string()).optional(),
   sameAs: z.array(z.string()).optional(),
+  legislationIdentifier: z.string().optional(),
+  legislationType: z.string().optional(),
+  distribution: z.array(z.string()).optional(),
 })
 type JsonLdFact = z.infer<typeof jsonLdFactSchema>
 
@@ -66,18 +69,31 @@ const asStrings = (v: unknown): string[] =>
 const authorNames = (v: unknown): string[] =>
   (Array.isArray(v) ? v : [v]).flatMap((a) => (isNode(a) ? asStrings(a['name']) : asStrings(a)))
 
+// Legislation type and identifier are strings or named objects; a Dataset's
+// DataDownload parts carry their file links in contentUrl.
+const namedString = (v: unknown): string | undefined =>
+  (isNode(v) ? asStrings(v['name']) : asStrings(v))[0]
+const downloadUrls = (v: unknown): string[] =>
+  (Array.isArray(v) ? v : [v]).flatMap((d) => (isNode(d) ? asStrings(d['contentUrl']) : []))
+
 function factOf(node: Node): JsonLdFact {
   const [name] = asStrings(node['name'])
   const [url] = asStrings(node['url'])
   const [datePublished] = asStrings(node['datePublished'])
   const author = authorNames(node['author'])
   const sameAs = asStrings(node['sameAs'])
+  const legislationIdentifier = namedString(node['legislationIdentifier'])
+  const legislationType = namedString(node['legislationType'])
+  const distribution = downloadUrls(node['distribution'])
   return {
     ...(name ? { name } : {}),
     ...(url ? { url } : {}),
     ...(datePublished ? { datePublished } : {}),
     ...(author.length ? { author } : {}),
     ...(sameAs.length ? { sameAs } : {}),
+    ...(legislationIdentifier ? { legislationIdentifier } : {}),
+    ...(legislationType ? { legislationType } : {}),
+    ...(distribution.length ? { distribution } : {}),
   }
 }
 

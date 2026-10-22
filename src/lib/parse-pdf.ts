@@ -1,6 +1,7 @@
 // PDF text through unpdf, bounded by a page cap and a deadline.
 import { Effect, Option } from 'effect'
 import { attempt, fail, ParseError, setting } from './parse-core.ts'
+import { columnText, type TextItem } from './parse-pdf-layout.ts'
 
 // A page cap and a deadline bound one PDF's text extraction (CPU and memory).
 // unpdf reads a dense text page in about 10 ms on an Apple-silicon Mac, so the
@@ -9,13 +10,11 @@ import { attempt, fail, ParseError, setting } from './parse-core.ts'
 // government reports. WEBULAR_PDF_MAX_PAGES and WEBULAR_PDF_TIMEOUT_MS override them.
 type Pdf = Awaited<ReturnType<typeof import('unpdf').getDocumentProxy>>
 
-// One page's text, joined the way unpdf's extractText joins it.
+// One page's text in column-aware reading order (XY-Cut), not stream order.
 const pageText = (pdf: Pdf, n: number) =>
   attempt(() => pdf.getPage(n)).pipe(
     Effect.flatMap((page) => attempt(() => page.getTextContent())),
-    Effect.map(({ items }) =>
-      items.map((it) => ('str' in it ? it.str + (it.hasEOL ? '\n' : '') : '')).join(''),
-    ),
+    Effect.map(({ items }) => columnText(items.filter((it): it is TextItem => 'str' in it))),
   )
 
 // pdf.js extraction runs on promise jobs only, so no timer (the deadline) fires
@@ -50,10 +49,26 @@ const stripRunning = (texts: string[]) => {
   })
 }
 
+// A line whose shape (digits ignored) is on more than 60% of 3+ pages is page
+// furniture (arXiv 2609.26381, 2602.11960); it goes wherever it sits on the page.
+export const dropRepeatedLines = (texts: string[]) => {
+  if (texts.length < 3) return texts
+  const pages = texts.map((t) => t.split('\n'))
+  const seen = new Map<string, number>()
+  for (const lines of pages)
+    for (const s of new Set(lines.map(shape))) if (s) seen.set(s, (seen.get(s) ?? 0) + 1)
+  const furniture = (line: string) => (seen.get(shape(line)) ?? 0) * 10 > texts.length * 6
+  // A page left with no text keeps its lines: the text may be all there is.
+  return pages.map((lines, i) => {
+    const body = lines.filter((l) => !furniture(l)).join('\n')
+    return body.trim() ? body : (texts[i] ?? '')
+  })
+}
+
 // unpdf's mergePages whitespace rules, then line-end hyphens joined.
 // ponytail: a compound broken at its own hyphen ("well-/known") loses the hyphen; a word list would fix it.
 const merge = (texts: string[]) =>
-  stripRunning(texts)
+  stripRunning(dropRepeatedLines(texts))
     .join('\n')
     .replace(/[^\S\n]+/g, ' ')
     .replace(/ ?\n ?/g, '\n')

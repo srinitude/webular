@@ -105,12 +105,18 @@ function readableArticle(doc: Document, docTitle: string, rawHtml: string): Arti
   if (!parsed?.content?.textContent?.trim()) return freshBody(rawHtml, docTitle)
   const contentHtml = sanitizeHtml(parsed.content?.innerHTML ?? '')
   if (parsed.content) inlineAlts(parsed.content as unknown as DomDocument['body'])
-  return {
+  const article = {
     title: dropInvisible(parsed.title ?? docTitle),
     contentHtml,
     text: dropInvisible(parsed.content?.textContent ?? ''),
   }
+  if (article.text.trim().length >= THIN_TEXT) return article
+  const body = freshBody(rawHtml, article.title)
+  return body.text.trim().length > article.text.trim().length ? body : article
 }
+
+// ponytail: length rule. A thin pick loses to fuller body text (code, math kept).
+const THIN_TEXT = 200
 
 function freshBody(rawHtml: string, title: string): Article {
   const { body } = parseHTML(rawHtml).document

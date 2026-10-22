@@ -13,7 +13,7 @@ import { jevOrder } from '../lib/crawl.ts'
 import { decisionStep } from '../lib/jev/steps.ts'
 import { fetchRootFor, pageLinks } from '../lib/map-root.ts'
 import { fetchErrorsSchema } from '../lib/sources.ts'
-import { locsOf, rootPrefix, withoutComments } from './map-xml.ts'
+import { capPrefixes, locsOf, rootPrefix, withoutComments } from './map-xml.ts'
 import { stepRuntime } from './runtime.ts'
 
 const mapInput = z.object({
@@ -93,13 +93,14 @@ const robotsSitemaps = Effect.fn('map.robotsSitemaps')(function* (
   site: string,
   host: string,
   budget: number,
+  alreadyRead: string,
 ) {
   const robotsUrl = new URL('/robots.txt', site).toString()
   const txt = yield* Effect.option(fetchTextWithinHost(robotsUrl, host, { timeoutMs: budget }))
   if (txt._tag === 'None') return null
   const locs = [...txt.value.matchAll(/^\s*sitemap\s*:\s*(\S+)/gim)]
     .map((m) => normalizeUrl(m[1] ?? '', robotsUrl) ?? '')
-    .filter((u) => sameHost(host, u))
+    .filter((u) => sameHost(host, u) && u !== alreadyRead)
     .slice(0, MAX_CHILD_SITEMAPS)
   const results = yield* Effect.forEach(locs, (loc) => namedSitemap(loc, host, budget), {
     concurrency: yield* hostConcurrency,
@@ -120,10 +121,12 @@ const fetchSitemap = Effect.fn('map.fetchSitemap')(function* (site: string, time
         : { links: [], errors: [{ url: xmlUrl, reason: errMsg(err) }] },
     ),
   )
-  if (primary && primary.links.length > 0) return { ...primary, fromSitemapXml: true }
-  const robots = yield* robotsSitemaps(site, host, budget)
+  // Every robots.txt Sitemap: line joins, after /sitemap.xml's own links.
+  const robots = yield* robotsSitemaps(site, host, budget, xmlUrl)
   const errors = [...(primary?.errors ?? []), ...(robots?.errors ?? [])]
-  return robots || primary ? { links: robots?.links ?? [], errors, fromSitemapXml: false } : null
+  const fromSitemapXml = (primary?.links.length ?? 0) > 0
+  const links = [...(primary?.links ?? []), ...(robots?.links ?? [])]
+  return robots || primary ? { links, errors, fromSitemapXml } : null
 })
 
 // Lee, Kim & Hong, "On URL Normalization" (ICCSA 2005): a trailing slash or a default
@@ -172,7 +175,7 @@ const discoverStep = decisionStep({
   prepare: (input: z.infer<typeof mapInput>) => stepRuntime.runPromise(discover(input)),
   pick: (d) => (d.unique.length > d.limit ? { site: d.site, urls: d.unique } : undefined),
   output: (d, ordered) => {
-    const links = (ordered ?? d.unique).slice(0, d.limit)
+    const links = capPrefixes(ordered ?? d.unique, d.limit)
     const errors = [...(links.length === 0 ? d.root.errors : []), ...(d.sitemap?.errors ?? [])]
     return { url: d.url, count: links.length, links, errors }
   },

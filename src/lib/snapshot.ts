@@ -38,15 +38,28 @@ function sha256(text: string): string {
   return createHash('sha256').update(text).digest('hex')
 }
 
-function compareInTx(db: Database, url: string, text: string, now: number): SnapshotResult {
+// Whitespace collapsed per line and blanks dropped, so whitespace churn never
+// reads as a change. Repeated lines stay: a price repeated on a page must still diff.
+export function normalizeText(text: string): string {
+  return text
+    .split('\n')
+    .map((l) => l.replace(/\s+/g, ' ').trim())
+    .filter(Boolean)
+    .join('\n')
+}
+
+function compareInTx(db: Database, url: string, raw: string, now: number): SnapshotResult {
+  const text = normalizeText(raw)
   const hash = sha256(text)
   const row = db.query<SnapshotRow, string>(SELECT).get(url)
   if (!row) {
     db.run(INSERT, [url, hash, text, now])
     return { url, changeStatus: 'new' }
   }
-  if (row.hash === hash) return { url, changeStatus: 'same' }
-  const diff = createTwoFilesPatch(url, url, row.text, text, 'previous', 'current')
+  // Rows stored before normalizing are normalized on read, so no false change.
+  const before = normalizeText(row.text)
+  if (sha256(before) === hash) return { url, changeStatus: 'same' }
+  const diff = createTwoFilesPatch(url, url, before, text, 'previous', 'current')
   db.run(UPDATE, [hash, text, now, url])
   return { url, changeStatus: 'changed', diff }
 }

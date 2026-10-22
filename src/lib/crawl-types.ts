@@ -77,7 +77,7 @@ interface CrawledPage {
   readonly status: number
   readonly body: string
 }
-type SkipReason = 'robots' | 'near-duplicate' | 'fetch-error'
+type SkipReason = 'robots' | 'noindex' | 'near-duplicate' | 'fetch-error'
 export interface CrawlResult {
   readonly pages: CrawledPage[]
   readonly skipped: { url: string; reason: SkipReason }[]
