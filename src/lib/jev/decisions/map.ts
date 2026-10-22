@@ -46,7 +46,7 @@ export const mapDecision = defineDecision<{ readonly site: string; readonly url:
   fallback: () => 0.5,
   codeCheck: (s) => s >= 0 && s <= 1,
   evals: 'tests/jev/evals/map.rank.json',
-  docs: '88a6a003018eaea50167565a766a0d4a91d039cf93cc7dc2965d3ceba3a72caf',
+  docs: 'b0b26ab933a61b5d43ccccae5fbd009f445bfdcfd2808cac9e410a84f0fd8ca4',
 })
 
 // map.kind: what kind of page a discovered URL is, so a map or crawl limit
@@ -129,7 +129,7 @@ export const kindDecision = defineDecision<KindInput, Kind>({
   fallback: kindBaseline,
   codeCheck: codeCheck,
   evals: 'tests/jev/evals/map.kind.json',
-  docs: '88a6a003018eaea50167565a766a0d4a91d039cf93cc7dc2965d3ceba3a72caf',
+  docs: 'b0b26ab933a61b5d43ccccae5fbd009f445bfdcfd2808cac9e410a84f0fd8ca4',
 })
 
 // `urls` best-first by map.kind. The sort is stable, so ties, no key, and unsure

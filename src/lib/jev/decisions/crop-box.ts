@@ -168,5 +168,5 @@ export const decideCropBox = defineDecision<CropBoxInput, CropRect | 'none'>({
   fallback: () => 'none',
   codeCheck: (r, input) => r === 'none' || Object.values(edgeChecks(r, input.image)).every(Boolean),
   evals: 'tests/jev/evals/chart.crop-box.json',
-  docs: '88a6a003018eaea50167565a766a0d4a91d039cf93cc7dc2965d3ceba3a72caf',
+  docs: 'b0b26ab933a61b5d43ccccae5fbd009f445bfdcfd2808cac9e410a84f0fd8ca4',
 })

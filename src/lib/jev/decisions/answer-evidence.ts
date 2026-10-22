@@ -12,7 +12,7 @@ import {
   score,
 } from '../payload/index.ts'
 
-const DOCS = '88a6a003018eaea50167565a766a0d4a91d039cf93cc7dc2965d3ceba3a72caf'
+const DOCS = 'b0b26ab933a61b5d43ccccae5fbd009f445bfdcfd2808cac9e410a84f0fd8ca4'
 const MAX_HITS = 18 // 18 scores + 2 gating choices = the 20-question cap
 const MAX_QUESTION = 300
 const MAX_SNIPPET = 400

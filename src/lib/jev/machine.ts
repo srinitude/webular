@@ -132,7 +132,7 @@ export const nextEvent = defineDecision<Allowed, string | undefined>({
   // The machine takes only a move it allows.
   codeCheck: (type, i) => type === undefined || i.allowed.includes(type),
   evals: 'tests/jev/evals/machine.next.json',
-  docs: '88a6a003018eaea50167565a766a0d4a91d039cf93cc7dc2965d3ceba3a72caf',
+  docs: 'b0b26ab933a61b5d43ccccae5fbd009f445bfdcfd2808cac9e410a84f0fd8ca4',
 })
 
 // The chosen event is always one the machine allows from `snapshot`, or

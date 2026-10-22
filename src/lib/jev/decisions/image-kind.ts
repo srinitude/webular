@@ -137,5 +137,5 @@ export const imageKindDecision = defineDecision<ImageKindInput, ImageKind[]>({
     kinds.length === Math.min(input.images.length, CAPS.fields) &&
     kinds.every((k) => IMAGE_KINDS.includes(k)),
   evals: 'tests/jev/evals/image.kind.json',
-  docs: '88a6a003018eaea50167565a766a0d4a91d039cf93cc7dc2965d3ceba3a72caf',
+  docs: 'b0b26ab933a61b5d43ccccae5fbd009f445bfdcfd2808cac9e410a84f0fd8ca4',
 })
