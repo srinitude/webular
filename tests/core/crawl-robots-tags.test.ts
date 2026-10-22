@@ -32,10 +32,25 @@ const SITE: Record<string, FetchResponse> = {
   'https://s.test/d2': page('<p>Never reached either.</p>'),
 }
 
+// A virtual clock, as in the other crawler tests: the host delay is 10x the
+// measured fetch time, so on a slow runner the real clock gives a real sleep,
+// and runSync fails on that async step.
+const virtualClock = () => {
+  let t = 0
+  return {
+    now: () => t,
+    sleep: (ms: number) =>
+      Effect.sync(() => {
+        t += ms
+      }),
+  }
+}
+
 test('noindex pages stay out of results, nofollow pages add no links', () => {
   const fetched: string[] = []
   const result = Effect.runSync(
     crawl({
+      ...virtualClock(),
       dbPath: ':memory:',
       seeds: ['https://s.test/'],
       concurrency: 1,
