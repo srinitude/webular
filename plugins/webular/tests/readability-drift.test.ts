@@ -19,7 +19,7 @@ const pinned: Record<string, string> = {
 }
 const pinnedCopies: Record<string, string> = {
   'human-language': 'd6d980355aa50f8d7add5dd3cef6f00b79896d026f63eb9b19a670c081739437',
-  'rich-and-native-markdown': '2623974c9f508b9ee2bf85bf088405d397bcd3646e6ef5c097f67b2ea827378a',
+  'rich-and-native-markdown': '4cbfa3089f7d1b15b6d351c9967058fe2a5af3f8faf43a661cab3004bb82a206',
 }
 
 // Rule lines only, with Markdown marks, case, and spacing removed.
