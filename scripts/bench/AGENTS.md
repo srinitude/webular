@@ -7,6 +7,7 @@ The benchmarks. The root [AGENTS.md](../../AGENTS.md) holds the repo-wide rules.
 - `scripts/bench/peers/`: the peer benchmark against other web research tools.
 - [tasks/](tasks/): the generators that build the task sets in [bench/tasks/](../../bench/tasks/).
 - [agreement.ts](agreement.ts): Cohen's and Fleiss' kappa, as pure functions, shared by the judge and the grader track.
+- [dataset-fetch.ts](dataset-fetch.ts), [dataset-manifest.ts](dataset-manifest.ts), and [dataset-pin.ts](dataset-pin.ts): download and check the public datasets pinned in [bench/datasets/](../../bench/datasets/).
 - The other scripts here are cold-start and scaling probes that `mise run bench` times.
 
 ## Rules
@@ -30,6 +31,11 @@ The benchmarks. The root [AGENTS.md](../../AGENTS.md) holds the repo-wide rules.
 - Keep a speed or accuracy change only when it beats the noise bar, max(2 x bootstrap SE, 10 ms), and accuracy holds.
 - Bench one change at a time on fixed input. Add fetch-and-cache, crawl-frontier, and peak-RSS benches next to the cold-start runs. Source: hyperfine README.
 - Entry scripts end in `BunRuntime.runMain`, not `Effect.runPromise` or `Effect.runFork`.
+
+### Fetched datasets
+
+- A public dataset is downloaded at run time, never copied into git. Its manifest pins the revision and a sha256, and the fetch fails on a mismatch.
+- No CI step downloads a dataset. Tests use a local fixture.
 
 ### Recordings and keys
 

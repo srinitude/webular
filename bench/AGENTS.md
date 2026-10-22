@@ -6,6 +6,7 @@ Benchmark data and inputs. The root [AGENTS.md](../AGENTS.md) holds the repo-wid
 
 - `bench/recordings/`: recorded peer responses, keyed by the sha256 of each request.
 - `bench/results/`: scored results and reports from each run.
+- [datasets/](datasets/): manifests for public datasets that `mise run bench:data` downloads into the gitignored cache. The data is never committed.
 - [fixtures/](fixtures/): local pages and sites that the fixture server serves.
 - [spec/](spec/): the benchmark spec.
 - [tasks/](tasks/): the frozen task sets.
@@ -23,6 +24,7 @@ mise run bench:peers
 
 ## Children
 
+- [datasets/AGENTS.md](datasets/AGENTS.md)
 - [fixtures/AGENTS.md](fixtures/AGENTS.md)
 - [spec/AGENTS.md](spec/AGENTS.md)
 - [tasks/AGENTS.md](tasks/AGENTS.md)

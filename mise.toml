@@ -382,3 +382,13 @@ run = "bun scripts/bench/peers/run.ts"
 description = "Peer benchmark live: calls each keyed provider (at most 20 calls per peer), records responses, writes bench/results (off the CI spine)"
 depends = ["setup"]
 run = "bun scripts/bench/peers/run.ts --live"
+
+[tasks."bench:data"]
+description = "Download the pinned public bench datasets (WebMainBench subset, Firecrawl scrape set) into .cache/bench-data and check each sha256 against bench/datasets (off the CI spine; a cached file makes no network call)"
+depends = ["setup"]
+run = "bun scripts/bench/dataset-fetch.ts"
+
+[tasks."bench:data:pin"]
+description = "Rewrite bench/datasets/*.json from the cached files after a revision bump (off the CI spine)"
+depends = ["setup"]
+run = "bun scripts/bench/dataset-pin.ts"
