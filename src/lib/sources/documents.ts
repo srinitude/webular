@@ -14,12 +14,15 @@ class DocumentConvertError extends Data.TaggedError('DocumentConvertError')<{
   // anydoc's ConvertErrorCode ('unsupported', 'needsOcr', 'malformed', ...).
   code: string
   message: string
+  // 1-indexed pages that need OCR, when code is 'needsOcr' (anydoc issue #144).
+  pages?: ReadonlyArray<number> | undefined
 }> {}
 
 const toError = (cause: unknown) =>
   new DocumentConvertError({
     code: (cause as { code?: unknown })?.code?.toString() ?? 'unknown',
     message: cause instanceof Error ? cause.message : String(cause),
+    pages: (cause as { pages?: ReadonlyArray<number> })?.pages,
   })
 
 export const documentToMarkdown = (bytes: Uint8Array) =>

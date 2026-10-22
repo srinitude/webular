@@ -120,7 +120,7 @@ const loadPdf = (bytes: Uint8Array, timeoutMs: number) =>
   attempt(() => import('unpdf')).pipe(
     // a copy: pdf.js detaches its input and rejects a Buffer
     Effect.flatMap(({ getDocumentProxy }) =>
-      attempt(() => getDocumentProxy(new Uint8Array(bytes))),
+      attempt(() => getDocumentProxy(new Uint8Array(bytes), { maxImageSize: 16_777_216 })),
     ),
     Effect.timeoutOption(Math.max(timeoutMs, LOAD_FLOOR_MS)),
     Effect.flatMap(
@@ -139,7 +139,7 @@ export const pdfText = Effect.fnUntraced(function* (bytes: Uint8Array) {
   const timeoutMs = yield* setting('WEBULAR_PDF_TIMEOUT_MS', 60_000)
   // The pdf.js proxy holds a worker and page buffers: free it on success and failure.
   return yield* Effect.acquireRelease(loadPdf(bytes, timeoutMs), (pdf) =>
-    Effect.ignore(attempt(() => (pdf as unknown as { destroy(): Promise<void> }).destroy())),
+    Effect.ignore(attempt(() => pdf.loadingTask.destroy())),
   ).pipe(
     Effect.flatMap((pdf) => readBounded(pdf, maxPages, timeoutMs)),
     Effect.scoped,

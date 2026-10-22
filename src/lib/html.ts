@@ -190,10 +190,14 @@ turndown.addRule('bare-pre', {
   },
 })
 
+// Turndown's regexes run superlinear on huge inputs (turndown #505, #506), so
+// input past 5 MB (well above any article) is cut before it reaches them.
+export const MARKDOWN_HTML_MAX_CHARS = 5_000_000
+
 // Every Markdown path sanitizes here, so no caller can hand Turndown hidden
 // text, script, or style from raw HTML.
 export function htmlToMarkdown(html: string): string {
-  return turndown.turndown(sanitizeHtml(html)).trim()
+  return turndown.turndown(sanitizeHtml(html.slice(0, MARKDOWN_HTML_MAX_CHARS))).trim()
 }
 
 export { sanitizeHtml }

@@ -1,12 +1,17 @@
 // MEDIA accuracy eval (offline): a page with every downloadable-media form is
 // scored against a gold URL set written from the page design. The inventory
 // must resolve relative URLs (incl. <base href>), expand srcset candidates,
-// and list each URL once. Gap: screenshot/PDF need a browser and are not covered.
+// and list each URL once. The command case serves the page from the local
+// fixture and scores the `media` field of `media --download --json`.
+// Gap: screenshot/PDF need a browser and are not covered.
 import { describe, expect, test } from 'bun:test'
-import { Effect } from 'effect'
+import { join } from 'node:path'
+import { Effect, Schema } from 'effect'
 import { parseHTML } from 'linkedom'
 import { mediaUrlsFrom } from '../../src/lib/html-images.ts'
-import { eff } from '../_support/run.ts'
+import { runCli } from '../_support/cli.ts'
+import { useFixture } from '../_support/fixture.ts'
+import { eff, tmpDir } from '../_support/run.ts'
 
 const PAGE = 'https://site.test/blog/post.html'
 const html = `<html><head>
@@ -39,24 +44,57 @@ const GOLD = [
   'https://site.test/audio/alt.ogg',
 ]
 
+const fx = useFixture(() => ({
+  '/blog/post.html': () =>
+    new Response(html.replaceAll('https://site.test', fx.origin), {
+      headers: { 'content-type': 'text/html' },
+    }),
+}))
+
+const score = (got: string[], gold: string[], label: string) =>
+  Effect.gen(function* () {
+    const hits = got.filter((u) => gold.includes(u)).length
+    const recall = hits / gold.length
+    const precision = got.length ? hits / got.length : 0
+    const missed = gold.filter((g) => !got.includes(g)).join(' ')
+    const extra = got.filter((g) => !gold.includes(g)).join(' ')
+    yield* Effect.logInfo(
+      `${label} recall=${recall.toFixed(3)} precision=${precision.toFixed(3)} n=${got.length} missed=${missed} extra=${extra}`,
+    )
+    expect(new Set(got).size).toBe(got.length)
+    expect(precision).toBe(1)
+    expect(recall).toBe(1)
+  })
+
+const decodeMedia = Schema.decodeUnknownEffect(
+  Schema.fromJsonString(Schema.Struct({ media: Schema.optional(Schema.Array(Schema.String)) })),
+)
+
 describe('webular media — page media inventory accuracy', () => {
   test(
     'precision, recall, and dedupe against the gold set',
+    eff(score(mediaUrlsFrom(parseHTML(html).document, PAGE), GOLD, 'media-accuracy')),
+  )
+
+  test(
+    'the media command reports the same inventory for a downloaded page',
     eff(
       Effect.gen(function* () {
-        const got = mediaUrlsFrom(parseHTML(html).document, PAGE)
-        const hits = got.filter((u) => GOLD.includes(u)).length
-        const recall = hits / GOLD.length
-        const precision = got.length ? hits / got.length : 0
-        const missed = GOLD.filter((g) => !got.includes(g)).join(' ')
-        const extra = got.filter((g) => !GOLD.includes(g)).join(' ')
-        yield* Effect.logInfo(
-          `media-accuracy recall=${recall.toFixed(3)} precision=${precision.toFixed(3)} n=${got.length} missed=${missed} extra=${extra}`,
-        )
-        expect(new Set(got).size).toBe(got.length)
-        expect(precision).toBe(1)
-        expect(recall).toBe(1)
+        const dest = join(yield* tmpDir('webular-'), 'post.html')
+        const url = `${fx.origin}/blog/post.html`
+        const { code, out } = yield* runCli('src/commands/media.ts', [
+          '--url',
+          url,
+          '-o',
+          dest,
+          '--json',
+        ])
+        expect(code).toBe(0)
+        const gold = GOLD.map((g) => g.replace('https://site.test', fx.origin))
+        const { media } = yield* decodeMedia(out)
+        yield* score([...(media ?? [])], gold, 'media-command-accuracy')
       }),
     ),
+    15_000,
   )
 })

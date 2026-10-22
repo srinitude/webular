@@ -22,6 +22,20 @@ interface SnapshotRow {
 
 class SnapshotError extends Data.TaggedError('SnapshotError')<{ readonly message: string }> {}
 
+// Edit-distance cap: past it jsdiff returns undefined (jsdiff #720), so a huge
+// rewrite costs bounded CPU and the stored diff is a short note instead.
+const MAX_EDIT_LENGTH = 5000
+
+export function boundedPatch(
+  url: string,
+  prev: string,
+  next: string,
+  maxEditLength = MAX_EDIT_LENGTH,
+): string {
+  const patch = createTwoFilesPatch(url, url, prev, next, 'previous', 'current', { maxEditLength })
+  return patch ?? `diff too large to show (${url})`
+}
+
 const SELECT = 'SELECT hash, text FROM snapshots WHERE url = ?'
 const INSERT = 'INSERT INTO snapshots (url, hash, text, ts) VALUES (?, ?, ?, ?)'
 const UPDATE = 'UPDATE snapshots SET hash = ?, text = ?, ts = ? WHERE url = ?'
@@ -59,7 +73,7 @@ function compareInTx(db: Database, url: string, raw: string, now: number): Snaps
   // Rows stored before normalizing are normalized on read, so no false change.
   const before = normalizeText(row.text)
   if (sha256(before) === hash) return { url, changeStatus: 'same' }
-  const diff = createTwoFilesPatch(url, url, before, text, 'previous', 'current')
+  const diff = boundedPatch(url, before, text)
   db.run(UPDATE, [hash, text, now, url])
   return { url, changeStatus: 'changed', diff }
 }
