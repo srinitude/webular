@@ -104,7 +104,7 @@ Syntax checked on 2026-10-21 against the [fish `set` page](https://fishshell.com
 
 ## MCP clients
 
-`webular mcp` serves every command as an MCP tool over stdio. Install webular first, so `webular` is on your PATH. The only key webular uses is the optional Jev key. The recommended way to reach Jev is the direct TypeSafe endpoint, with `TYPESAFE_API_KEY` or the macOS Keychain item `typesafe-ai-api-key`.
+`webular mcp` serves 24 MCP tools over stdio: one for each command but `mcp`, plus `machine.next` and four low-level `web.*` tools. Install webular first, so `webular` is on your PATH. The only key webular uses is the optional Jev key. The recommended way to reach Jev is the direct TypeSafe endpoint, with `TYPESAFE_API_KEY` or the macOS Keychain item `typesafe-ai-api-key`.
 
 ### Claude Code
 

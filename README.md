@@ -5,9 +5,9 @@
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/srinitude/webular/badge)](https://scorecard.dev/viewer/?uri=github.com/srinitude/webular)
 
-`webular` is a web research CLI and MCP server. It searches, scrapes, crawls, maps, extracts, summarizes, and answers with sources. It needs one key: Jev (`TYPESAFE_API_KEY`).
+`webular` is a web research CLI and MCP server. It searches, scrapes, crawls, maps, extracts, summarizes, and answers with sources. It uses one optional key: Jev (`TYPESAFE_API_KEY`).
 
-With `--json`, every command prints the same JSON shape. Each command is also an MCP tool with the same name.
+With `--json`, every command prints the same JSON shape. Each command but `mcp` is also an MCP tool with the same name.
 
 [Jev](src/lib/jev/AGENTS.md), TypeSafe's System One decision model, makes the judgment calls. The rest is built on [Mastra](src/workflows/AGENTS.md) workflows, Effect, [XState](src/machines/AGENTS.md) with the Stately agent, and Bun. Readability, linkedom, Turndown, unpdf, mammoth, and anydoc read pages. agent-browser and Cua drive real browsers and apps. mise's task graph runs the builds and checks. [Architecture](docs/architecture.md) has the details.
 
@@ -78,7 +78,7 @@ An agent can use webular in three ways. Pick one. Each way runs the same Mastra 
 
 - **Skills only.** Copy a folder from [`plugins/webular/skills`](plugins/webular/skills) into your agent's skills folder. Each skill names only real commands and flags.
 
-The tools are `search`, `scrape`, `map`, `summarize`, `crawl`, `extract`, `answer`, `research`, `jev`, `parse`, `media`, `monitor`, `batch`, `act`, `feed`, `doctor`, `tasks`, `diagram`, and `audit`. Each result holds at most 8,000 characters. A longer one comes back with a `cursor` for the next part. [Agent contract](docs/agent-contract.md) lists what each surface promises. [The plugin README](plugins/webular/README.md) covers the HTTP server for local work.
+The plugin's server has 19 command tools: `search`, `scrape`, `map`, `summarize`, `crawl`, `extract`, `answer`, `research`, `jev`, `parse`, `media`, `monitor`, `batch`, `act`, `feed`, `doctor`, `tasks`, `diagram`, and `audit`. `webular mcp` has 24 MCP tools: those 19, `machine.next`, and four low-level HTML tools (`web.fetch`, `web.links`, `web.markdown`, and `web.readability`). Each result holds at most 8,000 characters. A longer one comes back with a `cursor` for the next part. [Agent contract](docs/agent-contract.md) lists what each surface promises. [The plugin README](plugins/webular/README.md) covers the HTTP server for local work.
 
 The `machine.next` tool replays events on one of webular's flow machines (`cliDispatch`, `commandLifecycle`, `fetch`, `jevCommand`, `mcpServe`, or `scrapeFallback`). It returns the machine's state and the events it allows next, using the Stately agent's replay. It calls no model.
 

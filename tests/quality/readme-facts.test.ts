@@ -32,6 +32,13 @@ const truth = Effect.gen(function* () {
   const files = [...new Glob('src/**/*.ts').scanSync(ROOT)]
   const src = (yield* Effect.forEach(files, read, { concurrency: 16 })).join('\n')
   const dist = yield* read('src/release/distribution.ts')
+  // The plugin's own server reads env too (WEBULAR_BIN); only its env reads count.
+  const pluginFiles = [...new Glob('plugins/webular/src/**/*.ts').scanSync(ROOT)]
+  const plugin = (yield* Effect.forEach(pluginFiles, read, { concurrency: 16 })).join('\n')
+  // Env reads: process.env['X'] / env.X, and Effect Config constructors
+  // (Config.String('X'), Config.Redacted('X'), ...) or a setting('X') helper.
+  const envRead =
+    /(?:env\[['"]|env\.|Config\.[A-Z]\w*\(\s*'|\bsetting\(\s*')([A-Z][A-Z0-9_]+)/g
   const flags = [
     ...all(src, /^\s+'?([a-z][a-z0-9-]*)'?: \{ type: '(?:string|boolean)'/gm),
     ...all(src, /(?<![\w-])--([a-z][a-z0-9-]*)/g),
@@ -40,7 +47,7 @@ const truth = Effect.gen(function* () {
     commands: new Set(Object.keys(COMMANDS)),
     flags: new Set(flags),
     tools: mcpToolIds.length,
-    env: new Set(all(src, /(?:env\[['"]|env\.)([A-Z][A-Z0-9_]+)/g)),
+    env: new Set([...all(src, envRead), ...all(plugin, envRead)]),
     platforms: new Set(all(yield* read('mise.toml'), /--target=bun-([a-z0-9-]+)/g)),
     installs: new Map([
       ['npm', pkg.name],
@@ -62,8 +69,13 @@ const codeLines = (md: string) => [
   ...all(md.replace(/```[\s\S]*?```/g, ''), /`([^`\n]+)`/g),
 ]
 
+// A line starting with `/` is a chat slash command (Claude Code's
+// `/plugin install webular --marketplace ...`): there webular is an argument,
+// not the command, so its flags are not webular's.
 const invocations = (lines: string[]) =>
-  lines.flatMap((l) => all(l, /(?:^|\s)webular(\s.*)$/g)).filter((rest) => rest.trim())
+  lines
+    .filter((l) => !/^\s*\//.test(l))
+    .flatMap((l) => all(l, /(?:^|\s)webular(\s.*)$/g)).filter((rest) => rest.trim())
 
 const section = (md: string, heading: RegExp) => {
   const lines = md.split('\n')
@@ -86,8 +98,9 @@ const missing = (what: string, listed: string[], real: Set<string>) =>
   [...real].filter((x) => !listed.includes(x)).map((x) => `${what} list is missing ${x}`)
 
 const INSTALLS: [string, RegExp][] = [
-  ['npm', /\bnpm (?:i|install) -g ([@\w/-]+)/g],
-  ['bun', /\bbun add -g ([@\w/-]+)/g],
+  // The name only: a version tag (`webular@latest`) is not part of it.
+  ['npm', /\bnpm (?:i|install) -g ((?:@[\w-]+\/)?[\w-]+)/g],
+  ['bun', /\bbun add -g ((?:@[\w-]+\/)?[\w-]+)/g],
   ['brew', /\bbrew install (?:[\w-]+\/[\w-]+\/)?([\w-]+)/g],
   ['scoop', /\bscoop install ([\w-]+)/g],
   ['winget', /\bwinget install ([\w.-]+)/g],
@@ -102,6 +115,10 @@ const installProblems = (lines: string[], t: Truth) =>
   )
 
 const PLATFORM = /(?<![\w-])((?:darwin|linux|windows|win32|freebsd|android)-[a-z0-9-]+)/g
+
+// Link targets and bare URLs are addresses, not platform names
+// (learn.microsoft.com/.../windows-server/...).
+const withoutUrls = (md: string) => md.replace(/\]\([^)\s]*\)|https?:\/\/[^\s)>]+/g, ']')
 
 const ENV_SPAN = /^\$?([A-Z][A-Z0-9]*_[A-Z0-9_]+)(?:=.*)?$/g
 
@@ -126,7 +143,7 @@ const docProblems = (raw: string, t: Truth): string[] => {
     ...flags.filter((f) => !t.flags.has(f)).map((f) => `no command defines --${f}`),
     ...counts.filter((n) => n !== t.tools).map((n) => `says ${n} MCP tools, server has ${t.tools}`),
     ...env.filter((e) => !t.env.has(e)).map((e) => `src never reads ${e}`),
-    ...all(md, PLATFORM)
+    ...all(withoutUrls(md), PLATFORM)
       .filter((p) => !t.platforms.has(p))
       .map((p) => `platform ${p} is not built`),
     ...installProblems(lines, t),
