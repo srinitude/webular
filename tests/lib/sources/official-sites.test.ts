@@ -1,0 +1,79 @@
+// Official sites from Wikidata P856 for the Wikipedia articles a navigational
+// search found, against a real local Bun.serve fixture. No network, no mocks.
+import { describe, expect, test } from 'bun:test'
+import { Effect } from 'effect'
+import {
+  isNavigational,
+  officialBeside,
+  officialSites,
+} from '../../../src/lib/sources/official-sites.ts'
+import { against, json, run, serving } from './support.ts'
+
+const wiki = (title: string) => ({
+  title,
+  url: `https://en.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, '_'))}`,
+  description: '',
+})
+const hits = [
+  wiki('Node.js'),
+  { title: 'HN', url: 'https://news.ycombinator.com/item?id=1', description: '' },
+  wiki('Ryan Dahl'),
+  wiki('Deno (software)'),
+]
+const row = (a: string, site: string) => ({ a: { value: a }, site: { value: site } })
+// Rows come back out of article order, with two sites for Deno.
+const reply = JSON.stringify({
+  results: {
+    bindings: [
+      row(wiki('Deno (software)').url, 'https://deno.com'),
+      row(wiki('Node.js').url, 'https://nodejs.org'),
+      row(wiki('Deno (software)').url, 'https://deno.land'),
+    ],
+  },
+})
+
+const sitesCase = Effect.gen(function* () {
+  const { out, seen } = yield* serving('/sparql', reply, officialSites(hits, 5))
+  expect(out.map((h) => h.url)).toEqual(['https://nodejs.org', 'https://deno.com'])
+  expect(out[1]?.title).toBe('Deno (software)')
+  expect(seen.query.get('query')).toContain('<https://en.wikipedia.org/wiki/Deno_(software)>')
+  expect(seen.query.get('query')).not.toContain('news.ycombinator.com')
+})
+
+const failureCase = Effect.gen(function* () {
+  const out = yield* against({ '/sparql': () => json('nope', 500) }, officialSites(hits, 5))
+  expect(out).toEqual([])
+})
+
+// Beside the fan-out: the main query's Wikipedia hits feed the lookup; a
+// variant's hits never do, and with no Wikipedia answer `take` gives none.
+const runner = () => Effect.succeed(hits)
+const besideCase = Effect.gen(function* () {
+  const flow = Effect.gen(function* () {
+    const official = yield* officialBeside('deno official site', runner, 5)
+    yield* official.run('hackernews', 'deno official site', 5)
+    yield* official.run('wikipedia', 'deno variant', 5)
+    yield* official.run('wikipedia', 'deno official site', 5)
+    return yield* official.take
+  })
+  const { out } = yield* serving('/sparql', reply, flow)
+  expect(out.map((h) => h.url)).toEqual(['https://nodejs.org', 'https://deno.com'])
+})
+const noWikiCase = Effect.gen(function* () {
+  const official = yield* officialBeside('deno official site', runner, 5)
+  yield* official.run('wikipedia', 'deno variant', 5)
+  expect(yield* official.take).toEqual([])
+})
+
+describe('official sites from Wikidata', () => {
+  test('the main query feeds the lookup beside the fan-out', () => run(besideCase), 15_000)
+  test('no Wikipedia answer for the main query gives no list', () => run(noWikiCase), 15_000)
+  test('maps articles to their first official site, in article order', () => run(sitesCase), 15_000)
+  test('a failed lookup gives no list', () => run(failureCase), 15_000)
+  test('navigational queries only', () => {
+    expect(isNavigational('official website of the CSS framework by Adam Wathan')).toBe(true)
+    expect(isNavigational('Zed code editor homepage')).toBe(true)
+    expect(isNavigational('Who received the Turing Award for 2023?')).toBe(false)
+    expect(isNavigational('capital of Spain')).toBe(false)
+  })
+})

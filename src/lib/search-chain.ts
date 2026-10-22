@@ -17,12 +17,15 @@ import {
   type SourceStatus,
   traceLine,
 } from './search-source-run.ts'
+import { isNavigational, officialBeside } from './sources/official-sites.ts'
 import { type FreeSource, freeSourceFallback } from './sources/registry.ts'
 import { type SearchSource, SOURCE_TIMEOUT_MS, sourceSearch } from './sources-search.ts'
 
 // One DuckDuckGo request returns its whole page whatever the limit; fusion
 // ranks the full page and the caller's slice keeps the best hits.
 const WEB_PAGE = 30
+// Navigational queries: the official sites of this many top Wikipedia articles.
+const OFFICIAL_ARTICLES = 5
 
 const one: SourceRunner = (source, query, limit) => {
   if (source === 'crossref') return crossref(query, limit)
@@ -56,19 +59,17 @@ export interface SearchOptions {
   judge?: ((query: string) => Effect.Effect<SearchSource[]>) | undefined
 }
 
-// Deterministic mode (WEBULAR_DETERMINISTIC=1): no settle cutoff, so source
-// timing never changes the hits; each source still stops at SOURCE_TIMEOUT_MS.
-const deterministic = Config.String('WEBULAR_DETERMINISTIC').pipe(
-  Config.withDefault(''),
-  Effect.map((v) => v === '1'),
-  Effect.orDie,
-)
-
 const timedOut = () =>
   Effect.succeed({
     results: [] as Hit[],
     meta: { sources: {}, degraded: true, weak: true } as SearchMeta,
   })
+
+// Navigational queries: the official-site lookup runs beside the fan-out.
+const officialFor = (query: string, opts: SearchOptions) =>
+  !opts.runSource && isNavigational(query)
+    ? officialBeside(query, one, OFFICIAL_ARTICLES)
+    : Effect.succeed(undefined)
 
 // web: the keyword pick starts at once; the judge's pick adds the sources it
 // names when it lands, or is dropped at the settle cutoff. DuckDuckGo runs only
@@ -81,11 +82,11 @@ const fanOut = Effect.fn('fanOut')(function* (
   opts: SearchOptions,
 ) {
   const queries = [query, ...(opts.variants ?? []).slice(0, MAX_VARIANTS)]
-  const runSource = opts.runSource ?? one
+  const official = yield* officialFor(query, opts)
+  const runSource = opts.runSource ?? official?.run ?? one
   const hit = yield* Deferred.make<void>()
+  const settle = { hit, cutoff: Effect.andThen(Deferred.await(hit), Effect.sleep(SETTLE_GRACE_MS)) }
   const uncut = { hit, cutoff: Effect.never }
-  const grace = Effect.andThen(Deferred.await(hit), Effect.sleep(SETTLE_GRACE_MS))
-  const settle = (yield* deterministic) ? uncut : { hit, cutoff: grace }
   const keyword = source === 'web' ? pickSources(query) : [source]
   const query1 = (s: SearchSource) =>
     querySource(s, queries, limit, runSource, s === 'npm' && keyword.includes(s) ? uncut : settle)
@@ -102,7 +103,7 @@ const fanOut = Effect.fn('fanOut')(function* (
   const [first, [judgedAt, added]] = yield* Effect.all([run(keyword), more], { concurrency: 2 })
   const ran = [...first, ...added]
   if (source === 'web' && !ran.some((r) => r.status === 'ok')) ran.push(yield* query1('web'))
-  return { ran, judgeAt: judge ? judgedAt : null }
+  return { ran, sites: official ? yield* official.take : [], judgeAt: judge ? judgedAt : null }
 })
 
 const searchOnce = Effect.fn('searchOnce')(function* (
@@ -113,10 +114,10 @@ const searchOnce = Effect.fn('searchOnce')(function* (
 ) {
   const start = yield* Clock.currentTimeMillis
   const traced = yield* Config.String('WEBULAR_TRACE').pipe(Config.withDefault(''), Effect.orDie)
-  const { ran, judgeAt } = yield* fanOut(source, query, limit, opts)
+  const { ran, sites, judgeAt } = yield* fanOut(source, query, limit, opts)
   if (traced === '1') yield* logErr(traceLine(start, ran, judgeAt))
   const scored = scoreHits(
-    [...ran.flatMap((r) => r.lists), ...(opts.local ? [opts.local] : [])],
+    [sites, ...ran.flatMap((r) => r.lists), ...(opts.local ? [opts.local] : [])],
     query,
   )
   const ok = ran.filter((r) => r.status === 'ok').length
@@ -128,7 +129,10 @@ const searchOnce = Effect.fn('searchOnce')(function* (
   return { results: scored.slice(0, limit).map((e) => e.hit), meta }
 })
 
-type Found = Effect.Success<ReturnType<typeof searchOnce>>
+interface Found {
+  results: Hit[]
+  meta: SearchMeta
+}
 type Searched = Found & { source?: FreeSource }
 
 // Nothing found, DuckDuckGo included: the free sources answer and `source`
