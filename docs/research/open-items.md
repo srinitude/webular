@@ -43,7 +43,7 @@ The list is [answer-quality-changes.md](answer-quality-changes.md).
 - #2: add a sufficiency and abstain gate to [`src/workflows/answer.ts`](../../src/workflows/answer.ts). This needs a decision-models-first receipt. An abstain line must not count as an unbacked claim in [`tests/_support/citation-score.ts`](../../tests/_support/citation-score.ts).
 - #3: sweep the lead weight and `LAMBDA` in `summarize-rank.ts`.
 - #4, partly: add multi-reference scoring and a verbatim-substring guard ([`scripts/bench/scoreboard-rows.ts`](../../scripts/bench/scoreboard-rows.ts)).
-- #5, partly: report the resolution ratio and the smallest gap each comparison can detect ([`scripts/bench/stats.ts`](../../scripts/bench/stats.ts)).
+- #5, partly: the resolution ratio and the smallest detectable gap are in `scripts/bench/stats.ts:129` and `:133`, and the verdict gate uses the ratio. Still missing: show both in each report row, and add a repeated-split bootstrap for a tuned configuration.
 - #6: add a benchmark-host blocklist to [`scripts/bench/run.ts`](../../scripts/bench/run.ts).
 - #7: add a planted-text probe and a URL resolve check to the citation decision.
 - #8, partly: report the judge's flip rate beside the order swap ([`scripts/bench/judge.ts`](../../scripts/bench/judge.ts)).
@@ -92,7 +92,7 @@ The list is [engineering-changes.md](engineering-changes.md).
 - #2, #4, #8, #10, #11, #14, #15, #16, #17: see the list.
 - #3: flag a case as not resolvable in the bench spec.
 - #5: add a mutation gate.
-- #6, partly: add the grandchild-kill test for `src/core/proc.ts:79`.
+- #6, partly: a grandchild dies on timeout and on cancel (`tests/core/proc-process-group.test.ts:39` and `:56`). Still missing: a test that cancels each workflow at every await point and checks that cleanup ran.
 - #7: add stale-if-error and single-flight to the fetch cache.
 - #9: hedge slow sources in `search-chain.ts`.
 - #12, partly: add flaky-retry limits and a double-build hash check to `release.yml`.
@@ -106,7 +106,7 @@ The dependency research is not published in this folder, so each line here names
 - #2: set `maxRequestBodySize` and `maxToolInputElements` in [`plugins/webular/src`](../../plugins/webular/src).
 - #3: raise `min_version` in [`mise.toml`](../../mise.toml) to `2026.10.0` once every machine that runs the tasks has that mise release or later; a higher `min_version` than the installed binary stops every `mise run`.
 - #4: run PDF conversion in a child process or worker.
-- #5: add a startup-signal test for [`src/core/effect.ts`](../../src/core/effect.ts).
+- #5, applied: a SIGTERM during startup still exits 143 (`tests/cli/dispatch.test.ts:142`).
 - #6: bump `effect` with `@effect/platform-bun`.
 - #7: drop the `@effect/language-service` plugin entry from `tsconfig.json:25`.
 - #9: take `@mastra/mcp` `2.5.0` with `@mastra/core` `1.79.0`, and add a test that fails if the private `createServerInstance` cast in [`plugins/webular/src/server.ts`](../../plugins/webular/src/server.ts) disappears.

@@ -38,14 +38,14 @@ Tasks by class: `bugs:security` (8, 10, 11), `bugs:effect` (4, 7), `bugs:mcp-cli
 
 - Risk: `webular … | head` raises EPIPE instead of a quiet exit. `process.exit()` right after a write can cut the last NDJSON line. Ctrl-C should exit 130.
 - Where: [src/core/output.ts](../src/core/output.ts), [src/cli/dispatch.ts](../src/cli/dispatch.ts), [src/cli/run.ts](../src/cli/run.ts).
-- Guard: [exit-codes.test.ts](../tests/cli/exit-codes.test.ts). EPIPE and flush on exit are not guarded yet (owner: the MCP and CLI protocol hunt).
+- Guard: [exit-codes.test.ts](../tests/cli/exit-codes.test.ts), plus [dispatch.test.ts](../tests/cli/dispatch.test.ts) for SIGINT and SIGTERM, even a SIGTERM during startup. EPIPE and flush on exit are not guarded yet (owner: the MCP and CLI protocol hunt).
 - Sources: [EPIPE when piping to head](https://stackoverflow.com/questions/12329816/error-write-epipe-when-piping-node-output-to-head); [standard IO in Node](https://www.thenodebook.com/process-os/standard-io).
 
 ## 4. Shell strings and child processes
 
 - Risk: a command built as one string lets spaces and metacharacters run other commands. A child with no timeout can hang the run.
 - Where: [src/core/proc.ts](../src/core/proc.ts) (argv only, mandatory timeout), [src/release/node-launcher.ts](../src/release/node-launcher.ts).
-- Guard: `bugs:check` rule "no shell strings". [proc.test.ts](../tests/core/proc.test.ts) and [proc-child-cap.test.ts](../tests/core/proc-child-cap.test.ts).
+- Guard: `bugs:check` rule "no shell strings". [proc.test.ts](../tests/core/proc.test.ts), [proc-child-cap.test.ts](../tests/core/proc-child-cap.test.ts), and [proc-process-group.test.ts](../tests/core/proc-process-group.test.ts), which checks that a grandchild dies on timeout and on cancel.
 - Sources: [Bun child processes](https://bun.com/docs/runtime/child-process).
 
 ## 5. Fetch without a timeout

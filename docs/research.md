@@ -43,9 +43,9 @@ An open mark means the search did not find the whole change. It does not prove t
 | Decision models | 13 | 0 | 0 | 13 | 0 |
 | Agents and AGENTS.md | 19 | 3 | 0 | 16 | 4 |
 | Engineering | 18 | 1 | 0 | 17 | 3 |
-| Dependencies top 10 | 10 | 1 | 0 | 9 | 0 |
+| Dependencies top 10 | 10 | 2 | 0 | 8 | 0 |
 | Dependency rows | 77 | 24 | 1 | 52 | 2 |
-| **All** | **175** | **37** | **1** | **137** | **25** |
+| **All** | **175** | **38** | **1** | **136** | **25** |
 
 ## Applied
 
@@ -59,6 +59,7 @@ An open mark means the search did not find the whole change. It does not prove t
 - AGENTS.md #2 and #6: a short intro with no project map, and nested files under their size caps.
 - Engineering #13: shuffled test order, the `test:shuffled` task in [`mise.toml`](../mise.toml).
 - Dependencies top 10 #8: bounded parsers. `diff` uses `maxEditLength` (`src/lib/snapshot.ts:35`), `unpdf` uses `maxImageSize` (`src/lib/parse-pdf.ts:125`), and Readability skips pages past `READABLE_MAX_CHARS` ([`src/lib/html.ts`](../src/lib/html.ts)).
+- Dependencies top 10 #5: a SIGTERM during startup still exits 143, `tests/cli/dispatch.test.ts:142`.
 - Dependency rows #45 (the Readability cap above) and #37 (`Object.hasOwn` for tool names, [`src/tools/sdk-errors.ts`](../src/tools/sdk-errors.ts)).
 - Dependency row #56: a `<br>` inside `<pre>` stays a line break in Markdown, `src/lib/html-sanitize.ts:84`.
 - Dependency rows #54, #58, #60, #62, #66: mammoth messages logged, `maxImageSize`, `maxEditLength`, the TypeScript pin, and the Biome exclude.
