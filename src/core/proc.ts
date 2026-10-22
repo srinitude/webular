@@ -76,17 +76,18 @@ const capped = <E>(s: Stream.Stream<Uint8Array, E>, onOverflow: Effect.Effect<vo
     Effect.map((r) => ({ text: Buffer.concat(r.chunks).toString(), over: r.over })),
   )
 
-// detached: true makes the child lead its own process group, so a timeout,
-// interrupt, or overflow kill signals the whole tree and leaves no orphaned
-// grandchild. Windows has no process groups; there the spawner's kill runs
-// taskkill /T /F, which ends the same tree. Ctrl-C reaches it through our
-// interrupt, which runs that kill.
+// detached is left to the spawner's default: on POSIX the child leads its own
+// process group, so a timeout, interrupt, or overflow kill signals the whole
+// tree and leaves no orphaned grandchild. Windows has no process groups; there
+// the kill is `taskkill /T /F`, which ends the same tree, and a detached child
+// would get its own console, so a .cmd shim's grandchild (npm.cmd -> node.exe)
+// or PowerShell writes there and our stdout pipe stays empty. Ctrl-C reaches
+// the child through our interrupt, which runs that kill.
 const toCommand = ([cmd, ...args]: [string, ...string[]], opts: ProcOptions) =>
   ChildProcess.make(cmd, args, {
     cwd: opts.cwd,
     env: opts.env,
     extendEnv: opts.extendEnv,
-    detached: true,
     stdin: opts.stdin === undefined ? 'ignore' : Stream.make(new TextEncoder().encode(opts.stdin)),
   })
 
