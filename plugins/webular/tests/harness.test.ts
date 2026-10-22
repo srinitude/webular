@@ -44,7 +44,11 @@ const idsOf = (fs: FileSystem.FileSystem, path: string) =>
 
 const evalIds = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem
-  const skills = yield* fs.readDirectory(`${root}skills`)
+  const entries = yield* fs.readDirectory(`${root}skills`)
+  // skills/ also holds AGENTS.md and CLAUDE.md; each skill is a folder.
+  const skills = yield* Effect.filter(entries, (s) =>
+    fs.stat(`${root}skills/${s}`).pipe(Effect.map((info) => info.type === 'Directory')),
+  )
   const ids = yield* Effect.forEach(
     skills,
     (s) => idsOf(fs, `${root}skills/${s}/evals/evals.json`),

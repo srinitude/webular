@@ -35,11 +35,16 @@ type Skill = { name: string; body: string; front: string; rest: string; texts: M
 // ponytail: a path with an extension and no leading dot is a file; use fs.stat if not.
 const isFile = (path: string) => /(^|\/)[^./][^/]*\.\w+$/.test(path)
 
+// AGENTS.md and CLAUDE.md guide agents in the repo and are not skill content.
+const isGuide = (path: string) => /(^|\/)(AGENTS|CLAUDE)\.md$/.test(path)
+
 const readTexts = (fs: FileSystem.FileSystem, dir: string) =>
   fs.readDirectory(dir, { recursive: true }).pipe(
     Effect.flatMap((paths) =>
       Effect.forEach(
-        paths.map((path) => path.replaceAll('\\', '/')).filter(isFile),
+        paths
+          .map((path) => path.replaceAll('\\', '/'))
+          .filter((path) => isFile(path) && !isGuide(path)),
         (path) =>
           fs.readFileString(`${dir}/${path}`).pipe(Effect.map((text) => [path, text] as const)),
         { concurrency: 4 },
@@ -57,7 +62,18 @@ const loadSkill = (name: string) =>
     }),
   )
 
-const skillNames = files((fs) => fs.readDirectory(`${root}skills`))
+// skills/ also holds AGENTS.md and CLAUDE.md; each skill is a folder.
+const skillNames = files((fs) =>
+  fs
+    .readDirectory(`${root}skills`)
+    .pipe(
+      Effect.flatMap((names) =>
+        Effect.filter(names, (name) =>
+          fs.stat(`${root}skills/${name}`).pipe(Effect.map((info) => info.type === 'Directory')),
+        ),
+      ),
+    ),
+)
 
 const eachSkill = (check: (skill: Skill) => void) =>
   Effect.runPromise(
