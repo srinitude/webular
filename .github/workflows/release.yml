@@ -24,8 +24,9 @@
 # tests/core/platform-parity.test.ts keeps this file, mise.toml, and the
 # resolver table in step; tests/release/gates.test.ts checks the gates.
 # npm auth is trusted publishing (OIDC): no NPM_TOKEN. Before the first run, add
-# this repo + workflow filename "release.yml" as a trusted publisher on npmjs.com
-# for webular and for every webular-<key> package.
+# a trusted publisher on npmjs.com for webular and for every webular-<key>
+# package, with these form values: user srinitude, repo webular, workflow
+# release.yml, environment release, and "npm publish" allowed (ticked).
 name: Release
 
 on:
@@ -218,7 +219,12 @@ jobs:
         with:
           node-version: "24" # ships npm >= 11.5.1, required for OIDC publishing
           registry-url: https://registry.npmjs.org
-      - run: npm --version
+          package-manager-cache: false
+      - name: Require npm 11.5.1 or later (trusted publishing)
+        run: |
+          v=$(npm --version)
+          echo "npm $v"
+          [ "$(printf '%s\n11.5.1\n' "$v" | sort -V | head -n1)" = 11.5.1 ] || { echo "::error::npm $v is older than 11.5.1, which trusted publishing needs"; exit 1; }
       - uses: jdx/mise-action@fc42bcc7ddbf51124c30f95a877a0c5168a3bfde # v5.2.1
         with:
           experimental: true
