@@ -407,3 +407,4 @@
 {"path": "tests/engine/AGENTS.md", "sha": "8eef413a3e8b35779a4f0bfdf936a1d81ea4f2312a0ab31da16c90bc0aacd191"}
 {"path": "tests/lib/AGENTS.md", "sha": "2bf6de80a45192cbb938335aa8e4a4de264eb00c0493618e32cc8d42b872aebf"}
 {"path": "tests/quality/AGENTS.md", "sha": "4bece20ef17c205c3c5014c3d1906bc38aaa1d07a91f01f1ed50d29754901d78"}
+{"path": "docs/jev.md", "sha": "b853f602cc1d745ebe5d39ca3e4104986631a3fe4d6630fb66c250fdf3685a3a"}

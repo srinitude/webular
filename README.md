@@ -37,6 +37,9 @@ release binaries with their install scripts.
 To run from source, use the bundles, or build the standalone executable, read
 [Build and run](docs/build-and-run.md).
 
+Webular can use Jev, TypeSafe's optional decision model. To set up its key on
+any OS, read [Jev in webular](docs/jev.md).
+
 ## Usage
 
 ```bash
