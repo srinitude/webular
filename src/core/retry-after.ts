@@ -18,3 +18,13 @@ export const delayHeaderMs = (
   const at = Date.parse(HAS_ZONE.test(value) ? value : `${value} GMT`)
   return Number.isNaN(at) ? undefined : Math.max(0, at - now)
 }
+
+// A server's Retry-After wins over the backoff; a longer ask than this fails the
+// fetch at once, so a hostile value cannot stall the CLI.
+const MAX_RETRY_AFTER_MS = 10_000
+
+/** The error text for a wait over the cap; undefined when the wait is allowed. */
+export const retryAfterOverCap = (ms: number | undefined): string | undefined =>
+  ms === undefined || ms <= MAX_RETRY_AFTER_MS
+    ? undefined
+    : `asked to wait ${Math.ceil(ms / 1000)} s (Retry-After), over the ${MAX_RETRY_AFTER_MS / 1000} s limit`

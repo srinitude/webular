@@ -15,12 +15,10 @@ import { FetchError } from './decode.ts'
 import { FETCH_ERROR, RETRY_BACKOFF_MS, RETRY_STATUS, retryPause } from './fetch-policy.ts'
 import { dropBody, type HttpStatusError, okText } from './http-body.ts'
 import { errMsg } from './output.ts'
-import { delayHeaderMs } from './retry-after.ts'
+import { delayHeaderMs, retryAfterOverCap } from './retry-after.ts'
 import { sameHost } from './url.ts'
 
 export const USER_AGENT = `webular/${pkg.version} (+https://github.com/srinitude/webular)`
-// A server's Retry-After wins over the backoff, capped so a hostile value cannot stall the CLI.
-const MAX_RETRY_AFTER_MS = 10_000
 
 export interface FetchOptions extends CacheOptions {
   timeoutMs?: number | undefined
@@ -40,7 +38,7 @@ export function retryAfterMs(header: string | null, now: number): number | undef
   const ms = delayHeaderMs(header, now)
   // A past HTTP-date is ignored, while delay-seconds of 0 is a real "retry now".
   const past = ms === 0 && !/^\s*[\d.]+\s*$/.test(header ?? '')
-  return ms === undefined || past ? undefined : Math.min(ms, MAX_RETRY_AFTER_MS)
+  return past ? undefined : ms
 }
 
 type FetchSnapshot = SnapshotFrom<typeof fetchMachine>
@@ -128,7 +126,7 @@ function settle(run: Run, snap: FetchSnapshot, landed: Landed): Effect.Effect<La
 }
 
 // Fetch, name the outcome as an event, and do what the machine's next state says.
-// A retried status waits its Retry-After (capped); one past the deadline returns the status.
+// A retried status waits its Retry-After: past the deadline returns the status, over the cap fails.
 function drive(run: Run, url: string, snap: FetchSnapshot): Effect.Effect<Landed, FetchError> {
   return Effect.matchEffect(fetchOnce(url, run.opts), {
     onFailure: (err) =>
@@ -147,9 +145,11 @@ function drive(run: Run, url: string, snap: FetchSnapshot): Effect.Effect<Landed
         )
       return Effect.flatMap(Clock.currentTimeMillis, (now) => {
         const waitMs = retryAfterMs(res.headers.get('retry-after'), now)
-        return (waitMs ?? 0) > run.deadline - now
-          ? Effect.succeed(landed)
-          : Effect.andThen(dropBody(res), retry(run, url, next, waitMs))
+        if ((waitMs ?? 0) > run.deadline - now) return Effect.succeed(landed)
+        const over = retryAfterOverCap(waitMs)
+        if (over)
+          return Effect.andThen(dropBody(res), Effect.fail(new FetchError({ message: over })))
+        return Effect.andThen(dropBody(res), retry(run, url, next, waitMs))
       })
     },
   })

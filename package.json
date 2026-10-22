@@ -72,7 +72,7 @@
     "@modelcontextprotocol/sdk": "^1.32.1",
     "@mozilla/readability": "^0.6.0",
     "@statelyai/agent": "1.1.6",
-    "agent-browser": "^0.39.1",
+    "agent-browser": "0.39.1",
     "diff": "^9.0.0",
     "effect": "4.0.5",
     "linkedom": "^0.18.13",

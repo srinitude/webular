@@ -31,4 +31,17 @@ describe('installed dependencies', () => {
       expect(wrong).toEqual([])
     }),
   )
+  // A trusted package runs its install script on every user's machine, and npm
+  // ignores the shipped bun.lock there, so a range would run unreviewed code.
+  check(
+    'every trusted dependency is declared at an exact version',
+    Effect.gen(function* () {
+      const pkg = yield* packageJson
+      const all = { ...pkg.dependencies, ...pkg.optionalDependencies, ...pkg.devDependencies }
+      const ranged = pkg.trustedDependencies.filter(
+        (name) => !/^\d+\.\d+\.\d+$/.test(all[name] ?? ''),
+      )
+      expect(ranged).toEqual([])
+    }),
+  )
 })

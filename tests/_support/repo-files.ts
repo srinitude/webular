@@ -15,6 +15,8 @@ const PackageJson = Schema.fromJsonString(
     engines: Strings,
     dependencies: Strings,
     devDependencies: Strings,
+    optionalDependencies: Strings,
+    trustedDependencies: Schema.Array(Schema.String),
   }),
 )
 
