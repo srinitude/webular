@@ -3,6 +3,7 @@
 // survives reopen, and RRF merges ranked lists deterministically.
 import { expect, test } from 'bun:test'
 import { tmpdir } from 'node:os'
+import { join } from 'node:path'
 import { BunServices } from '@effect/platform-bun'
 import { ConfigProvider, Effect } from 'effect'
 import { headingText } from '../../src/lib/crawl-types.ts'
@@ -109,7 +110,7 @@ test('a caller-supplied config decides where the local index lives', () =>
     Effect.gen(function* () {
       const dir = yield* tmpDir('local-index-path-')
       const path = yield* localIndexPath.pipe(Effect.provide(cacheIn(dir)))
-      expect(path).toBe(`${dir}/local-index.sqlite`)
+      expect(path).toBe(join(dir, 'local-index.sqlite'))
     }).pipe(Effect.scoped, Effect.provide(BunServices.layer)),
   ))
 
