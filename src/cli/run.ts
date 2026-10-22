@@ -7,7 +7,7 @@ import { Effect, type FileSystem, type Path } from 'effect'
 import type { EventFromLogic } from 'xstate'
 import { CliError } from '../core/effect.ts'
 import { emit, errMsg, logErr, type OutputError } from '../core/output.ts'
-import type { SandboxError } from '../core/safepath.ts'
+import { outPath, type SandboxError } from '../core/safepath.ts'
 import { normalizeUrl } from '../core/url.ts'
 import { commandLifecycleMachine } from '../machines/command-lifecycle.ts'
 import { EXIT, payloadExit, settledExit } from './exit-codes.ts'
@@ -122,6 +122,7 @@ const disposeSteps = Effect.promise(() => import('../workflows/runtime.ts')).pip
 // it adopts it as a thenable and never settles. The logger loads with it: a
 // silent logger keeps the step's stack trace off stderr, and the failure line
 // still names the cause.
+// A bad -o path fails before the workflow module loads and the page is fetched.
 export function runWorkflow<M>(
   name: string,
   load: () => Promise<M>,
@@ -149,5 +150,6 @@ export function runWorkflow<M>(
       onSuccess: (outcome) => report(name, outcome, opts),
     }),
   )
-  return Effect.andThen(checkUrl(name, inputData), run)
+  const checkOut = opts.output ? Effect.asVoid(outPath(opts.output)) : Effect.void
+  return checkUrl(name, inputData).pipe(Effect.andThen(checkOut), Effect.andThen(run))
 }

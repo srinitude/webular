@@ -14,6 +14,7 @@ The code gates. The parent rules are in [tests/AGENTS.md](../AGENTS.md). The rul
 - The AGENTS.md tree: [`agents-md.test.ts`](agents-md.test.ts) (coverage, shape, size, paths, and tasks), [`claude-md-bridges.test.ts`](claude-md-bridges.test.ts) (a real CLAUDE.md beside each AGENTS.md), [`rule-greps.test.ts`](rule-greps.test.ts) (rules that one grep can decide), [`rule-files.test.ts`](rule-files.test.ts) (rules that one file read can decide but one grep cannot).
 - Coverage and safety: [`e2e-parity.test.ts`](e2e-parity.test.ts), [`sandbox.test.ts`](sandbox.test.ts).
 - Bug classes from [docs/bug-classes.md](../../docs/bug-classes.md): [`bugs-check.test.ts`](bugs-check.test.ts) plants one bad line per guard in [scripts/bugs-check.ts](../../scripts/bugs-check.ts) and proves it fails, then passes.
+- Install: [`installed-deps.test.ts`](installed-deps.test.ts) (each declared package is in this checkout's own `node_modules`, at a version its range allows).
 - Code scorers for search and answer factors:
   - [`date-recency-scorers.test.ts`](date-recency-scorers.test.ts): an output carries an ISO `asOf` that equals the pinned run date, and the top hit falls within the recency window.
   - [`search-determinism.test.ts`](search-determinism.test.ts): with `WEBULAR_DETERMINISTIC=1`, the same query on the same recorded sources gives the same ranked hits, however source timing falls.
@@ -28,3 +29,5 @@ The code gates. The parent rules are in [tests/AGENTS.md](../AGENTS.md). The rul
 ## Checks
 
 `mise run test:file tests/quality`
+
+Install, packaging, limit, and gate-budget bugs: `mise run bugs:tests-build`.

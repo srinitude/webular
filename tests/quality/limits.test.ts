@@ -37,5 +37,8 @@ describe('code limits — 200 lines/file, 30/construct, nesting depth <= 3', () 
         expect(violations).toEqual([])
       }),
     ),
+    // One parse per file across src, bin, tests, scripts: bounded and linear,
+    // but past bun's 5 s default on a loaded runner.
+    30_000,
   )
 })

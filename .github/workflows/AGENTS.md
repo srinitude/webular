@@ -31,3 +31,5 @@ The GitHub Actions workflows. The parent [AGENTS.md](../AGENTS.md) lists the res
 ```bash
 mise run test:file tests/ci tests/release
 ```
+
+Action pin and workflow hardening bugs: `mise run bugs:tests-build`.

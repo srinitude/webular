@@ -19,4 +19,6 @@ test(
       expect(out.code).toBe(0)
     }),
   ),
+  // Matches the child's own 60 s timeoutMs above; bun's 5 s default cut it short.
+  60_000,
 )

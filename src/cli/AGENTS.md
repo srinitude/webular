@@ -24,3 +24,5 @@ Rules for the launcher and router, under [src/AGENTS.md](../AGENTS.md).
 ```bash
 mise run test:file tests/cli tests/machines/cli-dispatch.test.ts
 ```
+
+A bad `-o` path fails before the workflow loads (slow sandbox rejects): `mise run bugs:tests-build`.

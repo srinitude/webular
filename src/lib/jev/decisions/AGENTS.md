@@ -28,3 +28,5 @@ One file per decision job. They group by command:
 ```bash
 mise run jev:check
 ```
+
+Function-length limit bugs in decision payloads: `mise run bugs:tests-build`.
