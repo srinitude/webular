@@ -114,10 +114,15 @@ run = [
   'bun "{{config_root}}/plugins/webular/scripts/check-timeless.ts"',
 ]
 
-[tasks."os:check"]
-description = "Every OS, locally: shell completions parse, the e2e parity list, and the CLI gateway. Linux, macOS, and Windows each run the full suite only in CI (.github/workflows/ci.yml)"
+[tasks."docs:facts"]
+description = "Docs: the facts in README.md and docs/install.md, and the repo and plugin descriptions, match the code. A focused subset of `mise run test`"
 depends = ["setup"]
-run = "bun test --timeout 60000 tests/release/completions.test.ts tests/quality/e2e-parity.test.ts tests/cli/gateway.test.ts"
+run = "bun test --timeout 60000 tests/quality/readme-facts.test.ts tests/release/description-sync.test.ts"
+
+[tasks."os:check"]
+description = "Every OS, locally: shell completions parse, the e2e parity list, the CLI gateway, and the Jev key lookup on each platform. Linux, macOS, and Windows each run the full suite only in CI (.github/workflows/ci.yml)"
+depends = ["setup"]
+run = "bun test --timeout 60000 tests/release/completions.test.ts tests/quality/e2e-parity.test.ts tests/cli/gateway.test.ts tests/jev/key-platform.test.ts"
 
 [tasks."bugs:static"]
 description = "Bugs: static guards from docs/bug-classes.md (no MCP stdout writes, no `as any`, no JSON.parse casts, no shell strings, no raw fetch); read-only"
@@ -209,7 +214,7 @@ depends = ["build"]
 run = "bun test --timeout 30000 --parallel"
 
 [tasks."jev:check"]
-description = "Jev framework checks (off the linear spine; the test task runs them too): payload caps and flat cost, canonical bytes, the 0.95 bar, machine-only moves, record and replay, the raw-call lint, and the evals"
+description = "Jev framework checks (off the linear spine; the test task runs them too): payload caps and flat cost, canonical bytes, the 0.95 bar, machine-only moves, record and replay, the raw-call lint, the doctor Jev route row, and the evals"
 depends = ["setup"]
 # A drifted answering model (lines in this file) makes the evals a required live rerun.
 env = { WEBULAR_JEV_DRIFT_FILE = "{{ get_env(name='WEBULAR_JEV_DRIFT_FILE', default=config_root ~ '/.cache/jev-drift.jsonl') }}" }

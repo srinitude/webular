@@ -42,14 +42,19 @@
     "unguarded": []
   },
   "jev": {
-    "globs": ["tests/jev/{definition-lint,machine-replay}*.test.ts", "tests/machines/**/*.test.ts"],
+    "globs": [
+      "tests/jev/{definition-lint,machine-replay}*.test.ts",
+      "tests/jev/route.test.ts",
+      "tests/machines/**/*.test.ts"
+    ],
     "unguarded": ["Jev fallback logging", "Mastra resume-schema drift"]
   },
   "os": {
     "globs": [
       "tests/os/**/*.test.ts",
       "tests/core/{platform,platform-parity,file-url-paths}.test.ts",
-      "tests/lib/home-fallback.test.ts"
+      "tests/lib/home-fallback.test.ts",
+      "tests/jev/key-platform.test.ts"
     ],
     "unguarded": []
   },

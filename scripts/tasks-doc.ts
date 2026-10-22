@@ -38,7 +38,9 @@ const render = (tasks: typeof Tasks.Type): string =>
 
 const program = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem
-  const raw = yield* Effect.tryPromise(() => Bun.$`mise tasks --json`.quiet().text())
+  const raw = yield* Effect.tryPromise(() =>
+    new Response(Bun.spawn(['mise', 'tasks', '--json']).stdout).text(),
+  )
   const text = render(yield* Schema.decodeUnknownEffect(Tasks)(raw))
   if (!Bun.argv.includes('--check')) return yield* fs.writeFileString(OUT, text)
   const current = yield* fs.readFileString(OUT).pipe(Effect.orElseSucceed(() => ''))
