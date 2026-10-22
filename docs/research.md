@@ -37,7 +37,7 @@ An open mark means the search did not find the whole change. It does not prove t
 
 | Source | Items | Applied | Rejected | Open | Of open, partly |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Retrieval | 14 | 1 | 0 | 13 | 6 |
+| Retrieval | 14 | 1 | 0 | 13 | 8 |
 | Extraction | 14 | 7 | 0 | 7 | 5 |
 | Answer quality | 10 | 1 | 0 | 9 | 4 |
 | Decision models | 13 | 0 | 0 | 13 | 0 |
@@ -45,7 +45,7 @@ An open mark means the search did not find the whole change. It does not prove t
 | Engineering | 18 | 3 | 0 | 15 | 2 |
 | Dependencies top 10 | 10 | 2 | 0 | 8 | 0 |
 | Dependency rows | 77 | 25 | 1 | 51 | 2 |
-| **All** | **175** | **42** | **1** | **132** | **23** |
+| **All** | **175** | **42** | **1** | **132** | **25** |
 
 ## Applied
 

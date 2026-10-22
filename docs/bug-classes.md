@@ -4,7 +4,7 @@ Webular runs on Bun, Effect 4, Mastra workflows, XState, and Jev. It fetches pag
 
 `mise run bugs:static` runs the static guards in [scripts/bugs-check.ts](../scripts/bugs-check.ts). Each `bugs:<class>` task runs one class's tests, listed in [bugs-hunts.json](../scripts/bugs-hunts.json), and prints every missing guard. `mise run bugs:check` runs both on the CI spine after `test`. [bugs-check.test.ts](../tests/quality/bugs-check.test.ts) proves each guard fails on a planted bad line and passes once the line is gone. A class marked "not guarded yet" names the bug hunt that owns it. Sources were read on 2026-10-21 unless a source gives its own date.
 
-Tasks by class: `bugs:security` (8, 10, 11), `bugs:effect` (4, 7), `bugs:mcp-cli` (1, 2, 3), `bugs:parsing` (6, 9, 12), `bugs:tests-build` (5, 16, 17), `bugs:jev` (14, 15), `bugs:os` (13), and `bugs:cross-branch` (18). Class 19 has no task yet; its tests run with `mise run test:file tests/lib tests/core/local-index.test.ts`.
+Tasks by class: `bugs:security` (8, 10, 11), `bugs:effect` (4, 7), `bugs:mcp-cli` (1, 2, 3), `bugs:parsing` (6, 9, 12), `bugs:tests-build` (5, 16, 17), `bugs:jev` (14, 15), `bugs:os` (13), and `bugs:cross-branch` (18). Class 19 has no task yet; its tests run with `mise run test:file tests/lib tests/core/local-index.test.ts`. Class 20 has no task yet; its tests run with `mise run test:file tests/lib/sources`.
 
 ## Before you merge
 
@@ -152,3 +152,10 @@ Tasks by class: `bugs:security` (8, 10, 11), `bugs:effect` (4, 7), `bugs:mcp-cli
 - Where: [src/lib/html-sanitize.ts](../src/lib/html-sanitize.ts) (MathML becomes its alt text, TeX source, or plain text before sanitizing, and a `<br>` in `<pre>` becomes a newline), [src/lib/archive-urls.ts](../src/lib/archive-urls.ts) (the fallback keeps only HTML captures with status 200, once each), [src/lib/html-table.ts](../src/lib/html-table.ts) (stacked header rows join into one header-path row, such as "Price / 2024"), [src/lib/local-chunks.ts](../src/lib/local-chunks.ts) (a chunk under 8 words joins the chunk after it).
 - Guard: "a formula keeps its words when the MathML element is stripped", "a `<br>` inside a code block stays a line break in Markdown", and "two header rows join into one header-path row" in [html-extraction.parsing.test.ts](../tests/lib/html-extraction.parsing.test.ts); "archive fallback keeps only same-host HTML captures that returned 200, once each" in [archives.test.ts](../tests/lib/sources/archives.test.ts); "a stub section hands its snippet the section text that follows it" in [local-index.test.ts](../tests/core/local-index.test.ts).
 - Sources: [open items](research/open-items.md), extraction rows 8, 10, 12, and 14, engineering row 7, and dependency row 56 for turndown.
+
+## 20. Stale or off-target search hits
+
+- Risk: one fixed 365-day half-life lets a year-old page beat this week's for "latest" asks, and buries a trusted old source for history asks. A query that names a year still gets hits from other years. A navigational lookup can miss an item that has only an official blog, list one site twice for two articles about one item, or treat "official" inside a domain name as a request for an official site.
+- Where: [src/lib/sources/rank.ts](../src/lib/sources/rank.ts) (the half-life comes from the query, and a named year window drops dated hits outside it), [src/lib/sources/official-sites.ts](../src/lib/sources/official-sites.ts) (P1581 fallback, one hit per site, domain names stripped before the navigational check).
+- Guard: "a fresh-class query favors the newest hit", "a history query lets an old trusted hit lead", and "a year window sinks dated hits outside it" in [rank.test.ts](../tests/lib/sources/rank.test.ts); "one hit per site, with the official blog as the fallback" and "navigational queries only" in [official-sites.test.ts](../tests/lib/sources/official-sites.test.ts).
+- Sources: [open items](research/open-items.md), retrieval rows 1 and 11.

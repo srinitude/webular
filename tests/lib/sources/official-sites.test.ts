@@ -99,7 +99,26 @@ const subjectCase = Effect.gen(function* () {
   ])
 })
 
+// Two articles about one item (a redirect title) give one hit, not two; an item
+// with no P856 falls back to its official blog URL (P1581) in the same call.
+const dedupeCase = Effect.gen(function* () {
+  const twins = [wiki('Node.js'), wiki('Nodejs')]
+  const body = JSON.stringify({
+    results: {
+      bindings: [
+        row(twins[0]?.url ?? '', 'https://nodejs.org'),
+        row(twins[1]?.url ?? '', 'https://nodejs.org'),
+      ],
+    },
+  })
+  const { out, seen } = yield* serving('/sparql', body, officialSites(twins, 5))
+  expect(out[0]?.map((h) => h.url)).toEqual(['https://nodejs.org'])
+  expect(seen.query.get('query')).toContain('COALESCE(?o, ?b)')
+  expect(seen.query.get('query')).toContain('wdt:P1581 ?b')
+})
+
 describe('official sites from Wikidata', () => {
+  test('one hit per site, with the official blog as the fallback', () => run(dedupeCase), 15_000)
   test("a trailing qualifier never hides the subject's article", () => run(subjectCase), 15_000)
   test(
     "the main query's Wikipedia list leads with its official sites",
@@ -113,5 +132,8 @@ describe('official sites from Wikidata', () => {
     expect(isNavigational('Zed code editor homepage')).toBe(true)
     expect(isNavigational('Who received the Turing Award for 2023?')).toBe(false)
     expect(isNavigational('capital of Spain')).toBe(false)
+    // A claim word inside a domain name is not a navigational ask.
+    expect(isNavigational('reviews of shop.official-merch.com')).toBe(false)
+    expect(isNavigational('is mywebsite.io any good')).toBe(false)
   })
 })

@@ -6,9 +6,9 @@ Each ranked change that is not in the code has a next step here. An "applied" li
 
 The list is [retrieval-changes.md](retrieval-changes.md).
 
-- #1: add a query-class half-life and a date-window gate ([`src/lib/sources/rank.ts`](../../src/lib/sources/rank.ts) uses one fixed 365-day half-life).
+- #1, partly: the free-source rank picks its half-life from the query: 30 days for a fresh query, 3,650 for a history query, and 365 for the rest (`src/lib/sources/rank.ts:11`). A dated hit outside a named year window, such as "in 2024", scores zero (`src/lib/sources/rank.ts:19`). Still missing: month and relative windows, a lower score for doubtful dates, and "supersedes" or "deprecated" cues.
 - #2, partly: tune the RRF k and class weights on a dev split (`src/lib/search.ts:102`, `src/lib/local-index.ts:135`).
-- #3, partly: add clue splitting and "A vs B" detection beside the hop gate (`src/lib/search-hop.ts:99`).
+- #3, partly: "A vs B" questions search each entity at once (`src/lib/search-hop.ts:126`). Still missing: clue splitting beside the hop gate.
 - #4: add a rerank skip gate on score margin and overlap in [`src/lib/search-chain.ts`](../../src/lib/search-chain.ts).
 - #5: score the top 16 hits in one Jev choice. This needs a decision-models-first receipt.
 - #6, partly: add the query-to-question rewrite to the heading-tree chunks (`src/lib/local-chunks.ts:66`).
@@ -16,7 +16,7 @@ The list is [retrieval-changes.md](retrieval-changes.md).
 - #8: check each hit with HEAD and fall back to GET; a 404 is dead, a 403 is ignored.
 - #9: open the top page for fresh-class queries in [`src/lib/search-chain.ts`](../../src/lib/search-chain.ts).
 - #10, partly: merge near copies only when results crowd, and drop repeated paragraphs in [`src/lib/fingerprints.ts`](../../src/lib/fingerprints.ts).
-- #11: add the exact-match shortcut and the P856 fallback in [`src/lib/sources/official-sites.ts`](../../src/lib/sources/official-sites.ts).
+- #11, partly: an item with no official website (P856) falls back to its official blog (P1581) in the same call (`src/lib/sources/official-sites.ts:37`). Two articles about one item give one hit (`:57`). A claim word inside a domain name, such as "official-merch.com", does not make a query navigational (`:20`). Still missing: the exact-label shortcut and the Jev gate for the hard tail, which needs a decision-models-first receipt.
 - #12, partly: add quoted, how-to, comparison, definition, and date intents, and the top-two union (`src/lib/jev/decisions/search-intent.ts:19`).
 - #14: add a benchmark-host blocklist and a no-search baseline to [`scripts/bench`](../../scripts/bench).
 

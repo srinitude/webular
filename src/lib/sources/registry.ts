@@ -96,6 +96,7 @@ export const freeSourceFallback = (command: FreeSourceCommand, query: string, li
     const ranked = rankHits(
       runs.flatMap((r) => r.hits),
       now,
+      query,
     )
     const top = ranked[0]
     if (!top) return yield* new AllFreeSourcesFailed({ command, failures })

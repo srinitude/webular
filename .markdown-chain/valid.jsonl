@@ -724,3 +724,7 @@
 {"path": "scripts/bench/peers/AGENTS.md", "sha": "adf112d50e6c8d478bc74d79b4b528ebb9035f50f884666583045d57bf3016e0"}
 {"path": "tests/bench/AGENTS.md", "sha": "ebdd6b7a85ecd5ab38ada81fd2e789552f6612dfcc5ac494eebb1ef4f1037187"}
 {"path": "docs/command-parity.md", "sha": "84ac3353011270d7dce2730101837afab270471222eb7a330c747605bdb7795a"}
+{"path": "src/lib/sources/AGENTS.md", "sha": "ae88d2a6c56655ad76659104e23d079679ccb6c74ad98034729b36dc8e8ca27b"}
+{"path": "docs/research.md", "sha": "eac3213e129c01a89b40ca710648b8579e56395de416d06f0d822f05e0f4915a"}
+{"path": "docs/research/open-items.md", "sha": "cb08443968f3f8d4f286d348b7996f2d6519b19f6f63dd5d09221d30a11bcbda"}
+{"path": "docs/bug-classes.md", "sha": "261170e680ac5abb73f6830e0d43020a1320cbf0cd906639be969c65e818998f"}

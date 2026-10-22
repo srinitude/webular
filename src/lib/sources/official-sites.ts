@@ -16,8 +16,10 @@ import {
 import type { Hit } from './polite.ts'
 
 const NAVIGATIONAL = /\b(official|website|homepage|home page)\b/i
+// A claim word inside a domain name ("official-merch.com") is not a nav ask.
+const DOMAIN = /\S+\.[a-z]{2,}\b\S*/gi
 export const isNavigational = (query: string) =>
-  !query.trim().endsWith('?') && NAVIGATIONAL.test(query)
+  !query.trim().endsWith('?') && NAVIGATIONAL.test(query.replace(DOMAIN, ' '))
 
 const Binding = Schema.Struct({ value: Schema.String })
 const Sparql = Schema.fromJsonString(
@@ -30,8 +32,9 @@ const Sparql = Schema.fromJsonString(
 
 // ponytail: article URLs as Wikipedia hits spell them (encodeURIComponent); a
 // title Wikidata encodes differently (an apostrophe) simply finds no site.
+// An item with no official website (P856) falls back to its official blog (P1581).
 const articlesPart = (articles: ReadonlyArray<string>) =>
-  `{ VALUES ?a { ${articles.map((u) => `<${u}>`).join(' ')} } ?a schema:about ?item . ?item wdt:P856 ?site . }`
+  `{ VALUES ?a { ${articles.map((u) => `<${u}>`).join(' ')} } ?a schema:about ?item . OPTIONAL { ?item wdt:P856 ?o } OPTIONAL { ?item wdt:P1581 ?b } BIND(COALESCE(?o, ?b) AS ?site) FILTER(BOUND(?site)) }`
 
 // Article rows carry ?a; product rows carry ?links, most-linked first.
 const queryFor = (articles: ReadonlyArray<string>, creator: string | undefined, limit: number) => {
@@ -44,19 +47,24 @@ const queryFor = (articles: ReadonlyArray<string>, creator: string | undefined, 
 
 const WIKI = /^https:\/\/en\.wikipedia\.org\/wiki\//
 
-// The first official site of each article, in article order, as a hit.
+// The first official site of each article, in article order, as a hit; two
+// articles about one item (a redirect title) share a site and give one hit.
 const siteHits = (
   articles: ReadonlyArray<string>,
   site: ReadonlyMap<string, string>,
   titles: ReadonlyMap<string, string>,
-): Hit[] =>
-  articles.flatMap((u) => {
+): Hit[] => {
+  const seen = new Set<string>()
+  return articles.flatMap((u) => {
     const url = site.get(u)
     const title = titles.get(u)
-    return url
-      ? [{ title: title ?? url, url, description: `Official website (Wikidata) of ${title ?? u}` }]
-      : []
+    if (!url || seen.has(url)) return []
+    seen.add(url)
+    return [
+      { title: title ?? url, url, description: `Official website (Wikidata) of ${title ?? u}` },
+    ]
   })
+}
 
 // Two lists: official sites for the Wikipedia articles among `hits` (first site
 // per article, in article order), then the products of the maker `query` names.
