@@ -14,7 +14,13 @@ afterEach(() => setPlatform(real))
 const check = (platform: string, env: Record<string, string>, want: object) => {
   setPlatform(platform)
   let spawned = 0
-  const spawner = { string: () => Effect.sync(() => (spawned++, 'from-keychain')) }
+  const spawner = {
+    string: () =>
+      Effect.sync(() => {
+        spawned++
+        return 'from-keychain'
+      }),
+  }
   return Effect.runPromise(
     resolveKey.pipe(
       Effect.map((key) =>

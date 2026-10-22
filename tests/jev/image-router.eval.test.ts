@@ -3,6 +3,7 @@
 // inventory build); the live part skips when Jev is unavailable. Prints pass
 // rate, mean confidence, share at the bar, and sure-but-wrong.
 import { expect, test } from 'bun:test'
+import assert from 'node:assert/strict'
 import { Console, Effect, Layer, ManagedRuntime } from 'effect'
 import { Jev } from '../../src/lib/jev/client.ts'
 import {
@@ -41,15 +42,20 @@ test('an infographic page skips the router and answers text', () => {
   )
 })
 
-test('zero images skips the router and answers text', () =>
-  rt.runPromise(
-    routeImages({ ...loses[0]!.input, images: [] }).pipe(
+test('zero images skips the router and answers text', () => {
+  const first = loses[0]
+  assert.ok(first)
+  return rt.runPromise(
+    routeImages({ ...first.input, images: [] }).pipe(
       Effect.map((route) => expect(route).toBe('text')),
     ),
-  ))
+  )
+})
 
 test('the payload asks both option orders and carries no image bytes', () => {
-  const req = routeDecision.def.payload(all[0]!.input)
+  const first = all[0]
+  assert.ok(first)
+  const req = routeDecision.def.payload(first.input)
   expect(Object.keys(req.questions)).toEqual(['route', 'route_swapped'])
   expect(JSON.stringify(req)).not.toContain('data:image')
 })

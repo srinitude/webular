@@ -2,7 +2,9 @@
 // router says the answer sits in a picture. Offline: recorded router answers
 // through a stub Jev layer, no network. The text-only arm (no figures, the
 // report without the router) is the baseline. Prints pass rate and sure-but-wrong.
+
 import { expect, test } from 'bun:test'
+import assert from 'node:assert/strict'
 import { Console, Effect, Layer } from 'effect'
 import { Jev, type JevResult } from '../../src/lib/jev/client.ts'
 import { CONFIDENCE_BAR } from '../../src/lib/jev/payload/index.ts'
@@ -134,7 +136,7 @@ const same = (a: ReadonlyArray<string>, b: ReadonlyArray<string>) => a.join() ==
 const score = (arm: (c: Case) => Effect.Effect<string[]>, asksJev: boolean) =>
   Effect.map(Effect.forEach(all, arm, { concurrency: 1 }), (lists) => {
     const rows = all.map((c, i) => ({
-      ok: same(srcs(lists[i]!), c.gold),
+      ok: same(srcs(lists[i] ?? []), c.gold),
       sure: asksJev && c.conf >= CONFIDENCE_BAR,
     }))
     return {
@@ -163,12 +165,15 @@ test('the router arm holds or beats the text-only baseline, with no more sure-bu
     }),
   ))
 
-test('zero images skips Jev', () =>
-  Effect.runPromise(
-    sourceFigures(wins[2]!.input).pipe(
+test('zero images skips Jev', () => {
+  const win = wins[2]
+  assert.ok(win)
+  return Effect.runPromise(
+    sourceFigures(win.input).pipe(
       Effect.provide(
         Layer.succeed(Jev)(Jev.of({ available: true, ask: () => Effect.die('no call') })),
       ),
       Effect.map((lines) => expect(lines).toEqual([])),
     ),
-  ))
+  )
+})
