@@ -74,13 +74,14 @@ const optional = <A, E, R>(eff: Effect.Effect<Option.Option<A>, E, R>) =>
   eff.pipe(Effect.orElseSucceed(() => Option.none<A>()))
 const setting = (name: string) => optional(Config.option(Config.String(name)))
 
-// Key order: TYPESAFE_API_KEY, then the macOS Keychain item typesafe-ai-api-key.
-// WEBULAR_JEV=off turns Jev off, so every decision uses its baseline.
-const resolveKey = Effect.gen(function* () {
+// Key order: TYPESAFE_API_KEY, then the macOS Keychain item typesafe-ai-api-key
+// (on macOS only; other systems spawn nothing). WEBULAR_JEV=off turns Jev off,
+// so every decision uses its baseline.
+export const resolveKey = Effect.gen(function* () {
   if (Option.contains(yield* setting('WEBULAR_JEV'), 'off'))
     return Option.none<Redacted.Redacted<string>>()
   const env = yield* optional(Config.option(Config.Redacted('TYPESAFE_API_KEY')))
-  if (Option.isSome(env)) return env
+  if (Option.isSome(env) || process.platform !== 'darwin') return env
   const spawner = yield* ChildProcessSpawner
   const out = yield* optional(
     spawner

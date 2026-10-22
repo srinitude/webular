@@ -441,3 +441,6 @@
 {"path": "tests/jev/AGENTS.md", "sha": "45971d50ee6d35d1043a3dbf567c4f6fd9edb79768ba871fdef6797eecec99fe"}
 {"path": "docs/commands.md", "sha": "9ac159217ebf053e05087a86a4cceddcf1f2f21cae870a504dd3690d9255587b"}
 {"path": "tests/contract/AGENTS.md", "sha": "539eb2ba70fc0a28a8501cc4f96f1e8c0fab8b73be1abfbe39fdf007617be5e1"}
+{"path": "docs/install.md", "sha": "24138a5bf03e19707441241bac848c10f02c7a1372d2a1a5144eaf2cdf3ed6c5"}
+{"path": "README.md", "sha": "40ba3ca8735e98fb650e95d8d62507201301ab80769f48422b6ac68a733a9114"}
+{"path": "tests/lib/AGENTS.md", "sha": "86991a9fdebea17803386f35a6855d52e00edaaeb1f1d651ff1062905f1b8330"}

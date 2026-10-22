@@ -30,6 +30,7 @@ export const decisions = Schema.decodeUnknownSync(DecisionsFile)(decisionsFile).
 
 // The macOS Keychain item that holds the TypeSafe key; None when it is absent.
 const fromKeychain = Effect.gen(function* () {
+  if (process.platform !== 'darwin') return Option.none<Redacted.Redacted<string>>()
   const spawner = yield* ChildProcessSpawner.ChildProcessSpawner
   const proc = yield* spawner.spawn(
     ChildProcess.make('security', ['find-generic-password', '-s', 'typesafe-ai-api-key', '-w']),

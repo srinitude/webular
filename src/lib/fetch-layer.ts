@@ -55,7 +55,10 @@ const validatorPath = Effect.gen(function* () {
   const off = yield* Config.String('WEBULAR_NO_CACHE').pipe(Config.withDefault(''))
   if (off === '1') return ':memory:'
   const path = yield* Path.Path
-  const home = yield* Config.String('HOME').pipe(Config.withDefault('.'))
+  const home = yield* Config.String('HOME').pipe(
+    Config.orElse(() => Config.String('USERPROFILE')),
+    Config.withDefault('.'),
+  )
   const dir = yield* Config.String('WEBULAR_CACHE_DIR').pipe(
     Config.withDefault(path.join(home, '.cache', 'webular')),
   )

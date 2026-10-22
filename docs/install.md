@@ -1,20 +1,47 @@
 # Install channels
 
-Pick one channel. The npm channel is in the README's Install section. Use the
-other channels here when npm does not fit. For agent hosts, see the
-[plugin README](../plugins/webular/README.md).
+Pick one channel. This page lists every supported system, then the commands for each channel, then how to set your Jev key in each shell. For agent hosts, see the [plugin README](../plugins/webular/README.md).
 
-## Bun
+## Platforms
 
-Bun needs Node on your PATH, because the launcher starts with a Node shebang.
+Webular ships eight native builds. Every install channel picks the one that fits your machine.
+
+| System | CPU | libc | Build | Installs with | CI tests it |
+|---|---|---|---|---|---|
+| macOS | arm64 | n/a | `darwin-arm64` | npm, Bun, pnpm, Homebrew, `install.sh` | Yes (macOS arm) |
+| macOS | x64 | n/a | `darwin-x64` | npm, Bun, pnpm, Homebrew, `install.sh` | Yes (macOS Intel) |
+| Linux | x64 | glibc | `linux-x64` | npm, Bun, pnpm, Homebrew, `install.sh` | Yes (Ubuntu) |
+| Linux | arm64 | glibc | `linux-arm64` | npm, Bun, pnpm, Homebrew, `install.sh` | Yes (Ubuntu arm) |
+| Linux | x64 | musl | `linux-x64-musl` | npm, Bun, pnpm, `install.sh` | Yes (Alpine container) |
+| Linux | arm64 | musl | `linux-arm64-musl` | npm, Bun, pnpm, `install.sh` | Release smoke test only (Alpine on Ubuntu arm) |
+| Windows | x64 | n/a | `windows-x64` | npm, Bun, pnpm, Scoop, winget, `install.ps1` | Yes (Windows x64) |
+| Windows | arm64 | n/a | `windows-arm64` | npm, Bun, pnpm, Scoop, winget, `install.ps1` | Yes (Windows arm) |
+
+- **WSL** is Linux. Use the Linux commands inside it: npm, Bun, pnpm, or `install.sh`. WSL has no macOS Keychain, so set the key with an environment variable.
+- **Rosetta** on Apple silicon gets the native arm64 build. **musl** (Alpine) has no Homebrew build, so use npm or `install.sh`.
+- **Other systems** (32-bit, FreeBSD, and so on) have no build. Run from source as described in [Build and run](build-and-run.md).
+
+### Features that work only on some systems
+
+- **Jev key lookup.** Webular reads `TYPESAFE_API_KEY` first, on every system. Only when that is unset does it look in the macOS Keychain, in the item `typesafe-ai-api-key`. The Keychain step is macOS-only. On Linux and Windows, use the environment variable.
+- **Cua browser mode** (`--render cua`, `act --goal`) is opt-in. It needs the separate `cua-driver` daemon and a throwaway browser window, as [Browser mode (Cua)](cua-browser-mode.md) explains. Webular's code knows the browser profile folders on macOS, Linux, and Windows, but treat Cua as macOS-first and confirm that `cua-driver` runs on your system before you rely on it.
+- **Everything else** (search, scrape, crawl, and the rest) is the same on every build.
+
+## npm, Bun, and pnpm
+
+These work on every system in the table. The root `webular` package is a Node launcher. It installs only the native package for your OS, CPU, and libc, and it needs no download step after install.
 
 ```bash
+npm i -g webular
+pnpm add -g webular
 bun add -g webular
 ```
 
+Bun needs Node on your PATH too, because the launcher starts with a Node shebang.
+
 ## Homebrew
 
-Homebrew works on macOS and glibc Linux.
+Homebrew works on macOS and glibc Linux, including WSL with a glibc distro.
 
 ```bash
 brew install srinitude/webular/webular
@@ -22,7 +49,7 @@ brew install srinitude/webular/webular
 
 ## Scoop
 
-Scoop works on Windows.
+Scoop works on Windows, x64 and arm64.
 
 ```powershell
 scoop bucket add webular https://github.com/srinitude/scoop-webular
@@ -31,8 +58,7 @@ scoop install webular
 
 ## winget
 
-winget works on Windows. It works once the manifest pull request to
-`microsoft/winget-pkgs` has merged.
+winget works on Windows once the manifest pull request to `microsoft/winget-pkgs` merges.
 
 ```powershell
 winget install Srinitude.Webular
@@ -40,39 +66,41 @@ winget install Srinitude.Webular
 
 ## GitHub release binaries
 
-These work on any platform.
-
-### Download and verify
-
-Download `webular-<platform>` (`webular-<platform>.exe` on Windows) from the
-[releases page](https://github.com/srinitude/webular/releases). Then verify it:
-
-```bash
-sha256sum --check --ignore-missing SHA256SUMS
-gh attestation verify webular-<platform> --repo srinitude/webular
-```
-
-### Platforms
-
-The platforms are `darwin-arm64`, `darwin-x64`, `linux-x64`, `linux-arm64`,
-`linux-x64-musl`, `linux-arm64-musl`, `windows-x64`, and `windows-arm64`.
+These work on any build in the table.
 
 ### Install scripts
 
-On macOS and Linux, including musl, [`scripts/install.sh`](../scripts/install.sh) picks the right
-asset, checks it against `SHA256SUMS`, and installs it to
-`~/.webular/bin/webular`:
+On macOS and Linux, including musl and WSL, [`scripts/install.sh`](../scripts/install.sh) picks the right asset, checks it against `SHA256SUMS`, and installs it to `~/.webular/bin/webular`. It prints a line when that folder is not on your PATH.
 
 ```bash
 curl -fsSL https://github.com/srinitude/webular/releases/latest/download/install.sh | sh
 ```
 
-On Windows, [`scripts/install.ps1`](../scripts/install.ps1) does the same in PowerShell and installs
-to `~\.webular\bin\webular.exe`:
+On Windows, [`scripts/install.ps1`](../scripts/install.ps1) does the same in PowerShell and installs to `~\.webular\bin\webular.exe`:
 
 ```powershell
 irm https://github.com/srinitude/webular/releases/latest/download/install.ps1 | iex
 ```
+
+### Download and verify
+
+Download `webular-<build>` (`webular-<build>.exe` on Windows) from the [releases page](https://github.com/srinitude/webular/releases). Use the build name from the Platforms table. Then verify it:
+
+```bash
+sha256sum --check --ignore-missing SHA256SUMS
+gh attestation verify webular-<build> --repo srinitude/webular
+```
+
+## Set your Jev key
+
+Webular reads the key from `TYPESAFE_API_KEY`. Replace `...` with your key, and keep the key out of files you commit.
+
+- **bash and zsh:** `export TYPESAFE_API_KEY=...` sets it for the current shell. Add the same line to `~/.bashrc` or `~/.zshrc` to keep it.
+- **fish:** `set -Ux TYPESAFE_API_KEY ...`. The `-U` flag saves it for every fish session, and `-x` exports it to programs.
+- **PowerShell:** `$env:TYPESAFE_API_KEY = "..."` sets it for the current session. `[Environment]::SetEnvironmentVariable("TYPESAFE_API_KEY", "...", "User")` saves it for your user account. New processes see the saved value, not windows that are already open.
+- **cmd:** `setx TYPESAFE_API_KEY "..."`. The `setx` command changes only future command windows, so open a new one. To also use the key in the current window, run `set TYPESAFE_API_KEY=...`.
+
+Syntax checked on 2026-10-21 against the [fish `set` page](https://fishshell.com/docs/current/cmds/set.html), the Microsoft Learn [`setx` page](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/setx), and the Microsoft Learn [`Environment.SetEnvironmentVariable` page](https://learn.microsoft.com/en-us/dotnet/api/system.environment.setenvironmentvariable).
 
 ## MCP clients
 
@@ -153,6 +181,4 @@ Uninstall the same way: `npm rm -g webular`, `bun rm -g webular`, `pnpm rm -g we
 
 ## Run from source instead
 
-To run from source, use the bundles, or build the standalone executable, read
-[Build and run](build-and-run.md). Return to the [README](../README.md)
-(navigation only).
+To run from source, use the bundles, or build the standalone executable, read [Build and run](build-and-run.md). Return to the [README](../README.md) (navigation only).

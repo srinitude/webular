@@ -51,7 +51,7 @@ bun add -g webular    # needs Bun, plus Node on PATH for the launcher
 pnpm add -g webular
 ```
 
-[Install channels](docs/install.md) covers Homebrew, Scoop, winget, release binaries with `SHA256SUMS` and provenance, and the `install.sh` and `install.ps1` scripts. It also covers upgrade, uninstall, and shell completions.
+[Install channels](docs/install.md) lists every supported OS, CPU, and libc, and shows how to set `TYPESAFE_API_KEY` in bash, zsh, fish, PowerShell, and cmd. It covers Homebrew, Scoop, winget, release binaries with `SHA256SUMS` and provenance, and the `install.sh` and `install.ps1` scripts. It also covers upgrade, uninstall, and shell completions.
 
 ## Use it from an agent
 
