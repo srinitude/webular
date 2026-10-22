@@ -43,6 +43,8 @@ The webular MCP server can take a few seconds to start. If no webular tool is in
 | List the state machines that model the flows | `webular:diagram` |
 | See whether the security scan tool is installed | `webular:audit` |
 
+`webular:jev` tests Jev lessons and labels one recorded Jev call. No research flow needs it.
+
 On the command line, `answer` takes the same list of pages as `--urls`.
 
 For the input fields, output shape, and errors of `webular:search`, `webular:scrape`, `webular:map`, `webular:summarize`, and `webular:feed`, read [the tool reference](references/tools.md).

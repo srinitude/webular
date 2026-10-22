@@ -516,3 +516,4 @@
 {"path": "src/lib/sources/AGENTS.md", "sha": "dfb16d188226583ab8327bc45d2087cf5917715b8255735e54a7fb4840ee2ed5"}
 {"path": "tests/fixtures/json-ld/AGENTS.md", "sha": "f547a3d491795749b59f48e2bd1de0176cda10746bb78fa9ec1cb318f0a86926"}
 {"path": "tests/fixtures/sitemaps/AGENTS.md", "sha": "4c7929ff8e1175e350826bcb55982d0453c0a20ab5da29c89ba37d50ac475e46"}
+{"path": "plugins/webular/skills/webular-research/SKILL.md", "sha": "fbc5cc37f6748b423a3f4be501bab1b52d772f241b08bb88f3c0bfe277f998cc"}

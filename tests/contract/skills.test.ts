@@ -14,9 +14,7 @@ const PLUGIN = `${ROOT}plugins/webular/`
 const CLAUDE_ROOT = ['$', '{CLAUDE_PLUGIN_ROOT}'].join('')
 
 // Commands no skill names, each with the reason. A stale entry fails the test.
-const UNDOCUMENTED: Record<string, string> = {
-  jev: 'It records and labels Jev calls for webular developers; no research flow uses it.',
-}
+const UNDOCUMENTED: Record<string, string> = {}
 // Flags that belong to a script, not to a webular command, and the file that reads them.
 const FOREIGN_FLAGS: Record<string, string> = {
   http: 'plugins/webular/src/server.ts',
