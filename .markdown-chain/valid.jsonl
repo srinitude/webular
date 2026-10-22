@@ -795,3 +795,5 @@
 {"path": "README.md", "sha": "d927dbe94b8388a05baaae415991766ea07d672e78931d3b026b3f80c5d19dcb"}
 {"path": "docs/benchmarks.md", "sha": "d05962c2008c054d4d0b5fc78e877b69847ac48141f8e70802a1e69ce34c22d3"}
 {"path": "docs/benchmarks-peers.md", "sha": "c05b852efae495ab0daf2aab00bb78bb249834c88f2a320df2f5a0a1c102f51c"}
+{"path": "scripts/bench/peers/AGENTS.md", "sha": "d90f6405983d35d8fc299ffce82742c5e096f4c9fd539b4734b057441a8da5e1"}
+{"path": "docs/scoreboard.md", "sha": "dcdb00359600335cd141a533f8bcbd95acb485b3a5e664fdd3a62b204976b6aa"}

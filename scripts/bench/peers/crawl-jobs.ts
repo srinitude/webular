@@ -58,28 +58,29 @@ const fcOutput = (s: typeof FcStatus.Type, sentBytes: number): Output => {
   )
 }
 
+const FC_CRAWL_API = 'https://api.firecrawl.dev/v2/crawl'
+const fcBody = (url: string) => ({
+  url,
+  limit: CRAWL_LIMIT,
+  maxDiscoveryDepth: CRAWL_DEPTH,
+  scrapeOptions: { formats: ['markdown'] },
+})
+
 // ponytail: reads the first status page only; Firecrawl pages results past 10 MB
 // through `next`, which a 10-page crawl of small pages never reaches.
 export const firecrawlCrawl = (post: Post, get: Get, key: string): Jobs => {
   const auth = { authorization: `Bearer ${key}` }
-  const api = 'https://api.firecrawl.dev/v2/crawl'
   const poll = (id: string): Effect.Effect<typeof FcStatus.Type, BenchError> =>
-    get(`${api}/${id}`, auth, FcStatus).pipe(
+    get(`${FC_CRAWL_API}/${id}`, auth, FcStatus).pipe(
       Effect.flatMap((s) =>
         s.status === 'scraping'
           ? Effect.sleep(POLL_MS).pipe(Effect.andThen(poll(id)))
           : Effect.succeed(s),
       ),
     )
-  const body = (url: string) => ({
-    url,
-    limit: CRAWL_LIMIT,
-    maxDiscoveryDepth: CRAWL_DEPTH,
-    scrapeOptions: { formats: ['markdown'] },
-  })
   return {
     crawl: ({ url = '' }) =>
-      post(api, auth, body(url), FcStart).pipe(
+      post(FC_CRAWL_API, auth, fcBody(url), FcStart).pipe(
         Effect.flatMap(({ r, sentBytes }) =>
           poll(r.id).pipe(
             Effect.filterOrFail(
