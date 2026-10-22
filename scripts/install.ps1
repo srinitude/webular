@@ -1,57 +1,135 @@
 # webular installer for Windows: picks the release asset for this CPU, checks it
-# against the release's SHA256SUMS, and installs it as
-# $env:WEBULAR_INSTALL\bin\webular.exe (default $HOME\.webular\bin\webular.exe).
+# against SHA256SUMS, and installs it as $env:WEBULAR_INSTALL\bin\webular.exe
+# (default $HOME\.webular\bin\webular.exe), then adds that folder to the user PATH.
 #   irm https://github.com/srinitude/webular/releases/latest/download/install.ps1 | iex
-# WEBULAR_VERSION=<x.y.z> pins a release. WEBULAR_BASE_URL replaces the download
-# folder (an http(s) URL, a file:// URL, or a local folder path).
-# WEBULAR_VERIFY_ATTESTATION=1 also runs `gh attestation verify` and fails on a
-# bad or missing attestation. WEBULAR_OS and WEBULAR_ARCH override detection,
-# so the tests can run this script on any OS with pwsh.
-$ErrorActionPreference = 'Stop'
+# WEBULAR_VERSION=<x.y.z> pins a release (a baked copy pins its own release and
+# checks the sums baked into it). WEBULAR_BASE_URL replaces the download folder
+# (an https:// URL, a file:// URL, or a local folder; http:// is refused).
+# WEBULAR_BASELINE=1 picks the -baseline x64 asset (chosen on its own without AVX2).
+# WEBULAR_NO_MODIFY_PATH=1 leaves PATH alone. WEBULAR_UNINSTALL=1 removes the
+# program and its PATH entry. WEBULAR_VERIFY_ATTESTATION=1 also runs
+# `gh attestation verify`. HTTPS_PROXY sets a proxy. WEBULAR_OS and WEBULAR_ARCH
+# override detection, so the tests can run this script on any OS with pwsh.
 & {
+  $ErrorActionPreference = 'Stop'
+  $ProgressPreference = 'SilentlyContinue'
+  if ($PSVersionTable.PSEdition -eq 'Desktop') {
+    [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+  }
   $repo = 'srinitude/webular'
-  function Fail($message) { throw "webular install: $message" }
+  # The release job fills these two; an unfilled copy resolves the release live.
+  $DefaultVersion = '__WEBULAR_VERSION__'
+  $BakedSums = @'
+__WEBULAR_SUMS__
+'@
+  $baked = $DefaultVersion -ne ('__WEBULAR_' + 'VERSION__')
+  function Fail($message) { throw $message }
 
-  $os = $env:WEBULAR_OS
-  if (-not $os) { $os = if ($PSVersionTable.PSEdition -eq 'Desktop' -or $IsWindows) { 'windows' } else { 'other' } }
-  if ($os -ne 'windows') { Fail 'install.ps1 is for Windows; on macOS and Linux use install.sh' }
-  # OSArchitecture reports the native CPU, so an x64 shell on ARM64 still gets arm64.
-  $cpu = $env:WEBULAR_ARCH
-  if (-not $cpu) { $cpu = [string][Runtime.InteropServices.RuntimeInformation]::OSArchitecture }
-  $arch = switch -Regex ($cpu) {
-    '^(x64|amd64|x86_64)$' { 'x64' }
-    '^(arm64|aarch64)$' { 'arm64' }
-    default { Fail "unsupported CPU $cpu" }
-  }
-  $asset = "webular-windows-$arch.exe"
-
-  $base = $env:WEBULAR_BASE_URL
-  if (-not $base) {
-    $base = if ($env:WEBULAR_VERSION) { "https://github.com/$repo/releases/download/v$($env:WEBULAR_VERSION)" }
-    else { "https://github.com/$repo/releases/latest/download" }
-  }
-  $tmp = Join-Path ([IO.Path]::GetTempPath()) "webular-$([guid]::NewGuid())"
-  New-Item -ItemType Directory -Path $tmp | Out-Null
-  try {
-    function Fetch($name) {
-      $out = Join-Path $tmp $name
-      try {
-        if ($base -match '^https?://') { Invoke-WebRequest -UseBasicParsing -Uri "$base/$name" -OutFile $out }
-        else {
-          $folder = if ($base -match '^file://') { ([uri]$base).LocalPath } else { $base }
-          Copy-Item -LiteralPath (Join-Path $folder $name) -Destination $out
-        }
-      } catch { Fail "download failed: $base/$name" }
-      $out
+  function Fetch($name) {
+    $out = Join-Path $tmp $name
+    try {
+      if ($base -match '^https://') {
+        $proxy = @{}
+        if ($env:HTTPS_PROXY) { $proxy.Proxy = $env:HTTPS_PROXY }
+        Invoke-WebRequest -UseBasicParsing @proxy -Uri "$base/$name" -OutFile $out
+      } else {
+        $folder = if ($base -match '^file://') { ([uri]$base).LocalPath } else { $base }
+        Copy-Item -LiteralPath (Join-Path $folder $name) -Destination $out
+      }
+    } catch {
+      $status = try { [int]$_.Exception.Response.StatusCode } catch { 0 }
+      if ($status -eq 404 -and $ver) { Fail "release v$ver not found" }
+      Fail "download failed: $base/$name"
     }
-    $file = Fetch $asset
-    $sums = Fetch 'SHA256SUMS'
+    $out
+  }
 
-    $want = Get-Content -LiteralPath $sums | ForEach-Object {
-      $field = -split $_
-      if ($field.Count -ge 2 -and ($field[1] -eq $asset -or $field[1] -eq "*$asset")) { $field[0] }
-    } | Select-Object -First 1
-    if (-not $want) { Fail "no checksum for $asset in SHA256SUMS" }
+  function Get-Sha256Entry($text, $asset) {
+    foreach ($line in ($text -split "`r?`n")) {
+      $field = -split $line
+      if ($field.Count -ge 2 -and ($field[1] -eq $asset -or $field[1] -eq "*$asset")) {
+        if ($field[0] -notmatch '^[0-9a-fA-F]{64}$') { Fail "bad checksum line for $asset" }
+        return $field[0].ToLowerInvariant()
+      }
+    }
+    Fail "no checksum for $asset"
+  }
+
+  # Adds or removes $dir in the user PATH, keeping the REG_EXPAND_SZ type.
+  function Update-UserPath($dir, $add) {
+    $key = Get-Item -LiteralPath 'HKCU:\Environment'
+    $raw = [string]$key.GetValue('Path', '', [Microsoft.Win32.RegistryValueOptions]::DoNotExpandEnvironmentNames)
+    $keep = @($raw -split ';' | Where-Object { $_ -and $_.TrimEnd('\') -ine $dir.TrimEnd('\') })
+    if ($add) { $keep += $dir }
+    Set-ItemProperty -LiteralPath 'HKCU:\Environment' -Name Path -Value ($keep -join ';') -Type ExpandString
+    Add-Type -Namespace Webular -Name Native -MemberDefinition '[DllImport("user32.dll", CharSet=CharSet.Auto)] public static extern IntPtr SendMessageTimeout(IntPtr h, uint m, UIntPtr w, string l, uint f, uint t, out UIntPtr r);'
+    $result = [UIntPtr]::Zero
+    [void][Webular.Native]::SendMessageTimeout([IntPtr]0xffff, 0x1A, [UIntPtr]::Zero, 'Environment', 2, 5000, [ref]$result)
+    $session = @($env:Path -split ';' | Where-Object { $_ -and $_.TrimEnd('\') -ine $dir.TrimEnd('\') })
+    if ($add) { $session += $dir }
+    $env:Path = $session -join ';'
+    if ($add -and $env:GITHUB_PATH) { Add-Content -LiteralPath $env:GITHUB_PATH -Value $dir }
+  }
+
+  function Get-Arch {
+    $cpu = $env:WEBULAR_ARCH
+    if (-not $cpu) {
+      $cpu = try { (Get-ItemPropertyValue 'HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Environment' PROCESSOR_ARCHITECTURE) } catch { '' }
+    }
+    if (-not $cpu) { $cpu = [string][Runtime.InteropServices.RuntimeInformation]::OSArchitecture }
+    switch -Regex ($cpu) {
+      '^(x64|amd64|x86_64)$' { 'x64' }
+      '^(arm64|aarch64)$' { 'arm64' }
+      default { Fail "unsupported CPU $cpu" }
+    }
+  }
+
+  # The AVX2 probe describes this host, so an arch override skips it.
+  function Use-Baseline {
+    if ($env:WEBULAR_BASELINE -eq '1') { return $true }
+    if ($env:WEBULAR_ARCH) { return $false }
+    -not $(try { [System.Runtime.Intrinsics.X86.Avx2]::IsSupported } catch { $true })
+  }
+
+  $tmp = Join-Path ([IO.Path]::GetTempPath()) "webular-$([guid]::NewGuid())"
+  try {
+    $os = $env:WEBULAR_OS
+    if (-not $os) { $os = if ($PSVersionTable.PSEdition -eq 'Desktop' -or $IsWindows) { 'windows' } else { 'other' } }
+    if ($os -ne 'windows') { Fail 'install.ps1 is for Windows; on macOS and Linux use install.sh' }
+    $root = if ($env:WEBULAR_INSTALL) { $env:WEBULAR_INSTALL } else { Join-Path $HOME '.webular' }
+    $dir = Join-Path $root 'bin'
+    $exe = Join-Path $dir 'webular.exe'
+    $touchPath = $env:WEBULAR_NO_MODIFY_PATH -ne '1'
+
+    if ($env:WEBULAR_UNINSTALL -eq '1') {
+      Remove-Item -Force -LiteralPath $exe, "$exe.old" -ErrorAction SilentlyContinue
+      if ($touchPath) { Update-UserPath $dir $false }
+      Write-Host "webular removed from $dir"
+      return
+    }
+
+    $arch = Get-Arch
+    $asset = "webular-windows-$arch.exe"
+    if ($arch -eq 'x64' -and (Use-Baseline)) { $asset = 'webular-windows-x64-baseline.exe' }
+
+    $ver = if ($env:WEBULAR_VERSION) { $env:WEBULAR_VERSION } elseif ($baked) { $DefaultVersion }
+    if ($ver) {
+      $ver = $ver -replace '^v', ''
+      if ($ver -notmatch '^\d+\.\d+\.\d+$') { Fail "bad version '$ver'; use <x.y.z>" }
+    }
+    $base = $env:WEBULAR_BASE_URL
+    if (-not $base) {
+      $base = if ($ver) { "https://github.com/$repo/releases/download/v$ver" }
+      else { "https://github.com/$repo/releases/latest/download" }
+    }
+    if ($base -match '^http://') { Fail 'refusing http:// base URL; use https://, file://, or a folder' }
+    if ($base -match '^[A-Za-z][A-Za-z0-9+.-]+://' -and $base -notmatch '^(https|file)://') { Fail "unsupported base URL $base" }
+
+    New-Item -ItemType Directory -Path $tmp | Out-Null
+    $file = Fetch $asset
+    $useBaked = $baked -and $ver -eq $DefaultVersion -and -not $env:WEBULAR_BASE_URL
+    $sums = if ($useBaked) { $BakedSums } else { Get-Content -Raw -LiteralPath (Fetch 'SHA256SUMS') }
+    $want = Get-Sha256Entry $sums $asset
     $got = (Get-FileHash -Algorithm SHA256 -LiteralPath $file).Hash.ToLowerInvariant()
     if ($got -ne $want) { Fail "checksum mismatch for $asset (want $want, got $got)" }
 
@@ -61,16 +139,24 @@ $ErrorActionPreference = 'Stop'
       if ($LASTEXITCODE -ne 0) { Fail 'attestation check failed' }
     }
 
-    $root = if ($env:WEBULAR_INSTALL) { $env:WEBULAR_INSTALL } else { Join-Path $HOME '.webular' }
-    $dir = Join-Path $root 'bin'
     New-Item -ItemType Directory -Force -Path $dir | Out-Null
-    $exe = Join-Path $dir 'webular.exe'
-    Move-Item -Force -LiteralPath $file -Destination $exe
-    Write-Host "webular installed to $exe"
-    if (($env:PATH -split [IO.Path]::PathSeparator) -notcontains $dir) {
-      Write-Host "add $dir to your PATH, for example:"
-      Write-Host "  [Environment]::SetEnvironmentVariable('Path', [Environment]::GetEnvironmentVariable('Path', 'User') + ';$dir', 'User')"
+    # A running exe cannot be overwritten but can be renamed.
+    if (Test-Path -LiteralPath $exe) {
+      Remove-Item -Force -LiteralPath "$exe.old" -ErrorAction SilentlyContinue
+      Move-Item -Force -LiteralPath $exe -Destination "$exe.old"
     }
+    Move-Item -Force -LiteralPath $file -Destination $exe
+    Remove-Item -Force -LiteralPath "$exe.old" -ErrorAction SilentlyContinue
+    # An overridden OS means a test fixture, which is not a runnable program.
+    if (-not $env:WEBULAR_OS) {
+      & $exe --version | Out-Null
+      if ($LASTEXITCODE -ne 0) { Fail "$exe --version failed (exit $LASTEXITCODE)" }
+    }
+    Write-Host "webular installed to $exe"
+    if ($touchPath) { Update-UserPath $dir $true }
+  } catch {
+    Write-Host "webular install: $($_.Exception.Message)" -ForegroundColor Red
+    exit 1
   } finally {
     Remove-Item -Recurse -Force -LiteralPath $tmp -ErrorAction SilentlyContinue
   }

@@ -1,7 +1,8 @@
 // scripts/install.ps1 under pwsh against a local release folder inside the repo
 // (out/, gitignored). WEBULAR_OS and WEBULAR_ARCH force the windows-x64 asset,
 // so this runs on any OS with pwsh: a matching checksum installs webular.exe,
-// and a SHA256SUMS that disagrees with the download installs nothing.
+// and a SHA256SUMS that disagrees with the download installs nothing. The script
+// also parses cleanly and refuses a plain http:// base URL.
 import { afterAll, expect, test } from 'bun:test'
 import { BunServices } from '@effect/platform-bun'
 import { Effect, FileSystem, ManagedRuntime } from 'effect'
@@ -36,6 +37,7 @@ const install = (sum: string, baseFor: (dir: string) => string) =>
           WEBULAR_INSTALL: `${dir}/home`,
           WEBULAR_OS: 'windows',
           WEBULAR_ARCH: 'x64',
+          WEBULAR_NO_MODIFY_PATH: '1',
         },
         extendEnv: true,
         stdout: 'ignore',
@@ -85,6 +87,50 @@ withPwsh(
           expect(installed).toBeUndefined()
         },
       ),
+    ),
+  PWSH_TIMEOUT,
+)
+
+const SCRIPT = `${ROOT}scripts/install.ps1`
+
+withPwsh(
+  'parses with no syntax errors',
+  () =>
+    runtime.runPromise(
+      Effect.gen(function* () {
+        const spawner = yield* ChildProcessSpawner.ChildProcessSpawner
+        const probe = `$e = $null; [System.Management.Automation.Language.Parser]::ParseFile($env:INSTALL_PS1, [ref]$null, [ref]$e) | Out-Null; $e | ForEach-Object { $_.Message }; exit $e.Count`
+        const command = ChildProcess.make('pwsh', ['-NoProfile', '-Command', probe], {
+          env: { INSTALL_PS1: SCRIPT },
+          extendEnv: true,
+        })
+        const output = yield* spawner.string(command, { includeStderr: true })
+        const code = yield* spawner.exitCode(command)
+        expect({ code: Number(code), output }).toEqual({ code: 0, output: '' })
+      }).pipe(Effect.scoped),
+    ),
+  PWSH_TIMEOUT,
+)
+
+withPwsh(
+  'refuses a plain http:// base URL before any download',
+  () =>
+    runtime.runPromise(
+      Effect.gen(function* () {
+        const spawner = yield* ChildProcessSpawner.ChildProcessSpawner
+        const command = ChildProcess.make('pwsh', ['-NoProfile', '-File', SCRIPT], {
+          env: {
+            WEBULAR_BASE_URL: 'http://127.0.0.1:9',
+            WEBULAR_OS: 'windows',
+            WEBULAR_ARCH: 'x64',
+          },
+          extendEnv: true,
+        })
+        const output = yield* spawner.string(command, { includeStderr: true })
+        const code = yield* spawner.exitCode(command)
+        expect(Number(code)).not.toBe(0)
+        expect(output).toContain('refusing http://')
+      }).pipe(Effect.scoped),
     ),
   PWSH_TIMEOUT,
 )
