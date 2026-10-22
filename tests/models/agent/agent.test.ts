@@ -61,6 +61,17 @@ test('public tasks keep single-answer, no-premise questions and skip the canary 
   expect(tasks[0]?.eval.answerMatches).toBe('A\\.B')
 })
 
+test('a public task matches its gold or any alias, literally', () => {
+  const line = JSON.stringify({
+    id: 'p',
+    input: { question: 'Q?' },
+    gold: { answers: ['8,586 m'] },
+    aliases: ['8,586 m', '8586 m'],
+    tags: { premise: 'none' },
+  })
+  expect(publicTasks(line)[0]?.eval.answerMatches).toBe('8,586 m|8586 m')
+})
+
 test('cost uses the public rate, and an unknown model has no cost', () => {
   const u = { inputTokens: 1e6, outputTokens: 1e6, cacheReadTokens: 0, cacheWriteTokens: 0 }
   expect(costUsd('claude-sonnet-5-5', u)).toBe(12)

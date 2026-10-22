@@ -29,7 +29,7 @@ export const assignSplits = (tasks: ReadonlyArray<Task>): ReadonlyArray<Task> =>
   })
 }
 
-const jsonl = (rows: ReadonlyArray<Task>) =>
+export const jsonl = (rows: ReadonlyArray<Task>) =>
   `${[JSON.stringify({ canary: CANARY }), ...rows.map((r) => JSON.stringify(r))].join('\n')}\n`
 
 // Writes bench/tasks/<split>/<name>.jsonl under root; private/ is gitignored.

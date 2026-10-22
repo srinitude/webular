@@ -5,7 +5,7 @@ The agent track: one model, one tool arm, and one public-web task per run. The p
 ## What lives here
 
 - [arm.ts](arm.ts): one tool arm. It sets which tools a run may call, what the prompt hints, and, for a peer arm, its MCP server and the keys its child env needs.
-- [tasks.ts](tasks.ts): single-answer tasks from the dev split of the answer family. An inline sample stands in when the task file is missing.
+- [tasks.ts](tasks.ts): single-answer tasks from the peer set, [bench/tasks/dev/peers.jsonl](../../../bench/tasks/dev/peers.jsonl). Set `BENCH_AGENT_SET` to read another set, such as `dev/answer.jsonl`. A reply passes when it holds the gold answer or any alias. An inline sample stands in when the task file is missing.
 - [judge.ts](judge.ts): the judge eval kind. It grades a reply with one Claude model through the grader track.
 - [rates.ts](rates.ts): public per-token rates for pricing subscription runs, with their source and read date.
 - [row.ts](row.ts): one result row, including the arm-order seed.

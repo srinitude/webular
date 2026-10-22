@@ -86,6 +86,16 @@ The `gold.checked` field of each row says how its answer was read and checked, a
 | pilot-images-infographic-03 | <https://www.census.gov/library/visualizations/2026/comm/median-household-income.html> | US-public-domain | $87,460 | 2026-10-21 |
 | pilot-images-infographic-04 | <https://www.ready.gov/publications> | US-public-domain | Save for a Rainy Day | 2026-10-21 |
 
+## Peer benchmark set sources
+
+[dev/peers.jsonl](dev/peers.jsonl) is the live peer benchmark set. It has seven categories: factual lookup, multi-hop, fresh, official site, extract, PDF, and comparison. Each row names its category in `tags.category`, and its source URL and license in `source`. We wrote every question. No row is copied from SimpleQA, FRAMES, WebWalkerQA, BrowseComp, or GAIA; those sets only shaped the style. A helper fetched each source page with Firecrawl or Exa when the set was built, and the evidence spans are quotes from those pages.
+
+- **Wikipedia** (CC BY-SA 4.0): factual, multi-hop, fresh, extract, and comparison rows.
+- **Wikidata** (CC0-1.0): one extract row.
+- **Official project sites**: SQLite, PostgreSQL, python.org, and peps.python.org rows. These rows quote one short fact, and the question is ours.
+- **IETF RFC text**: one extract row, under the IETF Trust Legal Provisions.
+- **PDFs**: each PDF row names its own license in `source.license`.
+
 ## Known limits
 
 - **Multilingual queries are not written by native speakers.** The spec asks for `search.multilingual` queries written by native speakers. These queries are Wikidata labels in each language, set into fixed question templates. No cited source with a fitting license gives native-written queries. BrowseComp-ZH is internal only, so its rows are not copied. Read scores on these tasks as label-matching scores, not as scores on natural native queries. A native speaker should rewrite each query before the set meets this part of the spec.
@@ -96,3 +106,4 @@ The `gold.checked` field of each row says how its answer was read and checked, a
   - Table-05 is a labeled graphic panel, not a ruled table.
   - Table-03, infographic-02, and infographic-04 are one-page PDFs, not image files.
   - The product-04 photo was supplied by the company and is posted on an FDA page.
+- **The peer set is small and scored by literal match.** It has about four rows per category, so a gap of one task between peers is noise. A reply passes when it holds the gold answer or any alias, letter for letter and case for case, so a right answer in an unlisted form fails.
