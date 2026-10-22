@@ -336,3 +336,11 @@
 {"path": "site/AGENTS.md", "sha": "1c827cb45f098693812b5375ed6b03c346cae132af79c1b29976cca3d62d8b83", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/tasks.md", "sha": "cd80ad1204e33eeeaca4845355080c10859d248454f0e67b7fdd6722ff30774e"}
 {"path": "docs/tasks.md", "sha": "cd80ad1204e33eeeaca4845355080c10859d248454f0e67b7fdd6722ff30774e", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/scripts/AGENTS.md", "sha": "69369ea98d236b7c7c53615866278810ed611777d12e29da82d7dff8454c2205", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/AGENTS.md", "sha": "3c3001b6e3586303d8b57393890f4483f42b26d88b3e92426f6458b89d43e5fb", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/AGENTS.md", "sha": "3ff2ed4c8c9d9a071cd1cd45c97eb439ed9c0ed4fa941c2fedefc2ee43373e49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/design/AGENTS.md", "sha": "d3cd79bb303f0a0c32fee46ed937ed88bf3f19389863c6f11ee481af3c6dced8", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "tests/quality/AGENTS.md", "sha": "b9d3006d2ae7551075311337732a5131253e5921718223347ff53587e1bfe277", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/public/AGENTS.md", "sha": "b1149ae7abfd9ae1cc1616fca83d69d95d81c4c3b2fad8ebc3dea172da38147d", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/routes/AGENTS.md", "sha": "ad59693c1fcd424d70f67a5d4fc55e2b8af87d11e71a8afa6ab2c17a0e032e2d", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/design/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}

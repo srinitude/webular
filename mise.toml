@@ -496,6 +496,8 @@ depends = ["setup"]
 dir = "{{config_root}}/site"
 run = [
   "bun install --frozen-lockfile 1>&2",
+  'bun "{{config_root}}/site/scripts/tokens-css.ts" 1>&2',
+  'bunx biome format --write "{{config_root}}/site/src/tokens.css" 1>&2',
   'bun "{{config_root}}/site/scripts/tools-json.ts"',
   'PUBLIC_BUILD_SHA="$(git rev-parse --short HEAD)" PUBLIC_BUILD_DATE="$(git log -1 --format=%cs)" bun --bun "{{config_root}}/site/node_modules/astro/bin/astro.mjs" build',
   'bun "{{config_root}}/site/scripts/machine-files.ts"',
@@ -508,6 +510,7 @@ dir = "{{config_root}}/site"
 run = [
   'bun "{{config_root}}/site/node_modules/playwright/cli.js" install chromium-headless-shell 1>&2',
   'bun "{{config_root}}/site/scripts/check-site.ts"',
+  'cd "{{config_root}}" && bun test --timeout 60000 tests/quality/site-routes.test.ts',
 ]
 
 [tasks."site:dev"]
