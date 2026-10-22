@@ -9,7 +9,7 @@ test('one page found through http, www, m, amp, and tracking-link forms is one r
     'https://m.example.com/post',
     'https://amp.example.com/post',
     'https://example.com/post/amp',
-    'https://example.com/post?utm_source=x&fbclid=1&gclid=2&ref=tw#top',
+    'https://example.com/post?utm_source=x&fbclid=1&gclid=2&ref_src=tw#top',
   ]
   expect(new Set(forms.map(hitKey)).size).toBe(1)
 })
