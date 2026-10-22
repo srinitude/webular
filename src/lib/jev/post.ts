@@ -74,7 +74,7 @@ const httpError = (res: {
     })
   })
 
-const jevRequest = (endpoint: string, key: Redacted.Redacted<string>, body: string) =>
+export const jevRequest = (endpoint: string, key: Redacted.Redacted<string>, body: string) =>
   HttpClientRequest.post(endpoint).pipe(
     HttpClientRequest.bearerToken(Redacted.value(key)),
     HttpClientRequest.bodyText(body, 'application/json'),

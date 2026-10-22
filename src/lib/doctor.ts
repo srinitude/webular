@@ -1,14 +1,16 @@
 // DOCTOR lib — environment + toolchain checks over runProc (drained, timed).
 // Required: bun, mise, node. Tolerated (reported, never failing overall ok):
-// network, agent-browser, deepsec. WEBULAR_DOCTOR_URL overrides the probe
-// target so the diagnosis is provable offline.
+// network, agent-browser, deepsec, and jev (the active route). WEBULAR_DOCTOR_URL
+// overrides the probe target so the diagnosis is provable offline.
 import { Config, Effect } from 'effect'
+import * as FetchHttpClient from 'effect/http/FetchHttpClient'
 import type { ChildProcessSpawner } from 'effect/process'
 import { httpGet } from '../core/http.ts'
 import { runProc } from '../core/proc.ts'
 import { resolveBin } from '../core/root.ts'
 import { resolveMise } from '../mise/gateway.ts'
 import { upgradeFor } from '../release/upgrade.ts'
+import { checkJevRoute } from './jev/doctor-route.ts'
 
 interface Check {
   name: string
@@ -16,7 +18,7 @@ interface Check {
   detail: string
 }
 
-const TOLERATED = new Set(['network', 'agent-browser', 'deepsec'])
+const TOLERATED = new Set(['network', 'agent-browser', 'deepsec', 'jev'])
 
 function versionCheck(
   name: string,
@@ -60,6 +62,7 @@ export const runChecks = Effect.fn('runChecks')(function* () {
     checkUpgrade,
     versionCheck('agent-browser', yield* resolveBin('agent-browser')),
     versionCheck('deepsec', yield* resolveBin('deepsec')),
+    checkJevRoute.pipe(Effect.provide(FetchHttpClient.layer)),
   ]
   const checks = yield* Effect.all(probes, { concurrency: probes.length })
   const ok = checks.filter((c) => !TOLERATED.has(c.name)).every((c) => c.ok)

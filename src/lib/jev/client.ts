@@ -23,6 +23,7 @@ import { withRecorder } from './learn/recorder.ts'
 import { isReleasedModel, JEV_LATEST_RELEASED } from './model.ts'
 import type { Instructions, OptionSpec } from './payload/answers.ts'
 import { postOnce, type Result, withRetry } from './post.ts'
+import { type JevRoute, resolveRoute } from './route.ts'
 import { flagDrift, logCalibration, makeAsk, makeLru, replayStore } from './store.ts'
 
 // Every call goes to the highest released Jev model (./model.ts). For tests only,
@@ -30,7 +31,8 @@ import { flagDrift, logCalibration, makeAsk, makeLru, replayStore } from './stor
 // is ignored, so a call never goes to a moving target.
 export const JEV_MODEL_DEFAULT = JEV_LATEST_RELEASED
 // Every call runs the docs-guard check (./docs-guard.ts) first, inside postOnce.
-const ENDPOINT = 'https://api.typesafe.ai/v1/systemone'
+// The endpoint is the active route's base (./route.ts) plus the System One path.
+export const systemOne = (r: JevRoute) => `${r.base}/v1/systemone`
 const CACHE_CAPACITY = 1_024 // LRU entries; each holds only answers, keyed by a 64-bit hash
 export const JEV_CONCURRENCY = 8 // under the per-org request rate
 
@@ -92,20 +94,22 @@ export const resolveKey = Effect.gen(function* () {
 })
 
 const make = Effect.gen(function* () {
-  const key = yield* resolveKey
+  const route = yield* resolveRoute(resolveKey)
+  const key = Option.map(route, (r) => r.key)
   const http = yield* HttpClient.HttpClient
   const fs = yield* FileSystem.FileSystem
   const model = (yield* setting('WEBULAR_JEV_MODEL')).pipe(
     Option.filter(isReleasedModel),
     Option.getOrElse(() => JEV_LATEST_RELEASED),
   )
+  const endpoint = Option.match(route, { onNone: () => '', onSome: systemOne })
   const record = Option.contains(yield* setting('WEBULAR_JEV_RECORD'), '1')
   const replay = Option.map(yield* setting('WEBULAR_JEV_REPLAY'), (d) => replayStore(fs, d, record))
   const ask = makeAsk({
     model,
     replay,
     live: withRetry(
-      postOnce(ENDPOINT, http, key, { snapshot: committedSnapshot, store: yield* docsStore }),
+      postOnce(endpoint, http, key, { snapshot: committedSnapshot, store: yield* docsStore }),
     ),
     lru: yield* Effect.sync(() => makeLru(CACHE_CAPACITY)),
     log: logCalibration(fs, yield* setting('WEBULAR_JEV_LOG')),

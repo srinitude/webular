@@ -9,13 +9,12 @@ import { runProc } from '../../src/core/proc.ts'
 import { ROOT } from '../_support/root.ts'
 import { eff } from '../_support/run.ts'
 
-// The Jev key names: TypeSafe's env var and Keychain item, and OpenRouter's,
-// which serves Jev as a decision model.
+// The Jev key names: TypeSafe's env var and Keychain item, and the Pydantic AI
+// Gateway key, which routes to Jev when no direct key is set.
 const JEV_KEYS = new Set([
   'TYPESAFE_API_KEY',
   'typesafe-ai-api-key',
-  'OPENROUTER_API_KEY',
-  'openrouter-api-key',
+  'PYDANTIC_AI_GATEWAY_API_KEY',
 ])
 
 const ENV = /\b(?:process|Bun)\.env(?:\.([A-Za-z_]\w*)|\[\s*['"`]([^'"`]+)['"`]\s*\])/g
