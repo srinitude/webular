@@ -5,7 +5,8 @@
 # code. Tests are authored BEFORE code (R1).
 #
 # Graph shape (zero cycles — it is a tree rooted at `setup`):
-#   setup -> lint -> typecheck -> build -> test -> validate -> ci
+#   setup -> lint -> docs:links -> docs:tasks:check -> prune:check -> typecheck
+#     -> build -> test -> validate -> ci
 #   setup -> format                   (mutating dev task, OFF the check-only spine)
 #   setup -> run:<command>            (one logical predecessor each)
 # The CI/CD spine (setup..ci) is the SINGLE default dependency path and is
@@ -58,9 +59,68 @@ description = "Docs: every tracked Markdown file links each repo path it names, 
 depends = ["lint"]
 run = 'bun "{{config_root}}/plugins/webular/scripts/check-links.ts" --repo'
 
+[tasks."docs:tasks:check"]
+description = "Docs: docs/tasks.md matches `mise tasks --json` (check-only; `mise run docs:tasks` rewrites it)"
+depends = ["docs:links"]
+run = 'bun "{{config_root}}/scripts/tasks-doc.ts" --check'
+
+[tasks."docs:tasks"]
+description = "Docs: rewrite docs/tasks.md from `mise tasks --json` (writes files; off the CI spine)"
+depends = ["setup"]
+run = 'bun "{{config_root}}/scripts/tasks-doc.ts"'
+
+[tasks."prune:check"]
+description = "Prune: knip finds unused files, exports, types, and dependencies from the entry points in knip.json (check-only; fails on any finding)"
+depends = ["docs:tasks:check"]
+run = "bunx knip --no-progress"
+
+[tasks."prune:fix"]
+description = "Prune: apply knip's safe fixes (unused exports, types, dependencies; never files), keep them only if typecheck and the quality tests pass, else undo them. Needs a clean tree; --dry lists what it would remove (off the CI spine)"
+depends = ["setup"]
+usage = 'flag "--dry" help="List what would be removed; change nothing"'
+run = """
+set -e
+if [ "${usage_dry:-false}" = "true" ]; then
+  bunx knip --no-progress --no-exit-code --include exports,types,dependencies,devDependencies --reporter compact
+  exit 0
+fi
+[ -z "$(git status --porcelain)" ] || { echo 'prune:fix: commit or set aside your changes first' >&2; exit 1; }
+bunx knip --no-progress --no-exit-code --fix --fix-type exports,types,dependencies
+bun install 1>&2
+bunx biome check --write . >/dev/null || true
+if bunx tsc --noEmit && bunx tsc --noEmit -p plugins/webular && bun test --timeout 60000 ./tests/quality; then
+  git status --short
+else
+  echo 'prune:fix: checks failed after the fixes; undoing them' >&2
+  git diff --binary | git apply -R
+  exit 1
+fi
+"""
+
+[tasks."sync:check"]
+description = "Drift: every generated or mirrored file matches its source (dispatch table, bench docs, practices and rule files, skills and plugin tools, docs/tasks.md). A focused subset of `mise run test`"
+depends = ["build", "plugin:bundle"]
+run = [
+  'bun "{{config_root}}/scripts/tasks-doc.ts" --check',
+  "bun test --timeout 60000 tests/cli/dispatch.test.ts tests/bench/bench-docs.test.ts tests/quality/practices-config.test.ts tests/quality/rule-files.test.ts tests/contract/skills.test.ts tests/contract/plugin-tools.test.ts",
+]
+
+[tasks."docs:chain:check"]
+description = "Docs: the readability-chain ledger rows, AGENTS.md rules, Markdown links, and the plugin's timeless wording all hold. A focused subset of `mise run test`"
+depends = ["setup"]
+run = [
+  "bun test --timeout 60000 tests/quality/agents-md.test.ts tests/quality/markdown-links.test.ts",
+  'bun "{{config_root}}/plugins/webular/scripts/check-timeless.ts"',
+]
+
+[tasks."os:check"]
+description = "Every OS, locally: shell completions parse, the e2e parity list, and the CLI gateway. Linux, macOS, and Windows each run the full suite only in CI (.github/workflows/ci.yml)"
+depends = ["setup"]
+run = "bun test --timeout 60000 tests/release/completions.test.ts tests/quality/e2e-parity.test.ts tests/cli/gateway.test.ts"
+
 [tasks.typecheck]
 description = "Compilation: strict TypeScript typecheck of the CLI and of plugins/webular (its own tsconfig, outside the root include)"
-depends = ["docs:links"]
+depends = ["prune:check"]
 run = ["bunx tsc --noEmit", "bunx tsc --noEmit -p plugins/webular"]
 
 [tasks.build]
@@ -75,6 +135,15 @@ run = [
 ]
 sources = ["src/**/*.ts", "bin/**/*.ts", "scripts/**/*.ts", "mise.toml", "package.json", "tsconfig.json"]
 outputs = ["dist/commands/search.js", "dist/bin/webular", "dist/webular.js"]
+
+[tasks.clean]
+description = "Delete build output (dist/) on every OS; never touches bench results, recordings, or caches"
+run = 'bun "{{config_root}}/scripts/clean.ts"'
+
+[tasks."release:dry"]
+description = "Release dry run: build, then list what `bun pm pack` would publish without writing a tarball (off the CI spine)"
+depends = ["build"]
+run = "bun pm pack --dry-run"
 
 [tasks."compile:all"]
 description = "Cross-compile the webular executable for every Bun target into dist/bin (release path, off the check-only spine)"
@@ -355,6 +424,11 @@ run = "echo webular: default complete"
 description = "Run the agent scenarios through headless Claude Code on the subscription models, per surface, into bench/results (off the CI spine; pass --smoke for one run per model)"
 depends = ["build"]
 run = 'bun "{{config_root}}/tests/models/run.ts"'
+
+[tasks."bench:matrix"]
+description = "Agent benchmark matrix: `test:models --agent` runs the Jev-off, Jev-on, and rival arms on the three subscription models into bench/results (paid and live; off the CI spine)"
+depends = ["build"]
+run = 'bun "{{config_root}}/tests/models/run.ts" --agent'
 
 [tasks.bench]
 description = "Benchmark cold start (wall + CPU) of the CLI and its network-free commands with hyperfine, then the summarizer scaling run at 10, 1,000 and 100,000 sentences (off the CI spine)"

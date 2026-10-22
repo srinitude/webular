@@ -40,7 +40,6 @@ export {
   MAX_DELAY_MS,
   MIN_DELAY_MS,
   nextDelay,
-  textOf,
 } from './crawl-types.ts'
 
 const robotsFor = (r: Run, origin: string) => {

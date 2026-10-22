@@ -3,7 +3,18 @@
 import { describe, expect, test } from 'bun:test'
 import { hasCycle, loadGraph, parentsOf } from '../_support/graph.ts'
 
-const SPINE = ['setup', 'lint', 'typecheck', 'build', 'test', 'validate', 'ci']
+const SPINE = [
+  'setup',
+  'lint',
+  'docs:links',
+  'docs:tasks:check',
+  'prune:check',
+  'typecheck',
+  'build',
+  'test',
+  'validate',
+  'ci',
+]
 const COMMANDS = [
   'search',
   'scrape',

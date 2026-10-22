@@ -8,10 +8,6 @@ import { FREE_SOURCES, type FreeSource, SOURCE_TRUST } from './catalog.ts'
 import { type Hit, TIMEOUT_MS } from './polite.ts'
 import { rankHits } from './rank.ts'
 
-// parse and scrape's document route: local anydoc conversion, first in parse's
-// fallback order (then Tesseract for a 'needsOcr' failure).
-export { documentToMarkdown } from './documents.ts'
-
 export type { FreeSource }
 
 export const FREE_SOURCE_NAMES = Object.keys(FREE_SOURCES) as [FreeSource, ...FreeSource[]]

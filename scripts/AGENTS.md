@@ -8,6 +8,7 @@ The build and maintenance scripts that `mise` tasks run. The root [AGENTS.md](..
 - [clean.ts](clean.ts) deletes build output on every OS. `mise run build` runs it before each bundle.
 - [jev-docs.ts](jev-docs.ts) refreshes and proves the Jev docs snapshot for `mise run jev:docs`.
 - [repo-settings.ts](repo-settings.ts) applies (`mise run repo:settings`) or checks (`mise run repo:settings:check`, read-only) the GitHub description, homepage, and topics against [.github/repo-settings.json](../.github/repo-settings.json).
+- [tasks-doc.ts](tasks-doc.ts) writes [docs/tasks.md](../docs/tasks.md) from `mise tasks --json` for `mise run docs:tasks`. `mise run docs:tasks:check` fails on drift.
 - [install.sh](install.sh) and [install.ps1](install.ps1) install a release binary.
 
 ## Rules

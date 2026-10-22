@@ -451,3 +451,7 @@
 {"path": "llms.txt", "sha": "0143c6a91047d08ab111d3c84b9b2470a6c8a5fb7e3cb51a5f0bbbfbd83e42c7"}
 {"path": "README.md", "sha": "79c2036bcb32af2a16a942e521980c89da0f114dfc44d8fa4ff748074733a8ad"}
 {"path": "docs/jev.md", "sha": "d56bcb3ec2d45199b0b9904f85e1d3e5d25cbb2ad7b7e6bbe75486ad89a1d3f4"}
+{"path": "AGENTS.md", "sha": "253fb63b888e720cfc7f2b362d04bd6e4ec9fd3a1b2b844a05aedf63407ce05f"}
+{"path": "scripts/AGENTS.md", "sha": "3f8b571c4cd73df44d6942b8692445e04b2a0510615150b81897dafcfea2f49d"}
+{"path": ".github/workflows/AGENTS.md", "sha": "caf6f2e473fd1222a9092f8580236c874d2efac9dd1536f3b7121613cdbf2ef8"}
+{"path": "docs/tasks.md", "sha": "2eecedcf0e3a8022d2146250616bdc7e98a7c6af7ac3399e264c4aa6c6237280"}

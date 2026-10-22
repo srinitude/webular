@@ -4,24 +4,28 @@ Webular is a web research CLI on Bun. Its jobs run as [Mastra workflows](src/wor
 Every command runs through the `mise` task graph in [mise.toml](mise.toml).
 This file is for coding agents. People start at [README.md](README.md).
 
-## Commands
+## Commands and mise
 
-Run every check through `mise`. Never call `bunx biome` or `bun test` by hand when a task exists.
-In a fresh clone, run `mise trust ./mise.toml` once.
+Every repeatable command is a `mise` task in [mise.toml](mise.toml). Never call `bunx biome` or `bun test` by hand when a task exists.
+Run `mise trust ./mise.toml` once. [docs/tasks.md](docs/tasks.md) lists every task.
 
 ```bash
 mise run setup                # install pinned packages (frozen lockfile)
-mise run lint                 # Biome lint and format check (check-only)
-mise run format               # Biome format and safe fixes (writes files)
+mise run lint                 # Biome lint and format check
 mise run typecheck            # strict tsc for the CLI and the plugin
-mise run build                # bundles in dist/commands, the executable in dist/bin
 mise run test:file tests/core # only the named test files or folders
 mise run test                 # the full suite (runs build first)
-mise run ci                   # setup, lint, typecheck, build, test, validate
-mise run plugin:ci            # the plugin chain
-mise run e2e                  # every command, flag, and tool on a local fixture server
+mise run ci                   # lint, docs, prune, typecheck, build, test
+mise run prune:check          # knip: unused files, exports, packages
+mise run prune:fix --dry      # what prune:fix would remove
+mise run sync:check           # drift checks
 mise run                      # default: ci, plugin:ci, then e2e
 ```
+
+- A task needs a `description`, one `depends` parent, and `sources` and `outputs` when caching helps. Then run `mise run docs:tasks`.
+- A check that `test` lacks joins the linear `ci` chain ([graph.test.ts](tests/ci/graph.test.ts)). Paid, live, or writing tasks stay off it.
+- `MISE_TASK_SKIP=setup` skips the install. Set `TMPDIR` to a worktree folder for tests.
+- Run the `ponytail:ponytail-audit` skill by hand for a report of more cuts.
 
 Run a command from source with `bun bin/webular.ts <command> --json`.
 Before handing work back, run `mise run test:file` on the tests you touched, then `mise run lint`.
@@ -46,7 +50,6 @@ A rule that names a test is enforced by it; `mise run test` fails when one break
 - Build eval-first. A change in behavior comes with an eval or test that fails before it and passes after.
 - Use American English and names that say what a thing is. No coded ids such as `j17` or `R05`.
 - Research an outside package, API, or site in its official docs and repo before its first use.
-- [mise.toml](mise.toml) keeps a `default` task, so a bare `mise run` runs the whole chain.
 - No diagrams in docs. The XState machines in [src/machines](src/machines/) are the flow docs, and each machine has tests ([no-diagrams.test.ts](tests/quality/no-diagrams.test.ts)).
 - No MCP App views or `.tsx` files ([no-mcp-apps.test.ts](tests/quality/no-mcp-apps.test.ts)).
 - The MCP tools/list reply stays at or under 4850 tokens.
@@ -56,7 +59,6 @@ A rule that names a test is enforced by it; `mise run test` fails when one break
 
 Always:
 
-- Add a `mise` task for any repeatable command, with one predecessor in the graph.
 - Keep `mise run ci` check-only. Tasks that write files stay off it.
 
 Ask first:
