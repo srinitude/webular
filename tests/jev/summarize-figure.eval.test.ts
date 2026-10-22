@@ -60,7 +60,7 @@ test('the text arm passes every baseline-wins case and fails every baseline-lose
 
 test('the image arm passes every case', () =>
   Effect.runPromise(
-    Effect.forEach(all, imageArm).pipe(
+    Effect.forEach(all, imageArm, { concurrency: 4 }).pipe(
       Effect.map((rows) => ({ before: rate(all.map(textArm)), after: rate(rows) })),
       Effect.tap((r) =>
         Console.log(JSON.stringify({ eval: 'summarize.figure', cases: all.length, ...r })),
