@@ -3,7 +3,7 @@
 // fixture injects random per-request latency to prove completion order is out
 // of the picture; URL-variant hrefs prove normalize-before-dedup.
 import { describe, expect, test } from 'bun:test'
-import { Effect } from 'effect'
+import { ConfigProvider, Effect, Random } from 'effect'
 import { bfsCrawl } from '../../src/lib/crawl.ts'
 import { openLocalIndex, searchLocal } from '../../src/lib/local-index.ts'
 import { type Routes, startFixture, useFixture } from '../_support/fixture.ts'
@@ -20,7 +20,7 @@ function html(title: string, links: string[]): Response {
 const jittered =
   (title: string, links: string[] = []) =>
   (): Effect.Effect<Response> =>
-    Effect.sleep(Math.random() * 12).pipe(Effect.as(html(title, links)))
+    Effect.flatMap(Random.nextBetween(0, 12), Effect.sleep).pipe(Effect.as(html(title, links)))
 
 function siteRoutes(origin: string): Routes {
   const upper = origin.toUpperCase().replace('HTTP://', 'HTTP://')
@@ -157,24 +157,10 @@ describe('bfsCrawl — deterministic order, membership and errors', () => {
   )
 })
 
-// Points the local index at `dir` for the scope, then restores the saved env.
-const indexEnv = (dir: string) =>
-  Effect.acquireRelease(
-    Effect.sync(() => {
-      const saved = {
-        off: process.env['WEBULAR_NO_CACHE'],
-        dir: process.env['WEBULAR_CACHE_DIR'],
-      }
-      process.env['WEBULAR_NO_CACHE'] = '0'
-      process.env['WEBULAR_CACHE_DIR'] = dir
-      return saved
-    }),
-    (saved) =>
-      Effect.sync(() => {
-        process.env['WEBULAR_NO_CACHE'] = saved.off ?? '1'
-        if (saved.dir === undefined) delete process.env['WEBULAR_CACHE_DIR']
-        else process.env['WEBULAR_CACHE_DIR'] = saved.dir
-      }),
+// Points the local index at `dir` through the crawl's own config; process.env stays untouched.
+const indexIn = (dir: string) =>
+  ConfigProvider.layer(
+    ConfigProvider.fromEnvRecord({ WEBULAR_NO_CACHE: '0', WEBULAR_CACHE_DIR: dir }),
   )
 
 test(
@@ -182,8 +168,9 @@ test(
   eff(
     Effect.gen(function* () {
       const dir = yield* tmpDir('crawl-index-')
-      yield* indexEnv(dir)
-      const { pages } = yield* bfsCrawl(`${fx.origin}/`, { ...OPTS, depth: 1 })
+      const { pages } = yield* bfsCrawl(`${fx.origin}/`, { ...OPTS, depth: 1 }).pipe(
+        Effect.provide(indexIn(dir)),
+      )
       const index = yield* openLocalIndex(`${dir}/local-index.sqlite`)
       const hits = yield* searchLocal(index, 'Gamma', 5)
       expect(pages.map((p) => p.url)).toContain(`${fx.origin}/c`)
