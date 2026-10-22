@@ -36,7 +36,12 @@ export const JEV_CONCURRENCY = 8 // under the per-org request rate
 
 type Text = string | Instructions
 export type JevQuestion =
-  | { readonly type: 'noul'; readonly instructions: Text }
+  | {
+      readonly type: 'noul'
+      readonly instructions: Text
+      // What a yes and a no each cover and where each stops (docs: Noul criteria).
+      readonly criteria?: { readonly true: OptionSpec; readonly false: OptionSpec }
+    }
   | { readonly type: 'box'; readonly instructions: Text } // needs the Jev 1.14 release and assets
   | {
       readonly type: 'choice'

@@ -46,6 +46,31 @@ const PURPOSE = purpose(
   'Word-count summaries keep menu, sign-up, and byline lines that tell the reader nothing.',
   'A sentence counts only when it states a fact itself; naming the topic is not enough.',
 )
+// Where a yes stops and a no starts, for one sentence and for the whole set.
+const SENTENCE_RULES = [
+  'Judge the sentence by its own words, not by the page around it.',
+  'A fact can be a number, a name, a date, a cause, a step, or a plain claim.',
+]
+const SENTENCE_SIDES = {
+  true: {
+    what: 'The sentence says a fact about the topic. A reader can use it.',
+    not_for: 'A sentence that just names the topic, or points to text on some other page.',
+  },
+  false: {
+    what: 'The sentence tells the reader nothing they could use about the topic.',
+    not_for: 'A short, plain sentence that still says a fact about the topic.',
+  },
+}
+const ANY_SIDES = {
+  true: {
+    what: 'At least one sentence says a fact about the topic.',
+    not_for: 'Sentences that just name the topic and say nothing about it.',
+  },
+  false: {
+    what: 'Not one of the sentences says a fact about the topic.',
+    not_for: 'A set where even one sentence says a fact about the topic.',
+  },
+}
 const payload = (input: SourceText) => {
   const all = researchSentences(input.text)
   const keep = best(input, MAX_SENTENCES)
@@ -64,12 +89,22 @@ const payload = (input: SourceText) => {
         keep.map((i) => [
           `c${i}`,
           noul(
-            `Does \`facts.candidates.c${i}\` state a fact that helps answer \`facts.topic.text\`?`,
+            {
+              task: `Does \`facts.candidates.c${i}\` state a fact that helps answer \`facts.topic.text\`?`,
+              answer_wanted: 'Give the chance, 0 to 1, that the answer is yes.',
+              rules: SENTENCE_RULES,
+            },
+            SENTENCE_SIDES,
           ),
         ]),
       ),
       any: noul(
-        'Does at least one entry of `facts.candidates` state a fact that helps answer `facts.topic.text`?',
+        {
+          task: 'Does at least one entry of `facts.candidates` state a fact that helps answer `facts.topic.text`?',
+          answer_wanted: 'Give the chance, 0 to 1, that the answer is yes.',
+          rules: SENTENCE_RULES,
+        },
+        ANY_SIDES,
       ),
     },
   }

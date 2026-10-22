@@ -36,8 +36,15 @@ const option = (v: string | null | OptionSpec, key: string): OptionSpec =>
 // The plain text of an instruction, for checks that read every instruction as one string.
 export const instructionText = (i: string | Instructions) =>
   typeof i === 'string' ? i : [i.task, i.answer_wanted, ...(i.rules ?? [])].join(' ')
-export const noul = (instructions: string | Instructions) =>
-  ({ type: 'noul', instructions: structured('noul', instructions) }) as const
+export const noul = (
+  instructions: string | Instructions,
+  criteria?: { readonly true: OptionSpec; readonly false: OptionSpec },
+) =>
+  ({
+    type: 'noul',
+    instructions: structured('noul', instructions),
+    ...(criteria === undefined ? {} : { criteria }),
+  }) as const
 export const choice = (
   instructions: string | Instructions,
   criteria: Record<string, string | null | OptionSpec>,
