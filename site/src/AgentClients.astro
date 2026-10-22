@@ -1,18 +1,12 @@
 ---
 // The home page's agent client tabs, each with a copyable setup block. The
-// commands match the /install#agents list.
+// caller passes each tab's label and text.
 import Tabs from './Tabs.astro'
 
-const askAgent =
-  "Install webular with `curl --proto '=https' --tlsv1.2 -fsSL https://webular.dev/install.sh | sh`. Ask me before you run it. Then add it as an MCP server that runs `webular mcp`. Read https://webular.dev/llms.txt first."
-const clients = Object.entries({
-  'Claude Code': 'claude mcp add webular -- webular mcp',
-  'Ask your agent': askAgent,
-  'Codex CLI': 'codex mcp add webular -- webular mcp',
-  Cursor: '{ "mcpServers": { "webular": { "command": "webular", "args": ["mcp"] } } }',
-  'VS Code':
-    '{ "servers": { "webular": { "type": "stdio", "command": "webular", "args": ["mcp"] } } }',
-})
+interface Props {
+  clients: [string, string][]
+}
+const { clients } = Astro.props
 ---
 
 <div data-tabs>

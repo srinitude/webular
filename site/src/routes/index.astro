@@ -36,6 +36,17 @@ const scrape = `$ webular scrape https://example.com
 This domain is for use in documentation examples without needing permission. This is not a service; avoid relying on it for testing and monitoring purposes.`
 const summarize = `$ webular summarize --text "Bun is a fast runtime. It runs TypeScript." --sentences 1 --json
 {"figures":[],"picks":[{"end":22,"index":0,"source_url":null,"start":0,"text":"Bun is a fast runtime."}],"sentences":["Bun is a fast runtime."],"source_url":null,"summary":"Bun is a fast runtime."}`
+const askAgent =
+  "Install webular with `curl --proto '=https' --tlsv1.2 -fsSL https://webular.dev/install.sh | sh`. Ask me before you run it. Then add it as an MCP server that runs `webular mcp`. Read https://webular.dev/llms.txt first."
+// The agent client tabs; the commands match the /install#agents list.
+const clients = Object.entries({
+  'Claude Code': 'claude mcp add webular -- webular mcp',
+  'Ask your agent': askAgent,
+  'Codex CLI': 'codex mcp add webular -- webular mcp',
+  Cursor: '{ "mcpServers": { "webular": { "command": "webular", "args": ["mcp"] } } }',
+  'VS Code':
+    '{ "servers": { "webular": { "type": "stdio", "command": "webular", "args": ["mcp"] } } }',
+})
 const samples = Object.entries({ Search: search, Scrape: scrape, Summarize: summarize })
 const keychain = `security add-generic-password -a "$USER" -s typesafe-ai-api-key -w`
 const readKey = 'read -rs TYPESAFE_API_KEY && export TYPESAFE_API_KEY'
@@ -99,7 +110,7 @@ const docCards = [
   <section class="section" aria-labelledby="agent">
     <h2 id="agent">Give your agent the web</h2>
     <p><code>webular mcp</code> serves 24 tools over stdio. Install webular first, so <code>webular</code> is on your PATH.</p>
-    <AgentClients />
+    <AgentClients clients={clients} />
     <p>The plugin bundles an MCP server and four skills: research, interview, plain language, and Markdown. The plugin's own server runs with Bun and has the 19 command tools. <code>webular mcp</code> has those 19 plus five more, for 24.</p>
     <p><a href="/install#agents">Set up your client →</a> <a href="/tools">See all 24 tools →</a></p>
   </section>
