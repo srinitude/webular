@@ -5,8 +5,6 @@
     "": {
       "name": "webular",
       "dependencies": {
-        "@ai-sdk/anthropic": "0.0.56",
-        "@ai-sdk/openai": "0.0.40",
         "@effect/platform-bun": "4.0.5",
         "@firecrawl/anydoc": "^0.2.4",
         "@mastra/core": "^1.78.0",
@@ -51,8 +49,6 @@
     "@a2a-js/sdk-v0_3": ["@a2a-js/sdk@0.3.14", "", { "dependencies": { "uuid": "^11.1.0" }, "peerDependencies": { "@bufbuild/protobuf": "^2.10.2", "@grpc/grpc-js": "^1.11.0", "express": "^4.21.2 || ^5.1.0" }, "optionalPeers": ["@bufbuild/protobuf", "@grpc/grpc-js", "express"] }, "sha512-F6Ew1AtPzCLhTn8h9yiqTe7DiDf6XVrSnq9V1YqSl9eWqPm6anMveTiKdCSb/76cW0YiJc24rNaUrVezFFHbqQ=="],
 
     "@a2a-js/sdk-v1": ["@a2a-js/sdk@1.0.1", "", { "dependencies": { "jose": "^6.2.3", "uuid": "^11.1.0" }, "peerDependencies": { "@bufbuild/protobuf": "^2.10.2", "@grpc/grpc-js": "^1.11.0", "express": "^4.21.2 || ^5.1.0" }, "optionalPeers": ["@bufbuild/protobuf", "@grpc/grpc-js", "express"] }, "sha512-CJQdh3Wzwo8qIx5UUkSJ7+7BEI16PB+MXMHHNSmx8JQsQed2HlQgvx1ENOiKUfYA3PlcEvxIwv14dBblhDuPmw=="],
-
-    "@ai-sdk/anthropic": ["@ai-sdk/anthropic@0.0.56", "", { "dependencies": { "@ai-sdk/provider": "0.0.26", "@ai-sdk/provider-utils": "1.0.22" }, "peerDependencies": { "zod": "^3.0.0" } }, "sha512-FC/XbeFANFp8rHH+zEZF34cvRu9T42rQxw9QnUzJ1LXTi1cWjxYOx2Zo4vfg0iofxxqgOe4fT94IdT2ERQ89bA=="],
 
     "@ai-sdk/openai": ["@ai-sdk/openai@0.0.40", "", { "dependencies": { "@ai-sdk/provider": "0.0.14", "@ai-sdk/provider-utils": "1.0.5" }, "peerDependencies": { "zod": "^3.0.0" } }, "sha512-9Iq1UaBHA5ZzNv6j3govuKGXrbrjuWvZIgWNJv4xzXlDMHu9P9hnqlBr/Aiay54WwCuTVNhTzAUTfFgnTs2kbQ=="],
 

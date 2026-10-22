@@ -19,8 +19,3 @@ updates:
     groups:
       effect:
         patterns: ['effect', '@effect/*']
-    ignore:
-      # @statelyai/agent 1.x needs ai 3.x, which calls models of spec `v1` only.
-      # @ai-sdk/anthropic `4.x` builds spec `v4` models, so the Anthropic planner fails at run time.
-      - dependency-name: '@ai-sdk/anthropic'
-        update-types: ['version-update:semver-major']

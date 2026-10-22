@@ -16,6 +16,5 @@ export const awaitingApproval: readonly Provider[] = [
   waiting('vertex-grounding', 'needs a Google Cloud project'),
   waiting('bing-grounding', 'needs an Azure AI Foundry project'),
   waiting('zyte', 'a card is required'),
-  waiting('brave', 'the free plan is closed to new users'),
   waiting('spider', 'pay as you go from $1'),
 ]

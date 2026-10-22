@@ -14,7 +14,7 @@ Rules for the XState flow machines, under [src/AGENTS.md](../AGENTS.md).
 - Code that runs a flow reads its decisions from the machine. [`src/core/http.ts`](../core/http.ts) performs only what [`fetch.ts`](fetch.ts) asks.
 - [`tests/machines/flow-coverage.test.ts`](../../tests/machines/flow-coverage.test.ts) needs a machine for every command and MCP tool, and a test for every machine.
 - The agent takes an event only when the machine allows it from the current state. Jev's pick counts only at the bar. Otherwise the observed event stays.
-- Provider keys for the agent come from the environment. Only Jev's key may also come from the macOS Keychain. Provider packages load lazily.
+- Jev is the agent's only model provider. Its key comes from `TYPESAFE_API_KEY` or the macOS Keychain, through the shared Jev client. The agent package loads lazily.
 
 ### XState and the Stately agent
 
@@ -23,12 +23,6 @@ Rules for the XState flow machines, under [src/AGENTS.md](../AGENTS.md).
 - Start an actor with `createActor(logic, { input }).start()`, and end it with `actor.stop()`. Source: [statelyai/xstate@xstate@5.33.3](https://github.com/statelyai/xstate/blob/xstate@5.33.3/packages/core/src/createActor.ts).
 - `agent.decide` resolves to a plan or `undefined`, so handle `undefined`. Without `execute`, it only proposes the event, and the machine still applies it. Source: [statelyai/agent@v1.1.6](https://github.com/statelyai/agent/blob/v1.1.6/src/decision.ts).
 - Each agent keeps its own memory, so make a fresh agent per decision. Source: [statelyai/agent@v1.1.6](https://github.com/statelyai/agent/blob/v1.1.6/src/agent.ts).
-
-### AI SDK
-
-- Cite only model ids from `AnthropicMessagesModelId`; other strings type-check but are unknown. `anthropic(modelId)` reads `ANTHROPIC_API_KEY` from the environment.
-- The `ai` package calls only `specificationVersion = 'v1'` models, so keep the Anthropic provider on its 0.0.x line.
-- `generateText` takes `maxRetries` and `abortSignal`. Pass a real `LanguageModelV1`, and never hide a type mismatch with a cast.
 
 ## Checks
 

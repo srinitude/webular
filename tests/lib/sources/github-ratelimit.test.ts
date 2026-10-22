@@ -1,7 +1,7 @@
 // GitHub search rate limits against a real local Bun.serve fixture: once the
 // headers say the pool is empty (x-ratelimit-remaining 0, or a 403/429 with
 // retry-after), later searches skip GitHub until the reset with a 429 reason,
-// and GITHUB_TOKEN / GH_TOKEN go out as an Authorization header. No mocks.
+// and no Authorization header goes out, even with GITHUB_TOKEN or GH_TOKEN set. No mocks.
 import { describe, expect, test } from 'bun:test'
 import { Clock, Effect } from 'effect'
 import { freeSourceFallback } from '../../../src/lib/sources/registry.ts'
@@ -86,11 +86,8 @@ const tokens = Effect.gen(function* () {
   for (const key of ['GITHUB_TOKEN', 'GH_TOKEN']) {
     const { seen, routes } = counted(200, {})
     yield* against(routes, githubSearch('effect', 1), { [key]: 'fixture-token' })
-    expect(seen.auth).toBe('Bearer fixture-token')
+    expect(seen.auth).toBeNull()
   }
-  const { seen, routes } = counted(200, {})
-  yield* against(routes, githubSearch('effect', 1))
-  expect(seen.auth).toBeNull()
 })
 
 // The search fallback while GitHub is out of quota, in both of GitHub's forms
@@ -123,6 +120,6 @@ describe('github search rate limit', () => {
   test('403 with retry-after skips GitHub for that long', () => run(retryAfter))
   test('403 with an HTTP-date retry-after skips GitHub until then', () => run(retryAfterDate))
   test('remaining above 0 keeps asking GitHub', () => run(remainingLeft))
-  test('GITHUB_TOKEN or GH_TOKEN goes out as a bearer token', () => run(fresh(tokens)))
+  test('GitHub search stays keyless with GITHUB_TOKEN or GH_TOKEN set', () => run(fresh(tokens)))
   test('search fallback answers from other sources while GitHub is spent', () => run(fallbackSpent))
 })

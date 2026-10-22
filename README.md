@@ -8,8 +8,8 @@
 
 > A web research CLI for every platform. It can scrape, crawl, map, extract, search, summarize, and gather context. It uses **free and open-source** libraries. It runs them as **Mastra** workflows and tools, defines every command in a fixed **mise** task graph, and runs on **Bun**.
 
-`webular` puts the web features of seven paid web-data products in one CLI:
-Firecrawl, Exa, Perplexity, Tavily, Parallel, Nimble, and Brave.
+`webular` puts the web features of six paid web-data products in one CLI:
+Firecrawl, Exa, Perplexity, Tavily, Parallel, and Nimble.
 It needs **no paid API**. Every feature uses open-source parts.
 
 ## Why webular

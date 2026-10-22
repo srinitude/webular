@@ -1,6 +1,6 @@
 // Keyless REST search backends: Crossref, OpenAlex, and the npm registry
 // (WEBULAR_MAILTO joins their polite pool).
-import { Config, Effect, Option, Redacted, Schema } from 'effect'
+import { Config, Effect, Schema } from 'effect'
 import { fetchText } from '../core/http.ts'
 import { HttpStatusError } from '../core/http-body.ts'
 import { logErr } from '../core/output.ts'
@@ -73,12 +73,6 @@ const OPENALEX = 'https://api.openalex.org/works'
 // retry-after, else a minute, so a spent pool costs no request.
 export const OpenAlexLimit = rateLimit('OpenAlex')
 
-// Optional OPENALEX_API_KEY raises the limit; it is sent as api_key, never logged.
-const keyParam = Effect.gen(function* () {
-  const key = yield* Config.option(Config.Redacted('OPENALEX_API_KEY'))
-  return Option.isSome(key) ? { api_key: Redacted.value(key.value) } : {}
-}).pipe(Effect.orElseSucceed(() => ({})))
-
 // A spent pool (429) is no hits, not a failure; WEBULAR_TRACE=1 says so on stderr.
 const spentPool = (err: unknown) => err instanceof HttpStatusError && err.status === 429
 const noHits = () =>
@@ -89,10 +83,8 @@ const noHits = () =>
   }).pipe(Effect.orElseSucceed(() => []))
 
 export const openalex = (query: string, limit: number) =>
-  Effect.flatMap(keyParam, (key) =>
-    unlessLimited(OpenAlexLimit, OPENALEX, (onResponse) =>
-      getJson(OpenAlex, OPENALEX, { search: query, 'per-page': String(limit), ...key }, onResponse),
-    ),
+  unlessLimited(OpenAlexLimit, OPENALEX, (onResponse) =>
+    getJson(OpenAlex, OPENALEX, { search: query, 'per-page': String(limit) }, onResponse),
   ).pipe(
     Effect.map(({ results }) =>
       results.map((w) => ({

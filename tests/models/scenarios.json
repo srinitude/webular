@@ -31,12 +31,6 @@
       "command": "npx",
       "args": ["-y", "@perplexity-ai/mcp-server@1.3.0"],
       "keys": [{ "env": "PERPLEXITY_API_KEY", "item": "perplexity-api-key" }]
-    },
-    {
-      "id": "brave",
-      "command": "npx",
-      "args": ["-y", "@brave/brave-search-mcp-server@2.1.4"],
-      "keys": [{ "env": "BRAVE_API_KEY", "item": "brave-api-key" }]
     }
   ],
   "routes": {

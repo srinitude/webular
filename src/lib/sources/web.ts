@@ -1,7 +1,7 @@
 // Keyless general and entity search: Marginalia (independent small-web index,
 // shared "public" key, about 15 queries a minute) and Wikidata entity search
 // (CC0 data). Wikipedia lives in sources-search.ts.
-import { Config, Effect, Option, Redacted, Schema } from 'effect'
+import { Effect, Schema } from 'effect'
 import { getJson, type Hit, rateLimit, unlessLimited } from './polite.ts'
 
 const Marginalia = Schema.fromJsonString(
@@ -30,21 +30,14 @@ const Wikidata = Schema.fromJsonString(
   }),
 )
 
-// MARGINALIA_API_KEY, else the shared "public" key; kept Redacted until sent.
-const marginaliaKey = Config.Redacted('MARGINALIA_API_KEY').pipe(
-  Config.map(Redacted.value),
-  Config.withDefault('public'),
-)
-
 // The data license (CC-BY-NC-SA) rides in each description as attribution.
 export const marginalia = (query: string, limit: number): Effect.Effect<Hit[], unknown> =>
-  Effect.flatMap(marginaliaKey, (key) =>
-    getJson(
-      Marginalia,
-      'https://api2.marginalia-search.com/search',
-      { query, count: String(limit) },
-      { headers: { 'API-Key': key } },
-    ),
+  getJson(
+    Marginalia,
+    'https://api2.marginalia-search.com/search',
+    { query, count: String(limit) },
+    // The shared "public" key Marginalia hands every keyless caller.
+    { headers: { 'API-Key': 'public' } },
   ).pipe(
     Effect.map(({ license, results }) =>
       results.map((r) => ({
@@ -93,35 +86,12 @@ const GITHUB_SEARCH = 'https://api.github.com/search/repositories'
 // rate-limit headers (unlessLimited in polite.ts).
 export const GitHubLimit = rateLimit('GitHub')
 
-// GITHUB_TOKEN, then GH_TOKEN, as a bearer header; kept Redacted until sent.
-const githubAuth = Config.option(
-  Config.Redacted('GITHUB_TOKEN').pipe(Config.orElse(() => Config.Redacted('GH_TOKEN'))),
-).pipe(
-  Effect.orElseSucceed(() => Option.none<Redacted.Redacted>()),
-  Effect.map(
-    Option.match({
-      onNone: (): Record<string, string> => ({}),
-      onSome: (t) => ({ authorization: `Bearer ${Redacted.value(t)}` }),
-    }),
-  ),
-)
-
 const githubGet = (query: string, limit: number) =>
   unlessLimited(GitHubLimit, GITHUB_SEARCH, (onResponse) =>
-    Effect.flatMap(githubAuth, (headers) =>
-      getJson(
-        GitHubRepos,
-        GITHUB_SEARCH,
-        { q: query, per_page: String(limit) },
-        {
-          headers,
-          onResponse,
-        },
-      ),
-    ),
+    getJson(GitHubRepos, GITHUB_SEARCH, { q: query, per_page: String(limit) }, { onResponse }),
   )
 
-// GitHub repository search, keyless (10 a minute per IP) unless a token is set.
+// GitHub repository search, keyless (10 a minute per IP).
 // Best-match order; stars go in the description so a ranker can weigh them.
 export const githubSearch = (query: string, limit: number): Effect.Effect<Hit[], unknown> =>
   githubGet(query, limit).pipe(

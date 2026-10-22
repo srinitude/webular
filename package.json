@@ -60,8 +60,6 @@
     "access": "public"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "0.0.56",
-    "@ai-sdk/openai": "0.0.40",
     "@effect/platform-bun": "4.0.5",
     "@firecrawl/anydoc": "^0.2.4",
     "@mastra/core": "^1.78.0",

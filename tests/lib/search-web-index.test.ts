@@ -1,13 +1,13 @@
 // The keyless web index joins general and software searches: Marginalia (with
-// its shared "public" key unless MARGINALIA_API_KEY is set, and its data
-// license kept as attribution) and GitHub repository search.
+// its shared "public" key, and its data license kept as attribution) and
+// GitHub repository search.
 import { describe, expect, test } from 'bun:test'
 import { Effect } from 'effect'
 import { pickSources } from '../../src/lib/search-intent.ts'
 import { marginalia } from '../../src/lib/sources/web.ts'
 import { against, body, json, run } from './sources/support.ts'
 
-const keyed = (extra: Record<string, string>) =>
+const keyed = () =>
   Effect.gen(function* () {
     const text = yield* body('marginalia-search.json')
     const seen = { key: '', query: '' }
@@ -16,7 +16,7 @@ const keyed = (extra: Record<string, string>) =>
       seen.query = url.searchParams.get('query') ?? ''
       return json(text)
     }
-    const hits = yield* against({ '/search': route }, marginalia('effect typescript', 2), extra)
+    const hits = yield* against({ '/search': route }, marginalia('effect typescript', 2))
     return { hits, seen }
   })
 
@@ -34,21 +34,10 @@ describe('keyless web index', () => {
     'Marginalia uses the public key and credits its license',
     () =>
       run(
-        Effect.map(keyed({}), ({ hits, seen }) => {
+        Effect.map(keyed(), ({ hits, seen }) => {
           expect(seen.key).toBe('public')
           expect(seen.query).toBe('effect typescript')
           expect(hits[0]?.description).toContain('CC-BY-NC-SA 4.0')
-        }),
-      ),
-    15_000,
-  )
-
-  test(
-    'Marginalia sends a configured key instead',
-    () =>
-      run(
-        Effect.map(keyed({ MARGINALIA_API_KEY: 'k-123' }), ({ seen }) => {
-          expect(seen.key).toBe('k-123')
         }),
       ),
     15_000,
