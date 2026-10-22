@@ -163,16 +163,21 @@ const scrapePicks = (p: Prepared) => {
   return main || titleIn ? { main, title: titleIn } : undefined
 }
 
+// The main-content pick and the title pick run at once, so the title adds no wait.
+export const scrapeDecide = ({ main, title }: NonNullable<ReturnType<typeof scrapePicks>>) =>
+  Effect.all(
+    [
+      main ? decisions.main(main) : Effect.succeed(undefined),
+      title ? decisions.pageTitle(title) : Effect.succeed(undefined),
+    ] as const,
+    { concurrency: 2 },
+  )
+
 const extractStep = decisionStep({
   id: 'extract',
   inputSchema: fetched,
   outputSchema: scrapeOutput,
-  // The main-content pick and the title pick run at once, so the title adds no wait.
-  decide: ({ main, title }: NonNullable<ReturnType<typeof scrapePicks>>) =>
-    Effect.all([
-      main ? decisions.main(main) : Effect.succeed(undefined),
-      title ? decisions.pageTitle(title) : Effect.succeed(undefined),
-    ] as const),
+  decide: scrapeDecide,
   prepare: prepareScrape,
   pick: scrapePicks,
   output: toScrapeResult,

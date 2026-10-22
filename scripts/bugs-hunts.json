@@ -12,6 +12,7 @@
   "effect": {
     "globs": [
       "tests/effect/**/*.test.ts",
+      "tests/**/*.effect.test.ts",
       "tests/core/{no-nested-run,proc,proc-child-cap,fault-injection}.test.ts",
       "tests/cli/run-dispose.test.ts"
     ],

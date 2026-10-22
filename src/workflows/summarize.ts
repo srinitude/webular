@@ -65,7 +65,7 @@ const resolveStep = createStep({
   id: 'resolve',
   inputSchema: summarizeInput,
   outputSchema: resolved,
-  execute: ({ inputData }) => {
+  execute: ({ inputData, abortSignal }) => {
     const { url, sentences } = inputData
     const page = url
       ? Effect.map(
@@ -77,7 +77,7 @@ const resolveStep = createStep({
           }),
         )
       : Effect.succeed<Resolved>({ text: inputData.text ?? '', sentences, source_url: null })
-    return stepRuntime.runPromise(page)
+    return stepRuntime.runPromise(page, { signal: abortSignal })
   },
 })
 

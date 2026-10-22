@@ -51,7 +51,8 @@ const actStep = createStep({
   id: 'act',
   inputSchema: actInput,
   outputSchema: browsed,
-  execute: ({ inputData }) => stepRuntime.runPromise(act(inputData)),
+  execute: ({ inputData, abortSignal }) =>
+    stepRuntime.runPromise(act(inputData), { signal: abortSignal }),
 })
 
 // With a goal, Jev picks the next element to click (a ref, or none).

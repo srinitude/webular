@@ -67,13 +67,14 @@ const feedStep = createStep({
   id: 'feed',
   inputSchema: feedInput,
   outputSchema: feedOutput,
-  execute: ({ inputData }) => {
+  execute: ({ inputData, abortSignal }) => {
     const { url, timeoutMs, limit, archive } = inputData
     return stepRuntime.runPromise(
       Effect.map(resolveFeed(url, { timeoutMs, archive }), ({ xml, feedUrl, archivedFrom }) => {
         const { title, items } = parseFeed(xml, limit)
         return { url, feedUrl, archivedFrom, title, count: items.length, items }
       }),
+      { signal: abortSignal },
     )
   },
 })

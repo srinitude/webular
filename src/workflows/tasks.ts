@@ -59,7 +59,7 @@ const listStep = createStep({
   id: 'list',
   inputSchema: tasksInput,
   outputSchema: tasksOutput,
-  execute: () => stepRuntime.runPromise(listTasks()),
+  execute: ({ abortSignal }) => stepRuntime.runPromise(listTasks(), { signal: abortSignal }),
 })
 
 export const tasksWorkflow = createWorkflow({

@@ -115,7 +115,8 @@ const searchStep = createStep({
   id: 'search',
   inputSchema: answerInput,
   outputSchema: evidenceSchema,
-  execute: ({ inputData }) => stepRuntime.runPromise(gatherBridged(inputData)),
+  execute: ({ inputData, abortSignal }) =>
+    stepRuntime.runPromise(gatherBridged(inputData), { signal: abortSignal }),
 })
 
 const topSentences = (data: Evidence) =>
@@ -178,7 +179,8 @@ const readabilityStep = createStep({
   id: 'readability',
   inputSchema: answerBody,
   outputSchema: answerOutput,
-  execute: ({ inputData }) => stepRuntime.runPromise(withReadability('answer')(inputData)),
+  execute: ({ inputData, abortSignal }) =>
+    stepRuntime.runPromise(withReadability('answer')(inputData), { signal: abortSignal }),
 })
 
 export const answerWorkflow = createWorkflow({

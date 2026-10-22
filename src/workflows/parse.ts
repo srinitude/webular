@@ -21,12 +21,13 @@ const parseStep = createStep({
   id: 'parse',
   inputSchema: parseInput,
   outputSchema: parseOutput,
-  execute: ({ inputData }) =>
+  execute: ({ inputData, abortSignal }) =>
     stepRuntime.runPromise(
       Effect.gen(function* () {
         const result = yield* parseDocument(yield* inPath(inputData.file))
         return { file: result.file, format: result.format, markdown: result.markdown }
       }),
+      { signal: abortSignal },
     ),
 })
 

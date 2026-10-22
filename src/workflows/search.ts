@@ -46,7 +46,7 @@ const searchStep = createStep({
   id: 'search',
   inputSchema: searchInput,
   outputSchema: searchOutput,
-  execute: ({ inputData: { query, limit, source, variants } }) =>
+  execute: ({ inputData: { query, limit, source, variants }, abortSignal }) =>
     stepRuntime.runPromise(
       Effect.gen(function* () {
         // A product named only by its maker comes from Wikidata, beside the web round;
@@ -67,6 +67,7 @@ const searchStep = createStep({
         const answered = web.source && { source: web.source }
         return { query, count: results.length, ...answered, results, meta: web.meta }
       }),
+      { signal: abortSignal },
     ),
 })
 

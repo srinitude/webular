@@ -59,7 +59,8 @@ const mediaStep = createStep({
   id: 'media',
   inputSchema: mediaInput,
   outputSchema: mediaOutput,
-  execute: ({ inputData }) => stepRuntime.runPromise(media(inputData)),
+  execute: ({ inputData, abortSignal }) =>
+    stepRuntime.runPromise(media(inputData), { signal: abortSignal }),
 })
 
 export const mediaWorkflow = createWorkflow({

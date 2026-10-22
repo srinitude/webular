@@ -49,7 +49,7 @@ const fetchStep = createStep({
   id: 'fetch',
   inputSchema: monitorInput,
   outputSchema: compared,
-  execute: ({ inputData }) =>
+  execute: ({ inputData, abortSignal }) =>
     stepRuntime.runPromise(
       pageHtml(inputData.url, inputData.timeoutMs).pipe(
         Effect.flatMap((html) =>
@@ -57,6 +57,7 @@ const fetchStep = createStep({
         ),
         Effect.map((r) => ({ ...r, watchFor: inputData.watchFor ?? '' })),
       ),
+      { signal: abortSignal },
     ),
 })
 

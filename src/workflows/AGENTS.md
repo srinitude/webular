@@ -33,7 +33,7 @@ One workflow per command, such as [`search.ts`](search.ts), [`scrape.ts`](scrape
 - The first step's input schema matches the workflow's, the last step's output schema matches the workflow's, and each step's output matches the next step's input. Share one schema const per pair. Source: [mastra-ai/mastra@@mastra/core@1.78.0](https://github.com/mastra-ai/mastra/blob/@mastra/core@1.78.0/docs/src/content/en/docs/workflows/control-flow.mdx).
 - Check a run's `status` before you read `result` or `error`. Source: [mastra-ai/mastra@@mastra/core@1.78.0](https://github.com/mastra-ai/mastra/blob/@mastra/core@1.78.0/docs/src/content/en/docs/workflows/overview.mdx).
 - Pass `shouldPersistSnapshot: () => false` to every `createWorkflow`. Webular has no Mastra storage, and the default still builds a snapshot at each step. Source: [mastra-ai/mastra@@mastra/core@1.78.0](https://github.com/mastra-ai/mastra/blob/@mastra/core@1.78.0/packages/core/src/workflows/workflow.ts).
-- Forward each step's `abortSignal` into the Effect run, so a cancelled run stops fetching. Keep step outputs small (zod schemas, summaries only) and step chains linear.
+- Cancellation (`mise run bugs:effect`): forward each step's `abortSignal` into its Effect run, so a cancelled run stops. Keep step outputs small and step chains linear.
 - Reuse one `ManagedRuntime` per process and dispose it at teardown. Do not build a second runtime with its own fetch layer.
 - Drop duplicate URLs before batch fan-out.
 

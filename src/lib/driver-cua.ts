@@ -162,8 +162,10 @@ const open = Effect.fnUntraced(function* (url: string) {
   yield* requireThrowaway(target.pid)
   const session = `webular-${yield* Random.nextInt}`
   yield* cuaCall('start_session', { session })
-  const ids = yield* idsFromBind(yield* cuaCall('get_browser_state', { ...target, session }))
-  yield* cuaCall('browser_navigate', { ...ids, url, session })
+  yield* Effect.gen(function* () {
+    const ids = yield* idsFromBind(yield* cuaCall('get_browser_state', { ...target, session }))
+    yield* cuaCall('browser_navigate', { ...ids, url, session })
+  }).pipe(Effect.onError(() => Effect.ignore(cuaCall('end_session', { session }))))
   return { ...target, session } satisfies Opened
 })
 

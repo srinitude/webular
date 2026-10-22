@@ -58,7 +58,7 @@ const searchStep = createStep({
   inputSchema: researchInput,
   outputSchema: foundSchema,
   // Bounded rounds: research.done asks for another search only when the hits miss the topic.
-  execute: ({ inputData }) =>
+  execute: ({ inputData, abortSignal }) =>
     stepRuntime.runPromise(
       Effect.map(
         searchRounds(inputData.topic, inputData.depth, (q, n) =>
@@ -71,6 +71,7 @@ const searchStep = createStep({
           sources: found.map((h) => ({ title: h.title, url: h.url })),
         }),
       ),
+      { signal: abortSignal },
     ),
 })
 
@@ -96,7 +97,8 @@ const fetchSourcesStep = createStep({
   id: 'fetch-sources',
   inputSchema: foundSchema,
   outputSchema: entriesSchema,
-  execute: ({ inputData }) => stepRuntime.runPromise(fetchAndFilter(inputData)),
+  execute: ({ inputData, abortSignal }) =>
+    stepRuntime.runPromise(fetchAndFilter(inputData), { signal: abortSignal }),
 })
 
 // Each section opens with the sentences Jev keeps as the source's facts, in page
@@ -150,8 +152,10 @@ const assembleStep = createStep({
   id: 'assemble',
   inputSchema: entriesSchema,
   outputSchema: researchOutput,
-  execute: ({ inputData }) =>
-    stepRuntime.runPromise(assemble(inputData).pipe(Effect.flatMap(withReadability('report')))),
+  execute: ({ inputData, abortSignal }) =>
+    stepRuntime.runPromise(assemble(inputData).pipe(Effect.flatMap(withReadability('report'))), {
+      signal: abortSignal,
+    }),
 })
 
 export const researchWorkflow = createWorkflow({

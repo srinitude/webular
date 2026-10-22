@@ -48,7 +48,7 @@ const fetchStep = createStep({
     fields: z.string().optional(),
     selector: z.string().optional(),
   }),
-  execute: ({ inputData }) => {
+  execute: ({ inputData, abortSignal }) => {
     const opts = { timeoutMs: inputData.timeoutMs }
     const fetched = withArchiveCopy(inputData.url, fetchText(inputData.url, opts), (capture) =>
       fetchText(capture, opts),
@@ -61,6 +61,7 @@ const fetchStep = createStep({
         fields: inputData.fields,
         selector: inputData.selector,
       })),
+      { signal: abortSignal },
     )
   },
 })
@@ -75,7 +76,8 @@ const selectStep = createStep({
     selector: z.string().optional(),
   }),
   outputSchema: extractOutput,
-  execute: ({ inputData }) => stepRuntime.runPromise(select(inputData)),
+  execute: ({ inputData, abortSignal }) =>
+    stepRuntime.runPromise(select(inputData), { signal: abortSignal }),
 })
 
 function select(inputData: {

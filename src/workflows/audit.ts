@@ -27,7 +27,7 @@ const detectStep = createStep({
   id: 'detect',
   inputSchema: auditInput,
   outputSchema: auditOutput,
-  execute: () =>
+  execute: ({ abortSignal }) =>
     stepRuntime.runPromise(
       Effect.map(detectDeepsec, (available) => ({
         tool: 'deepsec' as const,
@@ -37,6 +37,7 @@ const detectStep = createStep({
           ? {}
           : { hint: "dev tool — run 'bun add -d deepsec' in a checkout to enable" }),
       })),
+      { signal: abortSignal },
     ),
 })
 

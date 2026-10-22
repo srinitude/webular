@@ -103,8 +103,12 @@ const checkUrl = (name: string, inputData: unknown): Effect.Effect<void, CliErro
   return Effect.fail(new CliError({ message, exitCode: EXIT.usage }))
 }
 
+// Ctrl-C interrupts this fiber; cancelling the run aborts each step's signal,
+// so its Effect (and any child process it holds) is interrupted too.
 const startRun = (inputData: unknown) => (created: WorkflowRun) =>
-  Effect.tryPromise({ try: () => created.start({ inputData }), catch: errMsg })
+  Effect.tryPromise({ try: () => created.start({ inputData }), catch: errMsg }).pipe(
+    Effect.onInterrupt(() => Effect.promise(() => created.cancel())),
+  )
 
 // The run ends by stopping the parse pool's idle workers. The shared step
 // runtime stays usable for the next run in this process. The module is cached:

@@ -33,7 +33,7 @@ const listStep = createStep({
   id: 'list',
   inputSchema: diagramInput,
   outputSchema: diagramListOutput,
-  execute: () => stepRuntime.runPromise(listDiagrams),
+  execute: ({ abortSignal }) => stepRuntime.runPromise(listDiagrams, { signal: abortSignal }),
 })
 
 export const diagramWorkflow = createWorkflow({

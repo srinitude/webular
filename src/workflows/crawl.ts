@@ -31,7 +31,7 @@ const crawlStep = createStep({
   id: 'crawl',
   inputSchema: crawlInput,
   outputSchema: crawlOutput,
-  execute: ({ inputData }) =>
+  execute: ({ inputData, abortSignal }) =>
     stepRuntime.runPromise(
       Effect.gen(function* () {
         const { root, pages, errors } = yield* bfsCrawl(inputData.url, {
@@ -48,6 +48,7 @@ const crawlStep = createStep({
           errors,
         }
       }),
+      { signal: abortSignal },
     ),
 })
 
