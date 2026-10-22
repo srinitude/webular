@@ -59,7 +59,7 @@ const TASK = {
   outcome: 'One small box around the control to click, so code can click its center.',
 }
 
-export const locateRequest = (goal: string, intent: Intent, shot: Shot) => {
+const locateRequest = (goal: string, intent: Intent, shot: Shot) => {
   const ref = `window-${Bun.hash(shot.base64).toString(16)}`
   const window = { screenshot: ref, size_px: { width: shot.width, height: shot.height } }
   return {
@@ -82,7 +82,7 @@ type Answers = (typeof Reply.Type)['answers']
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n))
 
 // The box center as a normalized point; none when any check fails.
-export const readPoint = (a: Answers): Option.Option<Point> => {
+const readPoint = (a: Answers): Option.Option<Point> => {
   const box = a['where']?.box
   if (!box || (a['is_there']?.noul ?? 0) < PRESENT_BAR) return Option.none()
   if (EDGES.some((edge) => (a[`cut_${edge}`]?.noul ?? 1) >= CUT_BAR)) return Option.none()
