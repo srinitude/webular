@@ -103,10 +103,13 @@ ul {
 .doc-body > ol {
   max-width: var(--measure);
 }
+/* Tables wrap to fit instead of scrolling: a scroll box with no keyboard
+   access fails axe scrollable-region-focusable at 320 and 360 px. */
 .doc-body table {
-  display: block;
-  overflow-x: auto;
   border-collapse: collapse;
+}
+.doc-body :is(th, td) {
+  overflow-wrap: anywhere;
 }
 th,
 td {

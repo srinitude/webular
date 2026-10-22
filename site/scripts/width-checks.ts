@@ -11,6 +11,9 @@ import {
 } from './page-probes.ts'
 import { openPage, PAGES, type Theme, urlOf } from './site-browser.ts'
 
+// A hung page fails the run instead of stalling it.
+const PAGE_TIMEOUT = '30 seconds'
+
 export const CHECKS = [
   'no sideways scroll',
   'targets 44px',
@@ -53,9 +56,11 @@ const themePass = (
     Effect.gen(function* () {
       const page = yield* openPage(b, width, theme)
       for (const name of PAGES) {
-        yield* Effect.tryPromise(() => page.goto(urlOf(base, name)))
-        record(tally, `axe ${theme}`, `${name} at ${width}px`, yield* axeIssues(page))
-        if (theme === 'light') yield* layoutProbes(page, name, width, tally)
+        yield* Effect.gen(function* () {
+          yield* Effect.tryPromise(() => page.goto(urlOf(base, name)))
+          record(tally, `axe ${theme}`, `${name} at ${width}px`, yield* axeIssues(page))
+          if (theme === 'light') yield* layoutProbes(page, name, width, tally)
+        }).pipe(Effect.timeout(PAGE_TIMEOUT))
       }
     }),
   )

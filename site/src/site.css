@@ -171,6 +171,17 @@ pre {
   display: block;
   padding: var(--space-12) var(--space-8);
 }
+/* Every standalone link is a 44 px target, the WCAG target size. */
+.skip-link,
+.wordmark,
+.card > a,
+.sidebar a,
+.site-footer a {
+  display: flex;
+  align-items: center;
+  min-height: var(--size-tap-target);
+  min-width: var(--size-tap-target);
+}
 .nav-390,
 .nav-600,
 .nav-768,

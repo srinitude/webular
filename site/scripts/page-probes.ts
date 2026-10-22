@@ -6,7 +6,7 @@ import type { Page } from 'playwright'
 import { HEIGHT } from './site-browser.ts'
 
 const MIN_TARGET = 44
-const MAX_TABS = 30
+const MAX_TABS = 12
 const TARGETS = 'a[href],button,input,select,textarea,summary,[role=button],[tabindex]'
 
 export const scrollsSideways = (page: Page) =>

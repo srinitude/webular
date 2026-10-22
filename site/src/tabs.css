@@ -30,8 +30,8 @@
   border: 0;
   scrollbar-width: none;
   background:
-    linear-gradient(to left, var(--color-bg) var(--space-16), transparent) right /
-    var(--space-32) 100% no-repeat local,
+    linear-gradient(to left, var(--color-bg) var(--space-16), transparent) right / var(--space-32)
+    100% no-repeat local,
     linear-gradient(to left, var(--fade), transparent) right / var(--space-16) 100% no-repeat scroll,
     var(--color-bg);
 }
