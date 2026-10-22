@@ -463,6 +463,72 @@
       "grader": "bun test: skill text match"
     },
     {
+      "assertion": "HTTP mode answers 403 to a foreign Origin or Host",
+      "source": "tests/http.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: HTTP status equality"
+    },
+    {
+      "assertion": "all four skills are covered",
+      "source": "tests/skill-spec.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: skill folder count"
+    },
+    {
+      "assertion": "the marketplace entry names the real number of skills",
+      "source": "tests/skill-spec.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: manifest text match"
+    },
+    {
+      "assertion": "the plugin README names the file the manifest runs",
+      "source": "tests/skill-spec.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: README text match"
+    },
+    {
+      "assertion": "the commands page says an unreachable robots.txt blocks the crawl",
+      "source": "tests/skill-spec.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: docs text match"
+    },
+    {
+      "assertion": "the research skill writes tool names with the webular: prefix",
+      "source": "tests/skill-spec.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: skill text match"
+    },
+    {
+      "assertion": "skills and evals hold no time-tied wording",
+      "source": "tests/skill-spec.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: forbidden-word scan"
+    },
+    {
+      "assertion": "every webular:<tool> in the research skill is a registered tool",
+      "source": "tests/skill-tools-sync.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: skill tool names against schemas"
+    },
+    {
+      "assertion": "the research skill names every registered tool",
+      "source": "tests/skill-tools-sync.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: registered tools against skill text"
+    },
+    {
+      "assertion": "each tools.md section lists exactly the input fields of its schema",
+      "source": "tests/skill-tools-sync.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: tools.md fields against schemas"
+    },
+    {
+      "assertion": "tools.md lists every machine that machine.next accepts",
+      "source": "tests/skill-tools-sync.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: tools.md machines against machine schema"
+    },
+    {
       "assertion": "each Jev scorer agrees with its calibration labels",
       "source": "tests/jev.test.ts",
       "kind": "jev",
