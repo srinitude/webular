@@ -4,7 +4,7 @@ Files Astro copies to the build as they are, under [site/AGENTS.md](../AGENTS.md
 
 ## What lives here
 
-- `robots.txt`: the crawl rules, served as written.
+- [robots.txt](robots.txt): the crawl rules, served as written.
 
 ## Rules
 

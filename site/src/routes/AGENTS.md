@@ -4,9 +4,9 @@ One route per file, added by the integration in the Astro config (a pages folder
 
 ## What lives here
 
-- `404.astro` and `index.astro`: the not-found page and the home page.
-- `agents.astro`, `benchmarks.astro`, `commands.astro`, `docs.astro`, and `tools.astro`: the reference pages.
-- `install.astro`, `keys.astro`, `privacy.astro`, `security.astro`, and `support.astro`: the setup and policy pages.
+- [404.astro](404.astro) and [index.astro](index.astro): the not-found page and the home page.
+- [agents.astro](agents.astro), [benchmarks.astro](benchmarks.astro), [commands.astro](commands.astro), [docs.astro](docs.astro), and [tools.astro](tools.astro): the reference pages.
+- [install.astro](install.astro), [keys.astro](keys.astro), [privacy.astro](privacy.astro), [security.astro](security.astro), and [support.astro](support.astro): the setup and policy pages.
 - The agents page twin lives at agents/index.md, so its URL is /agents/index.md.
 
 ## Rules
