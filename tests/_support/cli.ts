@@ -53,6 +53,13 @@ const parentPath = Config.String('PATH').pipe(
   Config.orElse(() => Config.String('Path')),
   Config.withDefault(''),
 )
+const childEnv = (env: CliOptions['env']) =>
+  Effect.gen(function* () {
+    if (env === undefined) return { WEBULAR_JEV: 'off' }
+    const ownPath = Object.keys(env).some((k) => k.toUpperCase() === 'PATH')
+    const PATH = ownPath ? '' : yield* parentPath
+    return { WEBULAR_JEV: 'off', WEBULAR_NO_CACHE: '1', ...(PATH && { PATH }), ...env }
+  })
 
 export const runCli = (
   entry: string,
@@ -67,16 +74,10 @@ export const runCli = (
     Effect.gen(function* () {
       const spawner = yield* ChildProcessSpawner.ChildProcessSpawner
       const run = yield* builtEntry(entry)
-      const keepPath =
-        opts.env !== undefined && !Object.keys(opts.env).some((k) => k.toUpperCase() === 'PATH')
-      const PATH = keepPath ? yield* parentPath : undefined
       const handle = yield* spawner.spawn(
         ChildProcess.make(opts.exec ?? 'bun', [`${ROOT}${run}`, ...args], {
           cwd: opts.cwd ?? ROOT,
-          env: {
-            WEBULAR_JEV: 'off',
-            ...(opts.env && { WEBULAR_NO_CACHE: '1', ...(PATH && { PATH }), ...opts.env }),
-          },
+          env: yield* childEnv(opts.env),
           extendEnv: opts.env === undefined,
           detached: false,
         }),
