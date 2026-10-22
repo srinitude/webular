@@ -1,0 +1,127 @@
+/* Layout changes by width, per the layout spec. The grid values (gutter,
+   content, type sizes, section gap) change in tokens.css; media queries
+   cannot read custom properties, so widths here are literal. */
+@media (orientation: landscape) and (max-height: 500px) {
+  :root {
+    --header-min: var(--size-header-landscape);
+  }
+}
+@media (min-width: 390px) {
+  .nav-390 {
+    display: inline-flex;
+  }
+  .site-footer ul {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 430px) {
+  .docs-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 600px) {
+  .nav-600 {
+    display: inline-flex;
+  }
+  .card-grid,
+  .cards-table tbody {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  /* An odd last card spans the row, so no slot stays empty. */
+  .card-grid > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}
+@media (min-width: 768px) {
+  .nav-768 {
+    display: inline-flex;
+  }
+  .site-footer ul {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .cards-table {
+    display: table;
+    border-collapse: collapse;
+  }
+  .cards-table thead {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+  }
+  .cards-table tbody {
+    display: table-row-group;
+  }
+  .cards-table tr {
+    display: table-row;
+    padding: 0;
+    background: none;
+    border: 0;
+  }
+  .cards-table th[scope="row"],
+  .cards-table td {
+    display: table-cell;
+    font-size: inherit;
+  }
+  .cards-table th,
+  .cards-table td {
+    padding: var(--space-12) var(--space-16);
+    border: var(--border-width) solid var(--color-border);
+  }
+  .cards-table thead th {
+    background: var(--color-surface);
+  }
+  .cards-table td::before {
+    content: none;
+  }
+}
+@media (min-width: 1024px) {
+  .nav-1024 {
+    display: inline-flex;
+  }
+  .menu {
+    display: none;
+  }
+  .hero {
+    grid-template-columns: 5fr 7fr;
+    gap: var(--space-48);
+    align-items: start;
+  }
+  .card-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .card-grid > :last-child:nth-child(odd) {
+    grid-column: auto;
+  }
+  /* Three columns: a last row of one or two cards fills the row. */
+  .card-grid > :last-child:nth-child(3n + 1) {
+    grid-column: 1 / -1;
+  }
+  .card-grid > :last-child:nth-child(3n + 2) {
+    grid-column: span 2;
+  }
+  .docs-cards {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .docs-cards > :last-child {
+    grid-column: auto;
+  }
+  .has-sidebar {
+    display: grid;
+    grid-template-columns: var(--size-sidebar) minmax(0, 1fr);
+    gap: var(--space-32);
+  }
+  .has-sidebar .sidebar {
+    display: block;
+  }
+}
+@media (min-width: 1280px) {
+  .demo-data {
+    grid-template-columns: 7fr 5fr;
+    align-items: start;
+  }
+  .doc {
+    max-width: 680px;
+  }
+}

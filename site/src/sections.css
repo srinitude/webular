@@ -1,0 +1,189 @@
+/* Page sections, cards, doc pages, and the comparison table, mobile first. */
+main {
+  padding-block: var(--space-32) var(--section-gap);
+}
+.section,
+.demo-data {
+  margin-top: var(--section-gap);
+  display: grid;
+  gap: var(--space-16);
+}
+.demo-data {
+  gap: var(--space-32);
+}
+.demo-data > .section {
+  margin-top: 0;
+}
+.section > *,
+.hero > *,
+.demo-data > * {
+  min-width: 0;
+}
+.hero {
+  display: grid;
+  gap: var(--space-24);
+}
+.hero p {
+  font-size: var(--lead-size);
+  margin-top: var(--space-16);
+}
+.install-block {
+  display: grid;
+  gap: var(--space-12);
+}
+.install-block h3 {
+  margin-top: var(--space-12);
+}
+.cards {
+  display: grid;
+  gap: var(--space-16);
+  list-style: none;
+  padding: 0;
+}
+.card,
+details.group {
+  padding: var(--space-16);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-box);
+}
+.card {
+  display: grid;
+  gap: var(--space-8);
+  min-width: 0;
+}
+summary {
+  cursor: pointer;
+  min-height: var(--size-tap-target);
+  display: flex;
+  align-items: center;
+  font-weight: var(--font-weight-bold);
+}
+details.group .cards {
+  margin-top: var(--space-12);
+}
+ul {
+  padding-left: var(--space-24);
+}
+
+/* Template pages: h1, lead, then each section 24 px apart. */
+.doc {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+  margin-bottom: var(--space-32);
+}
+.doc-body {
+  display: contents;
+}
+.doc-meta {
+  order: 1;
+  display: grid;
+  gap: var(--space-12);
+}
+.doc-body > :nth-child(n + 3) {
+  order: 2;
+}
+.doc-body > :nth-child(2) {
+  font-size: var(--lead-size);
+}
+.doc-body > *,
+.doc > * {
+  min-width: 0;
+  max-width: 100%;
+}
+.doc-body > h2 {
+  margin-top: var(--space-24);
+}
+.doc-body > h3 {
+  margin-top: var(--space-12);
+}
+.doc-body > p,
+.doc-body > ul,
+.doc-body > ol {
+  max-width: var(--measure);
+}
+.doc-body table {
+  display: block;
+  overflow-x: auto;
+  border-collapse: collapse;
+}
+th,
+td {
+  text-align: left;
+  padding: var(--space-8) var(--space-12);
+  border: var(--border-width) solid var(--color-border);
+  vertical-align: top;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+  list-style: none;
+  padding: 0;
+}
+.actions a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--size-tap-target);
+  padding-inline: var(--space-16);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-control);
+}
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: var(--space-4);
+}
+.sidebar a {
+  display: block;
+  padding: var(--space-4) 0;
+  color: var(--color-text);
+}
+.sidebar a[aria-current="page"] {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-bold);
+}
+
+/* The comparison: cards below 768, a table from 768. */
+.cards-table {
+  display: block;
+  width: 100%;
+  border: 0;
+}
+.cards-table thead {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.cards-table tbody {
+  display: grid;
+  gap: var(--space-16);
+}
+.cards-table tr,
+.cards-table td {
+  display: block;
+}
+.cards-table th,
+.cards-table td {
+  border: 0;
+  padding: var(--space-4) 0;
+}
+.cards-table tr {
+  padding: var(--space-16);
+  background: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-box);
+}
+.cards-table th[scope="row"] {
+  display: block;
+  font-size: calc(var(--body-size) + 1px);
+  font-weight: var(--font-weight-bold);
+}
+.cards-table td::before {
+  content: attr(data-label) ": ";
+  font-weight: var(--font-weight-bold);
+}
