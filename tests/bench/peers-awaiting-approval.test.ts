@@ -17,3 +17,9 @@ test('every peer awaiting approval has no jobs and an awaiting-approval skip', (
     expect(p.skip).toStartWith('awaiting approval: ')
   }
 })
+
+test('brave is skipped with the closed-free-plan reason and keeps its row', () => {
+  const brave = awaitingApproval.find((p) => p.id === 'brave')
+  expect(brave?.skip).toBe('awaiting approval: the free plan is closed to new users')
+  expect(brave?.jobs).toEqual({})
+})

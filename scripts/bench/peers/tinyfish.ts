@@ -9,6 +9,7 @@ import { Effect, Schema } from 'effect'
 import { type HttpClient, HttpClientRequest, HttpClientResponse } from 'effect/http'
 import type { Provider } from './model.ts'
 import { fail, type Post } from './peers.ts'
+import { CALL_TIMEOUT_MS } from './timeout.ts'
 
 const SearchOut = Schema.Struct({
   results: Schema.Array(
@@ -43,7 +44,7 @@ const search = (client: HttpClient.HttpClient, key: string, query: string) =>
       Effect.flatMap(HttpClientResponse.filterStatusOk),
       Effect.flatMap((res) => res.json),
       Effect.flatMap(Schema.decodeUnknownEffect(SearchOut)),
-      Effect.timeout('90 seconds'),
+      Effect.timeout(CALL_TIMEOUT_MS),
       Effect.mapError(fail),
       Effect.map((r) => {
         const text = r.results.map((h) => `${h.title ?? ''}\n${h.url}\n${h.snippet ?? ''}`)

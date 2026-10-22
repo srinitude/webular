@@ -8,6 +8,7 @@ import { Effect, Schema } from 'effect'
 import { type HttpClient, HttpClientRequest, HttpClientResponse } from 'effect/http'
 import type { Provider } from './model.ts'
 import { bytes, fail, type Post } from './peers.ts'
+import { CALL_TIMEOUT_MS } from './timeout.ts'
 
 const SEARCH_USD = 0.025
 
@@ -30,7 +31,7 @@ const search = (client: HttpClient.HttpClient, key: string, query: string) => {
       Effect.flatMap(HttpClientResponse.filterStatusOk),
       Effect.flatMap((res) => res.json),
       Effect.flatMap(Schema.decodeUnknownEffect(Reply)),
-      Effect.timeout('90 seconds'),
+      Effect.timeout(CALL_TIMEOUT_MS),
       Effect.map((r) => ({
         text: r.organic_results
           .map((h) => `${h.title ?? ''}\n${h.link}\n${h.snippet ?? ''}`)

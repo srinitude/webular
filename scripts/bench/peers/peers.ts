@@ -4,6 +4,7 @@
 import { Effect, Schema } from 'effect'
 import { type HttpClient, HttpClientRequest, HttpClientResponse } from 'effect/http'
 import { BenchError, type Output, type Provider } from './model.ts'
+import { CALL_TIMEOUT_MS } from './timeout.ts'
 
 export const PRICING_SOURCES: Record<string, string> = {
   firecrawl:
@@ -37,7 +38,7 @@ export const poster =
       Effect.flatMap(HttpClientResponse.filterStatusOk),
       Effect.flatMap((res) => res.json),
       Effect.flatMap(Schema.decodeUnknownEffect(schema)),
-      Effect.timeout('90 seconds'),
+      Effect.timeout(CALL_TIMEOUT_MS),
       Effect.map((r) => ({ r, sentBytes: bytes(JSON.stringify(body)) })),
       Effect.mapError(fail),
     )

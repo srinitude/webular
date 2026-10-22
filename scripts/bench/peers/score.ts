@@ -1,6 +1,7 @@
 // Scoring: exact checks per record, then one summary per provider, then a
 // per-dimension winner and webular's gap on every metric. Pure functions only.
 import type { Check, MetricDef, Provider, RecordedOutput, RunRecord, Task } from './model.ts'
+import { censoredLatencies } from './timeout.ts'
 
 const fold = (s: string) => s.normalize('NFKD').replace(/\p{M}/gu, '').toLowerCase()
 
@@ -73,7 +74,7 @@ function providerSummary(p: Provider, rows: readonly RunRecord[], defs: readonly
   const correct = sum(column(rows, 'accuracy'))
   const cost = sum(column(rows, 'costUsd'))
   const toks = sum(column(ok, 'tokens'))
-  const lat = column(ok, 'latencyMs')
+  const lat = censoredLatencies(rows)
   const s: Record<string, number | undefined> = {
     accuracy: mean(column(rows, 'accuracy')),
     citationPrecision: mean(column(ok, 'citationPrecision')),

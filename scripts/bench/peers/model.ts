@@ -102,6 +102,7 @@ export interface RunRecord {
 
 export const builtinMetrics: readonly MetricDef[] = [
   { name: 'accuracy', dimension: 'quality', better: 'higher', unit: 'share' },
+  { name: 'answerAccuracy', dimension: 'quality', better: 'higher', unit: 'share' },
   { name: 'citationPrecision', dimension: 'quality', better: 'higher', unit: 'share' },
   { name: 'latencyP50Ms', dimension: 'speed', better: 'lower', unit: 'ms' },
   { name: 'latencyP95Ms', dimension: 'speed', better: 'lower', unit: 'ms' },

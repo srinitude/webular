@@ -8,12 +8,13 @@ import { runProc } from '../../../src/core/proc.ts'
 import { htmlToArticle } from '../../../src/lib/html.ts'
 import type { Provider, TaskInput } from './model.ts'
 import { bytes, fail, out } from './peers.ts'
+import { CALL_TIMEOUT_MS } from './timeout.ts'
 
 type Argv = [string, ...string[]]
 type Probe = readonly [name: string, argv: Argv]
 type Spawner = ChildProcessSpawner.ChildProcessSpawner['Service']
 
-const TIMEOUT_MS = 90_000
+const TIMEOUT_MS = CALL_TIMEOUT_MS
 const DEFAULT_SEARXNG = 'http://localhost:8888'
 
 // ScrapeGraphAI's fetch node loads a page with no model: the free part of it.
@@ -74,7 +75,7 @@ const readability =
       Effect.flatMap(HttpClientResponse.filterStatusOk),
       Effect.flatMap((res) => res.text),
       Effect.flatMap((html) => Effect.try(() => htmlToArticle(html).text)),
-      Effect.timeout('90 seconds'),
+      Effect.timeout(CALL_TIMEOUT_MS),
       Effect.map((text) => out(text, [url], 0, 0)),
       Effect.mapError(fail),
     )
