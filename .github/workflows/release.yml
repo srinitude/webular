@@ -199,8 +199,31 @@ jobs:
           name: winget-manifests
           path: dist/bin/winget
           if-no-files-found: error
-      - name: Stage the installers
-        run: cp scripts/install.sh scripts/install.ps1 dist/bin/
+      # Each release's install.sh and install.ps1 carry that release as their
+      # default version and every asset's SHA-256 from SHA256SUMS, so a
+      # pinned installer checks its download without fetching SHA256SUMS. A
+      # prerelease tag (any "-") keeps the placeholders: the installers take
+      # only N.N.N versions, so they fall back to "releases/latest" and the
+      # SHA256SUMS on GitHub. Both files stay outside the webular-* globs, so
+      # SHA256SUMS never lists them.
+      - name: Stage the installers with this release's version and checksums
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          for f in install.sh install.ps1; do
+            case "$version" in
+              *-*) cp "scripts/$f" "dist/bin/$f" ;;
+              *)
+                awk -v sums=dist/bin/SHA256SUMS -v ver="$version" '
+                  $0 == "__WEBULAR_SUMS__" { while ((getline line < sums) > 0) print line; close(sums); next }
+                  { gsub(/__WEBULAR_VERSION__/, ver); print }
+                ' "scripts/$f" > "dist/bin/$f"
+                if grep -q -e __WEBULAR_VERSION__ -e __WEBULAR_SUMS__ "dist/bin/$f"; then
+                  echo "::error::dist/bin/$f still has a placeholder"; exit 1
+                fi
+                ;;
+            esac
+          done
+          sh -n dist/bin/install.sh
       - name: Write the Arch and Nix packaging files from SHA256SUMS
         run: mise run package:distros
         env:
