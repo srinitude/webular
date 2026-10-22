@@ -638,3 +638,4 @@
 {"path": "scripts/bench/AGENTS.md", "sha": "1ba37ce01ec96d9dff61995ac60280d350136ab9c7029cbb677903f7dbace147"}
 {"path": "AGENTS.md", "sha": "e7a8a8ca0e15fddda3039905b3594abbe165002148590d2dca6cf11c685ced2d"}
 {"path": "docs/tasks.md", "sha": "7395f25fbf692a8b3488a34a692969802b5aa51eada8561ec4fcc8c4454d8a14"}
+{"path": "tests/jev/AGENTS.md", "sha": "9276a7aa4f0ddd1e7587ef1b4a6a4f7566f7d840ad529ec11fe7517802f1f2e5"}

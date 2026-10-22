@@ -27,11 +27,11 @@ const INTENT_PURPOSE = purpose(
 )
 const DESCRIBE: Record<string, string> = {
   general:
-    'Everyday facts, news, people, places, products, or shopping, like `height of mount everest` or `paper towel prices`',
+    'Everyday facts, news, people, places, products, or shopping, including measurements or surveys of a place, like `height of mount everest` or `paper towel prices`; not a code library or developer tool, nor its website',
   scholarly:
-    'Only when the query asks for research papers, studies, trials, or academic findings, like `CRISPR off-target effects in embryos`',
+    'Only when the query asks for research papers, studies, trials, or academic findings, including a named paper, a DOI, an arXiv id, or a scientific result, like `CRISPR off-target effects in embryos`',
   software:
-    'Only when the query is about a code library, package, framework, or developer tool, like `how to install zod`',
+    'Only when the query is about a code library, package, framework, or developer tool, including finding its official website or docs, like `how to install zod`',
   none: 'Only when the query has no meaning at all',
 }
 

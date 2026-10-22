@@ -82,7 +82,7 @@ const firstKeys = (o: object, max: number): string[] => {
   return keys
 }
 
-const write = (v: unknown, depth: number, b: Budget, out: string[]): void => {
+const write = (v: unknown, depth: number, b: Budget, out: string[], keep = false): void => {
   const pre = typeof v === 'object' && v !== null ? (v as Interned)[INTERNED] : undefined
   if (pre !== undefined) return void out.push(pre)
   if (--b.nodes < 0 || depth > CAPS.depth || b.bytes <= 2) return void out.push('null')
@@ -99,18 +99,21 @@ const write = (v: unknown, depth: number, b: Budget, out: string[]): void => {
     }
     return void out.push(']')
   }
-  // Keys sort, so equal data built in another order gives equal bytes.
-  const keys = firstKeys(v, b.fields).sort()
+  // Keys sort, so equal data built in another order gives equal bytes. A Choice's
+  // `criteria` keeps its order: that is the option order Jev reads, and the
+  // both-orders position check (menu.ts bothOrders) depends on it.
+  const keys = keep ? firstKeys(v, b.fields) : firstKeys(v, b.fields).sort()
+  const choice = (v as { type?: unknown }).type === 'choice'
   out.push('{')
   keys.forEach((k, i) => {
     if (i) out.push(',')
     out.push(str(k, CAPS.keyChars, b), ':')
-    write((v as Record<string, unknown>)[k], depth + 1, b, out)
+    write((v as Record<string, unknown>)[k], depth + 1, b, out, choice && k === 'criteria')
   })
   out.push('}')
 }
 
-// Canonical bytes of one value: sorted keys, finite numbers, capped lists and
+// Canonical bytes of one value: sorted keys (but a Choice's option order), finite numbers, capped lists and
 // strings. The cache key is the hash of these bytes, and they are what is posted.
 export const canonical = (
   v: unknown,
