@@ -101,3 +101,38 @@ test('a site wordmark or logo is never the answer figure', () =>
       expect((yield* pick([wordmark, tagline, chart], routed))?.src).toBe(chart.src)
     }),
   ))
+
+// A low-confidence or timed-out router falls back to the image arm; a place the
+// text already states must still lead the answer, not a portrait.
+test('a where question whose lead text names the place keeps the text answer, with no Jev call', () =>
+  Effect.runPromise(
+    Effect.gen(function* () {
+      const portrait = { ...img('/upload/Heisenberg_1924.jpeg'), alt: 'Heisenberg in 1924' }
+      const lead = {
+        url: 'https://en.wikipedia.org/wiki/Werner_Heisenberg',
+        text: 'Werner Heisenberg was a German theoretical physicist. Werner Karl Heisenberg was born in Würzburg, Germany, the son of Kaspar Heisenberg.',
+        images: [portrait],
+      }
+      const question =
+        'In which city was the physicist who formulated the uncertainty principle born?'
+      expect(yield* answerFigure({ question, lead }).pipe(Effect.provide(noJev))).toBeUndefined()
+    }),
+  ))
+
+// "What is the capital" is no where/who question, but a lead that names the
+// capital answers it: the map must not displace the text answer.
+test('a capital question whose lead text names the capital keeps the text answer, with no Jev call', () =>
+  Effect.runPromise(
+    Effect.gen(function* () {
+      const map = { ...img('/upload/Australia_map.png'), alt: 'Map of Australia' }
+      const question = 'What is the capital city of Australia?'
+      for (const text of [
+        'Australia is a country in Oceania. Canberra is the capital city of Australia.',
+        'Australia is a country in Oceania. The capital of Australia is Canberra.',
+        '| Region | Oceania |\n| --- | --- |\n| Capital city | Canberra |',
+      ]) {
+        const lead = { url: 'https://en.wikipedia.org/wiki/Australia', text, images: [map] }
+        expect(yield* answerFigure({ question, lead }).pipe(Effect.provide(noJev))).toBeUndefined()
+      }
+    }),
+  ))

@@ -3,66 +3,11 @@
 
 import { type Spans, splitSentences } from './summarize-sentences.ts'
 
-const STOPWORDS = new Set([
-  'a',
-  'an',
-  'the',
-  'and',
-  'or',
-  'but',
-  'in',
-  'on',
-  'at',
-  'to',
-  'for',
-  'of',
-  'with',
-  'by',
-  'from',
-  'is',
-  'it',
-  'its',
-  'are',
-  'was',
-  'were',
-  'be',
-  'been',
-  'being',
-  'have',
-  'has',
-  'had',
-  'do',
-  'does',
-  'did',
-  'will',
-  'would',
-  'could',
-  'should',
-  'may',
-  'might',
-  'shall',
-  'can',
-  'that',
-  'this',
-  'these',
-  'those',
-  'i',
-  'you',
-  'he',
-  'she',
-  'we',
-  'they',
-  'as',
-  'if',
-  'not',
-  'so',
-  'than',
-  'then',
-  'when',
-  'where',
-  'which',
-  'who',
-])
+const STOPWORDS = new Set(
+  'a an the and or but in on at to for of with by from is it its are was were be been being have has had do does did will would could should may might shall can that this these those i you he she we they as if not so than then when where which who'.split(
+    ' ',
+  ),
+)
 
 // match() yields the same maximal [a-z0-9] runs as replace-then-split, with
 // one fewer full-size copy and no empty tokens to filter.
@@ -156,18 +101,35 @@ export function splitQuestion(query: string): { asked: string; clause: string } 
   const clause = verb ? m[0].replace(/\s\p{L}+\W*$/u, '') : m[0]
   return { asked: `${query.slice(0, m.index)} ${verb}`.trim(), clause }
 }
+// A capitalized word may be a name: "Born" (Max Born, "Born, M.") is not the
+// verb "born". A key the question writes in lowercase that the page also uses
+// in lowercase matches only lowercase forms, so a cited surname cannot inflate
+// its count. Other keys ("Heisenberg", or "rust" for a page that only says
+// "Rust") match any case.
+// ponytail: a sentence-initial verb ("Born in 1901, ...") stops counting too;
+// a part-of-speech tagger would tell the two apart.
+const NAMES = /\p{Lu}\p{L}*/gu
+const plainWords = (s: string) => new Set(tokenize(s.replace(NAMES, ' ')))
 function focusScores(text: string, spans: Spans, focus: Focus): number[] {
   const { asked, clause } = focus.wholeQuery
     ? { asked: focus.query, clause: '' }
     : splitQuestion(focus.query)
   const keys = new Set(tokenize(asked).filter((w) => !QUESTION_WORDS.has(w)))
   const entity = new Set(tokenize(`${focus.entity ?? ''} ${clause}`).filter((w) => !keys.has(w)))
-  const sets = spans.starts.map((from, i) => new Set(tokenize(text.slice(from, spans.ends[i]))))
+  const sentences = spans.starts.map((from, i) => text.slice(from, spans.ends[i]))
+  const sets = sentences.map((s) => new Set(tokenize(s)))
+  const plain = sentences.map(plainWords)
+  // Research topics match every case, like their whole-query keys.
+  const plainKeys = new Set(
+    focus.wholeQuery ? [] : [...plainWords(asked)].filter((k) => plain.some((set) => set.has(k))),
+  )
+  const holds = (i: number, k: string) => (plainKeys.has(k) ? plain[i] : sets[i])?.has(k) === true
   const df = new Map<string, number>()
-  for (const set of sets) for (const k of keys) if (set.has(k)) df.set(k, (df.get(k) ?? 0) + 1)
-  return sets.map((set) => {
+  for (let i = 0; i < sets.length; i++)
+    for (const k of keys) if (holds(i, k)) df.set(k, (df.get(k) ?? 0) + 1)
+  return sets.map((set, i) => {
     let score = 0
-    for (const [k, n] of df) if (set.has(k)) score += Math.log((sets.length + 1) / n)
+    for (const [k, n] of df) if (holds(i, k)) score += Math.log((sets.length + 1) / n)
     for (const e of entity) if (set.has(e)) return score * 1.5
     return score
   })

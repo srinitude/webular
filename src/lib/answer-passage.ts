@@ -25,12 +25,20 @@ const leadSentence = (text: string) => LEAD.exec(text.slice(0, 4_000))?.[1]?.tri
 // Unicode letter classes, so "Würzburg" and "José Martí" count.
 const NAME = /(?<!\p{L})\p{Lu}\p{Ll}+(?: \p{Lu}\.)? \p{Lu}\p{Ll}+(?!\p{L})/gu
 const PLACE = /\b(?:born|in|from)\s+(?:\p{Lu}\p{Ll}+,?\s*)+/gu
+// A capital is named beside "is" or in a table cell: "the capital is Canberra",
+// "Canberra is the capital", "| Capital city | Canberra |".
+// ponytail: a name next to "is" may be another city ("Sydney is a state capital"),
+// and "Canberra (/ˈkænbərə/) is" is missed; a typed span extractor would fix both.
+const SEAT =
+  /\bis\s+(?:\p{Lu}\p{Ll}+\s*)+|(?:\p{Lu}\p{Ll}+\s+)+(?=is\b)|\|\s*(?:\p{Lu}\p{Ll}+\s*)+/gu
 const answerType = (query: string) =>
   /\bwhere\b|\bwhich (?:country|city|state)\b/i.test(query)
     ? PLACE
     : /\bwho\b/i.test(query)
       ? NAME
-      : undefined
+      : /\bcapital\b/i.test(query)
+        ? SEAT
+        : undefined
 // The sentence names a person or place the question does not.
 const holdsType = (sentence: string, re: RegExp, asked: Set<string>) =>
   [...sentence.matchAll(re)].some((m) =>
@@ -57,6 +65,19 @@ const termScore = (pool: ReadonlyArray<string>, asked: Set<string>) => {
   const df = (w: string) => sets.filter((set) => set.has(w)).length
   const weight = new Map([...asked].map((w) => [w, Math.log((pool.length + 1) / (df(w) + 1))]))
   return (i: number) => [...weight].reduce((t, [w, v]) => t + (sets[i]?.has(w) ? v : 0), 0)
+}
+
+// The text states an answer of the asked type: one of its best focus sentences
+// holds an asked word ("born") and a place or name the question does not.
+// ponytail: lexical type check; a typed span extractor would catch paraphrases.
+export const statesTypedAnswer = (text: string, query: string) => {
+  const re = answerType(query)
+  if (re === undefined) return false
+  const asked = new Set(stems(query))
+  const keys = new Set(tokenize(splitQuestion(query).asked).map(stem))
+  return summarizeText(text, 9, { query }).sentences.some(
+    (s) => holdsType(s, re, asked) && stems(s).some((w) => keys.has(w)),
+  )
 }
 
 interface Focus {

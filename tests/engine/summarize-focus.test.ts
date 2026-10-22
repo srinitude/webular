@@ -20,6 +20,27 @@ test('a question picks the sentence with its rare key term and the entity', () =
   expect(summary).toContain('Würzburg')
 })
 
+// The live page cites Max Born over and over; "Born" the name must not make
+// the verb "born" look common, or two-word physicist lines push the birth out.
+test('a surname that spells a lowercase question word does not bury the answer', () => {
+  const cites = Array.from(
+    { length: 12 },
+    (_, i) => `Born, M.; Heisenberg, W.; Jordan, P. (19${10 + i}).`,
+  )
+  const physicists = Array.from(
+    { length: 6 },
+    (_, i) => `The physicist Max Born wrote to Heisenberg in letter ${i + 1} about matrices.`,
+  )
+  const page = [
+    'Werner Karl Heisenberg was a German theoretical physicist.',
+    ...physicists,
+    'Werner Karl Heisenberg was born in Würzburg, Germany, the son of Kaspar Heisenberg.',
+    ...cites,
+  ].join(' ')
+  const { summary } = summarizeText(page, 3, { query: RIDDLE, entity: 'Werner Heisenberg' })
+  expect(summary).toContain('Würzburg')
+})
+
 test('the plain frequency picker misses it, which is why focus exists', () => {
   expect(summarizeText(PAGE, 3).summary).not.toContain('Würzburg')
 })

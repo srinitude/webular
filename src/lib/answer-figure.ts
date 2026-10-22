@@ -4,6 +4,7 @@
 // reuses image.router, which skips Jev for zero images.
 import { Effect } from 'effect'
 import { z } from 'zod'
+import { statesTypedAnswer } from './answer-passage.ts'
 import type { PageImage } from './html-images.ts'
 import {
   imageInventory,
@@ -45,10 +46,12 @@ interface FigureInput {
   readonly question: string
   readonly lead: LeadSource | undefined
 }
-// A site logo or wordmark never counts as the answer figure.
+// A site logo or wordmark never counts as the answer figure. Text that already
+// states a place or name of the asked type keeps the text answer with no Jev
+// call, so the router's image fallback (low confidence, timeout) cannot hide it.
 const figureFor = ({ question, lead }: FigureInput) => {
   const images = (lead?.images ?? []).filter((i) => !isSiteMark(i.src))
-  if (lead === undefined || images.length === 0)
+  if (lead === undefined || images.length === 0 || statesTypedAnswer(lead.text, question))
     return Effect.succeed<PageImage | undefined>(undefined)
   const input = {
     question,
