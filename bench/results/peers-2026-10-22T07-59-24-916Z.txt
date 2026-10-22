@@ -1,0 +1,406 @@
+peer benchmark (live, 3 runs; no plan at /Users/kiren/webular-work/join/.claude/worktrees/agent-a671182cec79529a0/bench/benchmark-plan.json; seed 1989315838)
+
+status per provider:
+
+  webular: {"ok":51,"cached":0}
+
+  firecrawl: {"ok":20,"unsupported":30,"skipped":1,"cached":0}
+
+  exa: {"ok":20,"unsupported":9,"skipped":22,"cached":2}
+
+  tavily: {"unsupported":18,"ok":20,"skipped":13,"cached":9}
+
+  perplexity: {"unsupported":30,"ok":20,"skipped":1,"cached":0}
+
+  parallel: {"unsupported":18,"ok":20,"skipped":13,"cached":0}
+
+  youcom: {"unsupported":39,"ok":12,"cached":7}
+
+  linkup: {"skipped":51,"cached":0} (no key (env LINKUP_API_KEY or Keychain linkup-api-key))
+
+  valyu: {"skipped":51,"cached":0} (no key (env VALYU_API_KEY or Keychain valyu-api-key))
+
+  jina: {"ok":9,"unsupported":30,"error":11,"skipped":1,"cached":0}
+
+  tinyfish: {"skipped":51,"cached":0} (no key (env TINYFISH_API_KEY or Keychain tinyfish-api-key))
+
+  browserbase: {"error":20,"unsupported":30,"skipped":1,"cached":0}
+
+  gemini: {"unsupported":30,"error":20,"skipped":1,"cached":0}
+
+  serpapi: {"skipped":51,"cached":0} (no key (env SERPAPI_API_KEY or Keychain serpapi-api-key))
+
+  serper: {"skipped":51,"cached":0} (no key (env SERPER_API_KEY or Keychain serper-api-key))
+
+  brightdata: {"skipped":51,"cached":0} (no key (env BRIGHTDATA_API_KEY or Keychain brightdata-api-key))
+
+  scrapegraph: {"skipped":102,"cached":0} (no key (env SCRAPEGRAPH_API_KEY or Keychain scrapegraph-api-key))
+
+  apify: {"skipped":51,"cached":0} (no key (env APIFY_TOKEN or Keychain apify-api-key))
+
+  nimble: {"skipped":51,"cached":0} (no key (env NIMBLE_API_KEY or Keychain nimble-api-key))
+
+  contextdev: {"skipped":51,"cached":0} (no key (env CONTEXTDEV_API_KEY or Keychain contextdev-api-key))
+
+  searxng: {"skipped":51,"cached":0} (SearXNG not reachable at http://localhost:8888)
+
+  trafilatura: {"skipped":51,"cached":0} (not installed: trafilatura)
+
+  curl-html2text: {"skipped":51,"cached":0} (not installed: html2text)
+
+  crawl4ai: {"skipped":51,"cached":0} (not installed: crawl4ai)
+
+  scrapegraph: {"skipped":102,"cached":0} (not installed: scrapegraphai)
+
+  readability: {"unrecorded":9,"unsupported":33,"ok":9,"cached":0}
+
+  openai-web-search: {"skipped":51,"cached":0} (awaiting approval: $10 per 1,000 calls)
+
+  anthropic-web: {"skipped":51,"cached":0} (awaiting approval: web search $10 per 1,000 searches, plus web fetch)
+
+  vertex-grounding: {"skipped":51,"cached":0} (awaiting approval: needs a Google Cloud project)
+
+  bing-grounding: {"skipped":51,"cached":0} (awaiting approval: needs an Azure AI Foundry project)
+
+  zyte: {"skipped":51,"cached":0} (awaiting approval: a card is required)
+
+  spider: {"skipped":51,"cached":0} (awaiting approval: pay as you go from $1)
+
+== webular, every task ==
+metric               dim          webular  best     webular gap 
+accuracy             quality      0.882    webular  0 share     
+answerAccuracy       quality      0.529    webular  0 share     
+citationPrecision    quality      n/a      n/a      n/a         
+latencyP50Ms         speed        997      webular  0 ms        
+latencyP95Ms         speed        3741     webular  0 ms        
+latencyP99Ms         speed        6708     webular  0 ms        
+coldStartMs          speed        2564     webular  0 ms        
+costPerCallUsd       cost         0        webular  0 USD       
+costPerCorrectUsd    cost         0        webular  0 USD       
+costPer1kTokensUsd   cost         0        webular  0 USD       
+tokensPerTask        tokens       2679     webular  0 tokens    
+tokensPerCorrect     tokens       3036     webular  0 tokens    
+successRate          reliability  1        webular  0 share     
+retriesPerCall       reliability  0        webular  0 retries   
+determinism          reliability  0.588    webular  0 share     
+runsOffline          control      1        webular  0 bool      
+keysNeeded           control      0        webular  0 keys      
+bytesSentOffMachine  control      32.4     webular  0 bytes/task
+dimension winners:
+  quality: webular
+  speed: webular
+  cost: webular
+  tokens: webular
+  reliability: webular
+  control: webular
+
+== webular vs firecrawl on 7 shared tasks ==
+metric               dim          webular  firecrawl  best       webular gap 
+accuracy             quality      1        0.85       webular    0 share     
+answerAccuracy       quality      0.571    0.55       webular    0 share     
+citationPrecision    quality      n/a      n/a        n/a        n/a         
+latencyP50Ms         speed        526      613        webular    0 ms        
+latencyP95Ms         speed        3741     1142       firecrawl  2599 ms     
+latencyP99Ms         speed        6708     1240       firecrawl  5468 ms     
+coldStartMs          speed        2564     665        firecrawl  1899 ms     
+costPerCallUsd       cost         0        0.00129    webular    0 USD       
+costPerCorrectUsd    cost         0        0.00151    webular    0 USD       
+costPer1kTokensUsd   cost         0        0.000148   webular    0 USD       
+tokensPerTask        tokens       6332     8715       webular    0 tokens    
+tokensPerCorrect     tokens       6332     10253      webular    0 tokens    
+successRate          reliability  1        1          webular    0 share     
+retriesPerCall       reliability  0        0          webular    0 retries   
+determinism          reliability  0.571    0.857      firecrawl  -0.286 share
+runsOffline          control      1        0          webular    0 bool      
+keysNeeded           control      0        1          webular    0 keys      
+bytesSentOffMachine  control      20.4     60.8       webular    0 bytes/task
+dimension winners:
+  quality: webular
+  speed: firecrawl
+  cost: webular
+  tokens: webular
+  reliability: webular
+  control: webular
+
+== webular vs exa on 14 shared tasks ==
+metric               dim          webular  exa      best     webular gap 
+accuracy             quality      0.857    1        exa      -0.143 share
+answerAccuracy       quality      0.643    0.8      exa      -0.157 share
+citationPrecision    quality      n/a      0.963    exa      n/a         
+latencyP50Ms         speed        1594     1169     exa      425 ms      
+latencyP95Ms         speed        3741     1581     exa      2160 ms     
+latencyP99Ms         speed        6708     1597     exa      5111 ms     
+coldStartMs          speed        2564     255      exa      2309 ms     
+costPerCallUsd       cost         0        0.0048   webular  0 USD       
+costPerCorrectUsd    cost         0        0.0048   webular  0 USD       
+costPer1kTokensUsd   cost         0        0.00256  webular  0 USD       
+tokensPerTask        tokens       3243     1876     exa      1367 tokens 
+tokensPerCorrect     tokens       3784     1876     exa      1908 tokens 
+successRate          reliability  1        1        webular  0 share     
+retriesPerCall       reliability  0        0        webular  0 retries   
+determinism          reliability  0.5      0.5      webular  0 share     
+runsOffline          control      1        0        webular  0 bool      
+keysNeeded           control      0        1        webular  0 keys      
+bytesSentOffMachine  control      39.3     70.8     webular  0 bytes/task
+dimension winners:
+  quality: exa
+  speed: exa
+  cost: webular
+  tokens: exa
+  reliability: webular
+  control: webular
+
+== webular vs tavily on 11 shared tasks ==
+metric               dim          webular  tavily  best     webular gap 
+accuracy             quality      0.818    1       tavily   -0.182 share
+answerAccuracy       quality      0.818    1       tavily   -0.182 share
+citationPrecision    quality      n/a      0.908   tavily   n/a         
+latencyP50Ms         speed        1825     1504    tavily   321 ms      
+latencyP95Ms         speed        3460     2049    tavily   1411 ms     
+latencyP99Ms         speed        3870     2059    tavily   1811 ms     
+coldStartMs          speed        3179     2059    tavily   1120 ms     
+costPerCallUsd       cost         0        0.008   webular  0 USD       
+costPerCorrectUsd    cost         0        0.008   webular  0 USD       
+costPer1kTokensUsd   cost         0        0.0138  webular  0 USD       
+tokensPerTask        tokens       168      578     webular  0 tokens    
+tokensPerCorrect     tokens       205      578     webular  0 tokens    
+successRate          reliability  1        1       webular  0 share     
+retriesPerCall       reliability  0        0       webular  0 retries   
+determinism          reliability  0.364    1       tavily   -0.636 share
+runsOffline          control      1        0       webular  0 bool      
+keysNeeded           control      0        1       webular  0 keys      
+bytesSentOffMachine  control      50       101     webular  0 bytes/task
+dimension winners:
+  quality: tavily
+  speed: tavily
+  cost: webular
+  tokens: webular
+  reliability: webular
+  control: webular
+
+== webular vs perplexity on 7 shared tasks ==
+metric               dim          webular  perplexity  best        webular gap 
+accuracy             quality      0.714    1           perplexity  -0.286 share
+answerAccuracy       quality      0.714    1           perplexity  -0.286 share
+citationPrecision    quality      n/a      n/a         n/a         n/a         
+latencyP50Ms         speed        2737     1532        perplexity  1205 ms     
+latencyP95Ms         speed        3460     1805        perplexity  1655 ms     
+latencyP99Ms         speed        3870     2015        perplexity  1855 ms     
+coldStartMs          speed        3179     2015        perplexity  1164 ms     
+costPerCallUsd       cost         0        0.00504     webular     0 USD       
+costPerCorrectUsd    cost         0        0.00504     webular     0 USD       
+costPer1kTokensUsd   cost         0        0.251       webular     0 USD       
+tokensPerTask        tokens       155      20.1        perplexity  134 tokens  
+tokensPerCorrect     tokens       216      20.1        perplexity  196 tokens  
+successRate          reliability  1        1           webular     0 share     
+retriesPerCall       reliability  0        0           webular     0 retries   
+determinism          reliability  0.429    0.286       webular     0 share     
+runsOffline          control      1        0           webular     0 bool      
+keysNeeded           control      0        1           webular     0 keys      
+bytesSentOffMachine  control      58.1     118         webular     0 bytes/task
+dimension winners:
+  quality: perplexity
+  speed: perplexity
+  cost: webular
+  tokens: perplexity
+  reliability: webular
+  control: webular
+
+== webular vs parallel on 11 shared tasks ==
+metric               dim          webular  parallel  best      webular gap 
+accuracy             quality      0.818    1         parallel  -0.182 share
+answerAccuracy       quality      0.818    1         parallel  -0.182 share
+citationPrecision    quality      n/a      n/a       n/a       n/a         
+latencyP50Ms         speed        1825     1751      parallel  74 ms       
+latencyP95Ms         speed        3460     3114      parallel  346 ms      
+latencyP99Ms         speed        3870     4709      webular   0 ms        
+coldStartMs          speed        3179     2364      parallel  815 ms      
+costPerCallUsd       cost         0        0.00685   webular   0 USD       
+costPerCorrectUsd    cost         0        0.00685   webular   0 USD       
+costPer1kTokensUsd   cost         0        0.0145    webular   0 USD       
+tokensPerTask        tokens       168      473       webular   0 tokens    
+tokensPerCorrect     tokens       205      473       webular   0 tokens    
+successRate          reliability  1        1         webular   0 share     
+retriesPerCall       reliability  0        0         webular   0 retries   
+determinism          reliability  0.364    0.111     webular   0 share     
+runsOffline          control      1        0         webular   0 bool      
+keysNeeded           control      0        1         webular   0 keys      
+bytesSentOffMachine  control      50       134       webular   0 bytes/task
+dimension winners:
+  quality: parallel
+  speed: parallel
+  cost: webular
+  tokens: webular
+  reliability: webular
+  control: webular
+
+== webular vs youcom on 4 shared tasks ==
+metric               dim          webular  youcom   best     webular gap 
+accuracy             quality      1        1        webular  0 share     
+answerAccuracy       quality      1        1        webular  0 share     
+citationPrecision    quality      n/a      n/a      n/a      n/a         
+latencyP50Ms         speed        459      122      youcom   337 ms      
+latencyP95Ms         speed        782      820      webular  0 ms        
+latencyP99Ms         speed        782      820      webular  0 ms        
+coldStartMs          speed        459      820      webular  0 ms        
+costPerCallUsd       cost         0        0.005    webular  0 USD       
+costPerCorrectUsd    cost         0        0.005    webular  0 USD       
+costPer1kTokensUsd   cost         0        0.00543  webular  0 USD       
+tokensPerTask        tokens       191      921      webular  0 tokens    
+tokensPerCorrect     tokens       191      921      webular  0 tokens    
+successRate          reliability  1        1        webular  0 share     
+retriesPerCall       reliability  0        0        webular  0 retries   
+determinism          reliability  0.25     1        youcom   -0.75 share 
+runsOffline          control      1        0        webular  0 bool      
+keysNeeded           control      0        1        webular  0 keys      
+bytesSentOffMachine  control      35.8     57.8     webular  0 bytes/task
+dimension winners:
+  quality: webular
+  speed: webular
+  cost: webular
+  tokens: webular
+  reliability: webular
+  control: webular
+
+== webular vs jina on 7 shared tasks ==
+metric               dim          webular  jina       best     webular gap 
+accuracy             quality      1        0.3        webular  0 share     
+answerAccuracy       quality      0.571    0          webular  0 share     
+citationPrecision    quality      n/a      n/a        n/a      n/a         
+latencyP50Ms         speed        526      60000      webular  0 ms        
+latencyP95Ms         speed        3741     60000      webular  0 ms        
+latencyP99Ms         speed        6708     60000      webular  0 ms        
+coldStartMs          speed        2564     4086       webular  0 ms        
+costPerCallUsd       cost         0        0.000929   webular  0 USD       
+costPerCorrectUsd    cost         0        0.00139    webular  0 USD       
+costPer1kTokensUsd   cost         0        0.0000563  webular  0 USD       
+tokensPerTask        tokens       6332     16494      webular  0 tokens    
+tokensPerCorrect     tokens       6332     24741      webular  0 tokens    
+successRate          reliability  1        0.45       webular  0 share     
+retriesPerCall       reliability  0        0          webular  0 retries   
+determinism          reliability  0.571    1          jina     -0.429 share
+runsOffline          control      1        0          webular  0 bool      
+keysNeeded           control      0        1          webular  0 keys      
+bytesSentOffMachine  control      20.4     41.3       webular  0 bytes/task
+dimension winners:
+  quality: webular
+  speed: webular
+  cost: webular
+  tokens: webular
+  reliability: webular
+  control: webular
+
+== webular vs browserbase on 7 shared tasks ==
+metric               dim          webular  browserbase  best         webular gap 
+accuracy             quality      1        0            webular      0 share     
+answerAccuracy       quality      0.571    n/a          webular      0 share     
+citationPrecision    quality      n/a      n/a          n/a          n/a         
+latencyP50Ms         speed        526      60000        webular      0 ms        
+latencyP95Ms         speed        3741     60000        webular      0 ms        
+latencyP99Ms         speed        6708     60000        webular      0 ms        
+coldStartMs          speed        2564     n/a          webular      0 ms        
+costPerCallUsd       cost         0        n/a          webular      0 USD       
+costPerCorrectUsd    cost         0        n/a          webular      0 USD       
+costPer1kTokensUsd   cost         0        n/a          webular      0 USD       
+tokensPerTask        tokens       6332     n/a          webular      0 tokens    
+tokensPerCorrect     tokens       6332     n/a          webular      0 tokens    
+successRate          reliability  1        0            webular      0 share     
+retriesPerCall       reliability  0        n/a          webular      0 retries   
+determinism          reliability  0.571    1            browserbase  -0.429 share
+runsOffline          control      1        0            webular      0 bool      
+keysNeeded           control      0        1            webular      0 keys      
+bytesSentOffMachine  control      20.4     n/a          webular      0 bytes/task
+dimension winners:
+  quality: webular
+  speed: webular
+  cost: webular
+  tokens: webular
+  reliability: webular
+  control: webular
+
+== webular vs gemini on 7 shared tasks ==
+metric               dim          webular  gemini  best     webular gap 
+accuracy             quality      0.714    0       webular  0 share     
+answerAccuracy       quality      0.714    n/a     webular  0 share     
+citationPrecision    quality      n/a      n/a     n/a      n/a         
+latencyP50Ms         speed        2737     60000   webular  0 ms        
+latencyP95Ms         speed        3460     60000   webular  0 ms        
+latencyP99Ms         speed        3870     60000   webular  0 ms        
+coldStartMs          speed        3179     n/a     webular  0 ms        
+costPerCallUsd       cost         0        n/a     webular  0 USD       
+costPerCorrectUsd    cost         0        n/a     webular  0 USD       
+costPer1kTokensUsd   cost         0        n/a     webular  0 USD       
+tokensPerTask        tokens       155      n/a     webular  0 tokens    
+tokensPerCorrect     tokens       216      n/a     webular  0 tokens    
+successRate          reliability  1        0       webular  0 share     
+retriesPerCall       reliability  0        n/a     webular  0 retries   
+determinism          reliability  0.429    1       gemini   -0.571 share
+runsOffline          control      1        0       webular  0 bool      
+keysNeeded           control      0        1       webular  0 keys      
+bytesSentOffMachine  control      58.1     n/a     webular  0 bytes/task
+dimension winners:
+  quality: webular
+  speed: webular
+  cost: webular
+  tokens: webular
+  reliability: webular
+  control: webular
+
+== webular vs readability on 3 shared tasks ==
+metric               dim          webular  readability  best         webular gap 
+accuracy             quality      1        0.333        webular      0 share     
+answerAccuracy       quality      0        0            webular      0 share     
+citationPrecision    quality      n/a      n/a          n/a          n/a         
+latencyP50Ms         speed        362      4            readability  358 ms      
+latencyP95Ms         speed        1457     42           readability  1415 ms     
+latencyP99Ms         speed        1457     42           readability  1415 ms     
+coldStartMs          speed        552      1            readability  551 ms      
+costPerCallUsd       cost         0        0            webular      0 USD       
+costPerCorrectUsd    cost         0        0            webular      0 USD       
+costPer1kTokensUsd   cost         0        0            webular      0 USD       
+tokensPerTask        tokens       46       34.3         readability  11.7 tokens 
+tokensPerCorrect     tokens       46       103          webular      0 tokens    
+successRate          reliability  1        1            webular      0 share     
+retriesPerCall       reliability  0        0            webular      0 retries   
+determinism          reliability  1        1            webular      0 share     
+runsOffline          control      1        1            webular      0 bool      
+keysNeeded           control      0        0            webular      0 keys      
+bytesSentOffMachine  control      0        0            webular      0 bytes/task
+dimension winners:
+  quality: webular
+  speed: readability
+  cost: webular
+  tokens: readability
+  reliability: webular
+  control: webular
+
+== headline accuracy per family, shared tasks only ==
+  search on the 4 tasks every arm offering it scored: webular 1, firecrawl 1, exa 1, tavily 1, parallel 1, youcom 1, jina 0, browserbase 0
+  answer on the 7 tasks every arm offering it scored: webular 0.714, exa 1, tavily 1, perplexity 1, parallel 1, gemini 0
+== per-family paired tests, webular vs peer (Holm across all) ==
+  search  firecrawl  n=4  diff=0  ci=[0, 0]  exact McNemar  p=1  pHolm=1  tie
+  search  exa  n=4  diff=0  ci=[0, 0]  exact McNemar  p=1  pHolm=1  tie
+  answer  exa  n=7  diff=-0.286  ci=[-0.571, 0]  exact McNemar  p=0.5  pHolm=1  not enough tasks
+  search  tavily  n=4  diff=0  ci=[0, 0]  exact McNemar  p=1  pHolm=1  tie
+  answer  tavily  n=7  diff=-0.286  ci=[-0.571, 0]  exact McNemar  p=0.5  pHolm=1  not enough tasks
+  answer  perplexity  n=7  diff=-0.286  ci=[-0.571, 0]  exact McNemar  p=0.5  pHolm=1  not enough tasks
+  search  parallel  n=4  diff=0  ci=[0, 0]  exact McNemar  p=1  pHolm=1  tie
+  answer  parallel  n=7  diff=-0.286  ci=[-0.571, 0]  exact McNemar  p=0.5  pHolm=1  not enough tasks
+  search  youcom  n=4  diff=0  ci=[0, 0]  exact McNemar  p=1  pHolm=1  tie
+  search  jina  n=4  diff=1  ci=[1, 1]  exact McNemar  p=0.125  pHolm=1  not enough tasks
+  search  browserbase  n=4  diff=1  ci=[1, 1]  exact McNemar  p=0.125  pHolm=1  not enough tasks
+  answer  gemini  n=7  diff=0.714  ci=[0.429, 1]  exact McNemar  p=0.0625  pHolm=0.75  not enough tasks
+  answer  firecrawl  n=0  diff=0  ci=[0, 0]  exact McNemar  p=1  pHolm=1  not offered
+  search  perplexity  n=0  diff=0  ci=[0, 0]  exact McNemar  p=1  pHolm=1  not offered
+  answer  youcom  n=0  diff=0  ci=[0, 0]  exact McNemar  p=1  pHolm=1  not offered
+  answer  jina  n=0  diff=0  ci=[0, 0]  exact McNemar  p=1  pHolm=1  not offered
+  answer  browserbase  n=0  diff=0  ci=[0, 0]  exact McNemar  p=1  pHolm=1  not offered
+  search  gemini  n=0  diff=0  ci=[0, 0]  exact McNemar  p=1  pHolm=1  not offered
+  search  readability  n=0  diff=0  ci=[0, 0]  exact McNemar  p=1  pHolm=1  not offered
+  answer  readability  n=0  diff=0  ci=[0, 0]  exact McNemar  p=1  pHolm=1  not offered
+
+webular misses (run 1):
+
+  qa-heisenberg-birthplace: ok 
+
+  qa-atomic-79: ok 
