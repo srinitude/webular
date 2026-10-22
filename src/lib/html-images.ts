@@ -1,6 +1,7 @@
 // Page image inventory: what the HTML already says about its images (src,
 // alt, srcset, size, figcaption) plus og:image, read before Readability runs.
 import type { parseHTML } from 'linkedom'
+import type TurndownService from 'turndown'
 import { documentBase } from '../core/url.ts'
 import { insideHidden, textOf } from './html-sanitize.ts'
 
@@ -82,4 +83,18 @@ export function inlineAlts(root: Pick<DomDocument['body'], 'querySelectorAll'>):
     if (alt) img.replaceWith(` ${alt} `)
   }
   for (const el of Array.from(root.querySelectorAll(BLOCKS))) el.after('\n')
+}
+
+// A Markdown image loads its URL as soon as a reader renders it, which can send
+// page data to any host the page names. Each image becomes a marked plain link
+// instead, which loads nothing until someone opens it.
+export const addImageRule = (service: TurndownService): void => {
+  service.addRule('image', {
+    filter: 'img',
+    replacement: (_content, node) => {
+      const src = (node as Element).getAttribute('src')?.trim() ?? ''
+      const alt = altOf(node as Element).replace(/\s+/g, ' ').replace(/[[\]\\]/g, '\\$&')
+      return src ? `[image: ${alt}](${src})` : ''
+    },
+  })
 }

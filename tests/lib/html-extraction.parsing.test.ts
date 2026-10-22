@@ -65,3 +65,12 @@ test('a <br> inside a code block stays a line break in Markdown', () => {
   const bare = htmlToMarkdown('<pre>line one<br/>line two</pre>')
   expect(bare).toContain('line one\nline two')
 })
+
+// Engineering #18: a Markdown image loads its URL as soon as it renders, so a
+// page could leak data through it. Each image becomes a marked plain link.
+test('an image becomes a marked link, and tag-block characters are gone', () => {
+  const tag = String.fromCodePoint(0xe0041, 0xe0042)
+  const md = htmlToMarkdown(`<p>Hi${tag} there</p><img src="https://x.test/p.png?k=1" alt="a]b">`)
+  expect(md).toBe('Hi there\n\n[image: a\\]b](https://x.test/p.png?k=1)')
+  expect(htmlToMarkdown('<img alt="no source">')).toBe('')
+})

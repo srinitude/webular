@@ -1,10 +1,9 @@
-// FOSS HTML operations: main-content extraction, HTML→Markdown, link harvest.
-// Composes @mozilla/readability + linkedom + turndown (all open source).
+// HTML operations on readability, linkedom, and turndown: article, Markdown, links.
 import { isProbablyReaderable, Readability } from '@mozilla/readability'
 import { parseHTML } from 'linkedom'
 import TurndownService from 'turndown'
 import { documentBase, normalizeUrl } from '../core/url.ts'
-import { imagesFrom, inlineAlts, ogImageOf, type PageImage } from './html-images.ts'
+import { addImageRule, imagesFrom, inlineAlts, ogImageOf, type PageImage } from './html-images.ts'
 import { dropHidden, dropInvisible, sanitizeHtml, textOf } from './html-sanitize.ts'
 import { addTableRule, tableRows } from './html-table.ts'
 import { type TitleCandidates, titleBaseline } from './jev/decisions/page-title.ts'
@@ -178,6 +177,7 @@ export const extractLinks = (html: string, base: string): string[] =>
 
 const turndown = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' })
 addTableRule(turndown)
+addImageRule(turndown)
 // Turndown fences only <pre><code>; fence a bare <pre> past any backtick run inside.
 turndown.addRule('bare-pre', {
   filter: (node) => node.nodeName === 'PRE' && node.firstChild?.nodeName !== 'CODE',
