@@ -2,7 +2,7 @@ cff-version: 1.2.0
 message: If you use webular, please cite it with this metadata.
 type: software
 title: webular
-abstract: A web research CLI that sends its judgment calls to Jev, TypeSafe's System One decision model. It scrapes, crawls, maps, extracts, searches, and summarizes with free and open-source parts, as Mastra workflows on Bun with Effect and XState. It runs on your machine, is open source, respects robots.txt by default, and can replay a run with the same result. Jev's key is the only API key, and without it each decision falls back to a rule-based baseline.
+abstract: "Web research CLI that sends its judgment calls to Jev, TypeSafe's System One decision model, and does the rest with free and open-source parts: scrape, crawl, map, extract, search, summarize, and gather context as Mastra workflows on Bun, run with Effect and XState from a fixed mise task graph. It runs on your machine, is open source, respects robots.txt by default, and can replay a run with the same result. Jev's key is the only API key, and it works without one."
 authors:
   - family-names: Srinivasan
     given-names: Kiren

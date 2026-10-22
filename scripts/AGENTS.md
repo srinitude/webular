@@ -7,6 +7,7 @@ Build and maintenance scripts that `mise` tasks run. The root [AGENTS.md](../AGE
 - [gen-dispatch.ts](gen-dispatch.ts) writes [src/cli/dispatch-table.ts](../src/cli/dispatch-table.ts) from the `run:*` tasks in [`mise.toml`](../mise.toml). `mise run build` runs it first, and a test fails on drift.
 - [clean.ts](clean.ts) deletes build output on every OS. `mise run build` runs it before each bundle.
 - [jev-docs.ts](jev-docs.ts) refreshes and proves the Jev docs snapshot for `mise run jev:docs`.
+- [repo-settings.ts](repo-settings.ts) applies (`mise run repo:settings`) or checks (`mise run repo:settings:check`, read-only) the GitHub description, homepage, and topics against [.github/repo-settings.json](../.github/repo-settings.json).
 - [install.sh](install.sh) and [install.ps1](install.ps1) install a release binary.
 
 ## Rules

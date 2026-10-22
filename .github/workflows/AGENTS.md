@@ -8,6 +8,7 @@ The GitHub Actions workflows; the parent [AGENTS.md](../AGENTS.md) lists the res
 - `.github/workflows/plugin.yml`: runs the plugin chain.
 - `.github/workflows/release.yml`: builds and publishes a release, with an attested SPDX SBOM and npm provenance.
 - `.github/workflows/codeql.yml`: CodeQL analysis of the JavaScript and TypeScript sources on push to main, on pull requests, and weekly.
+- `.github/workflows/repo-settings.yml`: read-only weekly check that the GitHub description, homepage, and topics match [`.github/repo-settings.json`](../repo-settings.json). `mise run repo:settings` applies the file by hand.
 - `.github/workflows/scorecard.yml`: OpenSSF Scorecard on push to main and weekly, published and uploaded to code scanning.
 
 ## Rules

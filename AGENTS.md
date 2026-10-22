@@ -81,6 +81,7 @@ Never:
 - Land work by picking whole files or hunks, with a `Landed-from:` trailer. Never merge, rebase, squash, or cherry-pick between agent branches.
 - Main moves only by fast-forward, after CI is green on Linux, macOS, and Windows and all 117 three-model runs of `mise run test:models` pass.
 - A pull request lists the checks it ran, with their real output.
+- Keep README, settings, and docs current: see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Resources
 

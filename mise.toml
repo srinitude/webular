@@ -140,6 +140,16 @@ depends = ["setup"]
 env = { WEBULAR_JEV_DRIFT_FILE = "{{ get_env(name='WEBULAR_JEV_DRIFT_FILE', default=config_root ~ '/.cache/jev-drift.jsonl') }}" }
 run = "bun test ./tests/jev --timeout 30000"
 
+[tasks."repo:settings"]
+description = "Apply .github/repo-settings.json (description, homepage, topics) to the GitHub repository; writes to GitHub, so run it on purpose. Off the linear spine"
+depends = ["setup"]
+run = "bun scripts/repo-settings.ts apply"
+
+[tasks."repo:settings:check"]
+description = "Read-only: fails naming each GitHub repository setting that drifted from .github/repo-settings.json. No other task depends on it"
+depends = ["setup"]
+run = "bun scripts/repo-settings.ts check"
+
 [tasks."jev:docs"]
 description = "Refresh and verify the Jev docs snapshot: conditional GET of docs.typesafe.ai/llms-full.txt (a 304 when unchanged), proof (sha256, line count, chunk boundaries) written to src/lib/jev/docs-snapshot.json; pass --replay to re-prove the committed recording offline"
 depends = ["setup"]

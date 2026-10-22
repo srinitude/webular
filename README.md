@@ -104,6 +104,7 @@ The `machine.next` tool replays events on one of webular's flow machines (`cliDi
 | `audit`     | Reports whether `deepsec` is there, plus a scan plan |
 | `act`       | Drives a real browser |
 | `feed`      | Reads an RSS 2.0 or Atom 1.0 feed and lists its items |
+| `jev`       | Learns from recorded Jev calls, or labels one as an eval case |
 
 ```bash
 webular search "bun javascript runtime" --json
