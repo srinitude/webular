@@ -5,7 +5,7 @@
 import { Clock, Config, Deferred, Effect } from 'effect'
 import { logErr } from '../core/output.ts'
 import { crossref, npm, openalex } from './scholarly.ts'
-import { scoreHits, WEAK_SCORE, webSearch } from './search.ts'
+import { lexicalRerank, scoreHits, WEAK_SCORE, webSearch } from './search.ts'
 import { secondHop } from './search-hop.ts'
 import { pickSources, pickSourcesJudged } from './search-intent.ts'
 import { MAX_VARIANTS } from './search-source-names.ts'
@@ -139,7 +139,9 @@ const searchOnce = Effect.fn('searchOnce')(function* (
     degraded: ok * 2 < ran.length,
     weak: (scored[0]?.score ?? 0) < WEAK_SCORE,
   }
-  return { results: scored.slice(0, limit).map((e) => e.hit), meta }
+  const hits = scored.map((e) => e.hit)
+  // Web only: the other sources already return their own relevance order.
+  return { results: (source === 'web' ? lexicalRerank(hits, query) : hits).slice(0, limit), meta }
 })
 
 interface Found {

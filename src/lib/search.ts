@@ -119,6 +119,56 @@ export const rankHits = <H extends SearchHit>(
   query: string,
 ): H[] => scoreHits(lists, query).map((e) => e.hit)
 
+// Lexical rerank of the merged list, no model call: BM25 of the query over each
+// hit's title, host, and snippet (Unicode word segmentation), scaled to 0..1,
+// plus the Jaccard overlap of query and title words (so the exact title beats a
+// longer one) and a boost for an official host or Wikipedia. The sort is stable,
+// so ties and a query with no overlap keep the fused order.
+const BM25_K1 = 1.2
+const BM25_B = 0.75
+const WIKI_BOOST = 0.25
+const HOST_BOOST = 0.5
+const segmenter = new Intl.Segmenter(undefined, { granularity: 'word' })
+const words = (s: string) =>
+  [...segmenter.segment(s.toLowerCase())].filter((w) => w.isWordLike).map((w) => w.segment)
+
+export function lexicalRerank<H extends SearchHit>(hits: ReadonlyArray<H>, query: string): H[] {
+  const want = [...new Set(words(query))]
+  const docs = hits.map((h) =>
+    words(`${h.title} ${URL.parse(h.url)?.hostname.replace(/[.-]/g, ' ') ?? ''} ${h.description}`),
+  )
+  const avg = docs.reduce((n, d) => n + d.length, 0) / (docs.length || 1)
+  const idf = (t: string) => {
+    const df = docs.filter((d) => d.includes(t)).length
+    return Math.log(1 + (docs.length - df + 0.5) / (df + 0.5))
+  }
+  const weights = want.map(idf)
+  const raw = docs.map((d) =>
+    want.reduce((sum, t, i) => {
+      const tf = d.filter((w) => w === t).length
+      return (
+        sum +
+        (weights[i] ?? 0) *
+          ((tf * (BM25_K1 + 1)) / (tf + BM25_K1 * (1 - BM25_B + (BM25_B * d.length) / avg)))
+      )
+    }, 0),
+  )
+  const top = Math.max(...raw)
+  if (!(top > 0)) return [...hits]
+  const score = hits.map((h, i) => {
+    const site = URL.parse(h.url)?.hostname.split('.').slice(-2).join('.')
+    const boost =
+      domainSignal(h.url, query) > 0 ? HOST_BOOST : site === 'wikipedia.org' ? WIKI_BOOST : 0
+    const title = new Set(words(h.title))
+    const shared = want.filter((t) => title.has(t)).length
+    return (raw[i] ?? 0) / top + shared / (want.length + title.size - shared) + boost
+  })
+  return hits
+    .map((h, i) => ({ h, s: score[i] ?? 0 }))
+    .sort((a, b) => b.s - a.s)
+    .map((e) => e.h)
+}
+
 // Weak: the top hit is only one list's first place, with no second list
 // agreeing and no official-site signal (1/61 = 0.0164; with either, >= 0.026).
 export const WEAK_SCORE = 1.5 / (RRF_K + 1)
