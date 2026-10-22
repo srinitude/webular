@@ -71,7 +71,12 @@ const connected = Effect.acquireRelease(
       command: process.execPath,
       args: [`${ROOT}src/commands/mcp.ts`],
       cwd: ROOT,
-      env: { ...host, WEBULAR_NO_CACHE: '1', WEBULAR_SOURCE_ORIGIN: fx.origin },
+      env: {
+        ...host,
+        WEBULAR_NO_CACHE: '1',
+        WEBULAR_SOURCE_ORIGIN: fx.origin,
+        WEBULAR_ALLOW_PRIVATE: '1',
+      },
       stderr: 'ignore',
     })
     return yield* io(() => client.connect(transport)).pipe(Effect.as(client))
