@@ -3,6 +3,7 @@
 [![CI](https://github.com/srinitude/webular/actions/workflows/ci.yml/badge.svg)](https://github.com/srinitude/webular/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/srinitude/webular/actions/workflows/codeql.yml/badge.svg)](https://github.com/srinitude/webular/actions/workflows/codeql.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/srinitude/webular/badge)](https://scorecard.dev/viewer/?uri=github.com/srinitude/webular)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15797/badge)](https://www.bestpractices.dev/projects/15797)
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
 Search, scrape, crawl, and answer with sources, from your own machine. A CLI and MCP server with one optional key: Jev.

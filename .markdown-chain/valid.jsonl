@@ -260,8 +260,9 @@
 {"path": "tests/release/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/workflows/AGENTS.md", "sha": "c982b7dbcbfee7dda301fbf256d951714424c1a55dd05e3b03c7321d38e7df70", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/workflows/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
-{"path": "README.md", "sha": "edbc6af101d0efbaa140220e0df15ae30d042beb4fac93ea48ed991ae5df9b5c", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "README.md", "sha": "ca9d4da77fd3a8752b9ccbcee6e132170259c1c05213d14ebe2a96a605b5d0b9", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/release/AGENTS.md", "sha": "d8b883c5c783520e8f7d5123bfb6b60d680f3aa6e0a6bddb8fca812e68648334"}
 {"path": "tests/release/AGENTS.md", "sha": "d8b883c5c783520e8f7d5123bfb6b60d680f3aa6e0a6bddb8fca812e68648334", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "CHANGELOG.md", "sha": "4266c7315746c28cd456d707c0bf5212194a26d85afcdaffc883458656e029e6"}
 {"path": "CHANGELOG.md", "sha": "4266c7315746c28cd456d707c0bf5212194a26d85afcdaffc883458656e029e6", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "README.md", "sha": "ca9d4da77fd3a8752b9ccbcee6e132170259c1c05213d14ebe2a96a605b5d0b9"}
