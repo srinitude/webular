@@ -14,11 +14,11 @@ webular runs every command with no key. `webular mcp` serves 24 MCP tools over s
 
 - [Add webular to your agent](https://webular.dev/install.md#agents): the command or config block for each MCP client.
 - [MCP tools](https://webular.dev/tools.md): all 24 tools, grouped by job, read-only or not.
-- [Use webular from your agent](https://webular.dev/agents.md): the plugin, results and paging, and agent-mode safety.
+- [Use webular from your agent](https://webular.dev/agents/index.md): the plugin, results and paging, and agent-mode safety.
 
 ## Skills
 
-- [Skills](https://webular.dev/agents.md#skills): webular-research, webular-interview, human-language, and rich-and-native-markdown.
+- [Skills](https://webular.dev/agents/index.md#skills): webular-research, webular-interview, human-language, and rich-and-native-markdown.
 
 ## CLI
 

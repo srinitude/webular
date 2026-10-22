@@ -23,10 +23,18 @@ const SLUGS = [
   'docs',
 ] as const
 
+// The agents twin lives at agents/index.md: /agents.md would clash with the
+// served /AGENTS.md on a case-blind disk.
+const twinPath = (slug: string) => (slug === 'agents' ? 'agents/index.md' : `${slug}.md`)
+
 const Server = Schema.fromJsonString(
-  Schema.Struct({ name: Schema.String, description: Schema.String, version: Schema.String }),
+  Schema.Struct({
+    name: Schema.String,
+    description: Schema.String,
+    version: Schema.String,
+    repository: Schema.Struct({ url: Schema.String, source: Schema.String }),
+  }),
 )
-const Tools = Schema.fromJsonString(Schema.Array(Schema.Unknown))
 
 const twins = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem
@@ -41,18 +49,19 @@ const twins = Effect.gen(function* () {
     { concurrency: 4 },
   )
   const all = [['index', llms] as const, ...pages]
+  yield* fs.makeDirectory(`${DIST}agents`, { recursive: true })
   yield* Effect.forEach(
     all,
-    ([slug, body]) => fs.writeFileString(`${DIST}${slug}.md`, `${INDEX_LINE}\n\n${body}`),
+    ([slug, body]) => fs.writeFileString(`${DIST}${twinPath(slug)}`, `${INDEX_LINE}\n\n${body}`),
     { concurrency: 4, discard: true },
   )
-  const full = all.map(([slug, body]) => `# ${ORIGIN}/${slug}.md\n\n${body}`).join('\n')
+  const full = all.map(([slug, body]) => `# ${ORIGIN}/${twinPath(slug)}\n\n${body}`).join('\n')
   yield* fs.writeFileString(`${DIST}llms-full.txt`, full)
   return all.map(([slug]) => slug)
 })
 
 const sitemap = (slugs: ReadonlyArray<string>, day: string) => {
-  const urls = slugs.flatMap((slug) => [slug === 'index' ? '/' : `/${slug}`, `/${slug}.md`])
+  const urls = slugs.flatMap((slug) => [slug === 'index' ? '/' : `/${slug}`, `/${twinPath(slug)}`])
   const rows = urls.map((u) => `  <url><loc>${ORIGIN}${u}</loc><lastmod>${day}</lastmod></url>`)
   return [
     '<?xml version="1.0" encoding="UTF-8"?>',
@@ -79,18 +88,20 @@ const serverFiles = Effect.gen(function* () {
   const serverText = yield* fs.readFileString(`${SITE}../server.json`)
   const toolsText = yield* fs.readFileString(`${SITE}src/generated/tools.json`)
   const server = yield* Schema.decodeUnknownEffect(Server)(serverText)
-  const tools = yield* Schema.decodeUnknownEffect(Tools)(toolsText)
   yield* fs.writeFileString(`${DIST}server.json`, serverText)
   yield* fs.writeFileString(`${DIST}tools.json`, toolsText)
   yield* fs.makeDirectory(`${DIST}.well-known/mcp`, { recursive: true })
-  // ponytail: field names follow server.json; check them against SEP-2127 before launch (GATED in the plan).
+  // Field names follow SEP-2127 (modelcontextprotocol/ext-server-card, schema.ts): a card has
+  // no transport, tools, or capabilities, and `remotes` lists only HTTP endpoints. webular is
+  // stdio-only, so the card has no `remotes`; clients list tools live over MCP.
   const card = {
+    $schema: 'https://static.modelcontextprotocol.io/schemas/v1/server-card.schema.json',
     name: server.name,
     title: 'webular',
     description: server.description,
     version: server.version,
-    transport: { type: 'stdio', command: 'webular', args: ['mcp'] },
-    tools,
+    websiteUrl: ORIGIN,
+    repository: server.repository,
   }
   const path = `${DIST}.well-known/mcp/server-card.json`
   yield* fs.writeFileString(path, `${JSON.stringify(card, null, 2)}\n`)
