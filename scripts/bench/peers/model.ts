@@ -4,7 +4,21 @@
 // registry entry, never new plumbing.
 import { Data, type Effect, Schema } from 'effect'
 
-export const Job = Schema.Literals(['search', 'scrape', 'crawl', 'map', 'extract', 'answer'])
+export const Job = Schema.Literals([
+  'search',
+  'scrape',
+  'crawl',
+  'map',
+  'extract',
+  'answer',
+  'research',
+  'summarize',
+  'media',
+  'parse',
+  'batch',
+  'act',
+  'monitor',
+])
 export type Job = typeof Job.Type
 
 // A check is data, so plan files can add tasks and metrics without code.

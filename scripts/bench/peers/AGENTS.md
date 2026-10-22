@@ -8,8 +8,7 @@ The peer benchmark. It scores webular against other web research tools. The pare
 - [matrix.ts](matrix.ts): the agent matrix. It scores every tool arm under every agent model from the committed agent run, or skips a cell with its reason.
 - [providers.ts](providers.ts): webular and one Effect Layer per peer. A peer with no key is skipped, and the report says so. Jina Reader runs without a key on its free limits.
 - [peers.ts](peers.ts): the Firecrawl, Exa, Tavily, and Perplexity adapters, with each peer's published prices. Every other hosted peer has its own adapter file named after it, such as [apify.ts](apify.ts) and [serper.ts](serper.ts).
-- [map-jobs.ts](map-jobs.ts) and [map-tasks.ts](map-tasks.ts): the map job. Firecrawl and Tavily list a site's URLs with the same page limit as webular. A map task passes only when every gold page is listed.
-- [extract-jobs.ts](extract-jobs.ts) and [extract-tasks.ts](extract-tasks.ts): the extract job. Firecrawl returns JSON for a field schema, and webular runs its extract workflow on the same fields. Each task checks the gold value in that JSON.
+- Each job has a `<job>-jobs.ts` and `<job>-tasks.ts` pair: [map](map-jobs.ts), [extract](extract-jobs.ts), [research](research-jobs.ts), [crawl](crawl-jobs.ts), [batch](batch-jobs.ts), [summarize](summarize-jobs.ts), [monitor](monitor-jobs.ts), [parse](parse-jobs.ts), [media](media-jobs.ts), and [act](act-jobs.ts). Webular and the rivals in the parity map run the same tasks.
 - [baselines.ts](baselines.ts): free local baselines. A missing tool is skipped, never faked.
 - [awaiting-approval.ts](awaiting-approval.ts): peers that need a cost, a card, or a cloud project the user has not approved. The report shows them as skipped.
 - [model.ts](model.ts), [tasks.ts](tasks.ts), and [score.ts](score.ts): the provider contract and metric registry, the tasks, and the pure scoring functions.

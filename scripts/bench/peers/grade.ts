@@ -32,7 +32,19 @@ export function gradeCheck(check: Check, out: Out, bare = false): boolean {
 }
 
 // An extract job's output is its JSON text, read whole like a page.
-const bareJobs = new Set<Task['job']>(['answer', 'scrape', 'extract'])
+const bareJobs = new Set<Task['job']>([
+  'answer',
+  'scrape',
+  'extract',
+  'research',
+  'summarize',
+  'media',
+  'parse',
+  'crawl',
+  'batch',
+  'act',
+  'monitor',
+])
 
 export const answerAccuracy = (task: Task, out: Out): number =>
   task.checks.every((c) => gradeCheck(c, out, bareJobs.has(task.job))) ? 1 : 0

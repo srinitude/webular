@@ -23,14 +23,14 @@ All four rivals have a key: `FIRECRAWL_API_KEY`, `EXA_API_KEY`,
 | `answer` | Exa `POST /answer`, Perplexity Sonar or Agent API, Tavily `POST /search` with `include_answer` | `answer` (Exa, Tavily, Perplexity) | Answer accuracy against aliases |
 | `map` | Firecrawl `POST /v2/map`, Tavily `POST /map` | `map` (Firecrawl, Tavily) | Page recall: every gold page listed |
 | `extract` | Firecrawl `POST /v2/scrape` with a `json` format and schema, or `POST /v2/extract`; Exa `POST /search` with `outputSchema` | `extract` (Firecrawl) | Field accuracy against gold values |
-| `crawl` | Firecrawl `POST /v2/crawl`, Tavily `POST /crawl` | none | Page recall plus gold text per page |
-| `batch` | Firecrawl batch scrape, Exa `POST /contents` with many URLs, Tavily `POST /extract` with many URLs | none | Scrape accuracy per URL |
-| `research` | Exa Agent (deep research), Perplexity Agent API, Tavily research | none | Answer accuracy and citation precision |
-| `summarize` | Exa `POST /contents` with `summary` | none | Key-fact recall |
-| `monitor` | Firecrawl scrape with the `changeTracking` format | none | Change found after a known edit |
-| `parse` | Firecrawl document parsing | none | Gold text present |
-| `media` | Firecrawl scrape with the `screenshot` format | none | Image returned for the page |
-| `act` | Firecrawl scrape `actions` and interact | none | Goal state reached |
+| `crawl` | Firecrawl `POST /v2/crawl`, Tavily `POST /crawl` | `crawl` (Firecrawl, Tavily) | Page recall plus gold text per page |
+| `batch` | Firecrawl batch scrape, Exa `POST /contents` with many URLs, Tavily `POST /extract` with many URLs | `batch` (Firecrawl, Exa, Tavily) | Scrape accuracy per URL |
+| `research` | Exa Agent (deep research), Perplexity Agent API, Tavily research | `research` (Exa, Perplexity) | Answer accuracy and citation precision |
+| `summarize` | Exa `POST /contents` with `summary` | `summarize` (Exa) | Key-fact recall |
+| `monitor` | Firecrawl scrape with the `changeTracking` format | `monitor` (Firecrawl) | Change found after a known edit |
+| `parse` | Firecrawl document parsing | `parse` (Firecrawl) | Gold text present |
+| `media` | Firecrawl scrape with the `screenshot` format | `media` (Firecrawl) | Image returned for the page |
+| `act` | Firecrawl scrape `actions` and interact | `act` (Firecrawl) | Goal state reached |
 
 ## Commands with no rival
 
