@@ -4,7 +4,7 @@
 // --depth, and duplicate forms of one page (/docs/ alias, #fragment, utm_* params).
 // A trap listed is a false positive; a reachable page missing is a miss.
 import { describe, expect, test } from 'bun:test'
-import { Config, Effect, Schema } from 'effect'
+import { Effect, Schema } from 'effect'
 import { runCli } from '../_support/cli.ts'
 import { useFixture } from '../_support/fixture.ts'
 import { eff } from '../_support/run.ts'
@@ -93,11 +93,10 @@ const decodeCrawl = Schema.decodeUnknownEffect(
 )
 
 const crawlUrls = Effect.gen(function* () {
-  // An explicit env replaces the parent's: keep the shell's PATH, drop the cache.
-  const PATH = yield* Config.String('PATH')
+  // An explicit env replaces the parent's; runCli keeps the parent's PATH.
   const args = ['--url', `${fx.origin}/`, '--limit', '50', '--depth', '2', '--json']
   const { code, out } = yield* runCli('src/commands/crawl.ts', args, {
-    env: { WEBULAR_NO_CACHE: '1', PATH },
+    env: { WEBULAR_NO_CACHE: '1' },
   })
   expect(code).toBe(0)
   return (yield* decodeCrawl(out)).pages.map((p) => p.url)

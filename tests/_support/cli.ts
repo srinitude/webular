@@ -1,6 +1,6 @@
 // One spawn helper for every command test — stdout/stderr drain CONCURRENTLY
 // (sequential drains deadlock once a pipe passes 64KB; see src/core/proc.ts).
-import { Effect, FileSystem, Option, Stream } from 'effect'
+import { Config, Effect, FileSystem, Option, Stream } from 'effect'
 import { ChildProcess, ChildProcessSpawner } from 'effect/process'
 import { exitCodeOf, IN_PROCESS } from '../../src/core/effect.ts'
 import { ROOT } from './root.ts'
@@ -47,6 +47,13 @@ const text = <E>(s: Stream.Stream<Uint8Array, E>) => Stream.mkString(Stream.deco
 // writes .cache/webular (into HOME, or into the repo when HOME is unset).
 // A child runs with Jev off unless the caller's env sets WEBULAR_JEV, so no
 // command test reads the Keychain key or waits on a live docs guard and Jev call.
+// An explicit env with no PATH key (any case) keeps the parent's PATH, read under
+// either spelling: Windows names it "Path", so a bare Config.String('PATH') fails there.
+const parentPath = Config.String('PATH').pipe(
+  Config.orElse(() => Config.String('Path')),
+  Config.withDefault(''),
+)
+
 export const runCli = (
   entry: string,
   args: string[],
@@ -60,10 +67,16 @@ export const runCli = (
     Effect.gen(function* () {
       const spawner = yield* ChildProcessSpawner.ChildProcessSpawner
       const run = yield* builtEntry(entry)
+      const keepPath =
+        opts.env !== undefined && !Object.keys(opts.env).some((k) => k.toUpperCase() === 'PATH')
+      const PATH = keepPath ? yield* parentPath : undefined
       const handle = yield* spawner.spawn(
         ChildProcess.make(opts.exec ?? 'bun', [`${ROOT}${run}`, ...args], {
           cwd: opts.cwd ?? ROOT,
-          env: { WEBULAR_JEV: 'off', ...(opts.env && { WEBULAR_NO_CACHE: '1', ...opts.env }) },
+          env: {
+            WEBULAR_JEV: 'off',
+            ...(opts.env && { WEBULAR_NO_CACHE: '1', ...(PATH && { PATH }), ...opts.env }),
+          },
           extendEnv: opts.env === undefined,
           detached: false,
         }),
