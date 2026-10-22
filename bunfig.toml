@@ -4,4 +4,4 @@
 minimumReleaseAge = 86400
 
 [test]
-preload = ["./tests/_support/no-cache.ts"]
+preload = ["./tests/_support/no-cache.ts", "./tests/_support/first-spawn.ts"]
