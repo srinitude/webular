@@ -78,7 +78,7 @@
 {"path": "docs/research/decision-models-changes.md", "sha": "6e8e4823367f4dd9e04cce3c4129d268eb3a249798193b7645f4da33b8da2e34", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/research/engineering-changes.md", "sha": "fd501f4719c6b82263a5e8961e470f60aa5bd10eaf3bf4acd2032e8c81fee57a", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/research/extraction-changes.md", "sha": "407e1844d743a9e4787de9c6f38c3c564727d09ebd12f9b015ecd83407a2bfc9", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
-{"path": "docs/research/open-items.md", "sha": "1638471a768e90f4616fbd9a741111850f4e04ed4ae6f1fe9559f730b5249f30", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/research/open-items.md", "sha": "69b333bd29b756990db51072c2acec6a63a94e99ec6a97c2702ae7b7f8572f00", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/research/retrieval-changes.md", "sha": "bab094478b8602b70d0ffbaf3a0f581d7553d8592a771586b6f50f700d1728c3", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/scoreboard.md", "sha": "1e71d3e737783488837b4d41cd42813903b4d3c9faf208f0420fa42cfa288384", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/tasks.md", "sha": "fbe33bd92dbd7446dc6d0faac7a4d82215c6d618f143453a378cf1d47f2aefe0", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
