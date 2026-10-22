@@ -116,9 +116,7 @@ const namedTools = Effect.gen(function* () {
   const texts = yield* Effect.forEach(files, (p) => read(`${PLUGIN}/skills/${p}`), {
     concurrency: 8,
   })
-  const rows = [
-    ...(yield* skillDoc).matchAll(/^\| [^|]+ \| `webular:([a-z]+)`( \([^|]*\))? \|$/gm),
-  ]
+  const rows = [...(yield* skillDoc).matchAll(/^\| [^|]+ \| `webular:([a-z]+)`( \([^|]*\))? \|$/gm)]
   return {
     table: rows.map((m) => m[1] ?? ''),
     sections: [...(yield* toolsDoc).matchAll(/^## (.+)$/gm)]

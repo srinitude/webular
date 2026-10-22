@@ -35,7 +35,12 @@ test(
           // codeql-action/init, /analyze, and /upload-sarif share one repository.
           const repo = action.split('/').slice(0, 2).join('/')
           count++
-          expect([path, action, tag, sha]).toEqual([path, action, tag, PINS[`${repo}@${tag}`] ?? 'unlisted pin'])
+          expect([path, action, tag, sha]).toEqual([
+            path,
+            action,
+            tag,
+            PINS[`${repo}@${tag}`] ?? 'unlisted pin',
+          ])
         }
         // No `uses:` without a SHA and a version comment.
         const uses = [...yml.matchAll(/^\s*(?:- )?uses:/gm)].length

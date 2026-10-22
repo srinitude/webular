@@ -129,8 +129,7 @@ const isNamed = (docs: Doc[], cmd: string) =>
     ({ text }) =>
       spans(text).some(
         (s) => s === cmd || s === `webular:${cmd}` || s.startsWith(`webular ${cmd}`),
-      ) ||
-      new RegExp(`^## ${cmd}$`, 'm').test(text),
+      ) || new RegExp(`^## ${cmd}$`, 'm').test(text),
   )
 
 test('every command has a skill that names it, or a stated reason', () =>
