@@ -20,6 +20,7 @@ import * as BunServices from '@effect/platform-bun/BunServices'
 import { Config, Effect, Layer, Predicate, Random, Schema } from 'effect'
 import { runProc } from '../core/proc.ts'
 import { resolveBin } from '../core/root.ts'
+import { requireThrowaway } from './cua-profile.ts'
 import { fieldsOf, snapshot, treeText } from './cua-tree.ts'
 import { Driver, driverError, makeDriver, type Steps } from './driver.ts'
 
@@ -105,47 +106,6 @@ export const cuaCall = (tool: string, args: Record<string, unknown>) =>
                   driverError('cua', `${tool}: ${res.stderr.trim() || `exit ${res.code}`}`),
                 ),
         ),
-  ).pipe(Effect.provide(BunServices.layer))
-
-// The browsers' default profile folders on macOS, Linux (expanded home), and
-// Windows. Matched on every OS, case-insensitive, after backslashes become slashes.
-const DEFAULT_PROFILE =
-  /\/(Library\/Application Support\/(Google\/Chrome|Chromium|Microsoft Edge|BraveSoftware\/Brave-Browser)|\.config\/(google-chrome|chromium|microsoft-edge|BraveSoftware\/Brave-Browser)|AppData\/Local\/(Google\/Chrome|Chromium|Microsoft\/Edge|BraveSoftware\/Brave-Browser)\/User Data)\/*$/i
-
-// `command` is the browser's full command line (`ps -o command=` or the Windows
-// CommandLine); a quoted --user-data-dir keeps its spaces and loses its quotes.
-export const throwawayProfile = (command: string) => {
-  const m = /--user-data-dir=(?:"([^"]*)"|(.+?)(?= --|$))/.exec(command.trim())
-  const dir = (m?.[1] ?? m?.[2])?.trim()
-  return dir !== undefined && dir !== '' && !DEFAULT_PROFILE.test(dir.replace(/\\/g, '/'))
-}
-
-// Windows has no `ps`; Console.Out.Write skips the formatter's line wrap.
-export const commandLineArgv = (os: string, pid: number): [string, ...string[]] =>
-  os === 'win32'
-    ? [
-        'powershell',
-        '-NoProfile',
-        '-Command',
-        `[Console]::Out.Write((Get-CimInstance Win32_Process -Filter 'ProcessId=${pid}').CommandLine)`,
-      ]
-    : ['ps', '-ww', '-o', 'command=', '-p', String(pid)]
-
-export const requireThrowaway = (pid: number) =>
-  Effect.flatMap(
-    Effect.orElseSucceed(
-      Effect.map(
-        runProc(commandLineArgv(process.platform, pid), { timeoutMs: 5_000 }),
-        (res) => res.stdout,
-      ),
-      () => '',
-    ),
-    (command) =>
-      throwawayProfile(command)
-        ? Effect.void
-        : Effect.fail(
-            driverError('cua', `pid ${pid} is not a throwaway browser profile (--user-data-dir)`),
-          ),
   ).pipe(Effect.provide(BunServices.layer))
 
 interface Opened extends CuaTarget {

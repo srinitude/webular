@@ -10,8 +10,9 @@ import { Config, Effect, Schedule, Schema } from 'effect'
 import { runProc } from '../../src/core/proc.ts'
 import { planGoal } from '../../src/lib/cua-goal.ts'
 import { runGoal } from '../../src/lib/cua-ground.ts'
+import { requireThrowaway } from '../../src/lib/cua-profile.ts'
 import { fieldsOf, snapshot } from '../../src/lib/cua-tree.ts'
-import { cuaCall, cuaTarget, requireThrowaway, windowSetting } from '../../src/lib/driver-cua.ts'
+import { cuaCall, cuaTarget, windowSetting } from '../../src/lib/driver-cua.ts'
 import { eff } from '../_support/run.ts'
 
 const optIn = Effect.runSync(

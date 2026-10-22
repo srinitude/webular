@@ -1,8 +1,16 @@
-// Per-OS paths of Cua browser mode (driver-cua.ts): how the browser's command
+// Per-OS paths of Cua browser mode (cua-profile.ts): how the browser's command
 // line is read, and which --user-data-dir folders count as the user's own
 // profile on macOS, Linux, and Windows.
 import { describe, expect, test } from 'bun:test'
-import { commandLineArgv, throwawayProfile } from '../../src/lib/driver-cua.ts'
+import { Duration, Effect } from 'effect'
+import {
+  commandLineArgv,
+  readCommandLine,
+  requireThrowaway,
+  throwawayProfile,
+} from '../../src/lib/cua-profile.ts'
+import { ROOT } from '../_support/root.ts'
+import { eff } from '../_support/run.ts'
 
 const WIN_CHROME = '"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"'
 const quoted = (dir: string) => `${WIN_CHROME} --user-data-dir="${dir}" --no-first-run`
@@ -15,6 +23,7 @@ describe('the command line is read per OS', () => {
     expect(commandLineArgv('win32', 42)).toEqual([
       'powershell',
       '-NoProfile',
+      '-NonInteractive',
       '-Command',
       "[Console]::Out.Write((Get-CimInstance Win32_Process -Filter 'ProcessId=42').CommandLine)",
     ])
@@ -49,4 +58,47 @@ describe('each OS default browser profile is refused', () => {
   test('an empty quoted dir is refused', () => {
     expect(throwawayProfile(`${WIN_CHROME} --user-data-dir=""`)).toBe(false)
   })
+})
+
+// A probe that cannot read the command line (a slow cold start, a missing
+// binary) is reported as that, not as "not a throwaway profile", and still refuses.
+const failure = (probe: Effect.Effect<void, Error>) =>
+  Effect.map(Effect.flip(probe), (err) => err.message)
+
+describe('a failed command line probe is its own error', () => {
+  test(
+    'a probe that never answers times out twice, then refuses with the timeout',
+    eff(
+      Effect.gen(function* () {
+        const sleeper = [process.execPath, `${ROOT}tests/engine/cua-fake-browser.ts`] as const
+        const [took, msg] = yield* Effect.timed(
+          failure(requireThrowaway(7, readCommandLine(7, [...sleeper], 200))),
+        )
+        expect(msg).toBe('could not read the command line of pid 7: timed out after 200 ms')
+        expect(Duration.toMillis(took)).toBeGreaterThanOrEqual(400)
+      }),
+    ),
+    20_000,
+  )
+  test(
+    'a probe that cannot start refuses with the spawn error, without a retry',
+    eff(
+      Effect.gen(function* () {
+        const msg = yield* failure(requireThrowaway(7, readCommandLine(7, ['webular-no-probe'])))
+        expect(msg).toStartWith('could not read the command line of pid 7: ')
+        expect(msg).not.toContain('throwaway')
+      }),
+    ),
+  )
+  test(
+    'a probe that reads a command line still judges the profile',
+    eff(
+      Effect.gen(function* () {
+        const msg = yield* failure(
+          requireThrowaway(7, readCommandLine(7, [process.execPath, '--version'])),
+        )
+        expect(msg).toBe('pid 7 is not a throwaway browser profile (--user-data-dir)')
+      }),
+    ),
+  )
 })

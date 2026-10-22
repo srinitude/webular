@@ -5,7 +5,7 @@
 // `open` without -g; and it pins the throwaway-profile guard of browser mode.
 import { describe, expect, test } from 'bun:test'
 import { Effect } from 'effect'
-import { throwawayProfile } from '../../src/lib/driver-cua.ts'
+import { throwawayProfile } from '../../src/lib/cua-profile.ts'
 import { ROOT } from '../_support/root.ts'
 import { eff, io } from '../_support/run.ts'
 
