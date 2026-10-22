@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: If you use webular, please cite it with this metadata.
+type: software
+title: webular
+abstract: A web research CLI that scrapes, crawls, maps, extracts, searches, and summarizes with free and open-source parts.
+authors:
+  - family-names: Srinivasan
+    given-names: Kiren
+repository-code: https://github.com/srinitude/webular
+license: Apache-2.0

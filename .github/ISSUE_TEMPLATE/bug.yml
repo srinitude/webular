@@ -1,0 +1,41 @@
+name: Bug report
+description: Something in webular does not work as documented.
+labels: ["bug"]
+body:
+  - type: textarea
+    id: command
+    attributes:
+      label: Command
+      description: The exact command you ran, with its flags.
+      render: shell
+      placeholder: webular scrape https://example.com --json
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual result
+      description: Paste the output and the exit code. Remove any keys or private URLs first.
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Webular version
+      description: The output of `webular --version`.
+    validations:
+      required: true
+  - type: input
+    id: system
+    attributes:
+      label: Operating system
+      placeholder: macOS 15, Ubuntu 24.04, Windows 11
+    validations:
+      required: true

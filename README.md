@@ -3,6 +3,7 @@
 [![npm](https://img.shields.io/npm/v/webular.svg)](https://www.npmjs.com/package/webular)
 [![CI](https://github.com/srinitude/webular/actions/workflows/ci.yml/badge.svg)](https://github.com/srinitude/webular/actions/workflows/ci.yml)
 [![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/srinitude/webular/badge)](https://scorecard.dev/viewer/?uri=github.com/srinitude/webular)
 [![runtime: Bun](https://img.shields.io/badge/runtime-Bun-f9f1e1.svg?logo=bun&logoColor=black)](https://bun.com)
 
 > A web research CLI for every platform. It can scrape, crawl, map, extract, search, summarize, and gather context. It uses **free and open-source** libraries. It runs them as **Mastra** workflows and tools, defines every command in a fixed **mise** task graph, and runs on **Bun**.
@@ -10,6 +11,12 @@
 `webular` puts the web features of seven paid web-data products in one CLI:
 Firecrawl, Exa, Perplexity, Tavily, Parallel, Nimble, and Brave.
 It needs **no paid API**. Every feature uses open-source parts.
+
+## Why webular
+
+- **No paid API.** Every feature runs on open-source parts.
+- **One CLI.** Search, scrape, crawl, map, extract, answer, research, and feed share one command set and one JSON contract.
+- **Measured, not claimed.** On the one committed peer run ([bench/results/peers-2026-10-21T03-51-21-982Z.json](bench/results/peers-2026-10-21T03-51-21-982Z.json)), webular search scored 0.222 and Exa scored 1.000 on the same 3 search tasks, so webular lost on search in that run. Read [the benchmark results](docs/benchmarks.md) for every score and the method behind it.
 
 ## Install
 

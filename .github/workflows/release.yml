@@ -4,7 +4,8 @@
 # Homebrew formula and Scoop manifest from it (src/release/distribution.ts),
 # write the winget manifest set (src/release/winget.ts) and upload it as the
 # build artifact "winget-manifests" (submitting it to microsoft/winget-pkgs is
-# a manual step), attest every file (actions/attest, Sigstore build provenance), and attach
+# a manual step), write an SPDX SBOM (anchore/sbom-action) and attest it, attest every file
+# (actions/attest, Sigstore build provenance), and attach
 # them all, plus scripts/install.sh and scripts/install.ps1, to a DRAFT GitHub release -> publish: one
 # npm package per target (webular-<key>, with os/cpu/libc fields), then the
 # root package that lists them as optionalDependencies, then un-draft the
@@ -156,6 +157,24 @@ jobs:
           path: dist/packaging
           include-hidden-files: true
           if-no-files-found: error
+      # SPDX SBOM of the installed dependencies (node_modules exists after
+      # compile:all). The webular.spdx.json name stays outside the webular-*
+      # globs, so the checksum and per-file steps do not pick it up.
+      - name: Generate the SPDX SBOM
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+        with:
+          path: .
+          format: spdx-json
+          output-file: dist/bin/webular.spdx.json
+          upload-artifact: false
+          upload-release-assets: false
+        env:
+          SYFT_EXCLUDE: ./dist/**
+      - name: Attest the SBOM
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: dist/bin/webular-*
+          sbom-path: dist/bin/webular.spdx.json
       - name: Attest build provenance for every release file
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
@@ -172,7 +191,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           prerelease=; case "$GITHUB_REF_NAME" in *-*) prerelease=--prerelease ;; esac
-          set -- dist/bin/webular-* dist/bin/SHA256SUMS dist/bin/install.sh dist/bin/install.ps1 dist/bin/webular.rb dist/bin/webular.json dist/bin/webular.1
+          set -- dist/bin/webular-* dist/bin/SHA256SUMS dist/bin/install.sh dist/bin/install.ps1 dist/bin/webular.rb dist/bin/webular.json dist/bin/webular.1 dist/bin/webular.spdx.json
           gh release create "$GITHUB_REF_NAME" --draft $prerelease --title "$GITHUB_REF_NAME" --generate-notes --verify-tag "$@" \
             || gh release upload "$GITHUB_REF_NAME" "$@" --clobber
 

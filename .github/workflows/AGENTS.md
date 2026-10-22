@@ -6,13 +6,15 @@ The GitHub Actions workflows; the parent [AGENTS.md](../AGENTS.md) lists the res
 
 - `.github/workflows/ci.yml`: runs `mise run ci` and `mise run e2e` on Linux, macOS, and Windows, and builds the executable on each.
 - `.github/workflows/plugin.yml`: runs the plugin chain.
-- `.github/workflows/release.yml`: builds and publishes a release.
+- `.github/workflows/release.yml`: builds and publishes a release, with an attested SPDX SBOM and npm provenance.
+- `.github/workflows/codeql.yml`: CodeQL analysis of the JavaScript and TypeScript sources on push to main, on pull requests, and weekly.
+- `.github/workflows/scorecard.yml`: OpenSSF Scorecard on push to main and weekly, published and uploaded to code scanning.
 
 ## Rules
 
 - A workflow runs `mise` tasks only. Tool versions come from `mise.toml`, never from a workflow.
 - Pin every action to a full commit SHA, with its tag in a comment.
-- Grant the least `permissions` a job needs, and set `persist-credentials: false` on checkout.
+- Start each workflow with `permissions: {}` or `contents: read`. Grant each job only the `permissions` it needs, and set `persist-credentials: false` on checkout.
 - Every job sets `timeout-minutes`, because the default is 360 ([GitHub Actions](https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions)).
 - Every workflow sets a `concurrency` group. Use `cancel-in-progress: true` for checks and `false` for releases ([GitHub Actions](https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions)).
 - Cache `BUN_INSTALL_CACHE_DIR`, keyed on `mise.toml` and `bun.lock`, and still run `bun install --frozen-lockfile` ([Bun](https://bun.com/docs/pm/cli/install), tag `bun-v1.4.3`).

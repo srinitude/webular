@@ -1,0 +1,32 @@
+name: Source request
+description: Ask for a new keyless source or site.
+labels: ["enhancement"]
+body:
+  - type: input
+    id: source
+    attributes:
+      label: Source or site
+      description: The name and the home page URL.
+    validations:
+      required: true
+  - type: input
+    id: docs
+    attributes:
+      label: API docs URL
+      description: The official docs for its public, keyless endpoint.
+    validations:
+      required: true
+  - type: textarea
+    id: use
+    attributes:
+      label: What it adds
+      description: The kind of question this source answers that the current sources do not.
+    validations:
+      required: true
+  - type: textarea
+    id: terms
+    attributes:
+      label: Terms of use
+      description: The license or terms that allow automated reads, with a link.
+    validations:
+      required: true

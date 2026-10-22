@@ -5,10 +5,17 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ['*']
   - package-ecosystem: bun
     directory: /
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     groups:
       effect:
         patterns: ['effect', '@effect/*']

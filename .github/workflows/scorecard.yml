@@ -1,0 +1,40 @@
+# OpenSSF Scorecard: scores the repository's supply chain practices, publishes
+# the result to the public Scorecard API (publish_results), and uploads the
+# SARIF to code scanning.
+name: Scorecard
+
+on:
+  push:
+    branches: [main]
+  branch_protection_rule:
+  schedule:
+    - cron: "41 6 * * 2" # weekly, Tuesday 06:41 UTC
+
+permissions: {}
+
+concurrency:
+  group: scorecard-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analysis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read # check out the code
+      actions: read # read workflow metadata for the checks
+      security-events: write # upload the SARIF results
+      id-token: write # publish_results signs the result with OIDC
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ossf/scorecard-action@fa7117db83c52d787ae5a89f350999701505d78e # v2.5.0
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          publish_results: true
+      - uses: github/codeql-action/upload-sarif@8498dc4c2b27cdd99baf0f87955b29ebbf30c78d # v4.39.1
+        with:
+          sarif_file: results.sarif
+          category: scorecard

@@ -1,0 +1,40 @@
+name: Accuracy regression
+description: A benchmark task scores worse than before.
+labels: ["bug"]
+body:
+  - type: input
+    id: task_id
+    attributes:
+      label: Benchmark task id
+      description: The `id` field of a line in `bench/tasks/`.
+      placeholder: search.known-item-en-Q1259644
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command
+      description: The exact command that reproduces the score.
+      render: shell
+      placeholder: mise run bench
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected score or answer
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual score or answer
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Webular version
+      description: The output of `webular --version`.
+    validations:
+      required: true
