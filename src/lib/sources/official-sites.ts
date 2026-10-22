@@ -44,6 +44,20 @@ const queryFor = (articles: ReadonlyArray<string>, creator: string | undefined, 
 
 const WIKI = /^https:\/\/en\.wikipedia\.org\/wiki\//
 
+// The first official site of each article, in article order, as a hit.
+const siteHits = (
+  articles: ReadonlyArray<string>,
+  site: ReadonlyMap<string, string>,
+  titles: ReadonlyMap<string, string>,
+): Hit[] =>
+  articles.flatMap((u) => {
+    const url = site.get(u)
+    const title = titles.get(u)
+    return url
+      ? [{ title: title ?? url, url, description: `Official website (Wikidata) of ${title ?? u}` }]
+      : []
+  })
+
 // Two lists: official sites for the Wikipedia articles among `hits` (first site
 // per article, in article order), then the products of the maker `query` names.
 // Any failure gives no lists, so the search stands as it was.
@@ -61,18 +75,7 @@ export const officialSites = (
       const site = new Map<string, string>()
       for (const { a, site: s } of results.bindings)
         if (a && !site.has(a.value)) site.set(a.value, s.value)
-      const sites = articles.flatMap((u) => {
-        const url = site.get(u)
-        return url
-          ? [
-              {
-                title: titles.get(u) ?? url,
-                url,
-                description: `Official website (Wikidata) of ${titles.get(u) ?? u}`,
-              },
-            ]
-          : []
-      })
+      const sites = siteHits(articles, site, titles)
       const made = results.bindings.filter((r) => !r.a)
       return creator ? [sites, productHits(made, creator, limit, query)] : [sites]
     }),

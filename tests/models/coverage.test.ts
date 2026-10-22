@@ -17,20 +17,27 @@ const Tools = Schema.fromJsonString(
   Schema.Struct({ tools: Schema.Record(Schema.String, Schema.Unknown) }),
 )
 
+// The command names in src/commands and the MCP tool names in descriptions.json.
+const commandsAndTools = Effect.gen(function* () {
+  const fs = yield* FileSystem.FileSystem
+  const commands = (yield* fs.readDirectory(`${ROOT}src/commands`))
+    .filter((f) => f.endsWith('.ts'))
+    .map((f) => f.slice(0, -3))
+  const tools = Object.keys(
+    (yield* Effect.flatMap(
+      fs.readFileString(`${ROOT}plugins/webular/src/descriptions.json`),
+      Schema.decodeUnknownEffect(Tools),
+    )).tools,
+  )
+  return { commands, tools }
+})
+
 test('every command and MCP tool has a scenario on every surface', () =>
   Effect.runPromise(
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem
       const file = yield* loadScenarios
-      const commands = (yield* fs.readDirectory(`${ROOT}src/commands`))
-        .filter((f) => f.endsWith('.ts'))
-        .map((f) => f.slice(0, -3))
-      const tools = Object.keys(
-        (yield* Effect.flatMap(
-          fs.readFileString(`${ROOT}plugins/webular/src/descriptions.json`),
-          Schema.decodeUnknownEffect(Tools),
-        )).tools,
-      )
+      const { commands, tools } = yield* commandsAndTools
       const covered = new Set(file.scenarios.map((s) => s.tool))
       const missing = [...new Set([...commands, ...tools])]
         .filter((c) => !(c in EXEMPT) && !covered.has(c))
