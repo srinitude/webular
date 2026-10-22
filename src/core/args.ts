@@ -31,6 +31,8 @@ const COMMON: Record<string, OptionSpec> = {
   timeout: { type: 'string' },
   // Read by dispatch.ts (it sets WEBULAR_NO_CACHE); parsed here so no command rejects it.
   'no-cache': { type: 'boolean' },
+  // Read by dispatch.ts (it sets WEBULAR_BYOK): opt in to your own search key.
+  byok: { type: 'boolean' },
 }
 
 // Retired flags the CLI ignores — still PARSED so a legacy `--format json`
