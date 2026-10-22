@@ -3,7 +3,7 @@
 // question. Prints pass rate for both arms; the image arm must hold every
 // text win and cite the figure where the page's key facts sit in a picture.
 import { afterAll, expect, test } from 'bun:test'
-import { Console, Effect, Layer, ManagedRuntime, Ref } from 'effect'
+import { Config, Console, Effect, Layer, ManagedRuntime, Option, Ref } from 'effect'
 import type { PageImage } from '../../src/lib/html-images.ts'
 import { Jev, type JevResult } from '../../src/lib/jev/client.ts'
 import { sourceFigures } from '../../src/lib/router-images.ts'
@@ -82,7 +82,8 @@ const rt = ManagedRuntime.make(Jev.live)
 afterAll(() => rt.dispose())
 const liveRun = Effect.gen(function* () {
   const jev = yield* Jev
-  if (!jev.available) return
+  const live = yield* Config.option(Config.String('WEBULAR_TEST_LIVE'))
+  if (!Option.contains(live, '1') || !jev.available) return
   const tokens = yield* Ref.make(0)
   const counted = Jev.of({
     available: true,
@@ -112,8 +113,4 @@ const liveRun = Effect.gen(function* () {
   for (const a of after) expect(a).toBeGreaterThanOrEqual(before)
 })
 
-test.if(process.env['WEBULAR_TEST_LIVE'] === '1')(
-  'live: the image arm holds or beats the text arm',
-  () => rt.runPromise(liveRun),
-  120_000,
-)
+test('live: the image arm holds or beats the text arm', () => rt.runPromise(liveRun), 120_000)
