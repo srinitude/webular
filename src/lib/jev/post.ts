@@ -1,6 +1,6 @@
 // One Jev HTTP call: docs guard, POST, reply decode, one jittered retry, and the
 // same-model retry. client.ts owns the endpoint and wires this in.
-import { Clock, Effect, Option, Random, Redacted, Schema } from 'effect'
+import { Clock, Effect, identity, Option, Random, Redacted, Schema } from 'effect'
 import type * as HttpClient from 'effect/http/HttpClient'
 import * as HttpClientRequest from 'effect/http/HttpClientRequest'
 import { logErr } from '../../core/output.ts'
@@ -12,12 +12,22 @@ const TIMEOUT_MS = 3_000 // Jev's slow tail is about 2 s
 const RETRY_BASE_MS = 200 // full jitter: one retry after a random 0 to 200 ms
 const MAX_RETRY_AFTER_MS = 5_000 // a longer server wait falls back instead of stalling the step
 const NO_KEY = 'no TypeSafe API key'
+const IMAGES_HEADER = 'TypeSafe-Danger-Zone-Images'
+const ASSETS_KEY = ',"assets":{' // only requestBytes writes this; quotes inside strings are escaped
 
 const Answer = Schema.Struct({
   type: Schema.String,
   noul: Schema.optional(Schema.Number),
   choice: Schema.optional(Schema.String),
   score: Schema.optional(Schema.Number),
+  box: Schema.optional(
+    Schema.Struct({
+      top: Schema.Number,
+      bottom: Schema.Number,
+      left: Schema.Number,
+      right: Schema.Number,
+    }),
+  ),
   confidence: Schema.optional(Schema.NullOr(Schema.Number)),
   probabilities: Schema.optional(Schema.Record(Schema.String, Schema.Number)),
 })
@@ -78,6 +88,8 @@ export const postOnce =
       const req = HttpClientRequest.post(endpoint).pipe(
         HttpClientRequest.bearerToken(Redacted.value(key.value)),
         HttpClientRequest.bodyText(body, 'application/json'),
+        // Images are gated: the header is required on every request that carries one.
+        body.includes(ASSETS_KEY) ? HttpClientRequest.setHeader(IMAGES_HEADER, 'true') : identity,
       )
       const res = yield* http.execute(req)
       if (res.status >= 400) return yield* httpError(res)

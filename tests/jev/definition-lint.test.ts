@@ -4,6 +4,9 @@ import { expect, test } from 'bun:test'
 import { BunServices } from '@effect/platform-bun'
 import { Effect, FileSystem } from 'effect'
 import { JEV_MODEL_DEFAULT, type JevRequest } from '../../src/lib/jev/client.ts'
+import { decideCropBox } from '../../src/lib/jev/decisions/crop-box.ts'
+import { imageKindDecision } from '../../src/lib/jev/decisions/image-kind.ts'
+import { routeDecision } from '../../src/lib/jev/decisions/image-router.ts'
 import { decisions } from '../../src/lib/jev/decisions.ts'
 import type { DecisionDef } from '../../src/lib/jev/define.ts'
 import { fetchBlockDecision, fetchErrorDecision } from '../../src/lib/jev/fetch.ts'
@@ -147,7 +150,15 @@ const listed = (d: object): ReadonlyArray<Listed> =>
   'payload' in (Reflect.get(d, 'def') ?? {}) ? [d as Listed] : []
 const ALL: ReadonlyArray<Listed> = [
   ...Object.values(decisions).flatMap(listed),
-  ...[fetchErrorDecision, fetchBlockDecision, fetchBrowserDecision, nextEvent].flatMap(listed),
+  ...[
+    fetchErrorDecision,
+    fetchBlockDecision,
+    fetchBrowserDecision,
+    nextEvent,
+    routeDecision,
+    decideCropBox,
+    imageKindDecision,
+  ].flatMap(listed),
 ]
 
 const scannedCalls = Effect.gen(function* () {

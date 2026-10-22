@@ -8,6 +8,7 @@
 import * as BunServices from '@effect/platform-bun/BunServices'
 import { Context, Effect, Layer, Schema, type Stream, SubscriptionRef } from 'effect'
 import { runBatch } from './agentbrowser.ts'
+import { maybeScreenshot } from './driver-screenshot.ts'
 
 export const Backend = Schema.Literals(['agent-browser', 'cua'])
 export type Backend = typeof Backend.Type
@@ -27,6 +28,7 @@ class DriverError extends Schema.TaggedError<DriverError>()('DriverError', {
 interface Rendered {
   url: string
   html: string
+  screenshot?: Uint8Array // only when WEBULAR_SCREENSHOT is on and the capture succeeded
 }
 
 export class Driver extends Context.Service<
@@ -43,6 +45,8 @@ export interface Steps {
   open(url: string): Effect.Effect<unknown, DriverError>
   read(url: string, opened: unknown): Effect.Effect<string, DriverError>
   close(opened: unknown): Effect.Effect<void>
+  // Optional picture of the page just read; undefined when off or it failed.
+  shot?(): Effect.Effect<Uint8Array | undefined>
 }
 
 export const makeDriver = Effect.fnUntraced(function* (backend: Backend, steps: Steps) {
@@ -58,7 +62,9 @@ export const makeDriver = Effect.fnUntraced(function* (backend: Backend, steps: 
       Effect.gen(function* () {
         const opened = yield* session(url)
         yield* mark('reading', url)
-        return { url, html: yield* steps.read(url, opened) }
+        const html = yield* steps.read(url, opened)
+        const screenshot = steps.shot ? yield* steps.shot() : undefined
+        return screenshot ? { url, html, screenshot } : { url, html }
       }),
     )
   return Driver.of({ backend, render, state: SubscriptionRef.changes(ref) })
@@ -134,6 +140,7 @@ const readHtml = (url: string) =>
 const agentBrowserSteps: Steps = {
   open: () => Effect.void,
   read: readHtml,
+  shot: () => maybeScreenshot(SESSION),
   close: () => Effect.void,
 }
 

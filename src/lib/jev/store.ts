@@ -102,7 +102,7 @@ interface AskDeps {
 // Cache, then replay, then the live call; every answer is remembered, logged, and drift-checked.
 export const makeAsk = (d: AskDeps) => (decision: string, req: JevRequest) =>
   Effect.suspend(() => {
-    const body = requestBytes(d.model, req.state, req.questions)
+    const body = requestBytes(d.model, req.state, req.questions, req.assets)
     const k = cacheKey(body)
     const hit = d.lru.get(k)
     const fromReplay = (r: ReturnType<typeof replayStore>) => {

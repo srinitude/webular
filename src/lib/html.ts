@@ -3,6 +3,7 @@
 import { isProbablyReaderable, Readability } from '@mozilla/readability'
 import { parseHTML } from 'linkedom'
 import TurndownService from 'turndown'
+import { imagesFrom, inlineAlts, ogImageOf, type PageImage, textOf } from './html-images.ts'
 import { addTableRule } from './html-table.ts'
 import { type TitleCandidates, titleBaseline } from './jev/decisions/page-title.ts'
 
@@ -16,6 +17,8 @@ interface PageDoc {
   title: string
   titles: TitleCandidates
   links: string[]
+  images: PageImage[]
+  ogImage: string
   article: Article
 }
 
@@ -121,9 +124,8 @@ export function pageBodyHtml(html: string): string {
 // Plain text of a page Readability skips, read from a body dropHidden has
 // already cleared of non-text and hidden elements.
 function bodyText(body: DomDocument['body']): string {
-  return dropInvisible(body.textContent ?? '')
-    .replace(/\s+/g, ' ')
-    .trim()
+  inlineAlts(body)
+  return dropInvisible(textOf(body))
 }
 
 function articleFrom(document: DomDocument, rawHtml: string): Article {
@@ -147,30 +149,38 @@ function articleFrom(document: DomDocument, rawHtml: string): Article {
       text: bodyText(document.body),
     }
   }
-  const parsed = new Readability(doc).parse()
+  return readableArticle(doc, docTitle, rawHtml)
+}
+
+// The serializer hands back the article element itself, so its HTML is read
+// before the alt swap and its text after, with no second parse.
+function readableArticle(doc: Document, docTitle: string, rawHtml: string): Article {
+  const parsed = new Readability(doc, { serializer: (node) => node as Element }).parse()
   if (!parsed) return { title: docTitle, contentHtml: sanitizeHtml(rawHtml), text: '' }
+  const contentHtml = sanitizeHtml(parsed.content?.innerHTML ?? '')
+  if (parsed.content) inlineAlts(parsed.content as unknown as DomDocument['body'])
   return {
     title: parsed.title ?? docTitle,
-    contentHtml: sanitizeHtml(parsed.content ?? ''),
-    text: dropInvisible(parsed.textContent ?? ''),
+    contentHtml,
+    text: dropInvisible(parsed.content?.textContent ?? ''),
   }
 }
 
-const textOf = (el: { textContent: string | null } | null): string =>
-  (el?.textContent ?? '').replace(/\s+/g, ' ').trim()
-
-// ONE linkedom parse per page: titles and links are read BEFORE Readability
-// runs because Readability mutates the document it is given. `title` is the
-// rule's pick; the page.title Jev decision may pick another of `titles`.
+// ONE linkedom parse per page: titles, links, and images are read BEFORE
+// Readability runs because Readability mutates the document it is given.
+// `title` is the rule's pick; the page.title Jev decision may pick another of `titles`.
 export function parsePage(html: string, base: string): PageDoc {
   const { document } = parseHTML(html)
   const docTitle = document.title ?? ''
   const og = document.querySelector('meta[property="og:title"]')?.getAttribute('content') ?? ''
   const h1 = textOf(document.querySelector('h1'))
   const links = linksFrom(document, base)
+  const images = imagesFrom(document, base)
+  const ogImage = ogImageOf(document, base)
   const article = articleFrom(document, html)
   const titles = { readability: article.title, document: docTitle, og: og.trim(), h1 }
-  return { title: titleBaseline({ url: base, candidates: titles }), titles, links, article }
+  const title = titleBaseline({ url: base, candidates: titles })
+  return { title, titles, links, images, ogImage, article }
 }
 
 // Crawling needs only the title and links — skipping Readability here saves

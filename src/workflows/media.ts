@@ -9,10 +9,9 @@ import { CliError } from '../core/effect.ts'
 import { outPath } from '../core/safepath.ts'
 import { runBatch } from '../lib/agentbrowser.ts'
 import { downloadToFile } from '../lib/download.ts'
+import { MAX_CAPTURE_BYTES } from '../lib/driver-screenshot.ts'
 import { withArchiveCopy } from '../lib/sources/archive-copy.ts'
 import { stepRuntime } from './runtime.ts'
-
-const MAX_CAPTURE_BYTES = 50 * 1024 * 1024
 
 const mediaInput = z.object({
   url: z.url(),

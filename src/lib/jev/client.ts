@@ -37,6 +37,7 @@ export const JEV_CONCURRENCY = 8 // under the per-org request rate
 type Text = string | Instructions
 export type JevQuestion =
   | { readonly type: 'noul'; readonly instructions: Text }
+  | { readonly type: 'box'; readonly instructions: Text } // needs the Jev 1.14 release and assets
   | {
       readonly type: 'choice'
       readonly instructions: Text
@@ -48,7 +49,15 @@ export type JevQuestion =
       readonly criteria: ReadonlyArray<string | OptionSpec>
     }
 
+// One image the request carries (docs.typesafe.ai/images): named in state by its key.
+export interface JevImage {
+  readonly type: 'image'
+  readonly format: 'jpg' | 'png'
+  readonly data_base64: string
+}
+
 export interface JevRequest {
+  readonly assets?: Record<string, JevImage>
   readonly state: Record<string, unknown>
   readonly questions: Record<string, JevQuestion>
 }

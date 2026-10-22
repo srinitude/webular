@@ -132,8 +132,8 @@ const questionFindings = (
     out.push(err('instructions-object', `${at}.instructions`, 'needs a structured object'))
   if (q['type'] === 'choice') out.push(...choiceFindings(at, q['criteria']))
   if (q['type'] === 'score') out.push(...scoreFindings(at, q['criteria']))
-  if (q['type'] === 'box' && model !== 'jev-preview')
-    out.push(err('box-model', `${at}.type`, 'box questions need model jev-preview'))
+  if (q['type'] === 'box' && model !== 'jev-preview' && model !== JEV_LATEST_RELEASED)
+    out.push(err('box-model', `${at}.type`, 'box questions need jev-preview or the pinned release'))
   if (estTokens({ state, q }) > DEFINITION_LIMITS.questionTokens)
     out.push(err('question-size', at, 'state plus question over an estimated 32,000 tokens'))
   return out

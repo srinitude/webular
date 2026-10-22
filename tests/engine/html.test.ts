@@ -1,6 +1,9 @@
 // HTML reliability: the shared sanitizer, short-page text, and the empty-input fallback.
 import { describe, expect, test } from 'bun:test'
-import { htmlToArticle, htmlToMarkdown, sanitizeHtml } from '../../src/lib/html.ts'
+import { htmlToArticle, htmlToMarkdown, parsePage, sanitizeHtml } from '../../src/lib/html.ts'
+import fixtureBundle from '../fixtures/html/image-report.html' with { type: 'text' }
+
+const fixture = String(fixtureBundle)
 
 describe('sanitizeHtml', () => {
   test('strips active elements, on* attributes, and javascript: URLs', () => {
@@ -76,5 +79,42 @@ describe('htmlToMarkdown tables', () => {
       '<table><tr><td>x</td><td>y</td></tr><tr><td>1</td><td>2</td></tr></table>',
     )
     expect(md).toBe('| x | y |\n| --- | --- |\n| 1 | 2 |')
+  })
+})
+
+describe('page images', () => {
+  const base = 'https://acme.test/report/'
+
+  test('a readerable page keeps its image alt text in .text', () => {
+    expect(parsePage(fixture, base).article.text).toContain('Revenue 2025: $4.2M')
+  })
+
+  test('a short page keeps its image alt text in .text', () => {
+    const html =
+      '<html><body><p>Chart:</p><img src="c.png" alt="Revenue 2025: $4.2M"></body></html>'
+    expect(htmlToArticle(html).text).toBe('Chart: Revenue 2025: $4.2M')
+  })
+
+  test('lists every image with src, alt, srcset, size, and caption, plus og:image', () => {
+    const page = parsePage(fixture, base)
+    expect(page.ogImage).toBe('https://acme.test/media/cover.png')
+    expect(page.images).toEqual([
+      {
+        src: 'https://acme.test/logo.svg',
+        alt: 'Acme',
+        srcset: '',
+        width: '',
+        height: '',
+        caption: '',
+      },
+      {
+        src: 'https://acme.test/report/charts/revenue.png',
+        alt: 'Revenue 2025: $4.2M',
+        srcset: 'charts/revenue.png 1x, charts/revenue@2x.png 2x',
+        width: '640',
+        height: '360',
+        caption: 'Yearly revenue by quarter',
+      },
+    ])
   })
 })

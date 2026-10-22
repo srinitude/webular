@@ -1,0 +1,293 @@
+{
+  "decision": "image.router",
+  "baseline-wins": [
+    {
+      "id": "chart-owid",
+      "label": "image",
+      "input": {
+        "question": "In the life expectancy line chart for Japan, what is the first year labeled on the x-axis?",
+        "page": {
+          "url": "https://ourworldindata.org/grapher/life-expectancy?tab=chart&country=JPN",
+          "excerpt": "Life expectancy at birth. Data from the UN World Population Prospects and the Human Mortality Database."
+        },
+        "images": [
+          {
+            "file": "life-expectancy.png",
+            "alt": "",
+            "caption": "",
+            "width": 1200,
+            "height": 800,
+            "near": "Life expectancy at birth",
+            "kind": "chart"
+          }
+        ]
+      }
+    },
+    {
+      "id": "chart-eia",
+      "label": "image",
+      "input": {
+        "question": "In the U.S. energy consumption by source and sector diagram, what quadrillion Btu value is labeled inside the nuclear bar?",
+        "page": {
+          "url": "https://www.eia.gov/energyexplained/us-energy-facts/",
+          "excerpt": "In 2023 the United States consumed energy from petroleum, natural gas, coal, nuclear, and renewables."
+        },
+        "images": [
+          {
+            "file": "consumption-by-source-and-sector.png",
+            "alt": "Nuclear Electric Power 9%",
+            "caption": "",
+            "width": 960,
+            "height": 640,
+            "near": "U.S. energy consumption by source and sector",
+            "kind": "chart"
+          }
+        ]
+      }
+    },
+    {
+      "id": "chart-cdc",
+      "label": "image",
+      "input": {
+        "question": "In Figure 1 of the data brief, what is the labeled life expectancy at age 65 for both sexes in 2021?",
+        "page": {
+          "url": "https://www.cdc.gov/nchs/products/databriefs/db492.htm",
+          "excerpt": "Life expectancy at age 65 rose in 2022. Figure 1 shows life expectancy at age 65 by sex."
+        },
+        "images": [
+          {
+            "file": "db492-fig1.png",
+            "alt": "",
+            "caption": "",
+            "width": 800,
+            "height": 520,
+            "near": "Figure 1",
+            "kind": "chart"
+          }
+        ]
+      }
+    },
+    {
+      "id": "table-usgs",
+      "label": "image",
+      "input": {
+        "question": "In Table 3, what is the pH coefficient for site no. 9?",
+        "page": {
+          "url": "https://pubs.usgs.gov/wri/wri004198/",
+          "excerpt": "Table 3. Spearman rank correlation coefficients between fecal coliform and water-quality field measurements."
+        },
+        "images": [
+          {
+            "file": "table3.gif",
+            "alt": "table3.gif",
+            "caption": "",
+            "width": 700,
+            "height": 500,
+            "near": "Table 3",
+            "kind": "table"
+          }
+        ]
+      }
+    },
+    {
+      "id": "table-census",
+      "label": "image",
+      "input": {
+        "question": "In the Census Bureau graphic on population increases, what numeric increase is shown for New York, NY?",
+        "page": {
+          "url": "https://www.census.gov/library/visualizations/2025/demo/top-5-largest-population-increases-2023-2024.html",
+          "excerpt": "Top 5 Cities With the Largest Numeric Increase."
+        },
+        "images": [
+          {
+            "file": "top-5-largest-population-increases.jpg",
+            "alt": "Top 5 largest population increases",
+            "caption": "",
+            "width": 1100,
+            "height": 700,
+            "near": "",
+            "kind": "unknown"
+          }
+        ]
+      }
+    },
+    {
+      "id": "scan-patent",
+      "label": "image",
+      "input": {
+        "question": "On the scanned first page of the specification, headed UNITED STATES PATENT OFFICE, what patent number is printed?",
+        "page": {
+          "url": "https://patents.example.org/us1234567",
+          "excerpt": "Patent specification, page 1."
+        },
+        "images": [
+          {
+            "file": "page-1.png",
+            "alt": "",
+            "caption": "",
+            "width": 1000,
+            "height": 1400,
+            "near": "",
+            "kind": "unknown"
+          }
+        ]
+      }
+    },
+    {
+      "id": "scan-tribune",
+      "label": "image",
+      "input": {
+        "question": "On page 1 of the New-York Tribune of April 16, 1912, what number begins the full-width banner headline?",
+        "page": {
+          "url": "https://chroniclingamerica.loc.gov/lccn/sn83030214/1912-04-16/ed-1/seq-1/",
+          "excerpt": "New-York Tribune, April 16, 1912, page 1."
+        },
+        "images": [
+          {
+            "file": "seq-1.jpg",
+            "alt": "",
+            "caption": "",
+            "width": 1200,
+            "height": 1600,
+            "near": "",
+            "kind": "unknown"
+          }
+        ]
+      }
+    },
+    {
+      "id": "diagram-eye",
+      "label": "image",
+      "input": {
+        "question": "In this labeled eye diagram, which structure does the line from the lower right label point to?",
+        "page": {
+          "url": "https://en.wikipedia.org/wiki/Human_eye",
+          "excerpt": "The human eye is a sensory organ that reacts to light."
+        },
+        "images": [
+          {
+            "file": "Schematic_diagram_of_the_human_eye.svg.png",
+            "alt": "",
+            "caption": "",
+            "width": 640,
+            "height": 640,
+            "near": "Schematic diagram of the human eye",
+            "kind": "diagram"
+          }
+        ]
+      }
+    },
+    {
+      "id": "infographic-census",
+      "label": "image",
+      "input": {
+        "question": "What 2025 median household income does the Census Bureau infographic show?",
+        "page": {
+          "url": "https://www.census.gov/library/visualizations/2025/income.html",
+          "excerpt": "Income infographic."
+        },
+        "images": [
+          {
+            "file": "income-infographic.png",
+            "alt": "Income infographic",
+            "caption": "",
+            "width": 900,
+            "height": 1500,
+            "near": "",
+            "kind": "unknown"
+          }
+        ]
+      }
+    }
+  ],
+  "baseline-loses": [
+    {
+      "id": "text-recipe",
+      "label": "text",
+      "input": {
+        "question": "How long should the sourdough dough bulk ferment?",
+        "page": {
+          "url": "https://www.kingarthurbaking.com/recipes/sourdough-bread-recipe",
+          "excerpt": "Let the dough rise, covered, for 4 to 6 hours at room temperature until it has nearly doubled in size."
+        },
+        "images": [
+          {
+            "file": "sourdough-loaf.jpg",
+            "alt": "A baked loaf of sourdough bread",
+            "caption": "",
+            "width": 800,
+            "height": 600,
+            "near": "The finished loaf",
+            "kind": "photo"
+          }
+        ]
+      }
+    },
+    {
+      "id": "text-history",
+      "label": "text",
+      "input": {
+        "question": "In what year did Charles Keeling begin measuring carbon dioxide at Mauna Loa?",
+        "page": {
+          "url": "https://en.wikipedia.org/wiki/Keeling_Curve",
+          "excerpt": "The Keeling Curve is a graph of the change in carbon dioxide in the atmosphere since 1958. Charles David Keeling began the measurements in 1958."
+        },
+        "images": [
+          {
+            "file": "logo.png",
+            "alt": "Wikipedia logo",
+            "caption": "",
+            "width": 135,
+            "height": 155,
+            "near": "",
+            "kind": "logo"
+          }
+        ]
+      }
+    },
+    {
+      "id": "text-api",
+      "label": "text",
+      "input": {
+        "question": "Which header does the API use to pass the bearer token?",
+        "page": {
+          "url": "https://docs.example.dev/api/auth",
+          "excerpt": "Send your token in the Authorization header as `Authorization: Bearer <token>`. Tokens expire after one hour."
+        },
+        "images": [
+          {
+            "file": "icon-lock.svg",
+            "alt": "",
+            "caption": "",
+            "width": 24,
+            "height": 24,
+            "near": "",
+            "kind": "icon"
+          }
+        ]
+      }
+    },
+    {
+      "id": "text-news",
+      "label": "text",
+      "input": {
+        "question": "What was the council vote count on the park budget?",
+        "page": {
+          "url": "https://news.example.org/council-park-budget",
+          "excerpt": "The council voted 5 to 2 on Tuesday to approve the park budget. Council member Ruiz led the vote."
+        },
+        "images": [
+          {
+            "file": "council.jpg",
+            "alt": "Council members at the meeting",
+            "caption": "",
+            "width": 1024,
+            "height": 683,
+            "near": "The council meets on Tuesday",
+            "kind": "photo"
+          }
+        ]
+      }
+    }
+  ]
+}

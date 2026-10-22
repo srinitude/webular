@@ -114,7 +114,7 @@ export const canonical = (
 }
 
 interface JevQuestionShape {
-  readonly type: 'noul' | 'choice' | 'score'
+  readonly type: 'noul' | 'choice' | 'score' | 'box'
   readonly instructions: unknown
   readonly criteria?: unknown
 }
@@ -126,11 +126,14 @@ export const requestBytes = (
   model: string,
   state: unknown,
   questions: Record<string, JevQuestionShape>,
+  assets?: object,
 ): string => {
   const b = { bytes: CAPS.bytes, nodes: CAPS.nodes, fields: CAPS.fields }
   const s = canonical(state, b)
   const q = canonical(questions, { ...b, fields: CAPS.options })
-  return `{"model":${JSON.stringify(model)},"state":${s},"questions":${q}}`
+  // Assets go in raw: base64 is far past the string cap, and it never counts against the byte budget.
+  const a = assets ? `,"assets":${JSON.stringify(assets)}` : ''
+  return `{"model":${JSON.stringify(model)},"state":${s},"questions":${q}${a}}`
 }
 
 // 64-bit wyhash of the canonical bytes: the cache key.

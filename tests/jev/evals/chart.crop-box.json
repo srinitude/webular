@@ -1,0 +1,39 @@
+{
+  "decision": "chart.crop-box",
+  "baseline-wins": [
+    {
+      "input": {
+        "question": "Which month had the most sales?",
+        "target": "the map of store sites",
+        "url": "https://example.com/report",
+        "title": "Sales report",
+        "image": {
+          "width": 320,
+          "height": 320,
+          "format": "png",
+          "base64": "tests/jev/fixtures/bar-chart-320.png"
+        }
+      },
+      "label": "none",
+      "ok": ["none"]
+    }
+  ],
+  "baseline-loses": [
+    {
+      "input": {
+        "question": "Which month had the most sales?",
+        "target": "the bar chart of monthly sales",
+        "url": "https://example.com/report",
+        "title": "Sales report",
+        "image": {
+          "width": 320,
+          "height": 320,
+          "format": "png",
+          "base64": "tests/jev/fixtures/bar-chart-320.png"
+        }
+      },
+      "label": "crop",
+      "ok": ["crop"]
+    }
+  ]
+}
