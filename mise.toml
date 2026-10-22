@@ -110,7 +110,7 @@ run = [
 description = "Docs: the readability-chain ledger rows, AGENTS.md rules, Markdown links, and the plugin's timeless wording all hold. A focused subset of `mise run test`"
 depends = ["setup"]
 run = [
-  "bun test --timeout 60000 tests/quality/agents-md.test.ts tests/quality/markdown-links.test.ts",
+  "bun test --timeout 60000 tests/quality/agents-md.test.ts tests/quality/markdown-links.test.ts tests/quality/markdown-chain-ledger.test.ts",
   'bun "{{config_root}}/plugins/webular/scripts/check-timeless.ts"',
 ]
 

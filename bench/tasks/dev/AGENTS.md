@@ -1,6 +1,6 @@
 # bench/tasks/dev/AGENTS.md
 
-The public dev split. The parent rules are in [bench/tasks/AGENTS.md](../AGENTS.md).
+This folder holds the public dev split. The parent rules are in [bench/tasks/AGENTS.md](../AGENTS.md).
 
 ## What lives here
 
@@ -15,4 +15,4 @@ The public dev split. The parent rules are in [bench/tasks/AGENTS.md](../AGENTS.
 
 ## Checks
 
-`mise run test:file tests/bench/set-loader.test.ts`
+Run `mise run test:file tests/bench/set-loader.test.ts`.

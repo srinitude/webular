@@ -3,7 +3,7 @@
 This file lists every source the spec cites, with its URL, its date, and what it says.
 Helpers read these on 2026-10-21.
 Most arXiv entries were checked at the abstract level only. "date nf" means no date was found.
-The spec starts at [benchmark-spec.md](benchmark-spec.md).
+Start with the spec in [benchmark-spec.md](benchmark-spec.md).
 
 ## Search, browsing, and research benchmarks
 

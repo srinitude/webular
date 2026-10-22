@@ -2,7 +2,7 @@
 
 ## Why this file exists
 
-Some benchmark tasks are built here instead of copied from a public set.
+Some benchmark tasks are built here, not copied from a public set.
 This file names the source and license behind each built task, and the limits a reader should know.
 The licenses of the public sets are in [LICENSES.md](LICENSES.md).
 
@@ -48,11 +48,11 @@ Each task keeps its source URL, the source date, and the license below.
 ## Image pilot sources
 
 [`dev/pilot-images.jsonl`](dev/pilot-images.jsonl) holds the 28 image pilot tasks: 6 charts, 5 table images, 5 scans, 4 product photos, 4 diagrams, and 4 infographics.
-Each task runs a text-only arm and an image arm on the same page.
+Each task runs two arms on the same page: a text-only arm and an image arm.
 
 Each gold answer was read from the image on 2026-10-21.
 Each one was also checked to be missing from the page text: the Firecrawl markdown, the alt text, and the captions.
-So only the image arm can answer it.
+So only the image arm can answer the task.
 The `gold.checked` field of each row says how its answer was read and checked, and `gold.evidence_place` says where in the image it sits.
 
 | Task | URL | License | Gold | Captured |
@@ -88,7 +88,7 @@ The `gold.checked` field of each row says how its answer was read and checked, a
 
 ## Peer benchmark set sources
 
-[dev/peers.jsonl](dev/peers.jsonl) is the live peer benchmark set. It has seven categories: factual lookup, multi-hop, fresh, official site, extract, PDF, and comparison. Each row names its category in `tags.category`, and its source URL and license in `source`. We wrote every question. No row is copied from SimpleQA, FRAMES, WebWalkerQA, BrowseComp, or GAIA; those sets only shaped the style. A helper fetched each source page with Firecrawl or Exa when the set was built, and the evidence spans are quotes from those pages.
+[dev/peers.jsonl](dev/peers.jsonl) is the live peer benchmark set. It has seven categories: factual lookup, multi-hop, fresh, official site, extract, PDF, and comparison. Each row names its category in `tags.category`, and its source URL and license in `source`. We wrote every question. No row is copied from SimpleQA, FRAMES, WebWalkerQA, BrowseComp, or GAIA; those sets only shaped the style. A helper fetched each source page with Firecrawl or Exa when the set was built. The evidence spans are quotes from those pages.
 
 - **Wikipedia** (CC BY-SA 4.0): factual, multi-hop, fresh, extract, and comparison rows.
 - **Wikidata** (CC0-1.0): one extract row.

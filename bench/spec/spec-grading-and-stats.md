@@ -50,7 +50,7 @@ Each task is graded by the cheapest grader that can decide it, in this order:
 - Pass/fail outcomes use an exact McNemar test on the paired results.
   Confidence intervals come from a paired bootstrap with 10,000 resamples, clustered by task group when tasks share a source ([Miller, Adding error bars to evals](https://arxiv.org/abs/2411.00640)).
 - Graded scores use a paired permutation test with 10,000 permutations.
-- Each report names its family of tests ahead of time and controls family-wise error with Holm-Bonferroni at alpha 0.05.
+- Each report names its family of tests before the run and controls family-wise error with Holm-Bonferroni at alpha 0.05.
 - Power: before freezing, the plan sets the smallest gap that matters (default 5 points of accuracy) and computes the task count needed for 80% power.
   An underpowered comparison is labeled "not enough tasks" and is never called a win ([Card et al.](https://arxiv.org/abs/2010.06595)).
 - Model-graded tasks run at least 3 times and report the mean and the spread across runs ([Miller](https://arxiv.org/abs/2411.00640)).
@@ -84,10 +84,17 @@ Each task is graded by the cheapest grader that can decide it, in this order:
 - **Local caches.**
   Every round writes to its own cache dir (`rounds/<round-id>/cache`).
   The harness fails if any tool reads a cache dir from another round.
-- **Spread.** Report p50, p90, and p99 with bootstrap CIs. Means alone are not allowed.
-- **Concurrency.** Measure at 1, 4, and 16 in-flight requests, with throughput and rate-limit errors at each level.
-- **Placement.** Record the runner's region and each API's resolved region. Compare tools only from the same runner, in the same hour.
-- **Timeouts.** The default is 60 s per call, and 300 s for research. A timeout counts as a failure, not a missing row.
+- **Spread.**
+  Report p50, p90, and p99 with bootstrap CIs.
+  A mean alone is not allowed.
+- **Concurrency.**
+  Measure at 1, 4, and 16 in-flight requests, with throughput and rate-limit errors at each level.
+- **Placement.**
+  Record the runner's region and each API's resolved region.
+  Compare tools only from the same runner, in the same hour.
+- **Timeouts.**
+  The default is 60 s per call, and 300 s for research.
+  A timeout counts as a failure, not a missing row.
 
 ## Cost protocol
 
@@ -107,4 +114,5 @@ Each task is graded by the cheapest grader that can decide it, in this order:
 
 - Every row ends in one of `ok`, `wrong`, `empty`, `error_4xx`, `error_5xx`, `timeout`, `blocked`, or `rate_limited`.
 - Errors count as wrong in accuracy, and each error rate is also reported on its own.
-- Robustness runs paraphrase 10% of queries and add typos to 5% of queries. The report shows the accuracy drop for each.
+- Robustness runs reword 10% of queries and add typos to 5% of queries.
+  The report shows the accuracy drop for each.

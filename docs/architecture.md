@@ -16,10 +16,10 @@ you ▸ webular CLI ▸ command process (table from mise.toml) ▸ Mastra workfl
 ### Dispatch
 
 The CLI never imports feature code. It parses argv and looks the command up in
-the table built from the `run:<command>` tasks in [`mise.toml`](../mise.toml). Then it starts
-that command in its own process at the package root, with the same Bun that
-runs the CLI. The command's exit code becomes the CLI's exit code. A SIGINT or
-SIGTERM sent to the CLI goes on to the command.
+the table built from the `run:<command>` tasks in [`mise.toml`](../mise.toml).
+Then it starts that command in its own process at the package root, with the
+same Bun that runs the CLI. The command's exit code becomes the CLI's exit
+code. The CLI passes a SIGINT or SIGTERM on to the command.
 
 ### Task graph
 
@@ -35,9 +35,9 @@ Tested [XState](https://stately.ai/docs) machines in
 [`tests/machines/`](../tests/machines/) walk each machine's paths against the
 real code:
 
-- [`cli-dispatch.ts`](../src/machines/cli-dispatch.ts): argv to help, version, an
-  unknown-command error, or the command process from the dispatch table and
-  its exit code.
+- [`cli-dispatch.ts`](../src/machines/cli-dispatch.ts): how argv leads to help,
+  the version, an unknown-command error, or the command process from the
+  dispatch table, and that process's exit code.
 - [`command-lifecycle.ts`](../src/machines/command-lifecycle.ts): input
   validation, the workflow run, rendering, and the exit-code rule for
   partial failures.

@@ -1,6 +1,7 @@
 # AGENTS.md
 
 Webular is a web research CLI on Bun. Its jobs run as [Mastra workflows](src/workflows/AGENTS.md) on Effect, with judgment calls sent to [Jev](src/lib/jev/AGENTS.md), TypeSafe's decision model, and flows in [XState](src/machines/AGENTS.md).
+
 This file is for coding agents on any host. People start at [README.md](README.md).
 
 ## Commands and mise

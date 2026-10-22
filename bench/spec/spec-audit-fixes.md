@@ -1,7 +1,7 @@
-# Fixes for the bias audit of the current bench
+# Fixes for the bench bias audit
 
-This file maps each of the 16 findings in the bias audit of the current bench to the spec rule that fixes it.
-Rules that the other spec files already hold are linked, not repeated.
+This file maps each of the 16 findings in the bench bias audit to the spec rule that fixes it.
+Rules that other spec files already hold are linked, not repeated.
 It builds on [benchmark-spec.md](benchmark-spec.md).
 
 ## 1. The answer job compares unlike things (critical)
@@ -9,9 +9,9 @@ It builds on [benchmark-spec.md](benchmark-spec.md).
 - Split answering into two families:
   - `retrieve.evidence`: each provider returns passages and sources, graded against gold evidence spans for recall and precision.
   - `answer.fixed-reader`: one pinned answerer model reads each provider's passages, capped at the same token budget, and writes the answer.
-- Peers' own synthesized answers are scored in a third family, `answer.native`, which is reported apart.
+- Each peer's own written answers are scored in a third family, `answer.native`, which is reported apart.
 - A closed-book baseline runs the same answerer with no web tool.
-  A task that the closed-book run answers right is tagged `memory` and reported apart.
+  A task that the closed-book run gets right is tagged `memory` and reported apart.
 - Grading uses normalized exact match first, then the pinned judge (see [spec-grading-and-stats.md](spec-grading-and-stats.md)).
 - Answer questions must need search: recent, long-tail, or multi-source.
 
@@ -77,7 +77,7 @@ It builds on [benchmark-spec.md](benchmark-spec.md).
 
 ## 11. ABBA covers webular code variants only (medium)
 
-- Providers are interleaved per task in a randomized order, and blocks repeat across times of day.
+- Providers run in a random order within each task, and blocks repeat across times of day.
 - The latency analysis uses a mixed model with provider, task, and block effects.
 
 ## 12. Grader false passes and false fails (medium)
