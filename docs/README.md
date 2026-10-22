@@ -4,7 +4,9 @@ This page links every doc in this folder. Start with the first group.
 
 ## Start here
 
-- [Install channels](install.md): every way to install webular besides npm.
+- [Install channels](install.md): every way to install webular, the platforms, and MCP client setup.
+- [Install script](install-script.md): the curl and PowerShell installers, their options, and how they verify.
+- [More ways to install](install-more.md): mise, eget, release files, completions, upgrade, and uninstall.
 - [How webular works](how-it-works.md): each building block and what it does for you.
 - [Why webular](why-webular.md): where webular differs from hosted rivals, and where they do better.
 - [Benchmarks](benchmarks.md): scores against other web research tools, losses included.

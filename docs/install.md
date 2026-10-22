@@ -1,6 +1,6 @@
 # Install channels
 
-Pick one channel. This page lists every supported system, then the commands for each channel, then how to set your Jev key in each shell. For agent hosts, see the [plugin README](../plugins/webular/README.md).
+Pick one channel. This page lists every supported system, then the install script, then the other channels, then how to set your Jev key in each shell. For agent hosts, see the [plugin README](../plugins/webular/README.md).
 
 ## Platforms
 
@@ -18,6 +18,7 @@ Webular ships eight native builds. Every install channel picks the one that fits
 | Windows | arm64 | n/a | `windows-arm64` | npm, Bun, pnpm, Scoop, winget, `install.ps1` | Yes (Windows arm) |
 
 - **WSL** is Linux. Use the Linux commands inside it: npm, Bun, pnpm, or `install.sh`. WSL has no macOS Keychain, so set the key with an environment variable.
+- **No AVX2.** The x64 builds run on every x64 CPU, including CPUs without AVX2, because the runtime picks its code paths when it starts. There is no separate build to choose.
 - **Rosetta** on Apple silicon gets the native arm64 build. **musl** (Alpine) has no Homebrew build, so use npm or `install.sh`.
 - **Other systems** (32-bit, FreeBSD, and so on) have no build. Run from source as described in [Build and run](build-and-run.md).
 
@@ -27,6 +28,26 @@ Webular ships eight native builds. Every install channel picks the one that fits
 - **Cua browser mode** (`--render cua`, `act --goal`) is opt-in. It needs the separate `cua-driver` daemon and a throwaway browser window, as [Browser mode (Cua)](cua-browser-mode.md) explains. Webular's code knows the browser profile folders on macOS, Linux, and Windows, but treat Cua as macOS-first and confirm that `cua-driver` runs on your system before you rely on it.
 - **Document conversion** (`parse` on Word, PowerPoint, Excel, OpenDocument, RTF, EPUB, CSV, and PDF files, and scrape's document route) uses the `@firecrawl/anydoc` addon. The addon ships no Windows arm64 binary. On Windows arm64, document conversion fails with the error code `unsupportedPlatform`. Everything else works there. To convert documents on that machine, run webular inside WSL, which uses the Linux arm64 build.
 - **Everything else** (search, scrape, crawl, and the rest) is the same on every build.
+
+## Install script
+
+The install script is the primary way to install webular. `install.sh` covers macOS, Linux (glibc and musl), and WSL. `install.ps1` covers Windows. Each one picks the right build, checks its SHA-256, installs one binary, puts it on your PATH, and writes a receipt. Neither needs root, and neither sends telemetry.
+
+macOS and Linux:
+
+```bash
+curl --proto '=https' --tlsv1.2 -fsSL https://webular.dev/install.sh | sh
+```
+
+Windows (PowerShell):
+
+```powershell
+irm https://webular.dev/install.ps1 | iex
+```
+
+Copy the command only from the [README](../README.md) or webular.dev, because fake install pages swap the host name. To pin a version, use `https://webular.dev/v0.3.0/install.sh`.
+
+Two checks guard the download, and they prove different things. `SHA256SUMS` proves the file is intact (integrity), but not who built it (origin). The attestation check proves origin. It is pinned to the signer workflow `srinitude/webular/.github/workflows/release.yml`. The installer runs the attestation check by default and fails closed when `gh` is installed and signed in. The [install script reference](install-script.md) covers reading the script before it runs, every option, where it installs, PATH changes, the receipt, verification, offline installs, proxies, CI, and telemetry.
 
 ## npm, Bun, and pnpm
 
@@ -67,33 +88,6 @@ winget works on Windows once the manifest pull request to `microsoft/winget-pkgs
 
 ```powershell
 winget install Srinitude.Webular
-```
-
-## GitHub release binaries
-
-These work on any build in the table.
-
-### Install scripts
-
-On macOS and Linux, including musl and WSL, [`scripts/install.sh`](../scripts/install.sh) picks the right asset, checks it against `SHA256SUMS`, and installs it to `~/.webular/bin/webular`. It prints a line when that folder is not on your PATH.
-
-```bash
-curl -fsSL https://github.com/srinitude/webular/releases/latest/download/install.sh | sh
-```
-
-On Windows, [`scripts/install.ps1`](../scripts/install.ps1) does the same in PowerShell and installs to `~\.webular\bin\webular.exe`:
-
-```powershell
-irm https://github.com/srinitude/webular/releases/latest/download/install.ps1 | iex
-```
-
-### Download and verify
-
-Download `webular-<build>` (`webular-<build>.exe` on Windows) from the [releases page](https://github.com/srinitude/webular/releases). Use the build name from the Platforms table. Then verify it:
-
-```bash
-sha256sum --check --ignore-missing SHA256SUMS
-gh attestation verify webular-<build> --repo srinitude/webular
 ```
 
 ## Set your Jev key
@@ -176,22 +170,9 @@ Zed uses the `context_servers` key in its settings file. You can also add the se
 
 Copy a folder from [`plugins/webular/skills`](../plugins/webular/skills) into your agent's skills folder. The skills are `webular-research`, `webular-interview`, `human-language`, and `rich-and-native-markdown`.
 
-## Shell completions
+## More ways to install
 
-Each release has `webular-completions.tar.gz`, with completions for bash, zsh, fish, and PowerShell, plus the `webular(1)` man page. Unpack it and copy each file to the folder your shell reads.
-
-## Upgrade and uninstall
-
-Upgrade with the channel you installed from:
-
-```bash
-npm i -g webular@latest     # or: bun add -g webular@latest, pnpm add -g webular@latest
-brew upgrade webular
-```
-
-On Windows, run `scoop update webular` or `winget upgrade Srinitude.Webular`. To upgrade an install-script copy, run its script again.
-
-Uninstall the same way: `npm rm -g webular`, `bun rm -g webular`, `pnpm rm -g webular`, `brew uninstall webular`, `scoop uninstall webular`, or `winget uninstall Srinitude.Webular`. An install-script copy lives in `~/.webular`, so delete that folder. The page cache is in `~/.cache/webular` unless `WEBULAR_CACHE_DIR` moves it.
+mise, eget, the GitHub CLI, release files with manual checks, shell completions, upgrade, and uninstall are on the [more ways to install](install-more.md) page.
 
 ## Run from source instead
 
