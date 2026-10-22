@@ -1,12 +1,12 @@
 // The PDF load caps pdf.js image size, the loaded proxy is destroyed after the read,
 // and WEBULAR_PDF_TIMEOUT_MS bounds the load too: a load that never settles fails
 // with the timeout note instead of hanging.
-// One file, one mock.module: Bun keeps the first mock of a module for the whole
-// process, so a second file mocking unpdf would get this file's mock.
-import { afterAll, expect, mock, test } from 'bun:test'
+// The fake loader goes in through the PdfLoader service, not mock.module: Bun keeps
+// a module mock for the whole process and it leaked into every other PDF test.
+import { expect, test } from 'bun:test'
 import { ConfigProvider, Effect } from 'effect'
-import * as realUnpdf from 'unpdf'
-import { pdfText } from '../../src/lib/parse.ts'
+import { pdfText as realPdfText } from '../../src/lib/parse.ts'
+import { PdfLoader } from '../../src/lib/parse-pdf.ts'
 import { eff, failMsg } from '../_support/run.ts'
 
 const seen: { options: unknown; destroyed: number; hang: boolean } = {
@@ -14,28 +14,23 @@ const seen: { options: unknown; destroyed: number; hang: boolean } = {
   destroyed: 0,
   hang: false,
 }
-mock.module('unpdf', () => ({
-  ...realUnpdf,
-  getDocumentProxy: (_data: unknown, options: unknown) => {
-    seen.options = options
-    // unpdf's mocked API returns a Promise: build it from an Effect.
-    if (seen.hang) return Effect.runPromise(Effect.never)
-    return Effect.runPromise(
-      Effect.succeed({
-        numPages: 0,
-        loadingTask: {
-          destroy: () =>
-            Effect.runPromise(
-              Effect.sync(() => {
-                seen.destroyed += 1
-              }),
-            ),
-        },
-      }),
-    )
-  },
-}))
-afterAll(() => mock.module('unpdf', () => realUnpdf))
+const fakeLoader = (_data: unknown, options: unknown) => {
+  seen.options = options
+  if (seen.hang) return Effect.never
+  return Effect.succeed({
+    numPages: 0,
+    loadingTask: {
+      destroy: () =>
+        Effect.runPromise(
+          Effect.sync(() => {
+            seen.destroyed += 1
+          }),
+        ),
+    },
+  } as never)
+}
+const pdfText = (bytes: Uint8Array) =>
+  realPdfText(bytes).pipe(Effect.provideService(PdfLoader, fakeLoader))
 
 const withEnv = (env: Record<string, string>) =>
   Effect.provideService(ConfigProvider.ConfigProvider, ConfigProvider.fromEnv({ env }))

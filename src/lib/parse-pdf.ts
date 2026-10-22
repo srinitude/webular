@@ -1,5 +1,5 @@
 // PDF text through unpdf, bounded by a page cap and a deadline.
-import { Effect, Option } from 'effect'
+import { Context, Effect, Option } from 'effect'
 import { attempt, fail, ParseError, setting } from './parse-core.ts'
 import { columnText, type TextItem } from './parse-pdf-layout.ts'
 
@@ -118,12 +118,22 @@ const LOAD_FLOOR_MS = 1_000
 // A load that stops early has no proxy to destroy: unpdf's getDocumentProxy
 // does not expose its loading task.
 // ponytail: fixed floor; give the load its own setting if large PDFs need more.
-const loadPdf = (bytes: Uint8Array, timeoutMs: number) =>
-  attempt(() => import('unpdf')).pipe(
-    // a copy: pdf.js detaches its input and rejects a Buffer
-    Effect.flatMap(({ getDocumentProxy }) =>
-      attempt(() => getDocumentProxy(new Uint8Array(bytes), { maxImageSize: 16_777_216 })),
+// The loader is a service so a test supplies a fake without mock.module, which
+// Bun keeps for the whole process.
+export const PdfLoader = Context.Reference<
+  (data: Uint8Array, options: object) => Effect.Effect<Pdf, ParseError>
+>('webular/lib/PdfLoader', {
+  defaultValue: () => (data, options) =>
+    attempt(() => import('unpdf')).pipe(
+      Effect.flatMap(({ getDocumentProxy }) => attempt(() => getDocumentProxy(data, options))),
     ),
+})
+
+const loadPdf = (bytes: Uint8Array, timeoutMs: number) =>
+  Effect.flatMap(PdfLoader, (load) =>
+    // a copy: pdf.js detaches its input and rejects a Buffer
+    load(new Uint8Array(bytes), { maxImageSize: 16_777_216 }),
+  ).pipe(
     Effect.timeoutOption(Math.max(timeoutMs, LOAD_FLOOR_MS)),
     Effect.flatMap(
       Option.match({
