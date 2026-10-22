@@ -35,7 +35,21 @@ const chunkByHeadings = (text: string): Chunk[] => {
     trail[depth - 1] = (heading[2] as string).trim()
   }
   flush(chunks, trail, lines)
-  return chunks
+  return mergeSmall(chunks)
+}
+
+// A chunk under MIN_WORDS words joins the chunk after it (2603.24556), so a stub
+// section ("See the plans.") never stands alone as a snippet; the last one stays.
+const MIN_WORDS = 8
+const mergeSmall = (chunks: ReadonlyArray<Chunk>): Chunk[] => {
+  const out: Chunk[] = []
+  let carry = ''
+  for (const [i, c] of chunks.entries()) {
+    const body = carry ? `${carry}\n${c.body}` : c.body
+    carry = i < chunks.length - 1 && words(body).length < MIN_WORDS ? body : ''
+    if (!carry) out.push({ path: c.path, body })
+  }
+  return out
 }
 
 const shared = (terms: ReadonlyArray<string>, text: string) => {

@@ -23,6 +23,8 @@ export interface FetchResult {
   readonly headers: Record<string, string>
   readonly body: string
   readonly fromCache: boolean
+  /** Set when the origin failed with a 5xx and the stored copy stood in (stale-if-error). */
+  readonly stale?: true
   readonly tier: string
 }
 

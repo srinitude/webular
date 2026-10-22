@@ -167,3 +167,19 @@ test('crawled HTML keeps its h1-h6 headings as chunk heading paths', () =>
       }),
     ),
   ))
+
+test('a stub section hands its snippet the section text that follows it', () =>
+  Effect.runPromise(
+    withIndex(':memory:', (index) =>
+      Effect.gen(function* () {
+        const text =
+          '# Pricing\nSee the plans.\n## Plans\nThe Pro plan costs ten dollars each month.'
+        yield* addPages(index, [{ url: guide.url, title: 'Pricing', text }])
+        const [hit] = yield* searchLocal(index, 'pricing', 5)
+        expect([hit?.section, hit?.description]).toEqual([
+          'Pricing > Plans',
+          'See the plans.\nThe Pro plan costs ten dollars each month.',
+        ])
+      }),
+    ),
+  ))

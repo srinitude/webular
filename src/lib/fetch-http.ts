@@ -1,5 +1,5 @@
 // HTTP attempt, retry with jitter, per-host gating, and tier escalation.
-import { Effect, Random, Semaphore, Stream } from 'effect'
+import { type Deferred, Effect, Random, Semaphore, Stream } from 'effect'
 import type * as HttpClient from 'effect/http/HttpClient'
 import * as HttpClientRequest from 'effect/http/HttpClientRequest'
 import type * as HttpClientResponse from 'effect/http/HttpClientResponse'
@@ -22,6 +22,8 @@ export interface Ctx {
   readonly global: Semaphore.Semaphore
   /** Memory O(hosts with a call in flight or waiting): an entry leaves when its refcount hits 0. */
   readonly hosts: Map<string, { sem: Semaphore.Semaphore; refs: number }>
+  /** Memory O(distinct URLs in flight): an entry leaves when its call settles. */
+  readonly inflight: Map<string, Deferred.Deferred<FetchResult, FetchError>>
   readonly maxBytes: number
   readonly attempts: number
   readonly baseMs: number
@@ -109,6 +111,22 @@ const httpOnce = (
 const retryable = (e: FetchError) =>
   e.kind === 'network' || (e.kind === 'http' && e.next_action !== 'give-up')
 
+// Stale-if-error (RFC 5861): a 5xx after the last retry serves the stored copy, marked stale.
+const staleOr = (ctx: Ctx, url: string, e: FetchError): Effect.Effect<FetchResult, FetchError> => {
+  const cached = (e.status ?? 0) >= 500 ? ctx.cache.lookup(url) : null
+  return cached
+    ? Effect.succeed({
+        url,
+        status: 200,
+        headers: {},
+        body: cached.body,
+        fromCache: true,
+        stale: true,
+        tier: 'http',
+      })
+    : Effect.fail(e)
+}
+
 /** Holds the host and global permits for one attempt only, never across a backoff sleep. */
 export type Gate = <A, E>(eff: Effect.Effect<A, E>) => Effect.Effect<A, E>
 
@@ -120,7 +138,7 @@ export const httpWithRetry = (
   n = 0,
 ): Effect.Effect<FetchResult, FetchError> =>
   Effect.catchTag(gate(httpOnce(ctx, url, originPrivate)), 'FetchError', (e) => {
-    if (!retryable(e) || n + 1 >= ctx.attempts) return Effect.fail(e)
+    if (!retryable(e) || n + 1 >= ctx.attempts) return staleOr(ctx, url, e)
     if (e.retryAfterMs !== undefined && e.retryAfterMs > ctx.capMs)
       return Effect.fail(new FetchError({ ...e, next_action: 'slow-down' }))
     const wait = Effect.map(

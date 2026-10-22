@@ -42,3 +42,41 @@ test(
     }),
   ),
 )
+
+test(
+  'a page whose server fails after every retry comes back from its stored copy, marked stale',
+  eff(
+    Effect.gen(function* () {
+      let up = true
+      const fx = yield* startFixture(() => ({
+        '/page': () =>
+          up ? page(new Request('http://x/')) : new Response('down', { status: 503 }),
+      }))
+      const fetchPage = yield* makeFetchLayer({ retry: { attempts: 2, baseMs: 1, capMs: 2 } })
+      const first = yield* fetchPage(`${fx.origin}/page`)
+      up = false
+      const second = yield* fetchPage(`${fx.origin}/page`)
+      expect([first.stale, second.stale, second.body]).toEqual([undefined, true, 'hello'])
+    }),
+  ),
+)
+
+test(
+  'ten callers asking for one page at once cost the site one request',
+  eff(
+    Effect.gen(function* () {
+      let hits = 0
+      const counted = () => {
+        hits++
+        return new Response('hello')
+      }
+      const fx = yield* startFixture(() => ({ '/page': counted }))
+      const fetchPage = yield* makeFetchLayer()
+      const all = yield* Effect.all(
+        Array.from({ length: 10 }, () => fetchPage(`${fx.origin}/page`)),
+        { concurrency: 10 },
+      )
+      expect([hits, all.every((r) => r.body === 'hello')]).toEqual([1, true])
+    }),
+  ),
+)

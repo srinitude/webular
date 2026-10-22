@@ -42,10 +42,10 @@ An open mark means the search did not find the whole change. It does not prove t
 | Answer quality | 10 | 1 | 0 | 9 | 4 |
 | Decision models | 13 | 0 | 0 | 13 | 0 |
 | Agents and AGENTS.md | 19 | 3 | 0 | 16 | 4 |
-| Engineering | 18 | 2 | 0 | 16 | 2 |
+| Engineering | 18 | 3 | 0 | 15 | 2 |
 | Dependencies top 10 | 10 | 2 | 0 | 8 | 0 |
 | Dependency rows | 77 | 25 | 1 | 51 | 2 |
-| **All** | **175** | **41** | **1** | **133** | **23** |
+| **All** | **175** | **42** | **1** | **132** | **23** |
 
 ## Applied
 
@@ -58,6 +58,7 @@ An open mark means the search did not find the whole change. It does not prove t
 - Answer quality #8: a bench judge that changes 2% or more of its labels on swapped answer order is refused, `scripts/bench/judge.ts:28` and `:62`.
 - Agents #2: the MCP server's directive and worked example, `plugins/webular/src/descriptions.json:3`.
 - AGENTS.md #2 and #6: a short intro with no project map, and nested files under their size caps.
+- Engineering #7: when a site fails with a 5xx after the last retry, the stored copy comes back marked stale (`src/lib/fetch-http.ts:115`). Calls for one URL at the same time share one request (`src/lib/fetch-layer.ts:59`).
 - Engineering #13: shuffled test order, the `test:shuffled` task in [`mise.toml`](../mise.toml).
 - Engineering #18: each Markdown image becomes a marked plain link that loads nothing until someone opens it, `src/lib/html-images.ts:91`.
 - Dependencies top 10 #8: bounded parsers. `diff` uses `maxEditLength` (`src/lib/snapshot.ts:35`), `unpdf` uses `maxImageSize` (`src/lib/parse-pdf.ts:125`), and Readability skips pages past `READABLE_MAX_CHARS` ([`src/lib/html.ts`](../src/lib/html.ts)).

@@ -4,7 +4,17 @@
 // escalation to a caller-supplied render hook, and bounded sockets
 // (16 overall, one per host).
 import { BunServices } from '@effect/platform-bun'
-import { Config, Effect, FileSystem, Layer, Path, type Scope, Semaphore } from 'effect'
+import {
+  Config,
+  Deferred,
+  Effect,
+  Exit,
+  FileSystem,
+  Layer,
+  Path,
+  type Scope,
+  Semaphore,
+} from 'effect'
 import * as FetchHttpClient from 'effect/http/FetchHttpClient'
 import * as HttpClient from 'effect/http/HttpClient'
 import { setHeader } from 'effect/http/HttpClientRequest'
@@ -12,7 +22,13 @@ import { guardTarget } from '../core/address-guard.ts'
 import { USER_AGENT } from '../core/http.ts'
 import { openCache } from './fetch-cache.ts'
 import { type Ctx, escalate, type Gate, httpWithRetry, perHost } from './fetch-http.ts'
-import { type FetchError, type FetchLayerOptions, type FetchPage, fail } from './fetch-types.ts'
+import {
+  type FetchError,
+  type FetchLayerOptions,
+  type FetchPage,
+  type FetchResult,
+  fail,
+} from './fetch-types.ts'
 import { closeSqlite } from './sqlite-open.ts'
 
 export {
@@ -37,6 +53,26 @@ const parseUrl = (url: string) =>
         : Effect.fail(fail(url, 'invalid-url', 'give-up')),
   )
 
+// Single-flight: a call for a URL already in flight (same tiers) waits on that
+// call's result instead of sending its own GET. The entry leaves when it settles.
+// A waiter whose leader hit its deadline gets a 'timeout' error, never the interrupt.
+const joined = (ctx: Ctx, url: string, key: string, work: Effect.Effect<FetchResult, FetchError>) =>
+  Effect.suspend(() => {
+    const seen = ctx.inflight.get(key)
+    if (seen) return Deferred.await(seen)
+    const done = Deferred.makeUnsafe<FetchResult, FetchError>()
+    ctx.inflight.set(key, done)
+    return Effect.onExit(work, (exit) =>
+      Effect.andThen(
+        Effect.sync(() => ctx.inflight.delete(key)),
+        Deferred.done(
+          done,
+          Exit.hasInterrupts(exit) ? Exit.fail(fail(url, 'timeout', 'retry')) : exit,
+        ),
+      ),
+    )
+  })
+
 const fetchWith =
   (ctx: Ctx): FetchPage =>
   (url, opts = {}) =>
@@ -45,8 +81,9 @@ const fetchWith =
       const gate: Gate = (eff) => perHost(ctx, u.host, ctx.global.withPermits(1)(eff))
       const http = httpWithRetry(ctx, u.href, gate, originPrivate)
       const work = Effect.catchTag(http, 'FetchError', (e) => escalate(u.href, tiers, e, gate))
+      const key = [u.href, ...tiers.map((t) => t.name)].join(' ')
       // The deadline covers queueing, retries, and tiers.
-      return Effect.timeoutOrElse(work, {
+      return Effect.timeoutOrElse(joined(ctx, url, key, work), {
         duration: opts.deadlineMs ?? ctx.layer.deadlineMs ?? 10_000,
         orElse: () => Effect.fail(fail(url, 'timeout', 'retry')),
       })
@@ -100,6 +137,7 @@ export const makeFetchLayer = (
       client,
       global: yield* Semaphore.make(layer.globalSockets ?? 16),
       hosts: new Map(),
+      inflight: new Map(),
       maxBytes: layer.maxBytes ?? 10 * 1024 * 1024,
       attempts: layer.retry?.attempts ?? 3,
       baseMs: layer.retry?.baseMs ?? 200,

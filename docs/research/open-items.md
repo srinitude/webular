@@ -11,7 +11,7 @@ The list is [retrieval-changes.md](retrieval-changes.md).
 - #3, partly: add clue splitting and "A vs B" detection beside the hop gate (`src/lib/search-hop.ts:99`).
 - #4: add a rerank skip gate on score margin and overlap in [`src/lib/search-chain.ts`](../../src/lib/search-chain.ts).
 - #5: score the top 16 hits in one Jev choice. This needs a decision-models-first receipt.
-- #6, partly: add the query-to-question rewrite to the heading-tree chunks (`src/lib/local-chunks.ts:47`).
+- #6, partly: add the query-to-question rewrite to the heading-tree chunks (`src/lib/local-chunks.ts:66`).
 - #7, partly: add domain tiers, min(trust, freshness), and an intent-by-source-type table (`src/lib/sources/catalog.ts:44`).
 - #8: check each hit with HEAD and fall back to GET; a 404 is dead, a 403 is ignored.
 - #9: open the top page for fresh-class queries in [`src/lib/search-chain.ts`](../../src/lib/search-chain.ts).
@@ -31,7 +31,7 @@ The list is [extraction-changes.md](extraction-changes.md).
 - #9, applied: alt text stops at 300 characters, and the image list skips hidden images (`src/lib/html-images.ts:30` and `:38`).
 - #10, partly: stacked header rows join into one header-path row, such as "Price / 2024" (`src/lib/html-table.ts:54`). Still missing: "header: value" output for table rows in [`src/lib/html-table.ts`](../../src/lib/html-table.ts).
 - #11: reuse a page's XHR or JSON endpoint in [`src/lib/driver.ts`](../../src/lib/driver.ts).
-- #12, partly: merge small chunks and chunk table rows with their header ([`src/lib/local-chunks.ts`](../../src/lib/local-chunks.ts)).
+- #12, partly: a chunk under 8 words joins the chunk after it, so a snippet is never a lone stub (`src/lib/local-chunks.ts:44`). Still missing: chunk table rows with their header in [`src/lib/local-chunks.ts`](../../src/lib/local-chunks.ts).
 - #13, partly: finish the locator ladder (text, repeated sibling, per-host cache) in [`src/lib/select.ts`](../../src/lib/select.ts).
 - #14, applied: the archive fallback keeps only HTML captures that returned status 200, each one once (`src/lib/archive-urls.ts:14`).
 
@@ -93,7 +93,7 @@ The list is [engineering-changes.md](engineering-changes.md).
 - #3: flag a case as not resolvable in the bench spec.
 - #5: add a mutation gate.
 - #6, partly: a grandchild dies on timeout and on cancel (`tests/core/proc-process-group.test.ts:42` and `:59`). Still missing: a test that cancels each workflow at every await point and checks that cleanup ran.
-- #7: add stale-if-error and single-flight to the fetch cache.
+- #7, applied: when a site fails with a 5xx after the last retry, the stored copy comes back marked stale (`src/lib/fetch-http.ts:115`). Calls for one URL at the same time share one request (`src/lib/fetch-layer.ts:59`).
 - #9: hedge slow sources in `search-chain.ts`.
 - #12, partly: add flaky-retry limits and a double-build hash check to `release.yml`.
 - #18, applied: each Markdown image becomes a plain link whose text starts with `image:`, which loads nothing until someone opens it (`src/lib/html-images.ts:91`). Invisible characters are stripped in `src/lib/html-sanitize.ts:24`.
