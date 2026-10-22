@@ -121,6 +121,12 @@ export function parsePage(html: string, base: string): PageDoc {
   return { title, titles, links, images, ogImage, article }
 }
 
+// The fetch path's parse: article text plus the page's <img> records.
+export const textAndImages = (html: string, base: string) => {
+  const page = parsePage(html, base)
+  return { text: page.article.text, images: page.images }
+}
+
 // Crawling needs only the title and links — skipping Readability here saves
 // its full-document scoring pass on every crawled page.
 // withLinks=false skips the anchor scan for pages whose links are never used

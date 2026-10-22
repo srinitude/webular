@@ -3,11 +3,13 @@
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
+import { pageImageSchema } from '../lib/answer-figure.ts'
 import { searchRounds } from '../lib/jev/decisions/research.ts'
 import { researchSentences } from '../lib/jev/decisions/research-sentences.ts'
 import { decisions } from '../lib/jev/decisions.ts'
 import { onJevRuntime } from '../lib/jev/run.ts'
 import { readabilitySchema, withReadability } from '../lib/readability-chain.ts'
+import { sourceFigures } from '../lib/router-images.ts'
 import { searchEffect } from '../lib/search-chain.ts'
 import { fetchErrorsSchema, fetchSources, type SourceEntry } from '../lib/sources.ts'
 import { stepRuntime } from './runtime.ts'
@@ -39,7 +41,14 @@ const foundSchema = z.object({
 const entriesSchema = z.object({
   topic: z.string(),
   sentences: z.number(),
-  entries: z.array(z.object({ title: z.string(), url: z.string(), text: z.string() })),
+  entries: z.array(
+    z.object({
+      title: z.string(),
+      url: z.string(),
+      text: z.string(),
+      images: z.array(pageImageSchema).optional(),
+    }),
+  ),
   errors: fetchErrorsSchema,
 })
 
@@ -98,14 +107,22 @@ function buildSection(
   topN: number,
   topic: string,
   kept: ReadonlyArray<number> = [],
+  figures: ReadonlyArray<string> = [],
 ) {
   const all = researchSentences(entry.text)
   const top = researchSentences(entry.text, topN, topic)
   const lead = kept.flatMap((i) => (all[i] === undefined ? [] : [all[i]]))
   const sentences = [...new Set([...lead, ...top])].slice(0, topN)
   const body = sentences.length > 0 ? sentences.join(' ') : 'No extractable content.'
-  return `## ${entry.title || `Source ${idx + 1}`}\n\n${body}\n\n> Source [${idx + 1}]: ${entry.url}`
+  const figs = figures.length > 0 ? `\n\n${figures.join('\n')}` : ''
+  return `## ${entry.title || `Source ${idx + 1}`}\n\n${body}${figs}\n\n> Source [${idx + 1}]: ${entry.url}`
 }
+
+// image.router per source: figures only where the answer sits in a picture.
+const figuresOf = (topic: string, entries: ReadonlyArray<SourceEntry>) =>
+  Effect.forEach(entries, (e) => onJevRuntime(sourceFigures, { question: topic, ...e }), {
+    concurrency: 8,
+  })
 
 const assemble = Effect.fn('research.assemble')(function* (
   inputData: z.infer<typeof entriesSchema>,
@@ -119,7 +136,10 @@ const assemble = Effect.fn('research.assemble')(function* (
         : onJevRuntime(decisions.researchSentence, { topic, text: e.text }),
     { concurrency: 8 }, // Jev per-org bound; workflows never import the client
   )
-  const sections = entries.map((e, i) => buildSection(e, i, inputData.sentences, topic, leads[i]))
+  const figures = yield* figuresOf(topic, entries)
+  const sections = entries.map((e, i) =>
+    buildSection(e, i, inputData.sentences, topic, leads[i], figures[i]),
+  )
   const report = `# Research: ${topic}\n\n${sections.join('\n\n')}`
   const sources = entries.map((e) => ({ title: e.title, url: e.url }))
   return { topic, report, sources, errors: inputData.errors }

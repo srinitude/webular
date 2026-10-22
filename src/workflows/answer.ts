@@ -6,6 +6,7 @@ import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
 import { nameCountry } from '../lib/answer-country.ts'
+import { answerFigure, figureNote, pageImageSchema } from '../lib/answer-figure.ts'
 import { answerPassage } from '../lib/answer-passage.ts'
 import { asOfDate } from '../lib/as-of.ts'
 import { answerSentences } from '../lib/jev/decisions/answer.ts'
@@ -54,7 +55,9 @@ const evidenceSchema = z.object({
   sentences: z.number(),
   // The lead hit names the entity when the question does not (a bridge hop).
   entity: z.string().optional(),
-  used: z.array(sourceRef.extend({ text: z.string() })),
+  used: z.array(
+    sourceRef.extend({ text: z.string(), images: z.array(pageImageSchema).optional() }),
+  ),
   errors: fetchErrorsSchema,
 })
 type Evidence = z.infer<typeof evidenceSchema>
@@ -141,7 +144,11 @@ const prepareSynth = Effect.fn('answer.prepare')(function* (data: Evidence) {
   const cited = yield* citedSources(top, data.used, (c) =>
     onJevRuntime(decisions.answerCitation, c),
   )
-  return { ...data, text, top, cited, asOf: yield* asOfDate }
+  // The image router puts the lead source's answer in a figure: cite it, claim no sure sentence.
+  const lead = data.used[0]
+  const figure = yield* onJevRuntime(answerFigure, { question: data.query, lead })
+  const sources = figure && lead && !cited.includes(lead) ? [lead, ...cited] : cited
+  return { ...data, text, top, cited: sources, figure, asOf: yield* asOfDate }
 })
 // The direct answer Jev picked always opens the answer, never repeated.
 export const leadFirst = (top: ReadonlyArray<string>, lead: string | undefined, n: number) =>
@@ -152,12 +159,13 @@ const synthStep = decisionStep({
   outputSchema: answerBody,
   decide: decisions.answerSentence,
   prepare: (data: Evidence) => stepRuntime.runPromise(prepareSynth(data)),
-  pick: ({ query, text }) => (text ? { question: query, text } : undefined),
-  output: ({ query, text, sentences, top, cited, errors, asOf }, lead) => {
+  pick: ({ query, text, figure }) => (text && !figure ? { question: query, text } : undefined),
+  output: ({ query, text, sentences, top, cited, figure, errors, asOf }, lead) => {
     const first = lead === undefined ? undefined : answerSentences(text)[lead]
+    const body = leadFirst(top, first, sentences).join(' ')
     return {
       query,
-      answer: nameCountry(query, leadFirst(top, first, sentences).join(' ')),
+      answer: nameCountry(query, figure ? `${figureNote(figure)} ${body}` : body),
       asOf,
       sources: cited.map((e) => ({ title: e.title, url: e.url })),
       errors,

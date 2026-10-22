@@ -14,7 +14,7 @@ test('the step runtime and parse pool still work after a drain', () =>
     Effect.gen(function* () {
       yield* drainParsePool
       yield* drainParsePool
-      const text = yield* Effect.promise(() => stepRuntime.runPromise(parseArticleText(html)))
+      const { text } = yield* Effect.promise(() => stepRuntime.runPromise(parseArticleText(html)))
       expect(text).toContain('hello pool')
       yield* drainParsePool
     }),

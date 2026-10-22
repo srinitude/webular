@@ -9,7 +9,8 @@ import { z } from 'zod'
 import { hostConcurrency } from '../core/budget.ts'
 import { fetchText } from '../core/http.ts'
 import { errMsg } from '../core/output.ts'
-import { htmlToArticle } from './html.ts'
+import { textAndImages } from './html.ts'
+import type { PageImage } from './html-images.ts'
 import { withArchiveCopy } from './sources/archive-copy.ts'
 
 // The one zod mirror of the {url, reason} partial-failure shape — composed
@@ -37,7 +38,9 @@ const workerUrl = new URL(
   import.meta.url,
 ).href
 
-const parseInThread = (html: string) => Effect.try(() => htmlToArticle(html).text)
+type Parsed = { readonly text: string; readonly images: PageImage[] }
+const parseInThread = (html: string, base: string) =>
+  Effect.try((): Parsed => textAndImages(html, base))
 
 const takeWorker = ({ idle }: PoolState) =>
   Ref.modify(idle, (workers) => [workers.at(-1), workers.slice(0, -1)] as const).pipe(
@@ -53,7 +56,7 @@ const takeWorker = ({ idle }: PoolState) =>
 // the pool off for the rest of the pool's life.
 const releaseWorker =
   ({ idle, broken }: PoolState) =>
-  (worker: BunWorker, exit: Exit.Exit<string | undefined, unknown>) => {
+  (worker: BunWorker, exit: Exit.Exit<Parsed | undefined, unknown>) => {
     const crashed = Exit.isSuccess(exit) && exit.value === undefined
     if (crashed || Exit.hasInterrupts(exit)) {
       return Effect.sync(() => worker.terminate()).pipe(
@@ -66,24 +69,26 @@ const releaseWorker =
     )
   }
 
-const askWorker = (worker: BunWorker, html: string) =>
-  Effect.callback<string | undefined, unknown>((resume) => {
-    worker.onmessage = (event: MessageEvent<{ text?: string; error?: string }>) => {
-      const { text, error } = event.data
-      resume(error === undefined ? Effect.succeed(text ?? '') : Effect.fail(new Error(error)))
+const askWorker = (worker: BunWorker, html: string, base: string) =>
+  Effect.callback<Parsed | undefined, unknown>((resume) => {
+    worker.onmessage = (event: MessageEvent<{ parsed?: Parsed; error?: string }>) => {
+      const { parsed, error } = event.data
+      resume(
+        error === undefined
+          ? Effect.succeed(parsed ?? { text: '', images: [] })
+          : Effect.fail(new Error(error)),
+      )
     }
     worker.onerror = () => resume(Effect.succeed(undefined))
-    worker.postMessage(html)
+    worker.postMessage({ html, base })
   })
 
-const parseInWorker = (state: PoolState, html: string) =>
+const parseInWorker = (state: PoolState, html: string, base: string) =>
   Effect.acquireUseRelease(
     takeWorker(state),
-    (worker) => askWorker(worker, html),
+    (worker) => askWorker(worker, html, base),
     releaseWorker(state),
-  ).pipe(
-    Effect.flatMap((text) => (text === undefined ? parseInThread(html) : Effect.succeed(text))),
-  )
+  ).pipe(Effect.flatMap((p) => (p === undefined ? parseInThread(html, base) : Effect.succeed(p))))
 
 // The pool's permits and idle workers live as long as the runtime that builds
 // this layer. Building it starts no worker; closing it, or `drain`, terminates
@@ -103,9 +108,9 @@ const makePool = Effect.gen(function* () {
     idle: yield* Effect.acquireRelease(Ref.make<readonly BunWorker[]>([]), terminateIdle),
     broken: yield* Ref.make(typeof Worker === 'undefined'),
   }
-  const parse = (html: string) =>
+  const parse = (html: string, base: string) =>
     Effect.flatMap(Ref.get(state.broken), (broken) =>
-      broken ? parseInThread(html) : permits.withPermit(parseInWorker(state, html)),
+      broken ? parseInThread(html, base) : permits.withPermit(parseInWorker(state, html, base)),
     )
   return { parse, drain: terminateIdle(state.idle) }
 })
@@ -113,16 +118,17 @@ const makePool = Effect.gen(function* () {
 export class ParsePool extends Context.Service<
   ParsePool,
   {
-    readonly parse: (html: string) => Effect.Effect<string, unknown>
+    readonly parse: (html: string, base: string) => Effect.Effect<Parsed, unknown>
     readonly drain: Effect.Effect<void>
   }
 >()('webular/lib/ParsePool') {
   static readonly layer = Layer.effect(ParsePool, makePool)
 }
 
-// Article text for one page, off the main thread when Workers run; an
-// in-thread parse when they are missing or fail.
-export const parseArticleText = (html: string) => ParsePool.use((pool) => pool.parse(html))
+// Article text and images for one page, off the main thread when Workers run;
+// an in-thread parse when they are missing or fail.
+export const parseArticleText = (html: string, base = '') =>
+  ParsePool.use((pool) => pool.parse(html, base))
 
 interface SourceRef {
   title: string
@@ -133,6 +139,7 @@ export interface SourceEntry {
   title: string
   url: string
   text: string
+  images?: PageImage[] | undefined
 }
 
 interface FetchedSources {
@@ -155,12 +162,12 @@ const fetchOne = (src: SourceRef, timeoutMs: number, maxHtml: number, pooled: bo
     fetchText(capture, { timeoutMs }),
   ).pipe(
     Effect.flatMap(({ value: html }) =>
-      (pooled ? parseArticleText : parseInThread)(html.slice(0, maxHtml)),
+      (pooled ? parseArticleText : parseInThread)(html.slice(0, maxHtml), src.url),
     ),
     Effect.match({
-      onSuccess: (text): Outcome => ({
+      onSuccess: ({ text, images }): Outcome => ({
         ok: true,
-        entry: { title: src.title, url: src.url, text },
+        entry: { title: src.title, url: src.url, text, images },
       }),
       onFailure: (err): Outcome => ({ ok: false, url: src.url, reason: errMsg(err) }),
     }),

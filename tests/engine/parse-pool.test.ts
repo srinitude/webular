@@ -99,7 +99,10 @@ describe('parseArticleText — worker pool', () => {
     eff(
       Effect.gen(function* () {
         const pages = Array.from({ length: 9 }, (_, i) => page(i))
-        const texts = yield* Effect.forEach(pages, parseArticleText, { concurrency: 'unbounded' })
+        const parsed = yield* Effect.forEach(pages, (html) => parseArticleText(html), {
+          concurrency: 'unbounded',
+        })
+        const texts = parsed.map((p) => p.text)
         expect(texts).toEqual(pages.map((html) => htmlToArticle(html).text))
         expect(texts[3]).toContain('Deterministic pool body 3')
       }),
