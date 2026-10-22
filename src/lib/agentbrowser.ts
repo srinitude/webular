@@ -4,7 +4,7 @@
 // Bin resolution is package-rooted, not cwd-rooted, so global installs work
 // from any directory.
 import { dirname, join } from 'node:path'
-import { Effect, type Path } from 'effect'
+import { Effect, FileSystem, type Path } from 'effect'
 import { runProc } from '../core/proc.ts'
 import { resolveBin } from '../core/root.ts'
 
@@ -21,15 +21,25 @@ const native =
     ? null
     : `agent-browser-${process.platform}-${process.arch}${process.platform === 'win32' ? '.exe' : ''}`
 
-/** The native agent-browser binary next to the package, else the shim on PATH. */
+// npm's launchers: the node script on Unix, the .cmd/.ps1/.bat wrappers on Windows.
+const SHIM = /\.(js|cmd|ps1|bat)$/i
+
+/**
+ * A real `agent-browser` executable on PATH (an override or a test stub) wins.
+ * When PATH holds only the node shim, spawn the package's native binary instead.
+ */
 export const agentBin = Effect.fn('agentBin')(function* () {
-  const direct = native
-    ? yield* Effect.try(() => Bun.resolveSync('agent-browser/package.json', import.meta.dir)).pipe(
-        Effect.map((pkg) => Bun.which(native, { PATH: join(dirname(pkg), 'bin') })),
-        Effect.orElseSucceed(() => null),
-      )
-    : null
-  return direct ?? (yield* resolveBin('agent-browser'))
+  const bin = yield* resolveBin('agent-browser')
+  const fs = yield* FileSystem.FileSystem
+  const real = bin ? yield* fs.realPath(bin).pipe(Effect.orElseSucceed(() => bin)) : null
+  if (!native || (real && !SHIM.test(real))) return bin
+  const direct = yield* Effect.try(() =>
+    Bun.resolveSync('agent-browser/package.json', import.meta.dir),
+  ).pipe(
+    Effect.map((pkg) => Bun.which(native, { PATH: join(dirname(pkg), 'bin') })),
+    Effect.orElseSucceed(() => null),
+  )
+  return direct ?? bin
 })
 
 // A named session keeps its browser warm between batches; its daemon shuts
