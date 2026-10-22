@@ -23,6 +23,7 @@ const main = Effect.gen(function* () {
     url: { type: 'string' },
     archive: { type: 'boolean' },
     render: { type: 'string' },
+    'ignore-robots': { type: 'boolean' },
   })
   const url = (values['url'] as string) ?? positionals[0]
   if (!url) {
@@ -33,6 +34,7 @@ const main = Effect.gen(function* () {
     url,
     timeoutMs: yield* timeoutFlag('scrape', values),
     archive: values['archive'] === true,
+    ignoreRobots: values['ignore-robots'] === true,
     ...(render ? { render } : {}),
   }
   return yield* runWorkflow(

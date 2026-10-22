@@ -27,9 +27,10 @@
 
 ## scrape
 
-- Input: `url` (a full http or https URL, required), `archive` (true or false), and `render` (`agent-browser`, `cua`, or `off`; renders the page in a browser first).
+- Input: `url` (a full http or https URL, required), `archive` (true or false), `render` (`agent-browser`, `cua`, or `off`; renders the page in a browser first), and `ignoreRobots` (true or false).
 - Output: the page title and its main content as Markdown, with no menus or ads.
 - With `archive: true`, a page that fails live is read from its closest Wayback Machine copy, and `archivedFrom` names that copy.
+- By default, a page that robots.txt disallows returns status `blocked` with reason `robots`. With `ignoreRobots: true`, it is fetched anyway, and the output carries `robots: "disallowed"`. This works for a single URL only. Crawl, map, and batch always honor robots.txt.
 
 ## map
 

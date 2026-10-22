@@ -6,7 +6,7 @@ Rules for the Mastra workflows, under [src/AGENTS.md](../AGENTS.md).
 
 One workflow per command, such as `search.ts`, `scrape.ts`, `crawl.ts`, and `answer.ts`. A command in `src/commands/` runs the workflow with the same name.
 
-- `runtime.ts` is the one place where an Effect program meets a Mastra step.
+- `runtime.ts` is the one place where an Effect program meets a Mastra step. Its runtime also holds the per-origin robots.txt cache.
 - `scrape-fallback.ts` holds the render and PDF fallbacks around the plain fetch.
 
 ## Rules
@@ -17,6 +17,14 @@ One workflow per command, such as `search.ts`, `scrape.ts`, `crawl.ts`, and `ans
 - Fan out with a bounded `Effect.forEach` and a size from `src/core/budget.ts`. Results keep input order.
 - Give a sub-run a stable run id, such as the target URL.
 - Discovery commands keep partial failures in the payload. Exit 1 only when the payload is empty and errors exist.
+
+### robots.txt
+
+- Check robots.txt through `robotsGate` in `src/lib/robots-gate.ts` before any one-off page fetch.
+- A disallowed page is never fetched, and no browser or archive fallback runs for it.
+- Scrape returns `status: "blocked"` with `reason: "robots"`, the matched `rule`, and `userAgent: "webular"`.
+- Only scrape's `ignoreRobots` fetches a disallowed page, and only for the one URL the user named. Its output carries `robots: "disallowed"`.
+- Batch and map have no override.
 
 ### Mastra
 
@@ -30,7 +38,7 @@ One workflow per command, such as `search.ts`, `scrape.ts`, `crawl.ts`, and `ans
 
 ## Checks
 
-- `scrape.ts:17`, `monitor.ts:15`, `extract.ts:17`, `act.ts:17`, `summarize.ts:18`, `feed.ts:12`, and `map.ts:18` use bare `z.url()`, with no shared http-only URL helper.
+- `scrape.ts:18`, `monitor.ts:15`, `extract.ts:17`, `act.ts:17`, `summarize.ts:18`, `feed.ts:12`, and `map.ts:18` use bare `z.url()`, with no shared http-only URL helper.
 
 ```bash
 mise run test:file tests/commands tests/machines/command-lifecycle.test.ts

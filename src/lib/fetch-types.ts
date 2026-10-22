@@ -10,6 +10,9 @@ export class FetchError extends Data.TaggedError('FetchError')<{
   readonly url: string
   readonly status?: number | undefined
   readonly retryAfterMs?: number | undefined
+  /** Why a `blocked` fetch was refused; `robots` carries the matched rule. */
+  readonly reason?: 'robots' | undefined
+  readonly rule?: string | undefined
   readonly cause?: unknown
 }> {}
 

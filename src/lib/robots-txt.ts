@@ -89,9 +89,9 @@ const toRegex = (pattern: string) => {
 
 // ponytail: compiles each pattern per check, O(rules · path); cache compiled
 // regexes per host if robots checks show up in a profile.
-/** Longest matching pattern wins; on a tie Allow wins; /robots.txt is always allowed. */
-export const isAllowed = (robots: Robots, path: string): boolean => {
-  if (path === '/robots.txt') return true
+/** The deciding rule: longest matching pattern wins; on a tie Allow wins; none for /robots.txt. */
+export const matchedRule = (robots: Robots, path: string): RobotsRule | undefined => {
+  if (path === '/robots.txt') return undefined
   let best: RobotsRule | undefined
   for (const rule of robots.rules) {
     if (!toRegex(rule.pattern).test(path)) continue
@@ -99,5 +99,8 @@ export const isAllowed = (robots: Robots, path: string): boolean => {
     const tieAllow = best && rule.pattern.length === best.pattern.length && rule.allow
     if (longer || tieAllow) best = rule
   }
-  return best?.allow ?? true
+  return best
 }
+
+export const isAllowed = (robots: Robots, path: string): boolean =>
+  matchedRule(robots, path)?.allow ?? true

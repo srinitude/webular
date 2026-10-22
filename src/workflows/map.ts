@@ -4,13 +4,13 @@ import { createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
 import { hostConcurrency } from '../core/budget.ts'
-import { fetchRoot, fetchTextWithinHost } from '../core/http.ts'
+import { fetchTextWithinHost } from '../core/http.ts'
 import { errMsg } from '../core/output.ts'
 import { normalizeUrl, sameHost } from '../core/url.ts'
 import { archivedUrls } from '../lib/archive-urls.ts'
 import { jevOrder } from '../lib/crawl.ts'
-import { extractLinks } from '../lib/html.ts'
 import { decisionStep } from '../lib/jev/steps.ts'
+import { fetchRootFor, pageLinks } from '../lib/map-root.ts'
 import { fetchErrorsSchema } from '../lib/sources.ts'
 import { stepRuntime } from './runtime.ts'
 
@@ -137,40 +137,13 @@ export function dedupe(links: string[], limit: number): string[] {
   return out
 }
 
-interface RootFetch {
-  final: string
-  rootHtml: string | null
-  errors: { url: string; reason: string }[]
-}
-
-// The root is the user's explicit target: follow its redirects, anchor the sitemap origin
-// and host scope on the FINAL url, and reuse its HTML for page links (no second fetch).
-const fetchRootFor = (url: string, timeoutMs?: number): Effect.Effect<RootFetch> =>
-  Effect.match(fetchRoot(url, { timeoutMs: timeoutMs ?? SITEMAP_TIMEOUT_MS }), {
-    onFailure: (err): RootFetch => ({
-      final: url,
-      rootHtml: null,
-      errors: [{ url, reason: errMsg(err) }],
-    }),
-    onSuccess: (entry): RootFetch => ({ final: entry.finalUrl, rootHtml: entry.html, errors: [] }),
-  })
-
-// Origin-root page links join a /sitemap.xml result (sitemap order first); a deep
-// target's links or a robots.txt sitemap stand alone. No sitemap links: page links.
-function pageLinks(root: RootFetch, sitemap: { links: string[]; fromSitemapXml: boolean } | null) {
-  const final = new URL(root.final)
-  const merge = sitemap?.fromSitemapXml === true && final.pathname === '/'
-  if (!root.rootHtml || (sitemap && sitemap.links.length > 0 && !merge)) return []
-  return extractLinks(root.rootHtml, root.final).filter((u) => sameHost(final.hostname, u))
-}
-
 const discover = Effect.fn('map.discover')(function* (input: z.infer<typeof mapInput>) {
   const { url, limit = 1000, timeoutMs } = input
-  const root = yield* fetchRootFor(url, timeoutMs)
+  const root = yield* fetchRootFor(url, timeoutMs ?? SITEMAP_TIMEOUT_MS)
   const sitemap = yield* fetchSitemap(root.final, timeoutMs)
   const found = dedupe([...(sitemap?.links ?? []), ...pageLinks(root, sitemap)], Infinity)
   // The site would not answer at all: ask the archive indexes (2603.01548).
-  const dead = found.length === 0 && root.errors.length > 0
+  const dead = found.length === 0 && root.errors.length > 0 && !root.blocked
   const unique = dead ? dedupe(yield* archivedUrls('map', root.final, limit), Infinity) : found
   return { url, site: root.final, limit, unique, root, sitemap }
 })

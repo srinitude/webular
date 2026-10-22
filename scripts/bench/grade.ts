@@ -3,6 +3,7 @@
 // (audit finding 1, guard test 19); error rows never pass and stay in
 // latency as censored at the timeout (audit finding 10, guard test 24).
 import { Effect, Option } from 'effect'
+import { gradeRobots, type RobotsOutcome } from './robots-grade.ts'
 import type { Check, Row, Status, Task } from './schema.ts'
 
 export const ANSWER_MODES = [
@@ -19,6 +20,8 @@ interface Graded {
   readonly mode: AnswerMode | undefined
   readonly status: Status
   readonly pass: boolean
+  // Set on robots-gold tasks only; scored in its own report column, not accuracy.
+  readonly robots?: RobotsOutcome
 }
 
 export const normalizeText = (s: string): string =>
@@ -83,6 +86,9 @@ const effectiveStatus = (row: Row): Status =>
 
 export const gradeRow = (task: Task, row: Row, mode?: AnswerMode): Graded => {
   const status = effectiveStatus(row)
+  if (task.expect !== undefined) {
+    return { taskId: task.id, provider: row.key.provider, mode, status, ...gradeRobots(row) }
+  }
   const aliasOk = task.aliases.length === 0 || aliasMatch(row.output, task.aliases)
   const pass = status === 'ok' && aliasOk && task.checks.every((c) => runCheck(c, row.output))
   return { taskId: task.id, provider: row.key.provider, mode, status, pass }

@@ -10,6 +10,7 @@ import { fetchText } from '../core/http.ts'
 import { htmlToMarkdown, pageBodyHtml, parsePage } from '../lib/html.ts'
 import { decisions } from '../lib/jev/decisions.ts'
 import { decisionStep } from '../lib/jev/steps.ts'
+import { isRobotsBlock, ROBOTS_AGENT, robotsGate } from '../lib/robots-gate.ts'
 import { stepRuntime } from './runtime.ts'
 import { withFallbacks } from './scrape-fallback.ts'
 
@@ -20,7 +21,19 @@ const scrapeInput = z.object({
   archive: z.boolean().optional(),
   // Page needs JavaScript → render it in the background with this driver.
   render: z.enum(['agent-browser', 'cua', 'off']).optional(),
+  // Fetch even when robots.txt disallows the page; only for one named URL.
+  ignoreRobots: z.boolean().optional(),
 })
+
+const robotsFields = {
+  // A robots.txt block: nothing was fetched.
+  status: z.literal('blocked').optional(),
+  reason: z.literal('robots').optional(),
+  rule: z.string().optional(),
+  userAgent: z.string().optional(),
+  // Fetched under ignoreRobots although robots.txt disallows it.
+  robots: z.literal('disallowed').optional(),
+}
 
 const backends = z.enum(['agent-browser', 'cua'])
 
@@ -32,6 +45,7 @@ const scrapeOutput = z.object({
   links: z.array(z.string()),
   archivedFrom: z.string().optional(),
   renderedBy: backends.optional(),
+  ...robotsFields,
 })
 
 const fetched = z.object({
@@ -40,6 +54,8 @@ const fetched = z.object({
   archivedFrom: z.string().optional(),
   markdown: z.string().optional(),
   renderedBy: backends.optional(),
+  blockedBy: z.string().optional(),
+  robots: robotsFields.robots,
 })
 
 const staticFetch = ({ url, timeoutMs, archive }: z.infer<typeof scrapeInput>) =>
@@ -49,8 +65,29 @@ const staticFetch = ({ url, timeoutMs, archive }: z.infer<typeof scrapeInput>) =
       )
     : Effect.map(fetchText(url, { timeoutMs }), (html) => ({ html }))
 
+// robots.txt first: a block skips the fetch and every fallback, unless
+// ignoreRobots, which marks the page `robots: disallowed`.
+const robotsMark = (input: z.infer<typeof scrapeInput>) =>
+  Effect.catchIf(Effect.as(robotsGate(input.url), {}), isRobotsBlock, (err) =>
+    input.ignoreRobots ? Effect.succeed({ robots: 'disallowed' as const }) : Effect.fail(err),
+  )
+
 const fetchPage = (input: z.infer<typeof scrapeInput>) =>
-  withFallbacks(input.url, staticFetch(input), input.render ?? 'agent-browser', input.timeoutMs)
+  Effect.flatMap(robotsMark(input), (mark) =>
+    Effect.map(
+      withFallbacks(
+        input.url,
+        staticFetch(input),
+        input.render ?? 'agent-browser',
+        input.timeoutMs,
+      ),
+      (page) => ({ ...page, ...mark }),
+    ),
+  ).pipe(
+    Effect.catchIf(isRobotsBlock, (err) =>
+      Effect.succeed({ html: '', blockedBy: err.rule ?? '/' }),
+    ),
+  )
 
 const fetchStep = createStep({
   id: 'fetch',
@@ -71,9 +108,18 @@ const pdfResult = (url: string, markdown: string): z.infer<typeof scrapeOutput> 
   links: [],
 })
 
+const robotsBlocked = (url: string, rule: string): z.infer<typeof scrapeOutput> => ({
+  ...pdfResult(url, ''),
+  status: 'blocked',
+  reason: 'robots',
+  rule,
+  userAgent: ROBOTS_AGENT,
+})
+
 // The parsed page plus both Markdown candidates; `main` picks which one the result keeps.
 const prepareScrape = (input: z.infer<typeof fetched>) => {
-  if (input.markdown !== undefined) return { input, page: undefined, article: '', full: '' }
+  if (input.markdown !== undefined || input.blockedBy !== undefined)
+    return { input, page: undefined, article: '', full: '' }
   const page = parsePage(input.html, input.url)
   const article = page.article.contentHtml ? htmlToMarkdown(page.article.contentHtml) : ''
   return { input, page, article, full: htmlToMarkdown(pageBodyHtml(input.html)) }
@@ -83,7 +129,8 @@ type Prepared = ReturnType<typeof prepareScrape>
 type Picks = readonly ['article' | 'page' | undefined, string | undefined]
 
 function toScrapeResult(p: Prepared, picks: Picks | undefined): z.infer<typeof scrapeOutput> {
-  const { url, archivedFrom, markdown, renderedBy } = p.input
+  const { url, archivedFrom, markdown, renderedBy, blockedBy, robots } = p.input
+  if (blockedBy !== undefined) return robotsBlocked(url, blockedBy)
   if (markdown !== undefined || p.page === undefined) return pdfResult(url, markdown ?? '')
   const [main, judgedTitle] = picks ?? [undefined, undefined]
   const body = (main ?? (p.article ? 'article' : 'page')) === 'article' ? p.article : p.full
@@ -96,6 +143,7 @@ function toScrapeResult(p: Prepared, picks: Picks | undefined): z.infer<typeof s
     links: p.page.links,
     ...(archivedFrom ? { archivedFrom } : {}),
     ...(renderedBy ? { renderedBy } : {}),
+    ...(robots ? { robots } : {}),
   }
 }
 

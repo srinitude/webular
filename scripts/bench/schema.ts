@@ -64,6 +64,10 @@ export const Task = Schema.Struct({
   tags: Tags,
   checks: Schema.Array(Check),
   rubric: Schema.optional(Schema.String),
+  // Gold for a page the site's robots.txt disallows (guard test 16).
+  expect: Schema.optional(
+    Schema.Struct({ status: Schema.Literal('blocked'), reason: Schema.Literal('robots') }),
+  ),
 })
 export type Task = typeof Task.Type
 
@@ -159,6 +163,10 @@ export const Row = Schema.Struct({
   loadAvg: Schema.Number,
   cpuMs: Schema.Number,
   calls: Schema.Array(OutboundCall),
+  // Every HTTP request the tool made, when recorded (guard test 16).
+  requests: Schema.optional(
+    Schema.Array(Schema.Struct({ method: Schema.String, url: Schema.String })),
+  ),
 })
 export type Row = typeof Row.Type
 

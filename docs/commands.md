@@ -8,7 +8,7 @@ usage line, the global options, the exit codes, and examples.
 | Command | What it does |
 |---|---|
 | `search`    | Searches the web with no key, through DuckDuckGo's no-JS HTML page. `--source wikipedia\|hackernews\|arxiv` searches one of those keyless sources instead |
-| `scrape`    | Reads one URL as clean markdown or JSON (Bun.fetch + Readability + Turndown) |
+| `scrape`    | Reads one URL as clean markdown or JSON (Bun.fetch + Readability + Turndown). By default, a page that robots.txt disallows returns status "blocked" with reason "robots". `--ignore-robots` fetches it anyway (single URL only), and the output carries robots: "disallowed". Crawl, map, and batch always honor robots.txt |
 | `crawl`     | Reads a site page by page on the same host, breadth first (no rate limits, so crawl with care; an unreachable robots.txt blocks the crawl) |
 | `map`       | Finds all URLs for a domain (sitemap + link BFS) |
 | `extract`   | Pulls fields with CSS selectors or a schema |

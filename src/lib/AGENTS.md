@@ -8,7 +8,8 @@ Files group by name prefix:
 
 - Fetching: `fetch-layer.ts` is the one fetch layer, with deadline, conditional GET, jittered retry, and a validator cache. `fetch-http.ts`, `fetch-cache.ts`, and `fetch-types.ts` support it.
 - Search: `search.ts`, `search-chain.ts`, and the other `search-*.ts` files ask the free sources and fuse their lists. `sources-search.ts` and `sources.ts` fetch the evidence for `answer` and `research`.
-- Crawl: `crawl.ts` plus `crawl-frontier.ts`, `crawl-heap.ts`, `crawl-resume.ts`, and `polite-crawler.ts`. `robots-txt.ts` reads `robots.txt`.
+- Crawl: `crawl.ts` plus `crawl-frontier.ts`, `crawl-heap.ts`, `crawl-resume.ts`, and `polite-crawler.ts`.
+- robots.txt: `robots-txt.ts` reads `robots.txt`. `robots-gate.ts` is the one gate for one-off fetches (scrape, batch, and map's root page). It caches each origin's rules for `ROBOTS_TTL_MS`. `map-root.ts` fetches map's root page behind that gate.
 - Pages and text: `html.ts`, `html-table.ts`, `parse.ts`, `select.ts`, `summarize.ts`, `simhash.ts`, and `readability-chain.ts`.
 - Browser drivers: `driver.ts` runs a headless Chrome. `driver-cua.ts` and the `cua-*.ts` files drive the user's own window.
 - Local state: `snapshot.ts` and `local-index.ts` use `bun:sqlite`.
@@ -36,7 +37,7 @@ Files group by name prefix:
 mise run test:file tests/lib tests/core tests/commands/search.test.ts
 ```
 
-- crawl.ts:101 turns a failed robots.txt fetch into status 0, read as allow-all. crawl.ts:196 fetches the root before any robots check.
+- crawl.ts:196 fetches the root before any robots check.
 - fetch-http.ts:56 sends no User-Agent, and search.ts:18 sends a Chrome one.
 - snapshot.ts:29 and crawl-resume.ts:14 open SQLite with no WAL pragma.
 - driver.ts:131 and driver-cua.ts:197 name layers with a Live suffix.

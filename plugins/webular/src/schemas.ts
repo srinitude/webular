@@ -28,6 +28,7 @@ export const schemas = {
       .enum(['agent-browser', 'cua', 'off'])
       .optional()
       .describe('Render the page in a browser first: agent-browser, cua, or off'),
+    ignoreRobots: flag('Fetch even when robots.txt disallows the page; single URL only'),
   }),
   map: z.strictObject({ url, limit: count(10_000, 'Most URLs to return') }),
   summarize: z.strictObject({

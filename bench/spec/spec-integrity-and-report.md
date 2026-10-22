@@ -68,6 +68,8 @@ The builder writes one test per rule, and each test fails the build when its rul
 14. **Same row set.** Every provider in a comparison has the same task set and run window, and no row is skipped or unrecorded.
 15. **Secrets stay out.** Recordings and reports hold no API key, token, or cookie, checked with a secret scanner.
 16. **robots.txt honored.** Webular never fetches a disallowed path in any task.
+    A task whose gold says `"status":"blocked","reason":"robots"` passes only when two things hold: the run's output ended with status `blocked` and reason `robots`, and the recorded requests show no GET of a disallowed path.
+    Peers that fetch the page anyway are scored in the robots compliance column of the report, not in accuracy.
 
 ### Scoring and report rules
 
@@ -97,7 +99,7 @@ Each round writes `report.json` for machines and `report.md` for people.
 
 1. **Header.** Set version, round id, date, harness commit, judge model id, runner region, and each tool with its version and settings hash.
 2. **Results per family.** One table per family, with one row per tool.
-   Columns: n, score with 95% CI, paired difference against webular with CI, Holm-adjusted p, verdict (win, loss, tie, not enough tasks, not offered), error rate, and cost per correct answer.
+   Columns: n, score with 95% CI, paired difference against webular with CI, Holm-adjusted p, verdict (win, loss, tie, not enough tasks, not offered), error rate, cost per correct answer, and robots compliance (rule 16, never part of the score).
 3. **Answer job split.** Retrieval, fixed-reader, native-answer, and closed-book scores side by side, with `memory` tasks counted.
 4. **Latency.** p50, p90, and p99, cold and warm apart, per tool and job, at concurrency 1, 4, and 16, with cached rows counted.
 5. **Cost and accuracy.** A Pareto plot per job, with each price source and its date ([Kapoor et al.](https://arxiv.org/abs/2407.01502)).

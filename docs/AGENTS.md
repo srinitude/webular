@@ -19,7 +19,7 @@ User and developer docs; the root [AGENTS.md](../AGENTS.md) holds the repo-wide 
 - Docs name the exact command each shipped manifest runs. Source: [Agent Plugins 1.0.0, section 7.2.1](https://agent-plugins.org/specification).
 - `docs/install.md` links the plugin README for agent-host setup. Source: [Cursor plugins reference](https://cursor.com/docs/reference/plugins).
 - An install line that uses `/plugin install webular --marketplace` needs Claude Code `2.1.275` or a higher build. Source: [Claude Code plugin install, CC 2.1.306](https://code.claude.com/docs/en/plugins/install).
-- `docs/commands.md` gives each command's robots.txt stance. Crawl obeys robots.txt and paces its requests. Scrape, batch, and `web.fetch` are user-directed and skip it. Source: [RFC 9309](https://www.rfc-editor.org/rfc/rfc9309).
+- `docs/commands.md` gives each command's robots.txt stance. Crawl obeys robots.txt and paces its requests. Scrape returns status "blocked" for a disallowed page unless `--ignore-robots` is set. Batch always honors robots.txt. `web.fetch` is user-directed and skips it. Source: [RFC 9309](https://www.rfc-editor.org/rfc/rfc9309).
 - A page that cites a standard names its version. Source: [Agent Skills specification](https://agentskills.io/specification).
 - The page that covers server.json also says how to publish and check the MCP Registry entry. Source: [MCP Registry server.json, schema 2025-12-11](https://github.com/modelcontextprotocol/registry/blob/main/docs/reference/server-json/draft/server.schema.json).
 

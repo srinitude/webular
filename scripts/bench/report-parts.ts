@@ -25,6 +25,9 @@ export interface FamilyResult {
   readonly errorRate: number
   readonly costPerCorrect: number | null
   readonly webularOnly: boolean
+  // Share of robots-gold tasks where no disallowed path was fetched; its own
+  // column, never part of the score (guard test 16).
+  readonly robotsCompliance?: number | null
 }
 
 export interface ReportInput {
@@ -84,7 +87,8 @@ export const header = (h: Header) =>
   )
 
 const resultRow = (r: FamilyResult): string[] => {
-  if (r.score === null) return [r.tool, String(r.n), 'not offered', '', '', 'not offered', '', '']
+  if (r.score === null)
+    return [r.tool, String(r.n), 'not offered', '', '', 'not offered', '', '', '']
   const c = r.comparison
   return [
     r.tool,
@@ -95,6 +99,7 @@ const resultRow = (r: FamilyResult): string[] => {
     c === undefined ? '' : c.verdict,
     num(r.errorRate),
     num(r.costPerCorrect, 4),
+    num(r.robotsCompliance ?? null),
   ]
 }
 
@@ -106,7 +111,7 @@ export const results = (rs: readonly FamilyResult[]) => {
   const tables = families.map(
     (f) =>
       `### ${f}\n\n${table(
-        [...RESULT_HEAD, 'error rate', 'cost per correct'],
+        [...RESULT_HEAD, 'error rate', 'cost per correct', 'robots compliance'],
         shown.filter((r) => r.family === f).map(resultRow),
       )}`,
   )

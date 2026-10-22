@@ -23,6 +23,9 @@ const resultItem = z.object({
   ok: z.boolean(),
   title: z.string().optional(),
   error: z.string().optional(),
+  // robots.txt disallows this URL; batch has no override, so it was never fetched.
+  status: z.literal('blocked').optional(),
+  reason: z.literal('robots').optional(),
 })
 
 const batchOutput = z.object({
@@ -31,6 +34,8 @@ const batchOutput = z.object({
 })
 
 type ResultItem = z.infer<typeof resultItem>
+
+const ROBOTS_BLOCKED = 'blocked: robots.txt disallows this URL'
 
 // Index-prefixed runId: deterministic AND unique — Mastra caches Run
 // instances by id; targets are deduped first, so the index is per distinct URL.
@@ -53,6 +58,8 @@ const scrapeOne = (
   Effect.match(scrapeRun(url, index, timeoutMs, archive), {
     onFailure: (err): ResultItem => ({ url, ok: false, error: errMsg(err.cause ?? err) }),
     onSuccess: (outcome): ResultItem => {
+      if (outcome.status === 'success' && outcome.result.status === 'blocked')
+        return { url, ok: false, status: 'blocked', reason: 'robots', error: ROBOTS_BLOCKED }
       if (outcome.status === 'success') return { url, ok: true, title: outcome.result.title }
       const detail = outcome.status === 'failed' ? outcome.error.message : outcome.status
       return { url, ok: false, error: detail }

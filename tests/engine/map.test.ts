@@ -17,9 +17,7 @@ function page(links: string[]): Response {
   const anchors = links.map((href) => `<a href="${href}">${href}</a>`).join('')
   return new Response(
     `<!doctype html><html><head><title>t</title></head><body>${anchors}</body></html>`,
-    {
-      headers: { 'content-type': 'text/html' },
-    },
+    { headers: { 'content-type': 'text/html' } },
   )
 }
 
@@ -193,7 +191,7 @@ describe('map — robots.txt Sitemap: fallback', () => {
         const fx = yield* startFixture((): Routes => ({ '/': () => page(['/only']) }))
         const { links } = yield* runMap(fx.origin)
         expect(links).toEqual([`${fx.origin}/only`])
-        expect(fx.hits('/robots.txt')).toBe(1)
+        expect(fx.hits('/robots.txt')).toBe(2) // robots gate read + Sitemap: lookup
       }),
     ),
     15_000,
