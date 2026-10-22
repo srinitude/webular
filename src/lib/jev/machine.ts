@@ -25,9 +25,15 @@ import {
 } from './payload/index.ts'
 
 // The machine says which moves are allowed; Jev picks one of them; the machine
-// takes it. The fallback is the observed event when the machine allows it.
-export const allowedEvents = (snapshot: AnyMachineSnapshot): string[] =>
-  agentAllowedEvents(snapshot).slice(0, CAPS.fields)
+// takes it. The fallback is the observed event when the machine allows it, so
+// a cut past the cap keeps it in the last slot.
+export const allowedEvents = (snapshot: AnyMachineSnapshot, observed?: string): string[] => {
+  const all = agentAllowedEvents(snapshot)
+  const capped = all.slice(0, CAPS.fields)
+  return observed === undefined || capped.includes(observed) || !all.includes(observed)
+    ? capped
+    : [...capped.slice(0, -1), observed]
+}
 
 const MACHINE_PURPOSE = purpose(
   'A webular command runs as a state machine, one move at a time.',
@@ -132,7 +138,7 @@ export const nextEvent = defineDecision<Allowed, string | undefined>({
 // The chosen event is always one the machine allows from `snapshot`, or
 // undefined when Jev gives no allowed pick and the observed event is not allowed.
 export const machineDecision = (i: MachineInput) => {
-  const allowed = allowedEvents(i.snapshot)
+  const allowed = allowedEvents(i.snapshot, i.observed.type)
   return allowed.length < 2
     ? Effect.succeed(observedIfAllowed(i, allowed))
     : nextEvent({ ...i, allowed })

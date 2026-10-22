@@ -1,7 +1,7 @@
 // RESEARCH workflow: search DDG HTML → fetch top N → extract + summarize → markdown report
 // Composed as a Mastra non-model workflow over FOSS tools.
 import { createStep, createWorkflow } from '@mastra/core/workflows'
-import { Effect } from 'effect'
+import { Effect, Ref } from 'effect'
 import { z } from 'zod'
 import { mdHeading } from '../core/output.ts'
 import { pageImageSchema } from '../lib/answer-figure.ts'
@@ -12,6 +12,7 @@ import { onJevRuntime } from '../lib/jev/run.ts'
 import { readabilitySchema, withReadability } from '../lib/readability-chain.ts'
 import { sourceFigures } from '../lib/router-images.ts'
 import { searchEffect } from '../lib/search-chain.ts'
+import { searchErrors } from '../lib/search-errors.ts'
 import { fetchErrorsSchema, fetchSources, type SourceEntry } from '../lib/sources.ts'
 import { stepRuntime } from './runtime.ts'
 
@@ -37,6 +38,8 @@ const foundSchema = z.object({
   sentences: z.number(),
   timeoutMs: z.number().optional(),
   sources: z.array(sourceItem),
+  // Search sources that failed when no round found anything.
+  errors: fetchErrorsSchema,
 })
 
 const entriesSchema = z.object({
@@ -60,17 +63,27 @@ const searchStep = createStep({
   // Bounded rounds: research.done asks for another search only when the hits miss the topic.
   execute: ({ inputData, abortSignal }) =>
     stepRuntime.runPromise(
-      Effect.map(
-        searchRounds(inputData.topic, inputData.depth, (q, n) =>
-          Effect.map(searchEffect('web', q, n), (r) => r.results),
-        ),
-        (found) => ({
+      Effect.gen(function* () {
+        const failures = yield* Ref.make(new Map<string, { url: string; reason: string }>())
+        const found = yield* searchRounds(inputData.topic, inputData.depth, (q, n) =>
+          searchEffect('web', q, n).pipe(
+            Effect.tap((r) =>
+              Ref.update(
+                failures,
+                (m) => new Map([...m, ...searchErrors(r).map((e) => [e.url, e] as const)]),
+              ),
+            ),
+            Effect.map((r) => r.results),
+          ),
+        )
+        return {
           topic: inputData.topic,
           sentences: inputData.sentences,
           timeoutMs: inputData.timeoutMs,
           sources: found.map((h) => ({ title: h.title, url: h.url })),
-        }),
-      ),
+          errors: found.length === 0 ? [...(yield* Ref.get(failures)).values()] : [],
+        }
+      }),
       { signal: abortSignal },
     ),
 })
@@ -89,7 +102,7 @@ const fetchAndFilter = Effect.fn('research.fetchSources')(function* (
     topic: input.topic,
     sentences: input.sentences,
     entries: [...entries],
-    errors: fetched.errors,
+    errors: [...input.errors, ...fetched.errors],
   }
 })
 

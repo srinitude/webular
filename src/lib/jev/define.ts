@@ -112,7 +112,9 @@ export const defineDecision = <I, A>(def: DecisionDef<I, A>) =>
         def.name,
         () => def.fallback(input),
         (jev) =>
-          guardPayload(def.name, def.payload(input), def.maxTokens, def.model).pipe(
+          // A payload builder that throws fails here, so the fallback answers.
+          Effect.try(() => def.payload(input)).pipe(
+            Effect.flatMap((built) => guardPayload(def.name, built, def.maxTokens, def.model)),
             Effect.flatMap((req) => askJev(jev, def.name, req)),
             Effect.map((r) => {
               const picked = def.read(r.answers, def.bar, input)

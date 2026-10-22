@@ -52,10 +52,18 @@ export const purpose = (
   return Object.freeze(p)
 }
 
+// At most `n` chars, never ending inside a surrogate pair, and well-formed:
+// a lone surrogate (often a raw upstream .slice) becomes U+FFFD, as Jev takes only UTF-8.
+const cut = (s: string, n: number): string => {
+  const t = s.length > n ? s.slice(0, n) : s
+  const last = t.charCodeAt(t.length - 1)
+  return (last >= 0xd800 && last <= 0xdbff ? t.slice(0, -1) : t).toWellFormed()
+}
+
 // One JSON string, cut to `max` chars and to what is left of the byte budget.
 const str = (s: string, max: number, b: Budget): string => {
-  let j = JSON.stringify(s.length > max ? s.slice(0, max) : s)
-  if (j.length > b.bytes) j = JSON.stringify(s.slice(0, Math.max(0, Math.floor((b.bytes - 2) / 6))))
+  let j = JSON.stringify(cut(s, max))
+  if (j.length > b.bytes) j = JSON.stringify(cut(s, Math.max(0, Math.floor((b.bytes - 2) / 6))))
   b.bytes -= j.length
   return j
 }

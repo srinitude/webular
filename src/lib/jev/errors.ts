@@ -13,6 +13,7 @@ type JevErrorKind =
   | 'server'
   | 'timeout'
   | 'network'
+  | 'bad_reply'
   | 'no_key'
 
 const KINDS: Record<JevErrorKind, { readonly next: string; readonly retry: boolean }> = {
@@ -25,6 +26,11 @@ const KINDS: Record<JevErrorKind, { readonly next: string; readonly retry: boole
   server: { next: 'retry once with jitter; else use the code rule', retry: true },
   timeout: { next: 'retry once with jitter; else use the code rule', retry: true },
   network: { next: 'retry once with jitter; else use the code rule', retry: true },
+  // A 200 is billed; its reply would not decode the second time either.
+  bad_reply: {
+    next: 'check the reply shape against the docs; the code rule decides',
+    retry: false,
+  },
   no_key: { next: 'set a TypeSafe key; the code rule decides meanwhile', retry: false },
 }
 

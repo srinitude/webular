@@ -96,7 +96,10 @@ export const postOnce =
       const req = jevRequest(endpoint, key.value, body)
       const res = yield* http.execute(req)
       if (res.status >= 400) return yield* httpError(res)
-      const reply = yield* decodeReply(yield* res.json)
+      const reply = yield* res.json.pipe(
+        Effect.flatMap(decodeReply),
+        Effect.mapError((e) => new JevError({ reason: `reply: ${String(e)}`, kind: 'bad_reply' })),
+      )
       const { answers, model } = reply
       const inputTokens = reply.usage?.input_tokens ?? 0
       return { answers, inputTokens, model, source: 'jev' } satisfies typeof Result.Type

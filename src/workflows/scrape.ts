@@ -134,7 +134,8 @@ type Picks = readonly ['article' | 'page' | undefined, string | undefined]
 function toScrapeResult(p: Prepared, picks: Picks | undefined): z.infer<typeof scrapeOutput> {
   const { url, archivedFrom, markdown, renderedBy, blockedBy, robots } = p.input
   if (blockedBy !== undefined) return robotsBlocked(url, blockedBy)
-  if (markdown !== undefined || p.page === undefined) return pdfResult(url, markdown ?? '')
+  if (markdown !== undefined || p.page === undefined)
+    return { ...pdfResult(url, markdown ?? ''), ...(robots ? { robots } : {}) }
   const [main, judgedTitle] = picks ?? [undefined, undefined]
   const body = (main ?? (p.article ? 'article' : 'page')) === 'article' ? p.article : p.full
   const title = judgedTitle ?? p.page.title

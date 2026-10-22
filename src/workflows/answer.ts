@@ -17,6 +17,7 @@ import { onJevRuntime } from '../lib/jev/run.ts'
 import { decisionStep } from '../lib/jev/steps.ts'
 import { readabilitySchema, withReadability } from '../lib/readability-chain.ts'
 import { searchEffect } from '../lib/search-chain.ts'
+import { searchErrors } from '../lib/search-errors.ts'
 import { mainEntity, nestedBridge } from '../lib/search-hop.ts'
 import { subjectSources } from '../lib/source-subject.ts'
 import { fetchErrorsSchema, fetchSources } from '../lib/sources.ts'
@@ -63,23 +64,21 @@ const evidenceSchema = z.object({
 type Evidence = z.infer<typeof evidenceSchema>
 
 const searchHits = (query: string, n: number) =>
-  Effect.map(
-    searchEffect('web', query, n, { hop: true, deadlineMs: ANSWER_SEARCH_MS }),
-    ({ results }) => results,
-  )
+  searchEffect('web', query, n, { hop: true, deadlineMs: ANSWER_SEARCH_MS })
 
 // --urls reads exactly those pages, no search. Otherwise over-fetch 3x so Jev can
 // pick which hits to fetch (else the engine's first N). Namesake pages (a TV
 // series named after the novel) drop out, then Jev keeps only the fetched
 // sources that hold facts answering the query.
 const gather = Effect.fn('answer.gather')(function* (input: z.infer<typeof answerInput>) {
-  const hits = input.urls
-    ? input.urls.map((url) => ({ title: url, url }))
-    : yield* onJevRuntime(decisions.answerHits, {
+  const searched = input.urls ? undefined : yield* searchHits(input.query, input.sources * 3)
+  const hits = searched
+    ? yield* onJevRuntime(decisions.answerHits, {
         question: input.query,
-        hits: yield* searchHits(input.query, input.sources * 3),
+        hits: searched.results,
         n: input.sources,
       })
+    : (input.urls ?? []).map((url) => ({ title: url, url }))
   const fetched = yield* fetchSources(
     hits.map((h) => ({ title: h.title, url: h.url })),
     input.timeoutMs ?? ANSWER_FETCH_MS,
@@ -95,7 +94,8 @@ const gather = Effect.fn('answer.gather')(function* (input: z.infer<typeof answe
       : yield* onJevRuntime(decisions.answerSources, { question: input.query, sources: withText })
   const entity = mainEntity(input.query) ?? hits[0]?.title
   const { query, sentences } = input
-  return { query, sentences, entity, used: [...used], errors: fetched.errors }
+  const errors = [...searchErrors(searched), ...fetched.errors]
+  return { query, sentences, entity, used: [...used], errors }
 })
 
 // A nested question ("the capital of the country that hosted ...") takes its

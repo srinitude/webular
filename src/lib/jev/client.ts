@@ -104,7 +104,12 @@ const make = Effect.gen(function* () {
   )
   const endpoint = Option.match(route, { onNone: () => '', onSome: systemOne })
   const record = Option.contains(yield* setting('WEBULAR_JEV_RECORD'), '1')
-  const replay = Option.map(yield* setting('WEBULAR_JEV_REPLAY'), (d) => replayStore(fs, d, record))
+  // WEBULAR_JEV=off also turns replay off, so every decision uses its baseline.
+  const off = Option.contains(yield* setting('WEBULAR_JEV'), 'off')
+  const replay = Option.map(
+    off ? Option.none<string>() : yield* setting('WEBULAR_JEV_REPLAY'),
+    (d) => replayStore(fs, d, record),
+  )
   const ask = makeAsk({
     model,
     replay,
