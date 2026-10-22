@@ -96,6 +96,7 @@
     "@typescript/typescript6": "6.0.2",
     "ai": "3.4.33",
     "deepsec": "^2.3.10",
+    "fast-check": "4.10.2",
     "knip": "6.40.0",
     "portless": "0.15.8",
     "typescript": "7.0.2"
