@@ -6,29 +6,37 @@ Read it as one small run, not as a final ranking.
 
 ## Source files
 
-All numbers come from one live peer run, with 3 runs per task:
+<!-- bench:start run -->
+All numbers come from one committed peer run, with 3 runs per task (sha256 `fc2653bb0e73`):
 
-- [[bench/results/peers-2026-10-21T03-51-21-982Z.json](../bench/results/peers-2026-10-21T03-51-21-982Z.json)][json]: one row per tool, task, and run, with its status and accuracy.
-- [[bench/results/peers-2026-10-21T03-51-21-982Z.txt](../bench/results/peers-2026-10-21T03-51-21-982Z.txt)][txt]: the harness's text report for the same run.
+- [peers-2026-10-21T03-51-21-982Z.json](../bench/results/peers-2026-10-21T03-51-21-982Z.json): one row per tool, task, and run, with its status and accuracy.
+- [peers-2026-10-21T03-51-21-982Z.txt](../bench/results/peers-2026-10-21T03-51-21-982Z.txt): the harness's text report for the same run.
+<!-- bench:end -->
 
 The results file holds no confidence intervals, no paired tests, and no p values.
 So this page gives none, and it calls no win or loss as proven.
+`mise run bench:docs` writes every number on this page from the results file. A test fails when a number here differs from that file.
 
 ## Short answer
 
-- **Search:** webular scores 0.222 on 3 tasks. Exa and Firecrawl both score 1.000 on the same 3 tasks. Source: [[bench/results/peers-2026-10-21T03-51-21-982Z.json](../bench/results/peers-2026-10-21T03-51-21-982Z.json)][json].
-- **Answer:** webular scores 0.000 on 6 tasks. Exa scores 1.000 on the same 6 tasks. Source: [[bench/results/peers-2026-10-21T03-51-21-982Z.json](../bench/results/peers-2026-10-21T03-51-21-982Z.json)][json].
-- **Scrape:** webular scores 0.400 on the 5 tasks it finished. It failed the sixth task, a PDF, in all 3 runs. Source: [[bench/results/peers-2026-10-21T03-51-21-982Z.json](../bench/results/peers-2026-10-21T03-51-21-982Z.json)][json].
-- **Where webular leads:** the harness marks it as running offline (`runsOffline` 1). It needs 0 keys and costs 0 USD per call. Source: [[bench/results/peers-2026-10-21T03-51-21-982Z.txt](../bench/results/peers-2026-10-21T03-51-21-982Z.txt)][txt].
+<!-- bench:start short -->
+- **answer:** webular scores 0.000 on 6 tasks; exa scores 1.000 on 6 tasks. Source: [peers-2026-10-21T03-51-21-982Z.json](../bench/results/peers-2026-10-21T03-51-21-982Z.json).
+- **scrape:** webular scores 0.400 on 5 tasks; exa scores 1.000 on 3 tasks; firecrawl scores 0.333 on 3 tasks. Source: [peers-2026-10-21T03-51-21-982Z.json](../bench/results/peers-2026-10-21T03-51-21-982Z.json).
+- **search:** webular scores 0.222 on 3 tasks; exa scores 1.000 on 3 tasks; firecrawl scores 1.000 on 3 tasks. Source: [peers-2026-10-21T03-51-21-982Z.json](../bench/results/peers-2026-10-21T03-51-21-982Z.json).
+- **Where webular leads:** it runs offline, needs 0 keys, and costs 0 USD per call. Source: [the text report](../bench/results/peers-2026-10-21T03-51-21-982Z.txt).
+<!-- bench:end -->
 
 ## What ran
 
-The run has 15 tasks: 3 search, 6 scrape, and 6 answer.
-Source: [[bench/results/peers-2026-10-21T03-51-21-982Z.json](../bench/results/peers-2026-10-21T03-51-21-982Z.json)][json].
+<!-- bench:start ran -->
+The run has 15 tasks: 6 scrape, 3 search, 6 answer.
+Source: [peers-2026-10-21T03-51-21-982Z.json](../bench/results/peers-2026-10-21T03-51-21-982Z.json).
+<!-- bench:end -->
 
-Rows per tool, from [[bench/results/peers-2026-10-21T03-51-21-982Z.txt](../bench/results/peers-2026-10-21T03-51-21-982Z.txt)][txt]:
+Rows per tool, from the results file:
 
-| tool | ok | error | not offered | skipped | not recorded |
+<!-- bench:start status -->
+| tool | ok | error | unsupported | skipped | unrecorded |
 | --- | --- | --- | --- | --- | --- |
 | webular | 42 | 3 | 0 | 0 | 0 |
 | firecrawl | 18 | 0 | 27 | 0 | 0 |
@@ -36,16 +44,17 @@ Rows per tool, from [[bench/results/peers-2026-10-21T03-51-21-982Z.txt](../bench
 | tavily | 0 | 0 | 18 | 0 | 27 |
 | perplexity | 0 | 0 | 27 | 0 | 18 |
 | parallel | 0 | 0 | 0 | 45 | 0 |
+<!-- bench:end -->
 
-- Tavily, Perplexity, and Parallel have no `ok` rows, so they have no score. A missing score is never a zero.
-- Parallel was skipped because no key was set. The harness reads keys from the environment (`PARALLEL_API_KEY`) or the Keychain (`parallel-api-key`). Source: [[bench/results/peers-2026-10-21T03-51-21-982Z.txt](../bench/results/peers-2026-10-21T03-51-21-982Z.txt)][txt].
+- A tool with no `ok` rows has no score. A missing score is never a zero.
+- A tool with no key is skipped. The harness reads keys from the environment or the Keychain, and the text report names the missing key.
 
 ## Scores per job
 
 Each score keeps only rows with status `ok`.
 It averages each task over its runs, then takes the mean across tasks.
-Source: [[bench/results/peers-2026-10-21T03-51-21-982Z.json](../bench/results/peers-2026-10-21T03-51-21-982Z.json)][json].
 
+<!-- bench:start jobs -->
 | job | tool | tasks | mean accuracy |
 | --- | --- | --- | --- |
 | answer | exa | 6 | 1.000 |
@@ -56,12 +65,13 @@ Source: [[bench/results/peers-2026-10-21T03-51-21-982Z.json](../bench/results/pe
 | search | exa | 3 | 1.000 |
 | search | firecrawl | 3 | 1.000 |
 | search | webular | 3 | 0.222 |
+<!-- bench:end -->
 
 ## Shared tasks
 
 These rows compare webular with one peer only on the tasks both tools answered.
-Source: [[bench/results/peers-2026-10-21T03-51-21-982Z.txt](../bench/results/peers-2026-10-21T03-51-21-982Z.txt)][txt].
 
+<!-- bench:start shared -->
 | metric | webular | firecrawl (6 shared tasks) | webular | exa (12 shared tasks) |
 | --- | --- | --- | --- | --- |
 | accuracy | 0.444 | 0.667 | 0.222 | 1 |
@@ -74,16 +84,19 @@ Source: [[bench/results/peers-2026-10-21T03-51-21-982Z.txt](../bench/results/pee
 | keys needed | 0 | 1 | 0 | 1 |
 
 Across all of its own tasks, webular has an accuracy of 0.178, a success rate of 0.933, a p50 latency of 161 ms, and a p95 latency of 730 ms.
-Source: [[bench/results/peers-2026-10-21T03-51-21-982Z.txt](../bench/results/peers-2026-10-21T03-51-21-982Z.txt)][txt].
+Source: [the text report](../bench/results/peers-2026-10-21T03-51-21-982Z.txt).
+<!-- bench:end -->
 
 ### What the numbers say
 
-- Webular trails Exa on accuracy in every job.
-- On the 6 tasks it shares with Firecrawl, webular trails on accuracy, 0.444 against 0.667.
-- In the scrape job, webular's mean of 0.400 is above Firecrawl's 0.333. The two means cover different task sets (5 tasks against 3), so they do not show a win.
-- Webular is faster at p50 than Exa, but slower than Firecrawl.
-- Webular costs nothing per call and needs no key. Its cost of 0 is also one of the harness biases listed below.
-- The task counts are very small: 3 search tasks and 6 answer tasks. Treat every gap as a sign, not a proof.
+- Webular costs nothing per call and needs no key. Its zero cost is also one of the harness biases listed below.
+
+<!-- bench:start notes -->
+- On the 6 tasks it shares with firecrawl, webular trails on accuracy, 0.444 against 0.667.
+- On the 12 tasks it shares with exa, webular trails on accuracy, 0.222 against 1.
+- Webular is slower than firecrawl at p50 (683 ms against 501 ms), and faster than exa at p50 (194 ms against 998 ms).
+- The task counts are very small: 6 scrape, 3 search, 6 answer tasks. Treat every gap as a sign, not a proof.
+<!-- bench:end -->
 
 ## Method
 
@@ -101,7 +114,9 @@ Each peer has one adapter in [scripts/bench/peers](../scripts/bench/peers/).
 
 The audit in [bench/spec/spec-audit-fixes.md](../bench/spec/spec-audit-fixes.md) lists 16 biases.
 The commit that fixes several of them, `2cc33fb9` on the branch `bench-harness-fairness`, is not part of this branch.
-The results file has only two top-level fields, `runs` and `records`, and saves no seed or task order.
+<!-- bench:start fields -->
+The results file has these top-level fields: `runs`, `records`. It saves no seed or task order.
+<!-- bench:end -->
 So treat all 16 biases as open for these results:
 
 1. The answer job compares unlike things.
@@ -144,6 +159,3 @@ These rules come from [bench/AGENTS.md](../bench/AGENTS.md):
 
 - Recordings live in [`bench/recordings/`](../bench/recordings/), keyed by the sha256 of each request.
 - A results file is kept as written. To change a score, rerun the task instead of editing the file.
-
-[json]: [../bench/results/peers-2026-10-21T03-51-21-982Z.json](../bench/results/peers-2026-10-21T03-51-21-982Z.json)
-[txt]: [../bench/results/peers-2026-10-21T03-51-21-982Z.txt](../bench/results/peers-2026-10-21T03-51-21-982Z.txt)

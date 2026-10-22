@@ -380,7 +380,13 @@ run = "bun scripts/bench/peers/run.ts"
 [tasks."bench:peers:live"]
 description = "Peer benchmark live: calls each keyed provider (at most 20 calls per peer), records responses, writes bench/results (off the CI spine)"
 depends = ["setup"]
-run = "bun scripts/bench/peers/run.ts --live"
+# A new results file always refreshes the docs that quote it.
+run = ["bun scripts/bench/peers/run.ts --live", "bun scripts/bench/peers/docs.ts"]
+
+[tasks."bench:docs"]
+description = "Rewrite the generated benchmark blocks in README.md and docs/benchmarks.md from the committed peer run with the highest timestamp in bench/results"
+depends = ["setup"]
+run = "bun scripts/bench/peers/docs.ts"
 
 [tasks."bench:data"]
 description = "Download the pinned public bench datasets (WebMainBench subset, Firecrawl scrape set) into .cache/bench-data and check each sha256 against bench/datasets (off the CI spine; a cached file makes no network call)"
