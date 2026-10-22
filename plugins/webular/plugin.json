@@ -2,7 +2,7 @@
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "webular",
   "version": "0.2.0",
-  "description": "Search, scrape, crawl, and answer with sources, from your own machine. A CLI and MCP server with one optional key: Jev.",
+  "description": "Search, scrape, crawl, and answer with sources, from your own machine. This plugin adds four skills: research, interview, plain language, and Markdown. Its one optional key is Jev.",
   "author": { "name": "Kiren Srinivasan", "email": "kiren@fantasymetals.com" },
   "homepage": "https://github.com/srinitude/webular",
   "repository": "https://github.com/srinitude/webular",
