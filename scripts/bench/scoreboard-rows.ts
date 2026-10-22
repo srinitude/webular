@@ -48,6 +48,8 @@ export const APPLIES: Record<CommandName, readonly string[]> = {
   doctor: ['test pass rate'],
   tasks: ['test pass rate'],
   mcp: ['test pass rate'],
+  upgrade: ['test pass rate'],
+  completions: ['test pass rate'],
   diagram: ['test pass rate'],
   audit: ['test pass rate'],
   act: ['test pass rate', 'robustness'],

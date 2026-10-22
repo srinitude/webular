@@ -4,6 +4,7 @@ export const DISPATCH = {
   answer: 'answer',
   audit: 'audit',
   batch: 'batch',
+  completions: 'completions',
   crawl: 'crawl',
   diagram: 'diagram',
   doctor: 'doctor',
@@ -20,4 +21,5 @@ export const DISPATCH = {
   search: 'search',
   summarize: 'summarize',
   tasks: 'tasks',
+  upgrade: 'upgrade',
 } as const
