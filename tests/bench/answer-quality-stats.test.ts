@@ -4,7 +4,12 @@ import { expect, test } from 'bun:test'
 import { kappaReport } from '../../scripts/bench/agreement.ts'
 import { answerSplit, type FamilyResult, results } from '../../scripts/bench/report-parts.ts'
 import type { Comparison } from '../../scripts/bench/schema.ts'
-import { wilsonCI } from '../../scripts/bench/stats.ts'
+import {
+  minDetectableGap,
+  requiredTasks,
+  resolutionRatio,
+  wilsonCI,
+} from '../../scripts/bench/stats.ts'
 
 test('wilsonCI gives a bounded interval for small n', () => {
   expect(wilsonCI(0, 0)).toEqual([0, 1])
@@ -14,6 +19,16 @@ test('wilsonCI gives a bounded interval for small n', () => {
   const [allLo, allHi] = wilsonCI(10, 10)
   expect(allLo).toBeCloseTo(0.7225, 3)
   expect(allHi).toBe(1)
+})
+
+test('resolution ratio and minimum detectable gap agree with the power formula', () => {
+  const nStar = requiredTasks(0.3)
+  expect(resolutionRatio(Math.ceil(nStar), 0.3)).toBeGreaterThanOrEqual(1)
+  expect(resolutionRatio(Math.floor(nStar / 2), 0.3)).toBeLessThan(1)
+  expect(minDetectableGap(Math.ceil(nStar), 0.3)).toBeLessThanOrEqual(0.05 + 1e-9)
+  expect(minDetectableGap(25, 0.3)).toBeGreaterThan(0.05)
+  expect(minDetectableGap(0, 0.3)).toBe(1)
+  expect(resolutionRatio(0, 0.3)).toBe(0)
 })
 
 test('answer split shows the native answer as a ratio to closed book', () => {

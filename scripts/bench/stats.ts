@@ -125,6 +125,21 @@ export const holm = (ps: readonly number[]): number[] => {
 export const requiredTasks = (pd: number, d = MIN_GAP): number =>
   (1.96 * Math.sqrt(pd) + 0.84 * Math.sqrt(Math.max(0, pd - d * d))) ** 2 / (d * d)
 
+// Resolution ratio q = n / N*: a gap of d is claimable only when q >= 1.
+export const resolutionRatio = (n: number, pd: number, d = MIN_GAP): number =>
+  n === 0 ? 0 : n / requiredTasks(pd, d)
+
+// Smallest gap n tasks can detect at 80% power (bisects requiredTasks; n = 0 gives 1).
+export const minDetectableGap = (n: number, pd: number): number => {
+  let [lo, hi] = [0, 1]
+  for (let i = 0; i < 40 && n > 0; i++) {
+    const mid = (lo + hi) / 2
+    if (requiredTasks(pd, mid) <= n) hi = mid
+    else lo = mid
+  }
+  return hi
+}
+
 interface Draft extends Omit<Comparison, 'pHolm' | 'verdict'> {
   readonly pd: number
   readonly errA: number
@@ -156,7 +171,7 @@ export const draft = (
 }
 
 const verdictOf = (d: Draft, pHolm: number, minGap = MIN_GAP): Verdict => {
-  if (d.n === 0 || d.n < requiredTasks(d.pd, minGap)) return 'not enough tasks'
+  if (resolutionRatio(d.n, d.pd, minGap) < 1) return 'not enough tasks'
   if (pHolm < ALPHA && d.ci[0] > 0 && d.errA <= d.errB + 0.01) return 'win'
   if (pHolm < ALPHA && d.ci[1] < 0 && d.errB <= d.errA + 0.01) return 'loss'
   return 'tie'
