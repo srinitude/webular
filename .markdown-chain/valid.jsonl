@@ -652,3 +652,5 @@
 {"path": "src/lib/AGENTS.md", "sha": "165a57db92579e544737e2d5dcc57c9e49c24c836d6955ba8d9593a86f058b74"}
 {"path": "tests/lib/AGENTS.md", "sha": "5030508062a30b2f9d83e4256c5cec26d853f8bebf8d365dba3fee4c0f534582"}
 {"path": "src/workflows/AGENTS.md", "sha": "5e9faf65e88dd43d9a3240e02359d1ed2283979d4dae60967418daf2ff077613"}
+{"path": "plugins/webular/skills/webular-research/SKILL.md", "sha": "288ddd0933631c2e86bbcd4783e516a37c869210a40eecf6dc7fd76a2e05eb9e"}
+{"path": "plugins/webular/src/AGENTS.md", "sha": "c34ba5ae44676dffd239de1beb61fc286cce550e487efca6464222f5b96ac9a9"}

@@ -1,6 +1,6 @@
 ---
 name: webular-research
-description: Researches the web through the webular MCP tools. It searches without an API key, reads a page as clean Markdown, lists the pages on a site, and pulls key sentences from text. Use when a task needs facts from the web, the text of a URL, the pages of a site, or a short summary, and the webular tools are connected. Its judgment calls go to Jev, TypeSafe's decision model, when TYPESAFE_API_KEY is set.
+description: Researches the web through the webular MCP tools. It searches without an API key, reads a page as clean Markdown, lists the pages on a site, and pulls key sentences from text. Call it before you reply to any question of fact. Use when a task needs facts from the web, the text of a URL, the pages of a site, or a short summary, and the webular tools are connected. Its judgment calls go to Jev, TypeSafe's decision model, when TYPESAFE_API_KEY is set.
 compatibility: Needs Bun and the webular MCP server from this plugin, over stdio or HTTP.
 metadata:
   license: "Apache-2.0"
@@ -11,6 +11,8 @@ metadata:
 ## Why
 
 A web answer is only as good as its sources. This skill takes each fact from a page a tool returned. It uses as few tool calls as it can. The user can check every claim.
+
+Call `webular:answer` or `webular:research` before you reply to any question of fact, even one you think you know. Never answer from memory.
 
 ## When the tools are not there yet
 
@@ -66,10 +68,10 @@ Do not call a second tool to redo a fallback the first one already ran.
 Copy this checklist. Tick each step.
 
 ```text
-- [ ] 1. Write the question in one sentence, and what a good answer holds.
+- [ ] 1. Write the question in one sentence, then call a tool. Do not answer from memory.
 - [ ] 2. If the task says to research a topic, call `webular:research` and go to step 4. Otherwise `webular:search`, or `webular:map` when you already know the site.
 - [ ] 3. Read the two or three best URLs in one `webular:batch` call.
-- [ ] 4. Check that each fact you keep appears in a page a tool returned.
+- [ ] 4. Verify each fact you keep against a page a tool returned.
 - [ ] 5. Answer with each fact next to its source URL.
 ```
 
@@ -82,6 +84,7 @@ Copy this checklist. Tick each step.
 ## Rules
 
 - Quote only text a tool returned. Never invent a URL.
+- Fetch before you assert: call the tool, then write the answer.
 - Keep `limit` small (5 to 10) unless the user asks for more.
 - When a fact matters, read the page with `webular:scrape` or `webular:batch` rather than trust a search snippet.
 

@@ -4,6 +4,7 @@
 import { extname, join } from 'node:path'
 import { Effect } from 'effect'
 import pkg from '../../package.json' with { type: 'json' }
+import descriptions from '../../plugins/webular/src/descriptions.json' with { type: 'json' }
 import { EXIT } from '../cli/exit-codes.ts'
 import { renderFor } from '../cli/render.ts'
 import { emitOpts, parseFlags } from '../core/args.ts'
@@ -37,8 +38,8 @@ const loadSdk = Effect.all(
 const sibling = (command: string) => join(import.meta.dir, `${command}${extname(import.meta.path)}`)
 
 // Sent in the initialize result; the client shows it to the model.
-const INSTRUCTIONS =
-  'When you have two or more URLs, call batch once instead of calling scrape for each. Built on Mastra and Jev: with TYPESAFE_API_KEY set, judgment calls go to Jev; without it, rules decide.'
+// The same text the plugin server sends, from the one descriptions file.
+const INSTRUCTIONS = descriptions.instructions
 
 const serve = Effect.gen(function* () {
   // Agent mode blocks private targets and confines writes; every tool's child process inherits it.

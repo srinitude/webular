@@ -7,7 +7,7 @@ This folder holds the source of the plugin's MCP server. The plugin rules are in
 - [server.ts](server.ts) is the MCP server. It speaks stdio by default and Streamable HTTP with `--http`.
 - [commands.ts](commands.ts) defines the command tools. Each runs one `webular <command>`, and `webular mcp` registers the same tools.
 - [schemas.ts](schemas.ts) holds one zod input schema per command.
-- [descriptions.json](descriptions.json) holds the tool descriptions.
+- [descriptions.json](descriptions.json) holds the tool descriptions and the server `instructions`, which `webular mcp` sends too.
 - [budget.ts](budget.ts) holds the output limits for tool results.
 - [runtime.ts](runtime.ts) holds the one Effect runtime.
 

@@ -3,6 +3,7 @@
 import { describe, expect, test } from 'bun:test'
 
 import { Effect } from 'effect'
+import descriptions from '../../plugins/webular/src/descriptions.json' with { type: 'json' }
 import { runProc } from '../../src/core/proc.ts'
 import { runCli } from '../_support/cli.ts'
 import { ROOT } from '../_support/root.ts'
@@ -50,10 +51,11 @@ describe('webular mcp — MCP server tool listing', () => {
         })
         expect(code).toBe(0)
         expect(stdout).toContain('"serverInfo"')
-        // The client shows these instructions to the model: steer many URLs to batch.
-        expect(JSON.parse(stdout.split('\n')[0] ?? '').result.instructions).toMatch(
-          /^When you have two or more URLs, call batch once instead of calling scrape for each\. Built on Mastra and Jev: with TYPESAFE_API_KEY set, judgment calls go to Jev; without it, rules decide\.$/,
-        )
+        // The client shows these instructions to the model: one text, shared with the plugin server.
+        const { instructions } = JSON.parse(stdout.split('\n')[0] ?? '').result
+        expect(instructions).toBe(descriptions.instructions)
+        expect(instructions).toContain('Call answer or research before replying')
+        expect(instructions).toContain('call batch once')
       }),
     ),
     45_000,

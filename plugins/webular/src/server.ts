@@ -47,6 +47,8 @@ export const server = new MCPServer({
   name: 'webular',
   version: manifest.version,
   description: descriptions.server,
+  // Shown to the model at initialize: when to call webular, one example, and the CLI names.
+  instructions: descriptions.instructions,
   tools: Object.fromEntries(commandTools.map((t) => [t.id, tool(t)])),
 })
 

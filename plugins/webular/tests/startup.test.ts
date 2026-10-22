@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 import { Duration, Effect } from 'effect'
 import { runProc } from '../../../src/core/proc.ts'
 import { eff } from '../../../tests/_support/run.ts'
+import descriptions from '../src/descriptions.json' with { type: 'json' }
 
 const SERVER = fileURLToPath(new URL('../dist/server.js', import.meta.url))
 const requests = [
@@ -36,6 +37,10 @@ test(
       expect(stderr).toBe('')
       expect(stdout).toContain('"id":1')
       expect(stdout).toContain('"id":2')
+      // The plugin server sends the call directive at initialize.
+      expect(JSON.parse(stdout.split('\n')[0] ?? '').result.instructions).toBe(
+        descriptions.instructions,
+      )
       expect(Duration.toSeconds(elapsed)).toBeLessThan(10)
     }),
   ),
