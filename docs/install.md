@@ -31,7 +31,7 @@ Webular ships eight native builds. Every install channel picks the one that fits
 
 ## Install script
 
-The install script is the primary way to install webular. `install.sh` covers macOS, Linux (glibc and musl), and WSL. `install.ps1` covers Windows. Each one picks the right build, checks its SHA-256, installs one binary, puts it on your PATH, and writes a receipt. Neither needs root, and neither sends telemetry.
+The install script is the primary way to install webular. `install.sh` covers macOS, Linux (glibc and musl), and WSL. `install.ps1` covers Windows. Each one picks the right build, checks its SHA-256, installs one binary, and puts it on your PATH. Neither needs root, and neither sends telemetry.
 
 macOS and Linux:
 
@@ -45,9 +45,9 @@ Windows (PowerShell):
 irm https://webular.dev/install.ps1 | iex
 ```
 
-Copy the command only from the [README](../README.md) or webular.dev, because fake install pages swap the host name. To pin a version, use `https://webular.dev/v0.3.0/install.sh`.
+Copy the command only from the [README](../README.md) or webular.dev, because fake install pages swap the host name. To pin a release, pass `--version <x.y.z>`.
 
-Two checks guard the download, and they prove different things. `SHA256SUMS` proves the file is intact (integrity), but not who built it (origin). The attestation check proves origin. It is pinned to the signer workflow `srinitude/webular/.github/workflows/release.yml`. The installer runs the attestation check by default and fails closed when `gh` is installed and signed in. The [install script reference](install-script.md) covers reading the script before it runs, every option, where it installs, PATH changes, the receipt, verification, offline installs, proxies, CI, and telemetry.
+Two checks guard the download, and they prove different things. `SHA256SUMS` proves the file is intact (integrity), but not who built it (origin). The attestation check proves origin. It is pinned to the signer workflow `srinitude/webular/.github/workflows/release.yml`. With `WEBULAR_VERIFY_ATTESTATION=1`, the installer runs the attestation check and fails closed. The [install script reference](install-script.md) covers reading the script before it runs, every option, where it installs, PATH changes, verification, proxies, and telemetry.
 
 ## npm, Bun, and pnpm
 

@@ -60,7 +60,6 @@ const ADAPTERS: Readonly<Record<string, string>> = {
   'tests/quality/claude-md-bridges.test.ts': 'CLAUDE.md adapter drift test',
   'tests/quality/readme-facts.test.ts': 'checks the README host one-liners',
   'tests/release/install-ps1.test.ts': 'install path fixture',
-  'tests/release/install.test.ts': 'install path fixture',
   'tests/release/upgrade.test.ts': 'per-OS package manager path fixtures',
 }
 

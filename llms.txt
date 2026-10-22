@@ -23,7 +23,7 @@ Jev's key (`TYPESAFE_API_KEY`) is the only API key. Without it, each decision fa
 ## Install
 
 - [docs/install.md](https://github.com/srinitude/webular/blob/main/docs/install.md): npm `webular`, Homebrew `srinitude/webular/webular`, Scoop bucket `srinitude/scoop-webular` with package `webular`, winget `Srinitude.Webular`, and GitHub release assets.
-- [docs/install-script.md](https://github.com/srinitude/webular/blob/main/docs/install-script.md): one command that installs and verifies, `curl --proto '=https' --tlsv1.2 -fsSL https://webular.dev/install.sh | sh` (the attestation check runs inside when `gh` is signed in), with every option.
+- [docs/install-script.md](https://github.com/srinitude/webular/blob/main/docs/install-script.md): one command that installs and verifies, `curl --proto '=https' --tlsv1.2 -fsSL https://webular.dev/install.sh | sh` (it checks the SHA-256 before it installs), with every option.
 - [docs/install-more.md](https://github.com/srinitude/webular/blob/main/docs/install-more.md): mise, eget, release file checks, upgrade, and uninstall.
 
 ## Benchmarks

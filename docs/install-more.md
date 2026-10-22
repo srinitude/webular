@@ -65,6 +65,6 @@ brew upgrade webular
 
 On Windows, run `scoop update webular` or `winget upgrade Srinitude.Webular`.
 
-Uninstall the same way: `webular uninstall` for an install-script copy, or `npm rm -g webular`, `bun rm -g webular`, `pnpm rm -g webular`, `brew uninstall webular`, `scoop uninstall webular`, or `winget uninstall Srinitude.Webular`. The install script's receipt and PATH files are described in [Receipt, upgrade, and uninstall](install-script.md#receipt-upgrade-and-uninstall). The page cache is in `~/.cache/webular` unless `WEBULAR_CACHE_DIR` moves it.
+Uninstall the same way: `sh install.sh --uninstall` for an install-script copy, or `npm rm -g webular`, `bun rm -g webular`, `pnpm rm -g webular`, `brew uninstall webular`, `scoop uninstall webular`, or `winget uninstall Srinitude.Webular`. The install script PATH lines are described in [Upgrade and uninstall](install-script.md#upgrade-and-uninstall). The page cache is in `~/.cache/webular` unless `WEBULAR_CACHE_DIR` moves it.
 
 Return to [Install channels](install.md) (navigation only).
