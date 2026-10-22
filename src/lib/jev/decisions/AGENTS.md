@@ -7,7 +7,7 @@ Rules for the individual Jev decisions, under [src/lib/jev/AGENTS.md](../AGENTS.
 One file per decision job, grouped by command:
 
 - Search and answer: [`search.ts`](search.ts), [`search-intent.ts`](search-intent.ts), [`answer.ts`](answer.ts), [`answer-evidence.ts`](answer-evidence.ts), [`answer-citation.ts`](answer-citation.ts), and [`answer-sentences.ts`](answer-sentences.ts).
-- Research and summary: [`research.ts`](research.ts), [`research-sentences.ts`](research-sentences.ts), [`summarize.ts`](summarize.ts), and [`summary-follow-up.ts`](summary-follow-up.ts).
+- Research and summary: [`research.ts`](research.ts), [`research-hop.ts`](research-hop.ts), [`research-sentences.ts`](research-sentences.ts), [`summarize.ts`](summarize.ts), and [`summary-follow-up.ts`](summary-follow-up.ts).
 - Pages: [`scrape.ts`](scrape.ts), [`page-title.ts`](page-title.ts), [`extract.ts`](extract.ts), [`monitor.ts`](monitor.ts), [`map.ts`](map.ts), and [`crawl.ts`](crawl.ts).
 - Control: [`act.ts`](act.ts) picks the element to click. [`cli-suggest.ts`](cli-suggest.ts) guesses which command a user meant.
 
@@ -23,7 +23,7 @@ One file per decision job, grouped by command:
 
 ## Checks
 
-- `src/lib/jev/decisions/research.ts:122` calls `runPromise` outside the allowed process edges.
+- `src/lib/jev/decisions/research.ts:125` calls `runPromise` outside the allowed process edges.
 
 ```bash
 mise run jev:check
