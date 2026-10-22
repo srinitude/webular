@@ -33,6 +33,33 @@ const writeLauncher = (dir: string) =>
     yield* fs.chmod(bin, 0o755)
   })
 
+// One cua open in a child process, with the fake driver first on PATH and a
+// throwaway "browser" as the named window.
+const openOnce = (dir: string) =>
+  Effect.gen(function* () {
+    const path = yield* Path.Path
+    const PATH = yield* Config.String('PATH').pipe(Config.orElse(() => Config.String('Path')))
+    const spawner = yield* ChildProcessSpawner.ChildProcessSpawner
+    const browser = yield* spawner.spawn(
+      ChildProcess.make(process.execPath, [
+        `${ROOT}tests/engine/cua-fake-browser.ts`,
+        `--user-data-dir=${path.join(dir, 'profile')}`,
+      ]),
+    )
+    return yield* runProc([process.execPath, `${ROOT}tests/engine/cua-open-once.ts`], {
+      timeoutMs: 30_000,
+      extendEnv: true,
+      env: {
+        // Windows keeps its own Path key beside an added PATH and either can win,
+        // so both name the fake driver's folder first.
+        PATH: `${dir}${delimiter}${PATH}`,
+        Path: `${dir}${delimiter}${PATH}`,
+        FAKE_CUA_LOG: path.join(dir, 'calls.log'),
+        WEBULAR_CUA_WINDOW: `${browser.pid}:1`,
+      },
+    })
+  })
+
 test(
   'a failed cua open still ends the session it started',
   eff(
@@ -41,26 +68,7 @@ test(
       const path = yield* Path.Path
       const dir = yield* tmpDir('webular-cua-leak-')
       yield* writeLauncher(dir)
-      const PATH = yield* Config.String('PATH').pipe(Config.orElse(() => Config.String('Path')))
-      const spawner = yield* ChildProcessSpawner.ChildProcessSpawner
-      const browser = yield* spawner.spawn(
-        ChildProcess.make(process.execPath, [
-          `${ROOT}tests/engine/cua-fake-browser.ts`,
-          `--user-data-dir=${path.join(dir, 'profile')}`,
-        ]),
-      )
-      const res = yield* runProc([process.execPath, `${ROOT}tests/engine/cua-open-once.ts`], {
-        timeoutMs: 30_000,
-        extendEnv: true,
-        env: {
-          // Windows keeps its own Path key beside an added PATH and either can win,
-          // so both name the fake driver's folder first.
-          PATH: `${dir}${delimiter}${PATH}`,
-          Path: `${dir}${delimiter}${PATH}`,
-          FAKE_CUA_LOG: path.join(dir, 'calls.log'),
-          WEBULAR_CUA_WINDOW: `${browser.pid}:1`,
-        },
-      })
+      const res = yield* openOnce(dir)
       // stderr carries the open's failure cause, so a wrong failure shows why.
       const calls = yield* Effect.orElseSucceed(
         fs.readFileString(path.join(dir, 'calls.log')),
