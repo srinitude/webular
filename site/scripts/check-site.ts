@@ -16,7 +16,6 @@ const MACHINE = [
   'AGENTS.md',
   'server.json',
   'tools.json',
-  '.well-known/mcp/server-card.json',
   'robots.txt',
   'sitemap.xml',
   '.well-known/security.txt',

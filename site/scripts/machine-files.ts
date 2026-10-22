@@ -77,24 +77,10 @@ const serverFiles = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem
   const serverText = yield* fs.readFileString(`${SITE}../server.json`)
   const toolsText = yield* fs.readFileString(`${SITE}src/generated/tools.json`)
-  const server = yield* Schema.decodeUnknownEffect(Server)(serverText)
+  yield* Schema.decodeUnknownEffect(Server)(serverText)
   yield* fs.writeFileString(`${DIST}server.json`, serverText)
   yield* fs.writeFileString(`${DIST}tools.json`, toolsText)
-  yield* fs.makeDirectory(`${DIST}.well-known/mcp`, { recursive: true })
-  // Field names follow SEP-2127 (modelcontextprotocol/ext-server-card, schema.ts): a card has
-  // no transport, tools, or capabilities, and `remotes` lists only HTTP endpoints. webular is
-  // stdio-only, so the card has no `remotes`; clients list tools live over MCP.
-  const card = {
-    $schema: 'https://static.modelcontextprotocol.io/schemas/v1/server-card.schema.json',
-    name: server.name,
-    title: 'webular',
-    description: server.description,
-    version: server.version,
-    websiteUrl: ORIGIN,
-    repository: server.repository,
-  }
-  const path = `${DIST}.well-known/mcp/server-card.json`
-  yield* fs.writeFileString(path, `${JSON.stringify(card, null, 2)}\n`)
+  yield* fs.makeDirectory(`${DIST}.well-known`, { recursive: true })
 })
 
 const program = Effect.gen(function* () {
@@ -106,7 +92,7 @@ const program = Effect.gen(function* () {
   yield* fs.copyFile(`${SITE}scripts/agents.txt`, `${DIST}AGENTS.md`)
   yield* fs.writeFileString(`${DIST}sitemap.xml`, sitemap(slugs, date.toISOString().slice(0, 10)))
   yield* fs.writeFileString(`${DIST}.well-known/security.txt`, securityTxt(date))
-  yield* Console.log(`machine files: ${slugs.length} twins, llms-full.txt, sitemap, cards`)
+  yield* Console.log(`machine files: ${slugs.length} twins, llms-full.txt, sitemap`)
 })
 
 program.pipe(

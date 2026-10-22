@@ -5,7 +5,7 @@ Build and check scripts for the site, under [site/AGENTS.md](../AGENTS.md).
 ## What lives here
 
 - [tools-json.ts](tools-json.ts) starts `webular mcp` and saves its tools/list reply for the tools page and tools.json.
-- [machine-files.ts](machine-files.ts) runs after the Astro build. It writes the twins, llms-full.txt, AGENTS.md, server.json, the server card, the sitemap, and security.txt.
+- [machine-files.ts](machine-files.ts) runs after the Astro build. It writes the twins, llms-full.txt, AGENTS.md, server.json, the sitemap, and security.txt.
 - [check-site.ts](check-site.ts) is the check behind `mise run site:test`. It runs [width-checks.ts](width-checks.ts) at every width in [site-browser.ts](site-browser.ts), using the probes in [page-probes.ts](page-probes.ts). It prints pass and fail counts for each check at each width.
 - [home-shots.ts](home-shots.ts) saves home page screenshots at 390, 1024, and 1440 px into the git-ignored `dist-shots` folder for a review by eye. Run `bun scripts/home-shots.ts` from the site folder after `mise run site:build`.
 - [agents.txt](agents.txt) is the source of the served AGENTS.md. Its plain text name keeps it apart from this folder's own AGENTS.md.
@@ -13,4 +13,3 @@ Build and check scripts for the site, under [site/AGENTS.md](../AGENTS.md).
 ## Rules
 
 - The page weight limit is 100 KB gzip, measured with CompressionStream over the home HTML and its same-origin scripts and styles.
-- The server card fields follow server.json until the SEP-2127 schema is checked.
