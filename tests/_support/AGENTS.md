@@ -12,6 +12,8 @@ This folder holds no tests of its own. Other test folders import from it.
 - Analyzers: [`limits.ts`](limits.ts) (line and nesting limits), [`exports.ts`](exports.ts) (unused exports), [`graph.ts`](graph.ts) (the [`mise.toml`](../../mise.toml) task graph), [`agents-sync.ts`](agents-sync.ts) (AGENTS.md drift against the code).
 - Scores: [`scoreboard.ts`](scoreboard.ts) (the value that [`bench/scoreboard.json`](../../bench/scoreboard.json) records for one command metric). Each offline eval checks its result against it, so a stale value fails the eval.
 
+[`cli.ts`](cli.ts) runs a `src/commands/<name>.ts` entry as the built `dist/commands/<name>.js` bundle. It does this only when the bundle's mtime is at or past every file in [src/](../../src/). Otherwise it runs the source, so a test never runs a stale build. [`tests/commands/cli-entry.test.ts`](../commands/cli-entry.test.ts) checks this rule.
+
 ## Rules
 
 - Keep route content static, so byte-level checks hold on every run.

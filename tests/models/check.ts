@@ -45,11 +45,13 @@ export const usedTool = (uses: readonly ToolUse[], surface: Surface, tool: strin
   )
 
 // Any webular tool on the surface: the rule each rival arm gets for its own tools.
-export const usedAnyWebular =(uses: readonly ToolUse[], surface: Surface): boolean =>
+export const usedAnyWebular = (uses: readonly ToolUse[], surface: Surface): boolean =>
   uses.some((u) =>
     surface === 'cli'
       ? u.name === 'Bash' && /\bwebular\s+\w/.test(JSON.stringify(u.input))
-      : u.name.startsWith(surface === 'plugin' ? 'mcp__plugin_webular_webular__' : 'mcp__webular__'),
+      : u.name.startsWith(
+          surface === 'plugin' ? 'mcp__plugin_webular_webular__' : 'mcp__webular__',
+        ),
   )
 
 // The "never called" problem, unless the scenario grades the outcome alone,

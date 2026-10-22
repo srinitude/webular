@@ -4,7 +4,7 @@ Rules for the shared Effect services, under [src/AGENTS.md](../AGENTS.md).
 
 ## What lives here
 
-[effect.ts](effect.ts), [args.ts](args.ts), [output.ts](output.ts), [http.ts](http.ts), [http-body.ts](http-body.ts), [decode.ts](decode.ts), [gunzip.ts](gunzip.ts), [cache.ts](cache.ts), [archive.ts](archive.ts), [fetch-policy.ts](fetch-policy.ts), [budget.ts](budget.ts), [address-guard.ts](address-guard.ts), [url.ts](url.ts), [safepath.ts](safepath.ts), [proc.ts](proc.ts), [root.ts](root.ts), [platform.ts](platform.ts), [auth-headers.ts](auth-headers.ts), [capped-bytes.ts](capped-bytes.ts), [feed-source.ts](feed-source.ts), [retry-after.ts](retry-after.ts), [utc-date.ts](utc-date.ts).
+[effect.ts](effect.ts), [args.ts](args.ts), [output.ts](output.ts), [http.ts](http.ts), [http-body.ts](http-body.ts), [decode.ts](decode.ts), [gunzip.ts](gunzip.ts), [cache.ts](cache.ts), [cache-entry.ts](cache-entry.ts), [archive.ts](archive.ts), [fetch-policy.ts](fetch-policy.ts), [budget.ts](budget.ts), [address-guard.ts](address-guard.ts), [url.ts](url.ts), [safepath.ts](safepath.ts), [proc.ts](proc.ts), [root.ts](root.ts), [platform.ts](platform.ts), [auth-headers.ts](auth-headers.ts), [capped-bytes.ts](capped-bytes.ts), [feed-source.ts](feed-source.ts), [retry-after.ts](retry-after.ts), [utc-date.ts](utc-date.ts).
 
 ## Rules
 

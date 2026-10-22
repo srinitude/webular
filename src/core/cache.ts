@@ -5,20 +5,12 @@
 // the fetch: they only skip the cache.
 
 import { Clock, Config, Effect, FileSystem, Option, Path, Random, Schema } from 'effect'
-import { parseUtc } from './utc-date.ts'
+import { Entry, freshen, toEntry } from './cache-entry.ts'
 
 export interface CacheOptions {
   cache?: boolean
 }
 
-const Entry = Schema.Struct({
-  body: Schema.String,
-  etag: Schema.NullOr(Schema.String),
-  lastModified: Schema.NullOr(Schema.String),
-  contentType: Schema.NullOr(Schema.String),
-  freshUntil: Schema.optional(Schema.Number),
-})
-type Entry = typeof Entry.Type
 const decodeEntry = Schema.decodeUnknownEffect(Schema.fromJsonString(Entry))
 
 const DEFAULT_MAX_BYTES = 64 * 1024 * 1024
@@ -81,17 +73,6 @@ const storable = (res: Response) =>
   res.status === 200 &&
   (res.headers.has('etag') || res.headers.has('last-modified')) &&
   !/\bno-store\b/i.test(res.headers.get('cache-control') ?? '')
-
-// Epoch ms until which a response may be reused unrequested: max-age wins over
-// Expires, and no-cache (or no usable header) means revalidate every time.
-const freshUntil = (h: Headers, now: number): number | undefined => {
-  const control = h.get('cache-control') ?? ''
-  if (/\bno-cache\b/i.test(control)) return undefined
-  const age = /\bmax-age=(\d+)/i.exec(control)?.[1]
-  if (age !== undefined) return now + Number(age) * 1000
-  const expires = parseUtc(h.get('expires') ?? '')
-  return Number.isNaN(expires) ? undefined : expires
-}
 
 const entryInfo = (file: string) =>
   Effect.gen(function* () {
@@ -161,14 +142,6 @@ const touch = (file: string) =>
     yield* fs.utimes(file, now, now)
   }).pipe(Effect.ignore)
 
-const toEntry = (body: string, h: Headers, now: number): Entry => ({
-  body,
-  freshUntil: freshUntil(h, now),
-  etag: h.get('etag'),
-  lastModified: h.get('last-modified'),
-  contentType: h.get('content-type'),
-})
-
 // GET text through the disk cache. `get` performs the request with the extra
 // validator headers; `read` turns a response into text (and rejects bad ones).
 export const cachedGetText = Effect.fn('cachedGetText')(function* <E>(
@@ -190,7 +163,7 @@ export const cachedGetText = Effect.fn('cachedGetText')(function* <E>(
   const stream = res.body
   if (res.status === 304 && Option.isSome(entry)) {
     if (stream) yield* Effect.ignore(Effect.tryPromise(() => stream.cancel()))
-    yield* touch(file)
+    yield* store(dir, file, freshen(entry.value, res.headers, now), limits)
     return entry.value.body
   }
   const body = yield* read(res)

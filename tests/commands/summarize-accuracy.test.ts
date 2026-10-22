@@ -70,8 +70,10 @@ const oracle = (text: string, ref: string) => {
 
 // The mean ROUGE-n F1 of each 3-sentence pick against its article's gold lead.
 const rouge = (summaries: string[], n: number) =>
-  summaries.reduce((sum, s, i) => sum + f1(s, grams(words(gold.articles[i]?.gold ?? ''), n), n), 0) /
-  summaries.length
+  summaries.reduce(
+    (sum, s, i) => sum + f1(s, grams(words(gold.articles[i]?.gold ?? ''), n), n),
+    0,
+  ) / summaries.length
 
 test('summarize rule pick scores against human lead summaries', () => {
   const summaries = picks()

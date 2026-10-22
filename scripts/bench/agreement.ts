@@ -40,3 +40,21 @@ export const fleiss = (rows: readonly (readonly string[])[]) => {
   for (const count of total.values()) chance += (count / (rows.length * raters)) ** 2
   return kappaOf(observed, chance)
 }
+
+const marginals = (labels: readonly string[]) =>
+  Object.fromEntries([...share(labels)].map(([l, c]) => [l, c / labels.length]))
+
+// Kappa alone hides label imbalance and protocol choices, so report it with
+// raw agreement and each rater's label shares over the paired items.
+export const kappaReport = (a: readonly string[], b: readonly string[]) => {
+  const n = Math.min(a.length, b.length)
+  const xs = a.slice(0, n)
+  const ys = b.slice(0, n)
+  return {
+    n,
+    observed: n === 0 ? 0 : xs.filter((x, i) => x === ys[i]).length / n,
+    kappa: cohensKappa(xs, ys),
+    marginalsA: marginals(xs),
+    marginalsB: marginals(ys),
+  }
+}

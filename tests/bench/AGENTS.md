@@ -6,6 +6,8 @@ Benchmark tests and the scaling run. The parent rules are in [tests/AGENTS.md](.
 
 - [`peers-cases.test.ts`](peers-cases.test.ts) and [`peers-score.test.ts`](peers-score.test.ts) check the peer benchmark in [`scripts/bench/peers/`](../../scripts/bench/peers/): case markers, exact checks, per-provider summaries, and winners. Each other peers-NAME test checks one peer adapter.
 - The guards-NAME tests check the bench guards: the set, the run, grading, and the report. [set-loader.test.ts](set-loader.test.ts) checks that the task sets load and that one edited byte is refused.
+- [grade-semantic.test.ts](grade-semantic.test.ts) checks the answer grader: number grammar, answer extraction, hedges, and shotgun lists.
+- [answer-quality-stats.test.ts](answer-quality-stats.test.ts) checks the Wilson interval, the kappa report, the closed-book ratio column, and the small-sample note in the report.
 - [guards-requests.test.ts](guards-requests.test.ts), [peers-skip.test.ts](peers-skip.test.ts), and [robots-gold-rows.test.ts](robots-gold-rows.test.ts) check robots.txt in the bench. Every request is logged and a disallowed page is never fetched. A peer that cannot show its requests skips robots rows. Each robots gold row passes only for a compliant run.
 - [agent-matrix.test.ts](agent-matrix.test.ts) checks the agent-model matrix: its arms, cells, and the README line it writes.
 - [scrape-accuracy.test.ts](scrape-accuracy.test.ts) scores offline main-content recall and leak on the scrape.page fixtures.

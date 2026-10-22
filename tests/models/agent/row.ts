@@ -1,9 +1,10 @@
 // One result row in the guards' TrackRow shape (tests/models/guards.ts): who
 // ran, on which arm, under which conditions, what it called, what it cost,
 // and whether it passed, plus the problems and the arm-order seed.
+
+import { missOf } from '../check.ts'
 import type { Job } from '../jobs.ts'
 import type { parseStream } from '../report.ts'
-import { missOf } from '../check.ts'
 import { costUsd } from './rates.ts'
 
 const sha = (s: string) => new Bun.CryptoHasher('sha256').update(s).digest('hex').slice(0, 16)

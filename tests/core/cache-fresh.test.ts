@@ -54,7 +54,44 @@ const cases = [
   ['no-cache', (_now: number) => ({ 'cache-control': 'max-age=60, no-cache' }), 2],
   ['past-expires', (now: number) => ({ expires: http(now - MINUTE) }), 2],
   ['no-freshness', (_now: number) => ({}), 2],
+  ['age-spends-max-age', (_now: number) => ({ 'cache-control': 'max-age=60', age: '60' }), 2],
 ] as const
+
+// A fetcher that records the validator headers it is sent and answers from a
+// script; past the script it answers a plain 200.
+const scripted = (url: string, replies: Response[]) => {
+  const sent: Array<Record<string, string>> = []
+  const reply = (headers: Record<string, string>) => {
+    sent.push(headers)
+    return replies[sent.length - 1] ?? new Response('body', { headers: { etag: '"c"' } })
+  }
+  const fetchText = cachedGetText(
+    url,
+    (headers) => Effect.sync(() => reply(headers)),
+    (res) => Effect.promise(() => res.text()),
+  )
+  return { sent, fetchText }
+}
+
+// RFC 9111 "Freshening Stored Responses upon Validation": a 304 updates the
+// stored entry, so its max-age and ETag count for the next read.
+test('a 304 refreshes freshness and the validator', () =>
+  inCacheDir(() =>
+    Effect.gen(function* () {
+      const { sent, fetchText } = scripted('https://fresh.test/revalidate', [
+        new Response('body', { headers: { etag: '"a"' } }),
+        new Response(null, {
+          status: 304,
+          headers: { etag: '"b"', 'cache-control': 'max-age=60' },
+        }),
+      ])
+      yield* fetchText
+      expect(yield* fetchText).toBe('body')
+      expect(yield* fetchText).toBe('body')
+      expect(sent.length).toBe(2)
+      expect(sent[1]?.['if-none-match']).toBe('"a"')
+    }),
+  ))
 
 for (const [name, headersAt, expected] of cases) {
   test(`${name}: ${expected} request(s) for two reads`, () =>

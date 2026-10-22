@@ -68,7 +68,8 @@ const fetchOnce = (url: string, opts: FetchOptions): Effect.Effect<Response, Fet
   send(url, opts).pipe(
     Effect.mapError((err) => {
       const cause = 'cause' in err.reason ? err.reason.cause : err
-      return new FetchError({ message: errMsg(cause).replaceAll(url, safeUrl(url)), aborted: isAbort(cause) })
+      const message = errMsg(cause).replaceAll(url, safeUrl(url))
+      return new FetchError({ message, aborted: isAbort(cause) })
     }),
     Effect.tap((res) => Effect.sync(() => opts.onResponse?.(res))),
   )
@@ -160,8 +161,7 @@ export const httpGet = (
 ): Effect.Effect<Response, FetchError> =>
   Effect.flatMap(startRun(url, opts), (run) => Effect.map(drive(run, url, START), (l) => l.res))
 
-// Text GETs revalidate through the disk cache; a cache config error surfaces
-// as a FetchError, so callers see only HttpStatusError or FetchError.
+// Text GETs revalidate through the disk cache; callers see only HttpStatusError or FetchError.
 export const fetchText = (
   url: string,
   opts: FetchOptions = {},

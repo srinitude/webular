@@ -213,6 +213,11 @@ depends = ["build"]
 # processes), so files run side by side. Each file still gets a fresh global.
 run = "bun test --timeout 30000 --parallel"
 
+[tasks."test:shuffled"]
+description = "Run the bun test suite in random order; a failure prints its seed so the order-dependent test reproduces (off the CI spine)"
+depends = ["build"]
+run = "bun test --timeout 30000 --parallel --randomize"
+
 [tasks."jev:check"]
 description = "Jev framework checks (off the linear spine; the test task runs them too): payload caps and flat cost, canonical bytes, the 0.95 bar, machine-only moves, record and replay, the raw-call lint, the doctor Jev route row, and the evals"
 depends = ["setup"]

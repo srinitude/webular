@@ -1,6 +1,6 @@
 // One spawn helper for every command test — stdout/stderr drain CONCURRENTLY
 // (sequential drains deadlock once a pipe passes 64KB; see src/core/proc.ts).
-import { Effect, Stream } from 'effect'
+import { Effect, FileSystem, Option, Stream } from 'effect'
 import { ChildProcess, ChildProcessSpawner } from 'effect/process'
 import { exitCodeOf, IN_PROCESS } from '../../src/core/effect.ts'
 import { ROOT } from './root.ts'
@@ -17,6 +17,29 @@ export interface CliOptions {
   exec?: string
 }
 
+// A cold `bun src/commands/<name>.ts` transpiles the whole module graph on every
+// spawn (4-9 s each on a loaded host, against about 1 s for the bundle), which
+// is what pushed command tests past the 30 s budget. So a spawn runs the built
+// dist/commands/<name>.js while it is at least as new as every file under src/;
+// a stale or missing build falls back to the source, so a test never runs old code.
+const mtimeMs = (info: { readonly mtime: Option.Option<Date> }) =>
+  Option.match(info.mtime, { onNone: () => 0, onSome: (d) => d.getTime() })
+
+export const builtEntry = Effect.fnUntraced(function* (entry: string, root: string = ROOT) {
+  const name = /^src\/commands\/([\w-]+)\.ts$/.exec(entry)?.[1]
+  if (!name) return entry
+  const fs = yield* FileSystem.FileSystem
+  const built = yield* Effect.option(fs.stat(`${root}dist/commands/${name}.js`))
+  if (Option.isNone(built)) return entry
+  const files = yield* fs.readDirectory(`${root}src`, { recursive: true })
+  const times = yield* Effect.forEach(
+    files,
+    (f) => Effect.map(fs.stat(`${root}src/${f}`), (i) => (i.type === 'File' ? mtimeMs(i) : 0)),
+    { concurrency: 16 },
+  )
+  return mtimeMs(built.value) >= Math.max(...times) ? `dist/commands/${name}.js` : entry
+})
+
 const text = <E>(s: Stream.Stream<Uint8Array, E>) => Stream.mkString(Stream.decodeText(s))
 
 // An explicit env replaces the parent's; no env inherits it. A child skips the
@@ -28,12 +51,17 @@ export const runCli = (
   entry: string,
   args: string[],
   opts: CliOptions = {},
-): Effect.Effect<CliResult, Error, ChildProcessSpawner.ChildProcessSpawner> =>
+): Effect.Effect<
+  CliResult,
+  Error,
+  ChildProcessSpawner.ChildProcessSpawner | FileSystem.FileSystem
+> =>
   Effect.scoped(
     Effect.gen(function* () {
       const spawner = yield* ChildProcessSpawner.ChildProcessSpawner
+      const run = yield* builtEntry(entry)
       const handle = yield* spawner.spawn(
-        ChildProcess.make(opts.exec ?? 'bun', [`${ROOT}${entry}`, ...args], {
+        ChildProcess.make(opts.exec ?? 'bun', [`${ROOT}${run}`, ...args], {
           cwd: opts.cwd ?? ROOT,
           env: { WEBULAR_JEV: 'off', ...(opts.env && { WEBULAR_NO_CACHE: '1', ...opts.env }) },
           extendEnv: opts.env === undefined,

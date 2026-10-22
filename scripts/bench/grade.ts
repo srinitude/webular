@@ -3,6 +3,7 @@
 // (audit finding 1, guard test 19); error rows never pass and stay in
 // latency as censored at the timeout (audit finding 10, guard test 24).
 import { Effect, Option } from 'effect'
+import { answerCandidate, isHedged, isShotgun, numbersIn } from './grade-text.ts'
 import { gradeRobots, type RobotsOutcome } from './robots-grade.ts'
 import type { Check, Row, Status, Task } from './schema.ts'
 
@@ -29,6 +30,7 @@ export const normalizeText = (s: string): string =>
     .normalize('NFKD')
     .replace(/\p{M}/gu, '')
     .toLowerCase()
+    .replaceAll('&', ' and ')
     .replace(/[\p{P}\p{S}]/gu, ' ')
     .replace(/\s+/g, ' ')
     .trim()
@@ -57,8 +59,14 @@ const hasPhrase = (text: string, phrase: string): boolean => {
 export const aliasMatch = (answer: string, aliases: readonly string[]): boolean =>
   aliases.some((a) => hasPhrase(answer, a))
 
-const numbersIn = (text: string): number[] =>
-  (text.replace(/(\d),(\d)/g, '$1$2').match(/-?\d+(?:\.\d+)?/g) ?? []).map(Number)
+// The marked final answer is matched, not the reasoning before it. Hedged
+// answers and long guess lists do not commit to the gold, so they fail.
+export const aliasPass = (output: string, aliases: readonly string[]): boolean => {
+  if (aliases.length === 0) return true
+  const candidate = answerCandidate(output)
+  if (isHedged(candidate) || isShotgun(candidate, aliases.length)) return false
+  return aliasMatch(candidate, aliases)
+}
 
 // An invalid gold pattern fails the check instead of passing it.
 const safeRegex = Option.liftThrowable((pattern: string) => new RegExp(pattern, 'iu'))
@@ -89,7 +97,7 @@ export const gradeRow = (task: Task, row: Row, mode?: AnswerMode): Graded => {
   if (task.expect !== undefined) {
     return { taskId: task.id, provider: row.key.provider, mode, status, ...gradeRobots(row) }
   }
-  const aliasOk = task.aliases.length === 0 || aliasMatch(row.output, task.aliases)
+  const aliasOk = aliasPass(row.output, task.aliases)
   const pass = status === 'ok' && aliasOk && task.checks.every((c) => runCheck(c, row.output))
   return { taskId: task.id, provider: row.key.provider, mode, status, pass }
 }

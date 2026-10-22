@@ -88,6 +88,7 @@ sync:check: Drift: every generated or mirrored file matches its source (dispatch
 test: Run the bun test suite (CI/CD graph + contracts + integration) [after build]
 test:file: Run the named test files only (targeted check while editing) [after setup]
 test:models: Run the agent scenarios through headless Claude Code on the subscription models, per surface, into bench/results (off the CI spine; pass --smoke for one run per model) [after build]
+test:shuffled: Run the bun test suite in random order; a failure prints its seed so the order-dependent test reproduces (off the CI spine) [after build]
 typecheck: Compilation: strict TypeScript typecheck of the CLI and of plugins/webular (its own tsconfig, outside the root include) [after bugs:static]
 validate: Validate gate — aggregates the full quality spine [after bugs:check]
 ```

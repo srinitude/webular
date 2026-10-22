@@ -115,7 +115,9 @@ export const results = (rs: readonly FamilyResult[]) => {
         shown.filter((r) => r.family === f).map(resultRow),
       )}`,
   )
-  return section(2, 'Results per family', tables.join('\n\n'))
+  const small = shown.some((r) => r.comparison?.verdict === 'not enough tasks')
+  const note = small ? '\n\nSome rows have too few tasks for significance; no gap is claimed.' : ''
+  return section(2, 'Results per family', tables.join('\n\n') + note)
 }
 
 export const answerSplit = (a: ReportInput['answerSplit']) =>
@@ -123,13 +125,23 @@ export const answerSplit = (a: ReportInput['answerSplit']) =>
     3,
     'Answer job split',
     table(
-      ['tool', 'retrieval', 'fixed reader', 'native answer', 'closed book', 'memory tasks'],
+      [
+        'tool',
+        'retrieval',
+        'fixed reader',
+        'native answer',
+        'closed book',
+        'native / closed book',
+        'memory tasks',
+      ],
+      // The ratio strips what the model already knows without retrieval.
       a.map((r) => [
         r.tool,
         num(r.retrieval),
         num(r.fixedReader),
         num(r.nativeAnswer),
         num(r.closedBook),
+        num(r.closedBook > 0 ? r.nativeAnswer / r.closedBook : null),
         String(r.memory),
       ]),
     ),

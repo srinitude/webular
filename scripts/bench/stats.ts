@@ -171,3 +171,14 @@ export const finalize = (drafts: readonly Draft[], minGap = MIN_GAP): Comparison
     return { family, peer, n, diff, ci, test, p, pHolm, verdict: verdictOf(d, pHolm, minGap) }
   })
 }
+
+// Wilson 95% score interval for k passes in n tasks; stays inside [0, 1] and
+// is honest at small n, where the normal interval collapses. n = 0 gives [0, 1].
+export const wilsonCI = (k: number, n: number, z = 1.96): readonly [number, number] => {
+  if (n === 0) return [0, 1]
+  const p = k / n
+  const den = 1 + (z * z) / n
+  const mid = (p + (z * z) / (2 * n)) / den
+  const half = (z * Math.sqrt((p * (1 - p)) / n + (z * z) / (4 * n * n))) / den
+  return [Math.max(0, mid - half), Math.min(1, mid + half)]
+}

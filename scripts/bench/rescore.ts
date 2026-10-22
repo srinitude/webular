@@ -82,7 +82,9 @@ const rescoreChunk = (file: string) =>
       .pipe(Effect.flatMap(Schema.decodeUnknownEffect(Chunk)))
     const { runs, ...head } = chunk
     const root = dirname(dirname(dirname(file)))
-    const pairs = yield* Effect.forEach(runs as readonly Row[], rescoreOne(root), { concurrency: 4 })
+    const pairs = yield* Effect.forEach(runs as readonly Row[], rescoreOne(root), {
+      concurrency: 4,
+    })
     return { head, pairs }
   })
 

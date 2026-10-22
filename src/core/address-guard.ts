@@ -15,18 +15,24 @@ function privateV4(ip: string): boolean {
   return (a === 192 && b === 168) || (a === 100 && b >= 64 && b <= 127)
 }
 
-// IPv6 that embeds an IPv4 (mapped ::ffff:, NAT64 64:ff9b::, compatible ::), dotted
-// or in the hex hhhh:hhhh form URL parsing gives, as the IPv4 it names.
+// Two hextets as the IPv4 they spell.
+const hexV4 = (hi: number, lo: number) => [hi >> 8, hi & 255, lo >> 8, lo & 255].join('.')
+
+// IPv6 that embeds an IPv4 (mapped ::ffff:, SIIT ::ffff:0:, NAT64 64:ff9b::, compatible ::,
+// 6to4 2002:hhhh:hhhh::), dotted or in the hex hhhh:hhhh form URL parsing gives, as that IPv4.
 function mappedV4(ip: string): string | undefined {
-  const tail = /^(?:::ffff:|64:ff9b::|::)(.+)$/.exec(ip)?.[1]
+  const head = ip.split('::')[0] ?? ''
+  if (/^2002(?::|$)/.test(head)) {
+    const [, hi = '', lo = ''] = head.split(':') // hextets cut by :: are zero
+    return hexV4(Number.parseInt(hi || '0', 16), Number.parseInt(lo || '0', 16))
+  }
+  const tail = /^(?:::ffff:(?:0:)?|64:ff9b::|::)(.+)$/.exec(ip)?.[1]
   if (!tail) return undefined
   if (isIP(tail) === 4) return tail
   const hex = /^([0-9a-f]{1,4}):([0-9a-f]{1,4})$/.exec(tail)
   if (!hex) return undefined
-  return v4Of(Number.parseInt(hex[1] ?? '0', 16), Number.parseInt(hex[2] ?? '0', 16))
+  return hexV4(Number.parseInt(hex[1] ?? '0', 16), Number.parseInt(hex[2] ?? '0', 16))
 }
-
-const v4Of = (hi: number, lo: number) => [hi >> 8, hi & 255, lo >> 8, lo & 255].join('.')
 
 // The eight 16-bit groups of a valid IPv6 string; a dotted IPv4 tail becomes two groups.
 function hextets(ip: string): number[] {
@@ -45,12 +51,12 @@ function hextets(ip: string): number[] {
 // with the client IPv4 in the last 32 bits, each bit flipped.
 function tunnelV4(ip: string): string | undefined {
   const h = hextets(ip)
-  if (h[0] === 0x2002) return v4Of(h[1] ?? 0, h[2] ?? 0)
-  if (h[0] === 0x2001 && h[1] === 0) return v4Of(~(h[6] ?? 0) & 0xffff, ~(h[7] ?? 0) & 0xffff)
+  if (h[0] === 0x2002) return hexV4(h[1] ?? 0, h[2] ?? 0)
+  if (h[0] === 0x2001 && h[1] === 0) return hexV4(~(h[6] ?? 0) & 0xffff, ~(h[7] ?? 0) & 0xffff)
   return undefined
 }
 
-/** True for loopback, RFC 1918, link-local, CGNAT, unspecified, multicast, ULA, site-local, and IPv6 forms embedding them (mapped, NAT64, 6to4, Teredo). */
+/** True for loopback, RFC 1918, link-local, CGNAT, unspecified, multicast, ULA, site-local, local-use NAT64, and IPv6 forms embedding them (mapped, SIIT, NAT64, 6to4, Teredo). */
 export function isPrivateIp(raw: string): boolean {
   const ip = raw.replace(/^\[|\]$/g, '').toLowerCase()
   if (isIP(ip) === 4) return privateV4(ip)
@@ -58,7 +64,7 @@ export function isPrivateIp(raw: string): boolean {
   const mapped = mappedV4(ip) ?? tunnelV4(ip)
   if (mapped) return privateV4(mapped)
   if (ip === '::' || ip === '::1') return true
-  return /^(f[cd]|fe[89a-f]|ff)/.test(ip)
+  return /^(f[cd]|fe[89a-f]|ff|64:ff9b:1:)/.test(ip) // + RFC 8215 local-use NAT64
 }
 
 const lookup = (host: string) =>

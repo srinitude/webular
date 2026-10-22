@@ -76,13 +76,15 @@ const capped = <E>(s: Stream.Stream<Uint8Array, E>, onOverflow: Effect.Effect<vo
     Effect.map((r) => ({ text: Buffer.concat(r.chunks).toString(), over: r.over })),
   )
 
-// detached: false keeps the child in our process group, so Ctrl-C reaches it.
+// detached: true makes the child lead its own process group, so a timeout,
+// interrupt, or overflow kill signals the whole tree and leaves no orphaned
+// grandchild. Ctrl-C reaches it through our interrupt, which runs that kill.
 const toCommand = ([cmd, ...args]: [string, ...string[]], opts: ProcOptions) =>
   ChildProcess.make(cmd, args, {
     cwd: opts.cwd,
     env: opts.env,
     extendEnv: opts.extendEnv,
-    detached: false,
+    detached: true,
     stdin: opts.stdin === undefined ? 'ignore' : Stream.make(new TextEncoder().encode(opts.stdin)),
   })
 
