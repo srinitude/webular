@@ -10,6 +10,7 @@ Rules for the launcher and router, under [src/AGENTS.md](../AGENTS.md).
 - [`help.ts`](help.ts) and [`style.ts`](style.ts) shape terminal text: wrap, color, error labels, and "did you mean".
 - [`launch.ts`](launch.ts) picks what runs: the native build, else Bun on `dist`, else Bun on `src`.
 - [`exit-codes.ts`](exit-codes.ts) is the one source of exit codes.
+- [`completion-script.ts`](completion-script.ts) builds the bash, zsh, fish, and PowerShell completion scripts for `webular completions`.
 
 ## Rules
 

@@ -1,4 +1,4 @@
-export interface Spec {
+interface Spec {
   commands: Readonly<Record<string, string>>
   flags: Readonly<Record<string, readonly string[]>>
   shared: readonly string[]

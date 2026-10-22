@@ -67,7 +67,6 @@ The script picks the build for your OS, CPU, and libc, and the no-AVX2 build on 
    $ webular doctor
    ok   network HTTP 200
    ok   upgrade https://github.com/srinitude/webular/releases/latest
-   fail deepsec exit 143
    ok   jev off (WEBULAR_JEV=off)
    ```
 
@@ -122,6 +121,8 @@ read -rs TYPESAFE_API_KEY && export TYPESAFE_API_KEY                  # this she
 | `audit`     | Reports whether `deepsec` is there, plus a scan plan | `webular audit` |
 | `act`       | Drives a real browser | `webular act --help` |
 | `feed`      | Reads an RSS 2.0 or Atom 1.0 feed and lists its items | `webular feed https://hnrss.org/frontpage --limit 5` |
+| `upgrade`   | Prints the upgrade command for your install; `--yes` runs it | `webular upgrade` |
+| `completions` | Prints a shell completion script | `webular completions zsh` |
 | `jev`       | Learns from recorded Jev calls, or labels one as an eval case | `webular jev --help` |
 
 `search --source` also takes `hackernews` and `arxiv`. `webular <command> --help` lists every flag. [Command reference](docs/commands.md) describes each command.
