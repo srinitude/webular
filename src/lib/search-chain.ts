@@ -153,8 +153,11 @@ const searchOnce = Effect.fn('searchOnce')(function* (
     weak: (scored[0]?.score ?? 0) < WEAK_SCORE,
   }
   const hits = scored.map((e) => e.hit)
-  // Web only: the other sources already return their own relevance order.
-  return { results: (source === 'web' ? lexicalRerank(hits, query) : hits).slice(0, limit), meta }
+  // Web only: the other sources already return their own relevance order. Not under
+  // the answer hop: it owns the order, and BM25 over a whole multi-hop question
+  // lifts pages that share its bridge words over the fused order the hop expects.
+  const rerank = source === 'web' && !opts.hop
+  return { results: (rerank ? lexicalRerank(hits, query) : hits).slice(0, limit), meta }
 })
 
 interface Found {
