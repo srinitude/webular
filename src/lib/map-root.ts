@@ -8,7 +8,7 @@ import { fetchRoot } from '../core/http.ts'
 import { errMsg } from '../core/output.ts'
 import { sameHost } from '../core/url.ts'
 import { extractLinks } from './html.ts'
-import { type RobotsGate, robotsGate } from './robots-gate.ts'
+import { isRobotsBlock, type RobotsGate, robotsGate } from './robots-gate.ts'
 
 interface RootFetch {
   final: string
@@ -29,7 +29,12 @@ export const fetchRootFor = (
   timeoutMs: number,
 ): Effect.Effect<RootFetch, never, RobotsGate> =>
   Effect.matchEffect(robotsGate(url), {
-    onFailure: (e) => Effect.succeed(noRoot(url, `blocked: robots.txt disallows ${e.rule}`, true)),
+    onFailure: (e) =>
+      Effect.succeed(
+        isRobotsBlock(e)
+          ? noRoot(url, `blocked: robots.txt disallows ${e.rule}`, true)
+          : noRoot(url, errMsg(e.cause ?? e)),
+      ),
     onSuccess: () =>
       Effect.match(fetchRoot(url, { timeoutMs }), {
         onFailure: (err) => noRoot(url, errMsg(err)),

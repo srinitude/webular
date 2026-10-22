@@ -9,7 +9,7 @@
 // JSON, narrowed by `select`, paged under PAGE_MAX_CHARS with an opaque
 // `cursor`; errors are one short line.
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { Effect } from 'effect'
+import { type Duration, Effect } from 'effect'
 import type { ChildProcessSpawner } from 'effect/process'
 import type { z } from 'zod'
 import {
@@ -127,23 +127,78 @@ export const NOT_ON_MCP = {
 export const mcpToolIds = [...webTools.map((t) => t.id), ...commandTools.map((t) => t.id)].sort()
 
 // A command tool: the plugin's runCommand, with the result as compact JSON text.
-// The plugin's own numeric cursor pages a long result.
-const runTool = (id: string, args: Record<string, unknown>, entryOf?: EntryOf) => {
-  const { cursor = 0, ...input } = args
-  // lenient() passes a bad cursor through; refuse it rather than page from 0.
-  if (!Number.isInteger(cursor) || (cursor as number) < 0) {
-    return Effect.succeed(failure('cursor: use the cursor value from the previous result'))
-  }
-  return runCommand(id, input, cursor as number, entryOf).pipe(
-    Effect.map(
-      (result): McpText => ({
-        content: [{ type: 'text', text: stableJson(result) }],
-        structuredContent: result,
+// The plugin's own numeric cursor pages a long result. A call that runs past
+// `limit` stops (its child process with it) and returns isError.
+const runTool = (
+  id: string,
+  args: Record<string, unknown>,
+  limit: Duration.Input,
+  entryOf?: EntryOf,
+) =>
+  Effect.gen(function* () {
+    const { cursor = 0, ...input } = args
+    // lenient() passes a bad cursor through; refuse it rather than page from 0.
+    if (typeof cursor !== 'number' || !Number.isInteger(cursor) || cursor < 0) {
+      return failure('cursor: use the cursor value from the previous result')
+    }
+    const result = yield* runCommand(id, input, cursor, entryOf).pipe(
+      Effect.timeoutOrElse({
+        duration: limit,
+        orElse: () =>
+          Effect.fail(
+            new CommandFailed({
+              message: `webular ${id} stopped at its time limit. Call it again with a smaller input, or tell the user it took too long.`,
+            }),
+          ),
       }),
-    ),
+    )
+    return {
+      content: [{ type: 'text', text: stableJson(result) }],
+      structuredContent: result,
+    } satisfies McpText
+  }).pipe(
     Effect.catch((e) =>
       Effect.succeed(failure(e instanceof CommandFailed ? e.message : shortError(e))),
     ),
+  )
+
+// Tools that can run for minutes; they report progress when the caller asks.
+const LONG_TOOLS = new Set(['batch', 'crawl', 'research'])
+
+// What each MCP handler gets besides its arguments (a slice of the SDK's extra).
+interface CallExtra {
+  signal: AbortSignal
+  _meta?: { progressToken?: string | number | undefined }
+  sendNotification: (n: {
+    method: 'notifications/progress'
+    params: { progressToken: string | number; progress: number; total: number }
+  }) => Promise<void>
+}
+
+// With a progressToken, a long tool sends notifications/progress: 0 at the
+// start, a rising beat every 5 seconds (it resets a client's request timeout),
+// and 1 at the end. A lost notification never fails the call.
+const withProgress = <A, E, R>(id: string, extra: CallExtra, work: Effect.Effect<A, E, R>) => {
+  const token = extra._meta?.progressToken
+  if (token === undefined || !LONG_TOOLS.has(id)) return work
+  const send = (progress: number) =>
+    Effect.ignore(
+      Effect.tryPromise(() =>
+        extra.sendNotification({
+          method: 'notifications/progress',
+          params: { progressToken: token, progress, total: 1 },
+        }),
+      ),
+    )
+  const beats = Effect.gen(function* () {
+    for (let n = 1; ; n++) {
+      yield* Effect.sleep('5 seconds')
+      yield* send(n / (n + 1))
+    }
+  })
+  return send(0).pipe(
+    Effect.andThen(Effect.raceFirst(work, beats)),
+    Effect.tap(() => send(1)),
   )
 }
 
@@ -156,7 +211,12 @@ type RunWith = <A, E>(
 ) => Promise<A>
 
 // Registration order is tools/list order, so register every tool sorted by id.
-const toolRegistrations = (server: McpServer, runWith: RunWith, entryOf?: EntryOf) =>
+const toolRegistrations = (
+  server: McpServer,
+  runWith: RunWith,
+  limit: Duration.Input,
+  entryOf?: EntryOf,
+) =>
   [
     ...commandTools.map(
       ({ id, outputSchema: _, inputSchema, ...config }) =>
@@ -166,8 +226,10 @@ const toolRegistrations = (server: McpServer, runWith: RunWith, entryOf?: EntryO
             server.registerTool(
               id,
               { ...hintsOnly(config), inputSchema: lenient(inputSchema) },
-              (args: Record<string, unknown>, { signal }) =>
-                runWith(runTool(id, args, entryOf), { signal }),
+              (args: Record<string, unknown>, extra: CallExtra) =>
+                runWith(withProgress(id, extra, runTool(id, args, limit, entryOf)), {
+                  signal: extra.signal,
+                }),
             ),
         ] as const,
     ),
@@ -189,9 +251,10 @@ const toolRegistrations = (server: McpServer, runWith: RunWith, entryOf?: EntryO
 export const registerAll = Effect.fn('registerAll')(function* (
   server: McpServer,
   entryOf?: EntryOf,
+  limit: Duration.Input = '10 minutes',
 ) {
   const runWith = Effect.runPromiseWith(
     yield* Effect.context<ChildProcessSpawner.ChildProcessSpawner>(),
   )
-  for (const [, register] of toolRegistrations(server, runWith, entryOf)) register()
+  for (const [, register] of toolRegistrations(server, runWith, limit, entryOf)) register()
 })

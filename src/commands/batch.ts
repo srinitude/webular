@@ -4,7 +4,7 @@
 import { Effect } from 'effect'
 import { EXIT } from '../cli/exit-codes.ts'
 import { runWorkflow } from '../cli/run.ts'
-import { emitOpts, optIntFlag, parseFlags, timeoutFlag } from '../core/args.ts'
+import { emitOpts, listFlag, optIntFlag, parseFlags, timeoutFlag } from '../core/args.ts'
 import { CliError, runMain } from '../core/effect.ts'
 import { errMsg } from '../core/output.ts'
 import { inPath } from '../core/safepath.ts'
@@ -21,7 +21,8 @@ const loadUrls = Effect.fn('loadUrls')(function* (
   positionals: string[],
 ) {
   const { urls, input } = values
-  if (typeof urls === 'string') return splitList(urls, ',')
+  const listed = listFlag(urls)
+  if (listed !== undefined) return listed
   if (typeof input === 'string') {
     const path = yield* inPath(input)
     const text = yield* Effect.tryPromise({
@@ -46,7 +47,7 @@ const TOO_MANY = 'batch: too many URLs (the max is 1000)'
 
 const main = Effect.gen(function* () {
   const { values, positionals } = yield* parseFlags(Bun.argv.slice(2), {
-    urls: { type: 'string' },
+    urls: { type: 'string', multiple: true },
     input: { type: 'string' },
     concurrency: { type: 'string' },
     archive: { type: 'boolean' },

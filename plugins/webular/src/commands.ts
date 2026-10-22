@@ -53,13 +53,15 @@ const decode = (bytes: Stream.Stream<Uint8Array, unknown>) =>
   bytes.pipe(Stream.decodeText(), Stream.mkString)
 
 // camelCase keys become kebab-case flags, true becomes a bare --flag, false and
-// undefined drop out, arrays join with commas.
-const toFlags = (input: Record<string, unknown>) =>
+// undefined drop out, arrays repeat the flag once per item (so a comma inside
+// a URL survives).
+export const toFlags = (input: Record<string, unknown>) =>
   Object.entries(input).flatMap(([key, v]) => {
     const k = key.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)
     if (v === undefined || v === false) return []
+    if (v === true) return [`--${k}`]
     // One --key=value token, so a value that starts with '-' is never read as a flag.
-    return v === true ? [`--${k}`] : [`--${k}=${String(v)}`]
+    return (Array.isArray(v) ? v : [v]).map((item) => `--${k}=${String(item)}`)
   })
 
 // Picks the next step by exit code: 2 is bad input, anything else is the site or the network.

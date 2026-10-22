@@ -1,26 +1,9 @@
 // `webular mcp` refuses bad tool input with an isError result instead of
 // dropping it: a misspelled key or a bad paging cursor. Run by `mise run bugs:mcp-cli`.
 import { expect, test } from 'bun:test'
-import * as BunServices from '@effect/platform-bun/BunServices'
-import { Client } from '@modelcontextprotocol/sdk/client/index.js'
-import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js'
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { Effect } from 'effect'
-import { registerAll } from '../../src/tools/web.ts'
+import { connected } from '../_support/mcp-client.ts'
 import { eff } from '../_support/run.ts'
-
-const connected = Effect.acquireRelease(
-  Effect.gen(function* () {
-    const server = new McpServer({ name: 'webular-test', version: '0.0.0' })
-    yield* registerAll(server).pipe(Effect.provide(BunServices.layer))
-    const [clientSide, serverSide] = InMemoryTransport.createLinkedPair()
-    yield* Effect.promise(() => server.connect(serverSide))
-    const client = new Client({ name: 'test-client', version: '0.0.0' })
-    yield* Effect.promise(() => client.connect(clientSide))
-    return client
-  }),
-  (client) => Effect.promise(() => client.close()),
-)
 
 const bad: [string, Record<string, unknown>][] = [
   // A bad cursor must not silently restart or misread the paged result.

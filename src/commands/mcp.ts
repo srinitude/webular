@@ -51,8 +51,11 @@ const serve = Effect.gen(function* () {
     (s) => Effect.tryPromise(() => s.close()).pipe(Effect.ignore),
   )
   yield* registerAll(server, sibling)
+  const transport = new StdioServerTransport()
+  const { protocolErrors } = yield* lazy(() => import('../tools/sdk-errors.ts'))
+  protocolErrors(server, transport)
   yield* Effect.tryPromise({
-    try: () => server.connect(new StdioServerTransport()),
+    try: () => server.connect(transport),
     catch: serverError,
   })
   // The SDK's stdio transport never closes on stdin EOF, so end on either signal.

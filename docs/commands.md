@@ -8,12 +8,12 @@ usage line, the global options, the exit codes, and examples.
 | Command | What it does |
 |---|---|
 | `search`    | Searches the web with no key, through DuckDuckGo's no-JS HTML page. `--source wikipedia\|hackernews\|arxiv` searches one of those keyless sources instead |
-| `scrape`    | Reads one URL as clean markdown or JSON (Bun.fetch + Readability + Turndown). By default, a page that robots.txt disallows returns status "blocked" with reason "robots". `--ignore-robots` fetches it anyway (single URL only), and the output carries robots: "disallowed". Crawl, map, and batch always honor robots.txt |
-| `crawl`     | Reads a site page by page on the same host, breadth first (it obeys robots.txt and paces its requests per host; an unreachable robots.txt blocks the crawl) |
+| `scrape`    | Reads one URL as clean markdown or JSON (Bun.fetch + Readability + Turndown). By default, a page that robots.txt disallows returns status "blocked" with reason "robots". `--ignore-robots` fetches it anyway (single URL only), and the output carries robots: "disallowed". Crawl, map, and batch always honor robots.txt. A host that cannot be reached fails with the network error, not "blocked" |
+| `crawl`     | Reads a site page by page on the same host, breadth first. It obeys robots.txt and paces its requests per host. A robots.txt that answers with a server error blocks the crawl. A host that cannot be reached fails with the network error |
 | `map`       | Finds all URLs for a domain (sitemap + link BFS) |
 | `extract`   | Pulls fields with CSS selectors or a schema |
 | `summarize` | Picks the key sentences (no model) |
-| `answer`    | Answers from sources (search → fetch → synthesize; `--urls <a,b>` reads only those pages) |
+| `answer`    | Answers from sources (search → fetch → synthesize). `--urls <url>` reads only those pages. Repeat it for more URLs, so a comma inside a URL stays whole |
 | `research`  | Runs a multi-step research loop → cited markdown report |
 | `parse`     | Turns local docs into markdown (PDF/DOCX/HTML/CSV/JSON/TXT) |
 | `media`     | Downloads media; takes a screenshot or PDF in a real browser (agent-browser) |

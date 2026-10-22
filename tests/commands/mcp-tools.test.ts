@@ -1,24 +1,7 @@
 // `webular mcp` tool metadata, cancel, and bad-input contract, in memory.
 import { describe, expect, test } from 'bun:test'
-import * as BunServices from '@effect/platform-bun/BunServices'
-import { Client } from '@modelcontextprotocol/sdk/client/index.js'
-import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js'
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { Deferred, Effect, type Scope } from 'effect'
-import { registerAll } from '../../src/tools/web.ts'
-
-const connected = Effect.acquireRelease(
-  Effect.gen(function* () {
-    const server = new McpServer({ name: 'webular-test', version: '0.0.0' })
-    yield* registerAll(server).pipe(Effect.provide(BunServices.layer))
-    const [clientSide, serverSide] = InMemoryTransport.createLinkedPair()
-    yield* Effect.promise(() => server.connect(serverSide))
-    const client = new Client({ name: 'test-client', version: '0.0.0' })
-    yield* Effect.promise(() => client.connect(clientSide))
-    return client
-  }),
-  (client) => Effect.promise(() => client.close()),
-)
+import { connected } from '../_support/mcp-client.ts'
 
 const listsHints = Effect.gen(function* () {
   const client = yield* connected
