@@ -2,7 +2,7 @@
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "webular",
   "version": "0.2.0",
-  "description": "Jev, TypeSafe's decision model, makes the judgment calls in this web research CLI. It searches, scrapes, crawls, maps, extracts, summarizes, and answers on your machine. Its plugin adds four skills: research, interview, plain language, and Markdown. Jev's key is the only key.",
+  "description": "Search, scrape, crawl, and answer with sources, from your own machine. A CLI and MCP server with one optional key: Jev.",
   "author": { "name": "Kiren Srinivasan", "email": "kiren@fantasymetals.com" },
   "homepage": "https://github.com/srinitude/webular",
   "repository": "https://github.com/srinitude/webular",
