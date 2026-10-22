@@ -5,7 +5,7 @@ Rules for the shared Effect services, under [src/AGENTS.md](../AGENTS.md).
 ## What lives here
 
 - Process edge: [`effect.ts`](effect.ts) (typed CLI failures and exit codes), [`args.ts`](args.ts) (flag parsing), [`output.ts`](output.ts) (stdout, stderr, and the `-o` file).
-- Fetching: [`http.ts`](http.ts) runs requests, [`http-body.ts`](http-body.ts) reads bodies, [`decode.ts`](decode.ts) turns bytes into text, [`cache.ts`](cache.ts) is the disk cache, [`archive.ts`](archive.ts) is the Wayback fallback.
+- Fetching: [`http.ts`](http.ts) runs requests, [`http-body.ts`](http-body.ts) reads bodies, [`decode.ts`](decode.ts) turns bytes into text, [`gunzip.ts`](gunzip.ts) inflates gzip sitemaps, [`cache.ts`](cache.ts) is the disk cache, [`archive.ts`](archive.ts) is the Wayback fallback.
 - Policy: [`fetch-policy.ts`](fetch-policy.ts) holds the retry, redirect, and failure rules. [`budget.ts`](budget.ts) sizes fan-out from the host's real limits.
 - Scope and safety: [`url.ts`](url.ts) is the one place that decides URL identity and host scope. [`safepath.ts`](safepath.ts) confines paths when `WEBULAR_SANDBOX=1`.
 - Host: [`proc.ts`](proc.ts) runs subprocesses, [`root.ts`](root.ts) finds the package root, [`platform.ts`](platform.ts) picks the executable that fits the machine.

@@ -45,7 +45,7 @@ function locsOf(xml: string, base: string): string[] {
 }
 
 const fetchChild = (loc: string, host: string, timeoutMs: number): Effect.Effect<ChildResult> =>
-  Effect.match(fetchTextWithinHost(loc, host, { timeoutMs }), {
+  Effect.match(fetchTextWithinHost(loc, host, { timeoutMs, gunzip: true }), {
     onFailure: (err): ChildResult => ({ loc, ok: false, reason: errMsg(err) }),
     onSuccess: (xml): ChildResult => ({ loc, ok: true, locs: locsOf(xml, loc) }),
   })
@@ -80,7 +80,7 @@ const sitemapAt = Effect.fn('map.sitemapAt')(function* (
   host: string,
   budget: number,
 ) {
-  const xml = yield* fetchTextWithinHost(sitemapUrl, host, { timeoutMs: budget })
+  const xml = yield* fetchTextWithinHost(sitemapUrl, host, { timeoutMs: budget, gunzip: true })
   const sameHostLocs = locsOf(xml, sitemapUrl).filter((u) => sameHost(host, u))
   if (/<sitemapindex[\s>]/i.test(xml)) return yield* childLinks(sameHostLocs, host, budget)
   return { links: sameHostLocs, errors: [] } satisfies Discovery

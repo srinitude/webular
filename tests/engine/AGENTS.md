@@ -4,10 +4,10 @@ Tests for the engine that fetches, parses, and ranks pages. The parent rules are
 
 ## What lives here
 
-- Fetch and parse: [`http.test.ts`](http.test.ts), [`scrape.test.ts`](scrape.test.ts), [`parse.test.ts`](parse.test.ts), [`parse-pool.test.ts`](parse-pool.test.ts), [`parse-size.test.ts`](parse-size.test.ts), [`html.test.ts`](html.test.ts), [`decode.test.ts`](decode.test.ts), [`download.test.ts`](download.test.ts).
+- Fetch and parse: [`http.test.ts`](http.test.ts), [`scrape.test.ts`](scrape.test.ts), [`parse.test.ts`](parse.test.ts), [`parse-pool.test.ts`](parse-pool.test.ts), [`parse-size.test.ts`](parse-size.test.ts), [`html.test.ts`](html.test.ts), [`json-ld-metadata.test.ts`](json-ld-metadata.test.ts), [`decode.test.ts`](decode.test.ts), [`download.test.ts`](download.test.ts).
 - PDF limits: [parse-pdf-caps.test.ts](parse-pdf-caps.test.ts) checks the page cap and the time limit on one PDF's text. `WEBULAR_PDF_MAX_PAGES` and `WEBULAR_PDF_TIMEOUT_MS` override them. An early stop keeps the pages read and adds a truncation note.
 - Hidden text: [sanitize-injection.test.ts](sanitize-injection.test.ts) checks that text a reader never sees does not reach the Markdown or plain text.
-- Crawl and map: [`crawl.test.ts`](crawl.test.ts), [`crawl-limit.test.ts`](crawl-limit.test.ts), [`map.test.ts`](map.test.ts), [`map-order.test.ts`](map-order.test.ts), [`map-dedupe.test.ts`](map-dedupe.test.ts).
+- Crawl and map: [`crawl.test.ts`](crawl.test.ts), [`crawl-limit.test.ts`](crawl-limit.test.ts), [`map.test.ts`](map.test.ts), [`map-order.test.ts`](map-order.test.ts), [`map-dedupe.test.ts`](map-dedupe.test.ts), [`canonical-url.test.ts`](canonical-url.test.ts) (one canonical URL for every dedupe key), [`map-gzip.test.ts`](map-gzip.test.ts).
 - Search: files that start with `search-`, plus [`sources.test.ts`](sources.test.ts) and [`source-subject.test.ts`](source-subject.test.ts).
 - Answer and summarize: [`answer-passage.test.ts`](answer-passage.test.ts) and files that start with `summarize-`.
 - Cua (background GUI driver): files that start with `cua-`, plus [`driver.test.ts`](driver.test.ts).

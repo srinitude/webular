@@ -3,10 +3,12 @@
 import { isProbablyReaderable, Readability } from '@mozilla/readability'
 import { parseHTML } from 'linkedom'
 import TurndownService from 'turndown'
+import { normalizeUrl } from '../core/url.ts'
 import { imagesFrom, inlineAlts, ogImageOf, type PageImage, textOf } from './html-images.ts'
 import { dropHidden, dropInvisible, sanitizeHtml } from './html-sanitize.ts'
 import { addTableRule } from './html-table.ts'
 import { type TitleCandidates, titleBaseline } from './jev/decisions/page-title.ts'
+import { type PageMetadata, pageMetadata } from './json-ld.ts'
 
 interface Article {
   title: string
@@ -20,13 +22,15 @@ interface PageDoc {
   links: string[]
   images: PageImage[]
   ogImage: string
+  metadata?: PageMetadata
   article: Article
 }
 
 type DomDocument = ReturnType<typeof parseHTML>['document']
 
 function addLink(out: Set<string>, href: string | null, base: string): void {
-  if (href && URL.canParse(href, base)) out.add(new URL(href, base).toString())
+  const url = href && normalizeUrl(href, base)
+  if (url) out.add(url)
 }
 
 function linksFrom(document: DomDocument, base: string): string[] {
@@ -115,10 +119,11 @@ export function parsePage(html: string, base: string): PageDoc {
   const links = linksFrom(document, base)
   const images = imagesFrom(document, base)
   const ogImage = ogImageOf(document, base)
+  const metadata = pageMetadata(document)
   const article = articleFrom(document, html)
   const titles = { readability: article.title, document: docTitle, og: og.trim(), h1 }
   const title = titleBaseline({ url: base, candidates: titles })
-  return { title, titles, links, images, ogImage, article }
+  return { title, titles, links, images, ogImage, ...(metadata ? { metadata } : {}), article }
 }
 
 // The fetch path's parse: article text plus the page's <img> records.

@@ -23,6 +23,7 @@ const MAX_RETRY_AFTER_MS = 10_000
 export interface FetchOptions extends CacheOptions {
   timeoutMs?: number | undefined
   maxBytes?: number | undefined // body cap, MAX_TEXT_BYTES when unset
+  gunzip?: boolean // fetchTextWithinHost: gunzip the body; maxBytes counts decompressed bytes
   headers?: Record<string, string>
   signal?: AbortSignal
   redirect?: RequestRedirect
@@ -191,9 +192,8 @@ export const fetchRoot = Effect.fn('fetchRoot')(function* (url: string, opts: Fe
   return { finalUrl: res.url || url, html: yield* okText(res, url) }
 })
 
-// Fetch text but follow redirects MANUALLY, blocking any hop that leaves `host`
-// (EXACT hostname match — scope control for crawls, not an IP/SSRF filter).
+// Fetch text, following redirects MANUALLY and blocking any hop off `host` (exact match, not an SSRF filter).
 export const fetchTextWithinHost = (url: string, host: string, opts: FetchOptions = {}) =>
   Effect.flatMap(startRun(url, { ...opts, redirect: 'manual' }, host), (run) =>
-    Effect.flatMap(drive(run, url, START), (landed) => okText(landed.res, landed.url)),
+    Effect.flatMap(drive(run, url, START), (l) => okText(l.res, l.url, opts.maxBytes, opts.gunzip)),
   )

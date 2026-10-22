@@ -4,6 +4,7 @@
 import { Data, Effect } from 'effect'
 import { FetchError, readTextCapped } from './decode.ts'
 import { FETCH_ERROR } from './fetch-policy.ts'
+import { gunzipResponse } from './gunzip.ts'
 
 const MAX_TEXT_BYTES = 25 * 1024 * 1024
 
@@ -50,9 +51,19 @@ function refusedMime(res: Response): string | undefined {
   return ok ? undefined : mime
 }
 
-const readOk = Effect.fn('readOk')(function* (res: Response, url: string, max = MAX_TEXT_BYTES) {
-  if (!res.ok)
-    return yield* new HttpStatusError({ url, status: res.status, statusText: res.statusText })
+const readOk = Effect.fn('readOk')(function* (
+  landed: Response,
+  url: string,
+  max = MAX_TEXT_BYTES,
+  gunzip = false,
+) {
+  if (!landed.ok)
+    return yield* new HttpStatusError({
+      url,
+      status: landed.status,
+      statusText: landed.statusText,
+    })
+  const res = gunzip ? yield* gunzipResponse(landed) : landed
   const bad = refusedMime(res)
   if (bad !== undefined)
     return yield* new FetchError({
@@ -62,5 +73,5 @@ const readOk = Effect.fn('readOk')(function* (res: Response, url: string, max = 
 })
 
 // Every rejected response releases its body.
-export const okText = (res: Response, url: string, maxBytes?: number) =>
-  readOk(res, url, maxBytes).pipe(Effect.tapError(() => dropBody(res)))
+export const okText = (res: Response, url: string, maxBytes?: number, gunzip?: boolean) =>
+  readOk(res, url, maxBytes, gunzip).pipe(Effect.tapError(() => dropBody(res)))

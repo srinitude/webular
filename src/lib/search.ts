@@ -4,6 +4,7 @@
 import { Effect } from 'effect'
 import { parseHTML } from 'linkedom'
 import { fetchText } from '../core/http.ts'
+import { normalizeUrl } from '../core/url.ts'
 import { searchRank } from './jev/decisions/search.ts'
 import { onJevRuntime } from './jev/run.ts'
 import { endpoint, SOURCE_TIMEOUT_MS } from './sources-search.ts'
@@ -53,16 +54,13 @@ export const webSearch = Effect.fn('webSearch')(function* (query: string, limit:
   return ranked.slice(0, limit)
 })
 
-const TRACKING =
-  /^(utm_|fbclid$|gclid$|dclid$|msclkid$|mc_[ce]id$|ref$|ref_src$|igshid$|_ga$|yclid$)/
 const MOBILE_HOST = /^(www|m|amp)\./
 
 // Dedupe key (SearXNG-style): scheme, www./m./amp. host prefix, /amp suffix,
 // trailing slash, tracking params, and hash do not tell two URLs apart.
 export function hitKey(raw: string): string {
-  const u = URL.parse(raw)
+  const u = URL.parse(normalizeUrl(raw) ?? '')
   if (!u) return raw
-  for (const k of [...u.searchParams.keys()]) if (TRACKING.test(k)) u.searchParams.delete(k)
   const path = u.pathname.replace(/\/amp\/?$/, '').replace(/\/+$/, '')
   return `${u.hostname.replace(MOBILE_HOST, '')}${path}${u.search}`
 }

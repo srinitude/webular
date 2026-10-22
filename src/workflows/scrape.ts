@@ -10,6 +10,7 @@ import { fetchText } from '../core/http.ts'
 import { htmlToMarkdown, pageBodyHtml, parsePage } from '../lib/html.ts'
 import { decisions } from '../lib/jev/decisions.ts'
 import { decisionStep } from '../lib/jev/steps.ts'
+import { metadataSchema } from '../lib/json-ld.ts'
 import { isRobotsBlock, ROBOTS_AGENT, robotsGate } from '../lib/robots-gate.ts'
 import { stepRuntime } from './runtime.ts'
 import { withFallbacks } from './scrape-fallback.ts'
@@ -43,6 +44,7 @@ const scrapeOutput = z.object({
   markdown: z.string(),
   text: z.string(),
   links: z.array(z.string()),
+  metadata: metadataSchema.optional(),
   archivedFrom: z.string().optional(),
   renderedBy: backends.optional(),
   ...robotsFields,
@@ -141,6 +143,7 @@ function toScrapeResult(p: Prepared, picks: Picks | undefined): z.infer<typeof s
     markdown: title ? `# ${title}\n\n${body}` : body,
     text: p.page.article.text,
     links: p.page.links,
+    ...(p.page.metadata ? { metadata: p.page.metadata } : {}),
     ...(archivedFrom ? { archivedFrom } : {}),
     ...(renderedBy ? { renderedBy } : {}),
     ...(robots ? { robots } : {}),

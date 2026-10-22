@@ -7,7 +7,7 @@
 import { Data, Effect } from 'effect'
 import { fetchRoot } from '../core/http.ts'
 import { errMsg } from '../core/output.ts'
-import { normalizeUrl, sameHost } from '../core/url.ts'
+import { canonicalUrl, normalizeUrl, sameHost } from '../core/url.ts'
 import { archivedUrls } from './archive-urls.ts'
 import { headingText } from './crawl-types.ts'
 import { type FetchError, type FetchPage, makeFetchLayer } from './fetch-layer.ts'
@@ -159,7 +159,7 @@ const orderSeeds = (site: string, urls: string[], room: number) =>
 
 const crawlFrom = (rootUrl: string, finalUrl: string, html: string, opts: CrawlOptions) =>
   Effect.gen(function* () {
-    const anchored = normalizeUrl(finalUrl) ?? rootUrl
+    const anchored = normalizeUrl(finalUrl) ? canonicalUrl(html, finalUrl) : rootUrl
     const root = { url: anchored, title: titleAndLinks(html, anchored, false).title }
     const depths = new Map([
       [rootUrl, 0],

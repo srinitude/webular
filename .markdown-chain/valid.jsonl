@@ -402,3 +402,7 @@
 {"path": "docs/benchmarks.md", "sha": "df2e1b8f46275f765e8b5e3224fe363e01c554f1434061174a4312fb3f54fdbc"}
 {"path": "scripts/bench/AGENTS.md", "sha": "9d984c023701c4416af908656cbd1097281ef5ef6df8b22092a281bde91f97a3"}
 {"path": "scripts/bench/peers/AGENTS.md", "sha": "3f28da0fc00b6cc9df2879d4f18dfbdb3a1440f0e53efffdd89f393e58f3c58a"}
+{"path": "src/core/AGENTS.md", "sha": "b1f9d3a3b93fe2f40bf2d1da4fe77aaec00f68921c4e0efc7cda41744881ada3"}
+{"path": "src/lib/AGENTS.md", "sha": "8939ab8f156f579751d25880a0a38f1220a8a14d3e67ff80fd3ffed0ca272bf0"}
+{"path": "tests/engine/AGENTS.md", "sha": "8eef413a3e8b35779a4f0bfdf936a1d81ea4f2312a0ab31da16c90bc0aacd191"}
+{"path": "tests/lib/AGENTS.md", "sha": "2bf6de80a45192cbb938335aa8e4a4de264eb00c0493618e32cc8d42b872aebf"}

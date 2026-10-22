@@ -2,8 +2,10 @@
 // non-model workflow over FOSS tools (linkedom).
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
+import { parseHTML } from 'linkedom'
 import { z } from 'zod'
 import { fetchText } from '../core/http.ts'
+import { metadataSchema, pageMetadata } from '../lib/json-ld.ts'
 import {
   type InvalidFieldSpecError,
   parseFieldSpecs,
@@ -21,15 +23,18 @@ const extractInput = z.object({
 })
 
 const archivedFrom = z.string().optional()
+const metadata = metadataSchema.optional()
 const fieldDataSchema = z.object({
   url: z.string(),
   data: z.record(z.string(), z.string()),
   archivedFrom,
+  metadata,
 })
 const selectorDataSchema = z.object({
   url: z.string(),
   matches: z.array(z.string()),
   archivedFrom,
+  metadata,
 })
 const extractOutput = z.union([fieldDataSchema, selectorDataSchema])
 
@@ -81,7 +86,12 @@ function select(inputData: {
   selector?: string | undefined
 }): Effect.Effect<z.infer<typeof extractOutput>, InvalidFieldSpecError> {
   const { url, html, fields, selector } = inputData
-  const from = inputData.archivedFrom ? { archivedFrom: inputData.archivedFrom } : {}
+  // The cheap text check skips a second parse on pages with no JSON-LD.
+  const meta = /ld\+json/i.test(html) ? pageMetadata(parseHTML(html).document) : undefined
+  const from = {
+    ...(inputData.archivedFrom ? { archivedFrom: inputData.archivedFrom } : {}),
+    ...(meta ? { metadata: meta } : {}),
+  }
   if (fields) {
     return Effect.flatMap(parseFieldSpecs(fields), (specs) =>
       Effect.map(selectFields(html, specs), (data) => ({ url, data, ...from })),
