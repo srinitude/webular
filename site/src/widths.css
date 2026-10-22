@@ -104,7 +104,7 @@
   .docs-cards {
     grid-template-columns: repeat(4, 1fr);
   }
-  .docs-cards > :last-child {
+  .docs-cards > :last-child:nth-child(n) {
     grid-column: auto;
   }
   .has-sidebar {
