@@ -20,7 +20,9 @@ const PDF_MAX_BYTES = 50 * 1024 * 1024
 
 // A full sentence (40+ characters ending in . ! or ?) is real content, so a
 // short static page with an analytics script (example.com) skips the render.
-const SENTENCE = /\w[^.!?]{39,}[.!?]/
+// An ellipsis is no sentence end, so a "Loading..." placeholder after the
+// title and byline still reads as a shell.
+const SENTENCE = /\w[^.!?]{39,}[.!?](?!\.)/
 // A short "enable JavaScript" notice is the shell talking, not page content.
 const JS_NOTICE = /enable javascript|javascript (is )?(required|disabled)/i
 // ponytail: length heuristic on the readable main text; a page that ships

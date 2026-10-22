@@ -41,7 +41,9 @@ function relevance(text: string, spans: Spans, t: TokenIds): Float64Array {
     const words = (t.offsets[i + 1] ?? 0) - (t.offsets[i] ?? 0)
     const prev = i > 0 ? text.slice(spans.starts[i - 1], spans.ends[i - 1]) : ''
     const wordsBefore = i > 0 ? (t.offsets[i] ?? 0) - (t.offsets[i - 1] ?? 0) : 0
-    const sectionLead = isHeading(prev, wordsBefore) ? 0.05 : 0
+    // A section lead gets the page lead's prior (0.1 / (1 + 0)): each section
+    // opens on its own topic, as the page does (Edmundson's location method).
+    const sectionLead = isHeading(prev, wordsBefore) ? 0.1 : 0
     out[i] = (base[i] ?? 0) * Math.min(1, words / SHORT) + 0.1 / (1 + i) + sectionLead
   }
   return out

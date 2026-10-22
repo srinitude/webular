@@ -2,11 +2,17 @@
 // static main-content path (parsePage, then Markdown of the article, or of the
 // whole page when Readability finds none) and is scored on its gold: recall of
 // the `with` lines and leak of the `without` boilerplate lines. Script-rendered
-// pages (spa, lazy-scroll) score 0 here: the scrape workflow's browser fallback
-// renders them, and this path runs no scripts.
+// pages (spa, lazy-scroll) score 0 here: their text sits base64-encoded inside
+// inline code, not in a data island, so only a browser render shows it. This
+// path runs no scripts, so static recall tops out at the share of other pages;
+// reaching 1.000 needs a live browser render, which no offline test runs.
+// The test instead checks the routing the scrape workflow takes: needsJs, the
+// shell rule withFallbacks runs before any Jev check, must send every
+// script-rendered page, and no other page, to the browser fallback.
 import { expect, test } from 'bun:test'
 import { Console, Duration, Effect, FileSystem, Schema } from 'effect'
 import { htmlToMarkdown, pageBodyHtml, parsePage } from '../../src/lib/html.ts'
+import { needsJs } from '../../src/workflows/scrape-fallback.ts'
 import { eff } from '../_support/run.ts'
 
 const root = `${import.meta.dir}/../..`
@@ -42,7 +48,7 @@ const scorePage = (fs: FileSystem.FileSystem, path: string, gold: typeof Gold.Ty
     const out = norm(markdownOf(html, `https://fixture.test${path}`))
     // A blocked page's gold lists no lines to keep, so it counts as full recall.
     const recall = gold.with?.length ? share(gold.with, out) : 1
-    return { path, recall, leak: share(gold.without ?? [], out) }
+    return { path, recall, leak: share(gold.without ?? [], out), routed: needsJs(html) }
   })
 
 // Pages run one at a time, so the timing reads the extractor, not the scheduler.
@@ -65,11 +71,15 @@ test(
       )
       const mean = (k: 'recall' | 'leak') => scores.reduce((a, s) => a + s[k], 0) / scores.length
       const ms = Math.round(Duration.toMillis(took))
-      const summary = { rows: rows.length, recall: mean('recall'), leak: mean('leak'), ms }
+      const scripted = scores.filter((s) => SCRIPT_RENDERED.test(s.path))
+      const routed = `${scripted.filter((s) => s.routed).length}/${scripted.length}`
+      const summary = { rows: rows.length, recall: mean('recall'), leak: mean('leak'), routed, ms }
       yield* Console.log(JSON.stringify(summary))
       expect(rows.length).toBeGreaterThan(40)
       expect(mean('leak')).toBe(0)
       expect(scores.filter((s) => s.recall < 1 && !SCRIPT_RENDERED.test(s.path))).toEqual([])
+      expect(scripted.length).toBeGreaterThan(0)
+      expect(scores.filter((s) => s.routed !== SCRIPT_RENDERED.test(s.path))).toEqual([])
     }),
   ),
   60_000,

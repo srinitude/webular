@@ -8,6 +8,7 @@ Benchmark data and inputs. The root [AGENTS.md](../AGENTS.md) holds the repo-wid
 - [`bench/results/`](results/): scored results and reports from each run.
 - [datasets/](datasets/): manifests for public datasets that `mise run bench:data` downloads into the gitignored cache. The data is never committed.
 - [fixtures/](fixtures/): local pages and sites that the fixture server serves.
+- [`scoreboard.json`](scoreboard.json): every metric for every command, with its value, eval, and set. `mise run bench:scoreboard` writes it. Never edit it by hand.
 - [spec/](spec/): the benchmark spec.
 - [tasks/](tasks/): the frozen task sets.
 

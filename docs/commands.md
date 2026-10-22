@@ -92,5 +92,7 @@ turns it off in agent mode.
   when a page is dead.
 - [Agent contract](agent-contract.md): read it for the `mcp` command, the agent
   plugin, and its skills.
+- [Accuracy scoreboard](scoreboard.md): read it for each command's measured
+  accuracy, the eval behind each number, and the metrics no eval covers yet.
 
 Return to the [README](../README.md) (navigation only).

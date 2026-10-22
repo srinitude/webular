@@ -12,6 +12,7 @@ bench:docs: Rewrite the generated benchmark blocks in README.md and docs/benchma
 bench:matrix: Agent benchmark matrix: `test:models --agent` runs the Jev-off, Jev-on, and rival arms on the three subscription models into bench/results (paid and live; off the CI spine) [after build]
 bench:peers: Peer benchmark from recordings: webular vs Firecrawl, Exa, Tavily, Perplexity, Parallel; free and deterministic (off the CI spine) [after setup]
 bench:peers:live: Peer benchmark live: calls each keyed provider (at most 20 calls per peer), records responses, writes bench/results (off the CI spine) [after setup]
+bench:scoreboard: Rewrite bench/scoreboard.json and the scoreboard table in docs/scoreboard.md: every metric for every command, its value, eval, and set [after setup]
 bugs:check: Bugs: the static guards, then every bug-hunt class (bugs:security through bugs:cross-branch) in one read-only CI node [after test]
 bugs:cross-branch: Bug hunt: run the cross-branch class guards (pinned literals to rerun after a combined land) from docs/bug-classes.md; prints every missing guard; read-only [after setup]
 bugs:effect: Bug hunt: run the effect class guards (defects, interruption, scopes, child processes) from docs/bug-classes.md; prints every missing guard; read-only [after setup]

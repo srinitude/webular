@@ -33,6 +33,7 @@ const toScenario = (t: AnswerTask): Scenario => ({
     answerMatches: [...new Set([...t.gold.answers, ...(t.aliases ?? [])])].map(reEscape).join('|'),
   },
   tool: 'answer',
+  anyTool: true,
   prompt: `${t.input.question} Reply in one line with the answer.`,
   reference: [],
 })

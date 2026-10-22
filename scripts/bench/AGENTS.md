@@ -1,14 +1,16 @@
 # scripts/bench/AGENTS.md
 
-The benchmark code. The root [AGENTS.md](../../AGENTS.md) holds the repo-wide rules. These rules keep scores fair and hard to game.
+The benchmark code. The root [AGENTS.md](../../AGENTS.md) holds the repo-wide rules. They keep scores fair and hard to game.
 
 ## What lives here
 
 - [peers/](peers/) and [tasks/](tasks/) (task set generators).
 - Run and replay: [run.ts](run.ts), [worker-io.ts](worker-io.ts), [loader.ts](loader.ts), [schema.ts](schema.ts), [guards.ts](guards.ts), [recordings.ts](recordings.ts), [order.ts](order.ts).
 - Grading and report: [grade.ts](grade.ts), [judge.ts](judge.ts), [stats.ts](stats.ts), [cost.ts](cost.ts), [claims.ts](claims.ts), [report.ts](report.ts), [agreement.ts](agreement.ts).
-- Search gold set: [search-gold.ts](search-gold.ts) runs `webular search` on the first rows of [the dev set](../../bench/tasks/dev/search.jsonl) and prints hit@10 and median latency.
-- Datasets: [dataset-fetch.ts](dataset-fetch.ts), [dataset-manifest.ts](dataset-manifest.ts), [dataset-pin.ts](dataset-pin.ts). Cold-start probes: [bare-bun.ts](bare-bun.ts), [import-feed-workflow.ts](import-feed-workflow.ts), [import-mastra-workflows.ts](import-mastra-workflows.ts).
+- [search-gold.ts](search-gold.ts) runs `webular search` on [the dev set](../../bench/tasks/dev/search.jsonl) and prints hit@10 and median latency.
+- Scoreboard: [scoreboard.ts](scoreboard.ts) and [scoreboard-rows.ts](scoreboard-rows.ts). `mise run bench:scoreboard` writes [bench/scoreboard.json](../../bench/scoreboard.json) and the table in [docs/scoreboard.md](../../docs/scoreboard.md). A metric with no eval is a "gap" row.
+- [rescore.ts](rescore.ts) rescores agent-run chunks under [tests/models/check.ts](../../tests/models/check.ts) and merges them into one run file for `mise run bench:docs`.
+- Datasets: [fetch](dataset-fetch.ts), [manifest](dataset-manifest.ts), [pin](dataset-pin.ts). Cold-start probes: [bare-bun.ts](bare-bun.ts), [import-feed-workflow.ts](import-feed-workflow.ts), [import-mastra-workflows.ts](import-mastra-workflows.ts).
 
 ## Rules
 
@@ -25,9 +27,8 @@ The benchmark code. The root [AGENTS.md](../../AGENTS.md) holds the repo-wide ru
 
 ### Runs and caches
 
-- Each round gets a round id and its own cache folder, `rounds/<round-id>/cache`. `WEBULAR_CACHE_DIR` points there.
-- That folder must not exist before the round. No tool reads another round's folder. The folder is deleted once the round's recordings are saved.
-- Headline latency comes from cold runs with `WEBULAR_NO_CACHE=1`. Report cold and warm runs apart.
+- Each round gets its own cache folder, `rounds/<round-id>/cache`, set in `WEBULAR_CACHE_DIR`. It must not exist before the round. No tool reads another round's folder. It is deleted once the round's recordings are saved.
+- Headline latency is from cold runs with `WEBULAR_NO_CACHE=1`. Report cold and warm runs apart.
 - A run fails if any `localhost` or `127.0.0.1` URL appears in a tool's output.
 - Each peer runs through its official API at its documented defaults.
 - Count the cost of every call, Jev calls included. A tie inside the noise bar stays a tie.

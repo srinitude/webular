@@ -23,33 +23,62 @@ function mappedV4(ip: string): string | undefined {
   if (isIP(tail) === 4) return tail
   const hex = /^([0-9a-f]{1,4}):([0-9a-f]{1,4})$/.exec(tail)
   if (!hex) return undefined
-  const hi = Number.parseInt(hex[1] ?? '0', 16)
-  const lo = Number.parseInt(hex[2] ?? '0', 16)
-  return [hi >> 8, hi & 255, lo >> 8, lo & 255].join('.')
+  return v4Of(Number.parseInt(hex[1] ?? '0', 16), Number.parseInt(hex[2] ?? '0', 16))
 }
 
-/** True for loopback, RFC 1918, link-local, CGNAT, unspecified, multicast, ULA, and IPv6 forms embedding them. */
+const v4Of = (hi: number, lo: number) => [hi >> 8, hi & 255, lo >> 8, lo & 255].join('.')
+
+// The eight 16-bit groups of a valid IPv6 string; a dotted IPv4 tail becomes two groups.
+function hextets(ip: string): number[] {
+  const hex = ip.replace(
+    /(\d+)\.(\d+)\.(\d+)\.(\d+)$/,
+    (_, a, b, c, d) => `${((+a << 8) | +b).toString(16)}:${((+c << 8) | +d).toString(16)}`,
+  )
+  const [head = '', tail = ''] = hex.split('::')
+  const a = head ? head.split(':') : []
+  const b = tail ? tail.split(':') : []
+  const gap = hex.includes('::') ? Array(8 - a.length - b.length).fill('0') : []
+  return [...a, ...gap, ...b].map((h) => Number.parseInt(h, 16))
+}
+
+// The IPv4 a tunnel address carries: 6to4 2002:V4HI:V4LO::/48, Teredo 2001:0::/32
+// with the client IPv4 in the last 32 bits, each bit flipped.
+function tunnelV4(ip: string): string | undefined {
+  const h = hextets(ip)
+  if (h[0] === 0x2002) return v4Of(h[1] ?? 0, h[2] ?? 0)
+  if (h[0] === 0x2001 && h[1] === 0) return v4Of(~(h[6] ?? 0) & 0xffff, ~(h[7] ?? 0) & 0xffff)
+  return undefined
+}
+
+/** True for loopback, RFC 1918, link-local, CGNAT, unspecified, multicast, ULA, site-local, and IPv6 forms embedding them (mapped, NAT64, 6to4, Teredo). */
 export function isPrivateIp(raw: string): boolean {
   const ip = raw.replace(/^\[|\]$/g, '').toLowerCase()
   if (isIP(ip) === 4) return privateV4(ip)
   if (isIP(ip) !== 6) return false
-  const mapped = mappedV4(ip)
+  const mapped = mappedV4(ip) ?? tunnelV4(ip)
   if (mapped) return privateV4(mapped)
   if (ip === '::' || ip === '::1') return true
-  return /^(f[cd]|fe[89ab]|ff)/.test(ip)
+  return /^(f[cd]|fe[89a-f]|ff)/.test(ip)
 }
 
-// Every address the host resolves to; a literal IP resolves to itself.
-// ponytail: check-then-connect. Bun's fetch takes no resolved address, so a DNS
-// answer that changes between this lookup and the connect (rebinding) is not
-// caught. Upgrade path: a fetch that accepts a pinned IP or a custom connect.
+const lookup = (host: string) =>
+  Effect.tryPromise({
+    try: () => Bun.dns.lookup(host, {}),
+    catch: () => new FetchError({ message: `could not resolve ${host}` }),
+  }).pipe(Effect.map((rows) => rows.map((r) => r.address)))
+
+// Every address the host resolves to, from two lookups in a row, so a name that
+// switches to a private address between them (DNS rebinding) is caught; a literal
+// IP resolves to itself.
+// ponytail: re-resolve, not pin. Bun's fetch takes no resolved address and looks
+// the name up again, so an answer that switches only after both lookups still
+// gets through. Upgrade path: a fetch that accepts a pinned IP or a custom connect.
 const resolve = (host: string) =>
   isIP(host.replace(/^\[|\]$/g, ''))
     ? Effect.succeed([host])
-    : Effect.tryPromise({
-        try: () => Bun.dns.lookup(host, {}),
-        catch: () => new FetchError({ message: `could not resolve ${host}` }),
-      }).pipe(Effect.map((rows) => rows.map((r) => r.address)))
+    : Effect.map(Effect.all([lookup(host), lookup(host)], { concurrency: 1 }), (both) =>
+        both.flat(),
+      )
 
 /** True when the URL's host is localhost or resolves to any private address. */
 const resolvesPrivate = (url: string) => {

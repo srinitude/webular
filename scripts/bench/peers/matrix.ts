@@ -53,7 +53,7 @@ export interface MatrixRow {
   costUsd: number | null
 }
 
-const MODELS_RUN = /^models-(\d{4}-\d{2}-\d{2})-(\d{6})-\d+\.json$/
+const MODELS_RUN = /^models-(\d{4}-\d{2}-\d{2})-(\d{6})-(?:\d+|merged)\.json$/
 
 // The agent run with the highest date and time in its name; smoke runs never count.
 export const pickModelsRun = (names: readonly string[]) =>

@@ -1,7 +1,7 @@
 // Count-based crawl priority: 0 is crawled first, 2 last. Paths and hosts that
 // yielded useful pages rise, paths that yielded none sink, and pagination,
 // archive, and category URL shapes rise. Plain counts, no model.
-export interface YieldStats {
+interface YieldStats {
   tried: number
   useful: number
 }
@@ -50,11 +50,4 @@ export const priorityOf = (y: Yields, url: string, fresh = false) => {
   if (s && s.useful >= 2 && s.useful * 2 >= s.tried) rank = 0
   else if (s && s.tried >= 3 && s.useful === 0) rank = 2
   return Math.max(0, rank - (k.shaped || fresh ? 1 : 0))
-}
-
-const FRESH_MS = 30 * 24 * 3600 * 1000
-/** True when a sitemap lastmod (ISO date) falls within 30 days before `now`. */
-export const isFresh = (lastmod: string, now: number) => {
-  const t = Date.parse(lastmod)
-  return Number.isFinite(t) && now - t <= FRESH_MS
 }

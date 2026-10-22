@@ -1,7 +1,7 @@
 // Page-level robots directives: the X-Robots-Tag response header and
 // <meta name="robots"> (Google's robots meta tag spec). `none` means
 // noindex plus nofollow. A "bot: directive" header value applies only to that bot.
-export interface RobotsTags {
+interface RobotsTags {
   readonly noindex: boolean
   readonly nofollow: boolean
 }

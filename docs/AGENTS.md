@@ -14,6 +14,7 @@ User and developer docs. The root [AGENTS.md](../AGENTS.md) holds the repo-wide 
 - [`docs/how-it-works.md`](how-it-works.md) and [`docs/why-webular.md`](why-webular.md): how webular works inside, and why to pick it.
 - [`docs/research-factors.md`](research-factors.md): each web-research factor, with the code and test that guard it or the gap that stays open.
 - [`docs/benchmarks.md`](benchmarks.md): the public benchmark report. Every number in it names the committed result file it comes from.
+- [`docs/scoreboard.md`](scoreboard.md): the scoreboard table, written by `mise run bench:scoreboard`.
 - [`docs/bug-classes.md`](bug-classes.md): each kind of bug webular can hit, where, its guard, and its sources, plus the before-you-merge checklist.
 - [`docs/research/`](research/): the paper ledger and one ranked change list per topic. Its [`README.md`](research/README.md) gives the counts.
 

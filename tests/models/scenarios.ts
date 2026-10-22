@@ -37,6 +37,8 @@ export const Scenario = Schema.Struct({
   tool: Schema.String,
   // false grades the reply alone: the model may reach the outcome with another tool.
   requireTool: Schema.optional(Schema.Boolean),
+  // true passes the tool check on any webular tool, as a rival passes on any of its own.
+  anyTool: Schema.optional(Schema.Boolean),
   // Tools the run must not call: a call to one fails the scenario.
   avoidTools: Schema.optional(Schema.Array(Schema.String)),
   prompt: Schema.String,

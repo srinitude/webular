@@ -54,7 +54,7 @@ function sha256(text: string): string {
 
 // Whitespace collapsed per line and blanks dropped, so whitespace churn never
 // reads as a change. Repeated lines stay: a price repeated on a page must still diff.
-export function normalizeText(text: string): string {
+function normalizeText(text: string): string {
   return text
     .split('\n')
     .map((l) => l.replace(/\s+/g, ' ').trim())

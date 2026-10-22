@@ -14,7 +14,9 @@ type Pdf = Awaited<ReturnType<typeof import('unpdf').getDocumentProxy>>
 const pageText = (pdf: Pdf, n: number) =>
   attempt(() => pdf.getPage(n)).pipe(
     Effect.flatMap((page) => attempt(() => page.getTextContent())),
-    Effect.map(({ items }) => columnText(items.filter((it): it is TextItem => 'str' in it))),
+    Effect.map(({ items }) =>
+      columnText(items.flatMap((it): TextItem[] => ('str' in it ? [it] : []))),
+    ),
   )
 
 // pdf.js extraction runs on promise jobs only, so no timer (the deadline) fires

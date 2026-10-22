@@ -523,6 +523,11 @@ depends = ["setup"]
 # A new results file always refreshes the docs that quote it.
 run = ["bun scripts/bench/peers/run.ts --live", "bun scripts/bench/peers/docs.ts"]
 
+[tasks."bench:scoreboard"]
+description = "Rewrite bench/scoreboard.json and the scoreboard table in docs/scoreboard.md: every metric for every command, its value, eval, and set"
+depends = ["setup"]
+run = "bun scripts/bench/scoreboard.ts"
+
 [tasks."bench:docs"]
 description = "Rewrite the generated benchmark blocks in README.md and docs/benchmarks.md from the committed peer run with the highest timestamp in bench/results"
 depends = ["setup"]

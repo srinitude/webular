@@ -150,13 +150,14 @@ export function parsePage(html: string, base: string): PageDoc {
 // The fetch path's parse: article text plus the page's <img> records.
 export const textAndImages = (html: string, base: string) => {
   const page = parsePage(html, base)
-  return { text: page.article.text, images: page.images }
+  const stated = page.metadata?.jsonLd.find((f) => f.datePublished)?.datePublished ?? ''
+  const at = Date.parse(stated) // NaN when missing or unreadable
+  const published = Number.isNaN(at) ? undefined : new Date(at).toISOString()
+  return { text: page.article.text, images: page.images, ...(published ? { published } : {}) }
 }
 
-// Crawling needs only the title and links — skipping Readability here saves
-// its full-document scoring pass on every crawled page.
-// withLinks=false skips the anchor scan for pages whose links are never used
-// (the crawl's last level).
+// Crawling needs only the title and links, so it skips Readability's scoring pass;
+// withLinks=false also skips the anchor scan (the crawl's last level).
 export function titleAndLinks(
   html: string,
   base: string,
@@ -169,18 +170,14 @@ export function titleAndLinks(
   }
 }
 
-export function htmlToArticle(html: string): Article {
-  return articleFrom(parseHTML(html).document, html)
-}
+export const htmlToArticle = (html: string): Article => articleFrom(parseHTML(html).document, html)
 
-export function extractLinks(html: string, base: string): string[] {
-  return linksFrom(parseHTML(html).document, base)
-}
+export const extractLinks = (html: string, base: string): string[] =>
+  linksFrom(parseHTML(html).document, base)
 
 const turndown = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' })
 addTableRule(turndown)
-// Turndown fences only <pre><code>; a bare <pre> would lose its line breaks
-// and get Markdown-escaped. The fence outgrows any backtick run inside.
+// Turndown fences only <pre><code>; fence a bare <pre> past any backtick run inside.
 turndown.addRule('bare-pre', {
   filter: (node) => node.nodeName === 'PRE' && node.firstChild?.nodeName !== 'CODE',
   replacement: (_content, node) => {
@@ -190,12 +187,10 @@ turndown.addRule('bare-pre', {
   },
 })
 
-// Turndown's regexes run superlinear on huge inputs (turndown #505, #506), so
-// input past 5 MB (well above any article) is cut before it reaches them.
-export const MARKDOWN_HTML_MAX_CHARS = 5_000_000
+// Turndown's regexes run superlinear on huge inputs (turndown #505, #506): cut past 5 MB.
+const MARKDOWN_HTML_MAX_CHARS = 5_000_000
 
-// Every Markdown path sanitizes here, so no caller can hand Turndown hidden
-// text, script, or style from raw HTML.
+// Every Markdown path sanitizes here: Turndown never sees hidden text, script, or style.
 export function htmlToMarkdown(html: string): string {
   return turndown.turndown(sanitizeHtml(html.slice(0, MARKDOWN_HTML_MAX_CHARS))).trim()
 }

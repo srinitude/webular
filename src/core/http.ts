@@ -12,7 +12,7 @@ import { guardTarget } from './address-guard.ts'
 import { hop } from './auth-headers.ts'
 import { type CacheOptions, cachedGetText } from './cache.ts'
 import { FetchError } from './decode.ts'
-import { FETCH_ERROR, RETRY_BACKOFF_MS, RETRY_STATUS, retryPause } from './fetch-policy.ts'
+import { FETCH_ERROR, RETRY_BACKOFF_MS, RETRY_STATUS, retryPause, safeUrl } from './fetch-policy.ts'
 import { dropBody, type HttpStatusError, okText } from './http-body.ts'
 import { errMsg } from './output.ts'
 import { retryAfterMs, retryAfterOverCap } from './retry-after.ts'
@@ -68,7 +68,7 @@ const fetchOnce = (url: string, opts: FetchOptions): Effect.Effect<Response, Fet
   send(url, opts).pipe(
     Effect.mapError((err) => {
       const cause = 'cause' in err.reason ? err.reason.cause : err
-      return new FetchError({ message: errMsg(cause), aborted: isAbort(cause) })
+      return new FetchError({ message: errMsg(cause).replaceAll(url, safeUrl(url)), aborted: isAbort(cause) })
     }),
     Effect.tap((res) => Effect.sync(() => opts.onResponse?.(res))),
   )

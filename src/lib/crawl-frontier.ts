@@ -4,6 +4,7 @@
 // in SQLite, so memory stays O(memoryCap + H) however large the crawl grows.
 import type { Database } from 'bun:sqlite'
 import { Data, Effect } from 'effect'
+import { dedupeKey } from '../core/url.ts'
 import { HostHeap } from './crawl-heap.ts'
 import { countVisit, priorityOf, type Yields } from './crawl-priority.ts'
 import { initSchema } from './crawl-schema.ts'
@@ -119,7 +120,8 @@ export const enqueue = (
     let added = 0
     f.db.transaction(() => {
       for (const url of urls) {
-        if (mark.run(f.token, url).changes !== 1) continue
+        // Same page, other query order: seen once, fetched in its first-seen form.
+        if (mark.run(f.token, dedupeKey(url) ?? url).changes !== 1) continue
         const p = priority ?? priorityOf(f.yields, url, fresh?.has(url))
         admit(f, url, Math.min(PRIORITIES - 1, Math.max(0, p)))
         added++

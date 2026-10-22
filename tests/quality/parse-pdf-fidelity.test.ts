@@ -7,6 +7,7 @@ import { Effect } from 'effect'
 import { pdfText } from '../../src/lib/parse.ts'
 import { linesPdf } from '../_support/pdf-fixture.ts'
 import { eff } from '../_support/run.ts'
+import { scoreboardValue } from '../_support/scoreboard.ts'
 
 const BODY = [
   [
@@ -65,6 +66,7 @@ test(
       const score = fidelity(out, gold)
       console.log(`pdf fidelity ${score.toFixed(3)} avg ${ms.toFixed(2)} ms`)
       expect(score).toBeGreaterThanOrEqual(0.95)
+      expect(Number(score.toFixed(4))).toBe(scoreboardValue('parse', 'accuracy') ?? -1)
     }),
   ),
   30_000,

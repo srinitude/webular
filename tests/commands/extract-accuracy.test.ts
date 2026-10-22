@@ -7,6 +7,7 @@ import { readFileSync } from 'node:fs'
 import { Effect } from 'effect'
 import { parseFieldSpecs, selectFields } from '../../src/lib/select.ts'
 import { eff } from '../_support/run.ts'
+import { scoreboardValue } from '../_support/scoreboard.ts'
 
 process.env['WEBULAR_JEV'] = 'off'
 
@@ -85,6 +86,8 @@ test(
       )
       expect(scored.length).toBe(23)
       expect(exact).toBe(23)
+      expect(exact / scored.length).toBe(scoreboardValue('extract', 'exact match') ?? -1)
+      expect(normalized / scored.length).toBe(scoreboardValue('extract', 'normalized match') ?? -1)
     }),
   ),
   30_000,

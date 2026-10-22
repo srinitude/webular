@@ -10,6 +10,7 @@ This folder holds no tests of its own. Other test folders import from it.
 - Servers: [`fixture.ts`](fixture.ts) (the local `Bun.serve` fixture), [`routes.ts`](routes.ts) (its route table), [`scripted-server.ts`](scripted-server.ts) (a TCP server that replays scripted replies), [`archive-fixture.ts`](archive-fixture.ts) (stand-in archive indexes), [`pdf-fixture.ts`](pdf-fixture.ts) (a small PDF built in memory).
 - Processes and env: [`cli.ts`](cli.ts) (spawn helper that drains stdout and stderr together), [`mcp-env.ts`](mcp-env.ts) (the env an MCP host gives a server), [`mcp-client.ts`](mcp-client.ts) (an MCP client for tests), [`no-cache.ts`](no-cache.ts) (preloaded by [`bunfig.toml`](../../bunfig.toml)).
 - Analyzers: [`limits.ts`](limits.ts) (line and nesting limits), [`exports.ts`](exports.ts) (unused exports), [`graph.ts`](graph.ts) (the [`mise.toml`](../../mise.toml) task graph), [`agents-sync.ts`](agents-sync.ts) (AGENTS.md drift against the code).
+- Scores: [`scoreboard.ts`](scoreboard.ts) (the value that [`bench/scoreboard.json`](../../bench/scoreboard.json) records for one command metric). Each offline eval checks its result against it, so a stale value fails the eval.
 
 ## Rules
 

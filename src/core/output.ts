@@ -79,9 +79,13 @@ export const parseFields = (raw: string | undefined): string[] | undefined =>
     .map((f) => f.trim())
     .filter(Boolean)
 
-// One compact JSON line per item of the first array field (or the value itself).
+// List fields commands emit, in preference order; any other output uses its first array.
+const LIST_KEYS = ['results', 'links', 'pages', 'sources']
+
+// One compact JSON line per item of the list field (or the value itself).
 export function toNdjson(data: unknown): string {
-  const list = isRec(data) ? Object.values(data).find(Array.isArray) : undefined
+  const named = isRec(data) ? LIST_KEYS.map((k) => data[k]).find(Array.isArray) : undefined
+  const list = named ?? (isRec(data) ? Object.values(data).find(Array.isArray) : undefined)
   return (list ?? [data]).map((item) => stableJson(item)).join('\n')
 }
 

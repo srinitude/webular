@@ -53,6 +53,12 @@ describe('selectFields / toNdjson', () => {
     ).toBe('{"t":"x","u":1}\n{"t":"y","u":2}')
     expect(toNdjson({ only: 'object' })).toBe('{"only":"object"}')
   })
+
+  test('a known list field wins over an earlier array field; unknown arrays fall back to the first', () => {
+    expect(toNdjson({ tags: ['x'], results: [1, 2] })).toBe('1\n2')
+    expect(toNdjson({ links: ['a'], sources: ['b'] })).toBe('"a"')
+    expect(toNdjson({ other: [3], more: [4] })).toBe('3')
+  })
 })
 
 describe('formatOutput', () => {

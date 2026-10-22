@@ -1,0 +1,859 @@
+[
+  {
+    "command": "search",
+    "metric": "accuracy",
+    "value": 1,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T00-58-50-543Z.json",
+    "set": "peer dev",
+    "bestRival": {
+      "tool": "exa",
+      "value": 1
+    }
+  },
+  {
+    "command": "search",
+    "metric": "hit@1",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "search",
+    "metric": "hit@10",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "search",
+    "metric": "precision",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "search",
+    "metric": "recall",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "search",
+    "metric": "cost per success usd",
+    "value": 0,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T00-58-50-543Z.json",
+    "set": "peer dev"
+  },
+  {
+    "command": "search",
+    "metric": "robustness",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "search",
+    "metric": "test pass rate",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "search",
+    "metric": "determinism",
+    "value": 0,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T00-58-50-543Z.json",
+    "set": "peer dev"
+  },
+  {
+    "command": "search",
+    "metric": "latency p50 ms",
+    "value": 385,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T00-58-50-543Z.json",
+    "set": "peer dev"
+  },
+  {
+    "command": "search",
+    "metric": "latency p95 ms",
+    "value": 1133,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T00-58-50-543Z.json",
+    "set": "peer dev"
+  },
+  {
+    "command": "scrape",
+    "metric": "accuracy",
+    "value": 1,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T00-58-50-543Z.json",
+    "set": "peer dev",
+    "bestRival": {
+      "tool": "exa",
+      "value": 1
+    }
+  },
+  {
+    "command": "scrape",
+    "metric": "recall",
+    "value": 0.8478,
+    "status": "measured",
+    "eval": "tests/bench/scrape-accuracy.test.ts",
+    "set": "dev",
+    "ceiling": "7 of 46 pages render only in a browser; offline recall tops out at 39/46 until a live render runs"
+  },
+  {
+    "command": "scrape",
+    "metric": "leak",
+    "value": 0,
+    "status": "measured",
+    "eval": "tests/bench/scrape-accuracy.test.ts",
+    "set": "dev"
+  },
+  {
+    "command": "scrape",
+    "metric": "script pages routed to browser",
+    "value": 1,
+    "status": "measured",
+    "eval": "tests/bench/scrape-accuracy.test.ts",
+    "set": "dev"
+  },
+  {
+    "command": "scrape",
+    "metric": "robustness",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "scrape",
+    "metric": "test pass rate",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "scrape",
+    "metric": "determinism",
+    "value": 1,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T00-58-50-543Z.json",
+    "set": "peer dev"
+  },
+  {
+    "command": "scrape",
+    "metric": "latency p50 ms",
+    "value": 699,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T00-58-50-543Z.json",
+    "set": "peer dev"
+  },
+  {
+    "command": "scrape",
+    "metric": "latency p95 ms",
+    "value": 3968,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T00-58-50-543Z.json",
+    "set": "peer dev"
+  },
+  {
+    "command": "crawl",
+    "metric": "precision",
+    "value": 1,
+    "status": "measured",
+    "eval": "tests/commands/crawl-accuracy.test.ts",
+    "set": "dev"
+  },
+  {
+    "command": "crawl",
+    "metric": "recall",
+    "value": 1,
+    "status": "measured",
+    "eval": "tests/commands/crawl-accuracy.test.ts",
+    "set": "dev"
+  },
+  {
+    "command": "crawl",
+    "metric": "F1",
+    "value": 1,
+    "status": "measured",
+    "eval": "tests/commands/crawl-accuracy.test.ts",
+    "set": "dev"
+  },
+  {
+    "command": "crawl",
+    "metric": "test pass rate",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "crawl",
+    "metric": "determinism",
+    "value": 1,
+    "status": "measured",
+    "eval": "tests/commands/crawl-accuracy.test.ts",
+    "set": "dev"
+  },
+  {
+    "command": "crawl",
+    "metric": "latency p50 ms",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "crawl",
+    "metric": "latency p95 ms",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "map",
+    "metric": "precision",
+    "value": 1,
+    "status": "measured",
+    "eval": "tests/commands/map-accuracy.test.ts",
+    "set": "dev"
+  },
+  {
+    "command": "map",
+    "metric": "recall",
+    "value": 1,
+    "status": "measured",
+    "eval": "tests/commands/map-accuracy.test.ts",
+    "set": "dev"
+  },
+  {
+    "command": "map",
+    "metric": "F1",
+    "value": 1,
+    "status": "measured",
+    "eval": "tests/commands/map-accuracy.test.ts",
+    "set": "dev"
+  },
+  {
+    "command": "map",
+    "metric": "test pass rate",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "map",
+    "metric": "determinism",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "map",
+    "metric": "latency p50 ms",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "map",
+    "metric": "latency p95 ms",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "extract",
+    "metric": "exact match",
+    "value": 1,
+    "status": "measured",
+    "eval": "tests/commands/extract-accuracy.test.ts",
+    "set": "dev"
+  },
+  {
+    "command": "extract",
+    "metric": "normalized match",
+    "value": 1,
+    "status": "measured",
+    "eval": "tests/commands/extract-accuracy.test.ts",
+    "set": "dev"
+  },
+  {
+    "command": "extract",
+    "metric": "test pass rate",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "extract",
+    "metric": "determinism",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "extract",
+    "metric": "latency p50 ms",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "extract",
+    "metric": "latency p95 ms",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "summarize",
+    "metric": "ROUGE-1 F1",
+    "value": 0.1867,
+    "status": "measured",
+    "eval": "tests/commands/summarize-accuracy.test.ts",
+    "set": "dev",
+    "ceiling": "ROUGE against a human-written summary cannot reach 1.000 for a summary built only from source sentences"
+  },
+  {
+    "command": "summarize",
+    "metric": "ROUGE-2 F1",
+    "value": 0.0474,
+    "status": "measured",
+    "eval": "tests/commands/summarize-accuracy.test.ts",
+    "set": "dev",
+    "ceiling": "ROUGE against a human-written summary cannot reach 1.000 for a summary built only from source sentences"
+  },
+  {
+    "command": "summarize",
+    "metric": "oracle ROUGE-1",
+    "value": 0.2399,
+    "status": "measured",
+    "eval": "tests/commands/summarize-accuracy.test.ts",
+    "set": "dev",
+    "ceiling": "ROUGE against a human-written summary cannot reach 1.000 for a summary built only from source sentences"
+  },
+  {
+    "command": "summarize",
+    "metric": "coverage",
+    "value": 0.761,
+    "status": "measured",
+    "eval": "tests/commands/summarize-accuracy.test.ts",
+    "set": "dev",
+    "ceiling": "ROUGE against a human-written summary cannot reach 1.000 for a summary built only from source sentences"
+  },
+  {
+    "command": "summarize",
+    "metric": "faithfulness",
+    "value": 1,
+    "status": "measured",
+    "eval": "tests/commands/summarize-accuracy.test.ts",
+    "set": "dev"
+  },
+  {
+    "command": "summarize",
+    "metric": "test pass rate",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "summarize",
+    "metric": "determinism",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "summarize",
+    "metric": "latency p50 ms",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "summarize",
+    "metric": "latency p95 ms",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "answer",
+    "metric": "accuracy",
+    "value": 0.7143,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T00-58-50-543Z.json",
+    "set": "peer dev",
+    "bestRival": {
+      "tool": "exa",
+      "value": 1
+    }
+  },
+  {
+    "command": "answer",
+    "metric": "citation faithfulness",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "answer",
+    "metric": "sure-but-wrong",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "answer",
+    "metric": "no-answer rate",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "answer",
+    "metric": "Jev eval pass rate",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "answer",
+    "metric": "cost per success usd",
+    "value": 0,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T00-58-50-543Z.json",
+    "set": "peer dev"
+  },
+  {
+    "command": "answer",
+    "metric": "robustness",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "answer",
+    "metric": "test pass rate",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "answer",
+    "metric": "determinism",
+    "value": 0.7143,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T00-58-50-543Z.json",
+    "set": "peer dev"
+  },
+  {
+    "command": "answer",
+    "metric": "latency p50 ms",
+    "value": 2483,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T00-58-50-543Z.json",
+    "set": "peer dev"
+  },
+  {
+    "command": "answer",
+    "metric": "latency p95 ms",
+    "value": 3301,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T00-58-50-543Z.json",
+    "set": "peer dev"
+  },
+  {
+    "command": "research",
+    "metric": "accuracy",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "research",
+    "metric": "citation faithfulness",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "research",
+    "metric": "sure-but-wrong",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "research",
+    "metric": "no-answer rate",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "research",
+    "metric": "Jev eval pass rate",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "research",
+    "metric": "cost per success usd",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "research",
+    "metric": "robustness",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "research",
+    "metric": "test pass rate",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "research",
+    "metric": "determinism",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "research",
+    "metric": "latency p50 ms",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "research",
+    "metric": "latency p95 ms",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "parse",
+    "metric": "accuracy",
+    "value": 1,
+    "status": "measured",
+    "eval": "tests/quality/parse-pdf-fidelity.test.ts",
+    "set": "dev"
+  },
+  {
+    "command": "parse",
+    "metric": "test pass rate",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "parse",
+    "metric": "determinism",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "parse",
+    "metric": "latency p50 ms",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "parse",
+    "metric": "latency p95 ms",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "media",
+    "metric": "accuracy",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "media",
+    "metric": "test pass rate",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "media",
+    "metric": "determinism",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "media",
+    "metric": "latency p50 ms",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "media",
+    "metric": "latency p95 ms",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "monitor",
+    "metric": "accuracy",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "monitor",
+    "metric": "test pass rate",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "monitor",
+    "metric": "determinism",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "monitor",
+    "metric": "latency p50 ms",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "monitor",
+    "metric": "latency p95 ms",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "batch",
+    "metric": "accuracy",
+    "value": 1,
+    "status": "measured",
+    "eval": "tests/commands/batch-accuracy.test.ts",
+    "set": "dev"
+  },
+  {
+    "command": "batch",
+    "metric": "test pass rate",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "batch",
+    "metric": "determinism",
+    "value": 1,
+    "status": "measured",
+    "eval": "tests/commands/batch-accuracy.test.ts",
+    "set": "dev"
+  },
+  {
+    "command": "batch",
+    "metric": "latency p50 ms",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "batch",
+    "metric": "latency p95 ms",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "doctor",
+    "metric": "test pass rate",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "tasks",
+    "metric": "test pass rate",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "mcp",
+    "metric": "test pass rate",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "diagram",
+    "metric": "test pass rate",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "audit",
+    "metric": "test pass rate",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "act",
+    "metric": "test pass rate",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "act",
+    "metric": "robustness",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "feed",
+    "metric": "accuracy",
+    "value": 1,
+    "status": "measured",
+    "eval": "tests/commands/feed-accuracy.test.ts",
+    "set": "dev"
+  },
+  {
+    "command": "feed",
+    "metric": "test pass rate",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "feed",
+    "metric": "determinism",
+    "value": 1,
+    "status": "measured",
+    "eval": "tests/commands/feed-accuracy.test.ts",
+    "set": "dev"
+  },
+  {
+    "command": "feed",
+    "metric": "latency p50 ms",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "feed",
+    "metric": "latency p95 ms",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "jev",
+    "metric": "Jev eval pass rate",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  },
+  {
+    "command": "jev",
+    "metric": "test pass rate",
+    "value": null,
+    "status": "gap",
+    "eval": null,
+    "set": null
+  }
+]

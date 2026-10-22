@@ -41,7 +41,7 @@ const workerUrl = new URL(
   import.meta.url,
 ).href
 
-type Parsed = { readonly text: string; readonly images: PageImage[] }
+type Parsed = { readonly text: string; readonly images: PageImage[]; readonly published?: string }
 const parseInThread = (html: string, base: string) =>
   Effect.try((): Parsed => textAndImages(html, base))
 
@@ -143,6 +143,8 @@ export interface SourceEntry {
   url: string
   text: string
   images?: PageImage[] | undefined
+  // ISO time from the page's JSON-LD datePublished, when it states one.
+  published?: string | undefined
 }
 
 interface FetchedSources {

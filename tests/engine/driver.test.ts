@@ -153,6 +153,14 @@ describe('render fallback trigger', () => {
     ))
 })
 
+// The title and byline run into "Loading..."; the ellipsis ends no sentence.
+test('a titled shell that says Loading... still gets a render', () => {
+  const page =
+    '<html><body><main><h1>Live board 811 (heavy)</h1><p>By Mara Ellison, 2026-02-02</p>' +
+    '<div id="app">Loading...</div></main><script>render()</script></body></html>'
+  expect(needsJs(page)).toBe(true)
+})
+
 const pdfServer = Effect.acquireRelease(
   Effect.sync(() =>
     Bun.serve({

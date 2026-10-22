@@ -6,6 +6,7 @@ import { Duration, Effect, Schema } from 'effect'
 import { runCli } from '../_support/cli.ts'
 import { useFixture } from '../_support/fixture.ts'
 import { eff } from '../_support/run.ts'
+import { scoreboardValue } from '../_support/scoreboard.ts'
 
 const NS = 'xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"'
 const urlset = (locs: string[]) =>
@@ -73,7 +74,11 @@ describe('webular map — accuracy against a gold URL set', () => {
           `map-accuracy recall=${s.recall.toFixed(3)} precision=${s.precision.toFixed(3)} n=${links.length} median_ms=${median.toFixed(0)} links=${links.join(' ')}`,
         )
         expect(s.precision).toBe(1)
-        expect(s.recall).toBeGreaterThanOrEqual(7 / 9)
+        expect(s.recall).toBe(1)
+        expect([s.precision, s.recall]).toEqual([
+          scoreboardValue('map', 'precision'),
+          scoreboardValue('map', 'recall'),
+        ])
       }),
     ),
     120_000,

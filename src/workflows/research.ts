@@ -23,7 +23,11 @@ const researchInput = z.object({
   timeoutMs: z.number().int().positive().optional(),
 })
 
-const sourceItem = z.object({ title: z.string(), url: z.string() })
+const sourceItem = z.object({
+  title: z.string(),
+  url: z.string(),
+  published: z.string().optional(),
+})
 
 const researchOutput = z.object({
   topic: z.string(),
@@ -51,6 +55,7 @@ const entriesSchema = z.object({
       url: z.string(),
       text: z.string(),
       images: z.array(pageImageSchema).optional(),
+      published: z.string().optional(),
     }),
   ),
   errors: fetchErrorsSchema,
@@ -157,7 +162,11 @@ const assemble = Effect.fn('research.assemble')(function* (
     buildSection(e, i, inputData.sentences, topic, leads[i], figures[i]),
   )
   const report = `# Research: ${topic}\n\n${sections.join('\n\n')}`
-  const sources = entries.map((e) => ({ title: e.title, url: e.url }))
+  const sources = entries.map(({ title, url, published }) => ({
+    title,
+    url,
+    ...(published ? { published } : {}),
+  }))
   return { topic, report, sources, errors: inputData.errors }
 })
 

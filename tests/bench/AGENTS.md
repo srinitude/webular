@@ -11,6 +11,8 @@ Benchmark tests and the scaling run. The parent rules are in [tests/AGENTS.md](.
 - [scrape-accuracy.test.ts](scrape-accuracy.test.ts) scores offline main-content recall and leak on the scrape.page fixtures.
 - [search-gold.test.ts](search-gold.test.ts) checks, offline, how the search gold-set eval counts a hit: a gold URL counts only when, after normalization, it sits in the first 10 distinct result URLs.
 - [dataset-fetch.test.ts](dataset-fetch.test.ts) checks the dataset manifests, the hash check, and the cached hit, with a stub client and a local fixture.
+- [scoreboard.test.ts](scoreboard.test.ts) fails in three cases: [bench/scoreboard.json](../../bench/scoreboard.json) or the table in [docs/scoreboard.md](../../docs/scoreboard.md) drifts from the generator, a command has no rows, or a measured row names an eval file that does not exist.
+- [rescore.test.ts](rescore.test.ts) checks that the rescore drops problems the stored rules raised by mistake, keeps the real ones, and labels each miss.
 - [fixtures/](fixtures/): fixed inputs for the guard tests.
 - [`complexity.ts`](complexity.ts) is not a test. It times the hot paths at 10, 1,000, and 100,000 items and prints peak memory. `mise run bench` runs it.
 
