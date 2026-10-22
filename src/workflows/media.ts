@@ -54,7 +54,16 @@ const browserCapture = Effect.fn('media.browserCapture')(function* (
   dest: string,
   action: 'screenshot' | 'pdf',
 ) {
-  const res = yield* runBatch([['open', url], [action, dest], ['close']])
+  // A warm session per URL: a repeat capture skips the browser launch, and two
+  // captures of different pages never share one tab. The daemon idles out.
+  const session = `webular-media-${Bun.hash(url).toString(36)}`
+  const res = yield* runBatch(
+    [
+      ['open', url],
+      [action, dest],
+    ],
+    session,
+  )
   if (res.code !== 0) return yield* fail(`agent-browser ${action} failed: ${res.stderr.trim()}`)
   const size = Bun.file(dest).size
   if (size > MAX_CAPTURE_BYTES) return yield* fail(`capture exceeded ${MAX_CAPTURE_BYTES} bytes`)
