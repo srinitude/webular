@@ -144,6 +144,7 @@ pre {
   min-height: var(--size-tap-target);
   padding-inline: var(--space-8);
   color: var(--color-text);
+  text-decoration: none;
   cursor: pointer;
 }
 .menu summary {

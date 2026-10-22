@@ -19,6 +19,12 @@
   gap: var(--space-4);
   min-width: 0;
 }
+/* A row's plain link sits after its tablist: a tablist holds only tabs. */
+.tab-line {
+  display: flex;
+  gap: var(--space-4);
+  min-width: 0;
+}
 .tab-label {
   color: var(--color-muted);
   font-size: var(--code-size);
@@ -128,8 +134,11 @@
 @media (min-width: 820px) {
   .tab-rows {
     flex-direction: row;
-    flex-wrap: wrap;
     column-gap: var(--space-24);
+  }
+  /* Side by side even when narrow: a long row scrolls inside itself. */
+  .tab-row {
+    flex: 0 1 auto;
   }
 }
 /* Command groups are cards in the shared card grid; an open group takes the

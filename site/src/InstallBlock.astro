@@ -30,9 +30,11 @@ const terminal = [
     {agent && (
       <div class="tab-row">
         <p class="tab-label" id={`${id}-agent`}>Your agent</p>
-        <div class="scroll-row" role="tablist" aria-labelledby={`${id}-agent`}>
-          <button type="button" role="tab" id={`${id}-tab-3`} aria-controls={`${id}-panel-3`} aria-selected="false" tabindex="-1">Claude Code</button>
-          <a class="tab-link" href="/install#agents">Other clients</a>
+        <div class="tab-line">
+          <div class="scroll-row" role="tablist" aria-labelledby={`${id}-agent`}>
+            <button type="button" role="tab" id={`${id}-tab-3`} aria-controls={`${id}-panel-3`} aria-selected="false" tabindex="-1">Claude Code</button>
+          </div>
+          <a class="tab-link" href="/install#agents">Other clients →</a>
         </div>
       </div>
     )}

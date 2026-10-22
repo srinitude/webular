@@ -1,7 +1,7 @@
 /*
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-  Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'
+  Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'sha256-zwfmDvPQhTyjwiIDeXC1Tr7pWruY25fPZo9qTD5w8d0='; frame-ancestors 'none'; base-uri 'self'
   Permissions-Policy: camera=(), microphone=(), geolocation=()
 
 /*.md

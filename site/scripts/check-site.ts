@@ -5,7 +5,7 @@
 // 'gzip', HTML plus every same-origin script and stylesheet it loads) and
 // loads no third-party script. Prints pass and fail counts per check per width.
 import { BunFileSystem, BunRuntime } from '@effect/platform-bun'
-import { Console, Effect, FileSystem } from 'effect'
+import { Config, Console, Effect, FileSystem } from 'effect'
 import type { Browser } from 'playwright'
 import { browser, DIST, PAGES, server, WIDTHS } from './site-browser.ts'
 import { CHECKS, checkWidth } from './width-checks.ts'
@@ -86,11 +86,15 @@ const program = Effect.gen(function* () {
   const s = yield* server
   const b = yield* browser
   const base = `http://localhost:${s.port}`
-  const widths = yield* Effect.forEach(WIDTHS, (w) => reportWidth(b, base, w), {
+  // SITE_WIDTHS="320,360" checks only those widths, so width groups can run in parallel.
+  const only = (yield* Config.String('SITE_WIDTHS').pipe(Config.withDefault(''))).split(',')
+  const picked = WIDTHS.filter((w) => only.includes(String(w)))
+  const run = picked.length > 0 ? picked : WIDTHS
+  const widths = yield* Effect.forEach(run, (w) => reportWidth(b, base, w), {
     concurrency: 4,
   })
   const failures = [...files, ...widths.flat(), ...(yield* weight)]
-  yield* Console.log(`${WIDTHS.length} widths checked; ${failures.length} failures`)
+  yield* Console.log(`${run.length} widths checked; ${failures.length} failures`)
   if (failures.length > 0) return yield* Effect.fail(new Error(failures.join('\n')))
   yield* Console.log('site:test ok')
 })

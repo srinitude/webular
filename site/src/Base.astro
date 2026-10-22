@@ -49,6 +49,7 @@ const footerLinks = [
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <script is:inline>try{const t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch{}</script>
     <slot name="head" />
   </head>
   <body>
@@ -112,10 +113,7 @@ const footerLinks = [
       // One small vanilla script: theme toggle, tabs, Copy, and "On this page".
       const root = document.documentElement
       const dark = () => (root.dataset.theme ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')) === 'dark'
-      try {
-        const saved = localStorage.getItem('theme')
-        if (saved) root.dataset.theme = saved
-      } catch {}
+      // The saved theme is applied by the inline head script before first paint.
       for (const button of document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]')) {
         const show = () => button.setAttribute('aria-pressed', String(dark()))
         show()
@@ -141,11 +139,13 @@ const footerLinks = [
           const tab = (event.target as Element).closest<HTMLButtonElement>('[role="tab"]')
           if (tab) select(tab)
         })
+        // Arrow keys move between the tabs of one tablist, wrapping.
         block.addEventListener('keydown', (event) => {
-          const at = tabs.indexOf(event.target as HTMLButtonElement)
+          const list = [...((event.target as Element).closest('[role="tablist"]')?.querySelectorAll<HTMLButtonElement>('[role="tab"]') ?? [])]
+          const at = list.indexOf(event.target as HTMLButtonElement)
           const step = { ArrowRight: 1, ArrowLeft: -1 }[event.key]
           if (at < 0 || !step) return
-          const next = tabs[(at + step + tabs.length) % tabs.length]
+          const next = list[(at + step + list.length) % list.length]
           select(next)
           next.focus()
         })

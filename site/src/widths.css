@@ -122,7 +122,6 @@
     gap: var(--space-4);
   }
   .sidebar a {
-    display: block;
     padding: var(--space-4) 0;
     color: var(--color-text);
   }
