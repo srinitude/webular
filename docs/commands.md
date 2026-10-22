@@ -13,7 +13,7 @@ usage line, the global options, the exit codes, and examples.
 | `map`       | Finds all URLs for a domain (sitemap + link BFS) |
 | `extract`   | Pulls fields with CSS selectors or a schema |
 | `summarize` | Picks the key sentences (no model) |
-| `answer`    | Answers from sources (search → fetch → synthesize). `--urls <url>` reads only those pages. Repeat it for more URLs, so a comma inside a URL stays whole |
+| `answer`    | Answers from sources (search → fetch → synthesize). `--urls <url>` reads only the pages you name. Repeat the flag once per URL, so a comma inside a URL stays whole |
 | `research`  | Runs a multi-step research loop → cited markdown report |
 | `parse`     | Turns local docs into markdown (PDF/DOCX/HTML/CSV/JSON/TXT) |
 | `media`     | Downloads media; takes a screenshot or PDF in a real browser (agent-browser) |
