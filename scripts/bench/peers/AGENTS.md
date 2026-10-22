@@ -17,7 +17,7 @@ The peer benchmark. It scores webular against other web research tools. The pare
 - [family.ts](family.ts): paired tests per task family, and the shared-task headline.
 - [grade.ts](grade.ts): the grader and the judge gate. For an answer job, `contains` and `regex` checks read the answer field (a JSON `answer` or an `Answer:` line, else the bare output). A scrape or extract job has no answer field, so those checks read the whole output text. Every peer is graded the same way.
 - [timeout.ts](timeout.ts): the 60 s call timeout, and latency that keeps failed rows.
-- [report.ts](report.ts): the text report.
+- [report.ts](report.ts), [plain-words.ts](plain-words.ts): the text report, and the page words.
 - [keys.ts](keys.ts): reads a peer key from the environment, then the macOS Keychain.
 - [cases.ts](cases.ts): joins Jev calibration rows to bench cases.
 - [skip.ts](skip.ts): why a provider and task pair does not run. A robots-gold task is unsupported, since no peer exposes its target-site requests.

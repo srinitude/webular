@@ -1,6 +1,6 @@
 # .github/ISSUE_TEMPLATE/AGENTS.md
 
-The GitHub issue forms; the parent [AGENTS.md](../AGENTS.md) lists the rest of the GitHub settings.
+The GitHub issue forms. The parent [AGENTS.md](../AGENTS.md) lists the rest of the GitHub settings.
 
 ## What lives here
 

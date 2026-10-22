@@ -63,7 +63,7 @@
 
 ## Links and headings
 
-- Local relative links must point to files that exist. Directories must exist; no index page is guessed.
+- Local relative links must point to files that exist. A linked directory must exist too. The checker never guesses an index page.
 - A fragment must match a heading ID in the GitHub style. That style is a convention, not proof of support in every app.
 - External URLs are not fetched. Check them another way when they matter.
 - Wiki links, footnotes, attributes, directives, shortcodes, and includes need the real renderer.
@@ -72,7 +72,7 @@
 ## Reading cycles
 
 - A self link, or a direct or indirect required cycle, fails.
-- Navigation-only edges are skipped only because the reviewer marked them so.
+- The checker skips a navigation-only edge only when the reviewer marked it that way.
 - A clean visible part never proves the full graph.
 - Never call checker results a complete language or dependency audit.
 

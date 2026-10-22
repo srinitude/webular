@@ -4,7 +4,7 @@ Rules for the individual Jev decisions, under [src/lib/jev/AGENTS.md](../AGENTS.
 
 ## What lives here
 
-One file per decision job. They group by command:
+One file per decision job, grouped by command:
 
 - Search and answer: [`search.ts`](search.ts), [`search-intent.ts`](search-intent.ts), [`answer.ts`](answer.ts), [`answer-evidence.ts`](answer-evidence.ts), [`answer-citation.ts`](answer-citation.ts), and [`answer-sentences.ts`](answer-sentences.ts).
 - Research and summary: [`research.ts`](research.ts), [`research-sentences.ts`](research-sentences.ts), [`summarize.ts`](summarize.ts), and [`summary-follow-up.ts`](summary-follow-up.ts).
@@ -15,7 +15,7 @@ One file per decision job. They group by command:
 
 - Each file builds its decision with `defineDecision`, and `decisions.ts` in the parent folder registers it.
 - A payload lists the purpose first, then the decisive facts, then the context. Questions point at state fields by backticked path.
-- Each decision has a rule-based fallback. Write it first. The fallback is what runs below the bar, with no key, and on any error.
+- Each decision has a rule-based fallback. Write it first. The fallback runs when Jev falls below the bar, when there is no key, and on any error.
 - Use a Choice when exactly one option is right, and ask it in both option orders. Use one yes/no per candidate when several can be true together.
 - Code keeps a veto. For example, [`act.ts`](act.ts) drops a destructive click even when Jev picks it.
 - Each decision has a labeled eval file in [`tests/jev/evals/`](../../../../tests/jev/evals/). Add the cases with the decision.

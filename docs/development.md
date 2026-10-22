@@ -16,7 +16,7 @@ bun bin/webular.ts scrape https://example.com --json
 
 ## Tests
 
-The suite enforces these rules:
+The test suite enforces these rules:
 
 - At most 200 lines per file.
 - At most 30 lines per construct.

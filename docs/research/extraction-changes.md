@@ -84,6 +84,6 @@ Every change below comes from abstract-level reads. No paper was read in full, s
 
 ## Limits of this research
 
-- All reads are abstract-only. The searches hit rate limits (HTTP 429) from the arXiv API and the paper index, so most dates are the first of the arXiv id's month, not the exact day.
+- All reads are abstract-only. Rate limits (HTTP 429) from the arXiv API and the paper index cut the searches short, so most dates are the first of the arXiv id's month, not the exact day.
 - The repo checks behind "already-done" verdicts were skims of file headers and exports. Treat those verdicts as unconfirmed.
 - Models named in the papers (ReaderLM and similar) would be Jev or model decisions, and need a decision-models-first receipt before any use.

@@ -2,7 +2,7 @@
 
 Web research is worth having only when its answers are right, quick, cheap, and the same on every run.
 This page lists each factor behind those goals, plus robustness and safety.
-For each factor it names the code and the test that guard it.
+Each factor names the code and the test that guard it.
 When nothing guards a factor yet, the page says so and names what would close the gap.
 
 ## How to read this page

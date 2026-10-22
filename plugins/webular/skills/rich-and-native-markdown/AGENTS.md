@@ -1,6 +1,6 @@
 # plugins/webular/skills/rich-and-native-markdown/AGENTS.md
 
-This folder holds the rich-and-native-markdown skill, a real copy of the readability skill. The skills rules are in [AGENTS.md](../AGENTS.md).
+This folder holds the rich-and-native-markdown skill, a real copy of the readability skill. The skill rules are in [AGENTS.md](../AGENTS.md).
 
 ## What lives here
 

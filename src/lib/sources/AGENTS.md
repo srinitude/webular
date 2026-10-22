@@ -19,7 +19,7 @@ Rules for the free source adapters, under [src/lib/AGENTS.md](../AGENTS.md).
 - Decode each reply with a `Schema`. An unexpected reply is a typed failure, not a guess.
 - `WEBULAR_SOURCE_ORIGIN` swaps an adapter's origin so tests run against a local fixture server. Keep each adapter working with it.
 - `WEBULAR_MAILTO` goes into the User-Agent. Respect each source's stated rate.
-- Adding an adapter takes these steps: write it, name it in [`catalog.ts`](catalog.ts), add it to the order in [`registry.ts`](registry.ts), and test it.
+- To add an adapter: write it, name it in [`catalog.ts`](catalog.ts), add it to the order in [`registry.ts`](registry.ts), and test it.
 - Ranking and merging stay in the search chain, not in an adapter.
 
 ## Checks

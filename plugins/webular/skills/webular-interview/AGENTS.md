@@ -1,6 +1,6 @@
 # plugins/webular/skills/webular-interview/AGENTS.md
 
-This folder holds the webular-interview skill. The skills rules are in [AGENTS.md](../AGENTS.md).
+This folder holds the webular-interview skill. The rules for all skills are in [AGENTS.md](../AGENTS.md).
 
 ## What lives here
 
@@ -10,7 +10,7 @@ This folder holds the webular-interview skill. The skills rules are in [AGENTS.m
 
 ## Rules
 
-- The skill uses the host's own question tool when there is one, and works in any agent host.
+- The skill asks through the host's own question tool when there is one. It works in any agent host.
 
 ## Checks
 

@@ -126,7 +126,7 @@ Every change names a test that fails on the unchanged code and passes with the c
 
 ## Web-client security
 
-Another helper is closing DNS rebinding, 6to4 and Teredo IPv6 tunnels, and secrets in network error text. Those are not repeated here. Papers on them (2609.09345, 2609.23042, 2606.04141) are in the ledger as not applicable or already done, and are owned by that helper.
+Another owner covers DNS rebinding, 6to4 and Teredo IPv6 tunnels, and secrets in network error text, so those are not repeated here. Papers on them (2609.09345, 2609.23042, 2606.04141) are in the ledger as not applicable or already done.
 
 The remaining security changes, ranked:
 

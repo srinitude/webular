@@ -14,7 +14,7 @@ Work built on a guess gets redone. Ask about the outcome first and the method la
 
 ## Before the first question
 
-1. Read the working folder before the first question. Look at its files, notes, and git log. Never ask what the folder already answers.
+1. Read the working folder. Look at its files, notes, and git log. Never ask what the folder already answers.
 2. Open with one or two plain sentences. Say what you think the user wants (intent) and what the finished result looks like (outcome).
 3. Ask the user to correct you.
 

@@ -65,7 +65,7 @@ Never:
 - Edit `dist/`, [bench/recordings](bench/recordings/), or [tests/jev/replay](tests/jev/replay/) by hand. Tasks write them.
 - Add mocks or stubs. Tests use real code on a local `Bun.serve` fixture.
 - Commit secrets or keys. Keys come only from the environment or OS keychain, read through Effect `Config.Redacted`.
-- Commit [bench/results](bench/results/), [bench/recordings](bench/recordings/), or the git-ignored .land/ folder, the scratch for landing patches and bench results.
+- Commit [bench/results](bench/results/), [bench/recordings](bench/recordings/), or the git-ignored .land/ folder (scratch for landing patches and bench results).
 - Create worktrees or test temp folders under `/tmp`. Each test suite gets its own `TMPDIR`.
 
 ## Commits and pull requests

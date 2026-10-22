@@ -9,7 +9,7 @@ The paper ledger and the change lists drawn from it. The parent [AGENTS.md](../A
 - [`agents-md-sources.jsonl`](agents-md-sources.jsonl): the sources for how AGENTS.md files are written.
 - [`verdict-changes.jsonl`](verdict-changes.jsonl): each verdict the full-text pass changed.
 - [`open-items.md`](open-items.md): each ranked change not in the code, with its next step. The totals are in [`../research.md`](../research.md).
-- The ranked changes from each topic's `apply` rows: [`agents-changes.md`](agents-changes.md), [`answer-quality-changes.md`](answer-quality-changes.md), [`decision-models-changes.md`](decision-models-changes.md), [`engineering-changes.md`](engineering-changes.md), [`extraction-changes.md`](extraction-changes.md), and [`retrieval-changes.md`](retrieval-changes.md).
+- Ranked changes from each topic's `apply` rows: [`agents-changes.md`](agents-changes.md), [`answer-quality-changes.md`](answer-quality-changes.md), [`decision-models-changes.md`](decision-models-changes.md), [`engineering-changes.md`](engineering-changes.md), [`extraction-changes.md`](extraction-changes.md), and [`retrieval-changes.md`](retrieval-changes.md).
 
 ## Rules
 

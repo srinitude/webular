@@ -1,6 +1,6 @@
 # plugins/webular/skills/webular-research/AGENTS.md
 
-This folder holds the webular-research skill. The skills rules are in [AGENTS.md](../AGENTS.md).
+This folder holds the webular-research skill. The rules for all skills are in [AGENTS.md](../AGENTS.md).
 
 ## What lives here
 

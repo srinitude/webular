@@ -1,6 +1,6 @@
 # .github/workflows/AGENTS.md
 
-The GitHub Actions workflows. The parent [AGENTS.md](../AGENTS.md) lists the rest of the GitHub settings.
+The GitHub Actions workflows live here. The parent [AGENTS.md](../AGENTS.md) lists the rest of the GitHub settings.
 
 ## What lives here
 
@@ -34,4 +34,4 @@ The GitHub Actions workflows. The parent [AGENTS.md](../AGENTS.md) lists the res
 mise run test:file tests/ci tests/release
 ```
 
-Action pin and workflow hardening bugs: `mise run bugs:tests-build`.
+To hunt action pin and workflow hardening bugs, run `mise run bugs:tests-build`.

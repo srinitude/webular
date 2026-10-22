@@ -1,6 +1,6 @@
 # Code of Conduct
 
-webular follows the [Contributor Covenant, version 2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/). It applies in every space the project runs, including issues, pull requests, and discussions, and when someone represents the project in public.
+webular follows the [Contributor Covenant, version 2.1](https://www.contributor-covenant.org/version/2/1/code_of_conduct/). It applies in every space the project runs, including issues, pull requests, and discussions. It also applies when someone represents the project in public.
 
 ## Reporting
 

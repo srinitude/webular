@@ -1,6 +1,6 @@
 # .cursor-plugin/AGENTS.md
 
-The Cursor plugin marketplace for this repo; the root [AGENTS.md](../AGENTS.md) holds the repo-wide rules, and [.claude-plugin/AGENTS.md](../.claude-plugin/AGENTS.md) holds the marketplace rules.
+The Cursor plugin marketplace for this repo. The root [AGENTS.md](../AGENTS.md) holds the repo-wide rules. [.claude-plugin/AGENTS.md](../.claude-plugin/AGENTS.md) holds the marketplace rules.
 
 ## What lives here
 

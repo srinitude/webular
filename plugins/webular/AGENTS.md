@@ -30,4 +30,3 @@ mise run plugin:ci       # lint, typecheck, the six checks, evals, and tests
 mise run plugin:bundle   # rebuild dist/server.js, the file mcp.json starts
 mise run plugin:dev      # serve MCP over HTTPS at webular-mcp.localhost
 ```
-

@@ -11,7 +11,7 @@ Most webular misses in the rival benchmark are runs where the model never called
 - Verdicts: 308 apply, 94 already-done, 310 not-applicable.
 - Most dates are the first of the month taken from the arXiv id, not the real submission day.
 - Gaps: papers on WebArena, GAIA, FRAMES, SimpleQA, and HLE, search-API comparisons (Exa, Tavily, Perplexity), and tool-use RL training are thin or missing. Many "already-done" verdicts came from a shallow code read, so check each one before acting.
-- The readers disagreed on one point. One says a "most effective tool, call whenever possible" line raised use about 7 times (2505.18135). Another says to avoid superlatives (2602.18764, 2606.30775). Test both wordings.
+- The readers disagreed on one point. One reports a "most effective tool, call whenever possible" line raised use about 7 times (2505.18135). Another says to avoid superlatives (2602.18764, 2606.30775). Test both wordings.
 - `src/mcp` does not exist in the factor-map-gaps worktree. The MCP server is [`plugins/webular/src/server.ts`](../../plugins/webular/src/server.ts), which passes no `instructions`. Two readers found an `INSTRUCTIONS` constant in [`src/commands/mcp.ts`](../../src/commands/mcp.ts) of another worktree. Confirm which file serves the plugin.
 
 ## Ranked changes for tool-call rate

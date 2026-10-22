@@ -15,6 +15,7 @@ User and developer docs. The root [AGENTS.md](../AGENTS.md) holds the repo-wide 
 - [`docs/research-factors.md`](research-factors.md): each web-research factor, with the code and test that guard it or the gap that stays open.
 - [`docs/benchmarks.md`](benchmarks.md): the public benchmark report. Every number in it names the committed result file it comes from.
 - [`docs/benchmarks-peers.md`](benchmarks-peers.md): the full comparison with each peer, and its notes. `mise run bench:docs` writes its numbers.
+- [`benchmarks-guide.md`](benchmarks-guide.md), [`benchmarks-method.md`](benchmarks-method.md): the reading guide and the method.
 - [`docs/command-parity.md`](command-parity.md): each command's rival endpoints, whether the peer bench scores it, and the metric that fits.
 - [`docs/scoreboard.md`](scoreboard.md): the scoreboard table, written by `mise run bench:scoreboard`.
 - [`docs/bug-classes.md`](bug-classes.md): each kind of bug webular can hit, where, its guard, and its sources, plus the before-you-merge checklist.
