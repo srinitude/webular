@@ -154,7 +154,7 @@
 {"path": "src/commands/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "src/core/AGENTS.md", "sha": "6261cb6a9e723b1289ceea0d6a601575c5538fb3d7b3990b854f952df8cbd556", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "src/core/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
-{"path": "src/lib/AGENTS.md", "sha": "ac31432a1d69f75e4c7e4acf18f007d91b65b7caf7cdeec616043c4362c6c9cd", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "src/lib/AGENTS.md", "sha": "6ba2d929562f845cbedaec38971ecbe24791fb9b40686c334ded1c4806bbfd35", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "src/lib/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "src/lib/jev/AGENTS.md", "sha": "3c01492d62869bd3b2604a0fa57f17e1aa7fa7c3dd330a56659c9331747dfa4e", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "src/lib/jev/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
@@ -260,5 +260,4 @@
 {"path": "tests/release/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/workflows/AGENTS.md", "sha": "c982b7dbcbfee7dda301fbf256d951714424c1a55dd05e3b03c7321d38e7df70", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/workflows/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
-{"path": "src/lib/AGENTS.md", "sha": "ac31432a1d69f75e4c7e4acf18f007d91b65b7caf7cdeec616043c4362c6c9cd"}
 {"path": "src/lib/jev/decisions/AGENTS.md", "sha": "757c38d6db91b65a086d363ebdaf96ccba04faeda8e4f4b9f5e869f07ad0dacf"}
