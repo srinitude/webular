@@ -5,6 +5,7 @@
 import { Effect } from 'effect'
 import { JEV_MODEL_DEFAULT, Jev, type JevAnswer, type JevRequest } from './client.ts'
 import { JevPayloadTooLarge } from './errors.ts'
+import type { JEV_LATEST_RELEASED } from './model.ts'
 import { type CONFIDENCE_BAR, JEV_TOKEN_CAP, payloadTokens, requestBytes } from './payload/index.ts'
 
 // Runs `jevPart` when Jev is available; any error uses `fallback`. The
@@ -35,8 +36,8 @@ interface Subtask {
   readonly payload: { readonly question: string }
 }
 
-// A pinned Jev model: a versioned id or jev-preview, never `jev`, `jev-latest`, or a `~alias`.
-type PinnedModel = `jev-${number}.${number}.${number}` | 'jev-preview'
+// The one pinned Jev model: the released constant, never `jev`, `jev-latest`, `jev-preview`, or a `~alias`.
+type PinnedModel = typeof JEV_LATEST_RELEASED
 
 export interface DecisionDef<I, A> {
   readonly name: string

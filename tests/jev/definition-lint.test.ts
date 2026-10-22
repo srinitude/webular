@@ -1,5 +1,4 @@
-// The jev mod's DEFINITION rules: the definer rejects an alias model at the type
-// level, and lintDefinition and lintSubtasks reject every other bad payload.
+// The jev mod's DEFINITION rules: the definer types only the pinned model; the lints reject the rest.
 import { expect, test } from 'bun:test'
 import { BunServices } from '@effect/platform-bun'
 import { Effect, FileSystem } from 'effect'
@@ -115,15 +114,16 @@ test('definition: a Jev step needs a primitive, a pattern, and a full payload', 
   ])
 })
 
-test('definition: defineDecision rejects an alias model at the type level', () => {
+test('definition: defineDecision takes only the pinned release at the type level', () => {
   type Model = NonNullable<DecisionDef<never, never>['model']>
-  const pinned: Model = 'jev-1.13.0'
+  const pinned: Model = JEV_LATEST_RELEASED
+  // @ts-expect-error an older release is not the pinned model
+  const older: Model = 'jev-1.13.0'
+  // @ts-expect-error jev-preview is not a release
   const preview: Model = 'jev-preview'
   // @ts-expect-error jev-latest is an alias, not a pinned model
   const latest: Model = 'jev-latest'
-  // @ts-expect-error a ~alias is not a pinned model
-  const tilde: Model = '~fast'
-  expect([pinned, preview, latest, tilde].length).toBe(4)
+  expect([pinned, older, preview, latest].length).toBe(4)
 })
 
 // Limits are tokens (llms-full.txt L14441, L14452-14457), estimated as chars / 4,
