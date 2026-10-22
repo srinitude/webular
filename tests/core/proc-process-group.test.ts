@@ -26,7 +26,10 @@ const survives = (pid: number) =>
   pid <= 0
     ? Effect.succeed(true)
     : alive(pid).pipe(
-        Effect.repeat({ until: (up) => !up, schedule: Schedule.spaced('20 millis') }),
+        Effect.repeat({
+          until: (up) => !up,
+          schedule: Schedule.spaced('20 millis').pipe(Schedule.upTo({ times: 150 })),
+        }),
         Effect.timeoutOption('2 seconds'),
         Effect.map((done) => done._tag === 'None'),
         Effect.tap((up) =>
@@ -64,7 +67,9 @@ describe('runProc — timeout kills the process group', () => {
         const pid = yield* fs.readFileString(pidFile).pipe(
           Effect.map((text) => Number(text.trim())),
           Effect.filterOrFail((n) => n > 0),
-          Effect.retry({ schedule: Schedule.spaced('20 millis'), times: 250 }),
+          Effect.retry({
+            schedule: Schedule.spaced('20 millis').pipe(Schedule.upTo({ times: 250 })),
+          }),
         )
         yield* Fiber.interrupt(fiber)
         expect(yield* survives(pid)).toBe(false)

@@ -92,7 +92,7 @@ The list is [engineering-changes.md](engineering-changes.md).
 - #2, #4, #8, #10, #11, #14, #15, #16, #17: see the list.
 - #3: flag a case as not resolvable in the bench spec.
 - #5: add a mutation gate.
-- #6, partly: a grandchild dies on timeout and on cancel (`tests/core/proc-process-group.test.ts:39` and `:56`). Still missing: a test that cancels each workflow at every await point and checks that cleanup ran.
+- #6, partly: a grandchild dies on timeout and on cancel (`tests/core/proc-process-group.test.ts:42` and `:59`). Still missing: a test that cancels each workflow at every await point and checks that cleanup ran.
 - #7: add stale-if-error and single-flight to the fetch cache.
 - #9: hedge slow sources in `search-chain.ts`.
 - #12, partly: add flaky-retry limits and a double-build hash check to `release.yml`.
