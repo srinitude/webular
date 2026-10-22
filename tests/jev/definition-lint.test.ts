@@ -4,6 +4,7 @@ import { expect, test } from 'bun:test'
 import { BunServices } from '@effect/platform-bun'
 import { Effect, FileSystem } from 'effect'
 import { JEV_MODEL_DEFAULT, type JevRequest } from '../../src/lib/jev/client.ts'
+import { JEV_LATEST_RELEASED } from '../../src/lib/jev/model.ts'
 import { decideCropBox } from '../../src/lib/jev/decisions/crop-box.ts'
 import { imageKindDecision } from '../../src/lib/jev/decisions/image-kind.ts'
 import { routeDecision } from '../../src/lib/jev/decisions/image-router.ts'
@@ -20,7 +21,7 @@ const GOOD_STATE = {
   facts: { page: { url: 'https://a.dev' } },
 }
 const good = {
-  model: 'jev-1.13.0',
+  model: JEV_LATEST_RELEASED,
   state: GOOD_STATE,
   questions: {
     pick: {
@@ -65,12 +66,12 @@ test('definition: bare instructions, thin options and levels, and flat state are
   expect(rules({ ...good, questions: { q } })).toEqual(['score-levels'])
 })
 
-test('definition: alias models, box without jev-preview, size and nesting caps', () => {
-  for (const model of ['jev', 'jev-latest', '~fast', 'jev-1.13', 'gpt-5'])
+test('definition: only the pinned release passes, box questions included, size and nesting caps', () => {
+  for (const model of ['jev', 'jev-latest', 'jev-preview', '~fast', 'jev-1.13', 'jev-1.13.0', 'gpt-5'])
     expect(rules({ ...good, model })).toEqual(['model-pin'])
   const box = { b: { type: 'box', instructions: { t: 1 } } }
-  expect(rules({ ...good, questions: box })).toEqual(['box-model'])
-  expect(rules({ ...good, model: 'jev-preview', questions: box })).toEqual([])
+  expect(rules({ ...good, questions: box })).toEqual([])
+  expect(rules({ ...good, model: 'jev-preview', questions: box })).toEqual(['model-pin'])
   expect(rules({ ...good, questions: { a: noul('q'.repeat(130_000)) } })).toContain('question-size')
   const wide = {
     a: noul('q'.repeat(90_000)),
