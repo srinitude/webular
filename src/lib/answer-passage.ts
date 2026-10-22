@@ -2,7 +2,7 @@
 // reference lines drop out before scoring, the top entity page's lead
 // sentence ("X is a 2024 novel by ...") comes first, and sentences that hold
 // an answer of the asked type (a place for "where", a name for "who") lead.
-import { splitQuestion, summarizeText } from './summarize.ts'
+import { splitQuestion, summarizeText, tokenize } from './summarize.ts'
 
 // Chrome glued into page text: archive stamps, the site tagline, "Retrieved"
 // stamps, and quoted reference titles (`"ACM's Turing Award prize".`).
@@ -69,8 +69,9 @@ export function answerPassage(pages: ReadonlyArray<string>, n: number, focus: Fo
   const pool = summarizeText(clean.join('\n\n'), n * 3, focus).sentences.filter(isSentence)
   const asked = new Set(stems(focus.query))
   const re = answerType(focus.query)
-  // Only the asked part weighs; a describing clause's rare words would win.
-  const score = termScore(pool, new Set(stems(splitQuestion(focus.query).asked)))
+  // Only the asked part's content words weigh: a describing clause's rare words,
+  // or a stopword like "who" in "Alan Turing, who was", would win.
+  const score = termScore(pool, new Set(tokenize(splitQuestion(focus.query).asked).map(stem)))
   const typed = pool
     .map((s, i) => ({ s, k: score(i) }))
     .filter(({ s }) => re === undefined || holdsType(s, re, asked))

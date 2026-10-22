@@ -66,7 +66,7 @@ const STOPWORDS = new Set([
 
 // match() yields the same maximal [a-z0-9] runs as replace-then-split, with
 // one fewer full-size copy and no empty tokens to filter.
-function tokenize(text: string): string[] {
+export function tokenize(text: string): string[] {
   return (text.toLowerCase().match(/[a-z0-9]+/g) ?? []).filter(
     (w) => w.length > 1 && !STOPWORDS.has(w),
   )
