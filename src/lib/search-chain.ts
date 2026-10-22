@@ -59,6 +59,16 @@ export interface SearchOptions {
   judge?: ((query: string) => Effect.Effect<SearchSource[]>) | undefined
 }
 
+// Deterministic mode (WEBULAR_DETERMINISTIC=1): no settle cutoff, so source
+// timing never changes the hits; each source still stops at SOURCE_TIMEOUT_MS.
+const deterministic = Config.String('WEBULAR_DETERMINISTIC').pipe(
+  Config.withDefault(''),
+  Effect.map((v) => v === '1'),
+  Effect.orDie,
+)
+const graceAfter = (hit: Deferred.Deferred<void>) =>
+  Effect.andThen(Deferred.await(hit), Effect.sleep(SETTLE_GRACE_MS))
+
 const timedOut = () =>
   Effect.succeed({
     results: [] as Hit[],
@@ -85,8 +95,8 @@ const fanOut = Effect.fn('fanOut')(function* (
   const official = yield* officialFor(query, opts)
   const runSource = opts.runSource ?? official?.run ?? one
   const hit = yield* Deferred.make<void>()
-  const settle = { hit, cutoff: Effect.andThen(Deferred.await(hit), Effect.sleep(SETTLE_GRACE_MS)) }
   const uncut = { hit, cutoff: Effect.never }
+  const settle = (yield* deterministic) ? uncut : { hit, cutoff: graceAfter(hit) }
   const keyword = source === 'web' ? pickSources(query) : [source]
   const query1 = (s: SearchSource) =>
     querySource(s, queries, limit, runSource, s === 'npm' && keyword.includes(s) ? uncut : settle)
