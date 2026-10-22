@@ -4,11 +4,10 @@
 import { Effect, Schema } from 'effect'
 import type { BenchError, Output, Provider } from './model.ts'
 import { fail, out, type Post } from './peers.ts'
-import type { Get } from './research-jobs.ts'
+import { type Get, POLL_MS } from './research-jobs.ts'
 
 export const CRAWL_LIMIT = 10
 export const CRAWL_DEPTH = 2
-const POLL_MS = 2000
 // Firecrawl crawl: 1 credit per page at $83 / 100,000. Tavily crawl: 1 credit per
 // 10 pages mapped plus 1 per 5 pages extracted (basic), $0.008 a credit.
 const FIRECRAWL_PAGE_USD = 83 / 100_000
