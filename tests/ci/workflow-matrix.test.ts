@@ -4,6 +4,7 @@
 // still runs exactly once on it (bun test --shard splits the file list).
 import { expect, test } from 'bun:test'
 import { Effect } from 'effect'
+import { loadGraph } from '../_support/graph.ts'
 import { ROOT } from '../_support/root.ts'
 import { eff, io } from '../_support/run.ts'
 
@@ -44,7 +45,7 @@ const shardsComplete = (job: Job | undefined) =>
     const shards = group.flatMap((e) => (e.shard === undefined ? [] : [e.shard]))
     if (shards.length === 0) return group.length === 1
     const want = Array.from({ length: group.length }, (_, i) => `${i + 1}/${group.length}`)
-    return shards.length === group.length && [...shards].sort().join() === want.join()
+    return [...shards].sort().join() === want.join()
   })
 
 test(
@@ -76,10 +77,7 @@ test(
   'the ci spine still reaches lint, typecheck, build, test, and the bug checks',
   eff(
     Effect.gen(function* () {
-      const toml = yield* io(() => Bun.file(`${ROOT}mise.toml`).text())
-      const { tasks } = Bun.TOML.parse(toml) as {
-        tasks: Record<string, { depends?: ReadonlyArray<string> }>
-      }
+      const tasks = yield* Effect.sync(loadGraph)
       const reached = new Set<string>()
       const queue = ['ci']
       for (let name = queue.pop(); name !== undefined; name = queue.pop()) {
