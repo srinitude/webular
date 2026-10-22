@@ -31,7 +31,7 @@ Rules for the MCP tools, under [src/AGENTS.md](../AGENTS.md).
 - A handler passes the request's abort signal into its run, so a cancelled call stops its child. Source: [MCP stdio transport, spec 2026-07-28](https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/stdio).
 - The tools share the plugin's rate limit and path guard. Source: [MCP tools security, spec 2026-07-28](https://modelcontextprotocol.io/specification/2026-07-28/server/tools#security-considerations).
 - The server lists at most 40 tools. Source: [VS Code tools](https://code.visualstudio.com/docs/agents/run/tools).
-- Tool ids use only letters, digits, `_`, and `-`. MCP allows `.`, but the model APIs behind Cursor and VS Code reject it. Source: [MCP issue 1063](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1063).
+- Tool ids use only letters, digits, `_`, and `-`. MCP allows `.`, but the model APIs behind some MCP clients reject it. Source: [MCP issue 1063](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1063).
 
 ### Known gaps
 

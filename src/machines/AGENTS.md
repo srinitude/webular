@@ -17,7 +17,7 @@ Rules for the XState flow machines, under [src/AGENTS.md](../AGENTS.md).
 - Code that runs a flow reads its decisions from the machine. [`src/core/http.ts`](../core/http.ts) performs only what [`fetch.ts`](fetch.ts) asks.
 - [`tests/machines/flow-coverage.test.ts`](../../tests/machines/flow-coverage.test.ts) needs a machine for every command and MCP tool, and a test for every machine.
 - The agent takes an event only when the machine allows it from the current state. Jev's pick counts only at the bar. Otherwise the observed event stays.
-- Jev is the agent's only model provider. Its key comes from `TYPESAFE_API_KEY` or the macOS Keychain, through the shared Jev client. The agent package loads lazily.
+- Jev is the agent's only model provider. Its key comes from `TYPESAFE_API_KEY` or, on macOS, the Keychain, through the shared Jev client. The agent package loads lazily.
 
 ### XState and the Stately agent
 

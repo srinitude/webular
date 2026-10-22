@@ -15,7 +15,7 @@ With `--json`, every command prints the same JSON shape. Each command but `mcp` 
 
 - It runs on your machine, with no webular server in the middle, and it is open source under Apache-2.0.
 - One key: Jev (`TYPESAFE_API_KEY`), reached through the direct TypeSafe endpoint. Without it, each decision falls back to its rule-based baseline.
-- One tool covers search, scrape, crawl, map, extract, summarize, answer, and research, as a CLI, an MCP server, a Claude Code plugin, and skills.
+- One tool covers search, scrape, crawl, map, extract, summarize, answer, and research, as a CLI, an MCP server, an agent plugin, and skills.
 - It respects robots.txt by default (`scrape --ignore-robots` opts out). A date-pinned replay with recorded Jev answers can give the same output again, but live pages still change.
 - Where others are ahead: Exa gives stronger answers, and Exa, Brave, and Google run their own search indexes. [The benchmark results](docs/benchmarks.md) hold every number.
 
@@ -58,19 +58,27 @@ pnpm add -g webular
 
 An agent can use webular in three ways. Pick one. Each way runs the same Mastra workflows, and each judgment call inside them goes to Jev, or to a rule-based fallback when no key is set.
 
-- **MCP server.** `webular mcp` serves every command as a tool over stdio. In Claude Code:
-
-  ```bash
-  claude mcp add webular -- webular mcp
-  ```
-
-  Claude Desktop, Cursor, Windsurf, Cline, and Gemini CLI read this block under `mcpServers`. VS Code uses `servers` instead. [Install channels](docs/install.md#mcp-clients) has the block for each client.
+- **MCP server.** `webular mcp` serves every command as a tool over stdio. Any MCP client can run it. Most clients read this block under `mcpServers`; VS Code uses `servers` instead:
 
   ```json
   { "mcpServers": { "webular": { "command": "webular", "args": ["mcp"] } } }
   ```
 
-- **Claude Code plugin.** It bundles the MCP server and four skills: research, interview, plain language, and Markdown.
+  Some hosts also have a one-line add command. In Claude Code:
+
+  ```bash
+  claude mcp add webular -- webular mcp
+  ```
+
+  In Codex CLI:
+
+  ```bash
+  codex mcp add webular -- webular mcp
+  ```
+
+  [Install channels](docs/install.md#mcp-clients) has the setup for each client, including Claude Desktop, Cursor, Windsurf, Cline, Gemini CLI, VS Code, and Zed.
+
+- **Agent plugin.** It bundles the MCP server and four skills: research, interview, plain language, and Markdown. Hosts that read plugin marketplaces can install it. In Claude Code:
 
   ```text
   /plugin install webular --marketplace srinitude/webular

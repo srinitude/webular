@@ -14,7 +14,7 @@ import { toNodeHandler } from '@modelcontextprotocol/node'
 import { createMcpHandler, type Server } from '@modelcontextprotocol/server'
 import { serveStdio } from '@modelcontextprotocol/server/stdio'
 import { Config, Effect } from 'effect'
-import manifest from '../.claude-plugin/plugin.json' with { type: 'json' }
+import manifest from '../plugin.json' with { type: 'json' }
 import { type CommandFailed, commandTools, runCommand } from './commands.ts'
 import descriptions from './descriptions.json' with { type: 'json' }
 import { runtime } from './runtime.ts'

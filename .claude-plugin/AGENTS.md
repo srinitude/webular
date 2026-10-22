@@ -22,4 +22,3 @@ mise run test:file plugins/webular/tests/manifests.test.ts
 
 - marketplace.json:1 has no top-level `description`.
 - marketplace.json:8 gives a shorter description than plugin.json:4, so the two differ.
-- .cursor-plugin/marketplace.json is missing.

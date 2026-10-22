@@ -25,6 +25,12 @@
       "grader": "bun test: schema decode and equality"
     },
     {
+      "assertion": "the Cursor marketplace matches the Claude Code marketplace",
+      "source": "tests/manifests.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: schema decode and equality"
+    },
+    {
       "assertion": "plugin code never reaches outside the plugin folder",
       "source": "tests/manifests.test.ts",
       "kind": "deterministic",

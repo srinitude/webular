@@ -17,4 +17,4 @@ Paste the real output of each check.
 - [ ] I ran `mise run bench` on the same input before and after. I keep the change only because the numbers and the tests both hold.
 - [ ] Markdown files went through the Markdown chain.
 - [ ] No secrets, no `dist/`, [`bench/results/`](../bench/results/), or [`bench/recordings/`](../bench/recordings/) files, and no AI co-attribution.
-- [ ] A new folder has an AGENTS.md and a CLAUDE.md that holds `@AGENTS.md`.
+- [ ] A new folder has an AGENTS.md and the thin adapter files its hosts need, such as a CLAUDE.md that holds only `@AGENTS.md`.

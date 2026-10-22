@@ -16,7 +16,7 @@ This folder holds the skills the plugin ships. The plugin rules are in [AGENTS.m
 - Optional keys are `license`, `compatibility` (up to 500 characters), `metadata` (a map of strings to strings), and `allowed-tools` ([Agent Skills spec, repo agentskills/agentskills](https://agentskills.io/specification)).
 - `SKILL.md` stays under 500 lines. Put long detail in `<skill>/references/`, one level deep, and link it from `SKILL.md`.
 - Optional folders are `<skill>/scripts/`, `<skill>/references/`, and `<skill>/assets/`. The `evals` folder is our own addition ([Cursor skills docs, undated](https://cursor.com/docs/skills)).
-- Cursor lists the keys `name`, `description`, `paths`, `disable-model-invocation`, `icon`, `color`, and `metadata`. It does not list `compatibility` or `license`, so it most likely ignores them ([Cursor skills docs, undated](https://cursor.com/docs/skills)).
+- A host may list fewer keys than the spec. For example, Cursor lists `name`, `description`, `paths`, `disable-model-invocation`, `icon`, `color`, and `metadata`, not `compatibility` or `license`, so it most likely ignores those two ([Cursor skills docs, undated](https://cursor.com/docs/skills)).
 - Every MCP tool a skill names exists on the live server. [`tests/contract/plugin-tools.test.ts`](../../../tests/contract/plugin-tools.test.ts) compares `tools/list` with the skills ([VS Code tools](https://code.visualstudio.com/docs/agents/run/tools)).
 - An eval file has `skill_name` and `evals`. Each case has `id`, `prompt`, `expected_output`, and a non-empty `assertions` list.
 

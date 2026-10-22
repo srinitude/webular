@@ -54,7 +54,7 @@ Live pages still change, so a live run can still differ.
 
 ### MCP server, plugin, and skills, all local
 
-Webular ships an MCP server, a Claude Code plugin, and skills. MCP itself is not new: Exa and Brave also publish MCP servers. The difference is that those front hosted APIs, and this one runs on your machine.
+Webular ships an MCP server, an agent plugin, and skills. MCP itself is not new: Exa and Brave also publish MCP servers. The difference is that those front hosted APIs, and this one runs on your machine.
 
 Sources (2026-10-21): https://mcp.exa.ai/mcp, https://github.com/brave/brave-search-mcp-server
 

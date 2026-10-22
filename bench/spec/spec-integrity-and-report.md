@@ -86,7 +86,7 @@ The builder writes one test per rule, and each test fails the build when its rul
 ### Model-track rules
 
 26. **Three models ran.** Every agent-track arm ran with `claude-opus-5-5`, `claude-sonnet-5-5`, and `claude-haiku-5-5`.
-27. **One web tool per arm.** Each arm allowed only its own tool, and `WebSearch` and `WebFetch` were off.
+27. **One web tool per arm.** Each arm allowed only its own tool, and the host's built-in web search and fetch tools were off.
 28. **Same arm conditions.** Task text, turn budget, timeout, and grader are byte-identical across arms, and wrapper descriptions differ in length by at most 10%.
 29. **Run records complete.** Each agent run records tool calls, turns, tokens, wall time, pass or fail, and cost per correct answer.
 30. **Grader cross-check.** Every rubric has Cohen's kappa per Claude model against gold and Fleiss' kappa across the three, and no Claude grader sets a headline score.

@@ -2,7 +2,7 @@
 
 Webular is a web research CLI on Bun. Its jobs run as [Mastra workflows](src/workflows/AGENTS.md) on Effect, with judgment calls sent to [Jev](src/lib/jev/AGENTS.md), TypeSafe's decision model, and flows in [XState](src/machines/AGENTS.md).
 Every command runs through the `mise` task graph in [mise.toml](mise.toml).
-This file is for coding agents. People start at [README.md](README.md).
+This file is for coding agents on any host. People start at [README.md](README.md).
 
 ## Commands and mise
 
@@ -117,5 +117,5 @@ These rules hold for every AGENTS.md below the root. [agents-md.test.ts](tests/q
 7. Citations. A rule from a package or standard links its source as a Markdown `https` link. A package rule names the repo and the pinned tag, such as `effect-ts/effect@effect@4.0.5`. Check: citations.
 8. Wording. Every file states standing facts in plain words, with no time words or version talk outside code spans and citations. Each file goes through the readability chain (rich-and-native-markdown, then human-language). Check: timeless wording, with the patterns from [check-timeless.ts](plugins/webular/scripts/check-timeless.ts).
 9. Change rule. A commit that changes a folder's code, commands, or dependencies updates that folder's AGENTS.md in the same commit.
-10. Bridges. Most agents read AGENTS.md natively (Codex, Copilot, Cursor, and others). Each AGENTS.md has a real CLAUDE.md beside it, never a symlink, holding only `@AGENTS.md`, for Claude Code. [.gemini/settings.json](.gemini/settings.json) points Gemini CLI at AGENTS.md. [.aider.conf.yml](.aider.conf.yml) loads it for Aider. Check: [claude-md-bridges.test.ts](tests/quality/claude-md-bridges.test.ts). Sources: [Claude Code memory](https://code.claude.com/docs/en/memory), [Gemini CLI](https://geminicli.com/docs/cli/gemini-md/), [Aider](https://aider.chat/docs/usage/conventions.html).
+10. Bridges. AGENTS.md is the neutral source; native readers need nothing more. Other hosts get thin adapters: a real CLAUDE.md beside each, never a symlink, holding only `@AGENTS.md`; [.gemini/settings.json](.gemini/settings.json); [.cursor-plugin/](.cursor-plugin/); [.aider.conf.yml](.aider.conf.yml). Check: [claude-md-bridges.test.ts](tests/quality/claude-md-bridges.test.ts). Sources: [Claude Code memory](https://code.claude.com/docs/en/memory), [Gemini CLI](https://geminicli.com/docs/cli/gemini-md/), [Aider](https://aider.chat/docs/usage/conventions.html).
 11. Links. Every mention of an existing repo path is a relative Markdown link from the file that names it. This holds for every file type and for folders. Fenced code blocks, commands such as `mise run build`, globs, and nonexistent example paths are exempt. A `#L` line anchor points at a line that exists. `mise run docs:links` checks it for every tracked Markdown file.

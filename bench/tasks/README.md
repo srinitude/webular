@@ -1,6 +1,6 @@
 # Benchmark tasks
 
-The `private/` folder holds the 30% private split. Git ignores it. To keep a safe copy, store it encrypted outside the repo. The passphrase lives in the macOS Keychain.
+The `private/` folder holds the 30% private split. Git ignores it. To keep a safe copy, store it encrypted outside the repo. The passphrase lives in a macOS Keychain item, which the script reads with the macOS `security` tool, so run it on macOS.
 
 Set licenses are in [LICENSES.md](LICENSES.md). Sources and known limits of the tasks built here are in [SOURCES.md](SOURCES.md).
 
@@ -18,7 +18,7 @@ The command asks you for the passphrase. If the Keychain item is missing, the sc
 bash scripts/bench/tasks/private-crypt.sh encrypt
 ```
 
-This writes `~/.local/share/webular-bench/private.tar.enc`. Add a path to use another file.
+This writes `$HOME/.local/share/webular-bench/private.tar.enc`. Add a path to use another file.
 
 ## Decrypt
 

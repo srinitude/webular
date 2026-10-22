@@ -1,6 +1,6 @@
 # .claude/hooks/AGENTS.md
 
-Claude Code hooks for this repo; the parent [AGENTS.md](../AGENTS.md) says how they are registered.
+Claude Code adapter hooks; the parent [AGENTS.md](../AGENTS.md) says how the hooks are registered.
 
 ## What lives here
 

@@ -1,6 +1,6 @@
 # .claude/AGENTS.md
 
-Claude Code project settings; the root [AGENTS.md](../AGENTS.md) holds the repo-wide rules.
+Adapter for Claude Code, one agent host among several. The neutral repo-wide rules live in the root [AGENTS.md](../AGENTS.md); this folder only wires the Jev docs gate into Claude Code.
 
 ## What lives here
 

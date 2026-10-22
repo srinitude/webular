@@ -56,9 +56,9 @@ Some pages only load in a real browser. agent-browser drives one for those pages
 
 [mise](https://mise.jdx.dev) holds every build, test, and check as a task with its dependencies. A bare `mise run` runs the whole chain.
 
-## The Claude Code plugin and skills
+## The agent plugin and skills
 
-The plugin in [`plugins/webular`](../plugins/webular/) adds the MCP server and skills to Claude Code, so an agent can call webular with no extra setup.
+The plugin in [`plugins/webular`](../plugins/webular/) adds the MCP server and skills to a host that reads plugin marketplaces, such as Claude Code, so an agent can call webular with no extra setup.
 
 ## Read next
 

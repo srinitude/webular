@@ -1,6 +1,6 @@
 # .gemini/AGENTS.md
 
-Gemini CLI settings; the root [AGENTS.md](../AGENTS.md) holds the repo-wide rules.
+Adapter for Gemini CLI, one agent host among several. The neutral repo-wide rules live in the root [AGENTS.md](../AGENTS.md).
 
 ## What lives here
 

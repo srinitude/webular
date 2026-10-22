@@ -1,11 +1,17 @@
 // Guard: each AGENTS.md has a CLAUDE.md beside it that holds only `@AGENTS.md`,
-// as a real file, so Claude Code loads the folder's rules.
+// as a real file, so Claude Code loads the folder's rules; each host adapter
+// points back at the neutral AGENTS.md tree.
 import { describe, expect, test } from 'bun:test'
-import { Effect } from 'effect'
+import { Effect, Schema } from 'effect'
 import { runProc } from '../../src/core/proc.ts'
 import { read } from '../_support/repo-files.ts'
 import { ROOT } from '../_support/root.ts'
 import { eff } from '../_support/run.ts'
+
+// The Gemini CLI adapter points at the same neutral files.
+const GeminiSettings = Schema.fromJsonString(
+  Schema.Struct({ context: Schema.Struct({ fileName: Schema.Array(Schema.String) }) }),
+)
 
 // `git ls-files -s` gives mode, blob, stage, and path; mode 120000 is a symlink.
 const staged = runProc(['git', 'ls-files', '-s', '--', '*AGENTS.md', '*CLAUDE.md'], {
@@ -54,3 +60,13 @@ describe('CLAUDE.md bridges', () => {
     ])
   })
 })
+
+test(
+  'Gemini CLI loads the same AGENTS.md tree',
+  eff(
+    Effect.map(
+      Effect.flatMap(read('.gemini/settings.json'), Schema.decodeUnknownEffect(GeminiSettings)),
+      (s) => expect(s.context.fileName).toEqual(['AGENTS.md']),
+    ),
+  ),
+)

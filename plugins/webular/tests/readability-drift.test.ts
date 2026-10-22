@@ -4,14 +4,15 @@
 // changes, this fails until the webular copy is reviewed and the hash updated.
 // The copy side is pinned too, so a copy edit also needs a reviewed hash, and
 // the copies must be real files that ship inside the plugin, never symlinks.
+// WEBULAR_READABILITY_SOURCES names the readability skills folder; the source
+// side skips when it is unset, and logs a skip when that folder is missing.
 import { expect, test } from 'bun:test'
 import { createHash } from 'node:crypto'
-import { homedir } from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { BunServices } from '@effect/platform-bun'
 import { Effect, FileSystem, Option } from 'effect'
 
-const sources = `${homedir()}/.claude/mods/readability/skills`
+const sources = process.env.WEBULAR_READABILITY_SOURCES
 const copies = fileURLToPath(new URL('../skills', import.meta.url))
 const pinned: Record<string, string> = {
   'human-language': '605c5e4b8f7f55050c49b40be22519b57779b0fb6621fcb6d337cb535e220955',
@@ -51,7 +52,7 @@ const checkSource = (fs: FileSystem.FileSystem, name: string, hash: string) =>
     Effect.option,
     Effect.flatMap(
       Option.match({
-        onNone: () => Effect.logWarning(`skip: no readability source for ${name} on this machine`),
+        onNone: () => Effect.logWarning(`skip: no readability source for ${name} in ${sources}`),
         onSome: (text) =>
           Effect.sync(() => expect(`${name}: ${ruleHash(text)}`).toBe(`${name}: ${hash}`)),
       }),
@@ -63,7 +64,7 @@ const kind = (fs: FileSystem.FileSystem, path: string) =>
   fs.readLink(path).pipe(Effect.match({ onFailure: () => 'file', onSuccess: () => 'link' }))
 
 for (const [name, hash] of Object.entries(pinned))
-  test(`${name} source rules match the pinned hash`, () =>
+  test.skipIf(!sources)(`${name} source rules match the pinned hash`, () =>
     withFs((fs) => checkSource(fs, name, hash)))
 
 for (const [name, hash] of Object.entries(pinnedCopies))
