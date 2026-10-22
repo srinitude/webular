@@ -23,6 +23,7 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   font: var(--body-size) / var(--line-height-body) var(--font-sans);
+  overflow-wrap: break-word;
 }
 /* Amber marks actions and links only. */
 a {
