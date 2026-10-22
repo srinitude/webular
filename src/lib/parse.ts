@@ -3,7 +3,7 @@
 // binary formats we cannot parse fail loudly instead of decoding to garbage.
 import { Config, Data, Effect, Option } from 'effect'
 import { errMsg, logErr } from '../core/output.ts'
-import { htmlToMarkdown, sanitizeHtml } from './html.ts'
+import { htmlToMarkdown } from './html.ts'
 
 type DocFormat = 'pdf' | 'docx' | 'html' | 'md' | 'txt' | 'csv' | 'json'
 
@@ -140,13 +140,11 @@ const parseDocx = Effect.fnUntraced(function* (file: string) {
     mammoth.convertToHtml({ buffer: Buffer.from(buf) }),
   )
   for (const m of messages) yield* logErr(`parse: ${file}: mammoth ${m.type}: ${m.message}`)
-  return htmlToMarkdown(sanitizeHtml(html))
+  return htmlToMarkdown(html)
 })
 
 const parseHtml = (file: string) =>
-  attempt(() => Bun.file(file).text()).pipe(
-    Effect.map((html) => htmlToMarkdown(sanitizeHtml(html))),
-  )
+  attempt(() => Bun.file(file).text()).pipe(Effect.map((html) => htmlToMarkdown(html)))
 
 // Extension checks can be fooled; NUL bytes in the head cannot.
 const parseText = Effect.fnUntraced(function* (file: string) {

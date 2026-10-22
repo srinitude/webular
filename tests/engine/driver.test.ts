@@ -62,6 +62,15 @@ describe('agent-browser blank page', () => {
         expect(yield* htmlFromAgentBrowser('"<head></head><body></body>"')).toBe('')
       }),
     ))
+
+  // Without its root, linkedom reads an empty body and the render's text is lost.
+  test('a render printed without its html root gets the root back', () =>
+    Effect.runPromise(
+      Effect.gen(function* () {
+        const inner = '<head><title>T</title></head><body><p>AURORA-7</p></body>'
+        expect(yield* htmlFromAgentBrowser(JSON.stringify(inner))).toBe(`<html>${inner}</html>`)
+      }),
+    ))
 })
 
 const fakeSteps = (closed: string[], readFails: boolean): Steps => ({

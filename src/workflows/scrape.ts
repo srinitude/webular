@@ -7,7 +7,7 @@ import { Effect } from 'effect'
 import { z } from 'zod'
 import { fetchTextOrArchive } from '../core/archive.ts'
 import { fetchText } from '../core/http.ts'
-import { htmlToMarkdown, parsePage } from '../lib/html.ts'
+import { htmlToMarkdown, pageBodyHtml, parsePage } from '../lib/html.ts'
 import { decisions } from '../lib/jev/decisions.ts'
 import { decisionStep } from '../lib/jev/steps.ts'
 import { stepRuntime } from './runtime.ts'
@@ -76,7 +76,7 @@ const prepareScrape = (input: z.infer<typeof fetched>) => {
   if (input.markdown !== undefined) return { input, page: undefined, article: '', full: '' }
   const page = parsePage(input.html, input.url)
   const article = page.article.contentHtml ? htmlToMarkdown(page.article.contentHtml) : ''
-  return { input, page, article, full: htmlToMarkdown(input.html) }
+  return { input, page, article, full: htmlToMarkdown(pageBodyHtml(input.html)) }
 }
 
 type Prepared = ReturnType<typeof prepareScrape>

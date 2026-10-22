@@ -103,6 +103,21 @@ const PAGE_BOILERPLATE =
   'nav, header, footer, aside, [role=banner], [role=navigation], [role=contentinfo], ' +
   '[class*=cookie], [id*=cookie], [class*=consent], [id*=consent]'
 
+const dropBoilerplate = (body: DomDocument['body']): void => {
+  for (const el of Array.from(body.querySelectorAll(PAGE_BOILERPLATE))) el.remove()
+}
+
+// The whole-page candidate's HTML: the body a reader sees, with hidden text and
+// page chrome gone, cleaned like the non-article path below. htmlToMarkdown
+// sanitizes it.
+export function pageBodyHtml(html: string): string {
+  const { document } = parseHTML(html)
+  if (!document.documentElement || !document.body) return html
+  dropHidden(document.body)
+  dropBoilerplate(document.body)
+  return document.body.innerHTML
+}
+
 // Plain text of a page Readability skips, read from a body dropHidden has
 // already cleared of non-text and hidden elements.
 function bodyText(body: DomDocument['body']): string {
@@ -125,7 +140,7 @@ function articleFrom(document: DomDocument, rawHtml: string): Article {
   // The readerable check skips Readability's scoring pass on non-article pages;
   // those pages still keep their body text.
   if (!isProbablyReaderable(doc)) {
-    for (const el of Array.from(document.body.querySelectorAll(PAGE_BOILERPLATE))) el.remove()
+    dropBoilerplate(document.body)
     return {
       title: docTitle,
       contentHtml: sanitizeHtml(document.body.innerHTML),
@@ -182,6 +197,8 @@ export function extractLinks(html: string, base: string): string[] {
 const turndown = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' })
 addTableRule(turndown)
 
+// Every Markdown path sanitizes here, so no caller can hand Turndown hidden
+// text, script, or style from raw HTML.
 export function htmlToMarkdown(html: string): string {
-  return turndown.turndown(html).trim()
+  return turndown.turndown(sanitizeHtml(html)).trim()
 }

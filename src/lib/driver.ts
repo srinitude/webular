@@ -71,6 +71,8 @@ const decodeQuoted = Schema.decodeUnknownEffect(Schema.fromJsonString(Schema.Str
 
 // agent-browser prints the page raw or as a JSON string; keep only the markup.
 // Markup with no text (a blank render) yields '' so readHtml fails it.
+// `get html html` can print the root's inner markup (`<head>…<body>…`), which
+// linkedom parses into an empty body, so it gets its `<html>` root back.
 export const htmlFromAgentBrowser = (stdout: string) =>
   Effect.map(
     Effect.orElseSucceed(decodeQuoted(stdout.trim()), () => stdout),
@@ -78,7 +80,8 @@ export const htmlFromAgentBrowser = (stdout: string) =>
       const start = text.indexOf('<')
       const end = text.lastIndexOf('>')
       const html = start >= 0 && end > start ? text.slice(start, end + 1) : ''
-      return html.replace(/<[^>]*>/g, '').trim() ? html : ''
+      if (!html.replace(/<[^>]*>/g, '').trim()) return ''
+      return /^<(!doctype|html)/i.test(html) ? html : `<html>${html}</html>`
     },
   )
 
