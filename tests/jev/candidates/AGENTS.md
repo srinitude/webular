@@ -5,6 +5,7 @@ Eval cases for a decision that no code makes yet. The parent rules are in [tests
 ## What lives here
 
 - [`research.sentences.segmenter.json`](research.sentences.segmenter.json) holds the segmenter cases, kept as data for a later try at `research.sentences`.
+- [`answer.figure.json`](answer.figure.json) holds the cases for the `answer` image arm. [answer-figure.eval.test.ts](../answer-figure.eval.test.ts) reads them; no decision owns them, because the arm reuses `image.router`.
 
 ## Rules
 

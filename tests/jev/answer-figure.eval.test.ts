@@ -7,7 +7,7 @@ import { expect, test } from 'bun:test'
 import { Console, Effect, Layer } from 'effect'
 import { answerFigure, figureNote, type LeadSource } from '../../src/lib/answer-figure.ts'
 import { Jev, type JevResult } from '../../src/lib/jev/client.ts'
-import cases from './evals/answer.figure.json'
+import cases from './candidates/answer.figure.json'
 
 type Gold = { kind: 'text'; fact: string } | { kind: 'figure'; src: string }
 type Case = {
