@@ -26,6 +26,7 @@ usage line, the global options, the exit codes, and examples.
 | `audit`     | Reports whether `deepsec` is there, plus a scan plan (keyless; scans need LLM keys) |
 | `act`       | Drives a real browser: open, snapshot, screenshot, interact (agent-browser). With `--goal`, it drives a Cua window (see [Browser mode](cua-browser-mode.md)) |
 | `feed`      | Reads an RSS 2.0 or Atom 1.0 feed and lists its items (title, link, date, summary) |
+| `jev`       | Learns from recorded Jev calls (`learn`), or labels one call as an eval case (`correct`) |
 
 ### Related pages
 

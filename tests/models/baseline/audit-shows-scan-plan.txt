@@ -1,0 +1,1 @@
+{"available":true,"command":"deepsec init && cd .deepsec && deepsec scan","tool":"deepsec"}

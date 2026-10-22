@@ -8,7 +8,7 @@ This folder holds the plugin's tests. The plugin rules are in [AGENTS.md](../AGE
 - Server tests: [`server.test.ts`](server.test.ts), [`http.test.ts`](http.test.ts), [`protocol.test.ts`](protocol.test.ts), [`startup.test.ts`](startup.test.ts), [`partial.test.ts`](partial.test.ts), [`commands.test.ts`](commands.test.ts), and [`cli-features.test.ts`](cli-features.test.ts).
 - Contract tests: [`schemas.test.ts`](schemas.test.ts), [`descriptions.test.ts`](descriptions.test.ts), [`manifests.test.ts`](manifests.test.ts), [`plugin.test.ts`](plugin.test.ts), and [`bundle-fresh.test.ts`](bundle-fresh.test.ts).
 - Eval tests: [`harness.test.ts`](harness.test.ts) and [`jev.test.ts`](jev.test.ts).
-- Skill tests: [`skill-spec.test.ts`](skill-spec.test.ts), [`readability-drift.test.ts`](readability-drift.test.ts), [`readability-lint.test.ts`](readability-lint.test.ts), [`markdown-check.test.ts`](markdown-check.test.ts), [`human-language-evals.test.ts`](human-language-evals.test.ts), and [`markdown-evals.test.ts`](markdown-evals.test.ts).
+- Skill tests: [`skill-tools-sync.test.ts`](skill-tools-sync.test.ts) (the research skill and its tools.md match the registered tools and fields), [`skill-spec.test.ts`](skill-spec.test.ts), [`readability-drift.test.ts`](readability-drift.test.ts), [`readability-lint.test.ts`](readability-lint.test.ts), [`markdown-check.test.ts`](markdown-check.test.ts), [`human-language-evals.test.ts`](human-language-evals.test.ts), and [`markdown-evals.test.ts`](markdown-evals.test.ts).
 - [readability-lint-exempt.json](readability-lint-exempt.json) lists the text that the readability lint skips.
 
 ## Rules

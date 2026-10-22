@@ -43,6 +43,12 @@ real code:
   partial failures.
 - [`fetch.ts`](../src/machines/fetch.ts): the timeout for each attempt, bounded
   retry, same-host redirects, and each failure the fetch layer reports.
+- [`scrape-fallback.ts`](../src/machines/scrape-fallback.ts): the fetch, then a
+  browser render or a PDF read, or a refusal.
+- [`jev-command.ts`](../src/machines/jev-command.ts): the `jev` command's
+  argv parse, its correct and learn paths, and usage errors.
+- [`mcp-serve.ts`](../src/machines/mcp-serve.ts): the stdio serve loop and how
+  it answers a tool call.
 
 ## CLI guidelines
 

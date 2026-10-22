@@ -8,6 +8,7 @@ User and developer docs; the root [AGENTS.md](../AGENTS.md) holds the repo-wide 
 - [`docs/best-practices.md`](best-practices.md): each practice webular follows, with its source and the test that checks it.
 - [`docs/development.md`](development.md), [`docs/build-and-run.md`](build-and-run.md), and [`docs/install.md`](install.md): how to build, test, and install.
 - [`docs/commands.md`](commands.md), [`docs/architecture.md`](architecture.md), [`docs/reliability.md`](reliability.md), and [`docs/cua-browser-mode.md`](cua-browser-mode.md): reference pages.
+- [`docs/jev.md`](jev.md): how to set up the Jev key on any OS, and each route to Jev that webular supports.
 - [docs/benchmarks.md](benchmarks.md): the public benchmark report. Every number in it names the committed result file it comes from.
 
 ## Rules

@@ -6,7 +6,7 @@ Model-based tests for the XState machines in [src/machines/](../../src/machines/
 
 - One machine each: [`fetch.test.ts`](fetch.test.ts), [`policy.test.ts`](policy.test.ts), [`scrape-fallback.test.ts`](scrape-fallback.test.ts), [`command-lifecycle.test.ts`](command-lifecycle.test.ts), [`cli-dispatch.test.ts`](cli-dispatch.test.ts), [`mcp-serve.test.ts`](mcp-serve.test.ts), [`jev-command.test.ts`](jev-command.test.ts).
 - Agent: [`agent.test.ts`](agent.test.ts), [`agent-jev.test.ts`](agent-jev.test.ts), and [`agent-cache.test.ts`](agent-cache.test.ts). Recorded planner answers go through the real `agent.decide()`. The answer cache drops its oldest-used entry at its limit.
-- Coverage: [`flow-coverage.test.ts`](flow-coverage.test.ts) (every path), [`machine-next.test.ts`](machine-next.test.ts).
+- Coverage: [`flow-coverage.test.ts`](flow-coverage.test.ts) (every path), [`machine-next.test.ts`](machine-next.test.ts). [`machine-sync.test.ts`](machine-sync.test.ts) (machine events match the branches in the code).
 
 ## Rules
 

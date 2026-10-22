@@ -26,7 +26,7 @@ Capability code behind the workflows, under [src/AGENTS.md](../AGENTS.md).
 - Each `bun:sqlite` database sets WAL, `synchronous = NORMAL`, and `busy_timeout`, batches writes in one transaction, and opens through `acquireRelease`. On macOS, run `wal_checkpoint(TRUNCATE)` before `close()`, or `-wal` and `-shm` files stay. Use `db.prepare()` for dynamic SQL and `safeIntegers: true` for 64-bit values such as SimHash.
 - Give each parse Worker one permit; `unref` idle Workers. Cap memo caches, with eviction. `Effect.retry` always passes a schedule or `while` matching retryable failures.
 - Readability: `parse()` changes the DOM, so read titles and links first or pass a clone. It returns `null` with no article and never sanitizes. linkedom lacks layout and `documentURI`, so relative links need a `<base href>`.
-- Sanitize HTML before turndown (unverified). Pass unpdf a `Uint8Array`. A PDF read stops at 2,000 pages or 60 seconds (`WEBULAR_PDF_MAX_PAGES`, `WEBULAR_PDF_TIMEOUT_MS`), returning its pages with a truncation note. Treat agent-browser output as untrusted: pass `--content-boundaries`, `--max-output`, `--allowed-domains`.
+- Sanitize HTML before turndown (unverified). Pass unpdf a `Uint8Array`. A PDF read stops at 2,000 pages or 60 seconds (`WEBULAR_PDF_MAX_PAGES`, `WEBULAR_PDF_TIMEOUT_MS`), returning its pages with a truncation note. Treat agent-browser output as untrusted.
 - An unreachable robots.txt (timeout, DNS, refused) means disallow all, crawl root included. Send the webular User-Agent that robots.txt groups match, never a browser one. Source: [RFC 9309](https://www.rfc-editor.org/rfc/rfc9309).
 
 ## Checks

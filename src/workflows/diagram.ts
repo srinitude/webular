@@ -1,5 +1,5 @@
 // DIAGRAM workflow: list the XState machines in src/machines, one per CLI
-// flow (dispatch, command lifecycle, fetch).
+// flow. A file counts only when it builds a machine; the agent files do not.
 import { join } from 'node:path'
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect, FileSystem } from 'effect'
@@ -19,18 +19,15 @@ const diagramListOutput = z.object({
   diagrams: z.array(z.string()),
 })
 
-const listDiagrams = Effect.map(
-  Effect.flatMap(FileSystem.FileSystem, (fs) => fs.readDirectory(MACHINES_DIR)).pipe(
-    Effect.mapError((err) => new CliError({ message: errMsg(err), exitCode: EXIT.failure })),
-  ),
-  (entries) => {
-    const diagrams = entries
-      .filter((f) => f.endsWith('.ts'))
-      .sort()
-      .map((f) => f.replace(/\.ts$/, ''))
-    return { count: diagrams.length, diagrams }
-  },
-)
+const listDiagrams = Effect.gen(function* () {
+  const fs = yield* FileSystem.FileSystem
+  const files = (yield* fs.readDirectory(MACHINES_DIR)).filter((f) => f.endsWith('.ts')).sort()
+  const isMachine = (f: string) =>
+    Effect.map(fs.readFileString(join(MACHINES_DIR, f)), (text) => text.includes('.createMachine('))
+  const flags = yield* Effect.forEach(files, isMachine, { concurrency: 8 })
+  const diagrams = files.filter((_, i) => flags[i]).map((f) => f.replace(/\.ts$/, ''))
+  return { count: diagrams.length, diagrams }
+}).pipe(Effect.mapError((err) => new CliError({ message: errMsg(err), exitCode: EXIT.failure })))
 
 const listStep = createStep({
   id: 'list',

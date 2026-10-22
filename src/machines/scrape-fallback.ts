@@ -1,15 +1,20 @@
 // Scrape fallbacks (src/workflows/scrape-fallback.ts, called from scrape.ts):
-// the plain fetch either returns a page or is refused as a PDF; a page whose
+// robots.txt runs first, and a block (without ignoreRobots) skips the fetch and
+// every fallback; with `archive`, a dead page is served from its Wayback
+// capture; the plain fetch either returns a page or is refused as a PDF; a page whose
 // main text is a script shell renders in the background driver unless render
 // is 'off'; a failed render keeps the fetched page; a refused PDF reads
 // through the parse reader. Final states: the page as fetched (`fetchedPage`,
-// `keptFetched`), the rendered page, the PDF text, or a failure.
+// `keptFetched`), the rendered page, the PDF text, a robots block, or a failure.
+// tests/machines/machine-sync.test.ts ties each event to its branch in the code.
 import { setup } from 'xstate'
 
 export const scrapeFallbackMachine = setup({
   types: {
     events: {} as
+      | { type: 'ROBOTS_BLOCKED' }
       | { type: 'FETCHED' }
+      | { type: 'ARCHIVED' }
       | { type: 'PDF_REFUSED' }
       | { type: 'FETCH_FAILED' }
       | { type: 'STATIC_PAGE' }
@@ -25,7 +30,13 @@ export const scrapeFallbackMachine = setup({
   initial: 'fetching',
   states: {
     fetching: {
-      on: { FETCHED: 'checkingShell', PDF_REFUSED: 'readingPdf', FETCH_FAILED: 'failed' },
+      on: {
+        ROBOTS_BLOCKED: 'robotsBlocked',
+        FETCHED: 'checkingShell',
+        ARCHIVED: 'checkingShell',
+        PDF_REFUSED: 'readingPdf',
+        FETCH_FAILED: 'failed',
+      },
     },
     checkingShell: {
       on: {
@@ -40,6 +51,7 @@ export const scrapeFallbackMachine = setup({
     keptFetched: { type: 'final' },
     rendered: { type: 'final' },
     pdfRead: { type: 'final' },
+    robotsBlocked: { type: 'final' },
     failed: { type: 'final' },
   },
 })

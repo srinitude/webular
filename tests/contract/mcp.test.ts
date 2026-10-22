@@ -11,7 +11,7 @@ import { mcpHostEnv } from '../_support/mcp-env.ts'
 import { ROOT } from '../_support/root.ts'
 import { defaultRoutes } from '../_support/routes.ts'
 import { eff, io } from '../_support/run.ts'
-import { cliFlags, commonFlags } from './_mcp-flags.ts'
+import { cliFlags, commonFlags, flagOf } from './_mcp-flags.ts'
 
 const RSS =
   '<rss version="2.0"><channel><title>F</title><item><title>One</title></item></channel></rss>'
@@ -97,15 +97,16 @@ describe('webular mcp — agent contract over stdio', () => {
     'each command tool takes exactly its CLI flags, plus the paging cursor',
     eff(
       Effect.gen(function* () {
-        const common = yield* commonFlags
+        const common = [...(yield* commonFlags), 'cursor']
         for (const tool of (yield* listed).tools.filter((t) => isCommand(t.name))) {
           const schema = tool.inputSchema as ToolSchema
-          const inputs = Object.keys(schema.properties ?? {}).filter((k) => k !== 'cursor')
+          const inputs = Object.keys(schema.properties ?? {}).map(flagOf)
           const flags = yield* cliFlags(tool.name)
           const extra = inputs.filter((k) => !flags.includes(k) && !common.includes(k))
           const missing = flags.filter((f) => !inputs.includes(f) && !CLI_ONLY[tool.name]?.[f])
           expect([tool.name, extra, missing]).toEqual([tool.name, [], []])
-          for (const key of schema.required ?? []) expect([...flags, ...common]).toContain(key)
+          for (const key of schema.required ?? [])
+            expect([...flags, ...common]).toContain(flagOf(key))
           expect(schema.properties?.['cursor']?.type).toBe('integer')
         }
       }),
