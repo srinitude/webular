@@ -7,7 +7,7 @@ import { Effect } from 'effect'
 import { z } from 'zod'
 import { nameCountry } from '../lib/answer-country.ts'
 import { answerFigure, figureNote, pageImageSchema } from '../lib/answer-figure.ts'
-import { answerPassage } from '../lib/answer-passage.ts'
+import { answerPassage, isSentence } from '../lib/answer-passage.ts'
 import { asOfDate } from '../lib/as-of.ts'
 import { answerSentences } from '../lib/jev/decisions/answer.ts'
 import { citedSources } from '../lib/jev/decisions/answer-citation.ts'
@@ -141,10 +141,9 @@ const prepareSynth = Effect.fn('answer.prepare')(function* (data: Evidence) {
     candidates.length === 0
       ? []
       : yield* onJevRuntime(decisions.answerFollowers, { question: data.query, candidates })
-  const top = [...new Set([...kept.map((i) => candidates[i] ?? ''), ...topSentences(data)])].slice(
-    0,
-    data.sentences,
-  )
+  const top = [...new Set([...kept.map((i) => candidates[i] ?? ''), ...topSentences(data)])]
+    .filter(isSentence)
+    .slice(0, data.sentences)
   const cited = yield* citedSources(top, data.used, (c) =>
     onJevRuntime(decisions.answerCitation, c),
   )
@@ -154,9 +153,11 @@ const prepareSynth = Effect.fn('answer.prepare')(function* (data: Evidence) {
   const sources = figure && lead && !cited.includes(lead) ? [lead, ...cited] : cited
   return { ...data, text, top, cited: sources, figure, asOf: yield* asOfDate }
 })
-// The direct answer Jev picked always opens the answer, never repeated.
+// Jev's direct answer opens the answer, never repeated; a heading line never leads it.
 export const leadFirst = (top: ReadonlyArray<string>, lead: string | undefined, n: number) =>
-  lead === undefined ? [...top] : [lead, ...top.filter((s) => s !== lead)].slice(0, n)
+  lead === undefined || !isSentence(lead)
+    ? [...top]
+    : [lead, ...top.filter((s) => s !== lead)].slice(0, n)
 const synthStep = decisionStep({
   id: 'fetch-and-summarize',
   inputSchema: evidenceSchema,

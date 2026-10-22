@@ -17,6 +17,7 @@ The code gates. The parent rules are in [tests/AGENTS.md](../AGENTS.md). The rul
 - Install: [`installed-deps.test.ts`](installed-deps.test.ts) (each declared package is in this checkout's own `node_modules`, at a version its range allows).
 - Code scorers for search and answer factors:
   - [`date-recency-scorers.test.ts`](date-recency-scorers.test.ts): an output carries an ISO `asOf` that equals the pinned run date, and the top hit falls within the recency window.
+  - [`answer-accuracy.eval.test.ts`](answer-accuracy.eval.test.ts): scores answers on the offline dev set for faithfulness, sure-but-wrong, and no-answer rates.
   - [`search-determinism.test.ts`](search-determinism.test.ts): with `WEBULAR_DETERMINISTIC=1`, the same query on the same recorded sources gives the same ranked hits, however source timing falls.
 
 ## Rules

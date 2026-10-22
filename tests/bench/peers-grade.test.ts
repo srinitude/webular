@@ -34,8 +34,13 @@ describe('length-normalized containment', () => {
     expect(answerAccuracy(task, out('Answer: Paris'))).toBe(1)
   })
 
-  test('no answer field means a containment check cannot pass', () => {
-    expect(answerAccuracy(task, out('Paris'))).toBe(0)
+  test('no answer field means a containment check cannot pass on a search job', () => {
+    expect(answerAccuracy({ ...task, job: 'search' }, out('Paris'))).toBe(0)
+  })
+
+  test('an answer job is graded on a bare answer string, the same for every provider', () => {
+    expect(answerAccuracy(task, out('The capital of France is Paris.'))).toBe(1)
+    expect(answerAccuracy(task, out('The capital of France is Lyon.'))).toBe(0)
   })
 })
 
@@ -68,7 +73,7 @@ describe('judge kappa gate', () => {
   })
 
   test('kappa under 0.8 falls back to containment', () => {
-    expect(run(weak, 'correct', 'Paris')).toBe(0)
+    expect(run(weak, 'correct', 'Lyon')).toBe(0)
     expect(run(weak, 'incorrect', 'Answer: Paris')).toBe(1)
   })
 

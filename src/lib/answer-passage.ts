@@ -36,9 +36,20 @@ const holdsType = (sentence: string, re: RegExp, asked: Set<string>) =>
     m[0].split(/[\s,]+/).some((w) => /^[A-Z]/.test(w) && !asked.has(w.toLowerCase())),
   )
 
+// A sentence ends on terminal punctuation, before any citation markers
+// ("ft).[5]", "1843.[1][2]", or a split left dangling as "in).["). A heading
+// line ("Kestrel Bridge") is no claim and would glue onto the next sentence.
+const citations = /(?:\s*\[[^\]\s]{0,12}\]?)+$/u
+export const isSentence = (s: string) => /[.!?]["')\]]?$/.test(s.trim().replace(citations, ''))
+
+// Word stems, so "opened" matches "open" and "glows" matches "glow".
+// ponytail: suffix strip, not a real stemmer; swap one in if recall needs it.
+const stem = (w: string) => (w.length > 4 ? w.replace(/(?:ing|ed|es|s)$/, '') : w)
+const stems = (s: string) => (s.toLowerCase().match(/[a-z0-9]+/g) ?? []).map(stem)
+
 // Rarer question terms weigh more within the pool (a year beats "award").
 const termScore = (pool: ReadonlyArray<string>, asked: Set<string>) => {
-  const sets = pool.map((s) => new Set(s.toLowerCase().match(/[a-z0-9]+/g) ?? []))
+  const sets = pool.map((s) => new Set(stems(s)))
   const df = (w: string) => sets.filter((set) => set.has(w)).length
   const weight = new Map([...asked].map((w) => [w, Math.log((pool.length + 1) / (df(w) + 1))]))
   return (i: number) => [...weight].reduce((t, [w, v]) => t + (sets[i]?.has(w) ? v : 0), 0)
@@ -51,8 +62,8 @@ interface Focus {
 export function answerPassage(pages: ReadonlyArray<string>, n: number, focus: Focus): string[] {
   const clean = pages.map(stripChrome)
   const lead = clean[0] === undefined ? undefined : leadSentence(clean[0])
-  const pool = summarizeText(clean.join('\n\n'), n * 3, focus).sentences
-  const asked = new Set(focus.query.toLowerCase().match(/[a-z0-9]+/g) ?? [])
+  const pool = summarizeText(clean.join('\n\n'), n * 3, focus).sentences.filter(isSentence)
+  const asked = new Set(stems(focus.query))
   const re = answerType(focus.query)
   const score = termScore(pool, asked)
   const typed = pool

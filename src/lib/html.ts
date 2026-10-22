@@ -65,12 +65,13 @@ export function pageBodyHtml(html: string): string {
   return document.body.innerHTML
 }
 
-// Plain text of a page Readability skips, read from a body dropHidden has
-// already cleared of non-text and hidden elements.
+// Text Readability skips. Block breaks keep headings apart; invisibles go first (\s hits U+FEFF).
 function bodyText(body: DomDocument['body']): string {
   inlineAlts(body)
-  // Invisible characters go first: \s matches U+FEFF, so textOf would turn it into a space.
-  return textOf({ textContent: dropInvisible(body.textContent ?? '') })
+  return dropInvisible(body.textContent ?? '')
+    .replace(/[^\S\n]+/g, ' ')
+    .replace(/ ?\n\s*/g, '\n')
+    .trim()
 }
 
 function articleFrom(document: DomDocument, rawHtml: string): Article {

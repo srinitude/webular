@@ -34,7 +34,7 @@ const LARGE_PX = 280
 const MAX_TEXT = 160
 const MAX_EXCERPT = 1500
 const KIND_WORDS: ReadonlyArray<readonly [ImageKind, RegExp]> = [
-  ['logo', /logo|brand/i],
+  ['logo', /logo|brand|wordmark|tagline/i],
   ['icon', /icon|sprite|avatar|button/i],
   ['chart', /chart|graph|plot|figure|fig\d/i],
   ['table', /table|tbl/i],
@@ -43,6 +43,12 @@ const KIND_WORDS: ReadonlyArray<readonly [ImageKind, RegExp]> = [
 ]
 const kindOf = (file: string): ImageKind =>
   KIND_WORDS.find(([, re]) => re.test(file))?.[0] ?? 'unknown'
+// A site logo, wordmark, or icon: page chrome that never holds an answer. The
+// whole path counts, so a file in an icons folder is an icon.
+export const isSiteMark = (src: string): boolean => {
+  const kind = kindOf(src.split(/[?#]/)[0]?.replace(/^\w+:\/\/[^/]*/, '') ?? '')
+  return kind === 'logo' || kind === 'icon'
+}
 const cut = (s: string): string => s.trim().slice(0, MAX_TEXT)
 
 // image_inventory_build: pure parsing of the fetched <img> records, no judgment.

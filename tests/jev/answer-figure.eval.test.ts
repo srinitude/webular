@@ -62,7 +62,7 @@ test('the text arm passes every baseline-wins case and fails every baseline-lose
 
 test('the image arm holds pass rate and adds no sure-but-wrong answer', () =>
   Effect.runPromise(
-    Effect.forEach(all, imageArm).pipe(
+    Effect.forEach(all, imageArm, { concurrency: 4 }).pipe(
       Effect.map((rows) => ({ before: stats(all.map(textArm)), after: stats(rows) })),
       Effect.tap((r) =>
         Console.log(JSON.stringify({ eval: 'answer.figure', cases: all.length, ...r })),
@@ -74,4 +74,30 @@ test('the image arm holds pass rate and adds no sure-but-wrong answer', () =>
         }),
       ),
     ),
+  ))
+
+const img = (src: string) => ({ src, alt: '', srcset: '', width: '', height: '', caption: '' })
+const wordmark = img('/static/images/mobile/copyright/wikipedia-wordmark-en.svg')
+const tagline = img('/static/images/mobile/copyright/wikipedia-tagline-en.svg')
+const icon = img('https://en.wikipedia.org/static/images/icons/enwiki-25.svg')
+const chart = img('/upload/gold-price-chart.png')
+const jevSays = (ask: (typeof Jev)['Service']['ask']) =>
+  Layer.succeed(Jev)(Jev.of({ available: true, ask }))
+const noJev = jevSays(() => Effect.die('no Jev call expected'))
+const image = { choice: 'image', confidence: 0.99 }
+const routed = jevSays(() =>
+  Effect.succeed({ answers: { route: image, route_swapped: image } } as unknown as JevResult),
+)
+const pick = (images: LeadSource['images'], layer: Layer.Layer<Jev>) =>
+  answerFigure({
+    question: 'atomic number 79?',
+    lead: { url: 'https://en.wikipedia.org/wiki/Gold', text: 'Gold', images },
+  }).pipe(Effect.provide(layer))
+
+test('a site wordmark or logo is never the answer figure', () =>
+  Effect.runPromise(
+    Effect.gen(function* () {
+      expect(yield* pick([wordmark, tagline, icon], noJev)).toBeUndefined()
+      expect((yield* pick([wordmark, tagline, chart], routed))?.src).toBe(chart.src)
+    }),
   ))

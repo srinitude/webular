@@ -64,10 +64,14 @@ export function mediaUrlsFrom(document: DomDocument, pageUrl: string): string[] 
 }
 
 // Swaps each <img alt> for its alt text in place, so page text keeps what the
-// images say ("Revenue 2025: $4.2M") where they sit.
+// images say ("Revenue 2025: $4.2M") where they sit. Each block element then
+// ends with a line break, so minified HTML (`</p><p>`) never glues the last
+// sentence of one paragraph to the next in the page text.
+const BLOCKS = 'p,h1,h2,h3,h4,h5,h6,li,dt,dd,div,br,tr,blockquote,pre,section,article'
 export function inlineAlts(root: Pick<DomDocument['body'], 'querySelectorAll'>): void {
   for (const img of Array.from(root.querySelectorAll('img[alt]'))) {
     const alt = (img.getAttribute('alt') ?? '').trim()
     if (alt) img.replaceWith(` ${alt} `)
   }
+  for (const el of Array.from(root.querySelectorAll(BLOCKS))) el.after('\n')
 }

@@ -5,7 +5,12 @@
 import { Effect } from 'effect'
 import { z } from 'zod'
 import type { PageImage } from './html-images.ts'
-import { imageInventory, type RawImage, routeImages } from './jev/decisions/image-router.ts'
+import {
+  imageInventory,
+  isSiteMark,
+  type RawImage,
+  routeImages,
+} from './jev/decisions/image-router.ts'
 
 export const pageImageSchema = z.object({
   src: z.string(),
@@ -40,8 +45,9 @@ interface FigureInput {
   readonly question: string
   readonly lead: LeadSource | undefined
 }
+// A site logo or wordmark never counts as the answer figure.
 const figureFor = ({ question, lead }: FigureInput) => {
-  const images = lead?.images ?? []
+  const images = (lead?.images ?? []).filter((i) => !isSiteMark(i.src))
   if (lead === undefined || images.length === 0)
     return Effect.succeed<PageImage | undefined>(undefined)
   const input = {

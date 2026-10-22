@@ -2,7 +2,9 @@
 // Plain containment over the whole text rewards long outputs that list many
 // candidates. Here `contains` and `regex` checks look only at the answer field.
 // The spec sets no fixed character window, so there is no first-N rule: text
-// with no answer field cannot pass a containment check.
+// with no answer field cannot pass a containment check. An answer job's output
+// is the answer itself, so for that job bare text is the answer field, for
+// every provider (the webular and Exa adapters return a bare answer string).
 import { Effect, Option, Schema } from 'effect'
 import { buildJudgeInput, type Calibration, type defaultJudge, useJudge } from '../judge.ts'
 import type { Check, RecordedOutput, Task } from './model.ts'
@@ -21,14 +23,14 @@ export const answerField = (text: string): string | undefined =>
   Option.getOrUndefined(Option.map(decodeJson(text.trim()), (v) => v.answer)) ??
   answerLine.exec(text)?.[1]?.trim()
 
-export function gradeCheck(check: Check, out: Out): boolean {
+export function gradeCheck(check: Check, out: Out, bare = false): boolean {
   if (check.kind !== 'contains' && check.kind !== 'regex') return checkPasses(check, out)
-  const answer = answerField(out.text)
+  const answer = answerField(out.text) ?? (bare ? out.text.trim() : undefined)
   return answer !== undefined && checkPasses(check, { text: answer, urls: [] })
 }
 
 export const answerAccuracy = (task: Task, out: Out): number =>
-  task.checks.every((c) => gradeCheck(c, out)) ? 1 : 0
+  task.checks.every((c) => gradeCheck(c, out, task.job === 'answer')) ? 1 : 0
 
 // Blinding: every tool and provider name becomes `[tool]`. The spec's cap is
 // per task and no task sets one, so nothing is cut here.
