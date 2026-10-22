@@ -52,11 +52,22 @@ test('a replayed run fills every arm by model cell, scored or skipped, never fak
   expect(missing(block)).toEqual([])
   const opus = byModel(block)['claude-opus-5-5']
   expect(opus).toContain(
-    'webular-jev-off 0.500 (2 runs, 1 sure-but-wrong, p50 900 ms, 2.0 tool calls, 240 tokens, 0.0200 USD)',
+    'webular-jev-off 0.500 (2 runs, 0 no tool call, 1 sure-but-wrong, p50 900 ms, 2.0 tool calls, 240 tokens, 0.0200 USD)',
   )
   expect(opus).toContain('webular-jev-on skipped: no key;')
   expect(byModel(block)['claude-haiku-5-5']).toContain('exa not run;')
   expect(byModel(block)['claude-haiku-5-5']).toContain('valyu skipped: no agent adapter;')
+})
+
+test('a run that never called the arm tool is no tool call, not sure-but-wrong', () => {
+  const rows = [
+    row('exa', 'claude-opus-5-5', false, {
+      problems: ['never called a exa tool on the peer surface'],
+    }),
+    row('exa', 'claude-opus-5-5', false),
+  ]
+  const exa = byModel(matrixBlock(rows, 'models-x.json', ''))['claude-opus-5-5']
+  expect(exa).toContain('exa 0.000 (2 runs, 1 no tool call, 1 sure-but-wrong,')
 })
 
 test(

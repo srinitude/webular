@@ -493,3 +493,6 @@
 {"path": "tests/core/AGENTS.md", "sha": "7347760e70ed3fb059d0f4c4e564cbc4c7f814572ce1667355b9c5f44ef27fa1"}
 {"path": "tests/engine/AGENTS.md", "sha": "f6e783c55a20bc180791eab619f523e34b2158e0c0d98c1ee6aaf62b7e8622e4"}
 {"path": "tests/cli/AGENTS.md", "sha": "4ed13dd76b2d6aa3127b0cf0363eb476a38fdf567432dc1ef979a539b1803b5b"}
+{"path": "bench/results/models-2026-10-22-015700-1.md", "sha": "3bd07ed54c13848364d014d241a329293f08417a23f4fccbf970b114635313e0"}
+{"path": "README.md", "sha": "1a1ac997ad0c9a9650d6cae1e8cfe76426b182c0c09587ada92f71d26da04253"}
+{"path": "docs/benchmarks.md", "sha": "d8dfe52fa1e0cf5423549847de2bdba17d61d1b0978ff91de2425bc35d122e20"}

@@ -66,9 +66,13 @@ export const pickModelsRun = (names: readonly string[]) =>
 
 const p50 = (xs: number[]) => xs.toSorted((a, b) => a - b)[Math.floor((xs.length - 1) / 2)] ?? 0
 const sum = (xs: number[]) => xs.reduce((a, b) => a + b, 0)
-// A graded miss that came back without a timeout or error: sure, but wrong.
+// The model never called the arm's tool: no graded answer came from it.
+const noTool = (r: MatrixRow) => !r.pass && r.problems.some((p) => p.startsWith('never called'))
+// A graded miss that came back without a timeout, an error, or a missing tool call: sure, but wrong.
 const sureWrong = (r: MatrixRow) =>
-  !r.pass && !r.problems.some((p) => p === 'timed out' || p.startsWith('claude reported'))
+  !r.pass &&
+  !noTool(r) &&
+  !r.problems.some((p) => p === 'timed out' || p.startsWith('claude reported'))
 
 const cell = (rows: readonly MatrixRow[], arm: string, model: string) => {
   const mine = rows.filter((r) => r.model === model && r.provider === arm)
@@ -82,9 +86,10 @@ const cell = (rows: readonly MatrixRow[], arm: string, model: string) => {
   const tokens = sum(ran.map((r) => (r.inputTokens ?? 0) + (r.outputTokens ?? 0)))
   const cost = sum(ran.map((r) => r.costUsd ?? 0)).toFixed(4)
   const calls = (sum(ran.map((r) => r.toolCalls.length)) / ran.length).toFixed(1)
+  const none = ran.filter(noTool).length
   const wrong = ran.filter(sureWrong).length
   const ms = p50(ran.map((r) => r.wallMs))
-  return `${arm} ${score} (${ran.length} runs, ${wrong} sure-but-wrong, p50 ${ms} ms, ${calls} tool calls, ${tokens} tokens, ${cost} USD)`
+  return `${arm} ${score} (${ran.length} runs, ${none} no tool call, ${wrong} sure-but-wrong, p50 ${ms} ms, ${calls} tool calls, ${tokens} tokens, ${cost} USD)`
 }
 
 const cells = (rows: readonly MatrixRow[], model: string) =>
@@ -93,10 +98,22 @@ const cells = (rows: readonly MatrixRow[], model: string) =>
 const source = (name: string | undefined, prefix: string) =>
   name ? `[${name}](${prefix}${name})` : 'no committed agent run'
 
+// Plain sample size, counted from the rows: the most runs in any one cell.
+const sample = (rows: readonly MatrixRow[]) => {
+  const per = new Map<string, number>()
+  for (const r of rows)
+    if (!r.skipped)
+      per.set(`${r.model}/${r.provider}`, (per.get(`${r.model}/${r.provider}`) ?? 0) + 1)
+  const runs = Math.max(0, ...per.values())
+  return runs
+    ? ` Each cell is at most ${runs} runs, one per task, a small sample, so treat a gap of one run as noise.`
+    : ''
+}
+
 // One line per model, naming every arm, so no cell can drop out unseen.
 export const matrixBlock = (rows: readonly MatrixRow[], name: string | undefined, prefix: string) =>
   [
-    `Each line is one agent model, and each entry is one tool arm, from ${source(name, prefix)}. Every cell uses the same tasks, grader, seed, and prompt; only the tool changes. A cell says skipped when its key or its agent adapter is missing.`,
+    `Each line is one agent model, and each entry is one tool arm, from ${source(name, prefix)}. Every cell uses the same tasks, grader, seed, and prompt; only the tool changes. A cell says skipped when its key or its agent adapter is missing. A no tool call run is one where the model never called the arm's tool, so no graded answer came back. Sure-but-wrong counts only graded wrong answers.${sample(rows)}`,
     '',
     ...AGENT_MODELS.map((m) => `- **${m}:** ${cells(rows, m).join('; ')}.`),
   ].join('\n')
