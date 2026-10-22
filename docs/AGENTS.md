@@ -17,7 +17,7 @@ User and developer docs. The root [AGENTS.md](../AGENTS.md) holds the repo-wide 
 - [`docs/benchmarks-peers.md`](benchmarks-peers.md): the full comparison with each peer, and its notes. `mise run bench:docs` writes its numbers.
 - [`docs/scoreboard.md`](scoreboard.md): the scoreboard table, written by `mise run bench:scoreboard`.
 - [`docs/bug-classes.md`](bug-classes.md): each kind of bug webular can hit, where, its guard, and its sources, plus the before-you-merge checklist.
-- [`docs/research/`](research/): the paper ledger and one ranked change list per topic. Its [`README.md`](research/README.md) gives the counts.
+- [`docs/research/`](research/): the paper ledger and one ranked change list per topic. Its [`README.md`](research/README.md) gives the counts. [`docs/research.md`](research.md) marks each ranked change applied, rejected, or open.
 
 ## Rules
 

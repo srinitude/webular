@@ -27,5 +27,6 @@ This page links every doc in this folder. The first group is the best place to b
 - [Mise tasks](tasks.md): every `mise` task, what it does, and what it runs first.
 - [Best practices](best-practices.md): each practice webular follows, with its source and check.
 - [Research ledger](research/README.md): the papers behind webular's design choices, and the ranked changes each topic suggests.
+- [Research status](research.md): how many papers and repos were read, and which ranked changes are applied, rejected, or open.
 - [Jev in webular](jev.md): how to set up the Jev key on any OS, and each route webular takes to Jev for its judgment calls.
 - [Docs rules](AGENTS.md): the rules for writing these pages.

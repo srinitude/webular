@@ -8,6 +8,7 @@ This folder holds the papers behind webular's design choices. Each row says whet
 - [`agents-md-sources.jsonl`](agents-md-sources.jsonl): the sources for how AGENTS.md files are written and loaded, with links and notes.
 - [`verdict-changes.jsonl`](verdict-changes.jsonl): each verdict the full-text pass changed, with `verdict_original`, `verdict`, and the evidence.
 - One ranked change list per topic, listed under [Topics](#topics).
+- [`open-items.md`](open-items.md): each ranked change not in the code, with its next step. [Research status](../research.md) gives the applied, rejected, and open totals.
 
 ## Counts
 
