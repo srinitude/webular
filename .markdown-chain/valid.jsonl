@@ -142,7 +142,7 @@
 {"path": "scripts/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "scripts/bench/AGENTS.md", "sha": "8124734724197e29a8b325a41834e9724cac3cdec4fce6d307837554e89b5318", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "scripts/bench/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
-{"path": "scripts/bench/peers/AGENTS.md", "sha": "cacb07fc8dca936ba5a3a0eabc6192fabf6fdd55eaadc8d5e6181ff7a80c8ee5", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "scripts/bench/peers/AGENTS.md", "sha": "5c077529f54755065c9a60486afc282aa4900a648707b926ae5e6b70da1b3c8f", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "scripts/bench/peers/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "scripts/bench/tasks/AGENTS.md", "sha": "e542aedd31abb368c486687ced5ab4d0649d645c11b07caaa0fd673504d11d2f", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "scripts/bench/tasks/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
