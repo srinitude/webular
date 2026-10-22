@@ -16,7 +16,7 @@ describe('the command line is read per OS', () => {
       'powershell',
       '-NoProfile',
       '-Command',
-      "(Get-CimInstance Win32_Process -Filter 'ProcessId=42').CommandLine",
+      "[Console]::Out.Write((Get-CimInstance Win32_Process -Filter 'ProcessId=42').CommandLine)",
     ])
   })
 })

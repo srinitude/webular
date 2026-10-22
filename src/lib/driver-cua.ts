@@ -120,14 +120,16 @@ export const throwawayProfile = (command: string) => {
   return dir !== undefined && dir !== '' && !DEFAULT_PROFILE.test(dir.replace(/\\/g, '/'))
 }
 
-// Windows has no `ps`; its command line comes from the process table.
+// Windows has no `ps`; its command line comes from the process table. It goes
+// out through [Console]::Out.Write, not PowerShell's formatter, which wraps a
+// long line at the console width and so splits the --user-data-dir path.
 export const commandLineArgv = (os: string, pid: number): [string, ...string[]] =>
   os === 'win32'
     ? [
         'powershell',
         '-NoProfile',
         '-Command',
-        `(Get-CimInstance Win32_Process -Filter 'ProcessId=${pid}').CommandLine`,
+        `[Console]::Out.Write((Get-CimInstance Win32_Process -Filter 'ProcessId=${pid}').CommandLine)`,
       ]
     : ['ps', '-ww', '-o', 'command=', '-p', String(pid)]
 
