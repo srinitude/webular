@@ -19,6 +19,7 @@ import {
 } from './search-source-run.ts'
 import { isNavigational, officialBeside } from './sources/official-sites.ts'
 import { type FreeSource, freeSourceFallback } from './sources/registry.ts'
+import { githubSearch, marginalia } from './sources/web.ts'
 import { type SearchSource, SOURCE_TIMEOUT_MS, sourceSearch } from './sources-search.ts'
 
 // One DuckDuckGo request returns its whole page whatever the limit; fusion
@@ -31,6 +32,8 @@ const one: SourceRunner = (source, query, limit) => {
   if (source === 'crossref') return crossref(query, limit)
   if (source === 'openalex') return openalex(query, limit)
   if (source === 'npm') return npm(query, limit)
+  if (source === 'marginalia') return marginalia(query, limit)
+  if (source === 'github-search') return githubSearch(query, limit)
   if (source === 'web') return webSearch(query, WEB_PAGE)
   return sourceSearch(source, query, limit)
 }

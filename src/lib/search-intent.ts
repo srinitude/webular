@@ -7,11 +7,12 @@ import type { SearchSource } from './sources-search.ts'
 // Free APIs per query intent; scraped engines (web = DuckDuckGo HTML) are the
 // last fallback only, since from this IP they mostly answer 403/429/captcha.
 // Software queries also ask npm, whose package homepages are official sites
-// the other free APIs never return.
+// the other free APIs never return. Marginalia runs only when named: its
+// shared public key answers 429 or times out, holding the fan-out open.
 const SOURCES: Record<Intent, SearchSource[]> = {
   scholarly: ['openalex', 'arxiv', 'crossref', 'wikipedia'],
-  software: ['wikipedia', 'hackernews', 'openalex', 'npm'],
-  general: ['wikipedia', 'hackernews', 'openalex'],
+  software: ['wikipedia', 'hackernews', 'openalex', 'npm', 'github-search'],
+  general: ['wikipedia', 'hackernews', 'openalex', 'github-search'],
 }
 
 // The keyword rule alone: the fallback when Jev is off or under the 0.95 bar.

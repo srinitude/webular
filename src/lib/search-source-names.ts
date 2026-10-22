@@ -8,6 +8,8 @@ export const SEARCH_SOURCES = [
   'crossref',
   'openalex',
   'npm',
+  'marginalia',
+  'github-search',
 ] as const
 export type SearchSource = (typeof SEARCH_SOURCES)[number]
 

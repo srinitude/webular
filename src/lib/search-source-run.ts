@@ -61,7 +61,7 @@ const bestStatus = (outcomes: ReadonlyArray<Outcome>) =>
 // a query that is only filler stay as they are.
 const TRAILING_NAV =
   /(?:\s+(?:official|site|website|homepage|home page|docs?|documentation|library|github))+\s*$/i
-const navCore = (q: string) => (q.trim().endsWith('?') ? q : q.replace(TRAILING_NAV, ''))
+export const navCore = (q: string) => (q.trim().endsWith('?') ? q : q.replace(TRAILING_NAV, ''))
 
 // One source, every query variant at once; the best variant status wins.
 // `hit` fires on the first variant with hits; `cutoff` ends the stragglers.

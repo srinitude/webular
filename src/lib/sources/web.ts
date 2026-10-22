@@ -6,6 +6,7 @@ import { getJson, type Hit, rateLimit, unlessLimited } from './polite.ts'
 
 const Marginalia = Schema.fromJsonString(
   Schema.Struct({
+    license: Schema.optional(Schema.String),
     results: Schema.Array(
       Schema.Struct({
         url: Schema.String,
@@ -29,12 +30,30 @@ const Wikidata = Schema.fromJsonString(
   }),
 )
 
+// MARGINALIA_API_KEY, else the shared "public" key; kept Redacted until sent.
+const marginaliaKey = Config.Redacted('MARGINALIA_API_KEY').pipe(
+  Config.map(Redacted.value),
+  Config.withDefault('public'),
+)
+
+// The data license (CC-BY-NC-SA) rides in each description as attribution.
 export const marginalia = (query: string, limit: number): Effect.Effect<Hit[], unknown> =>
-  getJson(Marginalia, `https://api.marginalia.nu/public/search/${encodeURIComponent(query)}`, {
-    count: String(limit),
-  }).pipe(
-    Effect.map(({ results }) =>
-      results.map((r) => ({ title: r.title, url: r.url, description: r.description ?? '' })),
+  Effect.flatMap(marginaliaKey, (key) =>
+    getJson(
+      Marginalia,
+      'https://api2.marginalia-search.com/search',
+      { query, count: String(limit) },
+      { headers: { 'API-Key': key } },
+    ),
+  ).pipe(
+    Effect.map(({ license, results }) =>
+      results.map((r) => ({
+        title: r.title,
+        url: r.url,
+        description: [r.description, license && `Marginalia, ${license}`]
+          .filter(Boolean)
+          .join(' · '),
+      })),
     ),
   )
 

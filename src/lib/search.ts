@@ -53,12 +53,18 @@ export const webSearch = Effect.fn('webSearch')(function* (query: string, limit:
   return ranked.slice(0, limit)
 })
 
-// Dedupe key: host without www, no trailing slash, no utm_* params, no hash.
+const TRACKING =
+  /^(utm_|fbclid$|gclid$|dclid$|msclkid$|mc_[ce]id$|ref$|ref_src$|igshid$|_ga$|yclid$)/
+const MOBILE_HOST = /^(www|m|amp)\./
+
+// Dedupe key (SearXNG-style): scheme, www./m./amp. host prefix, /amp suffix,
+// trailing slash, tracking params, and hash do not tell two URLs apart.
 export function hitKey(raw: string): string {
   const u = URL.parse(raw)
   if (!u) return raw
-  for (const k of [...u.searchParams.keys()]) if (k.startsWith('utm_')) u.searchParams.delete(k)
-  return `${u.hostname.replace(/^www\./, '')}${u.pathname.replace(/\/+$/, '')}${u.search}`
+  for (const k of [...u.searchParams.keys()]) if (TRACKING.test(k)) u.searchParams.delete(k)
+  const path = u.pathname.replace(/\/amp\/?$/, '').replace(/\/+$/, '')
+  return `${u.hostname.replace(MOBILE_HOST, '')}${path}${u.search}`
 }
 
 const RRF_K = 60
@@ -105,6 +111,8 @@ export function scoreHits<H extends SearchHit>(
       const key = hitKey(hit.url)
       const entry = seen.get(key) ?? { hit, score: domainSignal(hit.url, query) }
       entry.score += 1 / (RRF_K + i + 1)
+      if (hit.description.length > entry.hit.description.length)
+        entry.hit = { ...entry.hit, description: hit.description }
       seen.set(key, entry)
     })
   }

@@ -63,3 +63,10 @@ export const SOURCE_TRUST: Record<FreeSource, number> = {
   reddit: 0.3,
   bluesky: 0.3,
 }
+
+// SOURCE_TERMS, the terms of use and rate limits for the keyless web index
+// (a comment, not an export: no code reads it):
+// - marginalia: about 15 queries a minute, shared by all on the public key; data CC-BY-NC-SA 4.0
+// - github-search: unauthenticated core limit 60 an hour; search 10 a minute
+// - web: DuckDuckGo HTML, terms unclear, so fallback only
+// - mojeek: excluded, its site forbids automation and its API is paid

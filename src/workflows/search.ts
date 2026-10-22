@@ -11,6 +11,7 @@ import { z } from 'zod'
 import { dropPrivateHosts, fuseRanked, searchLocalIndex } from '../lib/local-index.ts'
 import { searchEffect } from '../lib/search-chain.ts'
 import { MAX_VARIANTS } from '../lib/search-source-names.ts'
+import { creatorProducts } from '../lib/sources/creator-products.ts'
 import { FREE_SOURCE_NAMES } from '../lib/sources/registry.ts'
 import { SEARCH_SOURCES } from '../lib/sources-search.ts'
 import { stepRuntime } from './runtime.ts'
@@ -47,10 +48,17 @@ const searchStep = createStep({
   execute: ({ inputData: { query, limit, source, variants } }) =>
     stepRuntime.runPromise(
       Effect.gen(function* () {
-        const web = yield* searchEffect(source, query, limit, { variants: variants ?? [] })
+        // A product named only by its maker comes from Wikidata, beside the web round.
+        const [web, made] = yield* Effect.all(
+          [
+            searchEffect(source, query, limit, { variants: variants ?? [] }),
+            source === 'web' ? creatorProducts(query, limit) : Effect.succeed([]),
+          ],
+          { concurrency: 2 },
+        )
         // Local BM25 hits answer alongside the free APIs: one SQLite query, a few ms.
         const local = yield* searchLocalIndex(query, limit)
-        const fused = yield* dropPrivateHosts(query, fuseRanked([web.results, local]))
+        const fused = yield* dropPrivateHosts(query, fuseRanked([made, web.results, local]))
         const results = fused.slice(0, limit)
         const answered = web.source && { source: web.source }
         return { query, count: results.length, ...answered, results, meta: web.meta }

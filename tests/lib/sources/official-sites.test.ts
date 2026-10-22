@@ -1,7 +1,8 @@
 // Official sites from Wikidata P856 for the Wikipedia articles a navigational
 // search found, against a real local Bun.serve fixture. No network, no mocks.
 import { describe, expect, test } from 'bun:test'
-import { Effect } from 'effect'
+import { Deferred, Effect } from 'effect'
+import { querySource } from '../../../src/lib/search-source-run.ts'
 import {
   isNavigational,
   officialBeside,
@@ -53,7 +54,7 @@ const besideCase = Effect.gen(function* () {
     const official = yield* officialBeside('deno official site', runner, 5)
     yield* official.run('hackernews', 'deno official site', 5)
     yield* official.run('wikipedia', 'deno variant', 5)
-    yield* official.run('wikipedia', 'deno official site', 5)
+    yield* official.run('wikipedia', 'deno', 5)
     return yield* official.take
   })
   const { out } = yield* serving('/sparql', reply, flow)
@@ -65,8 +66,23 @@ const noWikiCase = Effect.gen(function* () {
   expect(yield* official.take).toEqual([])
 })
 
+// The fan-out sends each source the query with its trailing "official website"
+// words cut (querySource); that Wikipedia call must still feed the lookup.
+const navCoreCase = Effect.gen(function* () {
+  const main = 'Deno runtime official website'
+  const flow = Effect.gen(function* () {
+    const official = yield* officialBeside(main, runner, 5)
+    const settle = { hit: yield* Deferred.make<void>(), cutoff: Effect.never }
+    yield* querySource('wikipedia', [main], 5, official.run, settle)
+    return yield* official.take
+  })
+  const { out } = yield* serving('/sparql', reply, flow)
+  expect(out.map((h) => h.url)).toEqual(['https://nodejs.org', 'https://deno.com'])
+})
+
 describe('official sites from Wikidata', () => {
   test('the main query feeds the lookup beside the fan-out', () => run(besideCase), 15_000)
+  test('the fan-out call, trailing nav words cut, feeds the lookup', () => run(navCoreCase), 15_000)
   test('no Wikipedia answer for the main query gives no list', () => run(noWikiCase), 15_000)
   test('maps articles to their first official site, in article order', () => run(sitesCase), 15_000)
   test('a failed lookup gives no list', () => run(failureCase), 15_000)

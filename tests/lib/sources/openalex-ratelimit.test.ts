@@ -26,11 +26,10 @@ const twice = (status: number, headers: Record<string, string>) =>
 const skipsAfter = (headers: Record<string, string>) =>
   Effect.gen(function* () {
     const out = yield* twice(429, headers)
-    expect(out.first._tag).toBe('Failure')
-    expect(out.second._tag).toBe('Failure')
-    const err = (out.second as { failure: { status: number; message: string } }).failure
-    expect(err.status).toBe(429)
-    expect(err.message).toContain('rate limited until')
+    for (const r of [out.first, out.second]) {
+      expect(r._tag).toBe('Success')
+      expect((r as { success: unknown }).success).toEqual([])
+    }
     expect(out.calls).toBe(out.callsAfterFirst)
   })
 

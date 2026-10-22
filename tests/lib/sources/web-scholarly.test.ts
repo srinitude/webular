@@ -35,7 +35,7 @@ const europePmcCase = Effect.gen(function* () {
 
 const marginaliaCase = Effect.gen(function* () {
   const text = yield* body('marginalia-search.json')
-  const routes = { '/public/search/effect%20typescript': () => json(text) }
+  const routes = { '/search': () => json(text) }
   const hits = yield* against(routes, marginalia('effect typescript', 2))
   expect(hits.map((h) => h.url)).toEqual([
     'https://effect.website/docs/',

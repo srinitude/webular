@@ -3,7 +3,7 @@
 // call reads each article's Wikidata official website (P856); those sites form
 // a list in article order, fused like any source list.
 import { Deferred, Effect, Fiber, Option, Schema } from 'effect'
-import type { SourceRunner } from '../search-source-run.ts'
+import { navCore, type SourceRunner } from '../search-source-run.ts'
 import { getJson, type Hit } from './polite.ts'
 
 const NAVIGATIONAL = /\b(official|website|homepage|home page)\b/i
@@ -61,7 +61,8 @@ export const officialSites = (hits: ReadonlyArray<Hit>, limit: number): Effect.E
 const OFFICIAL_WAIT_MS = 200
 
 // The lookup forked beside the fan-out, fed by `runner`'s Wikipedia hits for
-// the main query (never a variant, so one SPARQL call). `take` gives the sites
+// the main query as the fan-out sends it (navCore cuts trailing "official
+// website" words), never a variant, so one SPARQL call. `take` gives the sites
 // when they land within OFFICIAL_WAIT_MS of the fan-out's end, else none.
 export const officialBeside = Effect.fn('officialBeside')(function* (
   main: string,
@@ -72,8 +73,9 @@ export const officialBeside = Effect.fn('officialBeside')(function* (
   const lookup = yield* Effect.forkChild(
     Effect.flatMap(Deferred.await(wiki), (hits) => officialSites(hits, articles)),
   )
+  const sent = navCore(main)
   const run: SourceRunner = (source, query, limit) =>
-    source === 'wikipedia' && query === main
+    source === 'wikipedia' && query === sent
       ? Effect.tap(runner(source, query, limit), (hits) => Deferred.succeed(wiki, hits))
       : runner(source, query, limit)
   const take = Effect.gen(function* () {
