@@ -700,3 +700,7 @@
 {"path": "docs/research.md", "sha": "df1e5c375148c60b5d106f6c0490dfee0d5049bc19acd173767cd9158fa37b64"}
 {"path": "docs/research/open-items.md", "sha": "b2a13fe621ad6d58ff8bc16eeb14e854877d56cd579b3059040b8272d8b9d5b8"}
 {"path": "docs/bug-classes.md", "sha": "78b00428d317b634822a4af0f768674934552432e2633d1d0f5d951694104a01"}
+{"path": "docs/research/open-items.md", "sha": "9c120bd6f2d9ca0d104a90b607f750f693349ca39f73fd1089c0fb70ec7b386d"}
+{"path": "docs/research.md", "sha": "8b6285906a5215573d53f422ae1ed779119e7a75076d21fb0fc1c43f8175fff4"}
+{"path": "docs/bug-classes.md", "sha": "a3897a7a05d42e2fe27abc7404bd278ba201b7e9b79b9388ff8f33ea698c321d"}
+{"path": "scripts/bench/peers/AGENTS.md", "sha": "3cef2fbfee84d131b31436172e0699074f522e4bda24c61d5095390be239d7bc"}

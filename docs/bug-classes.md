@@ -99,9 +99,9 @@ Tasks by class: `bugs:security` (8, 10, 11), `bugs:effect` (4, 7), `bugs:mcp-cli
 
 ## 12. URL and Unicode normalization
 
-- Risk: two code paths that strip tracking params differently give two keys for one page. A bare `ref` can be a real page parameter. Hosts must be compared in punycode form, and text in NFC.
-- Where: [src/core/url.ts](../src/core/url.ts), [src/lib/search.ts](../src/lib/search.ts).
-- Guard: [canonical-url.test.ts](../tests/engine/canonical-url.test.ts), [url.test.ts](../tests/engine/url.test.ts), [search-hitkey.test.ts](../tests/lib/search-hitkey.test.ts), from commits `c2a7b5e0`, `abd12f4a`, and `aa2c1a58`.
+- Risk: two code paths that strip tracking params differently give two keys for one page. A bare `ref` can be a real page parameter. Hosts must be compared in punycode form, and text in NFC. A grader that reads only ASCII digits fails a right answer written as "４２" or "٤٢".
+- Where: [src/core/url.ts](../src/core/url.ts), [src/lib/search.ts](../src/lib/search.ts), [scripts/bench/grade-text.ts](../scripts/bench/grade-text.ts) (every Unicode decimal digit becomes its ASCII digit).
+- Guard: [canonical-url.test.ts](../tests/engine/canonical-url.test.ts), [url.test.ts](../tests/engine/url.test.ts), [search-hitkey.test.ts](../tests/lib/search-hitkey.test.ts), from commits `c2a7b5e0`, `abd12f4a`, and `aa2c1a58`. Digits from any script: the full-width, Arabic-Indic, and Devanagari case in [grade-semantic.test.ts](../tests/bench/grade-semantic.test.ts).
 - Sources: [WHATWG URL](https://url.spec.whatwg.org/); [UTS 46](https://www.unicode.org/reports/tr46/); [UAX 15](https://www.unicode.org/reports/tr15/).
 
 ## 13. Cross-platform paths and home folders

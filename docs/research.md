@@ -39,13 +39,13 @@ An open mark means the search did not find the whole change. It does not prove t
 | --- | ---: | ---: | ---: | ---: | ---: |
 | Retrieval | 14 | 1 | 0 | 13 | 6 |
 | Extraction | 14 | 7 | 0 | 7 | 5 |
-| Answer quality | 10 | 0 | 0 | 10 | 5 |
+| Answer quality | 10 | 1 | 0 | 9 | 4 |
 | Decision models | 13 | 0 | 0 | 13 | 0 |
 | Agents and AGENTS.md | 19 | 3 | 0 | 16 | 4 |
 | Engineering | 18 | 2 | 0 | 16 | 2 |
 | Dependencies top 10 | 10 | 2 | 0 | 8 | 0 |
 | Dependency rows | 77 | 25 | 1 | 51 | 2 |
-| **All** | **175** | **40** | **1** | **134** | **24** |
+| **All** | **175** | **41** | **1** | **133** | **23** |
 
 ## Applied
 
@@ -55,6 +55,7 @@ An open mark means the search did not find the whole change. It does not prove t
 - Extraction #8: a formula keeps its alt text, TeX source, or plain text when MathML is stripped, `src/lib/html-sanitize.ts:78`.
 - Extraction #9: alt text stops at 300 characters, and the image list skips hidden images, `src/lib/html-images.ts:30` and `:38`.
 - Extraction #14: the archive fallback keeps only HTML captures that returned status 200, `src/lib/archive-urls.ts:14`.
+- Answer quality #8: a bench judge that changes 2% or more of its labels on swapped answer order is refused, `scripts/bench/judge.ts:28` and `:62`.
 - Agents #2: the MCP server's directive and worked example, `plugins/webular/src/descriptions.json:3`.
 - AGENTS.md #2 and #6: a short intro with no project map, and nested files under their size caps.
 - Engineering #13: shuffled test order, the `test:shuffled` task in [`mise.toml`](../mise.toml).

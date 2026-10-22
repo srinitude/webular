@@ -39,14 +39,14 @@ The list is [extraction-changes.md](extraction-changes.md).
 
 The list is [answer-quality-changes.md](answer-quality-changes.md).
 
-- #1, partly: count a hedge as not attempted and grade strict, then lenient ([`scripts/bench/grade.ts`](../../scripts/bench/grade.ts)).
+- #1, partly: the grader reads scientific notation, superscripts, and digits from any script, such as "４２" (`scripts/bench/grade-text.ts:19`). Still missing: count a hedge as not attempted, and grade strict, then lenient ([`scripts/bench/grade.ts`](../../scripts/bench/grade.ts)).
 - #2: add a sufficiency and abstain gate to [`src/workflows/answer.ts`](../../src/workflows/answer.ts). This needs a decision-models-first receipt. An abstain line must not count as an unbacked claim in [`tests/_support/citation-score.ts`](../../tests/_support/citation-score.ts).
 - #3: sweep the lead weight and `LAMBDA` in `summarize-rank.ts`.
-- #4, partly: add multi-reference scoring and a verbatim-substring guard ([`scripts/bench/scoreboard-rows.ts`](../../scripts/bench/scoreboard-rows.ts)).
+- #4, partly: a guard checks that each summary sentence is a verbatim substring at its offsets (`tests/commands/summarize-accuracy.test.ts:108`). Still missing: multi-reference scoring ([`scripts/bench/scoreboard-rows.ts`](../../scripts/bench/scoreboard-rows.ts)).
 - #5, partly: the resolution ratio and the smallest detectable gap are in `scripts/bench/stats.ts:129` and `:133`, and the verdict gate uses the ratio. Still missing: show both in each report row, and add a repeated-split bootstrap for a tuned configuration.
 - #6: add a benchmark-host blocklist to [`scripts/bench/run.ts`](../../scripts/bench/run.ts).
 - #7: add a planted-text probe and a URL resolve check to the citation decision.
-- #8, partly: report the judge's flip rate beside the order swap ([`scripts/bench/judge.ts`](../../scripts/bench/judge.ts)).
+- #8, applied: the judge's calibration reports its flip rate on swapped answer order, and a judge that changes 2% or more of its labels is refused (`scripts/bench/judge.ts:28` and `:62`).
 - #9: add a penalty-aware score and canaries to [`scripts/bench`](../../scripts/bench).
 - #10, partly: restate the question, check completeness, and cross-check sources in [`src/workflows/answer.ts`](../../src/workflows/answer.ts).
 
