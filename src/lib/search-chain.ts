@@ -28,6 +28,14 @@ const WEB_PAGE = 30
 // Navigational queries: the official sites of this many top Wikipedia articles.
 const OFFICIAL_ARTICLES = 5
 
+// Known-item rewrite, no model: "what is Bruges" also asks for "Bruges", the
+// entity the free title and repo indexes match. Added only below MAX_VARIANTS.
+const QUESTION_LEAD = /^(?:what|who|where) (?:is|are|was) (?:an? |the )?/i
+export const entityVariant = (query: string) => {
+  const core = query.trim().replace(QUESTION_LEAD, '')
+  return core && core !== query.trim() && !core.endsWith('?') ? [core] : []
+}
+
 const one: SourceRunner = (source, query, limit) => {
   if (source === 'crossref') return crossref(query, limit)
   if (source === 'openalex') return openalex(query, limit)
@@ -94,7 +102,12 @@ const fanOut = Effect.fn('fanOut')(function* (
   limit: number,
   opts: SearchOptions,
 ) {
-  const queries = [query, ...(opts.variants ?? []).slice(0, MAX_VARIANTS)]
+  const variants = (opts.variants ?? []).slice(0, MAX_VARIANTS)
+  const queries = [
+    query,
+    ...variants,
+    ...(variants.length < MAX_VARIANTS ? entityVariant(query) : []),
+  ]
   const official = yield* officialFor(query, opts)
   const runSource = opts.runSource ?? official?.run ?? one
   const hit = yield* Deferred.make<void>()
