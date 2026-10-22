@@ -49,6 +49,8 @@ plugin:typecheck: Plugin: strict TypeScript typecheck of plugins/webular [after 
 prune:check: Prune: knip finds unused files, exports, types, and dependencies from the entry points in knip.json (check-only; fails on any finding) [after docs:tasks:check]
 prune:fix: Prune: apply knip's safe fixes (unused exports, types, dependencies; never files), keep them only if typecheck and the quality tests pass, else undo them. Needs a clean tree; --dry lists what it would remove (off the CI spine) [after setup]
 release:dry: Release dry run: build, then list what `bun pm pack` would publish without writing a tarball (off the CI spine) [after build]
+repo:settings: Apply .github/repo-settings.json (description, homepage, topics) to the GitHub repository; writes to GitHub, so run it on purpose. Off the linear spine [after setup]
+repo:settings:check: Read-only: fails naming each GitHub repository setting that drifted from .github/repo-settings.json. No other task depends on it [after setup]
 run:act: ACT — drive a real browser (open/snapshot/screenshot/interact) via agent-browser [after setup]
 run:answer: ANSWER — grounded answer (search -> fetch -> synthesize) [after setup]
 run:audit: AUDIT — deepsec vulnerability scan of composed tools [after setup]
