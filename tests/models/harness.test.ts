@@ -194,5 +194,5 @@ test('answer --urls is discoverable from the help text and the research skill', 
   ))
 
 test('the agent-mode MCP and plugin servers may reach the 127.0.0.1 fixture', () => {
-  expect(webularEnv('http://127.0.0.1:1', '/t').WEBULAR_ALLOW_PRIVATE).toBe('1')
+  expect(webularEnv('http://127.0.0.1:1', '/t')['WEBULAR_ALLOW_PRIVATE']).toBe('1')
 })
