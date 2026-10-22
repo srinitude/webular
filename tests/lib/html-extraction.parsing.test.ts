@@ -25,6 +25,16 @@ describe('table rule', () => {
     expect(md.split('\n')).toHaveLength(3)
   })
 
+  // Extraction #10: GFM has one header row, so stacked header rows join into
+  // one header-path row and no column loses its parent header.
+  test('two header rows join into one header-path row', () => {
+    const md = htmlToMarkdown(
+      '<table><thead><tr><th rowspan="2">Item</th><th colspan="2">Price</th></tr>' +
+        '<tr><th>2024</th><th>2025</th></tr></thead><tr><td>A</td><td>1</td><td>2</td></tr></table>',
+    )
+    expect(md).toBe('| Item | Price / 2024 | Price / 2025 |\n| --- | --- | --- |\n| A | 1 | 2 |')
+  })
+
   test('a line break inside a cell keeps the words apart', () => {
     const md = htmlToMarkdown('<table><tr><th>h</th></tr><tr><td>a<br>b</td></tr></table>')
     expect(md).toBe('| h |\n| --- |\n| a b |')

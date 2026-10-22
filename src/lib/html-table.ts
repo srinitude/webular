@@ -1,7 +1,8 @@
 // Turndown has no table rule; this one renders <table> as a GFM pipe table.
 // A colspan cell fills its spanned columns with empty cells, a rowspan cell
 // leaves an empty cell in each row below it, and every row is padded to the
-// widest one so GFM drops no cell. A <caption> becomes a line above the table.
+// widest one so GFM drops no cell. A <caption> becomes a line above the table,
+// and stacked header rows join into one header-path row.
 // ponytail: a nested table's text folds into its outer cell.
 import type TurndownService from 'turndown'
 import { dropHidden, dropInvisible } from './html-sanitize.ts'
@@ -18,25 +19,26 @@ const cellText = (cell: Element): string => {
 const spanOf = (cell: Element, attr: string): number =>
   Math.min(Math.max(Number.parseInt(cell.getAttribute(attr) ?? '1', 10) || 1, 1), 100)
 
-// Places each cell in its column grid; `below[c]` counts the rows a rowspan
-// cell above still covers in column c.
-const grid = (rows: Element[]): string[][] => {
-  const below: number[] = []
+// Places each cell in its column grid; `below[c]` holds the rows a rowspan
+// cell above still covers in column c. `spread` repeats a spanned cell's text
+// into every slot it covers, for header paths; otherwise those slots are empty.
+const grid = (rows: Element[], spread = false): string[][] => {
+  const below: { left: number; text: string }[] = []
   return rows.map((tr) => {
     const out: string[] = []
     const skipCovered = () => {
-      for (let left = below[out.length] ?? 0; left > 0; left = below[out.length] ?? 0) {
-        below[out.length] = left - 1
-        out.push('')
+      for (let up = below[out.length]; up && up.left > 0; up = below[out.length]) {
+        up.left -= 1
+        out.push(spread ? up.text : '')
       }
     }
     for (const cell of Array.from(tr.children)) {
       skipCovered()
-      const down = spanOf(cell, 'rowspan') - 1
+      const left = spanOf(cell, 'rowspan') - 1
       const text = cellText(cell)
       for (let i = 0; i < spanOf(cell, 'colspan'); i++) {
-        below[out.length] = down
-        out.push(i === 0 ? text : '')
+        below[out.length] = { left, text }
+        out.push(i === 0 || spread ? text : '')
       }
     }
     skipCovered()
@@ -44,17 +46,30 @@ const grid = (rows: Element[]): string[][] => {
   })
 }
 
+const allHeader = (tr: Element): boolean =>
+  tr.children.length > 0 && Array.from(tr.children).every((c) => c.tagName === 'TH')
+
+// GFM has one header row, so stacked header rows join per column into one
+// header path ("Price / 2024"), each spanned parent repeated over its columns.
+const headerPaths = (heads: Element[], width: number): string[] => {
+  const cells = grid(heads, true)
+  return Array.from({ length: width }, (_, c) =>
+    [...new Set(cells.map((r) => r[c] ?? '').filter(Boolean))].join(' / '),
+  )
+}
+
 const line = (cells: string[], width: number): string =>
   `| ${[...cells, ...Array<string>(width - cells.length).fill('')].join(' | ')} |`
 
 function tableToGfm(node: Element): string {
   // Only this table's own rows: a nested table's rows belong to its cell.
-  const rows = grid(
-    Array.from(node.querySelectorAll('tr')).filter((tr) => tr.closest('table') === node),
-  )
-  const [head, ...body] = rows
-  if (!head) return ''
+  const trs = Array.from(node.querySelectorAll('tr')).filter((tr) => tr.closest('table') === node)
+  const rows = grid(trs)
+  const stacked = trs.findIndex((tr) => !allHeader(tr))
   const width = Math.max(...rows.map((r) => r.length))
+  const [head, ...body] =
+    stacked > 1 ? [headerPaths(trs.slice(0, stacked), width), ...rows.slice(stacked)] : rows
+  if (!head) return ''
   const rule = Array<string>(width).fill('---')
   const caption = Array.from(node.children).find((c) => c.tagName === 'CAPTION')
   const title = caption ? flat(caption) : ''
