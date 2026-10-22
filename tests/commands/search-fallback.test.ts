@@ -76,7 +76,7 @@ const search = (
 
 describe('webular search — free APIs at once for the default web source', () => {
   test(
-    'asks wikipedia, hackernews, openalex together; openalex hits, so DuckDuckGo is skipped',
+    'asks wikipedia, hackernews, openalex, github-search together; openalex hits, so DuckDuckGo is skipped',
     () =>
       search(['--limit', '2'], true, (data, webHits) => {
         expect(webHits).toBe(0)
@@ -85,6 +85,8 @@ describe('webular search — free APIs at once for the default web source', () =
           wikipedia: expect.objectContaining({ status: 'no-results' }),
           hackernews: expect.objectContaining({ status: 'blocked:500' }),
           openalex: expect.objectContaining({ status: 'ok' }),
+          // No route, so it fails; a failed source never adds results.
+          'github-search': expect.objectContaining({ status: 'blocked:404' }),
         })
       }),
     30_000,
