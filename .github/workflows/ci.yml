@@ -119,7 +119,10 @@ jobs:
 
   # musl: the same suite on Alpine, where the linux-*-musl executables run.
   # A docker run on the host (not a job container), because the JavaScript
-  # actions need glibc node and checkout stays on the host.
+  # actions need glibc node and checkout stays on the host. The image ships no
+  # bash, curl, or npm, and its `node` is a bun symlink that fails
+  # `node --version`; the doctor, completion, PKGBUILD, installer, and
+  # platform package tests need the real tools, as on every other runner.
   alpine:
     needs: push-covered-by-pr
     if: ${{ !cancelled() && needs.push-covered-by-pr.outputs.covered != 'true' }}
@@ -132,7 +135,7 @@ jobs:
       - name: Run mise run ci and mise run e2e on Alpine
         run: |
           docker run --rm -v "$PWD:/w" -w /w -e MISE_LOCKED=1 oven/bun:1.4.3-alpine sh -ec '
-            apk add --no-cache git fish mandoc libgcc libstdc++
+            apk add --no-cache git fish mandoc libgcc libstdc++ bash curl nodejs npm
             apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community mise
             git config --global --add safe.directory /w
             mise trust
