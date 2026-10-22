@@ -464,3 +464,5 @@
 {"path": "tests/lib/AGENTS.md", "sha": "2e6e9a8cf7ea771a4b8272aaccfac639d6a1568ef8303f36e678b60700de40bc"}
 {"path": "tests/quality/AGENTS.md", "sha": "0ef4c06b38ee023bda66082b6d4c02cf4878d2f5cef02b12a8aaf0504cdca11e"}
 {"path": "tests/jev/candidates/AGENTS.md", "sha": "47b6637e942781850b3d08d9278618c901c51e8947951bec38b2921793568b4c"}
+{"path": "tests/jev/AGENTS.md", "sha": "eed5e1bab588538438416342f906767e2953ebf76a3dbc6b5a82c8f0d5ec5a91"}
+{"path": "tests/jev/evals/AGENTS.md", "sha": "6f41283d036da6d3d887453f0c8a3b5b75f133acdf75c5767de2d4417f4dacb3"}
