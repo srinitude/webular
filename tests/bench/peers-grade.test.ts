@@ -42,6 +42,12 @@ describe('length-normalized containment', () => {
     expect(answerAccuracy(task, out('The capital of France is Paris.'))).toBe(1)
     expect(answerAccuracy(task, out('The capital of France is Lyon.'))).toBe(0)
   })
+
+  test('a scrape job is graded on the page text it returns, the same for every provider', () => {
+    const scrape = { ...task, job: 'scrape', checks: [{ kind: 'contains', values: ['AURORA-7'] }] }
+    expect(answerAccuracy(scrape as Task, out('# Launch\n\nThe AURORA-7 probe flew.'))).toBe(1)
+    expect(answerAccuracy(scrape as Task, out('# Launch\n\nNo probe named.'))).toBe(0)
+  })
 })
 
 describe('judge blinding', () => {

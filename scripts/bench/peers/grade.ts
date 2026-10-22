@@ -5,6 +5,8 @@
 // with no answer field cannot pass a containment check. An answer job's output
 // is the answer itself, so for that job bare text is the answer field, for
 // every provider (the webular and Exa adapters return a bare answer string).
+// A scrape job asks no question: its output is the page text, so its checks
+// read that text whole, for every provider.
 import { Effect, Option, Schema } from 'effect'
 import { buildJudgeInput, type Calibration, type defaultJudge, useJudge } from '../judge.ts'
 import type { Check, RecordedOutput, Task } from './model.ts'
@@ -30,7 +32,9 @@ export function gradeCheck(check: Check, out: Out, bare = false): boolean {
 }
 
 export const answerAccuracy = (task: Task, out: Out): number =>
-  task.checks.every((c) => gradeCheck(c, out, task.job === 'answer')) ? 1 : 0
+  task.checks.every((c) => gradeCheck(c, out, task.job === 'answer' || task.job === 'scrape'))
+    ? 1
+    : 0
 
 // Blinding: every tool and provider name becomes `[tool]`. The spec's cap is
 // per task and no task sets one, so nothing is cut here.

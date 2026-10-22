@@ -14,7 +14,7 @@ The peer benchmark. It scores webular against other web research tools. The pare
 - [order.ts](order.ts): the seeded arm and task order, with ABBA pairs.
 - [cache.ts](cache.ts): the cache folder for each round, and the `cached` flag.
 - [family.ts](family.ts): paired tests per task family, and the shared-task headline.
-- [grade.ts](grade.ts): the answer-field grader and the judge gate.
+- [grade.ts](grade.ts): the grader and the judge gate. For an answer job, `contains` and `regex` checks read the answer field (a JSON `answer` or an `Answer:` line, else the bare output). A scrape job has no answer field, so those checks read the whole page text. Every peer is graded the same way.
 - [timeout.ts](timeout.ts): the 60 s call timeout, and latency that keeps failed rows.
 - [report.ts](report.ts): the text report.
 - [keys.ts](keys.ts): reads a peer key from the environment, then the macOS Keychain.

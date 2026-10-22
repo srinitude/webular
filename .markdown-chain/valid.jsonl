@@ -708,3 +708,4 @@
 {"path": "docs/scoreboard.md", "sha": "362dc32cb397f8e0ce81e37b8443d308d3eb520056a64f5f8d862b7a6fe6f857"}
 {"path": "docs/benchmarks.md", "sha": "d07ff5eafa11e23b72f224881caf334461d35002aeb381ff2255b33f8b7e8c02"}
 {"path": "README.md", "sha": "d93867360d0283be29a6949c80a19c42d11ca153987868b62bd96c747049c8c4"}
+{"path": "scripts/bench/peers/AGENTS.md", "sha": "1d55712f8fb11962ea68505d182a45d355b3ea4a185414d1d61236624fdec1ba"}
