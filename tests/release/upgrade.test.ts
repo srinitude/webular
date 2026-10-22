@@ -46,7 +46,7 @@ describe('upgradeFor — one command per install channel', () => {
     const got = upgradeFor(['/opt/tools/bin/webular'], { WEBULAR_INSTALL: '/opt/tools' })
     expect(got).toEqual({
       channel: 'install.sh',
-      command: `curl -fsSL ${RELEASES}/download/install.sh | WEBULAR_INSTALL=/opt/tools sh`,
+      command: INSTALL_SH.replace(/\| sh$/, '| WEBULAR_INSTALL=/opt/tools sh'),
     })
   })
 

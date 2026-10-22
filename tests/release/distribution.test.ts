@@ -55,7 +55,7 @@ test('every target has a package, an asset, a checksum line, and an install path
           expect([asset, viaManager]).toEqual([asset, false])
           continue
         }
-        const viaInstaller = target.libc === 'musl' && installer.includes('suffix=-musl')
+        const viaInstaller = target.libc === 'musl' && installer.includes('libc=-musl')
         expect([asset, viaManager || viaInstaller]).toEqual([asset, true])
       }
       expect(brewTargets.length + scoopTargets.length).toBe(

@@ -166,7 +166,7 @@ Browser mode uses agent-browser or Cua; read [Browser mode (Cua)](docs/cua-brows
 
 ## Platforms
 
-Prebuilt binaries cover `darwin-arm64`, `darwin-x64`, `linux-x64`, `linux-arm64`, `linux-x64-musl`, `linux-arm64-musl`, `windows-x64`, and `windows-arm64`. On any other platform, run from source with Bun.
+Prebuilt binaries cover `darwin-arm64`, `darwin-x64`, `linux-x64`, `linux-arm64`, `linux-x64-musl`, `linux-arm64-musl`, `windows-x64`, and `windows-arm64`. Each x64 build has a `-baseline` sibling for CPUs without AVX2: `darwin-x64-baseline`, `linux-x64-baseline`, `linux-x64-musl-baseline`, and `windows-x64-baseline`. The installers pick it for you. On any other platform, run from source with Bun.
 
 ## Troubleshooting
 

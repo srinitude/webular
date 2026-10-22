@@ -4,22 +4,26 @@ Pick one channel. This page lists every supported system, then the install scrip
 
 ## Platforms
 
-Webular ships eight native builds. Every install channel picks the one that fits your machine.
+Webular ships twelve native builds. Every install channel picks the one that fits your machine.
 
 | System | CPU | libc | Build | Installs with | CI tests it |
 |---|---|---|---|---|---|
-| macOS | arm64 | n/a | `darwin-arm64` | npm, Bun, pnpm, Homebrew, `install.sh` | Yes (macOS arm) |
-| macOS | x64 | n/a | `darwin-x64` | npm, Bun, pnpm, Homebrew, `install.sh` | Yes (macOS Intel) |
-| Linux | x64 | glibc | `linux-x64` | npm, Bun, pnpm, Homebrew, `install.sh` | Yes (Ubuntu) |
-| Linux | arm64 | glibc | `linux-arm64` | npm, Bun, pnpm, Homebrew, `install.sh` | Yes (Ubuntu arm) |
+| macOS | arm64 | n/a | `darwin-arm64` | npm, Bun, pnpm, `install.sh` | Yes (macOS arm) |
+| macOS | x64 | n/a | `darwin-x64` | npm, Bun, pnpm, `install.sh` | Yes (macOS Intel) |
+| macOS | x64, no AVX2 | n/a | `darwin-x64-baseline` | npm, Bun, pnpm, `install.sh` | No |
+| Linux | x64 | glibc | `linux-x64` | npm, Bun, pnpm, `install.sh` | Yes (Ubuntu) |
+| Linux | x64, no AVX2 | glibc | `linux-x64-baseline` | npm, Bun, pnpm, `install.sh` | No |
+| Linux | arm64 | glibc | `linux-arm64` | npm, Bun, pnpm, `install.sh` | Yes (Ubuntu arm) |
 | Linux | x64 | musl | `linux-x64-musl` | npm, Bun, pnpm, `install.sh` | Yes (Alpine container) |
+| Linux | x64, no AVX2 | musl | `linux-x64-musl-baseline` | npm, Bun, pnpm, `install.sh` | No |
 | Linux | arm64 | musl | `linux-arm64-musl` | npm, Bun, pnpm, `install.sh` | Release smoke test only (Alpine on Ubuntu arm) |
-| Windows | x64 | n/a | `windows-x64` | npm, Bun, pnpm, Scoop, winget, `install.ps1` | Yes (Windows x64) |
-| Windows | arm64 | n/a | `windows-arm64` | npm, Bun, pnpm, Scoop, winget, `install.ps1` | Yes (Windows arm) |
+| Windows | x64 | n/a | `windows-x64` | npm, Bun, pnpm, `install.ps1` | Yes (Windows x64) |
+| Windows | x64, no AVX2 | n/a | `windows-x64-baseline` | npm, Bun, pnpm, `install.ps1` | No |
+| Windows | arm64 | n/a | `windows-arm64` | npm, Bun, pnpm, `install.ps1` | Yes (Windows arm) |
 
 - **WSL** is Linux. Use the Linux commands inside it: npm, Bun, pnpm, or `install.sh`. WSL has no macOS Keychain, so set the key with an environment variable.
-- **No AVX2.** The x64 builds run on every x64 CPU, including CPUs without AVX2, because the runtime picks its code paths when it starts. There is no separate build to choose.
-- **Rosetta** on Apple silicon gets the native arm64 build. **musl** (Alpine) has no Homebrew build, so use npm or `install.sh`.
+- **No AVX2.** Each x64 build has a `-baseline` sibling for CPUs without AVX2. The installers and the npm launcher pick it on their own when the CPU lacks AVX2. Set `WEBULAR_BASELINE=1` to force it.
+- **Rosetta** on Apple silicon gets the native arm64 build.
 - **Other systems** (32-bit, FreeBSD, and so on) have no build. Run from source as described in [Build and run](build-and-run.md).
 
 ### Features that work only on some systems
@@ -64,31 +68,6 @@ Bun needs Node on your PATH too, because the launcher starts with a Node shebang
 ### From GitHub Packages
 
 Each release also goes to the GitHub Packages npm registry as `@srinitude/webular`. GitHub asks for a token to install from it, even for public packages: a personal access token (classic) with the `read:packages` scope. Add `@srinitude:registry=https://npm.pkg.github.com` and `//npm.pkg.github.com/:_authToken=TOKEN` to `~/.npmrc`, with your token in place of `TOKEN`. Then run `npm i -g @srinitude/webular`.
-
-## Homebrew
-
-Homebrew works on macOS and glibc Linux, including WSL with a glibc distro.
-
-```bash
-brew install srinitude/webular/webular
-```
-
-## Scoop
-
-Scoop works on Windows, x64 and arm64.
-
-```powershell
-scoop bucket add webular https://github.com/srinitude/scoop-webular
-scoop install webular
-```
-
-## winget
-
-winget works on Windows once the manifest pull request to `microsoft/winget-pkgs` merges.
-
-```powershell
-winget install Srinitude.Webular
-```
 
 ## Set your Jev key
 

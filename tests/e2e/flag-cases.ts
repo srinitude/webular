@@ -29,4 +29,25 @@ export const FLAG_CASES: CliCase[] = [
     maxMs: 8000,
   },
   { name: 'scrape help', cmd: 'scrape', args: ['--help'], maxChars: 2000, maxMs: 3000 },
+  { name: 'completions zsh', cmd: 'completions', args: ['zsh'], maxChars: 15000, maxMs: 3000 },
+  {
+    name: 'completions shell flag',
+    cmd: 'completions',
+    args: ['--shell', 'bash'],
+    maxChars: 10000,
+    maxMs: 3000,
+  },
+  // A closed port stands in for the release feed: upgrade fails before any installer runs.
+  ...[[], ['--yes']].map(
+    (args): CliCase => ({
+      name: `upgrade ${args.join(' ') || 'check'} offline`,
+      cmd: 'upgrade',
+      args,
+      code: 1,
+      err: 'upgrade:',
+      maxChars: 400,
+      maxMs: 5000,
+      env: { WEBULAR_LATEST_URL: 'http://127.0.0.1:9/latest' },
+    }),
+  ),
 ]

@@ -17,6 +17,26 @@ const BINARY = 'MZ fixture-ok\n'
 const sha256 = (text: string) => new Bun.CryptoHasher('sha256').update(text).digest('hex')
 const windowsX64 = TARGETS.find((target) => target.os === 'win32' && target.cpu === 'x64')
 
+// Runs install.ps1 for windows-x64 from `base` into `home`; yields its exit code.
+const runInstaller = (base: string, home: string) =>
+  Effect.gen(function* () {
+    const spawner = yield* ChildProcessSpawner.ChildProcessSpawner
+    return yield* spawner.exitCode(
+      ChildProcess.make('pwsh', ['-NoProfile', '-File', `${ROOT}scripts/install.ps1`], {
+        env: {
+          WEBULAR_BASE_URL: base,
+          WEBULAR_INSTALL: home,
+          WEBULAR_OS: 'windows',
+          WEBULAR_ARCH: 'x64',
+          WEBULAR_NO_MODIFY_PATH: '1',
+        },
+        extendEnv: true,
+        stdout: 'ignore',
+        stderr: 'ignore',
+      }),
+    )
+  })
+
 const install = (sum: string, baseFor: (dir: string) => string) =>
   Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem
@@ -29,21 +49,7 @@ const install = (sum: string, baseFor: (dir: string) => string) =>
     const asset = assetName(windowsX64)
     yield* fs.writeFileString(`${dir}/${asset}`, BINARY)
     yield* fs.writeFileString(`${dir}/SHA256SUMS`, `${sum}  ${asset}\n`)
-    const spawner = yield* ChildProcessSpawner.ChildProcessSpawner
-    const code = yield* spawner.exitCode(
-      ChildProcess.make('pwsh', ['-NoProfile', '-File', `${ROOT}scripts/install.ps1`], {
-        env: {
-          WEBULAR_BASE_URL: baseFor(dir),
-          WEBULAR_INSTALL: `${dir}/home`,
-          WEBULAR_OS: 'windows',
-          WEBULAR_ARCH: 'x64',
-          WEBULAR_NO_MODIFY_PATH: '1',
-        },
-        extendEnv: true,
-        stdout: 'ignore',
-        stderr: 'ignore',
-      }),
-    )
+    const code = yield* runInstaller(baseFor(dir), `${dir}/home`)
     const exe = `${dir}/home/bin/webular.exe`
     const installed = (yield* fs.exists(exe)) ? yield* fs.readFileString(exe) : undefined
     return { code: Number(code), installed }
@@ -134,3 +140,56 @@ withPwsh(
     ),
   PWSH_TIMEOUT,
 )
+
+// Runs the installer with env and returns its exit code and combined output.
+const run = (env: Record<string, string>) =>
+  Effect.gen(function* () {
+    const spawner = yield* ChildProcessSpawner.ChildProcessSpawner
+    const command = ChildProcess.make('pwsh', ['-NoProfile', '-File', SCRIPT], {
+      env: { WEBULAR_OS: 'windows', ...env },
+      extendEnv: true,
+    })
+    const output = yield* spawner.string(command, { includeStderr: true })
+    const code = yield* spawner.exitCode(command)
+    return { code: Number(code), output: output.trim() }
+  }).pipe(Effect.scoped)
+
+withPwsh(
+  'refuses a version that is not N.N.N before any download',
+  () =>
+    runtime.runPromise(
+      Effect.map(
+        run({
+          WEBULAR_ARCH: 'x64',
+          WEBULAR_VERSION: '1.2',
+          WEBULAR_BASE_URL: 'https://127.0.0.1:9',
+        }),
+        ({ code, output }) => {
+          expect(code).not.toBe(0)
+          expect(output).toContain("bad version '1.2'")
+        },
+      ),
+    ),
+  PWSH_TIMEOUT,
+)
+
+// Each row: WEBULAR_ARCH, then the asset a dry run prints.
+const ASSET_CHOICES: readonly (readonly [string, string])[] = [
+  ['x64', 'webular-windows-x64.exe'],
+  ['AMD64', 'webular-windows-x64.exe'],
+  ['arm64', 'webular-windows-arm64.exe'],
+  ['ARM64', 'webular-windows-arm64.exe'],
+]
+
+for (const [arch, expected] of ASSET_CHOICES) {
+  withPwsh(
+    `picks ${expected} for arch ${arch}`,
+    () =>
+      runtime.runPromise(
+        Effect.map(run({ WEBULAR_ARCH: arch, WEBULAR_PRINT_ASSET: '1' }), ({ code, output }) => {
+          expect({ code, output }).toEqual({ code: 0, output: expected })
+        }),
+      ),
+    PWSH_TIMEOUT,
+  )
+}

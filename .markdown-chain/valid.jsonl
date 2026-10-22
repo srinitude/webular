@@ -274,3 +274,17 @@
 {"path": ".github/workflows/AGENTS.md", "sha": "b619e6f88692f294b2fa80f3974b87faf912146efb7b475c16712993178e8e31", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/tasks.md", "sha": "8011765b5fd9b4c17ccdabe2a163fc2656ab7135acb85e6693952f9a8524acd5", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/ci/AGENTS.md", "sha": "ec8de6efde666f9be042edd2743378dcf9802ecc99265bd0b3daec6264843157", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/AGENTS.md", "sha": "d090e0d23b20c9de8d16fc2e2c22b69579df76b6811d2a807b764e04f3314cc0", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/README.md", "sha": "dec70562fc4a2a497e0e91eb1e299ca150101bacfbccba0d1779186acf038be6", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/commands.md", "sha": "8824a43c2f6508055349c26e212bdceed9b3bab4cbe0b37146d0b299e5bf2c59", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/install-script.md", "sha": "f651cd3282d78286d6cb00ad1994e95dfb620c8fa144ae8c719a91eb5b8a5e06", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "src/release/AGENTS.md", "sha": "d9a48d0d05bb744cb5bf5ba38c26c639fc12ca04fb03fba152a91e3d2c6e261a", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "tests/core/AGENTS.md", "sha": "4e923789eb6db18b775a7d95f0b05e419860cacc098048fda2660988fd520789", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "tests/release/AGENTS.md", "sha": "83efafc65ddd25dd6ecc3a4d85f72eefd1c52ecfbdad4926b37812dd17e427b8", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/tasks.md", "sha": "aaebce0a3f3691d2acb522c9c2d5fc38ec66e5cd67349b626584e367e89333f2", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "src/cli/AGENTS.md", "sha": "9e2be58e23077b739c9923533b8e1ed3b1d50cec4e115c2d6c72f4918444f009", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "src/core/AGENTS.md", "sha": "4f8146147e294fb0ee1fed052bf499ffc66f1af64efa9a3dfec67b32da534380", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/install.md", "sha": "c0ff51afa8676384291474431a0e3b08d66929b4a1fdc2542dbd6b46fb148225", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/install-more.md", "sha": "607f012220952b0d172292da95549405c3add8d8fe514d8662c2734dc1af7396", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "README.md", "sha": "99fee16d330b7192204913f557948427249d9a032cfa50fc4f2b111ccd834637", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "src/lib/AGENTS.md", "sha": "e23e470d39258382d7b633243857f45e30d9b373e2219fced418e526622788af", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}

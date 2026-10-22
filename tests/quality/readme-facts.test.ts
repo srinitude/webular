@@ -38,6 +38,8 @@ const truth = Effect.gen(function* () {
   // Env reads: process.env['X'] / env.X, and Effect Config constructors
   // (Config.String('X'), Config.Redacted('X'), ...) or a setting('X') helper.
   const envRead = /(?:env\[['"]|env\.|Config\.[A-Z]\w*\(\s*'|\bsetting\(\s*')([A-Z][A-Z0-9_]+)/g
+  // install.sh reads its own settings as ${WEBULAR_X:-...}, and the install docs name them.
+  const installer = all(yield* read('scripts/install.sh'), /\$\{(WEBULAR_[A-Z0-9_]+)/g)
   const flags = [
     ...all(src, /^\s+'?([a-z][a-z0-9-]*)'?: \{ type: '(?:string|boolean)'/gm),
     ...all(src, /(?<![\w-])--([a-z][a-z0-9-]*)/g),
@@ -46,7 +48,7 @@ const truth = Effect.gen(function* () {
     commands: new Set(Object.keys(COMMANDS)),
     flags: new Set(flags),
     tools: mcpToolIds.length,
-    env: new Set([...all(src, envRead), ...all(plugin, envRead)]),
+    env: new Set([...all(src, envRead), ...all(plugin, envRead), ...installer]),
     platforms: new Set(all(yield* read('mise.toml'), /--target=bun-([a-z0-9-]+)/g)),
     installs: new Map([
       ['npm', pkg.name],

@@ -5,6 +5,7 @@
 # WEBULAR_VERSION=<x.y.z> pins a release (a baked copy pins its own release and
 # checks the sums baked into it). WEBULAR_BASE_URL replaces the download folder
 # (an https:// URL, a file:// URL, or a local folder; http:// is refused).
+# WEBULAR_PRINT_ASSET=1 prints the asset name and stops.
 # WEBULAR_BASELINE=1 picks the -baseline x64 asset (chosen on its own without AVX2).
 # WEBULAR_NO_MODIFY_PATH=1 leaves PATH alone. WEBULAR_UNINSTALL=1 removes the
 # program and its PATH entry. WEBULAR_VERIFY_ATTESTATION=1 also runs
@@ -38,8 +39,8 @@ __WEBULAR_SUMS__
       }
     } catch {
       $status = try { [int]$_.Exception.Response.StatusCode } catch { 0 }
-      if ($status -eq 404 -and $ver) { Fail "release v$ver not found" }
-      Fail "download failed: $base/$name"
+      if ($status -eq 404 -and $ver) { Fail "release v$ver not found; see https://github.com/$repo/releases" }
+      Fail "download failed: $base/$name; check your network, then run the installer again"
     }
     $out
   }
@@ -52,7 +53,7 @@ __WEBULAR_SUMS__
         return $field[0].ToLowerInvariant()
       }
     }
-    Fail "no checksum for $asset"
+    Fail "no checksum for $asset; download the release again or report it at https://github.com/$repo/issues"
   }
 
   # Adds or removes $dir in the user PATH, keeping the REG_EXPAND_SZ type.
@@ -111,11 +112,12 @@ __WEBULAR_SUMS__
     $arch = Get-Arch
     $asset = "webular-windows-$arch.exe"
     if ($arch -eq 'x64' -and (Use-Baseline)) { $asset = 'webular-windows-x64-baseline.exe' }
+    if ($env:WEBULAR_PRINT_ASSET -eq '1') { Write-Output $asset; return }
 
     $ver = if ($env:WEBULAR_VERSION) { $env:WEBULAR_VERSION } elseif ($baked) { $DefaultVersion }
     if ($ver) {
       $ver = $ver -replace '^v', ''
-      if ($ver -notmatch '^\d+\.\d+\.\d+$') { Fail "bad version '$ver'; use <x.y.z>" }
+      if ($ver -notmatch '^\d+\.\d+\.\d+$') { Fail "bad version '$ver'; use <x.y.z>, for example from https://github.com/$repo/releases" }
     }
     $base = $env:WEBULAR_BASE_URL
     if (-not $base) {
@@ -131,12 +133,12 @@ __WEBULAR_SUMS__
     $sums = if ($useBaked) { $BakedSums } else { Get-Content -Raw -LiteralPath (Fetch 'SHA256SUMS') }
     $want = Get-Sha256Entry $sums $asset
     $got = (Get-FileHash -Algorithm SHA256 -LiteralPath $file).Hash.ToLowerInvariant()
-    if ($got -ne $want) { Fail "checksum mismatch for $asset (want $want, got $got)" }
+    if ($got -ne $want) { Fail "checksum mismatch for $asset (want $want, got $got); do not run it, and report it at https://github.com/$repo/blob/main/SECURITY.md" }
 
     if ($env:WEBULAR_VERIFY_ATTESTATION -eq '1') {
-      if (-not (Get-Command gh -ErrorAction SilentlyContinue)) { Fail 'WEBULAR_VERIFY_ATTESTATION=1 needs gh' }
+      if (-not (Get-Command gh -ErrorAction SilentlyContinue)) { Fail 'WEBULAR_VERIFY_ATTESTATION=1 needs gh; install it from https://cli.github.com, run `gh auth login`, then try again' }
       gh attestation verify $file --repo $repo --signer-workflow "$repo/.github/workflows/release.yml" | Out-Host
-      if ($LASTEXITCODE -ne 0) { Fail 'attestation check failed' }
+      if ($LASTEXITCODE -ne 0) { Fail "attestation check failed; do not run it. See https://github.com/$repo/blob/main/SECURITY.md" }
     }
 
     New-Item -ItemType Directory -Force -Path $dir | Out-Null
