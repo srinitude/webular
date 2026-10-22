@@ -7,7 +7,7 @@ import { Effect } from 'effect'
 import { z } from 'zod'
 import { nameCountry } from '../lib/answer-country.ts'
 import { answerFigure, figureNote, pageImageSchema } from '../lib/answer-figure.ts'
-import { answerPassage, isSentence } from '../lib/answer-passage.ts'
+import { answerPassage, isHeading, isSentence } from '../lib/answer-passage.ts'
 import { asOfDate } from '../lib/as-of.ts'
 import { answerSentences } from '../lib/jev/decisions/answer.ts'
 import { citedSources } from '../lib/jev/decisions/answer-citation.ts'
@@ -155,7 +155,7 @@ const prepareSynth = Effect.fn('answer.prepare')(function* (data: Evidence) {
 })
 // Jev's direct answer opens the answer, never repeated; a heading line never leads it.
 export const leadFirst = (top: ReadonlyArray<string>, lead: string | undefined, n: number) =>
-  lead === undefined || !isSentence(lead)
+  lead === undefined || isHeading(lead)
     ? [...top]
     : [lead, ...top.filter((s) => s !== lead)].slice(0, n)
 const synthStep = decisionStep({

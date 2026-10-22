@@ -42,6 +42,9 @@ const holdsType = (sentence: string, re: RegExp, asked: Set<string>) =>
 // line ("Kestrel Bridge") is no claim and would glue onto the next sentence.
 const citations = /(?:\s*\[[^\]\s]{0,12}\]?)+$/u
 export const isSentence = (s: string) => /[.!?]["')\]]?$/.test(s.trim().replace(citations, ''))
+// A heading starts with a capital and has no end mark; a lowercase fragment
+// ("c", a cut tail) is no heading, so it may still lead.
+export const isHeading = (s: string) => !isSentence(s) && /^\p{Lu}/u.test(s.trim())
 
 // Word stems, so "opened" matches "open" and "glows" matches "glow".
 // ponytail: suffix strip, not a real stemmer; swap one in if recall needs it.
