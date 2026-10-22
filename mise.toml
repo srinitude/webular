@@ -32,7 +32,7 @@ bun = "{{ get_env(name='WEBULAR_BUN', default='bun') }}"
 commands = "{% if get_env(name='WEBULAR_DEV', default='') != '' %}src{% else %}dist{% endif %}/commands"
 ext = "{% if get_env(name='WEBULAR_DEV', default='') != '' %}ts{% else %}js{% endif %}"
 # Listed, not globbed: the Windows task shell does not expand globs.
-entries = '"{{config_root}}/src/commands/act.ts" "{{config_root}}/src/commands/answer.ts" "{{config_root}}/src/commands/audit.ts" "{{config_root}}/src/commands/batch.ts" "{{config_root}}/src/commands/crawl.ts" "{{config_root}}/src/commands/diagram.ts" "{{config_root}}/src/commands/doctor.ts" "{{config_root}}/src/commands/extract.ts" "{{config_root}}/src/commands/feed.ts" "{{config_root}}/src/commands/jev.ts" "{{config_root}}/src/commands/map.ts" "{{config_root}}/src/commands/mcp.ts" "{{config_root}}/src/commands/media.ts" "{{config_root}}/src/commands/monitor.ts" "{{config_root}}/src/commands/parse.ts" "{{config_root}}/src/commands/research.ts" "{{config_root}}/src/commands/scrape.ts" "{{config_root}}/src/commands/search.ts" "{{config_root}}/src/commands/summarize.ts" "{{config_root}}/src/commands/tasks.ts" "{{config_root}}/src/lib/parse-worker.ts"'
+entries = '"{{config_root}}/src/commands/act.ts" "{{config_root}}/src/commands/answer.ts" "{{config_root}}/src/commands/audit.ts" "{{config_root}}/src/commands/batch.ts" "{{config_root}}/src/commands/crawl.ts" "{{config_root}}/src/commands/diagram.ts" "{{config_root}}/src/commands/doctor.ts" "{{config_root}}/src/commands/extract.ts" "{{config_root}}/src/commands/feed.ts" "{{config_root}}/src/commands/jev.ts" "{{config_root}}/src/commands/map.ts" "{{config_root}}/src/commands/mcp.ts" "{{config_root}}/src/commands/media.ts" "{{config_root}}/src/commands/monitor.ts" "{{config_root}}/src/commands/parse.ts" "{{config_root}}/src/commands/research.ts" "{{config_root}}/src/commands/scrape.ts" "{{config_root}}/src/commands/search.ts" "{{config_root}}/src/commands/summarize.ts" "{{config_root}}/src/commands/tasks.ts" "{{config_root}}/src/commands/upgrade.ts" "{{config_root}}/src/commands/completions.ts" "{{config_root}}/src/lib/parse-worker.ts"'
 
 # ───────────────────────── Quality / CI spine ─────────────────────────
 # Single linear default dependency path. Each task depends on exactly one
@@ -411,6 +411,16 @@ run = '"{{vars.bun}}" "{{config_root}}/{{vars.commands}}/feed.{{vars.ext}}"'
 description = "JEV — learn from recorded Jev calls, or label one call as an eval case"
 depends = ["setup"]
 run = '"{{vars.bun}}" "{{config_root}}/{{vars.commands}}/jev.{{vars.ext}}"'
+
+[tasks."run:upgrade"]
+description = "UPGRADE — print (or with --yes, run) the command that upgrades this install"
+depends = ["setup"]
+run = '"{{vars.bun}}" "{{config_root}}/{{vars.commands}}/upgrade.{{vars.ext}}"'
+
+[tasks."run:completions"]
+description = "COMPLETIONS — print the shell completion script for bash, zsh, fish, or powershell"
+depends = ["setup"]
+run = '"{{vars.bun}}" "{{config_root}}/{{vars.commands}}/completions.{{vars.ext}}"'
 
 # ───────────────────────── Agent plugin (plugins/webular) ─────────────────────────
 

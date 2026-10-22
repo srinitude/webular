@@ -5,7 +5,7 @@ import { describe, expect, test } from 'bun:test'
 import { upgradeFor } from '../../src/release/upgrade.ts'
 
 const RELEASES = 'https://github.com/srinitude/webular/releases/latest'
-const INSTALL_SH = `curl -fsSL ${RELEASES}/download/install.sh | sh`
+const INSTALL_SH = "curl --proto '=https' --tlsv1.2 -fsSL https://webular.dev/install.sh | sh"
 const BREW = 'brew upgrade webular'
 const NPM = 'npm install -g webular@latest'
 const SCOOP = 'scoop update webular'

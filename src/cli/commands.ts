@@ -22,6 +22,8 @@ export const COMMANDS = {
   act: 'Control a real browser: open, snapshot, screenshot, interact (agent-browser)',
   feed: 'Read an RSS or Atom feed and list its items',
   jev: 'Learn from recorded Jev calls (learn) or label one as an eval case (correct)',
+  upgrade: 'Print the command that upgrades this install (--yes runs it)',
+  completions: 'Print the shell completion script for bash, zsh, fish, or powershell',
 } as const
 
 export type CommandName = keyof typeof COMMANDS
@@ -42,6 +44,7 @@ export const ARGUMENTS: Partial<Record<CommandName, string>> = {
   batch: '<url>...',
   act: '<url>',
   feed: '<url>',
+  completions: '<shell>',
 }
 
 // One real call per command, shown under EXAMPLE in its --help.
@@ -66,5 +69,7 @@ export const EXAMPLES: Record<CommandName, string> = {
   act: 'webular act https://example.com',
   feed: 'webular feed https://example.com/feed.xml',
   jev: 'webular jev learn',
+  upgrade: 'webular upgrade',
+  completions: 'webular completions zsh',
 }
 export const COMMAND_NAMES = Object.keys(COMMANDS) as CommandName[]

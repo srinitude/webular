@@ -11,7 +11,7 @@ interface Upgrade {
 }
 
 const RELEASES = 'https://github.com/srinitude/webular/releases/latest'
-const INSTALL_SH = `curl -fsSL ${RELEASES}/download/install.sh | sh`
+const INSTALL_SH = "curl --proto '=https' --tlsv1.2 -fsSL https://webular.dev/install.sh | sh"
 
 // node_modules rules come first: a Homebrew- or Scoop-installed Node keeps its
 // global packages under its own prefix, and those upgrade through the package
@@ -47,6 +47,14 @@ function channelOf(raw: string, env: Readonly<Record<string, string | undefined>
     ? { channel: 'install.sh', command: script }
     : { channel: 'unknown', command: RELEASES }
 }
+
+// An installer receipt names its script, which re-runs to upgrade in place.
+const RECEIPT_COMMANDS: Readonly<Record<string, string>> = {
+  'install.sh': INSTALL_SH,
+  'install.ps1': 'irm https://webular.dev/install.ps1 | iex',
+}
+export const receiptCommand = (source: unknown): string | undefined =>
+  typeof source === 'string' ? RECEIPT_COMMANDS[source] : undefined
 
 // The first path that names a channel wins; none names one -> unknown.
 export function upgradeFor(

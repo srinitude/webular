@@ -26,6 +26,8 @@ This page describes what each `webular` command does. The README holds the usage
 | `act`       | Drives a real browser: open, snapshot, screenshot, interact (agent-browser). With `--goal`, it drives a Cua window (see [Browser mode](cua-browser-mode.md)) |
 | `feed`      | Reads an RSS 2.0 or Atom 1.0 feed and lists its items (title, link, date, summary) |
 | `jev`       | Learns from recorded Jev calls (`learn`), or labels one call as an eval case (`correct`) |
+| `upgrade`   | Prints the command that upgrades this install, from the installer receipt or the install path. `--yes` runs it. `WEBULAR_LATEST_URL` replaces `https://webular.dev/latest` |
+| `completions` | Prints the completion script for `bash`, `zsh`, `fish`, or `powershell` |
 
 ### Missing fields and missing text
 

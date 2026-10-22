@@ -68,6 +68,7 @@ run:act: ACT — drive a real browser (open/snapshot/screenshot/interact) via ag
 run:answer: ANSWER — grounded answer (search -> fetch -> synthesize) [after setup]
 run:audit: AUDIT — deepsec vulnerability scan of composed tools [after setup]
 run:batch: BATCH — concurrent over many targets [after setup]
+run:completions: COMPLETIONS — print the shell completion script for bash, zsh, fish, or powershell [after setup]
 run:crawl: CRAWL — recursive same-host traversal (Bun.fetch BFS) [after setup]
 run:diagram: DIAGRAM — list the XState machines in src/machines [after setup]
 run:doctor: DOCTOR — environment + toolchain diagnostics (clig.dev) [after setup]
@@ -84,6 +85,7 @@ run:scrape: SCRAPE — single URL to clean content (Bun.fetch + readability + tu
 run:search: SEARCH — keyless web search (DuckDuckGo HTML + linkedom) [after setup]
 run:summarize: SUMMARIZE — extractive summary (no model) [after setup]
 run:tasks: TASKS — introspect the mise task graph this CLI routes through [after setup]
+run:upgrade: UPGRADE — print (or with --yes, run) the command that upgrades this install [after setup]
 setup: Install pinned dependencies (frozen lockfile) — root of the universal task graph
 sync:check: Drift: every generated or mirrored file matches its source (dispatch table, bench docs, practices and rule files, skills and plugin tools, docs/tasks.md). A focused subset of `mise run test` [after build, plugin:bundle]
 test: Run the bun test suite (CI/CD graph + contracts + integration) [after build]

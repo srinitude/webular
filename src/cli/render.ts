@@ -79,6 +79,9 @@ const RENDERERS: Record<CommandName, Renderer> = {
       ? `${str(r, 'snapshot')}\nscreenshot: ${str(r, 'screenshot')}`
       : str(r, 'snapshot'),
   jev: (r) => str(r, 'summary'),
+  // Both print plain text themselves and never go through run.ts.
+  upgrade: (r) => str(r, 'command'),
+  completions: (r) => str(r, 'script'),
   feed: (r) =>
     arr(r, 'items')
       .map((x) => `${str(x, 'published')}\t${str(x, 'title')}\n  ${str(x, 'url')}`)
