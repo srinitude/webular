@@ -4,7 +4,10 @@
 // module loads only on platforms that have one.
 import { afterAll, expect, mock, test } from 'bun:test'
 import { Effect } from 'effect'
-import { anydocUnsupportedPlatform, documentToMarkdown } from '../../../src/lib/sources/documents.ts'
+import {
+  anydocUnsupportedPlatform,
+  documentToMarkdown,
+} from '../../../src/lib/sources/documents.ts'
 import { eff } from '../../_support/run.ts'
 
 const needsOcr = Object.assign(new Error('pages need OCR'), {

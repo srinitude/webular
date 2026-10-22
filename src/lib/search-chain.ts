@@ -187,7 +187,8 @@ export const searchEffect = Effect.fn('search')(function* (
       : Effect.succeed(found)
   if (!opts.hop || source !== 'web') return yield* free(first)
   const left = deadline - ((yield* Clock.currentTimeMillis) - start)
-  const round = (q: string, n: number) => searchOnce('web', q, n, { runSource: opts.runSource, c, hop: true })
+  const round = (q: string, n: number) =>
+    searchOnce('web', q, n, { runSource: opts.runSource, c, hop: true })
   return yield* secondHop(query, limit, first, round).pipe(
     cut(Math.max(0, left), () => Effect.succeed(first)),
     Effect.flatMap(free),

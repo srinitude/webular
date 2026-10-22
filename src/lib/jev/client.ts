@@ -94,9 +94,13 @@ export const resolveKey = Effect.gen(function* () {
   const out = yield* optional(
     spawner
       .string(
-        ChildProcess.make('security', ['find-generic-password', '-s', 'typesafe-ai-api-key', '-w'], {
-          stdin: 'ignore',
-        }),
+        ChildProcess.make(
+          'security',
+          ['find-generic-password', '-s', 'typesafe-ai-api-key', '-w'],
+          {
+            stdin: 'ignore',
+          },
+        ),
       )
       .pipe(
         Effect.map((s) => Option.liftPredicate(s.trim(), (k) => k.length > 0)),
