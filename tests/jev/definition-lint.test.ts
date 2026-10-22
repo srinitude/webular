@@ -67,16 +67,8 @@ test('definition: bare instructions, thin options and levels, and flat state are
 })
 
 test('definition: only the pinned release passes, box questions included, size and nesting caps', () => {
-  for (const model of [
-    'jev',
-    'jev-latest',
-    'jev-preview',
-    '~fast',
-    'jev-1.13',
-    'jev-1.13.0',
-    'gpt-5',
-  ])
-    expect(rules({ ...good, model })).toEqual(['model-pin'])
+  const unpinned = ['jev', 'jev-latest', 'jev-preview', '~fast', 'jev-1.13', 'jev-1.13.0', 'gpt-5']
+  for (const model of unpinned) expect(rules({ ...good, model })).toEqual(['model-pin'])
   const box = { b: { type: 'box', instructions: { t: 1 } } }
   expect(rules({ ...good, questions: box })).toEqual([])
   expect(rules({ ...good, model: 'jev-preview', questions: box })).toEqual(['model-pin'])
