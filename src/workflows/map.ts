@@ -126,6 +126,16 @@ const fetchSitemap = Effect.fn('map.fetchSitemap')(function* (site: string, time
   return robots || primary ? { links: robots?.links ?? [], errors, fromSitemapXml: false } : null
 })
 
+// Lee, Kim & Hong, "On URL Normalization" (ICCSA 2005): a trailing slash or a default
+// document (index.html) names the same page as the bare path, so both share one key.
+// The first form seen is kept, so a sitemap's own spelling wins over a page link's.
+const pageKey = (link: string): string | null => {
+  const url = URL.parse(dedupeKey(link) ?? '')
+  if (!url) return null
+  url.pathname = url.pathname.replace(/\/(?:index\.(?:html?|php|aspx?))?$/i, '')
+  return url.toString()
+}
+
 // Stops at `limit` kept links: O(links read until the limit fills), not O(all links).
 export function dedupe(links: string[], limit: number): string[] {
   const seen = new Set<string>()
@@ -133,7 +143,7 @@ export function dedupe(links: string[], limit: number): string[] {
   for (const link of links) {
     if (out.length >= limit) break
     const normalized = normalizeUrl(link)
-    const key = dedupeKey(link)
+    const key = pageKey(link)
     if (!normalized || !key || seen.has(key)) continue
     seen.add(key)
     out.push(normalized)

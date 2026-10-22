@@ -29,13 +29,36 @@ const readPages = (pdf: Pdf, last: number, texts: string[]) =>
     }
   })
 
-// unpdf's mergePages whitespace rules, so output matches a whole-document read.
+// Running headers and footers, and words split by a line-end hyphen, are the
+// body-text errors Bast and Korzen (JCDL 2017) count. A page's first or last line
+// is running when its shape (digits ignored) opens or closes at least half of 3+
+// pages; it is dropped only when other text stays on that page.
+const shape = (line = '') => line.trim().replace(/\d+/g, '#')
+
+const stripRunning = (texts: string[]) => {
+  if (texts.length < 3) return texts
+  const pages = texts.map((t) => t.trim().split('\n'))
+  const seen = new Map<string, number>()
+  for (const lines of pages)
+    for (const s of new Set([shape(lines[0]), shape(lines.at(-1))]))
+      if (s) seen.set(s, (seen.get(s) ?? 0) + 1)
+  const running = (line?: string) => (seen.get(shape(line)) ?? 0) * 2 >= pages.length
+  return pages.map((lines) => {
+    const end = lines.length > 1 && running(lines.at(-1)) ? -1 : lines.length
+    const body = lines.slice(0, end)
+    return (body.length > 1 && running(body[0]) ? body.slice(1) : body).join('\n')
+  })
+}
+
+// unpdf's mergePages whitespace rules, then line-end hyphens joined.
+// ponytail: a compound broken at its own hyphen ("well-/known") loses the hyphen; a word list would fix it.
 const merge = (texts: string[]) =>
-  texts
+  stripRunning(texts)
     .join('\n')
     .replace(/[^\S\n]+/g, ' ')
     .replace(/ ?\n ?/g, '\n')
     .replace(/\n{3,}/g, '\n\n')
+    .replace(/([a-z])-\n([a-z])/g, '$1$2')
 
 // The cap or the deadline stops early: the pages read before the stop come back
 // with a truncation note naming the setting. Only a stop before page 1 fails.

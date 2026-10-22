@@ -81,22 +81,23 @@ function factOf(node: Node): JsonLdFact {
   }
 }
 
-// Facts of one block: none when it is oversized or malformed.
-const blockFacts = (text: string): JsonLdFact[] =>
+// Nodes of one block: none when it is oversized or malformed.
+const blockNodes = (text: string): Node[] =>
   text.length > JSON_LD_MAX_BLOCK_CHARS
     ? []
-    : Option.match(parseBlock(text), {
-        onNone: () => [],
-        onSome: (v) =>
-          nodesOf(v)
-            .map(factOf)
-            .filter((fact) => Object.keys(fact).length > 0),
-      })
+    : Option.match(parseBlock(text), { onNone: () => [], onSome: (v) => nodesOf(v) })
+
+// Every JSON-LD node on the page, for readers of keys beyond the facts below.
+export const jsonLdNodes = (document: DomDocument): Node[] =>
+  Array.from(document.querySelectorAll('script[type="application/ld+json" i]')).flatMap((script) =>
+    blockNodes(script.textContent ?? ''),
+  )
 
 // The page's JSON-LD facts, or undefined when it has none.
 export function pageMetadata(document: DomDocument): PageMetadata | undefined {
-  const facts = Array.from(document.querySelectorAll('script[type="application/ld+json" i]'))
-    .flatMap((script) => blockFacts(script.textContent ?? ''))
+  const facts = jsonLdNodes(document)
+    .map(factOf)
+    .filter((fact) => Object.keys(fact).length > 0)
     .slice(0, JSON_LD_MAX_FACTS)
   return facts.length ? { jsonLd: facts } : undefined
 }

@@ -30,8 +30,10 @@ export const sentenceSpans = (text: string): Span[] => {
 const isHeading = (s: string, words: number) => words > 0 && words <= 10 && !/[.!?:;,]$/.test(s)
 
 // Relevance: mean word frequency, damped for fragments under SHORT words,
-// plus a position prior for the page lead and each section lead.
-const SHORT = 6
+// plus a position prior for the page lead and each section lead. SHORT is the
+// sentence-length cut-off feature of Kupiec, Pedersen and Chen (SIGIR 1995);
+// 12 content words beat 6 on tests/commands/summarize-accuracy.test.ts.
+const SHORT = 12
 function relevance(text: string, spans: Spans, t: TokenIds): Float64Array {
   const base = scores(t)
   const out = new Float64Array(base.length)
