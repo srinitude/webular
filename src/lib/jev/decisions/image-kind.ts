@@ -4,6 +4,7 @@
 // option orders). Code makes the images sendable first (size, format, repeats) and
 // routes by kind after; Jev only picks the kind. Low confidence reads, never skips.
 import type { JevImage, JevRequest } from '../client.ts'
+import { KIND_SPEC } from './image-kind-spec.ts'
 import { defineDecision } from '../define.ts'
 import {
   agreedPick,
@@ -12,11 +13,10 @@ import {
   CONFIDENCE_BAR,
   choice,
   menu,
-  type OptionSpec,
   purpose,
 } from '../payload/index.ts'
 
-export const IMAGE_KINDS = [
+const IMAGE_KINDS = [
   'chart',
   'table',
   'diagram',
@@ -28,15 +28,6 @@ export const IMAGE_KINDS = [
   'decoration',
 ] as const
 export type ImageKind = (typeof IMAGE_KINDS)[number]
-// The kinds that go to a reader.
-export const READ_KINDS: ReadonlyArray<ImageKind> = [
-  'chart',
-  'table',
-  'diagram',
-  'infographic',
-  'text_image',
-]
-
 export interface PageImage extends JevImage {
   readonly ref: string // a fresh UUID, the key in `assets`
   readonly alt: string | null
@@ -65,61 +56,17 @@ const WHY = purpose(
   'Charts, tables, diagrams, infographics and pictures of text get read. Photos, logos and decoration are skipped.',
 )
 
-const spec = (what: string, not_for: string, examples: string[]): OptionSpec => ({
-  what,
-  not_for,
-  examples,
-})
-const KIND_SPEC: Record<ImageKind, OptionSpec> = {
-  chart: spec(
-    'A graph of numbers, like a line, bar, pie or scatter chart, with axes or a legend.',
-    'A drawing of parts or steps, which is diagram.',
-    ['a line chart of prices by year', 'a bar chart of votes by state'],
-  ),
-  table: spec(
-    'Rows and columns of values, shown as a picture.',
-    'Plain sentences, which is text_image.',
-    ['a screenshot of a results table', 'a scanned price list'],
-  ),
-  diagram: spec(
-    'A drawing of parts, steps or links, often with labels and arrows.',
-    'A graph of numbers, which is chart.',
-    ['a flow chart', 'a labeled drawing of an engine'],
-  ),
-  infographic: spec(
-    'A poster-like picture that mixes facts, numbers, icons and short text.',
-    'One plain chart, which is chart.',
-    ['a health tips poster with numbers', 'a census fact sheet graphic'],
-  ),
-  product_photo: spec(
-    'A photo of a product for sale or a package, where the label or item matters.',
-    'A photo of people or places, which is other_photo.',
-    ['a cereal box photo', 'a shoe on a white background'],
-  ),
-  other_photo: spec(
-    'A photo of people, places, animals or events.',
-    'A photo whose main point is a product, which is product_photo.',
-    ['a portrait of an author', 'a city street'],
-  ),
-  text_image: spec(
-    'A picture whose main content is words to read, like a scanned page, a quote card or a screenshot of text.',
-    'Rows and columns of values, which is table.',
-    ['a scanned book page', 'a tweet screenshot'],
-  ),
-  logo: spec(
-    'A brand mark, site name or badge.',
-    'A product photo that shows a brand, which is product_photo.',
-    ['a company logo in the header', 'a payment badge'],
-  ),
-  decoration: spec(
-    'A picture that adds look and feel but no facts, like a banner, background, divider or icon.',
-    'A picture with numbers or readable words.',
-    ['a stock photo banner', 'a social share icon'],
-  ),
-}
-
 const ask = (i: number) =>
   `What kind of picture is \`facts.images[${i}].image\`? Go by what you see. Use \`facts.images[${i}].alt_text\` and \`facts.images[${i}].caption\` only as hints: they can be wrong. \`facts.page.title\` and \`facts.page.user_question\` say what the page is about.`
+
+const imageFacts = (p: PageImage) => ({
+  image: p.ref,
+  alt_text: p.alt,
+  caption: p.caption,
+  shown_size: { width_px: p.width, height_px: p.height },
+  where_on_page: p.region,
+  times_on_page: p.repeats,
+})
 
 const imagePayload = (input: ImageKindInput): JevRequest => {
   const images = input.images.slice(0, CAPS.fields)
@@ -131,14 +78,7 @@ const imagePayload = (input: ImageKindInput): JevRequest => {
       purpose: WHY,
       facts: {
         page: { url: input.url, title: input.title, user_question: input.question },
-        images: images.map((p) => ({
-          image: p.ref,
-          alt_text: p.alt,
-          caption: p.caption,
-          shown_size: { width_px: p.width, height_px: p.height },
-          where_on_page: p.region,
-          times_on_page: p.repeats,
-        })),
+        images: images.map(imageFacts),
       },
     },
     questions: Object.assign(

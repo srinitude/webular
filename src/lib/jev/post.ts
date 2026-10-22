@@ -74,6 +74,14 @@ const httpError = (res: {
     })
   })
 
+const jevRequest = (endpoint: string, key: Redacted.Redacted<string>, body: string) =>
+  HttpClientRequest.post(endpoint).pipe(
+    HttpClientRequest.bearerToken(Redacted.value(key)),
+    HttpClientRequest.bodyText(body, 'application/json'),
+    // Images are gated: the header is required on every request that carries one.
+    body.includes(ASSETS_KEY) ? HttpClientRequest.setHeader(IMAGES_HEADER, 'true') : identity,
+  )
+
 export const postOnce =
   (
     endpoint: string,
@@ -85,12 +93,7 @@ export const postOnce =
     Effect.gen(function* () {
       if (Option.isNone(key)) return yield* new JevError({ reason: NO_KEY, kind: 'no_key' })
       yield* guardDocs(http, body, docs)
-      const req = HttpClientRequest.post(endpoint).pipe(
-        HttpClientRequest.bearerToken(Redacted.value(key.value)),
-        HttpClientRequest.bodyText(body, 'application/json'),
-        // Images are gated: the header is required on every request that carries one.
-        body.includes(ASSETS_KEY) ? HttpClientRequest.setHeader(IMAGES_HEADER, 'true') : identity,
-      )
+      const req = jevRequest(endpoint, key.value, body)
       const res = yield* http.execute(req)
       if (res.status >= 400) return yield* httpError(res)
       const reply = yield* decodeReply(yield* res.json)

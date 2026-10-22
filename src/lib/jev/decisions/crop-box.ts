@@ -13,7 +13,7 @@ const PAD = 0.02 // fraction of the image added on each side
 const LOW_CONF_PAD = 0.05 // more pad when Box confidence is low or null
 const LOW_CONF = 0.6
 
-export interface Box {
+interface Box {
   readonly top: number
   readonly bottom: number
   readonly left: number
@@ -27,7 +27,7 @@ export interface CropRect extends Size {
   readonly x: number
   readonly y: number
 }
-export interface CropBoxInput {
+interface CropBoxInput {
   readonly question: string
   readonly target: string
   readonly url: string
@@ -36,7 +36,7 @@ export interface CropBoxInput {
 }
 
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n))
-export const clampBox = (b: Box): Box => ({
+const clampBox = (b: Box): Box => ({
   top: clamp01(b.top),
   bottom: clamp01(b.bottom),
   left: clamp01(b.left),

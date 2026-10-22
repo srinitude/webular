@@ -6,7 +6,7 @@ import type { Jev, JevRequest } from '../client.ts'
 import { defineDecision } from '../define.ts'
 import { agreedPick, bothOrders, CONFIDENCE_BAR, choice, menu, purpose } from '../payload/index.ts'
 
-export type Route = 'text' | 'image' | 'both'
+type Route = 'text' | 'image' | 'both'
 const ROUTES: ReadonlyArray<Route> = ['image', 'text', 'both']
 export type ImageKind = 'chart' | 'table' | 'diagram' | 'photo' | 'logo' | 'icon' | 'unknown'
 

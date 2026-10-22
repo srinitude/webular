@@ -58,7 +58,7 @@ export const officialSites = (hits: ReadonlyArray<Hit>, limit: number): Effect.E
 }
 
 // Past the fan-out, the longest wait for the lookup; a later answer is dropped.
-export const OFFICIAL_WAIT_MS = 200
+const OFFICIAL_WAIT_MS = 200
 
 // The lookup forked beside the fan-out, fed by `runner`'s Wikipedia hits for
 // the main query (never a variant, so one SPARQL call). `take` gives the sites

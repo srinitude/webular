@@ -11,7 +11,7 @@ export const MAX_CAPTURE_BYTES = 50 * 1024 * 1024
 // Half of runBatch's 60 s: a screenshot waits on one paint, not a page load.
 const SCREENSHOT_TIMEOUT_MS = 30_000
 
-export const screenshotOn = Config.Boolean('WEBULAR_SCREENSHOT').pipe(
+const screenshotOn = Config.Boolean('WEBULAR_SCREENSHOT').pipe(
   Config.withDefault(false),
   Effect.orElseSucceed(() => false),
 )
