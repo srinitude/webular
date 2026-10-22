@@ -4,6 +4,7 @@
 // Fixtures follow benchmark misses; the check is the bench's folded `contains`.
 import { expect, test } from 'bun:test'
 import { answerPassage } from '../../src/lib/answer-passage.ts'
+import { textAndImages } from '../../src/lib/html.ts'
 import { splitQuestion, summarizeText } from '../../src/lib/summarize.ts'
 
 const fold = (s: string) => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
@@ -78,6 +79,26 @@ test('a describing clause does not outrank the asked verb, and an accented place
 test('focus ranking keeps the "born" sentence over clause-word sentences', () => {
   const top = summarizeText(HEISENBERG, 1, { query: HEIS_Q }).sentences.join(' ')
   expect(top).toContain('Würzburg')
+})
+
+// A list page's element table: Readability may drop it, so its rows reach the
+// answer path as plain lines, and the row naming the asked number leads.
+const intro = (n: number) =>
+  `<p>This is a list of the chemical elements, part ${n}, ordered by atomic number, with symbols and names in the table below for each known chemical element.</p>`
+const ELEMENTS = `<html><head><title>List of chemical elements</title></head><body><article>
+<h1>List of chemical elements</h1>${[1, 2, 3, 4].map(intro).join('')}
+<table><tr><th>Z</th><th>Symbol</th><th>Element</th></tr>
+<tr><td>78</td><td><a href="/wiki/Pt">Pt</a></td><td><a href="/wiki/Platinum">Platinum</a></td></tr>
+<tr><td>79</td><td><a href="/wiki/Au">Au</a></td><td><a href="/wiki/Gold">Gold</a></td></tr>
+<tr><td>80</td><td><a href="/wiki/Hg">Hg</a></td><td><a href="/wiki/Mercury">Mercury</a></td></tr>
+<tr style="display:none"><td>99</td><td>Xx</td><td>Hidden</td></tr></table></article></body></html>`
+
+test('an element table row answers "which element has atomic number 79"', () => {
+  const { text, rows } = textAndImages(ELEMENTS, 'https://en.wikipedia.org/wiki/List')
+  expect(rows).toContain('79 Au Gold.')
+  expect(rows.join(' ')).not.toContain('Hidden')
+  const q = 'Which chemical element has atomic number 79?'
+  expect(holds([`${text}\n\n${rows.join('\n')}`], q, 'Gold')).toBe(true)
 })
 
 test('a fronted question keeps its final verb as the asked part', () => {

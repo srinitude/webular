@@ -21,7 +21,7 @@ import { searchErrors } from '../lib/search-errors.ts'
 import { mainEntity } from '../lib/search-hop.ts'
 import { nestedBridge } from '../lib/search-nested.ts'
 import { subjectSources } from '../lib/source-subject.ts'
-import { fetchErrorsSchema, fetchSources } from '../lib/sources.ts'
+import { fetchErrorsSchema, fetchSources, withRows } from '../lib/sources.ts'
 import { fetchedOnly, finishAnswer } from './answer-guard.ts'
 import { stepRuntime } from './runtime.ts'
 
@@ -89,7 +89,7 @@ const gather = Effect.fn('answer.gather')(function* (input: z.infer<typeof answe
   )
   const withText = yield* subjectSources(
     input.query,
-    fetched.entries.filter((e) => e.text.length > 0),
+    fetched.entries.map(withRows).filter((e) => e.text.length > 0),
   )
   const used =
     withText.length === 0

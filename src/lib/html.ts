@@ -6,7 +6,7 @@ import TurndownService from 'turndown'
 import { documentBase, normalizeUrl } from '../core/url.ts'
 import { imagesFrom, inlineAlts, ogImageOf, type PageImage, textOf } from './html-images.ts'
 import { dropHidden, dropInvisible, sanitizeHtml } from './html-sanitize.ts'
-import { addTableRule } from './html-table.ts'
+import { addTableRule, tableRows } from './html-table.ts'
 import { type TitleCandidates, titleBaseline } from './jev/decisions/page-title.ts'
 import { type PageMetadata, pageMetadata } from './json-ld.ts'
 
@@ -24,6 +24,7 @@ interface PageDoc {
   ogImage: string
   metadata?: PageMetadata
   article: Article
+  rows: string[]
 }
 
 type DomDocument = ReturnType<typeof parseHTML>['document']
@@ -125,10 +126,9 @@ function freshBody(rawHtml: string, title: string): Article {
   return bodyArticle(body, title)
 }
 
-// ONE linkedom parse per page: titles, links, and images are read BEFORE
-// Readability runs because Readability mutates the document it is given.
-// `title` is the rule's pick; the page.title Jev decision may pick another of `titles`.
-export function parsePage(html: string, base: string): PageDoc {
+// ONE linkedom parse per page: titles, links, images, and rows are read BEFORE
+// Readability mutates it. `title` is the rule's pick; Jev's page.title may pick another.
+export function parsePage(html: string, base: string, withRows = false): PageDoc {
   const { document } = parseHTML(html)
   const docTitle = dropInvisible(document.title ?? '')
   const og = document.querySelector('meta[property="og:title"]')?.getAttribute('content') ?? ''
@@ -137,6 +137,7 @@ export function parsePage(html: string, base: string): PageDoc {
   const images = imagesFrom(document, base)
   const ogImage = ogImageOf(document, base)
   const metadata = pageMetadata(document)
+  const rows = withRows && document.body ? tableRows(document.body) : []
   const article = articleFrom(document, html)
   const titles = {
     readability: article.title,
@@ -145,16 +146,15 @@ export function parsePage(html: string, base: string): PageDoc {
     h1: dropInvisible(h1),
   }
   const title = titleBaseline({ url: base, candidates: titles })
-  return { title, titles, links, images, ogImage, ...(metadata ? { metadata } : {}), article }
+  return { title, titles, links, images, ogImage, ...(metadata ? { metadata } : {}), article, rows }
 }
 
-// The fetch path's parse: article text plus the page's <img> records.
+// The fetch path's parse: article text, <img> records, and table rows.
 export const textAndImages = (html: string, base: string) => {
-  const page = parsePage(html, base)
-  const stated = page.metadata?.jsonLd.find((f) => f.datePublished)?.datePublished ?? ''
-  const at = Date.parse(stated) // NaN when missing or unreadable
-  const published = Number.isNaN(at) ? undefined : new Date(at).toISOString()
-  return { text: page.article.text, images: page.images, ...(published ? { published } : {}) }
+  const { article, images, rows, metadata } = parsePage(html, base, true)
+  const stated = metadata?.jsonLd.find((f) => f.datePublished)?.datePublished ?? ''
+  const published = Number.isNaN(Date.parse(stated)) ? undefined : new Date(stated).toISOString()
+  return { text: article.text, images, rows, ...(published ? { published } : {}) }
 }
 
 // Crawling needs only the title and links, so it skips Readability's scoring pass;

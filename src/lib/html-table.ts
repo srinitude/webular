@@ -4,6 +4,7 @@
 // widest one so GFM drops no cell. A <caption> becomes a line above the table.
 // ponytail: a nested table's text folds into its outer cell.
 import type TurndownService from 'turndown'
+import { dropHidden, dropInvisible } from './html-sanitize.ts'
 
 const flat = (el: Element): string => (el.textContent ?? '').replace(/\s+/g, ' ').trim()
 
@@ -66,4 +67,18 @@ export function addTableRule(service: TurndownService): void {
     filter: 'table',
     replacement: (_content, node) => tableToGfm(node as Element),
   })
+}
+
+// Table rows as plain lines ("79 Au Gold."), read before Readability, which
+// drops link-dense tables such as a list page's element table. Hidden rows go
+// first; each row ends in a period so the answer path keeps it as a sentence.
+export const tableRows = (body: Parameters<typeof dropHidden>[0]): string[] => {
+  dropHidden(body)
+  return Array.from(body.querySelectorAll('tr'), (tr) =>
+    dropInvisible(Array.from(tr.children, (c) => c.textContent ?? '').join(' '))
+      .replace(/\s+/g, ' ')
+      .trim(),
+  )
+    .filter((row) => row.includes(' '))
+    .map((row) => (/[.!?]$/.test(row) ? row : `${row}.`))
 }

@@ -21,7 +21,11 @@ export const fetchOne = <R>(
   parse: (
     html: string,
     base: string,
-  ) => Effect.Effect<{ text: string; images: PageImage[]; published?: string }, unknown, R>,
+  ) => Effect.Effect<
+    { text: string; images: PageImage[]; rows?: string[]; published?: string },
+    unknown,
+    R
+  >,
 ) =>
   (opts.typed ? Effect.void : guardTarget(src.url, { url: src.url, originPrivate: false })).pipe(
     Effect.andThen(
@@ -33,9 +37,9 @@ export const fetchOne = <R>(
     ),
     Effect.flatMap(({ value: html }) => parse(html.slice(0, opts.maxHtml), src.url)),
     Effect.match({
-      onSuccess: ({ text, images, published }): Outcome => ({
+      onSuccess: ({ text, images, rows, published }): Outcome => ({
         ok: true,
-        entry: { title: src.title, url: src.url, text, images, published },
+        entry: { title: src.title, url: src.url, text, images, rows, published },
       }),
       onFailure: (err): Outcome => ({ ok: false, url: src.url, reason: errMsg(err) }),
     }),
