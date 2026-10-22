@@ -87,7 +87,10 @@ const spawnClaude = (job: Job, ctx: Ctx, env: Record<string, string>, keys: Keys
   Effect.gen(function* () {
     const { file, s, model, surface, provider } = job
     const fs = yield* FileSystem.FileSystem
-    const path = yield* Config.String('PATH').pipe(Config.withDefault(''))
+    const path = yield* Config.String('PATH').pipe(
+      Config.orElse(() => Config.String('Path')),
+      Config.withDefault(''),
+    )
     const binDir = yield* Config.String('WEBULAR_BIN_DIR').pipe(
       Config.withDefault(`${ROOT}dist/bin`),
     )

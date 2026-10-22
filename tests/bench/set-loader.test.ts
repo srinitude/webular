@@ -7,7 +7,9 @@ import { loadSetFile } from '../../scripts/bench/loader.ts'
 import { eff, failMsg, tmpDir } from '../_support/run.ts'
 
 const DIR = `${import.meta.dir}/../../bench/tasks`
-const NAMES = [...new Bun.Glob('{dev,test}/*.jsonl').scanSync({ cwd: DIR })]
+const NAMES = [...new Bun.Glob('{dev,test}/*.jsonl').scanSync({ cwd: DIR })].map((n) =>
+  n.replaceAll('\\', '/'),
+)
 
 test(
   'every committed set file loads with its canary and split',

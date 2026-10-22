@@ -10,7 +10,9 @@ import { BUILD_DATE } from './generate-common.ts'
 const writeManifest = (dir: string) =>
   Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem
-    const names = [...new Bun.Glob('{dev,test}/*.jsonl').scanSync({ cwd: dir })].sort()
+    const names = [...new Bun.Glob('{dev,test}/*.jsonl').scanSync({ cwd: dir })]
+      .map((n) => n.replaceAll('\\', '/'))
+      .sort()
     const texts = yield* Effect.forEach(names, (n) => fs.readFileString(`${dir}/${n}`), {
       concurrency: 8,
     })

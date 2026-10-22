@@ -17,7 +17,7 @@ const rows = (md: string) =>
 const flags = (text: string) => [...new Set(text.match(/--[a-z][a-z-]*/g) ?? [])]
 
 const help = (args: string[]) =>
-  Effect.flatMap(Config.String('PATH'), (PATH) =>
+  Effect.flatMap(Config.String('PATH').pipe(Config.orElse(() => Config.String('Path'))), (PATH) =>
     runCli('bin/webular.ts', args, { env: { PATH, WEBULAR_JEV: 'off' }, exec: process.execPath }),
   )
 

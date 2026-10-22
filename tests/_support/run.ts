@@ -8,8 +8,22 @@ import { HostBudget } from '../../src/core/budget.ts'
 import { RobotsGate } from '../../src/lib/robots-gate.ts'
 import { ParsePool } from '../../src/lib/sources.ts'
 
+// Windows lists nested readDirectory entries with `\`; tests compare POSIX paths,
+// and `/` paths open fine on Windows too.
+const posixFileSystem = Layer.effect(
+  FileSystem.FileSystem,
+  Effect.map(FileSystem.FileSystem, (fs) => ({
+    ...fs,
+    readDirectory: (...args: Parameters<typeof fs.readDirectory>) =>
+      Effect.map(fs.readDirectory(...args), (names) =>
+        names.map((name) => name.replaceAll('\\', '/')),
+      ),
+  })),
+).pipe(Layer.provide(BunServices.layer))
+
 const testLayer = Layer.mergeAll(
   BunServices.layer,
+  posixFileSystem,
   ParsePool.layer,
   RobotsGate.layer,
   HostBudget.layer.pipe(Layer.provide(BunServices.layer)),

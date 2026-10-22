@@ -7,7 +7,7 @@ import { ROOT } from '../_support/root.ts'
 import { eff, io } from '../_support/run.ts'
 
 const workflows = Effect.forEach(
-  [...new Bun.Glob('.github/workflows/*.yml').scanSync(ROOT)],
+  [...new Bun.Glob('.github/workflows/*.yml').scanSync(ROOT)].map((p) => p.replaceAll('\\', '/')),
   (path) => io(() => Bun.file(`${ROOT}${path}`).text()).pipe(Effect.map((yml) => ({ path, yml }))),
   { concurrency: 4 },
 )

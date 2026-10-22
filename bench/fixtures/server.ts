@@ -25,7 +25,10 @@ export const leaksFixtureUrl = (text: string): boolean =>
   FIXTURE_URL_PATTERNS.some((p) => p.test(text))
 
 const listFiles = Effect.sync(() => [
-  ...new Bun.Glob('{pages,sites}/**/*').scanSync({ cwd: ROOT, onlyFiles: true }),
+  // Windows scans with `\`; routes are URL paths.
+  ...Array.from(new Bun.Glob('{pages,sites}/**/*').scanSync({ cwd: ROOT, onlyFiles: true }), (f) =>
+    f.replaceAll('\\', '/'),
+  ),
 ])
 
 const routesFor = (files: ReadonlyArray<string>): Routes =>

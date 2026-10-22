@@ -8,7 +8,7 @@ import { Effect, FileSystem, Schema } from 'effect'
 
 const root = fileURLToPath(new URL('../skills', import.meta.url))
 const skillDirs = () =>
-  Array.from(new Bun.Glob('*/SKILL.md').scanSync(root), (p) => p.slice(0, p.indexOf('/')))
+  Array.from(new Bun.Glob('*/SKILL.md').scanSync(root), (p) => p.split(/[\\/]/)[0] ?? p)
 const skills = skillDirs()
 const specKeys = ['name', 'description', 'license', 'compatibility', 'metadata', 'allowed-tools']
 
@@ -134,9 +134,9 @@ test('skills and evals hold no time-tied wording', () =>
   run(
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem
-      const paths = (yield* fs.readDirectory(root, { recursive: true })).filter(
-        (p) => p.endsWith('.md') || p.endsWith('/evals/evals.json'),
-      )
+      const paths = (yield* fs.readDirectory(root, { recursive: true }))
+        .map((p) => p.replaceAll('\\', '/'))
+        .filter((p) => p.endsWith('.md') || p.endsWith('/evals/evals.json'))
       const hits = yield* Effect.forEach(
         paths,
         (p) =>
