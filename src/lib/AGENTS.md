@@ -32,12 +32,11 @@ Capability code behind the workflows, under [src/AGENTS.md](../AGENTS.md).
 ## Checks
 
 - `mise run bugs:security`: crawl-root robots gate, honest User-Agent.
+- [snapshot](snapshot.ts) and [resume](crawl-resume.ts) skip WAL. [driver](driver.ts) and [cua](driver-cua.ts) name layers `Live`.
 
 ```bash
 mise run test:file tests/lib tests/core tests/commands/search.test.ts
 ```
-
-[snapshot](snapshot.ts) and [resume](crawl-resume.ts) skip WAL. [driver](driver.ts) and [cua](driver-cua.ts) name layers `Live`.
 
 ## Children
 

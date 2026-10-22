@@ -1,13 +1,13 @@
 # src/core/AGENTS.md
 
-Rules for the shared Effect services. They sit under [src/AGENTS.md](../AGENTS.md).
+Rules for the shared Effect services, under [src/AGENTS.md](../AGENTS.md).
 
 ## What lives here
 
 - Process edge: [`effect.ts`](effect.ts) (typed CLI failures and exit codes), [`args.ts`](args.ts) (flag parsing), [`output.ts`](output.ts) (stdout, stderr, and the `-o` file).
 - Fetching: [`http.ts`](http.ts) runs requests, [`http-body.ts`](http-body.ts) reads bodies, [`decode.ts`](decode.ts) turns bytes into text, [`gunzip.ts`](gunzip.ts) inflates gzip sitemaps, [`cache.ts`](cache.ts) is the disk cache, [`archive.ts`](archive.ts) is the Wayback fallback.
 - Policy: [`fetch-policy.ts`](fetch-policy.ts) holds the retry, redirect, and failure rules. [`budget.ts`](budget.ts) sizes fan-out from the host's real limits.
-- Scope and safety: [`url.ts`](url.ts) is the one place that decides URL identity and host scope. [`safepath.ts`](safepath.ts) confines paths when `WEBULAR_SANDBOX=1`.
+- Scope and safety: [`url.ts`](url.ts) is the one place that sets URL identity and host scope. [`safepath.ts`](safepath.ts) confines paths when `WEBULAR_SANDBOX=1`.
 - Host: [`proc.ts`](proc.ts) runs subprocesses, [`root.ts`](root.ts) finds the package root, [`platform.ts`](platform.ts) picks the executable that fits the machine.
 
 ## Rules
@@ -16,7 +16,7 @@ Rules for the shared Effect services. They sit under [src/AGENTS.md](../AGENTS.m
 - [`src/machines/fetch.ts`](../machines/fetch.ts) decides every retry, redirect, and failure. [`http.ts`](http.ts) only performs what it asks. Change the rule in [`fetch-policy.ts`](fetch-policy.ts), never in [`http.ts`](http.ts).
 - [`url.ts`](url.ts) matches the exact host on purpose. Apex and `www` siblings are out of scope.
 - Run subprocesses with argv arrays and a timeout. Never use a shell. Drain stdout and stderr together.
-- Cache failures never fail a fetch. They only skip the cache.
+- A cache failure skips the cache and never fails a fetch.
 - [`platform.ts`](platform.ts) has one table of targets. Build, release, and the launcher all read it, so add a target there only.
 
 ### Resources
@@ -31,7 +31,7 @@ Rules for the shared Effect services. They sit under [src/AGENTS.md](../AGENTS.m
 
 ## Checks
 
-- `mise run bugs:security` checks that fetch error text hides key-like query parameters (secrets).
+- `mise run bugs:security` checks that fetch error text hides key-like query parameters.
 - URL identity, charset labels, and `Retry-After` dates have parsing guards in `mise run bugs:parsing`.
 - `src/core/budget.ts:89` calls `Effect.runSync` outside the allowed process edges.
 - `src/core/output.ts:127` and `src/core/args.ts:85` write with `process.stdout.write`, which breaks JSON-RPC-only stdout for `webular mcp`.

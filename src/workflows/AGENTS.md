@@ -4,8 +4,7 @@ Rules for the Mastra workflows, under [src/AGENTS.md](../AGENTS.md).
 
 ## What lives here
 
-One workflow per command, such as [`search.ts`](search.ts), [`scrape.ts`](scrape.ts), [`crawl.ts`](crawl.ts), and [`answer.ts`](answer.ts). A command in [`src/commands/`](../commands/) runs the workflow with the same name.
-
+- One workflow per command, such as [`search.ts`](search.ts), [`scrape.ts`](scrape.ts), [`crawl.ts`](crawl.ts), and [`answer.ts`](answer.ts). A command in [`src/commands/`](../commands/) runs the workflow with the same name.
 - [`runtime.ts`](runtime.ts) is the one place where an Effect program meets a Mastra step. Its runtime also holds the per-origin robots.txt cache.
 - [`scrape-fallback.ts`](scrape-fallback.ts) holds the render and PDF fallbacks around the plain fetch. A PDF is read through `pdfText` in [`src/lib/parse.ts`](../lib/parse.ts), which owns the page cap and the deadline.
 - [`answer.ts`](answer.ts) stamps its result with `asOf`, the run date from [`src/lib/as-of.ts`](../lib/as-of.ts). `WEBULAR_AS_OF` pins it.
@@ -13,7 +12,7 @@ One workflow per command, such as [`search.ts`](search.ts), [`scrape.ts`](scrape
 ## Rules
 
 - A workflow has no model call of its own. Jev decisions go through `decisionStep` from [`src/lib/jev/steps.ts`](../lib/jev/steps.ts), with a rule-based fallback.
-- Every step runs its Effect program through [`runtime.ts`](runtime.ts). Mastra needs a Promise here, so this is the only Promise edge. Do not add another.
+- Every step runs its Effect program through [`runtime.ts`](runtime.ts). Mastra needs a Promise here; this is the only Promise edge, so add no other.
 - Keep the real work in [`src/lib/`](../lib/). A step stays short and calls into it.
 - Fan out with a bounded `Effect.forEach` and a size from [`src/core/budget.ts`](../core/budget.ts). Results keep input order.
 - Give a sub-run a stable run id, such as the target URL.
@@ -22,7 +21,7 @@ One workflow per command, such as [`search.ts`](search.ts), [`scrape.ts`](scrape
 ### robots.txt
 
 - Check robots.txt through `robotsGate` in [`src/lib/robots-gate.ts`](../lib/robots-gate.ts) before any one-off page fetch.
-- A disallowed page is never fetched, and no browser or archive fallback runs for it.
+- A disallowed page is never fetched, and no browser or archive fallback runs.
 - Scrape returns `status: "blocked"` with `reason: "robots"`, the matched `rule`, and `userAgent: "webular"`.
 - Only scrape's `ignoreRobots` fetches a disallowed page, and only for the one URL the user named. Its output carries `robots: "disallowed"`.
 - Batch, map, and crawl have no override.
