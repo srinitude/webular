@@ -33,7 +33,7 @@ describe('map — sitemap XML details', () => {
           `${fx.origin}/p?a=1&b=2`,
           `${fx.origin}/cdata?x=1&y=2`,
           `${fx.origin}/spaced`,
-          `${fx.origin}/q?s=%22a+b%22&t=1`,
+          `${fx.origin}/q?s=%22a%20b%22&t=1`,
         ])
       }),
     ),

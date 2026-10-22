@@ -29,13 +29,19 @@ const isFeed = (xml: string): boolean => {
   return FEED_ROOTS.has(root?.tagName.toLowerCase() ?? '')
 }
 
-function alternates(html: string, base: string): string[] {
+// Links resolve against the page's <base href> when it parses; one that does
+// not parse is skipped, so a bad href never takes a slot or throws.
+function alternates(html: string, page: string): string[] {
   const doc = new DOMParser().parseFromString(html, 'text/html')
   const links = [...doc.querySelectorAll('link[rel~="alternate"][href]')] as Element[]
+  const baseHref = doc.querySelector('base[href]')?.getAttribute('href') ?? ''
+  const base = URL.canParse(baseHref, page) ? new URL(baseHref, page).toString() : page
   return links
     .filter((l) => FEED_TYPE.test(l.getAttribute('type') ?? ''))
+    .map((l) => l.getAttribute('href') ?? '')
+    .filter((href) => URL.canParse(href, base))
     .slice(0, MAX_ALTERNATES)
-    .map((l) => new URL(l.getAttribute('href') ?? '', base).toString())
+    .map((href) => new URL(href, base).toString())
 }
 
 const guesses = (url: string): string[] =>

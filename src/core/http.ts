@@ -109,7 +109,7 @@ function responseEvent(run: Run, res: Response, url: string): Landed & { event: 
   if (RETRY_STATUS.has(res.status)) return { res, url, event: { type: 'RETRYABLE_STATUS' } }
   if (run.host === undefined || !isRedirect(res.status)) return settled
   const location = res.headers.get('location')
-  if (!location) return settled
+  if (!location || !URL.canParse(location, url)) return settled
   const next = new URL(location, url).toString()
   const type = sameHost(run.host, next) ? 'REDIRECT_SAME_HOST' : 'REDIRECT_OFF_HOST'
   return { res, url: next, event: { type } }

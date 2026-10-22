@@ -3,7 +3,9 @@
 // temp-then-rename writes, oldest-last-use-first eviction under an entry and a
 // byte bound, and removal of stale temp files. Cache I/O failures never fail
 // the fetch: they only skip the cache.
+
 import { Clock, Config, Effect, FileSystem, Option, Path, Random, Schema } from 'effect'
+import { parseUtc } from './utc-date.ts'
 
 export interface CacheOptions {
   cache?: boolean
@@ -87,7 +89,7 @@ const freshUntil = (h: Headers, now: number): number | undefined => {
   if (/\bno-cache\b/i.test(control)) return undefined
   const age = /\bmax-age=(\d+)/i.exec(control)?.[1]
   if (age !== undefined) return now + Number(age) * 1000
-  const expires = Date.parse(h.get('expires') ?? '')
+  const expires = parseUtc(h.get('expires') ?? '')
   return Number.isNaN(expires) ? undefined : expires
 }
 

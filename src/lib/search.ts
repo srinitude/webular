@@ -4,7 +4,7 @@
 import { Effect } from 'effect'
 import { parseHTML } from 'linkedom'
 import { fetchText } from '../core/http.ts'
-import { normalizeUrl } from '../core/url.ts'
+import { dedupeKey } from '../core/url.ts'
 import { searchRank } from './jev/decisions/search.ts'
 import { onJevRuntime } from './jev/run.ts'
 import { endpoint, SOURCE_TIMEOUT_MS } from './sources-search.ts'
@@ -56,7 +56,7 @@ const MOBILE_HOST = /^(www|m|amp)\./
 // Dedupe key (SearXNG-style): scheme, www./m./amp. host prefix, /amp suffix,
 // trailing slash, tracking params, and hash do not tell two URLs apart.
 export function hitKey(raw: string): string {
-  const u = URL.parse(normalizeUrl(raw) ?? '')
+  const u = URL.parse(dedupeKey(raw) ?? '')
   if (!u) return raw
   const path = u.pathname.replace(/\/amp\/?$/, '').replace(/\/+$/, '')
   return `${u.hostname.replace(MOBILE_HOST, '')}${path}${u.search}`

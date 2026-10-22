@@ -21,29 +21,34 @@ const replayed = (reader: ReadableStreamDefaultReader<Uint8Array>, first: Uint8A
     cancel: (reason) => reader.cancel(reason),
   })
 
-// Same status and headers; the body is decompressed when it starts with gzip magic.
+// A body gzipped twice is peeled layer by layer; the cap in decode.ts still counts the final bytes.
+const MAX_GZIP_LAYERS = 3
+
+// Same status and headers; the body is decompressed while it starts with gzip magic.
 // A gzip content-type becomes application/xml either way, so the text guard accepts it.
 export const gunzipResponse = Effect.fn('gunzipResponse')(function* (res: Response) {
   if (!res.body) return res
-  const reader = res.body.getReader()
-  const head = yield* Effect.tryPromise({
-    try: () => reader.read(),
-    catch: (err) => new FetchError({ message: errMsg(err) }),
-  })
-  const first = head.done ? undefined : head.value
-  const gz = first?.[0] === 0x1f && first[1] === 0x8b
+  let reader: ReadableStreamDefaultReader<Uint8Array> = res.body.getReader()
+  let layers = 0
+  let body: ReadableStream<Uint8Array>
+  while (true) {
+    const r = reader
+    const head = yield* Effect.tryPromise({
+      try: () => r.read(),
+      catch: (err) => new FetchError({ message: errMsg(err) }),
+    })
+    const first = head.done ? undefined : head.value
+    body = replayed(reader, first)
+    if (!(first?.[0] === 0x1f && first[1] === 0x8b) || layers === MAX_GZIP_LAYERS) break
+    body = body.pipeThrough(
+      new DecompressionStream('gzip') as ReadableWritablePair<Uint8Array<ArrayBuffer>, Uint8Array>,
+    )
+    reader = body.getReader()
+    layers++
+  }
   const headers = new Headers(res.headers)
-  if (gz) headers.delete('content-length')
+  if (layers > 0) headers.delete('content-length')
   const type = (headers.get('content-type') ?? '').split(';')[0]?.trim().toLowerCase() ?? ''
   if (GZIP_TYPES.has(type)) headers.set('content-type', 'application/xml')
-  const body = replayed(reader, first)
-  const inflate = new DecompressionStream('gzip') as ReadableWritablePair<
-    Uint8Array<ArrayBuffer>,
-    Uint8Array
-  >
-  return new Response(gz ? body.pipeThrough(inflate) : body, {
-    status: res.status,
-    statusText: res.statusText,
-    headers,
-  })
+  return new Response(body, { status: res.status, statusText: res.statusText, headers })
 })

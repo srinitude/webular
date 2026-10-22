@@ -1,6 +1,7 @@
 // Page image inventory: what the HTML already says about its images (src,
 // alt, srcset, size, figcaption) plus og:image, read before Readability runs.
 import type { parseHTML } from 'linkedom'
+import { documentBase } from '../core/url.ts'
 
 type DomDocument = ReturnType<typeof parseHTML>['document']
 
@@ -19,7 +20,12 @@ export const textOf = (el: { textContent: string | null } | null | undefined): s
 const absolute = (href: string, base: string): string =>
   href ? (URL.parse(href, base)?.href ?? href) : ''
 
-export function imagesFrom(document: DomDocument, base: string): PageImage[] {
+// Image URLs resolve against <base href> when the page sets one.
+const baseOf = (document: DomDocument, pageUrl: string): string =>
+  documentBase(document.querySelector('base[href]')?.getAttribute('href'), pageUrl)
+
+export function imagesFrom(document: DomDocument, pageUrl: string): PageImage[] {
+  const base = baseOf(document, pageUrl)
   return Array.from(document.querySelectorAll('img[src]'), (img) => {
     const attr = (name: string): string => (img.getAttribute(name) ?? '').trim()
     return {
@@ -33,10 +39,10 @@ export function imagesFrom(document: DomDocument, base: string): PageImage[] {
   })
 }
 
-export const ogImageOf = (document: DomDocument, base: string): string =>
+export const ogImageOf = (document: DomDocument, pageUrl: string): string =>
   absolute(
     (document.querySelector('meta[property="og:image"]')?.getAttribute('content') ?? '').trim(),
-    base,
+    baseOf(document, pageUrl),
   )
 
 // Swaps each <img alt> for its alt text in place, so page text keeps what the

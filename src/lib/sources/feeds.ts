@@ -3,6 +3,7 @@
 // autodiscovery standard every feed reader follows. Second source for `feed`,
 // beside feedsearch.dev: it needs no third-party index, only the site's own HTML.
 import { Effect, Schema } from 'effect'
+import { hasRelToken } from '../../core/url.ts'
 import { getJson, type Hit } from './polite.ts'
 
 const FEED_TYPE = /^application\/(rss|atom)\+xml$/i
@@ -17,8 +18,7 @@ const feedLinks = (html: string, site: string): Hit[] =>
   (html.match(/<link\b[^>]*>/gi) ?? []).flatMap((tag) => {
     const href = attr(tag, 'href')
     const isFeed =
-      attr(tag, 'rel')?.toLowerCase().includes('alternate') &&
-      FEED_TYPE.test(attr(tag, 'type') ?? '')
+      hasRelToken(attr(tag, 'rel'), 'alternate') && FEED_TYPE.test(attr(tag, 'type') ?? '')
     if (!href || !isFeed) return []
     const url = URL.parse(href, site)?.toString()
     return url ? [{ title: attr(tag, 'title') ?? url, url, description: '' }] : []

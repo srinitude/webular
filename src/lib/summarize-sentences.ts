@@ -11,9 +11,11 @@ export interface Spans {
 
 function pushTrimmed(spans: Spans, text: string, from: number, to: number): void {
   const piece = text.slice(from, to)
-  const trimmed = piece.trim()
+  // String.trim keeps U+200B (zero-width space); a sentence segment can start
+  // or end with one, so trim it on both sides with the whitespace.
+  const trimmed = piece.replace(/^[\s\u200B]+|[\s\u200B]+$/g, '')
   if (trimmed.length === 0) return
-  const start = from + piece.length - piece.trimStart().length
+  const start = from + piece.length - piece.replace(/^[\s\u200B]+/, '').length
   spans.starts.push(start)
   spans.ends.push(start + trimmed.length)
 }

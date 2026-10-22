@@ -6,6 +6,7 @@ import { Effect } from 'effect'
 import { DOMParser } from 'linkedom'
 import { z } from 'zod'
 import { resolveFeed } from '../core/feed-source.ts'
+import { hasRelToken } from '../core/url.ts'
 import { stepRuntime } from './runtime.ts'
 
 const feedInput = z.object({
@@ -44,7 +45,7 @@ const text = (el: Element, ...tags: string[]): string => {
 // Atom puts the link in <link href>; prefer rel="alternate" (or no rel).
 function atomLink(el: Element): string {
   const links = [...el.getElementsByTagName('link')] as Element[]
-  const alt = links.find((l) => (l.getAttribute('rel') ?? 'alternate') === 'alternate')
+  const alt = links.find((l) => hasRelToken(l.getAttribute('rel') ?? 'alternate', 'alternate'))
   return (alt ?? links[0])?.getAttribute('href') ?? ''
 }
 

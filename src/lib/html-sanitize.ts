@@ -16,7 +16,8 @@ const UNSAFE_SCHEME = /^(javascript|vbscript|data):/
 // reads webular's output: hidden elements, comments, and invisible characters.
 // ponytail: inline style and attributes only; stylesheet-hidden text (class
 // rules, off-screen positioning, white-on-white) needs a CSS cascade to catch.
-const NEVER_RENDERED = 'script, style, noscript, template'
+// An SVG's <title> and <desc> are tooltip and accessibility labels, not page text.
+const NEVER_RENDERED = 'script, style, noscript, template, svg title, svg desc'
 const HIDDEN_CANDIDATES = '[hidden], [aria-hidden], [style]'
 const HIDDEN_STYLE = /display\s*:\s*none|visibility\s*:\s*hidden/i
 const COMMENT = /<!--[\s\S]*?-->/g

@@ -1,14 +1,14 @@
 // One canonical URL for every dedupe and cache key: tracking params gone,
-// params sorted, fragment dropped, and <link rel="canonical"> honored.
+// params sorted in the dedupe key, fragment dropped, and <link rel="canonical"> honored.
 import { describe, expect, test } from 'bun:test'
 import { canonicalUrl, normalizeUrl } from '../../src/core/url.ts'
 import { hitKey } from '../../src/lib/search.ts'
 import { dedupe } from '../../src/workflows/map.ts'
 
 describe('normalizeUrl: shared canonical form', () => {
-  test('strips tracking params and sorts the rest', () => {
+  test('strips tracking params and keeps the rest in order', () => {
     expect(normalizeUrl('HTTPS://X.dev:443/p?b=2&utm_source=n&a=1&fbclid=z&gclid=q#top')).toBe(
-      'https://x.dev/p?a=1&b=2',
+      'https://x.dev/p?b=2&a=1',
     )
   })
 

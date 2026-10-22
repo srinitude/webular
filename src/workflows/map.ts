@@ -1,4 +1,4 @@
-// MAP workflow: origin-root sitemap (one-level <sitemapindex> recursion), then robots.txt
+// MAP workflow: origin-root sitemap (nested <sitemapindex> recursion, depth-capped), then robots.txt
 // Sitemap: entries, then page links (see pageLinks). Same-host, byte-capped, ordered, deduped.
 import { createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
@@ -7,7 +7,7 @@ import { hostConcurrency } from '../core/budget.ts'
 import { fetchTextWithinHost } from '../core/http.ts'
 import { HttpStatusError } from '../core/http-body.ts'
 import { errMsg } from '../core/output.ts'
-import { normalizeUrl, sameHost } from '../core/url.ts'
+import { dedupeKey, normalizeUrl, sameHost } from '../core/url.ts'
 import { archivedUrls } from '../lib/archive-urls.ts'
 import { jevOrder } from '../lib/crawl.ts'
 import { decisionStep } from '../lib/jev/steps.ts'
@@ -28,15 +28,15 @@ const mapOutput = z.object({
   errors: fetchErrorsSchema,
 })
 
-// The spec forbids nested indexes, so one level suffices; a fetch cap bounds a hostile index.
+// Nested indexes recurse, but a hostile one is bounded: 10 children per index, and an
+// index below MAX_INDEX_DEPTH levels is ignored (at most 1 + 10 + 100 fetches).
 const MAX_CHILD_SITEMAPS = 10
+const MAX_INDEX_DEPTH = 2
 const SITEMAP_TIMEOUT_MS = 15_000
 
-type Discovery = { links: string[]; errors: { url: string; reason: string }[] }
+type MapServices = Effect.Services<ReturnType<typeof fetchTextWithinHost> | typeof hostConcurrency>
 
-type ChildResult =
-  | { loc: string; ok: true; locs: string[] }
-  | { loc: string; ok: false; reason: string }
+type Discovery = { links: string[]; errors: { url: string; reason: string }[] }
 
 const XML_ENTITIES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" }
 // Named XML entities and numeric references; anything else is left as written.
@@ -51,56 +51,67 @@ const decodeXml = (text: string): string =>
   )
 const withoutComments = (xml: string): string => xml.replace(/<!--[\s\S]*?-->/g, '')
 
+// The root element's namespace prefix (`sm:` in <sm:urlset>), or '' when unprefixed. Only
+// tags with that prefix count, so <image:loc> inside a <url> is not read as a page.
+const rootPrefix = (xml: string): string => {
+  const prefix = /<(?:([\w.-]+):)?(?:urlset|sitemapindex)[\s>]/i.exec(xml)?.[1]
+  return prefix ? `${prefix.replace(/\./g, '\\.')}:` : ''
+}
+
 // Each loc resolves against the sitemap's own URL, so relative locs count. Comments
 // are ignored, tags are case-insensitive, and a loc may be CDATA or hold entities.
-function locsOf(xml: string, base: string): string[] {
-  return [
-    ...withoutComments(xml).matchAll(/<loc>\s*(?:<!\[CDATA\[([\s\S]*?)\]\]>|([^<]*?))\s*<\/loc>/gi),
-  ].flatMap((m) => normalizeUrl(m[1] ?? decodeXml(m[2] ?? '').trim(), base) ?? [])
+function locsOf(xml: string, base: string, prefix: string): string[] {
+  const loc = new RegExp(
+    `<${prefix}loc>\\s*(?:<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>|([^<]*?))\\s*<\\/${prefix}loc>`,
+    'gi',
+  )
+  return [...withoutComments(xml).matchAll(loc)].flatMap(
+    (m) => normalizeUrl(m[1] ?? decodeXml(m[2] ?? '').trim(), base) ?? [],
+  )
 }
 
-const fetchChild = (loc: string, host: string, timeoutMs: number): Effect.Effect<ChildResult> =>
-  Effect.match(fetchTextWithinHost(loc, host, { timeoutMs, gunzip: true }), {
-    onFailure: (err): ChildResult => ({ loc, ok: false, reason: errMsg(err) }),
-    onSuccess: (xml): ChildResult => ({ loc, ok: true, locs: locsOf(xml, loc) }),
+// Index children are read as sitemaps themselves, so a child index recurses. A child that
+// fails is reported and the rest still count.
+const childLinks = (
+  locs: string[],
+  host: string,
+  timeoutMs: number,
+  depth: number,
+): Effect.Effect<Discovery, never, MapServices> =>
+  Effect.gen(function* () {
+    const concurrency = yield* hostConcurrency
+    const results = yield* Effect.forEach(
+      locs.slice(0, MAX_CHILD_SITEMAPS),
+      (loc) =>
+        Effect.catch(sitemapAt(loc, host, timeoutMs, depth), (err) =>
+          Effect.succeed<Discovery>({ links: [], errors: [{ url: loc, reason: errMsg(err) }] }),
+        ),
+      { concurrency },
+    )
+    return {
+      links: results.flatMap((r) => r.links),
+      errors: results.flatMap((r) => r.errors),
+    }
   })
 
-function mergeChildren(host: string, results: ChildResult[]): Discovery {
-  const out: Discovery = { links: [], errors: [] }
-  for (const result of results) {
-    // A loop, not push(...spread): a big child sitemap overflows the argument limit.
-    if (!result.ok) {
-      out.errors.push({ url: result.loc, reason: result.reason })
-      continue
-    }
-    for (const u of result.locs) if (sameHost(host, u)) out.links.push(u)
-  }
-  return out
-}
-
-const childLinks = Effect.fnUntraced(function* (locs: string[], host: string, timeoutMs: number) {
-  const concurrency = yield* hostConcurrency
-  const results = yield* Effect.forEach(
-    locs.slice(0, MAX_CHILD_SITEMAPS),
-    (loc) => fetchChild(loc, host, timeoutMs),
-    { concurrency },
-  )
-  return mergeChildren(host, results)
-})
-
-// One sitemap URL: a <urlset>, or a one-level <sitemapindex>. Fails when the
-// fetch fails; callers decide whether that is a fallback or a reported error.
-const sitemapAt = Effect.fn('map.sitemapAt')(function* (
+// One sitemap URL: a <urlset>, or a <sitemapindex> that recurses up to MAX_INDEX_DEPTH. Fails
+// when the fetch fails; callers decide whether that is a fallback or a reported error.
+const sitemapAt = (
   sitemapUrl: string,
   host: string,
   budget: number,
-) {
-  const xml = yield* fetchTextWithinHost(sitemapUrl, host, { timeoutMs: budget, gunzip: true })
-  const sameHostLocs = locsOf(xml, sitemapUrl).filter((u) => sameHost(host, u))
-  if (/<sitemapindex[\s>]/i.test(withoutComments(xml)))
-    return yield* childLinks(sameHostLocs, host, budget)
-  return { links: sameHostLocs, errors: [] } satisfies Discovery
-})
+  depth = 0,
+): Effect.Effect<Discovery, Effect.Error<ReturnType<typeof fetchTextWithinHost>>, MapServices> =>
+  Effect.gen(function* () {
+    const xml = yield* fetchTextWithinHost(sitemapUrl, host, { timeoutMs: budget, gunzip: true })
+    const prefix = rootPrefix(xml)
+    const sameHostLocs = locsOf(xml, sitemapUrl, prefix).filter((u) => sameHost(host, u))
+    if (new RegExp(`<${prefix}sitemapindex[\\s>]`, 'i').test(withoutComments(xml)))
+      return depth >= MAX_INDEX_DEPTH
+        ? ({ links: [], errors: [] } satisfies Discovery)
+        : yield* childLinks(sameHostLocs, host, budget, depth + 1)
+    return { links: sameHostLocs, errors: [] } satisfies Discovery
+  }).pipe(Effect.withSpan('map.sitemapAt'))
 
 const namedSitemap = (loc: string, host: string, budget: number) =>
   Effect.catch(sitemapAt(loc, host, budget), (err) =>
@@ -153,8 +164,9 @@ export function dedupe(links: string[], limit: number): string[] {
   for (const link of links) {
     if (out.length >= limit) break
     const normalized = normalizeUrl(link)
-    if (!normalized || seen.has(normalized)) continue
-    seen.add(normalized)
+    const key = dedupeKey(link)
+    if (!normalized || !key || seen.has(key)) continue
+    seen.add(key)
     out.push(normalized)
   }
   return out
