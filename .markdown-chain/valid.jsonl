@@ -728,3 +728,5 @@
 {"path": "docs/research.md", "sha": "eac3213e129c01a89b40ca710648b8579e56395de416d06f0d822f05e0f4915a"}
 {"path": "docs/research/open-items.md", "sha": "cb08443968f3f8d4f286d348b7996f2d6519b19f6f63dd5d09221d30a11bcbda"}
 {"path": "docs/bug-classes.md", "sha": "261170e680ac5abb73f6830e0d43020a1320cbf0cd906639be969c65e818998f"}
+{"path": "docs/research/open-items.md", "sha": "42bc715a42fa0d701132128962a324f03a7d7f2fa2954b29888fa229aaf0d1bb"}
+{"path": "tests/quality/AGENTS.md", "sha": "f91aa9070e8c178453bff3e2386df07fd69c836b74f629a5b5a9410454843deb"}
