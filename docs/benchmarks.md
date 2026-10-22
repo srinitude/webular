@@ -151,7 +151,7 @@ Each peer has one adapter in [scripts/bench/peers](../scripts/bench/peers/).
 ## Harness biases
 
 The audit in [bench/spec/spec-audit-fixes.md](../bench/spec/spec-audit-fixes.md) lists 16 biases.
-The commit that fixes several of them, `2cc33fb9` on the branch `bench-harness-fairness`, is not part of this branch.
+The fixes for several of them are in commit `2cc33fb9` on the branch `bench-harness-fairness`. These results do not include that commit.
 <!-- bench:start fields -->
 The results file has these top-level fields: `runs`, `seed`, `records`.
 <!-- bench:end -->
