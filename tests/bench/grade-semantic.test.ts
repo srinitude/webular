@@ -21,6 +21,14 @@ test('numbersIn reads scientific notation and unicode superscripts', () => {
   expect(runCheck({ kind: 'numeric', value: 1500, tolerance: 0 }, '1.5 × 10^3')).toBe(true)
 })
 
+test('numbersIn reads full-width, Arabic-Indic, and Devanagari digits as numbers', () => {
+  expect(numbersIn('１,３５８,０００ people')).toEqual([1358000])
+  expect(numbersIn('٤٢ and ۱۹')).toEqual([42, 19])
+  expect(numbersIn('२०२४')).toEqual([2024])
+  expect(numbersIn('2×10³')).toEqual([2000])
+  expect(runCheck({ kind: 'numeric', value: 42, tolerance: 0 }, 'Answer: ４２')).toBe(true)
+})
+
 test('normalizeText folds the ampersand to "and"', () => {
   expect(normalizeText('Johnson & Johnson')).toBe(normalizeText('Johnson and Johnson'))
   expect(aliasMatch('It is Johnson and Johnson.', ['Johnson & Johnson'])).toBe(true)

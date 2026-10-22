@@ -13,9 +13,20 @@ const NUMBER =
 const exponent = (s: string): string =>
   s.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, (c) => String(SUPERSCRIPTS.indexOf(c)))
 
+// Any Unicode decimal digit ("４", "٤", "४") becomes its ASCII digit. Each
+// digit block is a run of tens starting at zero, so the value is the count of
+// digits before it in its run, mod 10.
+const asciiDigit = (d: string): string => {
+  let cp = d.codePointAt(0) as number
+  let k = 0
+  while (/\p{Nd}/u.test(String.fromCodePoint(cp - 1))) [cp, k] = [cp - 1, k + 1]
+  return String(k % 10)
+}
+
 export const numbersIn = (text: string): number[] =>
   [
     ...text
+      .replace(/(?![0-9])\p{Nd}/gu, asciiDigit)
       .replace(/[−⁻]/g, '-')
       .replace(DOT_GROUPED, (g) => g.replaceAll('.', ''))
       .replace(GROUPED, (g) => g.replace(/\D/g, ''))
