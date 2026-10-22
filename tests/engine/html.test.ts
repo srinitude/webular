@@ -92,7 +92,8 @@ describe('page images', () => {
   test('a short page keeps its image alt text in .text', () => {
     const html =
       '<html><body><p>Chart:</p><img src="c.png" alt="Revenue 2025: $4.2M"></body></html>'
-    expect(htmlToArticle(html).text).toBe('Chart: Revenue 2025: $4.2M')
+    // A block break follows the paragraph, so the image's alt text starts a new line.
+    expect(htmlToArticle(html).text).toBe('Chart:\nRevenue 2025: $4.2M')
   })
 
   test('lists every image with src, alt, srcset, size, and caption, plus og:image', () => {
