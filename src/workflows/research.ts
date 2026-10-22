@@ -3,14 +3,13 @@
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
-import { answerSentences } from '../lib/jev/decisions/answer.ts'
 import { searchRounds } from '../lib/jev/decisions/research.ts'
+import { researchSentences } from '../lib/jev/decisions/research-sentences.ts'
 import { decisions } from '../lib/jev/decisions.ts'
 import { onJevRuntime } from '../lib/jev/run.ts'
 import { readabilitySchema, withReadability } from '../lib/readability-chain.ts'
 import { searchEffect } from '../lib/search-chain.ts'
 import { fetchErrorsSchema, fetchSources, type SourceEntry } from '../lib/sources.ts'
-import { summarizeText } from '../lib/summarize.ts'
 import { stepRuntime } from './runtime.ts'
 
 const researchInput = z.object({
@@ -100,8 +99,8 @@ function buildSection(
   topic: string,
   kept: ReadonlyArray<number> = [],
 ) {
-  const all = answerSentences(entry.text)
-  const top = summarizeText(entry.text, topN, { query: topic }).sentences
+  const all = researchSentences(entry.text)
+  const top = researchSentences(entry.text, topN, topic)
   const lead = kept.flatMap((i) => (all[i] === undefined ? [] : [all[i]]))
   const sentences = [...new Set([...lead, ...top])].slice(0, topN)
   const body = sentences.length > 0 ? sentences.join(' ') : 'No extractable content.'

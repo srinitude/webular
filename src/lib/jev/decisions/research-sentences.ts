@@ -2,25 +2,33 @@
 // topic? One call per source asks one yes/no per candidate (they can co-occur, so
 // no single-label Choice) plus an `any` companion that stands in for a none option.
 // Kept sentences open the report section; the summarizer fills the rest.
-import { summarizeText } from '../../summarize.ts'
+import { splitResearchSentences, summarizeText } from '../../summarize.ts'
 import { defineDecision } from '../define.ts'
 import { CONFIDENCE_BAR, noul, purpose, sureYes } from '../payload/index.ts'
-import { answerSentences } from './answer.ts'
 
 const DOCS = '88a6a003018eaea50167565a766a0d4a91d039cf93cc7dc2965d3ceba3a72caf'
 const MAX_SENTENCES = 18 // 18 candidate nouls + `any` per call
 const MAX_TOPIC = 300
 const MAX_SENTENCE = 600
 
+// Research ranks and indexes sentences from its own splitter, not the summarizer's default.
+export const researchSentences = (text: string, topN = Number.POSITIVE_INFINITY, topic?: string) =>
+  summarizeText(
+    text,
+    topN,
+    topic === undefined ? undefined : { query: topic },
+    splitResearchSentences,
+  ).sentences
+
 interface SourceText {
   readonly topic: string
   readonly text: string
 }
-// The topic-aware summarizer's best `n` sentences, as indexes into answerSentences(text).
+// The topic-aware summarizer's best `n` sentences, as indexes into researchSentences(text).
 const best = ({ topic, text }: SourceText, n: number) => {
-  const all = answerSentences(text)
+  const all = researchSentences(text)
   const used = new Set<number>()
-  for (const s of summarizeText(text, n, { query: topic }).sentences) {
+  for (const s of researchSentences(text, n, topic)) {
     const i = all.findIndex((t, j) => t === s && !used.has(j))
     if (i >= 0) used.add(i)
   }
@@ -28,8 +36,8 @@ const best = ({ topic, text }: SourceText, n: number) => {
 }
 // Baseline: the sentence the research workflow's summarizer ranks first.
 const baseline = (input: SourceText) => {
-  const top = summarizeText(input.text, 1, { query: input.topic }).sentences[0] ?? ''
-  return [Math.max(0, answerSentences(input.text).indexOf(top))]
+  const top = researchSentences(input.text, 1, input.topic)[0] ?? ''
+  return [Math.max(0, researchSentences(input.text).indexOf(top))]
 }
 const PURPOSE = purpose(
   'These sentences come from one web page fetched for a research topic.',
@@ -38,7 +46,7 @@ const PURPOSE = purpose(
   'A sentence counts only when it states a fact itself; naming the topic is not enough.',
 )
 const payload = (input: SourceText) => {
-  const all = answerSentences(input.text)
+  const all = researchSentences(input.text)
   const keep = best(input, MAX_SENTENCES)
   return {
     state: {

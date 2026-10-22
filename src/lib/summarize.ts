@@ -103,6 +103,21 @@ export function splitSentences(text: string): Spans {
   return spans
 }
 
+// Research answer sentences keep the original splitter: a sentence ends at [.!?] plus
+// whitespace before an uppercase letter or a quote. One forward scan, O(B), no lookbehind.
+// The research.sentences eval labels are indexes into these sentences.
+const RESEARCH_BOUNDARY = /[.!?]\s+(?=[A-Z"'])/g
+export function splitResearchSentences(text: string): Spans {
+  const spans: Spans = { starts: [], ends: [] }
+  let last = 0
+  for (const m of text.matchAll(RESEARCH_BOUNDARY)) {
+    pushTrimmed(spans, text, last, m.index + 1)
+    last = m.index + m[0].length
+  }
+  pushTrimmed(spans, text, last, text.length)
+  return spans
+}
+
 // Each sentence is tokenized once; tokens become small-integer word ids in
 // one flat array, so the only strings that outlive a sentence are the
 // distinct words. Sentence cuts fall on whitespace, so the joined sentence
@@ -182,8 +197,13 @@ function focusScores(text: string, spans: Spans, focus: Focus): number[] {
     return score
   })
 }
-export function summarizeText(text: string, topN: number, focus?: Focus): SummarizeResult {
-  const spans = splitSentences(text)
+export function summarizeText(
+  text: string,
+  topN: number,
+  focus?: Focus,
+  split: (text: string) => Spans = splitSentences,
+): SummarizeResult {
+  const spans = split(text)
   if (spans.starts.length === 0) return { sentences: [], summary: '' }
   const score = scores(tokenIds(text, spans))
   const key = focus ? focusScores(text, spans, focus) : undefined
