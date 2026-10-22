@@ -249,3 +249,6 @@
 {"path": "tests/bench/AGENTS.md", "sha": "dc017c71d843349fad9119782dfe42e31737d829aa3f39637b4c4c1744062505"}
 {"path": "bench/spec/sources.md", "sha": "69794f956fc752efc3365a549778a89f9b9c8742d0af115a07d57bcfa7b03c2a"}
 {"path": "bench/tasks/LICENSES.md", "sha": "609789c3258cbd975c156c9729b7fd54ee84656e49ccdd865846bbdc942ead08"}
+{"path": "bench/AGENTS.md", "sha": "9b19eca9483540d7163b914639fabf1492e383a4c7a631658cc55a7ff226483b"}
+{"path": "plugins/webular/AGENTS.md", "sha": "c4a4b865e14c53298c17bc03db90a6192e9654a1c91e74108b9652c277b08b56"}
+{"path": "scripts/AGENTS.md", "sha": "eeea49d44aaf1f691d6782160b278352414e07c7e5ddd3f27cf349d8727f479a"}

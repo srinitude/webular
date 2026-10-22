@@ -155,12 +155,6 @@ description = "CI entry — single default dependency path (local + remote)"
 depends = ["validate"]
 run = "echo webular: ci complete"
 
-[tasks.clean]
-description = "Remove build artifacts"
-# Portable delete: `rm -rf` does not exist in the Windows task shell.
-depends = ["setup"]
-run = "bun scripts/clean.ts"
-
 # ───────────────────────── Capability commands ─────────────────────────
 # Each is a Mastra workflow entrypoint. One logical predecessor (`setup`),
 # branching off the root so command runs stay fast and deterministic

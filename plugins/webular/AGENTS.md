@@ -31,8 +31,5 @@ mise run plugin:bundle   # rebuild dist/server.js, the file mcp.json starts
 mise run plugin:dev      # serve MCP over HTTPS at webular-mcp.localhost
 ```
 
-- `plugins/webular/mcp.json:1-5` lacks `$schema` and `type`, and no test checks it against the `1.0.0` schema.
-- `.claude-plugin/marketplace.json:8` says two skills, but `plugins/webular/plugin.json:5` says four.
-- `plugins/webular/README.md:17` names `./src/server.ts`, not `./dist/server.js`. It never names Bun, and `README.md:8` covers only Claude Code.
 - `plugins/webular/src/commands.ts:30` needs `WEBULAR_BIN` or `PATH`, which `mcp.json` does not set.
 - No CI step compares `plugins/webular/package.json:13` with the npm release of `@modelcontextprotocol/server`.
