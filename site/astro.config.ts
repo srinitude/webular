@@ -41,4 +41,6 @@ export default defineConfig({
   trailingSlash: 'never',
   build: { format: 'file', inlineStylesheets: 'always' },
   integrations: [routes],
+  // The CSP allows only same-origin scripts, so the page script ships as a file.
+  vite: { build: { assetsInlineLimit: 0 } },
 })
