@@ -20,7 +20,7 @@ const Reply = Schema.Struct({
       content: Schema.optional(Schema.Array(Schema.Struct({ text: Schema.String }))),
     }),
   ),
-  error: Schema.optional(Schema.Unknown),
+  error: Schema.optional(Schema.Struct({ code: Schema.Number, message: Schema.String })),
 })
 type Reply = typeof Reply.Type
 const decodeReply = Schema.decodeUnknownEffect(Schema.fromJsonString(Reply))
@@ -32,7 +32,7 @@ const CALLS: Record<string, { name: string; arguments: object }> = {
   TOOL_UNKNOWN: { name: 'web.nope', arguments: {} },
 }
 
-// Every reply is a result, never a protocol error; its first text block.
+// A known tool's reply is a result, never a protocol error; its first text block.
 const resultText = (reply: Reply | undefined, isError: boolean) => {
   expect(reply?.error).toBeUndefined()
   expect(reply?.result?.isError ?? false).toBe(isError)
@@ -42,7 +42,8 @@ const resultText = (reply: Reply | undefined, isError: boolean) => {
 const OUTCOMES: Record<string, (reply: Reply | undefined) => void> = {
   TOOL_OK: (r) => expect(resultText(r, false)).toContain('"title":"T"'),
   TOOL_INVALID_ARGS: (r) => expect(resultText(r, true)).toContain('Input validation error'),
-  TOOL_UNKNOWN: (r) => expect(resultText(r, true)).toContain('Tool web.nope not found'),
+  // An unknown tool name is the spec's -32602 protocol error (src/tools/sdk-errors.ts).
+  TOOL_UNKNOWN: (r) => expect(r?.error?.code).toBe(-32602),
 }
 
 const message = (body: object) => `${JSON.stringify({ jsonrpc: '2.0', ...body })}\n`

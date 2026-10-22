@@ -129,6 +129,13 @@ export const mcpToolIds = [...webTools.map((t) => t.id), ...commandTools.map((t)
 // A command tool: the plugin's runCommand, with the result as compact JSON text.
 // The plugin's own numeric cursor pages a long result. A call that runs past
 // `limit` stops (its child process with it) and returns isError.
+const timedOut = (id: string) =>
+  Effect.fail(
+    new CommandFailed({
+      message: `webular ${id} stopped at its time limit. Call it again with a smaller input, or tell the user it took too long.`,
+    }),
+  )
+
 const runTool = (
   id: string,
   args: Record<string, unknown>,
@@ -144,12 +151,7 @@ const runTool = (
     const result = yield* runCommand(id, input, cursor, entryOf).pipe(
       Effect.timeoutOrElse({
         duration: limit,
-        orElse: () =>
-          Effect.fail(
-            new CommandFailed({
-              message: `webular ${id} stopped at its time limit. Call it again with a smaller input, or tell the user it took too long.`,
-            }),
-          ),
+        orElse: () => timedOut(id),
       }),
     )
     return {
@@ -178,26 +180,30 @@ interface CallExtra {
 // With a progressToken, a long tool sends notifications/progress: 0 at the
 // start, a rising beat every 5 seconds (it resets a client's request timeout),
 // and 1 at the end. A lost notification never fails the call.
-const withProgress = <A, E, R>(id: string, extra: CallExtra, work: Effect.Effect<A, E, R>) => {
-  const token = extra._meta?.progressToken
-  if (token === undefined || !LONG_TOOLS.has(id)) return work
-  const send = (progress: number) =>
-    Effect.ignore(
-      Effect.tryPromise(() =>
-        extra.sendNotification({
-          method: 'notifications/progress',
-          params: { progressToken: token, progress, total: 1 },
-        }),
-      ),
-    )
-  const beats = Effect.gen(function* () {
+const progressSender = (extra: CallExtra, token: string | number) => (progress: number) =>
+  Effect.ignore(
+    Effect.tryPromise(() =>
+      extra.sendNotification({
+        method: 'notifications/progress',
+        params: { progressToken: token, progress, total: 1 },
+      }),
+    ),
+  )
+
+const heartbeats = (send: (progress: number) => Effect.Effect<void>) =>
+  Effect.gen(function* () {
     for (let n = 1; ; n++) {
       yield* Effect.sleep('5 seconds')
       yield* send(n / (n + 1))
     }
   })
+
+const withProgress = <A, E, R>(id: string, extra: CallExtra, work: Effect.Effect<A, E, R>) => {
+  const token = extra._meta?.progressToken
+  if (token === undefined || !LONG_TOOLS.has(id)) return work
+  const send = progressSender(extra, token)
   return send(0).pipe(
-    Effect.andThen(Effect.raceFirst(work, beats)),
+    Effect.andThen(Effect.raceFirst(work, heartbeats(send))),
     Effect.tap(() => send(1)),
   )
 }
@@ -211,6 +217,34 @@ type RunWith = <A, E>(
 ) => Promise<A>
 
 // Registration order is tools/list order, so register every tool sorted by id.
+const commandRegistration =
+  (server: McpServer, runWith: RunWith, limit: Duration.Input, entryOf?: EntryOf) =>
+  ({ id, outputSchema: _, inputSchema, ...config }: (typeof commandTools)[number]) =>
+    [
+      id,
+      () =>
+        server.registerTool(
+          id,
+          { ...hintsOnly(config), inputSchema: lenient(inputSchema) },
+          (args: Record<string, unknown>, extra: CallExtra) =>
+            runWith(withProgress(id, extra, runTool(id, args, limit, entryOf)), {
+              signal: extra.signal,
+            }),
+        ),
+    ] as const
+
+const webRegistration =
+  (server: McpServer, runWith: RunWith) => (tool: (typeof webTools)[number]) =>
+    [
+      tool.id,
+      () =>
+        server.registerTool(
+          tool.id,
+          { ...webMeta(tool), inputSchema: tool.schema },
+          (args: Record<string, unknown>, { signal }) => runWith(execute(tool, args), { signal }),
+        ),
+    ] as const
+
 const toolRegistrations = (
   server: McpServer,
   runWith: RunWith,
@@ -218,34 +252,8 @@ const toolRegistrations = (
   entryOf?: EntryOf,
 ) =>
   [
-    ...commandTools.map(
-      ({ id, outputSchema: _, inputSchema, ...config }) =>
-        [
-          id,
-          () =>
-            server.registerTool(
-              id,
-              { ...hintsOnly(config), inputSchema: lenient(inputSchema) },
-              (args: Record<string, unknown>, extra: CallExtra) =>
-                runWith(withProgress(id, extra, runTool(id, args, limit, entryOf)), {
-                  signal: extra.signal,
-                }),
-            ),
-        ] as const,
-    ),
-    ...webTools.map(
-      (tool) =>
-        [
-          tool.id,
-          () =>
-            server.registerTool(
-              tool.id,
-              { ...webMeta(tool), inputSchema: tool.schema },
-              (args: Record<string, unknown>, { signal }) =>
-                runWith(execute(tool, args), { signal }),
-            ),
-        ] as const,
-    ),
+    ...commandTools.map(commandRegistration(server, runWith, limit, entryOf)),
+    ...webTools.map(webRegistration(server, runWith)),
   ].sort(([x], [y]) => (x < y ? -1 : 1))
 
 export const registerAll = Effect.fn('registerAll')(function* (

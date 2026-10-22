@@ -55,27 +55,43 @@ export const runCli = (
 type Write = typeof process.stdout.write
 let loads = 0
 
+const capture =
+  (sink: string[]): Write =>
+  (chunk: string | Uint8Array, ...rest: unknown[]) => {
+    sink.push(typeof chunk === 'string' ? chunk : new TextDecoder().decode(chunk))
+    const done = rest.find((r) => typeof r === 'function') as (() => void) | undefined
+    done?.()
+    return true
+  }
+
+// The process state a run swaps, so restore puts every piece back.
+const snapshot = () => ({
+  argv: [...process.argv],
+  env: { ...process.env },
+  cwd: process.cwd(),
+  out: process.stdout.write,
+  err: process.stderr.write,
+  outTTY: process.stdout.isTTY,
+  errTTY: process.stderr.isTTY,
+})
+
+const restoreFrom = (saved: ReturnType<typeof snapshot>) =>
+  Effect.sync(() => {
+    process.argv.splice(0, process.argv.length, ...saved.argv)
+    for (const key of Object.keys(process.env)) delete process.env[key]
+    Object.assign(process.env, saved.env)
+    process.chdir(saved.cwd)
+    process.stdout.write = saved.out
+    process.stderr.write = saved.err
+    process.stdout.isTTY = saved.outTTY
+    process.stderr.isTTY = saved.errTTY
+  })
+
 const swapGlobals = (entry: string, args: string[], opts: CliOptions) =>
   Effect.sync(() => {
     const out: string[] = []
     const err: string[] = []
-    const capture =
-      (sink: string[]): Write =>
-      (chunk: string | Uint8Array, ...rest: unknown[]) => {
-        sink.push(typeof chunk === 'string' ? chunk : new TextDecoder().decode(chunk))
-        const done = rest.find((r) => typeof r === 'function') as (() => void) | undefined
-        done?.()
-        return true
-      }
-    const saved = {
-      argv: [...process.argv],
-      env: { ...process.env },
-      cwd: process.cwd(),
-      out: process.stdout.write,
-      err: process.stderr.write,
-      outTTY: process.stdout.isTTY,
-      errTTY: process.stderr.isTTY,
-    }
+    const saved = snapshot()
     const env = opts.env
       ? { WEBULAR_JEV: 'off', WEBULAR_NO_CACHE: '1', ...opts.env }
       : { ...process.env, WEBULAR_JEV: 'off' }
@@ -88,17 +104,7 @@ const swapGlobals = (entry: string, args: string[], opts: CliOptions) =>
     process.stderr.write = capture(err)
     process.stdout.isTTY = false
     process.stderr.isTTY = false
-    const restore = Effect.sync(() => {
-      process.argv.splice(0, process.argv.length, ...saved.argv)
-      for (const key of Object.keys(process.env)) delete process.env[key]
-      Object.assign(process.env, saved.env)
-      process.chdir(saved.cwd)
-      process.stdout.write = saved.out
-      process.stderr.write = saved.err
-      process.stdout.isTTY = saved.outTTY
-      process.stderr.isTTY = saved.errTTY
-    })
-    return { out, err, restore }
+    return { out, err, restore: restoreFrom(saved) }
   })
 
 const loadProgram = (entry: string) =>
