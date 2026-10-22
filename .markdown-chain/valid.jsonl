@@ -80,7 +80,7 @@
 {"path": "docs/research/extraction-changes.md", "sha": "407e1844d743a9e4787de9c6f38c3c564727d09ebd12f9b015ecd83407a2bfc9", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/research/open-items.md", "sha": "69b333bd29b756990db51072c2acec6a63a94e99ec6a97c2702ae7b7f8572f00", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/research/retrieval-changes.md", "sha": "bab094478b8602b70d0ffbaf3a0f581d7553d8592a771586b6f50f700d1728c3", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
-{"path": "docs/scoreboard.md", "sha": "1e71d3e737783488837b4d41cd42813903b4d3c9faf208f0420fa42cfa288384", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/scoreboard.md", "sha": "f52d82469e4dfa2acd228f92c1c1fae183e3562ce645bf3ead9f22dee725ebaa", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/tasks.md", "sha": "fbe33bd92dbd7446dc6d0faac7a4d82215c6d618f143453a378cf1d47f2aefe0", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/why-webular.md", "sha": "24def1af6cc648b72563ba215f245aa56e6e63f8c8648b63717f9b45a4e185ee", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "plugins/AGENTS.md", "sha": "c05c832eb2f3ab3990a07401c1384730b95b7c9c6195f1c00f026f223089cbcc", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}

@@ -13,11 +13,9 @@ import { coverage } from '../e2e/surface.ts'
 const PLUGIN = `${ROOT}plugins/webular/`
 const CLAUDE_ROOT = ['$', '{CLAUDE_PLUGIN_ROOT}'].join('')
 
-// Commands no skill names, each with the reason. A stale entry fails the test.
-const UNDOCUMENTED: Record<string, string> = {
-  upgrade: 'a local install command, not research',
-  completions: 'a shell-setup command, not research',
-}
+// Commands no skill names, each with the reason; local install and shell setup are not
+// research. A stale entry fails the test.
+const UNDOCUMENTED: Record<string, string> = { upgrade: 'install', completions: 'shell setup' }
 // Flags that belong to a script, not to a webular command, and the file that reads them.
 const FOREIGN_FLAGS: Record<string, string> = {
   http: 'plugins/webular/src/server.ts',
