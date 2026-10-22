@@ -1,9 +1,9 @@
 # tests/jev/AGENTS.md
 
-This folder holds the tests for the Jev framework in [`src/lib/jev/`](../../src/lib/jev/), and it follows [tests/AGENTS.md](../AGENTS.md).
+Tests for the Jev framework in [`src/lib/jev/`](../../src/lib/jev/). The parent rules are in [tests/AGENTS.md](../AGENTS.md).
 
 - `mise run jev:check` runs every test here.
-- A test whose name ends in eval.test.ts runs a decision against its cases.
+- A test whose name ends in eval.test.ts runs one decision against its cases.
 - [`evals-sync.test.ts`](evals-sync.test.ts) checks that every file in [evals/](evals/) belongs to exactly one decision.
 - [`answer-figure.eval.test.ts`](answer-figure.eval.test.ts) and [`research-figures.eval.test.ts`](research-figures.eval.test.ts) compare the image arm with the text-only arm, offline.
 - [`key-platform.test.ts`](key-platform.test.ts) checks that `TYPESAFE_API_KEY` works on every system and that the Keychain lookup runs only on macOS.

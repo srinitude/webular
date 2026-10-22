@@ -11,7 +11,7 @@ Tests for packaging and release. The parent rules are in [tests/AGENTS.md](../AG
 ## Rules
 
 - These tests read the workflows in `.github/workflows/` and the generators in [`src/release/`](../../src/release/). Changing a workflow needs a yes first.
-- Nothing here publishes or pushes. Tests check files and local runs only.
+- Nothing here publishes or pushes. These tests check files and local runs only.
 
 ## Checks
 
