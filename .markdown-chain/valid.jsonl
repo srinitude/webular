@@ -172,7 +172,7 @@
 {"path": "src/mise/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "src/release/AGENTS.md", "sha": "9d0592a4a1f6e0e27dafe07e5916e2fbfd2050b4ce707eede7fbee2effd6adcc", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "src/release/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
-{"path": "src/tools/AGENTS.md", "sha": "428f8c38cecab427295d7f3c88104e8ae0600e1abb955192307938bfb97954ad", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "src/tools/AGENTS.md", "sha": "a590ca81a8343334ef9a9934b9dadcfc8b66c6728a93b1d1e7a53eed41e795fb", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "src/tools/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "src/workflows/AGENTS.md", "sha": "ae3838e95cc4ed2e031ea4026fbf8b948eb7b38557f14be2b67fb8a504e1256d", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "src/workflows/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}

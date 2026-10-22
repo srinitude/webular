@@ -15,6 +15,7 @@ Rules for the MCP tools, under [src/AGENTS.md](../AGENTS.md).
 - A handler parses its input again with the same zod schema. A failing tool returns `isError` content and never breaks the protocol.
 - Load machines and the MCP SDK lazily, so `mcp --list` stays fast.
 - A tool calls the same workflow its command does. It has no logic of its own.
+- A command with no tool sits in `NOT_ON_MCP` in [web.ts](web.ts), with its reason.
 
 ### MCP SDK
 
