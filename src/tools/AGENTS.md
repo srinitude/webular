@@ -12,13 +12,14 @@ Rules for the MCP tool definitions, under [src/AGENTS.md](../AGENTS.md).
 ## Rules
 
 - A tool shares its name, input shape, and error text with its CLI command. Ask first before you rename one.
+- Bad tool input (an unknown key or a bad paging cursor) gets an `isError` result, never a silent drop. `mise run bugs:mcp-cli` checks it.
 - A handler parses its input again with the same zod schema. A failing tool returns `isError` content and never breaks the protocol.
 - Load machines and the MCP SDK lazily, so `mcp --list` stays fast.
 - A tool calls the same workflow its command does. It has no logic of its own.
 
 ### MCP SDK
 
-- `registerTool(name, config, handler)` takes raw Zod shapes for `inputSchema` and `outputSchema`. An `outputSchema` pairs with `structuredContent`, which the SDK validates. A failure is a tool result with `isError: true` and a text recovery hint.
+- `registerTool(name, config, handler)` takes a Zod shape or a Zod object for `inputSchema` and `outputSchema`. The web tools pass their strict object, so the SDK refuses unknown keys instead of dropping them. An `outputSchema` pairs with `structuredContent`, which the SDK validates. A failure is a tool result with `isError: true` and a text recovery hint.
 - Stdio is `new StdioServerTransport()` then `server.connect(transport)`. On stdio, stdout carries only JSON-RPC and logs go to stderr (unverified at this pin).
 - Never import first- and second-generation SDK objects in one file.
 

@@ -19,6 +19,7 @@
   "mcp-cli": {
     "globs": [
       "tests/mcp/**/*.test.ts",
+      "tests/**/*.mcp-cli.test.ts",
       "tests/contract/**/*.test.ts",
       "tests/commands/mcp*.test.ts",
       "tests/cli/exit-codes.test.ts"

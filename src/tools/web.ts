@@ -129,8 +129,12 @@ export const mcpToolIds = [...webTools.map((t) => t.id), ...commandTools.map((t)
 // A command tool: the plugin's runCommand, with the result as compact JSON text.
 // The plugin's own numeric cursor pages a long result.
 const runTool = (id: string, args: Record<string, unknown>, entryOf?: EntryOf) => {
-  const { cursor, ...input } = args
-  return runCommand(id, input, typeof cursor === 'number' ? cursor : 0, entryOf).pipe(
+  const { cursor = 0, ...input } = args
+  // lenient() passes a bad cursor through; refuse it rather than page from 0.
+  if (!Number.isInteger(cursor) || (cursor as number) < 0) {
+    return Effect.succeed(failure('cursor: use the cursor value from the previous result'))
+  }
+  return runCommand(id, input, cursor as number, entryOf).pipe(
     Effect.map(
       (result): McpText => ({
         content: [{ type: 'text', text: stableJson(result) }],
@@ -174,7 +178,7 @@ const toolRegistrations = (server: McpServer, runWith: RunWith, entryOf?: EntryO
           () =>
             server.registerTool(
               tool.id,
-              { ...webMeta(tool), inputSchema: tool.schema.shape },
+              { ...webMeta(tool), inputSchema: tool.schema },
               (args: Record<string, unknown>, { signal }) =>
                 runWith(execute(tool, args), { signal }),
             ),
