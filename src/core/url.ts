@@ -15,11 +15,14 @@ export function normalizeUrl(raw: string, base?: string): string | null {
   url.hash = ''
   url.pathname = url.pathname.replace(/%[0-9a-f]{2}/gi, (e) => e.toUpperCase())
   // Edit the raw query, never re-serialize it: `?foo` and `%20` stay as written.
-  url.search = url.search
+  // The search setter strips one leading `?`, so add it back: a query that starts
+  // with a literal `?` (`/??`) keeps it, and an empty query drops the `?`.
+  const query = url.search
     .slice(1)
     .split('&')
     .filter((p) => p && !TRACKING.test(p.replace(/=.*/, '')))
     .join('&')
+  url.search = query && `?${query}`
   return url.toString()
 }
 

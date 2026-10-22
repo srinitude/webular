@@ -7,10 +7,7 @@ import { normalizeUrl } from '../../src/core/url.ts'
 import { eff } from '../_support/run.ts'
 
 const trackingKeys = ['utm_source', 'fbclid', 'gclid', '_ga', 'mc_cid']
-// A query holding a literal `?` (`http://a.aa/??`) normalizes to `http://a.aa/?` and only then to `http://a.aa/`: the generator skips it.
-const anyUrl = fc
-  .webUrl({ withQueryParameters: true, withFragments: true })
-  .filter((url) => !url.slice(url.indexOf('?') + 1).includes('?'))
+const anyUrl = fc.webUrl({ withQueryParameters: true, withFragments: true })
 const trackedUrl = fc
   .tuple(anyUrl, fc.constantFrom(...trackingKeys), fc.string())
   .map(
@@ -28,6 +25,8 @@ test(
           expect(once).not.toBeNull()
           expect(normalizeUrl(once as string)).toBe(once)
         }),
+        // A query that starts with a literal `?` once lost it one pass at a time.
+        { examples: [['http://a.aa/??'], ['http://a.aa/??x=1&utm_source=y']] },
       ),
     ),
   ),
