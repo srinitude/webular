@@ -4,7 +4,6 @@ import type { Effect } from 'effect'
 import { crossref, openalex } from '../scholarly.ts'
 import { commonCrawlCdx, libraryOfCongress, waybackAvailable, waybackCdx } from './archives.ts'
 import { openLibrary } from './books.ts'
-import { brave } from './byok.ts'
 import { bluesky, reddit, stackExchange } from './communities.ts'
 import { siteFeeds } from './feeds.ts'
 import { gdelt, hnAlgolia } from './news.ts'
@@ -22,7 +21,6 @@ export const FREE_SOURCES = {
   stackexchange: stackExchange,
   'github-search': githubSearch,
   marginalia,
-  brave,
   feedsearch: feedSearch,
   'site-feeds': siteFeeds,
   'wayback-available': waybackAvailable,
@@ -61,7 +59,6 @@ export const SOURCE_TRUST: Record<FreeSource, number> = {
   'site-feeds': 0.6,
   'hn-algolia': 0.5,
   gdelt: 0.5,
-  brave: 0.7,
   marginalia: 0.4,
   reddit: 0.3,
   bluesky: 0.3,
@@ -71,6 +68,5 @@ export const SOURCE_TRUST: Record<FreeSource, number> = {
 // (a comment, not an export: no code reads it):
 // - marginalia: about 15 queries a minute, shared by all on the public key; data CC-BY-NC-SA 4.0
 // - github-search: unauthenticated core limit 60 an hour; search 10 a minute
-// - brave: opt-in --byok, your own Brave key (BRAVE_API_KEY or Keychain item webular-brave); plan limits apply
 // - web: DuckDuckGo HTML, terms unclear, so fallback only
 // - mojeek: excluded, its site forbids automation and its API is paid

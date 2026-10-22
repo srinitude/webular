@@ -3,8 +3,7 @@
 // benchmarks/free-sources.md). Ranking and merging stay with the search chain;
 // it calls freeSourceSearch, freeSourceFallback or freeSourceStatus and
 // decides what to keep.
-import { Clock, Data, Duration, Effect, Option } from 'effect'
-import { braveKey } from './byok.ts'
+import { Clock, Data, Duration, Effect } from 'effect'
 import { FREE_SOURCES, type FreeSource, SOURCE_TRUST } from './catalog.ts'
 import { type Hit, TIMEOUT_MS } from './polite.ts'
 import { rankHits } from './rank.ts'
@@ -79,7 +78,7 @@ const freeSourceSearch = (source: FreeSource, query: string, limit: number) =>
   )
 
 // The longest command order; a command asks that many sources at once.
-const MAX_SOURCES = 9
+const MAX_SOURCES = 8
 
 const attempt = (source: FreeSource, query: string, limit: number) =>
   freeSourceSearch(source, query, limit).pipe(
@@ -87,21 +86,13 @@ const attempt = (source: FreeSource, query: string, limit: number) =>
     Effect.catch((e) => Effect.succeed({ source, hits: [] as Hit[], error: String(e.cause) })),
   )
 
-// The command's order, plus Brave first for a search run that has a BYOK key.
-const orderOf = (command: FreeSourceCommand): Effect.Effect<ReadonlyArray<FreeSource>> =>
-  command === 'search'
-    ? Effect.map(braveKey, (key) =>
-        Option.isSome(key) ? ['brave', ...FREE_SOURCE_ORDER.search] : FREE_SOURCE_ORDER.search,
-      )
-    : Effect.succeed(FREE_SOURCE_ORDER[command])
-
 // Ask every source routed to a command at once, rank the merged hits by trust
 // and recency, and keep `limit`. Every source that failed or came back empty
 // is listed in `failures`; when none answered, the run fails with all of them.
 export const freeSourceFallback = (command: FreeSourceCommand, query: string, limit: number) =>
   Effect.gen(function* () {
     const ask = (s: FreeSource) => attempt(s, query, limit)
-    const runs = yield* Effect.forEach(yield* orderOf(command), ask, {
+    const runs = yield* Effect.forEach(FREE_SOURCE_ORDER[command], ask, {
       concurrency: MAX_SOURCES,
     })
     const failures = runs.filter((r) => r.error).map(({ source, error }) => ({ source, error }))
