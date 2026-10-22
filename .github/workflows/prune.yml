@@ -85,6 +85,7 @@ jobs:
           git -c user.name='Kiren Srinivasan' -c user.email='kiren@fantasymetals.com' \
             commit -m 'chore: prune dead code'
           git push "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/${PRUNE_BRANCH}"
+          # shellcheck disable=SC2016 # the backticks are Markdown in the PR body
           gh pr create --draft --base main --head "$PRUNE_BRANCH" \
             --title 'chore: prune dead code' \
             --body 'Opened by the Prune workflow: `mise run prune:check` failed, and `mise run prune:fix` produced this change. Review before merging.'

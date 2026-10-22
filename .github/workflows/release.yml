@@ -128,7 +128,7 @@ jobs:
           persist-credentials: false
       - name: Run mise run test on Alpine
         run: |
-          docker run --rm -v "$PWD:/w" -w /w -e MISE_LOCKED=1 oven/bun:1.4.3-alpine sh -ec '
+          docker run --rm -v "$PWD:/w" -w /w -e MISE_LOCKED=1 oven/bun:1.4.3-alpine@sha256:629e17411f1f129dbec3af78d5af9c9f2a937435c80349437206c6b0b7422373 sh -ec '
             apk add --no-cache git fish mandoc libgcc libstdc++ bash curl nodejs npm procps
             apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community mise
             git config --global --add safe.directory /w
@@ -285,7 +285,7 @@ jobs:
         if: ${{ matrix.musl }}
         run: |
           chmod +x smoke/*
-          docker run --rm -e KEY -v "$PWD/smoke:/s:ro" alpine:3.22 sh -ec 'apk add --no-cache libgcc libstdc++ && /s/webular-$KEY --version && /s/webular-$KEY --help'
+          docker run --rm -e KEY -v "$PWD/smoke:/s:ro" alpine:3.22@sha256:d406446bc05b82480756ce8f1287964d28768c23955fa9480d2a74a2eae7a654 sh -ec 'apk add --no-cache libgcc libstdc++ && /s/webular-$KEY --version && /s/webular-$KEY --help'
 
   publish:
     needs: [assets, smoke]
