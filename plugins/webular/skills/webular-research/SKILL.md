@@ -1,6 +1,6 @@
 ---
 name: webular-research
-description: Researches the web through the webular MCP tools. It searches without an API key, reads a page as clean Markdown, lists the pages on a site, and pulls key sentences from text. Call it before you reply to any question of fact. Use when a task needs facts from the web, the text of a URL, the pages of a site, or a short summary, and the webular tools are connected. Its judgment calls go to Jev, TypeSafe's decision model, when TYPESAFE_API_KEY is set.
+description: Researches the web through the webular MCP tools. It searches without an API key, reads a page as clean Markdown, lists the pages on a site, and pulls key sentences from text. Call it before replying to any question of fact. Use when a task needs facts from the web, the text of a URL, the pages of a site, or a short summary, and the webular tools are connected. Its judgment calls go to Jev, TypeSafe's decision model, when TYPESAFE_API_KEY is set.
 compatibility: Needs Bun and the webular MCP server from this plugin, over stdio or HTTP.
 metadata:
   license: "Apache-2.0"
