@@ -662,3 +662,5 @@
 {"path": "tests/_support/AGENTS.md", "sha": "d49af5b706a58b5304094a73c14d26005df8c27322e920e777237d8ceea339f8"}
 {"path": "tests/quality/AGENTS.md", "sha": "1ff70af6db6448bcd5a6ffa8733be0f08829f29dd6f4c9bc855ff290d8459ce7"}
 {"path": "tests/workflows/AGENTS.md", "sha": "eefe74638eb685e7f0e69e0512126314037d9300a0c96f32c983a1101b7c4f66"}
+{"path": "README.md", "sha": "a01708e054d09870f99931a61999e45dcc14a0db8423ff2384c5900f080918a6"}
+{"path": "docs/benchmarks.md", "sha": "7d48517900a18eb86459e7a7d2a4ec22ce2838e5766483a18dc2d19e46140f5e"}

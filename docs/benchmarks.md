@@ -5,10 +5,10 @@ This page shows how webular scores against other web research tools on the same 
 ## Source files
 
 <!-- bench:start run -->
-All numbers come from one committed peer run, with 3 runs per task (sha256 `b529ddc7af62`):
+All numbers come from one committed peer run, with 3 runs per task (sha256 `1be6c97a6664`):
 
-- [peers-2026-10-22T00-58-50-543Z.json](../bench/results/peers-2026-10-22T00-58-50-543Z.json): one row per tool, task, and run, with its status and accuracy.
-- [peers-2026-10-22T00-58-50-543Z.txt](../bench/results/peers-2026-10-22T00-58-50-543Z.txt): the harness's text report for the same run.
+- [peers-2026-10-22T07-59-24-916Z.json](../bench/results/peers-2026-10-22T07-59-24-916Z.json): one row per tool, task, and run, with its status and accuracy.
+- [peers-2026-10-22T07-59-24-916Z.txt](../bench/results/peers-2026-10-22T07-59-24-916Z.txt): the harness's text report for the same run.
 <!-- bench:end -->
 
 The results file holds no confidence intervals, no paired tests, and no p values. So this page gives none, and it calls no win or loss as proven. `mise run bench:docs` writes every number on this page from the results file. A test fails when a number here differs from that file.
@@ -16,17 +16,17 @@ The results file holds no confidence intervals, no paired tests, and no p values
 ## Short answer
 
 <!-- bench:start short -->
-- **answer:** webular scores 0.714 on 7 tasks; exa scores 1.000 on 7 tasks. Source: [peers-2026-10-22T00-58-50-543Z.json](../bench/results/peers-2026-10-22T00-58-50-543Z.json).
-- **scrape:** webular scores 1.000 on 6 tasks; exa scores 1.000 on 3 tasks; firecrawl scores 0.667 on 3 tasks; readability scores 0.333 on 3 tasks. Source: [peers-2026-10-22T00-58-50-543Z.json](../bench/results/peers-2026-10-22T00-58-50-543Z.json).
-- **search:** webular scores 1.000 on 4 tasks; exa scores 1.000 on 4 tasks; firecrawl scores 1.000 on 4 tasks. Source: [peers-2026-10-22T00-58-50-543Z.json](../bench/results/peers-2026-10-22T00-58-50-543Z.json).
-- **Where webular leads:** it runs offline, needs 0 keys, and costs 0 USD per call. Source: [the text report](../bench/results/peers-2026-10-22T00-58-50-543Z.txt).
+- **answer:** webular scores 0.714 on 7 tasks; exa scores 1.000 on 7 tasks; parallel scores 1.000 on 7 tasks; perplexity scores 1.000 on 7 tasks; tavily scores 1.000 on 7 tasks. Source: [peers-2026-10-22T07-59-24-916Z.json](../bench/results/peers-2026-10-22T07-59-24-916Z.json).
+- **scrape:** webular scores 1.000 on 6 tasks; exa scores 1.000 on 3 tasks; firecrawl scores 0.667 on 3 tasks; jina scores 0.667 on 3 tasks; readability scores 0.333 on 3 tasks. Source: [peers-2026-10-22T07-59-24-916Z.json](../bench/results/peers-2026-10-22T07-59-24-916Z.json).
+- **search:** webular scores 1.000 on 4 tasks; exa scores 1.000 on 4 tasks; firecrawl scores 1.000 on 4 tasks; parallel scores 1.000 on 4 tasks; tavily scores 1.000 on 4 tasks; youcom scores 1.000 on 4 tasks. Source: [peers-2026-10-22T07-59-24-916Z.json](../bench/results/peers-2026-10-22T07-59-24-916Z.json).
+- **Where webular leads:** it runs offline, needs 0 keys, and costs 0 USD per call. Source: [the text report](../bench/results/peers-2026-10-22T07-59-24-916Z.txt).
 <!-- bench:end -->
 
 ## What ran
 
 <!-- bench:start ran -->
-The run has 17 tasks: 4 search, 6 scrape, 7 answer.
-Source: [peers-2026-10-22T00-58-50-543Z.json](../bench/results/peers-2026-10-22T00-58-50-543Z.json).
+The run has 17 tasks: 6 scrape, 7 answer, 4 search.
+Source: [peers-2026-10-22T07-59-24-916Z.json](../bench/results/peers-2026-10-22T07-59-24-916Z.json).
 <!-- bench:end -->
 
 Rows per tool, from the results file:
@@ -34,38 +34,37 @@ Rows per tool, from the results file:
 <!-- bench:start status -->
 | tool | ok | error | unsupported | skipped | unrecorded |
 | --- | --- | --- | --- | --- | --- |
-| webular | 51 | 0 | 0 | 0 | 0 |
-| perplexity | 0 | 0 | 30 | 0 | 21 |
+| curl-html2text | 0 | 0 | 0 | 51 | 0 |
+| gemini | 0 | 20 | 30 | 1 | 0 |
+| serpapi | 0 | 0 | 0 | 51 | 0 |
+| parallel | 20 | 0 | 18 | 13 | 0 |
+| linkup | 0 | 0 | 0 | 51 | 0 |
+| spider | 0 | 0 | 0 | 51 | 0 |
+| anthropic-web | 0 | 0 | 0 | 51 | 0 |
+| contextdev | 0 | 0 | 0 | 51 | 0 |
+| vertex-grounding | 0 | 0 | 0 | 51 | 0 |
+| youcom | 12 | 0 | 39 | 0 | 0 |
+| exa | 20 | 0 | 9 | 22 | 0 |
+| crawl4ai | 0 | 0 | 0 | 51 | 0 |
+| serper | 0 | 0 | 0 | 51 | 0 |
+| scrapegraph | 0 | 0 | 0 | 102 | 0 |
+| browserbase | 0 | 20 | 30 | 1 | 0 |
+| jina | 9 | 11 | 30 | 1 | 0 |
+| bing-grounding | 0 | 0 | 0 | 51 | 0 |
+| tinyfish | 0 | 0 | 0 | 51 | 0 |
+| readability | 9 | 0 | 33 | 0 | 9 |
+| openai-web-search | 0 | 0 | 0 | 51 | 0 |
+| tavily | 20 | 0 | 18 | 13 | 0 |
+| perplexity | 20 | 0 | 30 | 1 | 0 |
 | searxng | 0 | 0 | 0 | 51 | 0 |
 | trafilatura | 0 | 0 | 0 | 51 | 0 |
-| tavily | 0 | 0 | 18 | 0 | 33 |
-| spider | 0 | 0 | 0 | 51 | 0 |
-| parallel | 0 | 0 | 18 | 0 | 33 |
-| contextdev | 0 | 0 | 0 | 51 | 0 |
-| linkup | 0 | 0 | 0 | 51 | 0 |
-| jina | 0 | 0 | 30 | 0 | 21 |
-| zyte | 0 | 0 | 0 | 51 | 0 |
-| readability | 9 | 0 | 33 | 0 | 9 |
-| scrapegraph | 0 | 0 | 0 | 102 | 0 |
-| exa | 20 | 0 | 9 | 22 | 0 |
-| serper | 0 | 0 | 0 | 51 | 0 |
-| browserbase | 0 | 0 | 30 | 0 | 21 |
-| valyu | 0 | 0 | 0 | 51 | 0 |
-| brave | 0 | 0 | 0 | 51 | 0 |
-| nimble | 0 | 0 | 0 | 51 | 0 |
-| gemini | 0 | 0 | 30 | 0 | 21 |
 | apify | 0 | 0 | 0 | 51 | 0 |
-| curl-html2text | 0 | 0 | 0 | 51 | 0 |
-| serpapi | 0 | 0 | 0 | 51 | 0 |
-| brightdata | 0 | 0 | 0 | 51 | 0 |
-| tinyfish | 0 | 0 | 0 | 51 | 0 |
-| openai-web-search | 0 | 0 | 0 | 51 | 0 |
-| youcom | 0 | 0 | 39 | 0 | 12 |
-| vertex-grounding | 0 | 0 | 0 | 51 | 0 |
+| nimble | 0 | 0 | 0 | 51 | 0 |
+| zyte | 0 | 0 | 0 | 51 | 0 |
 | firecrawl | 20 | 0 | 30 | 1 | 0 |
-| crawl4ai | 0 | 0 | 0 | 51 | 0 |
-| bing-grounding | 0 | 0 | 0 | 51 | 0 |
-| anthropic-web | 0 | 0 | 0 | 51 | 0 |
+| brightdata | 0 | 0 | 0 | 51 | 0 |
+| valyu | 0 | 0 | 0 | 51 | 0 |
+| webular | 51 | 0 | 0 | 0 | 0 |
 <!-- bench:end -->
 
 - A tool with no `ok` rows has no score. A missing score is never a zero. A tool with no key is skipped. The harness reads keys from the environment or the Keychain, and the text report names the missing key.
@@ -78,14 +77,21 @@ Each score keeps only rows with status `ok`. It averages each task over its runs
 | job | tool | tasks | mean accuracy |
 | --- | --- | --- | --- |
 | answer | exa | 7 | 1.000 |
+| answer | parallel | 7 | 1.000 |
+| answer | perplexity | 7 | 1.000 |
+| answer | tavily | 7 | 1.000 |
 | answer | webular | 7 | 0.714 |
 | scrape | exa | 3 | 1.000 |
 | scrape | firecrawl | 3 | 0.667 |
+| scrape | jina | 3 | 0.667 |
 | scrape | readability | 3 | 0.333 |
 | scrape | webular | 6 | 1.000 |
 | search | exa | 4 | 1.000 |
 | search | firecrawl | 4 | 1.000 |
+| search | parallel | 4 | 1.000 |
+| search | tavily | 4 | 1.000 |
 | search | webular | 4 | 1.000 |
+| search | youcom | 4 | 1.000 |
 <!-- bench:end -->
 
 ## Shared tasks
@@ -93,19 +99,19 @@ Each score keeps only rows with status `ok`. It averages each task over its runs
 These rows compare webular with one peer only on the tasks both tools answered.
 
 <!-- bench:start shared -->
-| metric | webular | firecrawl (7 shared tasks) | webular | exa (14 shared tasks) | webular | readability (3 shared tasks) |
-| --- | --- | --- | --- | --- | --- | --- |
-| accuracy | 1 | 0.85 | 0.857 | 1 | 1 | 0.333 |
-| citation precision | n/a | n/a | n/a | 0.977 | n/a | n/a |
-| latency p50 (ms) | 696 | 534 | 1693 | 1270 | 469 | 6 |
-| latency p95 (ms) | 2873 | 782 | 3301 | 1695 | 1132 | 47 |
-| success rate | 1 | 1 | 1 | 1 | 1 | 1 |
-| determinism | 0.429 | 1 | 0.571 | 0.5 | 1 | 1 |
-| cost per call (USD) | 0 | 0.00129 | 0 | 0.005 | 0 | 0 |
-| keys needed | 0 | 1 | 0 | 1 | 0 | 0 |
+| metric | webular | firecrawl (7 shared tasks) | webular | exa (14 shared tasks) | webular | tavily (11 shared tasks) | webular | perplexity (7 shared tasks) | webular | parallel (11 shared tasks) | webular | youcom (4 shared tasks) | webular | jina (7 shared tasks) | webular | browserbase (7 shared tasks) | webular | gemini (7 shared tasks) | webular | readability (3 shared tasks) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| accuracy | 1 | 0.85 | 0.857 | 1 | 0.818 | 1 | 0.714 | 1 | 0.818 | 1 | 1 | 1 | 1 | 0.3 | 1 | 0 | 0.714 | 0 | 1 | 0.333 |
+| citation precision | n/a | n/a | n/a | 0.963 | n/a | 0.908 | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a | n/a |
+| latency p50 (ms) | 526 | 613 | 1594 | 1169 | 1825 | 1504 | 2737 | 1532 | 1825 | 1751 | 459 | 122 | 526 | 60000 | 526 | 60000 | 2737 | 60000 | 362 | 4 |
+| latency p95 (ms) | 3741 | 1142 | 3741 | 1581 | 3460 | 2049 | 3460 | 1805 | 3460 | 3114 | 782 | 820 | 3741 | 60000 | 3741 | 60000 | 3460 | 60000 | 1457 | 42 |
+| success rate | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 0.45 | 1 | 0 | 1 | 0 | 1 | 1 |
+| determinism | 0.571 | 0.857 | 0.5 | 0.5 | 0.364 | 1 | 0.429 | 0.286 | 0.364 | 0.111 | 0.25 | 1 | 0.571 | 1 | 0.571 | 1 | 0.429 | 1 | 1 | 1 |
+| cost per call (USD) | 0 | 0.00129 | 0 | 0.0048 | 0 | 0.008 | 0 | 0.00504 | 0 | 0.00685 | 0 | 0.005 | 0 | 0.000929 | 0 | n/a | 0 | n/a | 0 | 0 |
+| keys needed | 0 | 1 | 0 | 1 | 0 | 1 | 0 | 1 | 0 | 1 | 0 | 1 | 0 | 1 | 0 | 1 | 0 | 1 | 0 | 0 |
 
-Across all of its own tasks, webular has an accuracy of 0.882, a success rate of 1, a p50 latency of 1361 ms, and a p95 latency of 3301 ms.
-Source: [the text report](../bench/results/peers-2026-10-22T00-58-50-543Z.txt).
+Across all of its own tasks, webular has an accuracy of 0.882, a success rate of 1, a p50 latency of 997 ms, and a p95 latency of 3741 ms.
+Source: [the text report](../bench/results/peers-2026-10-22T07-59-24-916Z.txt).
 <!-- bench:end -->
 
 ### What the numbers say
@@ -115,9 +121,16 @@ Source: [the text report](../bench/results/peers-2026-10-22T00-58-50-543Z.txt).
 <!-- bench:start notes -->
 - On the 7 tasks it shares with firecrawl, webular leads on accuracy, 1 against 0.85.
 - On the 14 tasks it shares with exa, webular trails on accuracy, 0.857 against 1.
+- On the 11 tasks it shares with tavily, webular trails on accuracy, 0.818 against 1.
+- On the 7 tasks it shares with perplexity, webular trails on accuracy, 0.714 against 1.
+- On the 11 tasks it shares with parallel, webular trails on accuracy, 0.818 against 1.
+- On the 4 tasks it shares with youcom, webular ties on accuracy, 1 against 1.
+- On the 7 tasks it shares with jina, webular leads on accuracy, 1 against 0.3.
+- On the 7 tasks it shares with browserbase, webular leads on accuracy, 1 against 0.
+- On the 7 tasks it shares with gemini, webular leads on accuracy, 0.714 against 0.
 - On the 3 tasks it shares with readability, webular leads on accuracy, 1 against 0.333.
-- Webular is slower than firecrawl at p50 (696 ms against 534 ms), and slower than exa at p50 (1693 ms against 1270 ms), and slower than readability at p50 (469 ms against 6 ms).
-- The task counts are very small: 4 search, 6 scrape, 7 answer tasks. Treat every gap as a sign, not a proof.
+- Webular is faster than firecrawl at p50 (526 ms against 613 ms), and slower than exa at p50 (1594 ms against 1169 ms), and slower than tavily at p50 (1825 ms against 1504 ms), and slower than perplexity at p50 (2737 ms against 1532 ms), and slower than parallel at p50 (1825 ms against 1751 ms), and slower than youcom at p50 (459 ms against 122 ms), and faster than jina at p50 (526 ms against 60000 ms), and faster than browserbase at p50 (526 ms against 60000 ms), and faster than gemini at p50 (2737 ms against 60000 ms), and slower than readability at p50 (362 ms against 4 ms).
+- The task counts are very small: 6 scrape, 7 answer, 4 search tasks. Treat every gap as a sign, not a proof.
 <!-- bench:end -->
 
 ## Agent matrix
