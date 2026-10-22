@@ -29,11 +29,17 @@ const decodeAnswer = Schema.decodeUnknownEffect(Answer)
 export const decisions = Schema.decodeUnknownSync(DecisionsFile)(decisionsFile).decisions
 
 // The macOS Keychain item that holds the TypeSafe key; None when it is absent.
+// CI machines have no Keychain item, and `security` can block there waiting on a
+// locked keychain, so CI never spawns it and any other lookup gets 3 seconds.
 const fromKeychain = Effect.gen(function* () {
-  if (process.platform !== 'darwin') return Option.none<Redacted.Redacted<string>>()
+  const ci = yield* Config.option(Config.String('CI'))
+  if (process.platform !== 'darwin' || Option.isSome(ci))
+    return Option.none<Redacted.Redacted<string>>()
   const spawner = yield* ChildProcessSpawner.ChildProcessSpawner
   const proc = yield* spawner.spawn(
-    ChildProcess.make('security', ['find-generic-password', '-s', 'typesafe-ai-api-key', '-w']),
+    ChildProcess.make('security', ['find-generic-password', '-s', 'typesafe-ai-api-key', '-w'], {
+      stdin: 'ignore',
+    }),
   )
   const [out, code] = yield* Effect.all(
     [proc.stdout.pipe(Stream.decodeText(), Stream.mkString), proc.exitCode],
@@ -43,6 +49,7 @@ const fromKeychain = Effect.gen(function* () {
   return code === 0 && key ? Option.some(Redacted.make(key)) : Option.none()
 }).pipe(
   Effect.scoped,
+  Effect.timeout('3 seconds'),
   Effect.provide(BunServices.layer),
   Effect.orElseSucceed(() => Option.none<Redacted.Redacted<string>>()),
 )
