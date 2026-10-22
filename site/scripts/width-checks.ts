@@ -42,7 +42,13 @@ const layoutProbes = (page: Page, name: string, width: number, tally: Map<Check,
     record(tally, 'focus ring', where, yield* missingFocusRings(page))
   })
 
-const themePass = (b: Browser, base: string, width: number, theme: Theme, tally: Map<Check, Tally>) =>
+const themePass = (
+  b: Browser,
+  base: string,
+  width: number,
+  theme: Theme,
+  tally: Map<Check, Tally>,
+) =>
   Effect.scoped(
     Effect.gen(function* () {
       const page = yield* openPage(b, width, theme)

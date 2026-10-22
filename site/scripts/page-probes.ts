@@ -31,9 +31,7 @@ const probeTargets = ([sel, min]: [string, number]) => {
 }
 
 export const smallTargets = (page: Page) =>
-  Effect.tryPromise(() =>
-    page.evaluate(probeTargets, [TARGETS, MIN_TARGET] as [string, number]),
-  )
+  Effect.tryPromise(() => page.evaluate(probeTargets, [TARGETS, MIN_TARGET] as [string, number]))
 
 const probeRing = () => {
   const el = document.activeElement

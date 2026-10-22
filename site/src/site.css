@@ -78,8 +78,8 @@ pre,
   overflow-x: auto;
   white-space: pre;
   background:
-    linear-gradient(to left, transparent, var(--color-surface) var(--space-24)) right / var(--space-32) 100%
-      no-repeat local,
+    linear-gradient(to left, transparent, var(--color-surface) var(--space-24)) right /
+    var(--space-32) 100% no-repeat local,
     linear-gradient(to left, var(--fade), transparent) right / var(--space-16) 100% no-repeat scroll,
     var(--color-surface);
 }
