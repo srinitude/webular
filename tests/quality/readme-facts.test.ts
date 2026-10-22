@@ -35,10 +35,8 @@ const truth = Effect.gen(function* () {
   // The plugin's own server reads env too (WEBULAR_BIN); only its env reads count.
   const pluginFiles = [...new Glob('plugins/webular/src/**/*.ts').scanSync(ROOT)]
   const plugin = (yield* Effect.forEach(pluginFiles, read, { concurrency: 16 })).join('\n')
-  // Env reads: process.env['X'] / env.X, and Effect Config constructors
-  // (Config.String('X'), Config.Redacted('X'), ...) or a setting('X') helper.
+  // Env reads: env['X'], env.X, Config.*('X'), setting('X'), and install.sh's ${WEBULAR_X}.
   const envRead = /(?:env\[['"]|env\.|Config\.[A-Z]\w*\(\s*'|\bsetting\(\s*')([A-Z][A-Z0-9_]+)/g
-  // install.sh reads its own settings as ${WEBULAR_X:-...}, and the install docs name them.
   const installer = all(yield* read('scripts/install.sh'), /\$\{(WEBULAR_[A-Z0-9_]+)/g)
   const flags = [
     ...all(src, /^\s+'?([a-z][a-z0-9-]*)'?: \{ type: '(?:string|boolean)'/gm),
