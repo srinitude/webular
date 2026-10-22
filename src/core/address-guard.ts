@@ -15,9 +15,10 @@ function privateV4(ip: string): boolean {
   return (a === 192 && b === 168) || (a === 100 && b >= 64 && b <= 127)
 }
 
-// IPv4-mapped (::ffff:a.b.c.d, or the hex ::ffff:hhhh:hhhh form URL parsing gives) as the IPv4 it names.
+// IPv6 that embeds an IPv4 (mapped ::ffff:, NAT64 64:ff9b::, compatible ::), dotted
+// or in the hex hhhh:hhhh form URL parsing gives, as the IPv4 it names.
 function mappedV4(ip: string): string | undefined {
-  const tail = /^::ffff:(.+)$/.exec(ip)?.[1]
+  const tail = /^(?:::ffff:|64:ff9b::|::)(.+)$/.exec(ip)?.[1]
   if (!tail) return undefined
   if (isIP(tail) === 4) return tail
   const hex = /^([0-9a-f]{1,4}):([0-9a-f]{1,4})$/.exec(tail)
@@ -27,7 +28,7 @@ function mappedV4(ip: string): string | undefined {
   return [hi >> 8, hi & 255, lo >> 8, lo & 255].join('.')
 }
 
-/** True for loopback, RFC 1918, link-local, CGNAT, unspecified, multicast, ULA, and mapped forms of them. */
+/** True for loopback, RFC 1918, link-local, CGNAT, unspecified, multicast, ULA, and IPv6 forms embedding them. */
 export function isPrivateIp(raw: string): boolean {
   const ip = raw.replace(/^\[|\]$/g, '').toLowerCase()
   if (isIP(ip) === 4) return privateV4(ip)

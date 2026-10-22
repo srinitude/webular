@@ -2,7 +2,7 @@
 // calibration log, and the drift file. client.ts wires these into `ask`.
 import { DateTime, Effect, type FileSystem, Option, Schema } from 'effect'
 import type { JevRequest, JevResult } from './client.ts'
-import type { JevError } from './errors.ts'
+import { JevError } from './errors.ts'
 import { JEV_LATEST_RELEASED } from './model.ts'
 import { cacheKey, isSure, requestBytes } from './payload/index.ts'
 import { Result } from './post.ts'
@@ -94,27 +94,49 @@ interface AskDeps {
   readonly model: string
   readonly replay: Option.Option<ReturnType<typeof replayStore>>
   readonly live: (body: string) => Effect.Effect<JevResult, JevError>
+  // Live calls this client may send; replay and cache hits cost none.
+  readonly maxLiveCalls: number
   readonly lru: ReturnType<typeof makeLru>
   readonly log: ReturnType<typeof logCalibration>
   readonly drift: ReturnType<typeof flagDrift>
 }
 
-// Cache, then replay, then the live call; every answer is remembered, logged, and drift-checked.
-export const makeAsk = (d: AskDeps) => (decision: string, req: JevRequest) =>
-  Effect.suspend(() => {
-    const body = requestBytes(d.model, req.state, req.questions, req.assets)
-    const k = cacheKey(body)
-    const hit = d.lru.get(k)
-    const fromReplay = (r: ReturnType<typeof replayStore>) => {
-      const onNone = () => r.miss(k, d.live(body))
-      return r.get(k).pipe(Effect.flatMap(Option.match({ onNone, onSome: Effect.succeed })))
-    }
-    const res: Effect.Effect<JevResult, JevError> = hit
-      ? Effect.succeed({ ...hit, source: 'cache' as const })
-      : Option.match(d.replay, { onNone: () => d.live(body), onSome: fromReplay })
-    return res.pipe(
-      Effect.tap((r) => d.lru.remember(k, r)),
-      Effect.tap((r) => d.log(decision, k, r)),
-      Effect.tap((r) => d.drift(decision, r)),
+// The live call, counted: past maxLiveCalls it fails with a typed budget error,
+// so the decision's fallback answers and nothing is sent.
+const budgeted = (d: AskDeps) => {
+  let sent = 0
+  return (body: string) =>
+    Effect.suspend(() =>
+      sent++ < d.maxLiveCalls
+        ? d.live(body)
+        : Effect.fail(
+            new JevError({
+              reason: `run budget of ${d.maxLiveCalls} live calls spent`,
+              kind: 'budget',
+            }),
+          ),
     )
-  })
+}
+
+// Cache, then replay, then the live call; every answer is remembered, logged, and drift-checked.
+export const makeAsk = (d: AskDeps) => {
+  const live = budgeted(d)
+  return (decision: string, req: JevRequest) =>
+    Effect.suspend(() => {
+      const body = requestBytes(d.model, req.state, req.questions, req.assets)
+      const k = cacheKey(body)
+      const hit = d.lru.get(k)
+      const fromReplay = (r: ReturnType<typeof replayStore>) => {
+        const onNone = () => r.miss(k, live(body))
+        return r.get(k).pipe(Effect.flatMap(Option.match({ onNone, onSome: Effect.succeed })))
+      }
+      const res: Effect.Effect<JevResult, JevError> = hit
+        ? Effect.succeed({ ...hit, source: 'cache' as const })
+        : Option.match(d.replay, { onNone: () => live(body), onSome: fromReplay })
+      return res.pipe(
+        Effect.tap((r) => d.lru.remember(k, r)),
+        Effect.tap((r) => d.log(decision, k, r)),
+        Effect.tap((r) => d.drift(decision, r)),
+      )
+    })
+}

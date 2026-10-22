@@ -130,7 +130,8 @@ const evict = (dir: string, max: Limits) =>
     const files = yield* Effect.forEach(names, (n) => entryInfo(path.join(dir, n)), {
       concurrency: 8,
     })
-    files.sort((a, b) => a.mtime - b.mtime)
+    // Ties leave in name order, not the file system's directory order.
+    files.sort((a, b) => a.mtime - b.mtime || (a.file < b.file ? -1 : a.file > b.file ? 1 : 0))
     let total = files.reduce((sum, f) => sum + f.size, 0)
     let count = files.length
     for (const f of files) {

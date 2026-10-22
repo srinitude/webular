@@ -15,6 +15,7 @@ type JevErrorKind =
   | 'network'
   | 'bad_reply'
   | 'no_key'
+  | 'budget'
 
 const KINDS: Record<JevErrorKind, { readonly next: string; readonly retry: boolean }> = {
   bad_request: { next: 'fix the payload: caps, UTF-8, or context length', retry: false },
@@ -32,6 +33,7 @@ const KINDS: Record<JevErrorKind, { readonly next: string; readonly retry: boole
     retry: false,
   },
   no_key: { next: 'set a TypeSafe key; the code rule decides meanwhile', retry: false },
+  budget: { next: 'raise WEBULAR_JEV_MAX_CALLS; the code rule decides meanwhile', retry: false },
 }
 
 const BY_STATUS: Readonly<Record<number, JevErrorKind>> = {

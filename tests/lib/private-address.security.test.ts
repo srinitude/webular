@@ -26,6 +26,10 @@ const PRIVATE = [
   '::ffff:7f00:1',
   '::ffff:a00:1',
   '[::1]',
+  '64:ff9b::a9fe:a9fe',
+  '64:ff9b::127.0.0.1',
+  '::7f00:1',
+  '::a9fe:a9fe',
 ]
 const PUBLIC = [
   '8.8.8.8',
@@ -34,6 +38,7 @@ const PUBLIC = [
   '192.169.0.1',
   '2606:4700::1111',
   '::ffff:8.8.8.8',
+  '64:ff9b::808:808',
 ]
 
 // env is the whole ConfigProvider, so the outer process env never leaks in.

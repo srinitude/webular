@@ -35,6 +35,8 @@ export const JEV_MODEL_DEFAULT = JEV_LATEST_RELEASED
 // The endpoint is the active route's base (./route.ts) plus the System One path.
 export const systemOne = (r: JevRoute) => `${r.base}/v1/systemone`
 const CACHE_CAPACITY = 1_024 // LRU entries; each holds only answers, keyed by a 64-bit hash
+// Live calls one process may send; WEBULAR_JEV_MAX_CALLS overrides. Past it every decision falls back.
+const MAX_LIVE_CALLS = 500
 export const JEV_CONCURRENCY = 8 // under the per-org request rate
 
 type Text = string | Instructions
@@ -121,6 +123,10 @@ const make = Effect.gen(function* () {
     live: withRetry(
       postOnce(endpoint, http, key, { snapshot: committedSnapshot, store: yield* docsStore }),
     ),
+    maxLiveCalls: Option.match(yield* setting('WEBULAR_JEV_MAX_CALLS'), {
+      onNone: () => MAX_LIVE_CALLS,
+      onSome: (v) => (Number.isInteger(+v) && +v >= 0 ? +v : MAX_LIVE_CALLS),
+    }),
     lru: yield* Effect.sync(() => makeLru(CACHE_CAPACITY)),
     log: logCalibration(fs, yield* setting('WEBULAR_JEV_LOG')),
     drift: flagDrift(fs, yield* setting('WEBULAR_JEV_DRIFT_FILE')),

@@ -12,6 +12,7 @@ User and developer docs. The root [AGENTS.md](../AGENTS.md) holds the repo-wide 
 - [`docs/commands.md`](commands.md), [`docs/architecture.md`](architecture.md), [`docs/reliability.md`](reliability.md), and [`docs/cua-browser-mode.md`](cua-browser-mode.md): reference pages.
 - [`docs/jev.md`](jev.md): how to set up the Jev key on any OS, and each route to Jev that webular supports.
 - [`docs/how-it-works.md`](how-it-works.md) and [`docs/why-webular.md`](why-webular.md): how webular works inside, and why to pick it.
+- [`docs/research-factors.md`](research-factors.md): each web-research factor, with the code and test that guard it or the gap that stays open.
 - [`docs/benchmarks.md`](benchmarks.md): the public benchmark report. Every number in it names the committed result file it comes from.
 - [`docs/bug-classes.md`](bug-classes.md): each kind of bug webular can hit, where, its guard, and its sources, plus the before-you-merge checklist.
 

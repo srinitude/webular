@@ -86,7 +86,10 @@ const asFetcher =
       Effect.map(({ status, body, headers }) => ({ status, body, headers })),
       Effect.catchTag('FetchError', (e) => {
         reasons.set(url, reasonOf(e))
-        return Effect.succeed({ status: e.status ?? 0, body: '', headers: {} })
+        // A 429/5xx keeps its Retry-After so the crawler paces the host by it.
+        const wait =
+          e.retryAfterMs === undefined ? {} : { 'retry-after': `${e.retryAfterMs / 1000}` }
+        return Effect.succeed({ status: e.status ?? 0, body: '', headers: wait })
       }),
     )
 

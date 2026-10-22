@@ -7,6 +7,7 @@ import { availableParallelism } from 'node:os'
 import { Cause, Config, Context, Effect, Exit, Layer, Option, Ref, Semaphore } from 'effect'
 import { z } from 'zod'
 import { hostConcurrency } from '../core/budget.ts'
+import { dedupeKey } from '../core/url.ts'
 import { textAndImages } from './html.ts'
 import type { PageImage } from './html-images.ts'
 import { fetchOne } from './sources/fetch-one.ts'
@@ -162,9 +163,15 @@ export const fetchSources = Effect.fn('fetchSources')(function* (
   maxHtml = Number.POSITIVE_INFINITY,
   typed = false,
 ) {
-  const pooled = sources.length >= POOL_MIN_PAGES
+  // One page under several spellings (#fragment, tracking params) is fetched and cited once.
+  const seen = new Set<string>()
+  const unique = sources.filter((s) => {
+    const key = dedupeKey(s.url) ?? s.url
+    return !seen.has(key) && Boolean(seen.add(key))
+  })
+  const pooled = unique.length >= POOL_MIN_PAGES
   const outcomes = yield* Effect.forEach(
-    sources,
+    unique,
     (src) =>
       fetchOne(src, { timeoutMs, maxHtml, typed }, pooled ? parseArticleText : parseInThread),
     { concurrency: yield* hostConcurrency },

@@ -111,3 +111,14 @@ test('crawl: resume keeps fingerprints, host delays, and the robots cache', () =
   db.close()
   expect((row as { ms: number }).ms).toBeGreaterThanOrEqual(MIN_DELAY_MS)
 })
+
+test('crawl: stops fetching once maxPages is reached, even with spare workers', () => {
+  const fetched: string[] = []
+  const site = fakeSite(fetched)
+  // Default concurrency is 4 workers; only 2 pages may be fetched.
+  const result = Effect.runSync(
+    crawl({ ...site, dbPath: ':memory:', seeds: ['https://s.test/'], maxPages: 2 }),
+  )
+  expect(fetched.filter((u) => !u.endsWith('/robots.txt')).length).toBe(2)
+  expect(result.done).toBe(false)
+})

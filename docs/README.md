@@ -15,6 +15,7 @@ This page links every doc in this folder. The first group is the best place to b
 - [Agent contract](agent-contract.md): what an agent needs from the CLI, MCP server, plugin, and skills.
 - [Browser mode (Cua)](cua-browser-mode.md): how webular drives a throwaway browser window.
 - [Reliability](reliability.md): retries, dead pages, and sites that will not answer.
+- [Research factors](research-factors.md): each factor that makes web research correct, fast, cheap, and repeatable, with its guard or its gap.
 
 ## Build on it
 

@@ -58,6 +58,25 @@ describe('fetchSources — index-ordered bounded fan-out', () => {
   )
 
   test(
+    'one page under several URL spellings is fetched and cited once',
+    eff(
+      Effect.gen(function* () {
+        const before = fx.hits('/b')
+        const sources = [
+          { title: 'B', url: `${fx.origin}/b` },
+          { title: 'B fragment', url: `${fx.origin}/b#top` },
+          { title: 'B tracked', url: `${fx.origin}/b?utm_source=feed` },
+          { title: 'A', url: `${fx.origin}/a` },
+        ]
+        const { entries } = yield* fetchSources(sources, 15_000, Number.POSITIVE_INFINITY, true)
+        expect(entries.map((e) => e.title)).toEqual(['B', 'A'])
+        expect(fx.hits('/b') - before).toBe(1)
+      }),
+    ),
+    15_000,
+  )
+
+  test(
     'two runs are deeply equal',
     eff(
       Effect.gen(function* () {

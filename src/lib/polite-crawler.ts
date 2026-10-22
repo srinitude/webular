@@ -2,6 +2,7 @@
 // robots.txt, adaptive per-host delay, SimHash near-duplicate skip, and
 // SQLite resume tokens that survive across processes.
 import { Effect } from 'effect'
+import { retryAfterMs } from '../core/retry-after.ts'
 import {
   attempt,
   type CrawlError,
@@ -103,9 +104,16 @@ const settle = (
   fetchMs: number,
   rules: Robots,
 ) => {
+  const h = res?.headers
+  const retryAfter = h instanceof Headers ? h.get('retry-after') : h?.['retry-after']
   const delay = nextDelay(
     r.delays.get(host) ?? floorOf(r),
-    { status: res?.status ?? 0, fetchMs, crawlDelayMs: rules.crawlDelayMs },
+    {
+      status: res?.status ?? 0,
+      fetchMs,
+      crawlDelayMs: rules.crawlDelayMs,
+      retryAfterMs: retryAfterMs(retryAfter ?? null, r.now()),
+    },
     floorOf(r),
   )
   r.delays.set(host, delay)

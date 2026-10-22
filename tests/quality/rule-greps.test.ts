@@ -45,6 +45,12 @@ const GATES: ReadonlyArray<Gate> = [
     'src/*.ts',
   ],
   ['connection pooling stays on', 'keepalive: false', 'src/*.ts'],
+  [
+    'every fan-out has a numeric concurrency bound',
+    'concurrency: [\'"]?(unbounded|inherit)|concurrency: Infinity',
+    'src/*.ts',
+    'plugins/webular/src/*.ts',
+  ],
   ['machine config is declarative', 'guard: \\(|actions: \\[?\\(|entry: \\(', 'src/machines/*.ts'],
   [
     'the plugin uses only the MCP server package',
