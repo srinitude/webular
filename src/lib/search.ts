@@ -7,6 +7,7 @@ import { fetchText } from '../core/http.ts'
 import { dedupeKey } from '../core/url.ts'
 import { searchRank } from './jev/decisions/search.ts'
 import { onJevRuntime } from './jev/run.ts'
+import { cleanHits, type Scored } from './search-diversify.ts'
 import { endpoint, SOURCE_TIMEOUT_MS } from './sources-search.ts'
 
 interface SearchHit {
@@ -95,23 +96,28 @@ export function domainSignal(raw: string, query: string): number {
 }
 
 // Reciprocal rank fusion, sum(1/(60+rank)), over every ranked list, plus the
-// domain signal once per URL; deduped by hitKey, ties keep first-seen order.
+// domain signal once per URL; deduped by hitKey, then near copies merge and a
+// host-heavy top is spread (search-diversify.ts). Ties keep
+// first-seen order; each entry carries its rank and the lists that returned it.
+// `weights[li]` scales list li's RRF term (source class weight); missing is 1.
 export function scoreHits<H extends SearchHit>(
   lists: ReadonlyArray<ReadonlyArray<H>>,
   query: string,
-): Array<{ hit: H; score: number }> {
-  const seen = new Map<string, { hit: H; score: number }>()
-  for (const list of lists) {
+  weights: ReadonlyArray<number> = [],
+): Scored<H>[] {
+  const seen = new Map<string, { hit: H; score: number; lists: number[] }>()
+  lists.forEach((list, li) => {
     list.forEach((hit, i) => {
       const key = hitKey(hit.url)
-      const entry = seen.get(key) ?? { hit, score: domainSignal(hit.url, query) }
-      entry.score += 1 / (RRF_K + i + 1)
+      const entry = seen.get(key) ?? { hit, score: domainSignal(hit.url, query), lists: [] }
+      entry.score += (weights[li] ?? 1) / (RRF_K + i + 1)
+      if (!entry.lists.includes(li)) entry.lists.push(li)
       if (hit.description.length > entry.hit.description.length)
         entry.hit = { ...entry.hit, description: hit.description }
       seen.set(key, entry)
     })
-  }
-  return [...seen.values()].sort((a, b) => b.score - a.score)
+  })
+  return cleanHits([...seen.values()].sort((a, b) => b.score - a.score))
 }
 
 export const rankHits = <H extends SearchHit>(

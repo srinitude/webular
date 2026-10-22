@@ -89,6 +89,45 @@ const factRound = <M extends { weak: boolean }>(
     ? Fiber.join(early)
     : Effect.andThen(Fiber.interrupt(early), search(renamed, limit))
 
+// Hop-only hits count at this share of their rank score: a tie goes to the
+// original query's hit, yet a hop's first hit still beats the original's second.
+const HOP_WEIGHT = 0.99
+const key = (h: Hit) => hitKey(h.url)
+// `lead` first, then the fused hits; the original's top hit survives the cut.
+const finish = <M extends { weak: boolean }>(
+  query: string,
+  limit: number,
+  first: Found<M>,
+  hops: Hit[][],
+  lead: Hit[],
+) => {
+  const base = new Map(scoreHits([first.results], query).map((e) => [key(e.hit), e.score]))
+  const scored = scoreHits([first.results, ...hops], query)
+    .map(({ hit, score }) => {
+      const b = base.get(key(hit)) ?? 0
+      return { hit, score: b + HOP_WEIGHT * (score - b) }
+    })
+    .sort((x, y) => y.score - x.score)
+  const led = new Set(lead.map(key))
+  const top = [...lead, ...scored.map((e) => e.hit).filter((h) => !led.has(key(h)))]
+  const kept = top.slice(0, limit)
+  const best = first.results[0]
+  const lost = best && limit > lead.length && !kept.some((h) => key(h) === key(best))
+  return {
+    results: lost ? [...kept.slice(0, limit - 1), best] : kept,
+    meta: { ...first.meta, weak: !lead.length && (scored[0]?.score ?? 0) < WEAK_SCORE },
+  }
+}
+
+// Comparison ("Who is older, A or B?", "A vs B"): one sub-query per entity, the
+// question with the other entity cut out. Capitalized names only.
+const NAME = String.raw`(?!(?:${[...NOT_ENTITY].join('|')})\b)${WORD}(?:${CONNECTOR}\s+${WORD})*`
+const COMPARE = new RegExp(String.raw`(${NAME})\s+(?:vs\.?|versus|or)\s+(${NAME})`, 'u')
+export const comparisonParts = (query: string) => {
+  const m = query.match(COMPARE)
+  return m ? [m[1] ?? '', m[2] ?? ''].map((e) => query.replace(m[0], e)) : undefined
+}
+
 // Runs only when the first round is weak: no top-3 hit names the entity.
 // Scoped, so a fact round still in flight stops when the hop ends or times out.
 export const secondHop = Effect.fn('secondHop')(function* <M extends { weak: boolean }>(
@@ -97,6 +136,15 @@ export const secondHop = Effect.fn('secondHop')(function* <M extends { weak: boo
   first: Found<M>,
   search: SearchRound<M>,
 ) {
+  const parts = comparisonParts(query)
+  if (parts) {
+    const subs = yield* Effect.all(
+      parts.map((p) => search(p, limit)),
+      { concurrency: 2 },
+    )
+    const lists = subs.map((s) => s.results)
+    return finish(query, limit, first, lists, [])
+  }
   const entity = mainEntity(query) ?? bridgeEntity(first.results.slice(0, HOP_TOP))
   if (!entity) return first
   // The entity page is already near the top: lead with it, since the answer
@@ -111,15 +159,11 @@ export const secondHop = Effect.fn('secondHop')(function* <M extends { weak: boo
   const fact = early
     ? yield* factRound(query, renamed, limit, early, search)
     : { results: [] as Hit[] }
+  // A hop that finds nothing new ends here: the first round stands.
+  const known = new Set(first.results.map((h) => hitKey(h.url)))
+  if (!pageHit && fact.results.every((h) => known.has(hitKey(h.url)))) return first
   // The entity page leads: the domain signal would sink a Wikipedia bio.
-  const lead = pageHit ? [pageHit] : []
-  const leadKeys = new Set(lead.map((h) => hitKey(h.url)))
-  const scored = scoreHits([fact.results, first.results], query)
-  const rest = scored.map((e) => e.hit).filter((h) => !leadKeys.has(hitKey(h.url)))
-  return {
-    results: [...lead, ...rest].slice(0, limit),
-    meta: { ...first.meta, weak: !lead.length && (scored[0]?.score ?? 0) < WEAK_SCORE },
-  }
+  return finish(query, limit, first, [fact.results], pageHit ? [pageHit] : [])
 }, Effect.scoped)
 
 // Nested question: "the capital city of the country that hosted the 2016

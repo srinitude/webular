@@ -115,3 +115,16 @@ export const officialBeside = Effect.fn('officialBeside')(function* (
   }).pipe(Effect.ensuring(Fiber.interrupt(lookup)))
   return { run, take }
 })
+
+// Navigational queries: Wikipedia's list for the main query (as the fan-out
+// sends it, navCore-cut) leads with its articles' official sites, looked up the
+// moment Wikipedia answers, inside that source's settle window. Variants skip
+// it, so one SPARQL call per search.
+export const withOfficial =
+  (main: string, runner: SourceRunner, articles: number): SourceRunner =>
+  (source, query, limit) =>
+    source === 'wikipedia' && query === navCore(main)
+      ? Effect.flatMap(runner(source, query, limit), (hits) =>
+          Effect.map(officialSites(hits, articles, main), (lists) => [...lists.flat(), ...hits]),
+        )
+      : runner(source, query, limit)

@@ -21,6 +21,7 @@ import { searchErrors } from '../lib/search-errors.ts'
 import { mainEntity, nestedBridge } from '../lib/search-hop.ts'
 import { subjectSources } from '../lib/source-subject.ts'
 import { fetchErrorsSchema, fetchSources } from '../lib/sources.ts'
+import { fetchedOnly, finishAnswer } from './answer-guard.ts'
 import { stepRuntime } from './runtime.ts'
 
 const answerInput = z.object({
@@ -162,14 +163,14 @@ const synthStep = decisionStep({
   decide: decisions.answerSentence,
   prepare: (data: Evidence) => stepRuntime.runPromise(prepareSynth(data)),
   pick: ({ query, text, figure }) => (text && !figure ? { question: query, text } : undefined),
-  output: ({ query, text, sentences, top, cited, figure, errors, asOf }, lead) => {
+  output: ({ query, text, sentences, top, cited, used, figure, errors, asOf }, lead) => {
     const first = lead === undefined ? undefined : answerSentences(text)[lead]
-    const body = leadFirst(top, first, sentences).join(' ')
+    const body = finishAnswer(query, cited, leadFirst(top, first, sentences).join(' '))
     return {
       query,
       answer: nameCountry(query, figure ? `${figureNote(figure)} ${body}` : body),
       asOf,
-      sources: cited.map((e) => ({ title: e.title, url: e.url })),
+      sources: fetchedOnly(cited, used).map((e) => ({ title: e.title, url: e.url })),
       errors,
     }
   },

@@ -1,13 +1,14 @@
-// Search across keyless sources. Web asks its free APIs at once, each under
-// SOURCE_TIMEOUT_MS, and fuses their lists (plus variants and a local index list)
-// by RRF + the official-domain signal. DuckDuckGo HTML runs only when no free API
-// had hits, then the free sources answer. Crossref and OpenAlex: scholarly.ts.
+// Search across keyless sources. Web asks its free APIs at once, each under SOURCE_TIMEOUT_MS,
+// and fuses their lists (plus variants and a local index list) by class-weighted RRF + the
+// official-domain signal. DuckDuckGo HTML runs only when no free API had hits, then the
+// free sources answer. Crossref and OpenAlex: scholarly.ts.
 import { Clock, Config, Deferred, Effect } from 'effect'
 import { logErr } from '../core/output.ts'
 import { crossref, npm, openalex } from './scholarly.ts'
 import { lexicalRerank, scoreHits, WEAK_SCORE, webSearch } from './search.ts'
 import { secondHop } from './search-hop.ts'
 import { pickSources, pickSourcesJudged } from './search-intent.ts'
+import { type Constraints, constraintsOf, matchesConstraints } from './search-query.ts'
 import { entityVariant, queriesFor } from './search-source-names.ts'
 import {
   type Hit,
@@ -17,13 +18,13 @@ import {
   type SourceStatus,
   traceLine,
 } from './search-source-run.ts'
-import { isNavigational, officialBeside } from './sources/official-sites.ts'
+import { listWeights } from './search-source-score.ts'
+import { isNavigational, withOfficial } from './sources/official-sites.ts'
 import { type FreeSource, freeSourceFallback } from './sources/registry.ts'
 import { githubSearch, marginalia } from './sources/web.ts'
 import { type SearchSource, SOURCE_TIMEOUT_MS, sourceSearch } from './sources-search.ts'
 
-// One DuckDuckGo request returns its whole page whatever the limit; fusion
-// ranks the full page and the caller's slice keeps the best hits.
+// One DuckDuckGo request returns a whole page; fusion ranks it and the caller slices.
 const WEB_PAGE = 30
 // Navigational queries: the official sites of this many top Wikipedia articles.
 const OFFICIAL_ARTICLES = 5
@@ -38,9 +39,8 @@ const one: SourceRunner = (source, query, limit) => {
   return sourceSearch(source, query, limit)
 }
 
-// Whole-search budget: the free-API round and the scraped fallback each stop
-// at SOURCE_TIMEOUT_MS, so this only trips if something ignores its timeout.
-// A caller can pass a shorter deadlineMs (answer mode does).
+// Whole-search budget: each round stops at SOURCE_TIMEOUT_MS, so this trips only when
+// something ignores its timeout. A caller may pass a shorter deadlineMs (answer mode does).
 const SEARCH_DEADLINE_MS = 3 * SOURCE_TIMEOUT_MS
 
 interface SearchMeta {
@@ -77,12 +77,6 @@ const timedOut = () =>
     meta: { sources: {}, degraded: true, weak: true } as SearchMeta,
   })
 
-// Navigational queries: the official-site lookup runs beside the fan-out.
-const officialFor = (query: string, opts: SearchOptions) =>
-  !opts.runSource && isNavigational(query)
-    ? officialBeside(query, one, OFFICIAL_ARTICLES)
-    : Effect.succeed(undefined)
-
 // web: the keyword pick starts at once; the judge's pick adds the sources it
 // names when it lands, or is dropped at the settle cutoff. DuckDuckGo runs only
 // if no source had hits. npm the keyword pick chose is never cut by the grace
@@ -94,8 +88,8 @@ const fanOut = Effect.fn('fanOut')(function* (
   opts: SearchOptions,
 ) {
   const queries = queriesFor(query, opts.variants)
-  const official = yield* officialFor(query, opts)
-  const runSource = opts.runSource ?? official?.run ?? one
+  const runSource =
+    opts.runSource ?? (isNavigational(query) ? withOfficial(query, one, OFFICIAL_ARTICLES) : one)
   const hit = yield* Deferred.make<void>()
   const uncut = { hit, cutoff: Effect.never }
   const settle = (yield* deterministic) ? uncut : { hit, cutoff: graceAfter(hit) }
@@ -115,23 +109,24 @@ const fanOut = Effect.fn('fanOut')(function* (
   const [first, [judgedAt, added]] = yield* Effect.all([run(keyword), more], { concurrency: 2 })
   const ran = [...first, ...added]
   if (source === 'web' && !ran.some((r) => r.status === 'ok')) ran.push(yield* query1('web'))
-  return { ran, sites: official ? yield* official.take : [], judgeAt: judge ? judgedAt : null }
+  return { ran, judgeAt: judge ? judgedAt : null }
 })
 
 const searchOnce = Effect.fn('searchOnce')(function* (
   source: SearchSource,
   query: string,
   limit: number,
-  opts: SearchOptions = {},
+  opts: SearchOptions & { c: Constraints },
 ) {
   const start = yield* Clock.currentTimeMillis
   const traced = yield* Config.String('WEBULAR_TRACE').pipe(Config.withDefault(''), Effect.orDie)
-  const { ran, sites, judgeAt } = yield* fanOut(source, query, limit, opts)
+  const { ran, judgeAt } = yield* fanOut(source, query, limit, opts)
   if (traced === '1') yield* logErr(traceLine(start, ran, judgeAt))
   const scored = scoreHits(
-    [...sites, ...ran.flatMap((r) => r.lists), ...(opts.local ? [opts.local] : [])],
+    [...ran.flatMap((r) => r.lists), ...(opts.local ? [opts.local] : [])],
     query,
-  )
+    ran.flatMap(listWeights),
+  ).filter((e) => matchesConstraints(e.hit, opts.c))
   const ok = ran.filter((r) => r.status === 'ok').length
   const meta: SearchMeta = {
     sources: Object.fromEntries(ran.map((r) => [r.source, { status: r.status, ms: r.ms }])),
@@ -151,16 +146,17 @@ interface Found {
 }
 type Searched = Found & { source?: FreeSource }
 
+const hitFields = ({ title, url, description }: Hit) => ({ title, url, description })
 // Nothing found, DuckDuckGo included: the free sources answer and `source`
 // names the one that did. If they all fail, the empty round stands.
-const withFreeSources = (query: string, limit: number, found: Found): Effect.Effect<Searched> =>
+const withFreeSources = (query: string, limit: number, found: Found, c: Constraints) =>
   found.results.length > 0
     ? Effect.succeed(found)
     : freeSourceFallback('search', query, limit).pipe(
         Effect.map(({ source, results }) => ({
           ...found,
           source,
-          results: results.map(({ title, url, description }) => ({ title, url, description })),
+          results: results.filter((h) => matchesConstraints(h, c)).map(hitFields),
         })),
         Effect.catch(() => Effect.succeed(found)),
       )
@@ -176,20 +172,22 @@ export const searchEffect = Effect.fn('search')(function* (
 ) {
   const deadline = opts.deadlineMs ?? SEARCH_DEADLINE_MS
   const start = yield* Clock.currentTimeMillis
+  const c = yield* constraintsOf([query, ...(opts.variants ?? [])])
+  const once = { ...opts, c }
   // Deterministic mode: no wall-clock cut; each source still stops at its own cap.
   const det = yield* deterministic
   const cut =
     <A>(duration: number, orElse: () => Effect.Effect<A>) =>
     (self: Effect.Effect<A>) =>
       det ? self : Effect.timeoutOrElse(self, { duration, orElse })
-  const first = yield* searchOnce(source, query, limit, opts).pipe(cut(deadline, timedOut))
+  const first = yield* searchOnce(source, query, limit, once).pipe(cut(deadline, timedOut))
   const free = (found: Found): Effect.Effect<Searched> =>
     source === 'web' && !opts.runSource
-      ? withFreeSources(query, limit, found)
+      ? withFreeSources(query, limit, found, c)
       : Effect.succeed(found)
   if (!opts.hop || source !== 'web') return yield* free(first)
   const left = deadline - ((yield* Clock.currentTimeMillis) - start)
-  const round = (q: string, n: number) => searchOnce('web', q, n, { runSource: opts.runSource })
+  const round = (q: string, n: number) => searchOnce('web', q, n, { runSource: opts.runSource, c })
   return yield* secondHop(query, limit, first, round).pipe(
     cut(Math.max(0, left), () => Effect.succeed(first)),
     Effect.flatMap(free),

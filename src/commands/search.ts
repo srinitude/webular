@@ -6,6 +6,8 @@ import { EXIT } from '../cli/exit-codes.ts'
 import { discoveryExit, runWorkflow } from '../cli/run.ts'
 import { emitOpts, intFlag, parseFlags, strFlag } from '../core/args.ts'
 import { CliError, runMain } from '../core/effect.ts'
+import { asOfDate } from '../lib/as-of.ts'
+import { queryPlan } from '../lib/search-query.ts'
 import { MAX_VARIANTS, SEARCH_SOURCES, type SearchSource } from '../lib/search-source-names.ts'
 
 type Values = Record<string, string | boolean | string[] | undefined>
@@ -40,12 +42,14 @@ function buildInput(values: Values, positionals: string[]) {
         exitCode: EXIT.usage,
       })
     }
-    const variants = yield* variantsOf(values)
+    // The first query is the plain keyword form; the original and --variant
+    // rewordings follow, repeats dropped. A well-formed query is sent as written.
+    const plan = queryPlan(query, yield* asOfDate, yield* variantsOf(values))
     return {
-      query,
+      query: plan.query,
       limit: yield* intFlag('search', values, 'limit', { def: 10, min: 1, max: 50 }),
       source,
-      ...(variants.length && { variants }),
+      ...(plan.variants.length && { variants: plan.variants }),
     }
   })
 }

@@ -8,6 +8,7 @@ import {
   isNavigational,
   officialBeside,
   officialSites,
+  withOfficial,
 } from '../../../src/lib/sources/official-sites.ts'
 import { against, json, run, serving } from './support.ts'
 
@@ -124,7 +125,29 @@ const makerCase = Effect.gen(function* () {
   ])
 })
 
+// Inside the settle window: the main query's Wikipedia list (trailing nav words
+// cut) leads with the official sites; a variant's list stays as it was.
+const insideCase = Effect.gen(function* () {
+  const lookup = withOfficial('Deno runtime official website', runner, 5)
+  const flow = Effect.all([
+    lookup('wikipedia', 'Deno runtime', 5),
+    lookup('wikipedia', 'deno variant', 5),
+  ])
+  const { out } = yield* serving('/sparql', reply, flow)
+  expect(out[0].map((h) => h.url).slice(0, 3)).toEqual([
+    'https://nodejs.org',
+    'https://deno.com',
+    'https://en.wikipedia.org/wiki/Node.js',
+  ])
+  expect(out[1]).toEqual(hits)
+})
+
 describe('official sites from Wikidata', () => {
+  test(
+    "the main query's Wikipedia list leads with its official sites",
+    () => run(insideCase),
+    15_000,
+  )
   test('a named maker rides the same call, inside the window', () => run(makerCase), 15_000)
   test('the main query feeds the lookup beside the fan-out', () => run(besideCase), 15_000)
   test('the fan-out call, trailing nav words cut, feeds the lookup', () => run(navCoreCase), 15_000)

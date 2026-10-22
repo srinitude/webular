@@ -1,5 +1,4 @@
-// RESEARCH workflow: search DDG HTML → fetch top N → extract + summarize → markdown report
-// Composed as a Mastra non-model workflow over FOSS tools.
+// RESEARCH workflow: search → fetch top N → extract + summarize → markdown report (Mastra, no model call)
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect, Ref } from 'effect'
 import { z } from 'zod'
@@ -14,6 +13,7 @@ import { sourceFigures } from '../lib/router-images.ts'
 import { searchEffect } from '../lib/search-chain.ts'
 import { searchErrors } from '../lib/search-errors.ts'
 import { fetchErrorsSchema, fetchSources, type SourceEntry } from '../lib/sources.ts'
+import { coverageLedger, dedupeSentences, findConflicts, gapsSection } from './research-report.ts'
 import { stepRuntime } from './runtime.ts'
 
 const researchInput = z.object({
@@ -29,11 +29,18 @@ const sourceItem = z.object({
   published: z.string().optional(),
 })
 
+const ledgerSchema = z.object({
+  url: z.string(),
+  status: z.enum(['answered', 'failed', 'no-evidence']),
+  reason: z.string().optional(),
+})
+
 const researchOutput = z.object({
   topic: z.string(),
   report: z.string(),
   sources: z.array(sourceItem),
   errors: fetchErrorsSchema,
+  coverage: z.array(ledgerSchema).optional(),
   readability: readabilitySchema,
 })
 
@@ -59,6 +66,7 @@ const entriesSchema = z.object({
     }),
   ),
   errors: fetchErrorsSchema,
+  coverage: z.array(ledgerSchema),
 })
 
 const searchStep = createStep({
@@ -108,6 +116,7 @@ const fetchAndFilter = Effect.fn('research.fetchSources')(function* (
     sentences: input.sentences,
     entries: [...entries],
     errors: [...input.errors, ...fetched.errors],
+    coverage: coverageLedger(input.sources, entries, fetched.errors),
   }
 })
 
@@ -124,16 +133,22 @@ const fetchSourcesStep = createStep({
 // fills the rest, so sentences holding the topic's key terms rank first.
 function buildSection(
   entry: SourceEntry,
-  idx: number,
   topN: number,
   topic: string,
   kept: ReadonlyArray<number> = [],
-  figures: ReadonlyArray<string> = [],
 ) {
   const all = researchSentences(entry.text)
   const top = researchSentences(entry.text, topN, topic)
   const lead = kept.flatMap((i) => (all[i] === undefined ? [] : [all[i]]))
-  const sentences = [...new Set([...lead, ...top])].slice(0, topN)
+  return [...new Set([...lead, ...top])].slice(0, topN)
+}
+
+function renderSection(
+  entry: SourceEntry,
+  idx: number,
+  sentences: ReadonlyArray<string>,
+  figures: ReadonlyArray<string> = [],
+) {
   const body = sentences.length > 0 ? sentences.join(' ') : 'No extractable content.'
   const figs = figures.length > 0 ? `\n\n${figures.join('\n')}` : ''
   return `## ${mdHeading(entry.title) || `Source ${idx + 1}`}\n\n${body}${figs}\n\n> Source [${idx + 1}]: ${entry.url}`
@@ -158,16 +173,18 @@ const assemble = Effect.fn('research.assemble')(function* (
     { concurrency: 8 }, // Jev per-org bound; workflows never import the client
   )
   const figures = yield* figuresOf(topic, entries)
-  const sections = entries.map((e, i) =>
-    buildSection(e, i, inputData.sentences, topic, leads[i], figures[i]),
+  const picked = dedupeSentences(
+    entries.map((e, i) => buildSection(e, inputData.sentences, topic, leads[i])),
   )
-  const report = `# Research: ${topic}\n\n${sections.join('\n\n')}`
+  const sections = entries.map((e, i) => renderSection(e, i, picked[i] ?? [], figures[i]))
+  const gaps = gapsSection(inputData.coverage, findConflicts(picked))
+  const report = `# Research: ${topic}\n\n${[...sections, ...(gaps ? [gaps] : [])].join('\n\n')}`
   const sources = entries.map(({ title, url, published }) => ({
     title,
     url,
     ...(published ? { published } : {}),
   }))
-  return { topic, report, sources, errors: inputData.errors }
+  return { topic, report, sources, errors: inputData.errors, coverage: inputData.coverage }
 })
 
 const assembleStep = createStep({

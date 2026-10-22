@@ -4,7 +4,7 @@ Rules for the Mastra workflows, under [src/AGENTS.md](../AGENTS.md).
 
 ## What lives here
 
-One workflow per command in [`src/commands/`](../commands/): [act.ts](act.ts), [answer.ts](answer.ts), [audit.ts](audit.ts), [batch.ts](batch.ts), [crawl.ts](crawl.ts), [diagram.ts](diagram.ts), [doctor.ts](doctor.ts), [extract.ts](extract.ts), [feed.ts](feed.ts), [map.ts](map.ts), [media.ts](media.ts), [monitor.ts](monitor.ts), [parse.ts](parse.ts), [research.ts](research.ts), [scrape.ts](scrape.ts), [search.ts](search.ts), [summarize.ts](summarize.ts), [tasks.ts](tasks.ts). Helpers: [runtime.ts](runtime.ts), [scrape-fallback.ts](scrape-fallback.ts), [scrape-schemas.ts](scrape-schemas.ts), [map-xml.ts](map-xml.ts).
+One workflow per command in [`src/commands/`](../commands/): [act.ts](act.ts), [answer.ts](answer.ts), [audit.ts](audit.ts), [batch.ts](batch.ts), [crawl.ts](crawl.ts), [diagram.ts](diagram.ts), [doctor.ts](doctor.ts), [extract.ts](extract.ts), [feed.ts](feed.ts), [map.ts](map.ts), [media.ts](media.ts), [monitor.ts](monitor.ts), [parse.ts](parse.ts), [research.ts](research.ts), [scrape.ts](scrape.ts), [search.ts](search.ts), [summarize.ts](summarize.ts), [tasks.ts](tasks.ts). Helpers: [runtime.ts](runtime.ts), [scrape-fallback.ts](scrape-fallback.ts), [scrape-schemas.ts](scrape-schemas.ts), [map-xml.ts](map-xml.ts), [answer-guard.ts](answer-guard.ts), [research-report.ts](research-report.ts).
 
 ## Rules
 
