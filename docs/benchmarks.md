@@ -1,9 +1,6 @@
 # Benchmarks
 
-This page shows how webular scores against other web research tools on the same tasks, and it shows losses as plainly as wins.
-Every number on this page comes from one committed results file, and each one links to that file.
-Read it as one small run, not as a final ranking.
-On webular's side, every score comes from its own open-source parts and Jev, TypeSafe's decision model, with no paid web API. [The README](../README.md) lists what webular is built on.
+This page shows how webular scores against other web research tools on the same tasks, and it shows losses as plainly as wins. Every number on this page comes from one committed results file, and each one links to that file. Read it as one small run, not as a final ranking. On webular's side, every score comes from its own open-source parts and Jev, TypeSafe's decision model, with no paid web API. [The README](../README.md) lists what webular is built on.
 
 ## Source files
 
@@ -14,9 +11,7 @@ All numbers come from one committed peer run, with 3 runs per task (sha256 `b529
 - [peers-2026-10-22T00-58-50-543Z.txt](../bench/results/peers-2026-10-22T00-58-50-543Z.txt): the harness's text report for the same run.
 <!-- bench:end -->
 
-The results file holds no confidence intervals, no paired tests, and no p values.
-So this page gives none, and it calls no win or loss as proven.
-`mise run bench:docs` writes every number on this page from the results file. A test fails when a number here differs from that file.
+The results file holds no confidence intervals, no paired tests, and no p values. So this page gives none, and it calls no win or loss as proven. `mise run bench:docs` writes every number on this page from the results file. A test fails when a number here differs from that file.
 
 ## Short answer
 
@@ -73,13 +68,11 @@ Rows per tool, from the results file:
 | anthropic-web | 0 | 0 | 0 | 51 | 0 |
 <!-- bench:end -->
 
-- A tool with no `ok` rows has no score. A missing score is never a zero.
-- A tool with no key is skipped. The harness reads keys from the environment or the Keychain, and the text report names the missing key.
+- A tool with no `ok` rows has no score. A missing score is never a zero. A tool with no key is skipped. The harness reads keys from the environment or the Keychain, and the text report names the missing key.
 
 ## Scores per job
 
-Each score keeps only rows with status `ok`.
-It averages each task over its runs, then takes the mean across tasks.
+Each score keeps only rows with status `ok`. It averages each task over its runs, then takes the mean across tasks.
 
 <!-- bench:start jobs -->
 | job | tool | tasks | mean accuracy |
@@ -136,6 +129,16 @@ Each line is one agent model, and each entry is one tool arm, from [models-2026-
 - **claude-haiku-5-5:** webular-jev-off 0.750 (4 runs, 1 no tool call, 0 sure-but-wrong, p50 52016 ms, 1.8 tool calls, 1885 tokens, 0.0067 USD); webular-jev-on 1.000 (4 runs, 0 no tool call, 0 sure-but-wrong, p50 65475 ms, 2.0 tool calls, 2009 tokens, 0.0057 USD); exa 1.000 (4 runs, 0 no tool call, 0 sure-but-wrong, p50 27840 ms, 1.0 tool calls, 782 tokens, 0.0052 USD); firecrawl 1.000 (4 runs, 0 no tool call, 0 sure-but-wrong, p50 29754 ms, 1.0 tool calls, 908 tokens, 0.0062 USD); parallel skipped: no agent adapter; tavily 0.750 (4 runs, 1 no tool call, 0 sure-but-wrong, p50 20386 ms, 0.8 tool calls, 1007 tokens, 0.0043 USD); perplexity 1.000 (4 runs, 0 no tool call, 0 sure-but-wrong, p50 20782 ms, 1.0 tool calls, 830 tokens, 0.0027 USD); youcom skipped: no agent adapter; jina skipped: no agent adapter; linkup skipped: no agent adapter; valyu skipped: no agent adapter; serpapi skipped: no agent adapter; serper skipped: no agent adapter; gemini skipped: no agent adapter; apify skipped: no agent adapter; brightdata skipped: no agent adapter; browserbase skipped: no agent adapter; scrapegraph skipped: no agent adapter; nimble skipped: no agent adapter; tinyfish skipped: no agent adapter; contextdev skipped: no agent adapter; searxng skipped: no agent adapter; crawl4ai skipped: no agent adapter; trafilatura skipped: no agent adapter; readability skipped: no agent adapter.
 <!-- bench:end -->
 
+## Outside reference points
+
+These scores are published by others. They were not measured here, and they are not comparable to webular's scores above: the tasks, graders, and tool settings differ.
+
+| source | date | published scores |
+| --- | --- | --- |
+| [Artificial Analysis Search Index](https://artificialanalysis.ai/agents/search-api) | data of 2026-10-19 | Exa 80, Perplexity 80, Octen 77, Parallel 75, Brave 75, Nimble 74, Firecrawl 73 |
+| [NEEDLE](https://keenableai.github.io/needle/results/), run by Keenable's makers | no date given | Keenable 73%, Exa 68%, Perplexity 67%, Brave 66%, Parallel 62%, Firecrawl 52%, Tavily 44% |
+| [openbenchmarks factual lookup](https://openbenchmarks.com/web-search) | 2026-10-02 | Exa 99.3%, Perplexity 97.3%, Linkup 96.7%, Firecrawl 95.3%, Nimble 94.3%, Tavily 87.7% |
+
 ## Method
 
 The full method lives in the spec:
@@ -145,13 +148,11 @@ The full method lives in the spec:
 - [Integrity and report](../bench/spec/spec-integrity-and-report.md): fairness, caching, guard tests, and the report format.
 - [Audit fixes](../bench/spec/spec-audit-fixes.md): the biases an audit found in the harness, and how to fix each one.
 
-The task sets live in [bench/tasks](../bench/tasks/), with their sources in [SOURCES.md](../bench/tasks/SOURCES.md).
-Each peer has one adapter in [scripts/bench/peers](../scripts/bench/peers/).
+The task sets live in [bench/tasks](../bench/tasks/), with their sources in [SOURCES.md](../bench/tasks/SOURCES.md). Each peer has one adapter in [scripts/bench/peers](../scripts/bench/peers/).
 
 ## Harness biases
 
-The audit in [bench/spec/spec-audit-fixes.md](../bench/spec/spec-audit-fixes.md) lists 16 biases.
-The fixes for several of them are in commit `2cc33fb9` on the branch `bench-harness-fairness`. These results do not include that commit.
+The audit in [bench/spec/spec-audit-fixes.md](../bench/spec/spec-audit-fixes.md) lists 16 biases. The fixes for several of them are in commit `2cc33fb9` on the branch `bench-harness-fairness`. These results do not include that commit.
 <!-- bench:start fields -->
 The results file has these top-level fields: `runs`, `seed`, `records`.
 <!-- bench:end -->
@@ -182,8 +183,7 @@ Replay the saved recordings. This is free and gives the same numbers each time:
 mise run bench:peers
 ```
 
-Run live against the keyed peers.
-This spends paid API quota, at most 20 calls per peer, as [mise.toml](../mise.toml) states. Run it only on purpose:
+Run live against the keyed peers. This spends paid API quota, at most 20 calls per peer, as [mise.toml](../mise.toml) states. Run it only on purpose:
 
 ```bash
 mise run bench:peers:live
