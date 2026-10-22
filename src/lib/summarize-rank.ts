@@ -1,6 +1,8 @@
 // Extractive pick for the summarize command: verbatim sentences with offsets,
 // chosen by MMR over a relevance score with a lead and section-lead prior.
-import { type Spans, scores, splitSentences, type TokenIds, tokenIds } from './summarize.ts'
+
+import { scores, type TokenIds, tokenIds } from './summarize.ts'
+import { type Spans, splitSentences } from './summarize-sentences.ts'
 
 // One verbatim sentence: its page-order index and [start, end) offsets into
 // the text it was cut from.

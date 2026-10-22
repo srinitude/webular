@@ -2,7 +2,8 @@
 // topic? One call per source asks one yes/no per candidate (they can co-occur, so
 // no single-label Choice) plus an `any` companion that stands in for a none option.
 // Kept sentences open the report section; the summarizer fills the rest.
-import { splitResearchSentences, summarizeText } from '../../summarize.ts'
+import { summarizeText } from '../../summarize.ts'
+import { splitResearchSentences } from '../../summarize-sentences.ts'
 import { defineDecision } from '../define.ts'
 import { CONFIDENCE_BAR, noul, purpose, sureYes } from '../payload/index.ts'
 
