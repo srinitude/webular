@@ -78,12 +78,22 @@ const hashTracked = Effect.gen(function* () {
 // A date, then a time of at least hours and minutes, joined by T, -, or _.
 const DATETIME_NAME = /[\w.-]*\d{4}-\d{2}-\d{2}[T_-]\d{2}-?\d{2}(?:-?\d{2})?[\w.-]*/g
 
+// HTML comments, removed until none is left, so no pass rebuilds a `<!--`.
+// Each pass that changes the text shortens it, so the loop ends.
+const dropComments = (markdown: string) => {
+  let text = markdown
+  let previous: string
+  do {
+    previous = text
+    text = text.replace(/<!--[\s\S]*?-->/g, '')
+  } while (text !== previous)
+  return text
+}
+
 // Prose only: drop fenced code, HTML comments, AGENTS.md path headings, inline
 // code, link targets, and reference definitions, so names there pass.
 const prose = (markdown: string) =>
-  markdown
-    .replace(/^(```|~~~)[^\n]*\n[\s\S]*?^\1[^\n]*$/gm, '')
-    .replace(/<!--[\s\S]*?-->/g, '')
+  dropComments(markdown.replace(/^(```|~~~)[^\n]*\n[\s\S]*?^\1[^\n]*$/gm, ''))
     .replace(/^# \S+\/AGENTS\.md$/gm, '')
     .replace(/`[^`\n]*`/g, '')
     .replace(/\]\([^)\s]*(?:\s+"[^"]*")?\)/g, ']')
