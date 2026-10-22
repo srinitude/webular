@@ -26,17 +26,31 @@ const INVISIBLE_CHARS = /[​-‏‪-‮⁠-⁤⁦-⁩﻿\u{E0000}-\u{E007F}]/gu
 
 export const dropInvisible = (text: string): string => text.replace(INVISIBLE_CHARS, '')
 
+interface HtmlNode {
+  readonly parentElement: HtmlNode | null
+  getAttribute(name: string): string | null
+  hasAttribute(name: string): boolean
+}
+
+const isHidden = (el: HtmlNode): boolean =>
+  el.hasAttribute('hidden') ||
+  el.getAttribute('aria-hidden') === 'true' ||
+  HIDDEN_STYLE.test(el.getAttribute('style') ?? '')
+
+// True when the element or any ancestor is hidden, for reads before dropHidden.
+export const insideHidden = (el: HtmlNode | null): boolean =>
+  el !== null && (isHidden(el) || insideHidden(el.parentElement))
+
 // Removes never-rendered elements and hidden ones in place.
 export function dropHidden(root: DomDocument['body']): void {
   for (const el of Array.from(root.querySelectorAll(NEVER_RENDERED))) el.remove()
   for (const el of Array.from(root.querySelectorAll(HIDDEN_CANDIDATES))) {
-    const hidden =
-      el.hasAttribute('hidden') ||
-      el.getAttribute('aria-hidden') === 'true' ||
-      HIDDEN_STYLE.test(el.getAttribute('style') ?? '')
-    if (hidden) el.remove()
+    if (isHidden(el)) el.remove()
   }
 }
+
+export const textOf = (el: { textContent: string | null } | null | undefined): string =>
+  (el?.textContent ?? '').replace(/\s+/g, ' ').trim()
 
 const unsafeAttr = (name: string, value: string): boolean => {
   // Browsers ignore control chars/whitespace inside the scheme ("java\tscript:").
@@ -58,8 +72,16 @@ const unsafeAttr = (name: string, value: string): boolean => {
 export function sanitizeHtml(html: string): string {
   const { document } = parseHTML(`<!doctype html><html><body>${html}</body></html>`)
   if (!document.body) return ''
-  for (const el of Array.from(document.querySelectorAll(UNSAFE_ELEMENTS))) el.remove()
   dropHidden(document.body)
+  // A formula is page text: keep its alt text, TeX source, or plain text as a
+  // text node before the foreign <math> element goes.
+  for (const el of Array.from(document.querySelectorAll('math'))) {
+    const tex = el.querySelector('annotation[encoding="application/x-tex"]')
+    el.replaceWith(el.getAttribute('alttext') || textOf(tex) || textOf(el))
+  }
+  for (const el of Array.from(document.querySelectorAll(UNSAFE_ELEMENTS))) el.remove()
+  // Turndown reads a code block's text, where a <br> would vanish and glue lines.
+  for (const br of Array.from(document.querySelectorAll('pre br'))) br.replaceWith('\n')
   for (const el of Array.from(document.querySelectorAll('*'))) {
     for (const name of el.getAttributeNames()) {
       if (unsafeAttr(name, el.getAttribute(name) ?? '')) el.removeAttribute(name)

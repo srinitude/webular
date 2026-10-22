@@ -2,6 +2,7 @@
 // alt, srcset, size, figcaption) plus og:image, read before Readability runs.
 import type { parseHTML } from 'linkedom'
 import { documentBase } from '../core/url.ts'
+import { insideHidden, textOf } from './html-sanitize.ts'
 
 type DomDocument = ReturnType<typeof parseHTML>['document']
 
@@ -14,9 +15,6 @@ export interface PageImage {
   readonly caption: string
 }
 
-export const textOf = (el: { textContent: string | null } | null | undefined): string =>
-  (el?.textContent ?? '').replace(/\s+/g, ' ').trim()
-
 const absolute = (href: string, base: string): string =>
   href ? (URL.parse(href, base)?.href ?? href) : ''
 
@@ -24,13 +22,23 @@ const absolute = (href: string, base: string): string =>
 const baseOf = (document: DomDocument, pageUrl: string): string =>
   documentBase(document.querySelector('base[href]')?.getAttribute('href'), pageUrl)
 
+// Alt text is author text that can carry injected instructions (2511.16397).
+// ponytail: a flat cap; WCAG advice keeps real alt text far shorter.
+const ALT_MAX = 300
+const altOf = (img: { getAttribute(name: string): string | null }): string =>
+  (img.getAttribute('alt') ?? '').trim().slice(0, ALT_MAX)
+
+// Read before dropHidden, so a hidden image and its alt are skipped here.
 export function imagesFrom(document: DomDocument, pageUrl: string): PageImage[] {
   const base = baseOf(document, pageUrl)
-  return Array.from(document.querySelectorAll('img[src]'), (img) => {
+  const shown = Array.from(document.querySelectorAll('img[src]')).filter(
+    (img) => !insideHidden(img),
+  )
+  return shown.map((img) => {
     const attr = (name: string): string => (img.getAttribute(name) ?? '').trim()
     return {
       src: absolute(attr('src'), base),
-      alt: attr('alt'),
+      alt: altOf(img),
       srcset: attr('srcset'),
       width: attr('width'),
       height: attr('height'),
@@ -70,7 +78,7 @@ export function mediaUrlsFrom(document: DomDocument, pageUrl: string): string[] 
 const BLOCKS = 'p,h1,h2,h3,h4,h5,h6,li,dt,dd,div,br,tr,blockquote,pre,section,article'
 export function inlineAlts(root: Pick<DomDocument['body'], 'querySelectorAll'>): void {
   for (const img of Array.from(root.querySelectorAll('img[alt]'))) {
-    const alt = (img.getAttribute('alt') ?? '').trim()
+    const alt = altOf(img)
     if (alt) img.replaceWith(` ${alt} `)
   }
   for (const el of Array.from(root.querySelectorAll(BLOCKS))) el.after('\n')

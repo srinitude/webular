@@ -38,25 +38,29 @@ An open mark means the search did not find the whole change. It does not prove t
 | Source | Items | Applied | Rejected | Open | Of open, partly |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | Retrieval | 14 | 1 | 0 | 13 | 6 |
-| Extraction | 14 | 4 | 0 | 10 | 6 |
+| Extraction | 14 | 7 | 0 | 7 | 5 |
 | Answer quality | 10 | 0 | 0 | 10 | 5 |
 | Decision models | 13 | 0 | 0 | 13 | 0 |
 | Agents and AGENTS.md | 19 | 3 | 0 | 16 | 4 |
 | Engineering | 18 | 1 | 0 | 17 | 3 |
 | Dependencies top 10 | 10 | 1 | 0 | 9 | 0 |
-| Dependency rows | 77 | 23 | 1 | 53 | 3 |
-| **All** | **175** | **33** | **1** | **141** | **27** |
+| Dependency rows | 77 | 24 | 1 | 52 | 2 |
+| **All** | **175** | **37** | **1** | **137** | **25** |
 
 ## Applied
 
 - Retrieval #13: source scores as hit rate over latency, `src/lib/search-source-score.ts:6`.
 - Extraction #1 and #2: crawl yield counts and URL-shape priority, `src/lib/crawl-priority.ts:1` and `:10`.
 - Extraction #5 and #6: PDF XY-Cut columns and repeated-line drop, `src/lib/parse-pdf-layout.ts:1` and `src/lib/parse-pdf.ts:54`.
+- Extraction #8: a formula keeps its alt text, TeX source, or plain text when MathML is stripped, `src/lib/html-sanitize.ts:78`.
+- Extraction #9: alt text stops at 300 characters, and the image list skips hidden images, `src/lib/html-images.ts:30` and `:38`.
+- Extraction #14: the archive fallback keeps only HTML captures that returned status 200, `src/lib/archive-urls.ts:14`.
 - Agents #2: the MCP server's directive and worked example, `plugins/webular/src/descriptions.json:3`.
 - AGENTS.md #2 and #6: a short intro with no project map, and nested files under their size caps.
 - Engineering #13: shuffled test order, the `test:shuffled` task in [`mise.toml`](../mise.toml).
 - Dependencies top 10 #8: bounded parsers. `diff` uses `maxEditLength` (`src/lib/snapshot.ts:35`), `unpdf` uses `maxImageSize` (`src/lib/parse-pdf.ts:125`), and Readability skips pages past `READABLE_MAX_CHARS` ([`src/lib/html.ts`](../src/lib/html.ts)).
 - Dependency rows #45 (the Readability cap above) and #37 (`Object.hasOwn` for tool names, [`src/tools/sdk-errors.ts`](../src/tools/sdk-errors.ts)).
+- Dependency row #56: a `<br>` inside `<pre>` stays a line break in Markdown, `src/lib/html-sanitize.ts:84`.
 - Dependency rows #54, #58, #60, #62, #66: mammoth messages logged, `maxImageSize`, `maxEditLength`, the TypeScript pin, and the Biome exclude.
 - Dependency rows #6, #8, #11, #12, #16, #17, #20, #24 to #28, #47, #57, #61, #76: keep-pin or informational rows that need no code.
 

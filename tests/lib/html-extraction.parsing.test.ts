@@ -1,7 +1,7 @@
 // HTML to Markdown edge cases: tables keep every cell in its column, and a
 // <pre> with no <code> child stays a code block.
 import { describe, expect, test } from 'bun:test'
-import { htmlToMarkdown } from '../../src/lib/html.ts'
+import { htmlToMarkdown, sanitizeHtml } from '../../src/lib/html.ts'
 import { selectMatches } from '../../src/lib/select.ts'
 
 describe('table rule', () => {
@@ -43,4 +43,25 @@ describe('selector matches', () => {
     const html = '<div class="a">Price <script>track()</script><style>.x{}</style>$5</div>'
     expect(selectMatches(html, '.a')).toEqual(['Price $5'])
   })
+})
+
+// MathML is dropped as foreign content, but the formula it shows is page text.
+test('a formula keeps its words when the MathML element is stripped', () => {
+  const out = sanitizeHtml(
+    '<p>Energy: <math alttext="E = mc^2"><mi>E</mi></math></p>' +
+      '<p>Area: <math><semantics><mi>A</mi><annotation encoding="application/x-tex">A = \\pi r^2</annotation></semantics></math></p>' +
+      '<p>Sum: <math><mi>a</mi><mo>+</mo><mi>b</mi></math></p>',
+  )
+  expect(out).not.toMatch(/<math|<annotation/i)
+  expect(out).toContain('E = mc^2')
+  expect(out).toContain('A = \\pi r^2')
+  expect(out).toContain('a+b')
+})
+
+// Some sites break code lines with <br> inside <pre>.
+test('a <br> inside a code block stays a line break in Markdown', () => {
+  const fenced = htmlToMarkdown('<pre><code>const a = 1<br>const b = 2</code></pre>')
+  expect(fenced).toContain('const a = 1\nconst b = 2')
+  const bare = htmlToMarkdown('<pre>line one<br/>line two</pre>')
+  expect(bare).toContain('line one\nline two')
 })

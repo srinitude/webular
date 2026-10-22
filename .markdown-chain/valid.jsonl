@@ -687,3 +687,6 @@
 {"path": "tests/lib/AGENTS.md", "sha": "2096e0a7e24d9a5bf4a2ce5b3de726779fb9e2e39e151fa6eebbc6e2d4f6f693"}
 {"path": "tests/lib/AGENTS.md", "sha": "7fde3ee27232d7a7dfbc032c476e0b397dae4dcccf2ae95efc7d37965118adbd"}
 {"path": "tests/lib/AGENTS.md", "sha": "704b4b8f9e013afba668a2ac68c055773a23fe29409a14ae01f1b1a7c553e3e6"}
+{"path": "docs/research.md", "sha": "17f68219ce55920007e9538a7946e8ad98e1431f4a67f340446aaa842bb65f96"}
+{"path": "docs/research/open-items.md", "sha": "990e756b675809c4959e0a6993089bbda0df7db4ab573a314d29712e34cb4520"}
+{"path": "docs/bug-classes.md", "sha": "161169d3788fb1c36f726ac69242b6f3afae22f2095a6070bf265945a79bc0bc"}

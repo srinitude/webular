@@ -4,7 +4,7 @@ Webular runs on Bun, Effect 4, Mastra workflows, XState, and Jev. It fetches pag
 
 `mise run bugs:static` runs the static guards in [scripts/bugs-check.ts](../scripts/bugs-check.ts). Each `bugs:<class>` task runs one class's tests, listed in [bugs-hunts.json](../scripts/bugs-hunts.json), and prints every missing guard. `mise run bugs:check` runs both on the CI spine after `test`. [bugs-check.test.ts](../tests/quality/bugs-check.test.ts) proves each guard fails on a planted bad line and passes once the line is gone. A class marked "not guarded yet" names the bug hunt that owns it. Sources were read on 2026-10-21 unless a source gives its own date.
 
-Tasks by class: `bugs:security` (8, 10, 11), `bugs:effect` (4, 7), `bugs:mcp-cli` (1, 2, 3), `bugs:parsing` (6, 9, 12), `bugs:tests-build` (5, 16, 17), `bugs:jev` (14, 15), `bugs:os` (13), and `bugs:cross-branch` (18).
+Tasks by class: `bugs:security` (8, 10, 11), `bugs:effect` (4, 7), `bugs:mcp-cli` (1, 2, 3), `bugs:parsing` (6, 9, 12), `bugs:tests-build` (5, 16, 17), `bugs:jev` (14, 15), `bugs:os` (13), and `bugs:cross-branch` (18). Class 19 has no task yet; its tests run with `mise run test:file tests/lib`.
 
 ## Before you merge
 
@@ -15,6 +15,7 @@ Tasks by class: `bugs:security` (8, 10, 11), `bugs:effect` (4, 7), `bugs:mcp-cli
 - [ ] Crawl and scrape read robots.txt before the first page on a host.
 - [ ] Home paths fall back from `HOME` to `USERPROFILE`, and paths are joined with `node:path`.
 - [ ] URL changes keep one canonical form, and tracking-param tests use a real tracking name such as `ref_src`.
+- [ ] A change to the sanitizer or the archive fallback keeps page facts: formulas, code-block line breaks, and only 200-status HTML captures.
 - [ ] Docs, AGENTS.md files, machines, and tool descriptions match the code in the same commit.
 - [ ] Two branches that touch the same string (the MCP instructions, a tool description) are joined by hand, and the joined text is tested.
 - [ ] Tests wait on events, use port 0 and their own temp folder, and pass under `bun test --parallel`.
@@ -91,9 +92,9 @@ Tasks by class: `bugs:security` (8, 10, 11), `bugs:effect` (4, 7), `bugs:mcp-cli
 
 ## 11. Prompt injection in page text
 
-- Risk: page text can carry instructions that steer the model that reads it. Hidden text and invisible characters slip past a reader.
-- Where: [src/lib/html.ts](../src/lib/html.ts), [src/lib/parse.ts](../src/lib/parse.ts), every Jev or model call that reads page text.
-- Guard: [sanitize-injection.test.ts](../tests/engine/sanitize-injection.test.ts).
+- Risk: page text can carry instructions that steer the model that reads it. Hidden text and invisible characters slip past a reader. An image inside a hidden element, or a very long alt text, carries the same instructions into the image list.
+- Where: [src/lib/html.ts](../src/lib/html.ts), [src/lib/parse.ts](../src/lib/parse.ts), [src/lib/html-images.ts](../src/lib/html-images.ts), every Jev or model call that reads page text.
+- Guard: [sanitize-injection.test.ts](../tests/engine/sanitize-injection.test.ts). Hidden images and the 300-character alt cap: the image-list case in [invisible-titles.security.test.ts](../tests/lib/invisible-titles.security.test.ts).
 - Sources: [OWASP LLM01 prompt injection](https://genai.owasp.org/llmrisk/llm01-prompt-injection/); [OWASP prompt injection cheat sheet](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html).
 
 ## 12. URL and Unicode normalization
@@ -144,3 +145,10 @@ Tasks by class: `bugs:security` (8, 10, 11), `bugs:effect` (4, 7), `bugs:mcp-cli
 - Where: every AGENTS.md, [README.md](../README.md), [src/commands/mcp.ts](../src/commands/mcp.ts), [plugins/webular/src/descriptions.json](../plugins/webular/src/descriptions.json).
 - Guard: [agents-md.test.ts](../tests/quality/agents-md.test.ts), [markdown-links.test.ts](../tests/quality/markdown-links.test.ts), [limits.test.ts](../tests/quality/limits.test.ts), `mise run docs:links`. A clash on a shared string is not guarded yet (owner: the cross-branch conflicts hunt).
 - Sources: [Mintlify on documentation drift](https://www.mintlify.com/library/how-to-stop-documentation-drift).
+
+## 19. Page facts lost in extraction
+
+- Risk: the sanitizer drops foreign elements, so a MathML formula vanishes with its words. Turndown reads a code block's text, so a `<br>` inside `<pre>` glues two lines into one. An archive fallback that keeps error pages, non-HTML files, or the same capture twice returns text that is not the page.
+- Where: [src/lib/html-sanitize.ts](../src/lib/html-sanitize.ts) (MathML becomes its alt text, TeX source, or plain text before sanitizing, and a `<br>` in `<pre>` becomes a newline), [src/lib/archive-urls.ts](../src/lib/archive-urls.ts) (the fallback keeps only HTML captures with status 200, once each).
+- Guard: "a formula keeps its words when the MathML element is stripped" and "a `<br>` inside a code block stays a line break in Markdown" in [html-extraction.parsing.test.ts](../tests/lib/html-extraction.parsing.test.ts); "archive fallback keeps only same-host HTML captures that returned 200, once each" in [archives.test.ts](../tests/lib/sources/archives.test.ts).
+- Sources: [open items](research/open-items.md), extraction rows 8 and 14, and dependency row 56 for turndown.

@@ -1,6 +1,6 @@
 # Open research items
 
-Each ranked change that is not in the code has a next step here. A "partly" item has some of the change in the code; the line says what is missing. The totals and the method are in [research.md](../research.md). Each `#N` is that change's number in its topic list.
+Each ranked change that is not in the code has a next step here. An "applied" line marks a change from this list that is in the code, and names the file and line that hold it. A "partly" item has some of the change in the code; the line says what is missing. The totals and the method are in [research.md](../research.md). Each `#N` is that change's number in its topic list.
 
 ## Retrieval
 
@@ -27,13 +27,13 @@ The list is [extraction-changes.md](extraction-changes.md).
 - #3: add a Chao1 coverage estimate to [`src/workflows/map.ts`](../../src/workflows/map.ts) and [`src/lib/crawl-resume.ts`](../../src/lib/crawl-resume.ts).
 - #4, partly: add an anchor-text and DOM drift check to [`src/lib/crawl.ts`](../../src/lib/crawl.ts).
 - #7, partly: join two extractors instead of picking the fuller one ([`src/lib/html.ts`](../../src/lib/html.ts)).
-- #8: swap `math` for its alt text before [`src/lib/html-sanitize.ts`](../../src/lib/html-sanitize.ts) drops it.
-- #9: cap alt-text length and strip hidden attributes in [`src/lib/html-images.ts`](../../src/lib/html-images.ts).
+- #8, applied: each `math` element becomes its alt text, TeX source, or plain text before the sanitizer drops it (`src/lib/html-sanitize.ts:78`).
+- #9, applied: alt text stops at 300 characters, and the image list skips hidden images (`src/lib/html-images.ts:30` and `:38`).
 - #10, partly: add header-path rows and "header: value" output to [`src/lib/html-table.ts`](../../src/lib/html-table.ts).
 - #11: reuse a page's XHR or JSON endpoint in [`src/lib/driver.ts`](../../src/lib/driver.ts).
 - #12, partly: merge small chunks and chunk table rows with their header ([`src/lib/local-chunks.ts`](../../src/lib/local-chunks.ts)).
 - #13, partly: finish the locator ladder (text, repeated sibling, per-host cache) in [`src/lib/select.ts`](../../src/lib/select.ts).
-- #14, partly: keep only HTML pages with status 200 in [`src/lib/archive-urls.ts`](../../src/lib/archive-urls.ts).
+- #14, applied: the archive fallback keeps only HTML captures that returned status 200, each one once (`src/lib/archive-urls.ts:14`).
 
 ## Answer quality
 
@@ -126,7 +126,7 @@ Each row's next step is its `change` field in the dependency research, which thi
 - `@mozilla/readability`: #46 (try a lower `charThreshold`).
 - `linkedom`: #48, #49, #50, #51.
 - `mammoth`: #52, #53 (a timeout on `convertToHtml`).
-- `turndown`: #55; #56 partly (`<br>` inside `<pre><code>`).
+- `turndown`: #55. Row #56 is applied: a `<br>` inside `<pre>` stays a line break (`src/lib/html-sanitize.ts:84`).
 - `unpdf`: #59.
 - `@types/bun`, `@biomejs/biome`, `knip`: #64, #65, #67.
 - `deepsec`: #68.
