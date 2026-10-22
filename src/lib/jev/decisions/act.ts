@@ -130,7 +130,7 @@ export const actDecision = defineDecision<ActInput, string>({
     },
   ],
   payload: actPayload,
-  read: (a, t) => agreedPick(a, 'next', t),
+  read: (a, t) => agreedPick(a, 'next', t, true),
   bar: CONFIDENCE_BAR,
   fallback: overlapBaseline,
   codeCheck: safeClick,

@@ -96,7 +96,7 @@ const payload = <I extends FieldInput>(full: I, ruleOf: (i: I) => string, select
 
 // The agreed element's full text; an agreed `none` means the field is empty.
 const read = (a: Record<string, JevAnswer>, t: number, input: FieldInput) => {
-  const pick = agreedPick(a, 'field', t)
+  const pick = agreedPick(a, 'field', t, true)
   if (pick === undefined) return undefined
   if (pick === 'none') return ''
   return input.candidates[Number(pick.slice(1))]?.text

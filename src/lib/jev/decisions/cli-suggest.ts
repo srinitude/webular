@@ -53,7 +53,7 @@ export const suggestDecision = defineDecision<SuggestInput, string | null>({
     ),
   }),
   read: (a, bar) => {
-    const pick = agreedPick(a, 'command', bar)
+    const pick = agreedPick(a, 'command', bar, true)
     return pick === NONE_OPTION ? null : NAMES.find((n) => n === pick)
   },
   bar: CONFIDENCE_BAR,
