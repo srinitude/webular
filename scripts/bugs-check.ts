@@ -55,6 +55,8 @@ const ruleHits = (root: string, rule: Rule) =>
   Effect.forEach(
     rule.globs
       .flatMap((g) => Array.from(new Bun.Glob(g).scanSync({ cwd: root })))
+      // Glob yields `\` paths on Windows; hits and `known` use `/`.
+      .map((file) => file.replaceAll('\\', '/'))
       .filter((file) => !rule.known?.includes(file)),
     (file) => fileHits(root, rule, file),
     { concurrency: 8 },
