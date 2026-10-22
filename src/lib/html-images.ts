@@ -93,7 +93,9 @@ export const addImageRule = (service: TurndownService): void => {
     filter: 'img',
     replacement: (_content, node) => {
       const src = (node as Element).getAttribute('src')?.trim() ?? ''
-      const alt = altOf(node as Element).replace(/\s+/g, ' ').replace(/[[\]\\]/g, '\\$&')
+      const alt = altOf(node as Element)
+        .replace(/\s+/g, ' ')
+        .replace(/[[\]\\]/g, '\\$&')
       return src ? `[image: ${alt}](${src})` : ''
     },
   })
