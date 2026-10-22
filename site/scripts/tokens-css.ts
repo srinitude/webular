@@ -45,6 +45,12 @@ const grid = (row: Group): ReadonlyArray<string> => {
   ]
 }
 
+// One line per width keeps the generated file short.
+const widthLine = (width: string, row: Group) =>
+  `@media (min-width: ${width}px) { :root { ${grid(row)
+    .map((line) => line.trim())
+    .join(' ')} } }`
+
 const render = (tokens: Group): string => {
   const color = tokens.color as Group
   const widths = Object.entries(tokens.breakpoint as Group).sort(
@@ -67,9 +73,7 @@ const render = (tokens: Group): string => {
     block(':root', root),
     `@media (prefers-color-scheme: dark) {\n${block(':root:not([data-theme="light"])', dark)}\n}`,
     block(':root[data-theme="dark"]', dark),
-    ...rest.map(
-      ([width, row]) => `@media (min-width: ${width}px) {\n${block(':root', grid(row as Group))}\n}`,
-    ),
+    ...rest.map(([width, row]) => widthLine(width, row as Group)),
     '',
   ].join('\n\n')
 }

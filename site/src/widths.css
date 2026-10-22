@@ -115,6 +115,22 @@
   .has-sidebar .sidebar {
     display: block;
   }
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: var(--space-4);
+  }
+  .sidebar a {
+    display: block;
+    padding: var(--space-4) 0;
+    color: var(--color-text);
+  }
+  /* The current page shows in the accent color. */
+  .sidebar a[aria-current="page"] {
+    color: var(--color-accent);
+    font-weight: var(--font-weight-bold);
+  }
 }
 @media (min-width: 1280px) {
   .demo-data {

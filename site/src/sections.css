@@ -130,21 +130,6 @@ td {
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-control);
 }
-.sidebar ul {
-  list-style: none;
-  padding: 0;
-  display: grid;
-  gap: var(--space-4);
-}
-.sidebar a {
-  display: block;
-  padding: var(--space-4) 0;
-  color: var(--color-text);
-}
-.sidebar a[aria-current="page"] {
-  color: var(--color-accent);
-  font-weight: var(--font-weight-bold);
-}
 
 /* The comparison: cards below 768, a table from 768. */
 .cards-table {
@@ -186,4 +171,21 @@ td {
 .cards-table td::before {
   content: attr(data-label) ": ";
   font-weight: var(--font-weight-bold);
+}
+
+/* Footer: 48 px top padding, 1 px top border. */
+.site-footer {
+  border-top: var(--border-width) solid var(--color-border);
+  padding-block: var(--space-48) var(--space-32);
+}
+.site-footer ul {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: var(--space-8);
+  margin-bottom: var(--space-24);
+}
+.site-footer a {
+  display: inline-block;
+  padding-block: var(--space-4);
 }
