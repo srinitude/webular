@@ -12,6 +12,7 @@ Rules for the shared Effect services. They sit under [src/AGENTS.md](../AGENTS.m
 
 ## Rules
 
+- Bug classes here ([bug classes](../../docs/bug-classes.md)): fetch timeouts, body caps, shell-free child processes, URL keys, home paths. Guard tasks: `mise run bugs:security`, `bugs:parsing`, `bugs:os`.
 - [`src/machines/fetch.ts`](../machines/fetch.ts) decides every retry, redirect, and failure. [`http.ts`](http.ts) only performs what it asks. Change the rule in [`fetch-policy.ts`](fetch-policy.ts), never in [`http.ts`](http.ts).
 - [`url.ts`](url.ts) matches the exact host on purpose. Apex and `www` siblings are out of scope.
 - Run subprocesses with argv arrays and a timeout. Never use a shell. Drain stdout and stderr together.

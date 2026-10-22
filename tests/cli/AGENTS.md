@@ -10,6 +10,7 @@ Tests for the CLI edge. The parent rules are in [tests/AGENTS.md](../AGENTS.md).
 
 ## Rules
 
+- Bug classes here ([bug classes](../../docs/bug-classes.md)): exit codes and runtime disposal. Guard tasks: `mise run bugs:mcp-cli`, `bugs:effect`.
 - The exit codes follow [docs/agent-contract.md](../../docs/agent-contract.md). Do not change one without asking first.
 - Real runs use [`bin/webular.ts`](../../bin/webular.ts) on a pipe.
 

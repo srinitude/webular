@@ -13,6 +13,7 @@ Tests for the shared Effect services in [src/core/](../../src/core/). The parent
 
 ## Rules
 
+- Bug classes here ([bug classes](../../docs/bug-classes.md)): network, Effect, and platform guards. Guard tasks: `mise run bugs:security`, `bugs:effect`, `bugs:os`.
 - [`cache.test.ts`](cache.test.ts) builds its own `ConfigProvider`, because [tests/_support/no-cache.ts](../_support/no-cache.ts) turns the cache off for every other test.
 - Use [tests/_support/scripted-server.ts](../_support/scripted-server.ts) to make network faults and hangs.
 

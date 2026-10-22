@@ -10,6 +10,7 @@ An entry file does three things only: parse flags, run the matching workflow fro
 
 ## Rules
 
+- Bug classes here ([bug classes](../../docs/bug-classes.md)): MCP stdout, exit codes, EPIPE. Guard tasks: `mise run bugs:mcp-cli`.
 - No capability logic here. Fetching, parsing, and ranking belong in [`src/workflows/`](../workflows/) and [`src/lib/`](../lib/).
 - Parse flags with [`src/core/args.ts`](../core/args.ts), which gives bounds-checked accessors.
 - Print through [`src/core/output.ts`](../core/output.ts).

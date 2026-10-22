@@ -19,7 +19,7 @@ This folder holds the source of the plugin's MCP server. The plugin rules are in
 - Serve stdio with `serveStdio(factory, { legacy })`. Serve HTTP with `createMcpHandler(factory, { legacy })` and a fresh server instance for each request. Wrap the handler once with `toNodeHandler`.
 - On plain `node:http`, bind loopback and put `localhostHostValidation()` and `localhostOriginValidation()` in front of the handler.
 - HTTP mode answers 403 to any Host or Origin that is not loopback or `*.localhost`. [http.test.ts](../tests/http.test.ts) checks it.
-- On stdio, stdout carries only JSON-RPC. Logs go to stderr.
+- On stdio, stdout carries only JSON-RPC. Logs go to stderr. `mise run bugs:check` fails on a stdout write here ([bug classes](../../../docs/bug-classes.md#1-stdout-writes-on-the-mcp-server)).
 - Register tools with `inputSchema: z.object(...)` (zod 4.2 or later). Arguments that fail the schema return `isError: true`, and the handler never runs.
 - Raise errors with `ProtocolError`, `ProtocolErrorCode`, and `SdkError`, not `McpError` and `ErrorCode`.
 - An `MCPServer` from `@mastra/mcp` takes `tools` as an object of `createTool` tools keyed by name. Never forward an MCP access token to another API.

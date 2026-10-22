@@ -14,6 +14,7 @@ Tests for the engine that fetches, parses, and ranks pages. The parent rules are
 
 ## Rules
 
+- Bug classes here ([bug classes](../../docs/bug-classes.md)): URL, charset, gzip, and injection guards. Guard tasks: `mise run bugs:parsing`, `bugs:security`.
 - Driver tests run on recorded output in [tests/fixtures/driver/](../fixtures/driver/). They start no browser and send no input.
 - [`cua-live.test.ts`](cua-live.test.ts) runs only when `WEBULAR_TEST_LIVE=1` is set.
 - [cua-jev.eval.ts](cua-jev.eval.ts) is an eval, not a test. Run it with `bun tests/engine/cua-jev.eval.ts`.

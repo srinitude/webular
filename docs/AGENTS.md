@@ -13,10 +13,12 @@ User and developer docs; the root [AGENTS.md](../AGENTS.md) holds the repo-wide 
 - [`docs/jev.md`](jev.md): how to set up the Jev key on any OS, and each route to Jev that webular supports.
 - [`docs/how-it-works.md`](how-it-works.md) and [`docs/why-webular.md`](why-webular.md): how webular works inside, and why to pick it.
 - [`docs/benchmarks.md`](benchmarks.md): the public benchmark report. Every number in it names the committed result file it comes from.
+- [`docs/bug-classes.md`](bug-classes.md): each kind of bug webular can hit, where, its guard, and its sources, plus the before-you-merge checklist.
 
 ## Rules
 
 - A behavior change updates the page that describes it in the same commit.
+- Adding a guard or fixing a bug class updates [`docs/bug-classes.md`](bug-classes.md).
 - Each item in [`docs/best-practices.md`](best-practices.md) names its source, the source's date, and its check.
 - No diagrams. Link the XState machine in [`src/machines/`](../src/machines/) instead.
 - Docs use American English and plain words.

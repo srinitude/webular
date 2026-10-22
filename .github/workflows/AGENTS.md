@@ -9,6 +9,7 @@ The GitHub Actions workflows. The parent [AGENTS.md](../AGENTS.md) lists the res
 - `.github/workflows/release.yml`: builds and publishes a release, with an attested SPDX SBOM and npm provenance.
 - `.github/workflows/codeql.yml`: CodeQL analysis of the JavaScript and TypeScript sources on push to main, on pull requests, and weekly.
 - `.github/workflows/repo-settings.yml`: read-only weekly check that the GitHub description, homepage, and topics match [`.github/repo-settings.json`](../repo-settings.json). `mise run repo:settings` applies the file by hand.
+- `.github/workflows/bug-hunts.yml`: runs `mise run bugs:check` (every class in [docs/bug-classes.md](../../docs/bug-classes.md)) weekly and on demand on Linux, macOS, and Windows.
 - `.github/workflows/scorecard.yml`: OpenSSF Scorecard on push to main and weekly, published and uploaded to code scanning.
 - `.github/workflows/prune.yml`: runs `mise run prune:check` on pull requests and weekly. A failed weekly run opens a draft pull request from a `prune/auto-*` branch with the `mise run prune:fix` result. It never pushes to main.
 

@@ -12,28 +12,28 @@ Run `mise trust ./mise.toml` once. [docs/tasks.md](docs/tasks.md) lists every ta
 ```bash
 mise run setup                # install pinned packages
 mise run lint                 # Biome lint and format check
+mise run bugs:check           # static guards, then every bugs:<class> hunt
 mise run typecheck            # strict tsc for the CLI and the plugin
 mise run test:file tests/core # only the named test files or folders
-mise run test                 # the full suite (runs build first)
-mise run ci                   # lint, docs, prune, typecheck, build, test
+mise run test                 # the full suite
+mise run ci                   # the check-only spine
 mise run                      # default: ci, plugin:ci, then e2e
 ```
 
 - A task needs a `description`, one `depends` parent, and `sources` and `outputs` when caching helps. Then run `mise run docs:tasks`.
 - A check that `test` lacks joins the linear `ci` chain ([graph.test.ts](tests/ci/graph.test.ts)). Paid, live, or writing tasks stay off it.
 - `MISE_TASK_SKIP=setup` skips the install. Set `TMPDIR` to a worktree folder for tests.
-- Run the `ponytail:ponytail-audit` skill by hand for a report of more cuts.
 
 Run a command from source with `bun bin/webular.ts <command> --json`.
 Before handing work back, run `mise run test:file` on the tests you touched, then `mise run lint`.
-Before a commit, run `mise run ci`.
+Before a commit, run `mise run ci`. Before a merge, walk the checklist in [docs/bug-classes.md](docs/bug-classes.md#before-you-merge).
 
 ## Project map
 
 - [src/commands](src/commands/) holds one file per command, and each runs as its own `run:<command>` task. [src/workflows](src/workflows/) holds the Mastra workflow behind it.
 - [dispatch-table.ts](src/cli/dispatch-table.ts) is generated from [mise.toml](mise.toml) by [gen-dispatch.ts](scripts/gen-dispatch.ts). Change [mise.toml](mise.toml), then run `mise run build`.
 - [src/lib/jev](src/lib/jev/) holds every Jev decision. [src/core](src/core/) holds the shared Effect services.
-- [tests/quality](tests/quality/) holds the code gates. [docs](docs/) holds the user and developer docs.
+- [tests/quality](tests/quality/) holds the code gates.
 
 ## Code rules
 
@@ -99,7 +99,7 @@ Never:
 - Keep CLAUDE.local.md and AGENTS.local.md out of git ([Claude Code memory](https://code.claude.com/docs/en/memory)).
 - A root llms.txt opens with one H1, then a `>` summary, then intro lines with no headings. H2 sections list one Markdown link per bullet, with a short note. Links are absolute https URLs to Markdown pages and match the README docs list ([llms.txt v2](https://llmstxt.org)).
 - A root server.json uses the `2025-12-11` schema, the name io.github.srinitude/webular, a description of at most 100 characters, the package.json version, and an npm stdio package. package.json `mcpName` holds the same name ([MCP Registry server.json schema 2025-12-11](https://github.com/modelcontextprotocol/registry/blob/main/docs/reference/server-json/draft/server.schema.json)).
-- Violations: .gitignore lists neither local file. llms.txt is missing. `ai` sits in `devDependencies` (package.json:94), not `dependencies`.
+- Violations: .gitignore lists neither local file. `ai` sits in `devDependencies` (package.json:94), not `dependencies`.
 
 ## Security
 

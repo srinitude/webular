@@ -9,6 +9,7 @@ The build and maintenance scripts that `mise` tasks run. The root [AGENTS.md](..
 - [jev-docs.ts](jev-docs.ts) refreshes and proves the Jev docs snapshot for `mise run jev:docs`.
 - [repo-settings.ts](repo-settings.ts) applies (`mise run repo:settings`) or checks (`mise run repo:settings:check`, read-only) the GitHub description, homepage, and topics against [.github/repo-settings.json](../.github/repo-settings.json).
 - [tasks-doc.ts](tasks-doc.ts) writes [docs/tasks.md](../docs/tasks.md) from `mise tasks --json` for `mise run docs:tasks`. `mise run docs:tasks:check` fails on drift.
+- [bugs-check.ts](bugs-check.ts) runs the static bug-class guards for `mise run bugs:static`. [bugs-hunt.ts](bugs-hunt.ts) runs one class from [bugs-hunts.json](bugs-hunts.json) per `bugs:<class>` task, and every class for `mise run bugs:check`. A file in a rule's `known` list is a hit a fix still owes; remove it once fixed.
 - [install.sh](install.sh) and [install.ps1](install.ps1) install a release binary.
 
 ## Rules

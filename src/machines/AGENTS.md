@@ -9,6 +9,7 @@ Rules for the XState flow machines, under [src/AGENTS.md](../AGENTS.md).
 
 ## Rules
 
+- Bug classes here ([bug classes](../../docs/bug-classes.md)): machine drift. Guard tasks: `mise run bugs:jev`.
 - A machine is the flow doc. Do not draw a diagram of it.
 - A final state carries an `exit-<code>` tag from [`src/cli/exit-codes.ts`](../cli/exit-codes.ts).
 - Code that runs a flow reads its decisions from the machine. [`src/core/http.ts`](../core/http.ts) performs only what [`fetch.ts`](fetch.ts) asks.

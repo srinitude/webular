@@ -14,6 +14,7 @@ Rules for the Jev client and decision framework, under [src/lib/AGENTS.md](../AG
 
 ## Rules
 
+- Bug classes here ([bug classes](../../../docs/bug-classes.md)): silent fallbacks, loose model pins. Guard tasks: `mise run bugs:jev`.
 - Every decision goes through `defineDecision`. It needs a docs-checked payload, a labeled eval file, the 0.95 bar, a rule-based fallback, and a code check after the pick.
 - Jev decides and code acts. A missing key, a timeout, or an API error returns the fallback and never blocks a workflow.
 - A decision acts only when both option orders agree at the bar and the code check passes.

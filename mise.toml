@@ -5,8 +5,9 @@
 # code. Tests are authored BEFORE code (R1).
 #
 # Graph shape (zero cycles — it is a tree rooted at `setup`):
-#   setup -> lint -> docs:links -> docs:tasks:check -> prune:check -> typecheck
-#     -> build -> test -> validate -> ci
+#   setup -> lint -> docs:links -> docs:tasks:check -> prune:check -> bugs:static
+#     -> typecheck -> build -> test -> bugs:check -> validate -> ci
+#   setup -> bugs:<class>             (one read-only bug hunt each)
 #   setup -> format                   (mutating dev task, OFF the check-only spine)
 #   setup -> run:<command>            (one logical predecessor each)
 # The CI/CD spine (setup..ci) is the SINGLE default dependency path and is
@@ -118,9 +119,14 @@ description = "Every OS, locally: shell completions parse, the e2e parity list, 
 depends = ["setup"]
 run = "bun test --timeout 60000 tests/release/completions.test.ts tests/quality/e2e-parity.test.ts tests/cli/gateway.test.ts"
 
+[tasks."bugs:static"]
+description = "Bugs: static guards from docs/bug-classes.md (no MCP stdout writes, no `as any`, no JSON.parse casts, no shell strings, no raw fetch); read-only"
+depends = ["prune:check"]
+run = 'bun "{{config_root}}/scripts/bugs-check.ts"'
+
 [tasks.typecheck]
 description = "Compilation: strict TypeScript typecheck of the CLI and of plugins/webular (its own tsconfig, outside the root include)"
-depends = ["prune:check"]
+depends = ["bugs:static"]
 run = ["bunx tsc --noEmit", "bunx tsc --noEmit -p plugins/webular"]
 
 [tasks.build]
@@ -229,9 +235,54 @@ description = "Fails when docs.typesafe.ai lists a Jev release above JEV_LATEST_
 depends = ["setup"]
 run = "bun scripts/jev-latest-check.ts"
 
+[tasks."bugs:security"]
+description = "Bug hunt: run the security class guards (SSRF, robots order, injection, CI credentials) from docs/bug-classes.md; prints every missing guard; read-only"
+depends = ["setup"]
+run = 'bun "{{config_root}}/scripts/bugs-hunt.ts" security'
+
+[tasks."bugs:effect"]
+description = "Bug hunt: run the effect class guards (defects, interruption, scopes, child processes) from docs/bug-classes.md; prints every missing guard; read-only"
+depends = ["setup"]
+run = 'bun "{{config_root}}/scripts/bugs-hunt.ts" effect'
+
+[tasks."bugs:mcp-cli"]
+description = "Bug hunt: run the mcp-cli class guards (MCP stdout and tools, exit codes, CLI contract) from docs/bug-classes.md; prints every missing guard; read-only"
+depends = ["setup"]
+run = 'bun "{{config_root}}/scripts/bugs-hunt.ts" mcp-cli'
+
+[tasks."bugs:parsing"]
+description = "Bug hunt: run the parsing class guards (URLs, charset, gzip and body caps, canonical keys) from docs/bug-classes.md; prints every missing guard; read-only"
+depends = ["setup"]
+run = 'bun "{{config_root}}/scripts/bugs-hunt.ts" parsing'
+
+[tasks."bugs:tests-build"]
+description = "Bug hunt: run the tests-build class guards (quality gates, CI graph, release) from docs/bug-classes.md; prints every missing guard; read-only"
+depends = ["setup"]
+run = 'bun "{{config_root}}/scripts/bugs-hunt.ts" tests-build'
+
+[tasks."bugs:jev"]
+description = "Bug hunt: run the jev class guards (Jev definitions, replays, XState machines) from docs/bug-classes.md; prints every missing guard; read-only"
+depends = ["setup"]
+run = 'bun "{{config_root}}/scripts/bugs-hunt.ts" jev'
+
+[tasks."bugs:os"]
+description = "Bug hunt: run the os class guards (platform parity and paths) from docs/bug-classes.md; prints every missing guard; read-only"
+depends = ["setup"]
+run = 'bun "{{config_root}}/scripts/bugs-hunt.ts" os'
+
+[tasks."bugs:cross-branch"]
+description = "Bug hunt: run the cross-branch class guards (pinned literals to rerun after a combined land) from docs/bug-classes.md; prints every missing guard; read-only"
+depends = ["setup"]
+run = 'bun "{{config_root}}/scripts/bugs-hunt.ts" cross-branch'
+
+[tasks."bugs:check"]
+description = "Bugs: the static guards, then every bug-hunt class (bugs:security through bugs:cross-branch) in one read-only CI node"
+depends = ["test"]
+run = ['bun "{{config_root}}/scripts/bugs-check.ts"', 'bun "{{config_root}}/scripts/bugs-hunt.ts" all']
+
 [tasks.validate]
 description = "Validate gate — aggregates the full quality spine"
-depends = ["test"]
+depends = ["bugs:check"]
 run = "echo webular: validate OK"
 
 [tasks.ci]
