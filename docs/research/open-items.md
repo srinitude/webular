@@ -125,7 +125,7 @@ Each row's next step is its `change` field in the dependency research, which thi
 - `@firecrawl/anydoc`: #41, #42, #43, #44.
 - `@mozilla/readability`: #46 (try a lower `charThreshold`).
 - `linkedom`: #48, #49, #50, #51.
-- `mammoth`: #52, #53 (a timeout on `convertToHtml`).
+- `mammoth`: #52. Row #53 is applied: `WEBULAR_DOCX_TIMEOUT_MS` bounds `convertToHtml` (`src/lib/parse.ts:74`).
 - `turndown`: #55. Row #56 is applied: a `<br>` inside `<pre>` stays a line break (`src/lib/html-sanitize.ts:84`).
 - `unpdf`: #59.
 - `@types/bun`, `@biomejs/biome`, `knip`: #64, #65, #67.

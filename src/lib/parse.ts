@@ -1,10 +1,10 @@
 // FOSS document parsing: detect format by extension, extract markdown/text.
 // pdf/docx parsers load their heavy deps lazily (they never tax a text parse);
 // binary formats we cannot parse fail loudly instead of decoding to garbage.
-import { Effect } from 'effect'
+import { Context, Effect, Option } from 'effect'
 import { logErr } from '../core/output.ts'
 import { htmlToMarkdown } from './html.ts'
-import { attempt, fail, ParseError } from './parse-core.ts'
+import { attempt, fail, ParseError, setting } from './parse-core.ts'
 import { pdfText } from './parse-pdf.ts'
 
 export { pdfText }
@@ -56,16 +56,35 @@ const parsePdf = Effect.fnUntraced(function* (file: string) {
   return yield* pdfText(new Uint8Array(buf))
 })
 
+type Docx = { value: string; messages: { type: string; message: string }[] }
+// The converter is a service so a test supplies a fake without mock.module.
+export const DocxConverter = Context.Reference<(buffer: Buffer) => Effect.Effect<Docx, ParseError>>(
+  'webular/lib/DocxConverter',
+  {
+    defaultValue: () => (buffer) =>
+      attempt(() => import('mammoth')).pipe(
+        Effect.flatMap(({ default: mammoth }) => attempt(() => mammoth.convertToHtml({ buffer }))),
+      ),
+  },
+)
+
+// WEBULAR_DOCX_TIMEOUT_MS bounds one conversion, as WEBULAR_PDF_TIMEOUT_MS bounds a PDF.
+// ponytail: mammoth has no abort, so a timed-out conversion runs on unseen; a worker would stop it.
 const parseDocx = Effect.fnUntraced(function* (file: string) {
-  const { default: mammoth } = yield* attempt(() => import('mammoth'))
+  const timeoutMs = yield* setting('WEBULAR_DOCX_TIMEOUT_MS', 60_000)
   const buf = yield* attempt(() => Bun.file(file).arrayBuffer())
-  const { value: html, messages } = yield* attempt(() =>
-    mammoth.convertToHtml({ buffer: Buffer.from(buf) }),
-  ).pipe(
+  const convert = yield* DocxConverter
+  const done = yield* convert(Buffer.from(buf)).pipe(
     Effect.mapError(
       (e) => new ParseError({ message: `parse: ${file}: docx unreadable: ${e.message}` }),
     ),
+    Effect.timeoutOption(timeoutMs),
   )
+  if (Option.isNone(done))
+    return yield* fail(
+      `parse: ${file}: docx conversion stopped (WEBULAR_DOCX_TIMEOUT_MS: over ${timeoutMs} ms)`,
+    )
+  const { value: html, messages } = done.value
   for (const m of messages) yield* logErr(`parse: ${file}: mammoth ${m.type}: ${m.message}`)
   return htmlToMarkdown(html)
 })

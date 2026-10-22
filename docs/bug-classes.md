@@ -80,7 +80,7 @@ Tasks by class: `bugs:security` (8, 10, 11), `bugs:effect` (4, 7), `bugs:mcp-cli
 
 - Risk: an unbounded body or a small gzip file that expands to gigabytes eats memory. A wrong charset garbles text.
 - Where: [src/core/decode.ts](../src/core/decode.ts), [src/core/gunzip.ts](../src/core/gunzip.ts), [src/core/http-body.ts](../src/core/http-body.ts).
-- Guard: [fetch-body-cap.test.ts](../tests/core/fetch-body-cap.test.ts), [map-gzip.test.ts](../tests/engine/map-gzip.test.ts), [decode.test.ts](../tests/engine/decode.test.ts), [parse-pdf-caps.test.ts](../tests/engine/parse-pdf-caps.test.ts).
+- Guard: [fetch-body-cap.test.ts](../tests/core/fetch-body-cap.test.ts), [map-gzip.test.ts](../tests/engine/map-gzip.test.ts), [decode.test.ts](../tests/engine/decode.test.ts), [parse-pdf-caps.test.ts](../tests/engine/parse-pdf-caps.test.ts). [pdf-load-options.effect.test.ts](../tests/lib/pdf-load-options.effect.test.ts) checks that a PDF load or a docx conversion that never settles fails at its deadline.
 - Sources: [CWE-409](https://cwe.mitre.org/data/definitions/409.html); [WHATWG Encoding](https://encoding.spec.whatwg.org/).
 
 ## 10. Robots.txt order, rate limits, and Retry-After

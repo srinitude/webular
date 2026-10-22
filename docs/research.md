@@ -44,8 +44,8 @@ An open mark means the search did not find the whole change. It does not prove t
 | Agents and AGENTS.md | 19 | 3 | 0 | 16 | 4 |
 | Engineering | 18 | 1 | 0 | 17 | 3 |
 | Dependencies top 10 | 10 | 2 | 0 | 8 | 0 |
-| Dependency rows | 77 | 24 | 1 | 52 | 2 |
-| **All** | **175** | **38** | **1** | **136** | **25** |
+| Dependency rows | 77 | 25 | 1 | 51 | 2 |
+| **All** | **175** | **39** | **1** | **135** | **25** |
 
 ## Applied
 
@@ -62,6 +62,7 @@ An open mark means the search did not find the whole change. It does not prove t
 - Dependencies top 10 #5: a SIGTERM during startup still exits 143, `tests/cli/dispatch.test.ts:142`.
 - Dependency rows #45 (the Readability cap above) and #37 (`Object.hasOwn` for tool names, [`src/tools/sdk-errors.ts`](../src/tools/sdk-errors.ts)).
 - Dependency row #56: a `<br>` inside `<pre>` stays a line break in Markdown, `src/lib/html-sanitize.ts:84`.
+- Dependency row #53: `WEBULAR_DOCX_TIMEOUT_MS` bounds one docx conversion, `src/lib/parse.ts:74`.
 - Dependency rows #54, #58, #60, #62, #66: mammoth messages logged, `maxImageSize`, `maxEditLength`, the TypeScript pin, and the Biome exclude.
 - Dependency rows #6, #8, #11, #12, #16, #17, #20, #24 to #28, #47, #57, #61, #76: keep-pin or informational rows that need no code.
 
