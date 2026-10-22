@@ -9,6 +9,7 @@ The Astro layout, components, and styles, under [site/AGENTS.md](../AGENTS.md).
 - [DocMeta.astro](DocMeta.astro): the head tags and page links for a doc page.
 - [InstallBlock.astro](InstallBlock.astro): the install commands for each host.
 - [site.css](site.css): the page styles.
+- [tabs.css](tabs.css): the install tabs, Copy, the theme toggle, the curl line breaks, the command group grid, and the "On this page" list.
 - [tokens.css](tokens.css): the style tokens, written by the tokens-css.ts script from design/tokens.json.
 - The a11y.css file holds the focus and contrast rules, and it loads after the page styles.
 

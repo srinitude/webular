@@ -1,0 +1,176 @@
+/* Install tabs, Copy, the theme toggle, the curl line breaks, the command
+   group grid, and the "On this page" list. Mobile first. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.tab-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  min-width: 0;
+}
+.tab-row {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.tab-label {
+  color: var(--color-muted);
+  font-size: var(--code-size);
+}
+/* A row that does not fit scrolls inside itself, with the scroll-row fade. */
+.tab-row .scroll-row {
+  display: flex;
+  gap: var(--space-4);
+  border: 0;
+  scrollbar-width: none;
+  background:
+    linear-gradient(to left, var(--color-bg) var(--space-16), transparent) right /
+    var(--space-32) 100% no-repeat local,
+    linear-gradient(to left, var(--fade), transparent) right / var(--space-16) 100% no-repeat scroll,
+    var(--color-bg);
+}
+[role="tab"],
+.tab-link,
+.copy,
+.theme-toggle {
+  flex: none;
+  min-height: var(--size-tap-target);
+  min-width: var(--size-tap-target);
+  padding: 0 var(--space-12);
+  font: inherit;
+  font-size: var(--code-size);
+  color: var(--color-muted);
+  background: none;
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius-control);
+  cursor: pointer;
+}
+.tab-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+/* The selected tab: a surface fill and a neutral border, never amber. */
+[role="tab"][aria-selected="true"] {
+  color: var(--color-text);
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  font-weight: var(--font-weight-bold);
+}
+[role="tab"]:focus-visible,
+.tab-link:focus-visible,
+.copy:focus-visible,
+.theme-toggle:focus-visible {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: -3px;
+}
+.tab-panel {
+  display: grid;
+  gap: var(--space-12);
+  min-width: 0;
+}
+.tab-panel[hidden] {
+  display: none;
+}
+.path-note,
+.tab-panel p {
+  color: var(--color-muted);
+}
+/* Copy sits outside the scrolling box, 8 px from it. */
+.code-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  min-width: 0;
+}
+.code-row pre {
+  flex: 1;
+}
+.copy {
+  width: var(--size-copy-button);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+.theme-toggle {
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+/* The curl line: below 600 it breaks before "| sh"; from 600 to 767 after
+   "-fsSL" with a "\"; from 768 it is one line. */
+.br-mid,
+.br-rest {
+  display: none;
+}
+@media (min-width: 600px) and (max-width: 767px) {
+  .br-mid,
+  .br-rest {
+    display: inline;
+  }
+  .br-wide,
+  .br-narrow {
+    display: none;
+  }
+}
+@media (min-width: 768px) {
+  .br-rest {
+    display: inline;
+  }
+  .br-narrow {
+    display: none;
+  }
+}
+@media (min-width: 820px) {
+  .tab-rows {
+    flex-direction: row;
+    flex-wrap: wrap;
+    column-gap: var(--space-24);
+  }
+}
+/* Command groups are cards in the shared card grid; an open group takes the
+   full row, and dense flow fills the gaps it leaves. */
+.group-grid {
+  grid-auto-flow: dense;
+}
+.group-grid summary > span {
+  display: grid;
+  gap: var(--space-4);
+}
+.group-grid summary code {
+  color: var(--color-muted);
+  font-weight: normal;
+}
+.group-grid > details.group[open] {
+  grid-column: 1 / -1;
+}
+.toc {
+  display: none;
+}
+@media (min-width: 1280px) {
+  .has-sidebar {
+    grid-template-columns: var(--size-sidebar) minmax(0, 680px) var(--size-on-this-page);
+  }
+  .has-sidebar .toc {
+    display: block;
+  }
+  .toc ul {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: var(--space-4);
+  }
+  .toc h2 {
+    font-size: var(--code-size);
+    color: var(--color-muted);
+    margin-bottom: var(--space-8);
+  }
+  .toc a {
+    display: block;
+    padding: var(--space-4) 0;
+  }
+}

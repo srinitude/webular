@@ -77,9 +77,10 @@ const groups: [string, [string, string, string][]][] = [
 ]
 ---
 
+<div class="cards card-grid group-grid">
 {groups.map(([name, commands]) => (
   <details class="group">
-    <summary><h3>{name}: {commands.map(([command]) => command).join(", ")}</h3></summary>
+    <summary><span><h3>{name}</h3><code>{commands.map(([command]) => command).join(", ")}</code></span></summary>
     <ul class="cards card-grid">
       {commands.map(([command, line, example]) => (
         <li class="card">
@@ -90,3 +91,4 @@ const groups: [string, [string, string, string][]][] = [
     </ul>
   </details>
 ))}
+</div>

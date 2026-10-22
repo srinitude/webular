@@ -1,26 +1,74 @@
 ---
-// The install commands, shown as stacked blocks so no script is needed.
+// The install commands as two tab rows ("Terminal" and "Your agent"). The
+// inline script in Base.astro switches tabs and runs Copy; without it, every
+// panel shows, stacked.
 interface Props {
   firstId?: string
+  agent?: boolean
 }
-const { firstId } = Astro.props
+const { firstId, agent = true } = Astro.props
+const id = firstId ?? 'install-again'
 const curl = "curl --proto '=https' --tlsv1.2 -fsSL https://webular.dev/install.sh | sh"
 const claude = 'claude mcp add webular -- webular mcp'
+const terminal = [
+  ['macOS and Linux', curl],
+  ['Windows', 'irm https://webular.dev/install.ps1 | iex'],
+  ['npm', 'npm i -g webular'],
+]
 ---
 
-<div class="install-block">
-  <h3>Terminal: macOS and Linux</h3>
-  <pre id={firstId} tabindex="0"><code>{curl}</code></pre>
-  <p>Downloads the webular build that matches your machine (OS, CPU, and libc), checks it against SHA256SUMS, and puts it in <code>~/.webular/bin</code>. <a href="/install.sh">View the script</a>.</p>
-  <h3>Terminal: Windows</h3>
-  <pre tabindex="0"><code>irm https://webular.dev/install.ps1 | iex</code></pre>
-  <p>Checks the download against SHA256SUMS and puts it in <code>$HOME\.webular\bin</code>. <a href="/install.ps1">View the script</a>.</p>
-  <h3>Terminal: npm</h3>
-  <pre tabindex="0"><code>npm i -g webular</code></pre>
-  <p>Installs only the native build for your OS, CPU, and libc.</p>
-  <p>If the script says to add <code>~/.webular/bin</code> to your PATH, do that. Then open a new terminal and run <code>webular doctor</code>.</p>
-  <h3>Your agent: Claude Code</h3>
-  <p>First install webular with a Terminal block. Then run:</p>
-  <pre tabindex="0"><code>{claude}</code></pre>
-  <p>Other clients: <a href="/install#agents">add webular to your agent</a>.</p>
+<div class="install-block" data-tabs>
+  <div class="tab-rows">
+    <div class="tab-row">
+      <p class="tab-label" id={`${id}-terminal`}>Terminal</p>
+      <div class="scroll-row" role="tablist" aria-labelledby={`${id}-terminal`}>
+        {terminal.map(([label], i) => (
+          <button type="button" role="tab" id={`${id}-tab-${i}`} aria-controls={`${id}-panel-${i}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1}>{label}</button>
+        ))}
+      </div>
+    </div>
+    {agent && (
+      <div class="tab-row">
+        <p class="tab-label" id={`${id}-agent`}>Your agent</p>
+        <div class="scroll-row" role="tablist" aria-labelledby={`${id}-agent`}>
+          <button type="button" role="tab" id={`${id}-tab-3`} aria-controls={`${id}-panel-3`} aria-selected="false" tabindex="-1">Claude Code</button>
+          <a class="tab-link" href="/install#agents">Other clients</a>
+        </div>
+      </div>
+    )}
+  </div>
+  <div class="tab-panel" role="tabpanel" id={`${id}-panel-0`} aria-labelledby={`${id}-tab-0`}>
+    <div class="code-row">
+      <pre id={firstId} tabindex="0"><code>curl --proto '=https' --tlsv1.2 -fsSL<span class="br-mid"> \
+  </span><span class="br-wide"> </span>https://webular.dev/install.sh<span class="br-narrow">
+  </span><span class="br-rest"> </span>| sh</code></pre>
+      <button type="button" class="copy" data-copy={curl}>Copy</button>
+    </div>
+    <p>Downloads the webular build that matches your machine (OS, CPU, and libc), checks it against SHA256SUMS, and puts it in <code>~/.webular/bin</code>. <a href="/install.sh">View the script</a>.</p>
+  </div>
+  <div class="tab-panel" role="tabpanel" id={`${id}-panel-1`} aria-labelledby={`${id}-tab-1`}>
+    <div class="code-row">
+      <pre tabindex="0"><code>{terminal[1][1]}</code></pre>
+      <button type="button" class="copy" data-copy={terminal[1][1]}>Copy</button>
+    </div>
+    <p>Checks the download against SHA256SUMS and puts it in <code>$HOME\.webular\bin</code>. <a href="/install.ps1">View the script</a>.</p>
+  </div>
+  <div class="tab-panel" role="tabpanel" id={`${id}-panel-2`} aria-labelledby={`${id}-tab-2`}>
+    <div class="code-row">
+      <pre tabindex="0"><code>{terminal[2][1]}</code></pre>
+      <button type="button" class="copy" data-copy={terminal[2][1]}>Copy</button>
+    </div>
+    <p>Installs only the native build for your OS, CPU, and libc.</p>
+  </div>
+  {agent && (
+    <div class="tab-panel" role="tabpanel" id={`${id}-panel-3`} aria-labelledby={`${id}-tab-3`}>
+      <p>First install webular with a Terminal tab. Then run:</p>
+      <div class="code-row">
+        <pre tabindex="0"><code>{claude}</code></pre>
+        <button type="button" class="copy" data-copy={claude}>Copy</button>
+      </div>
+    </div>
+  )}
+  <p class="path-note">If the script says to add <code>~/.webular/bin</code> to your PATH, do that. Then open a new terminal and run <code>webular doctor</code>.</p>
+  <p class="visually-hidden" aria-live="polite" data-copy-status></p>
 </div>
