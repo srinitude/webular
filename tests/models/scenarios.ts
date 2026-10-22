@@ -97,4 +97,6 @@ export const webularEnv = (origin: string, tmp: string): Record<string, string> 
   WEBULAR_INVOKE_DIR: tmp,
   WEBULAR_DB: `${tmp}/webular.db`,
   WEBULAR_NO_CACHE: '1',
+  // The fixture is on 127.0.0.1, which agent mode (the MCP and plugin servers) blocks.
+  WEBULAR_ALLOW_PRIVATE: '1',
 })

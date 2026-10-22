@@ -10,7 +10,7 @@ import { ROOT } from '../_support/root.ts'
 import { runBaseline, spawnText } from './baseline.ts'
 import { evaluate, toolProblems } from './check.ts'
 import { allowedTools, claudeArgs, claudeEnv } from './run.ts'
-import { loadScenarios, type Scenario } from './scenarios.ts'
+import { loadScenarios, type Scenario, webularEnv } from './scenarios.ts'
 
 const Tools = Schema.fromJsonString(
   Schema.Struct({ tools: Schema.Record(Schema.String, Schema.Unknown) }),
@@ -192,3 +192,7 @@ test('answer --urls is discoverable from the help text and the research skill', 
       }
     }),
   ))
+
+test('the agent-mode MCP and plugin servers may reach the 127.0.0.1 fixture', () => {
+  expect(webularEnv('http://127.0.0.1:1', '/t').WEBULAR_ALLOW_PRIVATE).toBe('1')
+})
