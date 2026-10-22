@@ -128,8 +128,7 @@ jobs:
         run: |
           docker run --rm -v "$PWD:/w" -w /w -e MISE_LOCKED=1 oven/bun:1.4.3-alpine sh -ec '
             apk add --no-cache git fish mandoc libgcc libstdc++
-            apk add --no-cache mise \
-              || apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community mise
+            apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community mise
             git config --global --add safe.directory /w
             mise trust
             MISE_EXPERIMENTAL=1 mise run test'
