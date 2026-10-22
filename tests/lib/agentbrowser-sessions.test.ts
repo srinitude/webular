@@ -2,7 +2,9 @@
 // (never agent-browser's idle-forever `default`), repeat batches in one run
 // reuse it warm, and the run's end (closeBrowserSessions, which runWorkflow's
 // disposeSteps calls) closes each one exactly once. A compiled stub
-// `agent-browser` first on PATH logs each call's argv and first command.
+// `agent-browser` first on PATH logs each call's argv and first command. It
+// appends one line in one write: closeSessions closes sessions in parallel, and
+// a read-then-rewrite log lost one close's line whenever two stubs overlapped.
 import { expect, test } from 'bun:test'
 import { platform } from 'node:os'
 import { delimiter } from 'node:path'
@@ -20,10 +22,10 @@ await stepRuntime.runPromise(runBatch([['open', 'https://x.test/c']]))
 await Effect.runPromise(closeBrowserSessions)
 await Effect.runPromise(closeBrowserSessions)`
 
-const stubSource = (dir: string) => `const commands: string[][] = await Bun.stdin.json()
-const calls = await Bun.file(${JSON.stringify(dir)} + '/calls').text().catch(() => '')
+const stubSource = (dir: string) => `import { appendFile } from 'node:fs/promises'
+const commands: string[][] = await Bun.stdin.json()
 const idle = process.env['AGENT_BROWSER_IDLE_TIMEOUT_MS'] ?? 'none'
-await Bun.write(${JSON.stringify(dir)} + '/calls', calls + [...process.argv.slice(2), commands[0]?.[0], idle].join(' ') + '\\n')`
+await appendFile(${JSON.stringify(dir)} + '/calls', [...process.argv.slice(2), commands[0]?.[0], idle].join(' ') + '\\n')`
 
 test.skipIf(platform() === 'win32')(
   'a run closes every browser session it opened, once, and never uses the default session',
