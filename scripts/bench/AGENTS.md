@@ -10,6 +10,7 @@ The benchmark code. The root [AGENTS.md](../../AGENTS.md) holds the repo-wide ru
 - [grade.ts](grade.ts), [judge.ts](judge.ts), [stats.ts](stats.ts), [cost.ts](cost.ts), [claims.ts](claims.ts), and [report.ts](report.ts): grading, statistics, cost, and the report.
 - [agreement.ts](agreement.ts): Cohen's and Fleiss' kappa, as pure functions, shared by the judge and the grader track.
 - [dataset-fetch.ts](dataset-fetch.ts), [dataset-manifest.ts](dataset-manifest.ts), and [dataset-pin.ts](dataset-pin.ts): download and check the public datasets pinned in [bench/datasets/](../../bench/datasets/).
+- [search-gold.ts](search-gold.ts): the search gold-set eval. It runs `webular search` on the first rows of the dev set in [bench/tasks/dev/search.jsonl](../../bench/tasks/dev/search.jsonl), then prints hit@10 and median latency.
 - [bare-bun.ts](bare-bun.ts), [import-feed-workflow.ts](import-feed-workflow.ts), and [import-mastra-workflows.ts](import-mastra-workflows.ts): the cold-start probes that `mise run bench` times.
 
 ## Rules

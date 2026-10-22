@@ -9,6 +9,7 @@ Benchmark tests and the scaling run. The parent rules are in [tests/AGENTS.md](.
 - [guards-requests.test.ts](guards-requests.test.ts), [peers-skip.test.ts](peers-skip.test.ts), and [robots-gold-rows.test.ts](robots-gold-rows.test.ts) check robots.txt in the bench. Every request is logged and a disallowed page is never fetched. A peer that cannot show its requests skips robots rows. Each robots gold row passes only for a compliant run.
 - [agent-matrix.test.ts](agent-matrix.test.ts) checks the agent-model matrix: its arms, cells, and the README line it writes.
 - [scrape-accuracy.test.ts](scrape-accuracy.test.ts) scores offline main-content recall and leak on the scrape.page fixtures.
+- [search-gold.test.ts](search-gold.test.ts) checks, offline, how the search gold-set eval counts a hit: a gold URL counts only when, after normalization, it sits in the first 10 distinct result URLs.
 - [dataset-fetch.test.ts](dataset-fetch.test.ts) checks the dataset manifests, the hash check, and the cached hit, with a stub client and a local fixture.
 - [fixtures/](fixtures/): fixed inputs for the guard tests.
 - [`complexity.ts`](complexity.ts) is not a test. It times the hot paths at 10, 1,000, and 100,000 items and prints peak memory. `mise run bench` runs it.

@@ -5,10 +5,10 @@ This folder holds the tests for the Jev framework in [`src/lib/jev/`](../../src/
 - `mise run jev:check` runs every test here.
 - A test whose name ends in eval.test.ts runs a decision against its cases.
 - [`evals-sync.test.ts`](evals-sync.test.ts) checks that every file in [evals/](evals/) belongs to exactly one decision.
-- [`answer-figure.eval.test.ts`](answer-figure.eval.test.ts) and [`research-figures.eval.test.ts`](research-figures.eval.test.ts) compare the image arm with the text-only arm, offline.
+- [`answer-figure.eval.test.ts`](answer-figure.eval.test.ts), [`research-figures.eval.test.ts`](research-figures.eval.test.ts), and [`summarize-figure.eval.test.ts`](summarize-figure.eval.test.ts) compare the image arm with the text-only arm, offline.
 - [`key-platform.test.ts`](key-platform.test.ts) checks that `TYPESAFE_API_KEY` works on every system and that the Keychain lookup runs only on macOS.
 - [`tests/jev/evals/`](evals/) holds the cases, and [`tests/jev/replay/`](replay/) holds the recorded Jev answers.
-- [`tests/jev/candidates/`](candidates/) keeps eval cases for decisions that have no code. The segmenter cases stay as data for `research.sentences`, which has no decision, and the `answer` image arm cases sit there because no decision owns them. The eval check does not scan this folder.
+- [`tests/jev/candidates/`](candidates/) keeps eval cases for decisions that have no code. The segmenter cases stay as data for `research.sentences`, which has no decision. The `answer` and `summarize` image arm cases sit there because no decision owns them. The eval check does not scan this folder.
 - [`tests/jev/learn/`](learn/) holds the tests for the learning loop.
 - [`tests/jev/docs-guard-support.ts`](docs-guard-support.ts) and [`tests/jev/work-count.ts`](work-count.ts) are helpers. They are not tests.
 - The framework tests: [`define.test.ts`](define.test.ts), [`definition-lint.test.ts`](definition-lint.test.ts), [`framework.test.ts`](framework.test.ts), [`framework-bounds.test.ts`](framework-bounds.test.ts), [`guards.test.ts`](guards.test.ts), [`no-direct-calls.test.ts`](no-direct-calls.test.ts), [`code-check.test.ts`](code-check.test.ts), [`decision-cost.test.ts`](decision-cost.test.ts), and [`route.test.ts`](route.test.ts).
