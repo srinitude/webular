@@ -132,18 +132,14 @@ const segmenter = new Intl.Segmenter(undefined, { granularity: 'word' })
 const words = (s: string) =>
   [...segmenter.segment(s.toLowerCase())].filter((w) => w.isWordLike).map((w) => w.segment)
 
-export function lexicalRerank<H extends SearchHit>(hits: ReadonlyArray<H>, query: string): H[] {
-  const want = [...new Set(words(query))]
-  const docs = hits.map((h) =>
-    words(`${h.title} ${URL.parse(h.url)?.hostname.replace(/[.-]/g, ' ') ?? ''} ${h.description}`),
-  )
+const bm25 = (docs: string[][], want: string[]) => {
   const avg = docs.reduce((n, d) => n + d.length, 0) / (docs.length || 1)
   const idf = (t: string) => {
     const df = docs.filter((d) => d.includes(t)).length
     return Math.log(1 + (docs.length - df + 0.5) / (df + 0.5))
   }
   const weights = want.map(idf)
-  const raw = docs.map((d) =>
+  return docs.map((d) =>
     want.reduce((sum, t, i) => {
       const tf = d.filter((w) => w === t).length
       return (
@@ -153,6 +149,14 @@ export function lexicalRerank<H extends SearchHit>(hits: ReadonlyArray<H>, query
       )
     }, 0),
   )
+}
+
+export function lexicalRerank<H extends SearchHit>(hits: ReadonlyArray<H>, query: string): H[] {
+  const want = [...new Set(words(query))]
+  const docs = hits.map((h) =>
+    words(`${h.title} ${URL.parse(h.url)?.hostname.replace(/[.-]/g, ' ') ?? ''} ${h.description}`),
+  )
+  const raw = bm25(docs, want)
   const top = Math.max(...raw)
   if (!(top > 0)) return [...hits]
   const score = hits.map((h, i) => {

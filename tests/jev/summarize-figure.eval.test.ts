@@ -46,11 +46,12 @@ const correct = (gold: Gold, summary: string) =>
   summary.includes(gold.kind === 'text' ? gold.fact : gold.src)
 
 const textArm = (c: Case) => correct(c.gold, summaryOf(c, []))
-const imageArm = (c: Case) =>
+const armWith = (jev: Layer.Layer<Jev>) => (c: Case) =>
   sourceFigures({ question: SUMMARY_QUESTION, ...c.page }).pipe(
-    Effect.provide(recorded(c)),
+    Effect.provide(jev),
     Effect.map((figures) => correct(c.gold, summaryOf(c, figures))),
   )
+const imageArm = (c: Case) => armWith(recorded(c))(c)
 const rate = (rows: ReadonlyArray<boolean>) => rows.filter(Boolean).length / rows.length
 
 test('the text arm passes every baseline-wins case and fails every baseline-loses case', () => {
@@ -90,18 +91,10 @@ const liveRun = Effect.gen(function* () {
     ask: (name, req) =>
       jev.ask(name, req).pipe(Effect.tap((r) => Ref.update(tokens, (n) => n + r.inputTokens))),
   })
+  const liveArm = armWith(Layer.succeed(Jev)(counted))
   const runs = yield* Effect.forEach(
     Array.from({ length: RUNS }),
-    () =>
-      Effect.forEach(
-        all,
-        (c) =>
-          sourceFigures({ question: SUMMARY_QUESTION, ...c.page }).pipe(
-            Effect.provideService(Jev, counted),
-            Effect.map((figures) => correct(c.gold, summaryOf(c, figures))),
-          ),
-        { concurrency: 4 },
-      ),
+    () => Effect.forEach(all, liveArm, { concurrency: 4 }),
     { concurrency: 1 },
   )
   const before = rate(all.map(textArm))

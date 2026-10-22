@@ -8,7 +8,7 @@ import { crossref, npm, openalex } from './scholarly.ts'
 import { lexicalRerank, scoreHits, WEAK_SCORE, webSearch } from './search.ts'
 import { secondHop } from './search-hop.ts'
 import { pickSources, pickSourcesJudged } from './search-intent.ts'
-import { MAX_VARIANTS } from './search-source-names.ts'
+import { entityVariant, queriesFor } from './search-source-names.ts'
 import {
   type Hit,
   querySource,
@@ -27,14 +27,6 @@ import { type SearchSource, SOURCE_TIMEOUT_MS, sourceSearch } from './sources-se
 const WEB_PAGE = 30
 // Navigational queries: the official sites of this many top Wikipedia articles.
 const OFFICIAL_ARTICLES = 5
-
-// Known-item rewrite, no model: "what is Bruges" also asks for "Bruges", the
-// entity the free title and repo indexes match. Added only below MAX_VARIANTS.
-const QUESTION_LEAD = /^(?:what|who|where) (?:is|are|was) (?:an? |the )?/i
-export const entityVariant = (query: string) => {
-  const core = query.trim().replace(QUESTION_LEAD, '')
-  return core && core !== query.trim() && !core.endsWith('?') ? [core] : []
-}
 
 const one: SourceRunner = (source, query, limit) => {
   if (source === 'crossref') return crossref(query, limit)
@@ -70,8 +62,7 @@ export interface SearchOptions {
   judge?: ((query: string) => Effect.Effect<SearchSource[]>) | undefined
 }
 
-// Deterministic mode (WEBULAR_DETERMINISTIC=1): no settle cutoff, so source
-// timing never changes the hits; each source still stops at SOURCE_TIMEOUT_MS.
+// WEBULAR_DETERMINISTIC=1: no settle cutoff, so source timing never changes the hits.
 const deterministic = Config.String('WEBULAR_DETERMINISTIC').pipe(
   Config.withDefault(''),
   Effect.map((v) => v === '1'),
@@ -102,12 +93,7 @@ const fanOut = Effect.fn('fanOut')(function* (
   limit: number,
   opts: SearchOptions,
 ) {
-  const variants = (opts.variants ?? []).slice(0, MAX_VARIANTS)
-  const queries = [
-    query,
-    ...variants,
-    ...(variants.length < MAX_VARIANTS ? entityVariant(query) : []),
-  ]
+  const queries = queriesFor(query, opts.variants)
   const official = yield* officialFor(query, opts)
   const runSource = opts.runSource ?? official?.run ?? one
   const hit = yield* Deferred.make<void>()
@@ -153,9 +139,8 @@ const searchOnce = Effect.fn('searchOnce')(function* (
     weak: (scored[0]?.score ?? 0) < WEAK_SCORE,
   }
   const hits = scored.map((e) => e.hit)
-  // Web only: the other sources already return their own relevance order. Not under
-  // the answer hop: it owns the order, and BM25 over a whole multi-hop question
-  // lifts pages that share its bridge words over the fused order the hop expects.
+  // Web only (other sources keep their own order), never under the answer hop: BM25 over
+  // a multi-hop question lifts pages sharing its bridge words over the hop's fused order.
   const rerank = source === 'web' && !opts.hop
   return { results: (rerank ? lexicalRerank(hits, query) : hits).slice(0, limit), meta }
 })
@@ -211,4 +196,4 @@ export const searchEffect = Effect.fn('search')(function* (
   )
 })
 
-export { pickSources, SETTLE_GRACE_MS, type SourceRunner }
+export { entityVariant, pickSources, SETTLE_GRACE_MS, type SourceRunner }
