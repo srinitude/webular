@@ -16,7 +16,8 @@ export const protocolErrors = (
   const original = low._requestHandlers.get('tools/call')
   if (original) {
     server.server.setRequestHandler(CallToolRequestSchema, (request, extra) => {
-      if (!(request.params.name in (server as unknown as Internals)._registeredTools))
+      // hasOwn, not `in`: "constructor" and other Object.prototype names are no tools.
+      if (!Object.hasOwn((server as unknown as Internals)._registeredTools, request.params.name))
         throw new McpError(ErrorCode.InvalidParams, `Unknown tool: ${request.params.name}`)
       return original(request, extra) as never
     })
