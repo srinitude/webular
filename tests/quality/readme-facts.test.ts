@@ -37,8 +37,7 @@ const truth = Effect.gen(function* () {
   const plugin = (yield* Effect.forEach(pluginFiles, read, { concurrency: 16 })).join('\n')
   // Env reads: process.env['X'] / env.X, and Effect Config constructors
   // (Config.String('X'), Config.Redacted('X'), ...) or a setting('X') helper.
-  const envRead =
-    /(?:env\[['"]|env\.|Config\.[A-Z]\w*\(\s*'|\bsetting\(\s*')([A-Z][A-Z0-9_]+)/g
+  const envRead = /(?:env\[['"]|env\.|Config\.[A-Z]\w*\(\s*'|\bsetting\(\s*')([A-Z][A-Z0-9_]+)/g
   const flags = [
     ...all(src, /^\s+'?([a-z][a-z0-9-]*)'?: \{ type: '(?:string|boolean)'/gm),
     ...all(src, /(?<![\w-])--([a-z][a-z0-9-]*)/g),
@@ -75,7 +74,8 @@ const codeLines = (md: string) => [
 const invocations = (lines: string[]) =>
   lines
     .filter((l) => !/^\s*\//.test(l))
-    .flatMap((l) => all(l, /(?:^|\s)webular(\s.*)$/g)).filter((rest) => rest.trim())
+    .flatMap((l) => all(l, /(?:^|\s)webular(\s.*)$/g))
+    .filter((rest) => rest.trim())
 
 const section = (md: string, heading: RegExp) => {
   const lines = md.split('\n')
