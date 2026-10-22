@@ -127,10 +127,42 @@ const roundDone = (s: ResearchState) =>
     ),
   ).pipe(Effect.orElseSucceed(() => true))
 
+// A question as search keywords: the wh- lead ("In which city was") and the "?" go.
+export const keywordQuery = (topic: string): string =>
+  topic
+    .replace(
+      /^\s*(?:(?:in|at|of|for|from|by)\s+)?(?:which|what|who|whom|whose|where|when|how)\b(?:\s+\w+)??\s+(?:was|were|is|are|did|does|do|has|had)\s+/i,
+      '',
+    )
+    .replace(/[?.!]+\s*$/, '')
+    .trim()
+
+const words = (s: string) => s.toLowerCase().match(/[a-z]{4,}/g) ?? []
+// One sentence's names, each scored by how many topic words share its sentence.
+const sentenceNames = (sentence: string, inTopic: ReadonlySet<string>) => {
+  const score = new Set(words(sentence).filter((w) => inTopic.has(w))).size
+  return (sentence.match(/\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+\b/g) ?? [])
+    .filter((n) => !words(n).some((w) => inTopic.has(w)))
+    .map((n) => [n, score] as const)
+}
+
+// The bridge entity of a multi-hop question: a multi-word capitalized name the
+// topic does not hold, from the sentence that shares the most topic words.
+// ponytail: capitalized-run heuristic; a named-entity decision if bridges are missed.
+export const bridgeEntity = (topic: string, texts: ReadonlyArray<string>): string | undefined => {
+  const inTopic = new Set(words(topic))
+  let best: readonly [string, number] | undefined
+  for (const e of texts
+    .flatMap((t) => t.split(/(?<=[.!?])\s+/))
+    .flatMap((s) => sentenceNames(s, inTopic)))
+    if (e[1] > 0 && (!best || e[1] > best[1])) best = e
+  return best?.[0]
+}
+
 // Search rounds: another round runs only when research.done says the hits
-// miss the topic. A failed later search keeps the earlier hits.
-// ponytail: one code-built sub-question (the topic) and a fixed widening query;
-// split the topic into sub-questions if multi-part topics need it.
+// miss the topic, or the topic is a question. That round searches the topic as keywords, then hops to the
+// bridge entity the hits name (topic → person → fact). A failed later search
+// keeps the earlier hits.
 export const searchRounds = <H extends Hit, E, R>(
   topic: string,
   depth: number,
@@ -138,13 +170,29 @@ export const searchRounds = <H extends Hit, E, R>(
 ) =>
   Effect.gen(function* () {
     let hits = yield* search(topic, depth)
+    const add = (more: ReadonlyArray<H>) => {
+      const seen = new Set(hits.map((h) => h.url))
+      hits = [...hits, ...more.filter((h) => !seen.has(h.url))]
+    }
+    const safe = (q: string) =>
+      search(q, depth).pipe(Effect.orElseSucceed((): ReadonlyArray<H> => []))
     for (let round = 1; round < RESEARCH_ROUNDS; round++) {
       const bestEvidence = hits.map((h) => `${h.title}: ${h.description}`).join('\n')
       const subQuestions = [{ question: topic, bestEvidence }]
-      if (yield* roundDone({ topic, subQuestions, round, maxRounds: RESEARCH_ROUNDS })) break
-      const seen = new Set(hits.map((h) => h.url))
-      const more = yield* search(`${topic} explained`, depth).pipe(Effect.orElseSucceed(() => []))
-      hits = [...hits, ...more.filter((h) => !seen.has(h.url))]
+      // A question always hops: research.done judged "Nobel Prize" pages as done
+      // for a question whose answer sits one entity further.
+      const question = /\?\s*$/.test(topic)
+      if (
+        !question &&
+        (yield* roundDone({ topic, subQuestions, round, maxRounds: RESEARCH_ROUNDS }))
+      )
+        break
+      add(yield* safe(keywordQuery(topic)))
+      const bridge = bridgeEntity(
+        topic,
+        hits.map((h) => h.description),
+      )
+      if (bridge) add(yield* safe(bridge))
     }
     return hits
   })
