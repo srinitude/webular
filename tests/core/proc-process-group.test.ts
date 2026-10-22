@@ -11,6 +11,16 @@ const alive = (pid: number) =>
     Effect.orElseSucceed(() => false),
   )
 
+// A runtime script, not /bin/sh, so it runs on Windows too: the child starts a
+// grandchild, writes its pid, and both wait far past the timeout.
+const parentScript = (pidFile: string) =>
+  [
+    "const g = require('node:child_process').spawn(process.execPath,",
+    "['-e', 'setTimeout(() => {}, 30000)'], { stdio: 'ignore' });",
+    `require('node:fs').writeFileSync(${JSON.stringify(pidFile)}, String(g.pid));`,
+    'setTimeout(() => {}, 30000);',
+  ].join(' ')
+
 describe('runProc — timeout kills the process group', () => {
   test(
     'a grandchild started by the child dies with it on timeout',
@@ -19,10 +29,9 @@ describe('runProc — timeout kills the process group', () => {
         const fs = yield* FileSystem.FileSystem
         const dir = yield* tmpDir('proc-group-')
         const pidFile = `${dir}/grandchild.pid`
-        const { timedOut } = yield* runProc(
-          ['/bin/sh', '-c', `sleep 30 & echo $! > "${pidFile}"; wait`],
-          { timeoutMs: 500 },
-        )
+        const { timedOut } = yield* runProc([process.execPath, '-e', parentScript(pidFile)], {
+          timeoutMs: 2000,
+        })
         expect(timedOut).toBe(true)
         const pid = Number((yield* fs.readFileString(pidFile)).trim())
         // Poll with a deadline: the group signal lands at once, the exit a moment later.

@@ -78,7 +78,9 @@ const capped = <E>(s: Stream.Stream<Uint8Array, E>, onOverflow: Effect.Effect<vo
 
 // detached: true makes the child lead its own process group, so a timeout,
 // interrupt, or overflow kill signals the whole tree and leaves no orphaned
-// grandchild. Ctrl-C reaches it through our interrupt, which runs that kill.
+// grandchild. Windows has no process groups; there the spawner's kill runs
+// taskkill /T /F, which ends the same tree. Ctrl-C reaches it through our
+// interrupt, which runs that kill.
 const toCommand = ([cmd, ...args]: [string, ...string[]], opts: ProcOptions) =>
   ChildProcess.make(cmd, args, {
     cwd: opts.cwd,
