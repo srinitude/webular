@@ -21,10 +21,10 @@
 {"path": "CODE_OF_CONDUCT.md", "sha": "81fce83a29ac616fc0f85a7bc75d83748b412b3e30b3b3a996b4466804b1e70f", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "CONTRIBUTING.md", "sha": "29d0e961e4dcaa97c4a3ad3a922bf4e6625f800918975cae47fb7afe47a6bc2a", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "GOVERNANCE.md", "sha": "e3a77caf96cef71447d5d1aea9b744ed0ac30ed817b92fcb7b9818f1a843315b", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
-{"path": "README.md", "sha": "53712bb746fc46be1b1531d8cb4504d9b6c0eada2f49f2f92df58672e17213a4", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "README.md", "sha": "7c6f15d220c6bb5457a9a7ced80483fc85b67746637bb89519425ee968a16d06", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "SECURITY.md", "sha": "ff519447fd45ddc25498d3a818052a8f9eced5b46260a1afc053447707fe9701", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "SUPPORT.md", "sha": "5b35c03758a3949342f20cbc85cf80800892c6af3cb98614d1a67ff3a14cdfd6", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
-{"path": "bench/AGENTS.md", "sha": "35d843655eea58b68b4556ef5fd21d6c638a46617ccf2c16bfbe0a6f364ee3a7", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "bench/AGENTS.md", "sha": "20556abbeee846b9bba9f2e98210d2ca8b4b84cef1878599c4af229412133644", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "bench/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "bench/datasets/AGENTS.md", "sha": "cf1e49eea6a9e550132a9ed8ef73b03fb8a2ddcd7344b38ff2c280d223d9208c", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "bench/datasets/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
@@ -55,8 +55,8 @@
 {"path": "docs/architecture.md", "sha": "78c0cf3646970b455daa20123c6aa2e4f7dc0506f8a1de224b804820636559da", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/benchmarks-guide.md", "sha": "ae3921a8c29a19bc564fab6a248a777494b430df889a092fcaee3c93f2b31171", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/benchmarks-method.md", "sha": "99c74e12064b94338bfe36578bee5b685f5039cd69bb601eef4f21ba5b428def", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
-{"path": "docs/benchmarks-peers.md", "sha": "850df7ada58defb24eca3c33eabc14ecdf37cc56d9cc3af3c40338202ac09d29", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
-{"path": "docs/benchmarks.md", "sha": "44dade719f5b00aafc2bbd0fe9af85c5131fa5adb762e2c00d6be6df5225381f", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/benchmarks-peers.md", "sha": "1da50d0deb46e5ca05426417732beabe1bf53d9418755f27a338d87c71e0a104", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/benchmarks.md", "sha": "36e45e1e02707e872d071cecb751ca7d6e9a06c6dcf4c23dda0c684fdc9941ef", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/best-practices.md", "sha": "22360a6901b347591d1263571f28346ab5b00707a191a042fe7d17b33bf29a42", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/bug-classes.md", "sha": "261170e680ac5abb73f6830e0d43020a1320cbf0cd906639be969c65e818998f", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/build-and-run.md", "sha": "44a4b7883b6bf1561d0ee7aec38c696f1bf85729223446cece925c0752a322be", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
@@ -80,7 +80,7 @@
 {"path": "docs/research/extraction-changes.md", "sha": "407e1844d743a9e4787de9c6f38c3c564727d09ebd12f9b015ecd83407a2bfc9", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/research/open-items.md", "sha": "1638471a768e90f4616fbd9a741111850f4e04ed4ae6f1fe9559f730b5249f30", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/research/retrieval-changes.md", "sha": "bab094478b8602b70d0ffbaf3a0f581d7553d8592a771586b6f50f700d1728c3", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
-{"path": "docs/scoreboard.md", "sha": "de50ea65268f51c0b754a58ee2e9f8685d917cfaa85b25f8891d0e1ec6051d0a", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/scoreboard.md", "sha": "1e71d3e737783488837b4d41cd42813903b4d3c9faf208f0420fa42cfa288384", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/tasks.md", "sha": "fbe33bd92dbd7446dc6d0faac7a4d82215c6d618f143453a378cf1d47f2aefe0", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/why-webular.md", "sha": "24def1af6cc648b72563ba215f245aa56e6e63f8c8648b63717f9b45a4e185ee", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "plugins/AGENTS.md", "sha": "c05c832eb2f3ab3990a07401c1384730b95b7c9c6195f1c00f026f223089cbcc", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
@@ -142,7 +142,7 @@
 {"path": "scripts/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "scripts/bench/AGENTS.md", "sha": "8124734724197e29a8b325a41834e9724cac3cdec4fce6d307837554e89b5318", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "scripts/bench/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
-{"path": "scripts/bench/peers/AGENTS.md", "sha": "5fad0fda169b29023cba4c2370314b9cb98bc80da0f8110a72a8305fe8e1c0c1", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "scripts/bench/peers/AGENTS.md", "sha": "cacb07fc8dca936ba5a3a0eabc6192fabf6fdd55eaadc8d5e6181ff7a80c8ee5", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "scripts/bench/peers/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "scripts/bench/tasks/AGENTS.md", "sha": "e542aedd31abb368c486687ced5ab4d0649d645c11b07caaa0fd673504d11d2f", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "scripts/bench/tasks/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
@@ -182,7 +182,7 @@
 {"path": "tests/_support/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/agent/AGENTS.md", "sha": "91ce1cb40e4d7b022e8cfe0c47bd849d35edb11c0c9a3556465a2e981d1b9c3f", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/agent/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
-{"path": "tests/bench/AGENTS.md", "sha": "ed52b570a8524fa9502d0f8a3da34ce72f9aa8f94fd21664e79a4dd046324d29", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "tests/bench/AGENTS.md", "sha": "60ff561a788b173da76665001590ecbb24e65be94afcb3412872aa43bc3a5aea", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/bench/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/bench/fixtures/AGENTS.md", "sha": "23419690939be202feb953eef495be816415cb098a1bd6227f88913f09019d0b", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/bench/fixtures/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
@@ -260,9 +260,3 @@
 {"path": "tests/release/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/workflows/AGENTS.md", "sha": "c982b7dbcbfee7dda301fbf256d951714424c1a55dd05e3b03c7321d38e7df70", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/workflows/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
-{"path": "src/lib/jev/decisions/AGENTS.md", "sha": "757c38d6db91b65a086d363ebdaf96ccba04faeda8e4f4b9f5e869f07ad0dacf"}
-{"path": "tests/bench/AGENTS.md", "sha": "f6d1f58e847c83d5ebdeedfc2c2e08b079091c0e9c6e71f844cd4fd5dd1ade63"}
-{"path": "scripts/bench/peers/AGENTS.md", "sha": "4d4e5ec5eb1cde2ba9a5b64b568f2f2744a8889d48a64a2f1b179603cc9830be"}
-{"path": "tests/bench/AGENTS.md", "sha": "f6d1f58e847c83d5ebdeedfc2c2e08b079091c0e9c6e71f844cd4fd5dd1ade63", "stages": ["rich-and-native-markdown", "human-language"]}
-{"path": "scripts/bench/peers/AGENTS.md", "sha": "4d4e5ec5eb1cde2ba9a5b64b568f2f2744a8889d48a64a2f1b179603cc9830be", "stages": ["rich-and-native-markdown", "human-language"]}
-{"path": "bench/AGENTS.md", "sha": "20556abbeee846b9bba9f2e98210d2ca8b4b84cef1878599c4af229412133644", "stages": ["rich-and-native-markdown", "human-language"]}
