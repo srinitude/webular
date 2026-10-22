@@ -5,7 +5,8 @@ import { exists, files, pluginDir, read, rel, run } from './lib.ts'
 const parse = (path: string) =>
   Effect.map(read(path), (text) => {
     try {
-      return { ok: true as const, data: JSON.parse(text) as unknown }
+      const data: unknown = JSON.parse(text)
+      return { ok: true as const, data }
     } catch (e) {
       return { ok: false as const, why: e instanceof Error ? e.message : String(e) }
     }

@@ -14,7 +14,7 @@ const ZOD_OLD =
 const GATES: ReadonlyArray<Gate> = [
   [
     'decode JSON with a schema, not a cast',
-    'JSON\\.parse\\(.*\\)\\s+as\\s',
+    'JSON\\.parse\\(.*\\)[[:space:]]+as[[:space:]]',
     'src/*.ts',
     'plugins/webular/*.ts',
   ],

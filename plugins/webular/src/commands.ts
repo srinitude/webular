@@ -5,7 +5,7 @@
 // Self-contained: nothing here reaches outside the plugin folder, so a host
 // that copies only this folder still runs it.
 import { constants } from 'node:os'
-import { Config, Data, Effect, Stream } from 'effect'
+import { Config, Data, Effect, Schema, Stream } from 'effect'
 import { ChildProcess, ChildProcessSpawner } from 'effect/process'
 import { z } from 'zod'
 import { cap } from './budget.ts'
@@ -83,6 +83,10 @@ const notJson = (command: string) =>
     message: `webular ${command} returned output that is not JSON. This is a webular bug. Do not retry. Tell the user, and include the tool name.`,
   })
 
+const decodeResult = Schema.decodeUnknownEffect(
+  Schema.fromJsonString(Schema.Record(Schema.String, Schema.Unknown)),
+)
+
 // Runs `webular <command> --json` with the tool input as flags; stdout is the
 // result, cut to one page that starts at `from`.
 export const runCommand = (
@@ -102,10 +106,10 @@ export const runCommand = (
       )
       // Exit 3 is the CLI's partial result: stdout holds every item, failed ones named.
       if (code !== 0 && code !== 3) return yield* failure(command, code, err)
-      return yield* Effect.try({
-        try: () => JSON.parse(out) as Record<string, unknown>,
-        catch: () => notJson(command),
-      }).pipe(Effect.map((result) => cap(result, command, from)))
+      return yield* decodeResult(out).pipe(
+        Effect.mapError(() => notJson(command)),
+        Effect.map((result) => cap(result, command, from)),
+      )
     }),
   ).pipe(Effect.mapError((e) => (e instanceof CommandFailed ? e : startFailed(command, e))))
 

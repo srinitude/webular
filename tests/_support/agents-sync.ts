@@ -28,7 +28,7 @@ const EXTERNAL = new Set([
   // ai and @ai-sdk/anthropic
   'AnthropicMessagesModelId',
   'LanguageModelV1',
-  // @xstate/graph
+  // xstate/graph
   'stopWhen',
   'getPathsFromEvents',
   // linkedom

@@ -25,12 +25,6 @@ export const RULES: ReadonlyArray<Rule> = [
     name: 'decode JSON with a schema, not a cast',
     pattern: /JSON\.parse\([^;]*\)\s*as\s/,
     globs: SRC,
-    known: [
-      'plugins/webular/src/commands.ts',
-      'src/lib/crawl-resume.ts',
-      'src/lib/sources-search.ts',
-      'src/workflows/tasks.ts',
-    ],
   },
   {
     name: 'no shell strings: spawn an argv array',
