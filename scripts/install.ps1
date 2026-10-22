@@ -135,7 +135,7 @@ __WEBULAR_SUMS__
 
     if ($env:WEBULAR_VERIFY_ATTESTATION -eq '1') {
       if (-not (Get-Command gh -ErrorAction SilentlyContinue)) { Fail 'WEBULAR_VERIFY_ATTESTATION=1 needs gh' }
-      gh attestation verify $file --repo $repo | Out-Host
+      gh attestation verify $file --repo $repo --signer-workflow "$repo/.github/workflows/release.yml" | Out-Host
       if ($LASTEXITCODE -ne 0) { Fail 'attestation check failed' }
     }
 
