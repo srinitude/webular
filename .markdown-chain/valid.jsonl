@@ -344,3 +344,4 @@
 {"path": "site/public/AGENTS.md", "sha": "b1149ae7abfd9ae1cc1616fca83d69d95d81c4c3b2fad8ebc3dea172da38147d", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "site/src/routes/AGENTS.md", "sha": "ad59693c1fcd424d70f67a5d4fc55e2b8af87d11e71a8afa6ab2c17a0e032e2d", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "site/design/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/AGENTS.md", "sha": "25a1e8bc8e3207d6a37458e2369adea0f8f590e6c73fa0b15ba536c157e7ef01", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
