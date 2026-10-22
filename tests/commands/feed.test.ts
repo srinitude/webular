@@ -1,7 +1,7 @@
 // FEED contract — RSS 2.0 and Atom 1.0 parsing against the deterministic local
 // fixture (real fetch, no mocks). Tests what `mise run run:feed` executes.
 import { describe, expect, test } from 'bun:test'
-import { Config, Effect } from 'effect'
+import { Config, Effect, Schema } from 'effect'
 import { runCli } from '../_support/cli.ts'
 import { startFixture } from '../_support/fixture.ts'
 import { eff } from '../_support/run.ts'
@@ -26,12 +26,13 @@ const withFx = startFixture(() => ({
 const withEmpty = startFixture(() => ({}))
 
 const runFeed = (args: string[]) => runCli('src/commands/feed.ts', args)
+const decodeJson = Schema.decodeUnknownEffect(Schema.fromJsonString(Schema.Any))
 
 const rssCase = Effect.gen(function* () {
   const fx = yield* withFx
   const { code, out } = yield* runFeed([`${fx.origin}/rss.xml`, '--json'])
   expect(code).toBe(0)
-  const data = JSON.parse(out)
+  const data = yield* decodeJson(out)
   expect(data.title).toBe('Fixture RSS')
   expect(data.count).toBe(2)
   expect(data.items[0]).toEqual({
@@ -46,7 +47,7 @@ const atomCase = Effect.gen(function* () {
   const fx = yield* withFx
   const { code, out } = yield* runFeed(['--url', `${fx.origin}/atom.xml`, '--json'])
   expect(code).toBe(0)
-  const data = JSON.parse(out)
+  const data = yield* decodeJson(out)
   expect(data.title).toBe('Fixture Atom')
   expect(data.items[0].url).toBe('https://example.com/a')
   expect(data.items[0].published).toBe('2026-10-19T10:00:00Z')
