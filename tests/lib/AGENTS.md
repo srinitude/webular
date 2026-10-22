@@ -7,9 +7,9 @@ Tests for helpers in [src/lib/](../../src/lib/). The parent rules are in [tests/
 - [answer-country.test.ts](answer-country.test.ts) checks that a country answer names the country with the demonym.
 - [as-of.test.ts](as-of.test.ts) checks that `WEBULAR_AS_OF` pins the run date; else the clock gives an ISO date.
 - [home-fallback.test.ts](home-fallback.test.ts) checks that Windows, with `USERPROFILE` but no `HOME`, keeps Jev state in the user folder.
-- [driver.test.ts](driver.test.ts) checks that the `agent-browser` driver retries a failed render once, if a retry can help.
+- [driver.test.ts](driver.test.ts) checks that the `agent-browser` driver retries a failed render once, only when a retry can fix it.
 - [json-ld.test.ts](json-ld.test.ts) checks JSON-LD facts: valid, `@graph`, bad, oversized blocks.
-- [extract-locators.test.ts](extract-locators.test.ts) checks that extract finds a field by name, no model (role, test id, aria-label, label text), picks one selector for repeated listing records, keeps Legislation and Dataset JSON-LD, and reads date, author, offer from structured data.
+- [extract-locators.test.ts](extract-locators.test.ts) checks that extract finds a field by name, no model (role, test id, aria-label, label text), picks one selector for repeated listing records, keeps Legislation and Dataset JSON-LD, and takes date, author, offer from structured data first.
 - [snapshot-normalize.test.ts](snapshot-normalize.test.ts) checks that monitor snapshots ignore whitespace churn but catch repeated-line edits.
 - [snapshot-diff-bound.test.ts](snapshot-diff-bound.test.ts) checks that a small change gives a diff, and a huge rewrite gives a "diff too large" note.
 - [html-thin-union.parsing.test.ts](html-thin-union.parsing.test.ts) checks that when Readability keeps a thin scrap, the fuller body comes back, code and math included.
@@ -23,7 +23,7 @@ Tests for helpers in [src/lib/](../../src/lib/). The parent rules are in [tests/
 
 ## Rules
 
-- Mock a module in one file only, because Bun keeps its first mock for the whole run. Inject a service when you can, like `PdfLoader` in [parse-pdf.ts](../../src/lib/parse-pdf.ts).
+- Mock a module in one file only, because Bun keeps its first mock for the whole run. Inject a service when you can, like `PdfLoader`.
 
 ## Checks
 
