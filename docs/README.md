@@ -8,6 +8,7 @@ This page links every doc in this folder. The first group is the best place to b
 - [How webular works](how-it-works.md): each building block and what it does for you.
 - [Why webular](why-webular.md): where webular differs from hosted rivals, and where they do better.
 - [Benchmarks](benchmarks.md): scores against other web research tools, losses included.
+- [Benchmarks by peer](benchmarks-peers.md): webular against each peer on the tasks both answered.
 
 ## Use it
 

@@ -10,10 +10,11 @@ import { Console, Data, Effect, FileSystem } from 'effect'
 import { blocks, type Run } from './docs-blocks.ts'
 import { type MatrixRow, matrixBlock, matrixHeadline, pickModelsRun } from './matrix.ts'
 
-export const DOCS = ['README.md', 'docs/benchmarks.md'] as const
+export const DOCS = ['README.md', 'docs/benchmarks.md', 'docs/benchmarks-peers.md'] as const
 const PREFIX: Record<(typeof DOCS)[number], string> = {
   'README.md': 'bench/results/',
   'docs/benchmarks.md': '../bench/results/',
+  'docs/benchmarks-peers.md': '../bench/results/',
 }
 const STAMP = /^peers-(\d{4}-\d{2}-\d{2})T(\d{2})-(\d{2})-(\d{2})-(\d{3})Z\.json$/
 const BLOCK = /<!-- bench:start ([\w-]+) -->\n[\s\S]*?<!-- bench:end -->/g
