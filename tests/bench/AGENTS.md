@@ -18,6 +18,7 @@ Benchmark tests and the scaling run. The parent rules are in [tests/AGENTS.md](.
 - [dataset-fetch.test.ts](dataset-fetch.test.ts) checks the dataset manifests, the hash check, and the cached hit, with a stub client and a local fixture.
 - [scoreboard.test.ts](scoreboard.test.ts) fails in three cases: [bench/scoreboard.json](../../bench/scoreboard.json) or the table in [docs/scoreboard.md](../../docs/scoreboard.md) drifts from the generator, a command has no rows, or a measured row names an eval file that does not exist.
 - [rescore.test.ts](rescore.test.ts) checks that the rescore drops problems the stored rules raised by mistake, keeps the real ones, and labels each miss.
+- [bench-artifacts-minimal.test.ts](bench-artifacts-minimal.test.ts) keeps only the benchmark files that something reads. [bench/results](../../bench/results/) may hold only the peer run with the highest timestamp, the agent run the docs generator picks, and runs that a ceilings file cites. Each file in [bench/datasets](../../bench/datasets/) must be named in code, tests, or [mise.toml](../../mise.toml).
 - [fixtures/](fixtures/): fixed inputs for the guard tests.
 - [`complexity.ts`](complexity.ts) is not a test. It times the hot paths at 10, 1,000, and 100,000 items and prints peak memory. `mise run bench` runs it.
 

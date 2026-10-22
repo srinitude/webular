@@ -800,3 +800,4 @@
 {"path": "tests/ci/AGENTS.md", "sha": "9ee68e96938d24757d0a56bfff248b63598f7402aaae1cd710ffab4127cc2687"}
 {"path": ".github/workflows/AGENTS.md", "sha": "e7dddb307abbbc896f272aa48cf669c719a9d7b4b29bcd67eb8d8e41bb2b1305"}
 {"path": "tests/workflows/AGENTS.md", "sha": "f894b3a08a33ec124a91b608fe3bac5bdb479bba7f69376bca173ffaf7147d6c"}
+{"path": "tests/bench/AGENTS.md", "sha": "74af8f2b5fbdd4c37617ffbf623d7c8f2b98fb12214da556bea9079a4925f9ec", "stages": ["rich-and-native-markdown", "human-language"]}
