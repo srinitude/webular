@@ -5,7 +5,7 @@
     {
       "name": "webular",
       "source": "./plugins/webular",
-      "description": "Jev, TypeSafe's decision model, makes the judgment calls in this web research CLI. It searches, scrapes, crawls, maps, extracts, summarizes, and answers on your machine. Jev's key is the only key."
+      "description": "Jev, TypeSafe's decision model, makes the judgment calls in this web research CLI. It searches, scrapes, crawls, maps, extracts, summarizes, and answers on your machine. Its plugin adds four skills: research, interview, plain language, and Markdown. Jev's key is the only key."
     }
   ]
 }
