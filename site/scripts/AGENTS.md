@@ -6,7 +6,8 @@ Build and check scripts for the site, under [site/AGENTS.md](../AGENTS.md).
 
 - [tools-json.ts](tools-json.ts) starts `webular mcp` and saves its tools/list reply for the tools page and tools.json.
 - [machine-files.ts](machine-files.ts) runs after the Astro build. It writes the twins, llms-full.txt, AGENTS.md, server.json, the server card, the sitemap, and security.txt.
-- [check-site.ts](check-site.ts) is the check behind `mise run site:test`.
+- [check-site.ts](check-site.ts) is the check behind `mise run site:test`. It runs [width-checks.ts](width-checks.ts) at every width in [site-browser.ts](site-browser.ts), with the probes in [page-probes.ts](page-probes.ts), and prints pass and fail counts per check per width.
+- [home-shots.ts](home-shots.ts) saves home page screenshots at 390, 1024, and 1440 px into the git-ignored `dist-shots` folder for a by-eye review. Run `bun scripts/home-shots.ts` from the site folder after `mise run site:build`.
 - [agents.txt](agents.txt) is the source of the served AGENTS.md. Its plain text name keeps it apart from this folder's own AGENTS.md.
 
 ## Rules

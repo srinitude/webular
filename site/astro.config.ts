@@ -5,20 +5,21 @@
 // CLAUDE.md (and AGENTS.md overwrites agents.html on a case-blind disk).
 import { defineConfig } from 'astro/config'
 
-const SLUGS = [
+// Every page slug, in /llms.txt order after index; scripts/ imports this list.
+export const SLUGS = [
   'index',
-  '404',
   'install',
+  'keys',
+  'security',
   'agents',
   'tools',
   'commands',
-  'keys',
   'benchmarks',
-  'security',
   'privacy',
   'support',
   'docs',
-]
+  '404',
+] as const
 
 type InjectRoute = (route: { pattern: string; entrypoint: URL }) => void
 

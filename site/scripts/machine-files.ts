@@ -4,24 +4,14 @@
 import { BunRuntime, BunServices } from '@effect/platform-bun'
 import { Console, Effect, FileSystem, Schema } from 'effect'
 import { runProc } from '../../src/core/proc.ts'
+import { SLUGS as PAGE_SLUGS } from '../astro.config.ts'
 
 const SITE = new URL('../', import.meta.url).pathname
 const DIST = `${SITE}dist/`
 const ORIGIN = 'https://webular.dev'
 const INDEX_LINE = `> Docs index for agents: ${ORIGIN}/llms.txt`
-// The order of /llms.txt; index is the home page twin.
-const SLUGS = [
-  'install',
-  'keys',
-  'security',
-  'agents',
-  'tools',
-  'commands',
-  'benchmarks',
-  'privacy',
-  'support',
-  'docs',
-] as const
+// The order of /llms.txt; index is the home page twin, 404 has none.
+const SLUGS = PAGE_SLUGS.filter((slug) => slug !== 'index' && slug !== '404')
 
 // The agents twin lives at agents/index.md: /agents.md would clash with the
 // served /AGENTS.md on a case-blind disk.
