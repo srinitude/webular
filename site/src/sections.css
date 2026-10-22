@@ -191,4 +191,6 @@ td {
 .site-footer a {
   display: inline-block;
   padding-block: var(--space-4);
+  color: var(--color-text);
+  text-decoration: none;
 }
