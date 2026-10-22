@@ -172,3 +172,7 @@ export class Jev extends Context.Service<
 
 // One runtime for the Promise-based Mastra steps; it builds the Jev layer on first use.
 export const jevRuntime = ManagedRuntime.make(Jev.live)
+
+// Runs an ask on jevRuntime's one Jev, so it shares the key lookup and the decision cache.
+export const withSharedJev = <A, E>(effect: Effect.Effect<A, E, Jev>) =>
+  Effect.flatMap(jevRuntime.contextEffect, (ctx) => Effect.provide(effect, ctx))

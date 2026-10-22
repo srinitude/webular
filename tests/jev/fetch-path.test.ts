@@ -2,9 +2,11 @@
 // the real fetch against a local server: with Jev off the code rule answers, and a
 // recorded sure Jev pick changes the outcome.
 import { expect, test } from 'bun:test'
-import { Effect, Layer } from 'effect'
+import * as BunServices from '@effect/platform-bun/BunServices'
+import { Effect, FileSystem, Layer } from 'effect'
 import { fetchTextOrArchive } from '../../src/core/archive.ts'
 import { fetchText } from '../../src/core/http.ts'
+import { withJev } from '../../src/lib/jev/budget.ts'
 import { Jev, type JevResult } from '../../src/lib/jev/client.ts'
 import { needsJs, wantsRender } from '../../src/workflows/scrape-fallback.ts'
 
@@ -104,4 +106,27 @@ test('fetch.browser: Jev off keeps the static page; a js_shell pick asks for a r
       expect(yield* run(off, render)).toBe(false)
       expect(yield* run(recorded('fetch.browser', 'js_shell'), render)).toBe(true)
     }),
+  ))
+
+// A scrape with no Jev provided reuses the one shared Jev, so each page skips
+// the Keychain lookup and a fresh decision cache (about 100 to 250 ms a page).
+test('fetch decisions reuse the shared Jev instead of building one per page', () =>
+  Effect.runPromise(
+    Effect.gen(function* () {
+      const first = yield* withJev(Effect.service(Jev))
+      const second = yield* withJev(Effect.service(Jev))
+      expect(second).toBe(first)
+    }),
+  ))
+
+// Building Jev.live per call costs a Keychain lookup and a cold decision cache on
+// every ask, so library code asks through the one shared client instead.
+test('library Jev asks never build a fresh client per call', () =>
+  Effect.runPromise(
+    Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem
+      const answers = yield* fs.readFileString('src/lib/jev/answers.ts')
+      const budget = yield* fs.readFileString('src/lib/jev/budget.ts')
+      expect(`${answers}\n${budget}`).not.toContain('Jev.live')
+    }).pipe(Effect.provide(BunServices.layer)),
   ))
