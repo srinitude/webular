@@ -328,6 +328,10 @@ jobs:
           - { os: macos-15-intel, key: darwin-x64 }
           - { os: windows-latest, key: windows-x64, ext: .exe }
           - { os: windows-11-arm, key: windows-arm64, ext: .exe }
+          - { os: ubuntu-latest, key: linux-x64-baseline }
+          - { os: ubuntu-latest, key: linux-x64-musl-baseline, musl: true }
+          - { os: macos-15-intel, key: darwin-x64-baseline }
+          - { os: windows-latest, key: windows-x64-baseline, ext: .exe }
     runs-on: ${{ matrix.os }}
     timeout-minutes: 5
     permissions:
