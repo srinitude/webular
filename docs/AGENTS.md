@@ -29,6 +29,3 @@ User and developer docs; the root [AGENTS.md](../AGENTS.md) holds the repo-wide 
 ```bash
 mise run test:file tests/quality tests/contract
 ```
-
-- docs/install.md:1-3 never links [plugins/webular/README.md](../plugins/webular/README.md).
-- docs/commands.md:12 says crawl has no rate limits, but [src/lib/polite-crawler.ts](../src/lib/polite-crawler.ts) paces requests per host.

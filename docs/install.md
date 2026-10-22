@@ -1,7 +1,8 @@
 # Install channels
 
 Pick one channel. The npm channel is in the README's Install section. Use the
-other channels here when npm does not fit.
+other channels here when npm does not fit. For agent hosts, see the
+[plugin README](../plugins/webular/README.md).
 
 ## Bun
 

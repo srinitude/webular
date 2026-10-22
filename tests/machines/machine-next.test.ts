@@ -29,7 +29,10 @@ const START: Record<string, { state: string; next: string[] }> = {
     next: ['CORRECT', 'HELP', 'LEARN', 'USAGE_ERROR'],
   },
   mcpServe: { state: 'serving', next: ['STOP', 'TOOL_INVALID_ARGS', 'TOOL_OK', 'TOOL_UNKNOWN'] },
-  scrapeFallback: { state: 'fetching', next: ['FETCHED', 'FETCH_FAILED', 'PDF_REFUSED'] },
+  scrapeFallback: {
+    state: 'fetching',
+    next: ['ARCHIVED', 'FETCHED', 'FETCH_FAILED', 'PDF_REFUSED', 'ROBOTS_BLOCKED'],
+  },
 }
 
 describe('machine.next covers every machine in its enum', () => {
