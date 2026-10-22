@@ -543,3 +543,4 @@
 {"path": "tests/quality/AGENTS.md", "sha": "b15ee98755555328a518b67dd8801e7a485e2110f15bfd1a925cf3c36bd8a10e"}
 {"path": "tests/release/AGENTS.md", "sha": "68195cc039a5f74837571111ef922e84ceafd13431a8e2709fbf4c3bcb4bf03b"}
 {"path": "tests/workflows/AGENTS.md", "sha": "8875dd6fde2e44eb225b0d78da340412328da55307508ca7945fbe232cb9bb5f"}
+{"path": "docs/commands.md", "sha": "31ce97cc2cec75f2a003fd0c216f5995538a7dbe7a36c427a74688be85e08bea"}
