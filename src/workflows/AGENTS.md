@@ -4,15 +4,15 @@ Rules for the Mastra workflows, under [src/AGENTS.md](../AGENTS.md).
 
 ## What lives here
 
-- One workflow per command, such as [`search.ts`](search.ts), [`scrape.ts`](scrape.ts), [`crawl.ts`](crawl.ts), [`answer.ts`](answer.ts), `audit.ts`, `batch.ts`, `diagram.ts`, `doctor.ts`, `research.ts`, and `tasks.ts`. A command in [`src/commands/`](../commands/) runs the workflow with the same name.
-- [`runtime.ts`](runtime.ts) is the one place where an Effect program meets a Mastra step. Its runtime also holds the per-origin robots.txt cache.
-- [`scrape-fallback.ts`](scrape-fallback.ts) holds the render and PDF fallbacks around the plain fetch. A PDF is read through `pdfText` in [`src/lib/parse.ts`](../lib/parse.ts), which owns the page cap and the deadline.
-- [`answer.ts`](answer.ts) stamps its result with `asOf`, the run date from [`src/lib/as-of.ts`](../lib/as-of.ts). `WEBULAR_AS_OF` pins it.
+- One workflow per command, such as [search](search.ts), [scrape](scrape.ts), [crawl](crawl.ts), [audit](audit.ts), [batch](batch.ts), [diagram](diagram.ts), [doctor](doctor.ts), and [answer](answer.ts). A command in [`src/commands/`](../commands/) runs the workflow with the same name.
+- [runtime](runtime.ts) is the one place where an Effect program meets a Mastra step. Its runtime also holds the per-origin robots.txt cache.
+- [scrape-fallback](scrape-fallback.ts) holds the render and PDF fallbacks around the plain fetch. A PDF is read through `pdfText` in [`src/lib/parse.ts`](../lib/parse.ts), which owns the page cap and the deadline.
+- [answer](answer.ts) stamps its result with `asOf`, the run date from [`src/lib/as-of.ts`](../lib/as-of.ts). `WEBULAR_AS_OF` pins it.
 
 ## Rules
 
 - A workflow has no model call of its own. Jev decisions go through `decisionStep` from [`src/lib/jev/steps.ts`](../lib/jev/steps.ts), with a rule-based fallback.
-- Every step runs its Effect program through [`runtime.ts`](runtime.ts). Mastra needs a Promise here; this is the only Promise edge, so add no other.
+- Every step runs its Effect program through [runtime](runtime.ts). Mastra needs a Promise here; this is the only Promise edge, so add no other.
 - Keep the real work in [`src/lib/`](../lib/). A step stays short and calls into it.
 - Fan out with a bounded `Effect.forEach` and a size from [`src/core/budget.ts`](../core/budget.ts). Results keep input order.
 - Give a sub-run a stable run id, such as the target URL.
@@ -38,7 +38,7 @@ Rules for the Mastra workflows, under [src/AGENTS.md](../AGENTS.md).
 
 ## Checks
 
-- `scrape.ts`, `monitor.ts`, `extract.ts`, `act.ts`, `summarize.ts`, `feed.ts`, `map.ts`, `crawl.ts`, and `media.ts` use bare `z.url()`, which also takes `file:`.
+- [scrape](scrape.ts), [monitor](monitor.ts), [extract](extract.ts), [act](act.ts), [summarize](summarize.ts), [feed](feed.ts), [map](map.ts), [crawl](crawl.ts), and [media](media.ts) use bare `z.url()`, which also takes `file:`.
 - `mise run bugs:security`: http-only batch URLs (SSRF).
 
 ```bash

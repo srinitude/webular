@@ -4,20 +4,21 @@ Rules for the shared Effect services, under [src/AGENTS.md](../AGENTS.md).
 
 ## What lives here
 
-- Process edge: [`effect.ts`](effect.ts) (typed CLI failures and exit codes), [`args.ts`](args.ts) (flag parsing), [`output.ts`](output.ts) (stdout, stderr, and the `-o` file).
-- Fetching: [`http.ts`](http.ts) runs requests, [`http-body.ts`](http-body.ts) reads bodies, [`decode.ts`](decode.ts) turns bytes into text, [`gunzip.ts`](gunzip.ts) inflates gzip sitemaps, [`capped-bytes.ts`](capped-bytes.ts) caps bytes read, [`cache.ts`](cache.ts) is the disk cache, [`archive.ts`](archive.ts) is the Wayback fallback. Also `auth-headers.ts`, `feed-source.ts`, `retry-after.ts`, `utc-date.ts`.
-- Policy: [`fetch-policy.ts`](fetch-policy.ts) holds the retry, redirect, and failure rules. [`budget.ts`](budget.ts) sizes fan-out from real limits.
-- Scope and safety: [`url.ts`](url.ts) is the one place that sets URL identity and host scope. [`safepath.ts`](safepath.ts) confines paths when `WEBULAR_SANDBOX=1`.
-- Host: [`proc.ts`](proc.ts) runs subprocesses, [`root.ts`](root.ts) finds the package root, [`platform.ts`](platform.ts) picks the executable that fits the machine.
+- Process edge: [effect](effect.ts) (typed CLI failures and exit codes), [args](args.ts) (flag parsing), [output](output.ts) (stdout, stderr, and the `-o` file).
+- Fetching: [http](http.ts) runs requests, [http-body](http-body.ts) reads bodies, [decode](decode.ts) turns bytes into text, [gunzip](gunzip.ts) inflates gzip sitemaps, [cache](cache.ts) is the disk cache, [archive](archive.ts) is the Wayback fallback.
+- Policy: [fetch-policy](fetch-policy.ts) holds the retry, redirect, and failure rules. [budget](budget.ts) sizes fan-out from the host's real limits.
+- Scope and safety: [url](url.ts) is the one place that sets URL identity and host scope. [safepath](safepath.ts) confines paths when `WEBULAR_SANDBOX=1`.
+- Host: [proc](proc.ts) runs subprocesses, [root](root.ts) finds the package root, [platform](platform.ts) picks the executable that fits the machine.
+- Small helpers: [auth-headers](auth-headers.ts), [capped-bytes](capped-bytes.ts), [feed-source](feed-source.ts), [retry-after](retry-after.ts), and [utc-date](utc-date.ts).
 
 ## Rules
 
 - Bug classes here ([bug classes](../../docs/bug-classes.md)): fetch timeouts, body caps, shell-free child processes, URL keys, home paths. Guard tasks: `mise run bugs:security`, `bugs:parsing`, `bugs:os`.
-- [`src/machines/fetch.ts`](../machines/fetch.ts) decides every retry, redirect, and failure. [`http.ts`](http.ts) only performs what it asks. Change the rule in [`fetch-policy.ts`](fetch-policy.ts), never in [`http.ts`](http.ts).
-- [`url.ts`](url.ts) matches the exact host. Apex and `www` siblings are out of scope.
+- [`src/machines/fetch.ts`](../machines/fetch.ts) decides every retry, redirect, and failure. [http](http.ts) only performs what it asks. Change the rule in [fetch-policy](fetch-policy.ts), never in [http](http.ts).
+- [url](url.ts) matches the exact host on purpose. Apex and `www` siblings are out of scope.
 - Run subprocesses with argv arrays and a timeout. Never use a shell. Drain stdout and stderr together.
 - A cache failure skips the cache and never fails a fetch.
-- [`platform.ts`](platform.ts) has the one table of targets. Build, release, and the launcher read it.
+- [platform](platform.ts) has one table of targets. Build, release, and the launcher all read it, so add a target there only.
 
 ### Resources
 
