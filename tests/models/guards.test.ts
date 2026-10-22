@@ -2,6 +2,7 @@
 // record that breaks one rule makes exactly that rule report a problem.
 import { expect, test } from 'bun:test'
 import { Schema } from 'effect'
+import { evaluate, fill } from './check.ts'
 import recorded from './fixtures/tracks/dry-run.json'
 import { type TrackRecord as Rec, TrackRecord } from './guards.ts'
 import { claudeArgs } from './run.ts'
@@ -99,4 +100,10 @@ test('arm stats give pass^k over repeats and cost per correct answer', () => {
     1 / 2,
     (0.043 + 0.042 + 0.031) / 2,
   ])
+})
+
+test('a Windows {tmp} fills with forward slashes, so it matches --json output', () => {
+  const win = { origin: 'http://x', tmp: 'C:\\T\\a' }
+  const out = JSON.stringify({ savedTo: fill('{tmp}/f.html', win) })
+  expect(evaluate({ kind: 'code', answerContains: ['{tmp}/f.html'] }, out, win)).toEqual([])
 })

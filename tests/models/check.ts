@@ -7,8 +7,16 @@ export interface Ctx {
   tmp: string
 }
 
+// {tmp} always fills with forward slashes: Windows accepts them, and a
+// backslash path would come back escaped as \\ in --json output, so the
+// filled path would never match the reply text.
+const slashTmp = (ctx: Ctx) => ctx.tmp.replaceAll('\\', '/')
+
 export const fill = (s: string, ctx: Ctx) =>
-  s.replaceAll('{origin}', ctx.origin).replaceAll('{tmp}', ctx.tmp)
+  s.replaceAll('{origin}', ctx.origin).replaceAll('{tmp}', slashTmp(ctx))
+
+export const unfill = (raw: string, ctx: Ctx) =>
+  raw.replaceAll(ctx.origin, '{origin}').replaceAll(slashTmp(ctx), '{tmp}')
 
 export const evaluate = (ev: Eval, text: string, ctx: Ctx): string[] => [
   ...(ev.answerContains ?? [])

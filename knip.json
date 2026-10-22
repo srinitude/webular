@@ -11,6 +11,8 @@
     "tests/**/*.eval.ts",
     "tests/models/run.ts",
     "tests/engine/cua-open-once.ts",
+    "tests/engine/cua-fake-driver.ts",
+    "tests/engine/cua-fake-browser.ts",
     "plugins/webular/src/server.ts",
     "plugins/webular/scripts/*.ts",
     "plugins/webular/**/*.test.ts"

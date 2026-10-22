@@ -565,3 +565,6 @@
 {"path": "src/core/AGENTS.md", "sha": "310bc29b64251d6a2f4fab2237788717cb4f97d869a00725f4f4a40bc0c63f78"}
 {"path": "src/lib/sources/AGENTS.md", "sha": "db171166303b33e85716e64f8fec894ee84cfac34a714443b4d9d88076433abc"}
 {"path": "tests/quality/AGENTS.md", "sha": "f67080a85e888606b9d3aab1f770b37ebdbbea7913835ba98cd1fe720bd19759"}
+{"path": "docs/install.md", "sha": "69d13e0ffe12185c3528e8f012323ba46bc7afe4048eb3523a5a43a6adcdfd57"}
+{"path": "tests/engine/AGENTS.md", "sha": "3cb7de95169b53fd9fb1a214773ba7e466da071655299f3ff20d7528b71df214"}
+{"path": "docs/install.md", "sha": "93e23cb660885f9e457df23c688f8e45854d32bf96c93376b379712a048ba54c"}

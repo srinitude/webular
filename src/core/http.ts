@@ -26,8 +26,8 @@ export interface FetchOptions extends CacheOptions {
   gunzip?: boolean // fetchTextWithinHost: gunzip the body; maxBytes counts decompressed bytes
   headers?: Record<string, string>
   signal?: AbortSignal
-  // onResponse sees every response, retries included, before its body is read (rate-limit
-  // headers). hopGate runs on each redirect target, after the address guard.
+  redirect?: RequestRedirect // 'manual' hands back the 3xx unfollowed, as fetch does
+  // onResponse: every response, retries too, before its body (rate limits); hopGate: each hop.
   onResponse?: (res: Response) => void
   hopGate?: (url: string) => Effect.Effect<void, FetchError>
 }
@@ -75,10 +75,11 @@ const fetchOnce = (url: string, opts: FetchOptions): Effect.Effect<Response, Fet
 
 const isRedirect = (status: number) => status >= 300 && status < 400
 
-// One run: redirects are followed by hand and guarded; `host` scopes hops; `deadline` caps retries.
+// One run: `byHand` follows redirects here, guarded; `host` scopes hops; `deadline` caps retries.
 interface Run {
   origin: string
   originPrivate: boolean
+  byHand: boolean
   host?: string | undefined
   opts: FetchOptions
   deadline: number
@@ -87,7 +88,8 @@ interface Run {
 const startRun = (origin: string, opts: FetchOptions, host?: string) =>
   Effect.zipWith(guardTarget(origin), Clock.currentTimeMillis, (originPrivate, now): Run => {
     const deadline = now + (opts.timeoutMs ?? Number.POSITIVE_INFINITY)
-    return { origin, originPrivate, host, opts, deadline }
+    const byHand = host !== undefined || opts.redirect !== 'manual'
+    return { origin, originPrivate, byHand, host, opts, deadline }
   })
 
 type Landed = { res: Response; url: string }
@@ -96,7 +98,7 @@ type Landed = { res: Response; url: string }
 function responseEvent(run: Run, res: Response, url: string): Landed & { event: FetchEvent } {
   const settled = { res, url, event: { type: res.ok ? 'OK' : 'HTTP_ERROR' } } as const
   if (RETRY_STATUS.has(res.status)) return { res, url, event: { type: 'RETRYABLE_STATUS' } }
-  if (!isRedirect(res.status)) return settled
+  if (!run.byHand || !isRedirect(res.status)) return settled
   const location = res.headers.get('location')
   if (!location || !URL.canParse(location, url)) return settled
   const next = new URL(location, url).toString()
@@ -151,14 +153,12 @@ function drive(run: Run, url: string, snap: FetchSnapshot): Effect.Effect<Landed
   })
 }
 
-// GET: network failures and retryable statuses retry on the backoff or Retry-After.
+// GET: failures and retryable statuses retry. Redirect 'manual' returns the 3xx: no hop, no gate owed.
 export const httpGet = (
   url: string,
   opts: FetchOptions = {},
 ): Effect.Effect<Response, FetchError> =>
-  Effect.flatMap(startRun(url, opts), (run) =>
-    Effect.map(drive(run, url, START), (landed) => landed.res),
-  )
+  Effect.flatMap(startRun(url, opts), (run) => Effect.map(drive(run, url, START), (l) => l.res))
 
 // Text GETs revalidate through the disk cache; a cache config error surfaces
 // as a FetchError, so callers see only HttpStatusError or FetchError.

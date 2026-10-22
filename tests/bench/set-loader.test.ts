@@ -2,11 +2,14 @@
 // file is in bench/tasks/manifest.json, decodes as SetTask lines with the
 // canary, and one edited byte makes the loader refuse the file.
 import { expect, test } from 'bun:test'
+import { resolve } from 'node:path'
 import { Effect, FileSystem } from 'effect'
 import { loadSetFile } from '../../scripts/bench/loader.ts'
 import { eff, failMsg, tmpDir } from '../_support/run.ts'
 
-const DIR = `${import.meta.dir}/../../bench/tasks`
+// Resolved, not `${dir}/../..`: Bun's copyFile on Windows does not collapse
+// `..` in a mixed-separator path and fails with ENOENT.
+const DIR = resolve(import.meta.dir, '../../bench/tasks')
 const NAMES = [...new Bun.Glob('{dev,test}/*.jsonl').scanSync({ cwd: DIR })].map((n) =>
   n.replaceAll('\\', '/'),
 )

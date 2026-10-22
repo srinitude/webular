@@ -8,7 +8,7 @@ import { Console, Effect, FileSystem, Stream } from 'effect'
 import { ChildProcess, ChildProcessSpawner } from 'effect/process'
 import { startFixture } from '../_support/fixture.ts'
 import { ROOT } from '../_support/root.ts'
-import { type Ctx, evaluate, fill } from './check.ts'
+import { type Ctx, evaluate, fill, unfill } from './check.ts'
 import {
   type Baseline,
   fixtureRoutes,
@@ -55,9 +55,6 @@ const step = (
         [`${ROOT}src/commands/${s[0]}.ts`, ...s.slice(1).map((a) => fill(a, ctx))],
         env,
       ).pipe(Effect.map((r) => `${r.out}${r.err}`))
-
-const unfill = (raw: string, ctx: Ctx) =>
-  raw.replaceAll(ctx.origin, '{origin}').replaceAll(ctx.tmp, '{tmp}')
 
 const baselineOne = (file: ScenarioFile, s: Scenario, keepRaw: boolean) =>
   Effect.gen(function* () {

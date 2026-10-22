@@ -53,3 +53,6 @@ npm/
 # Landing scratch (patches, bench results)
 .land/
 /bench/results/recordings/
+
+# Screenshot test scratch folders (tests/lib/driver-screenshot.test.ts) live under the repo root while it runs.
+.shot-test-*/

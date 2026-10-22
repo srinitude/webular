@@ -25,6 +25,7 @@ Webular ships eight native builds. Every install channel picks the one that fits
 
 - **Jev key lookup.** Webular reads `TYPESAFE_API_KEY` first, on every system. Only when that is unset does it look in the macOS Keychain, in the item `typesafe-ai-api-key`. The Keychain step is macOS-only. On Linux and Windows, use the environment variable.
 - **Cua browser mode** (`--render cua`, `act --goal`) is opt-in. It needs the separate `cua-driver` daemon and a throwaway browser window, as [Browser mode (Cua)](cua-browser-mode.md) explains. Webular's code knows the browser profile folders on macOS, Linux, and Windows, but treat Cua as macOS-first and confirm that `cua-driver` runs on your system before you rely on it.
+- **Document conversion** (`parse` on Word, PowerPoint, Excel, OpenDocument, RTF, EPUB, CSV, and PDF files, and scrape's document route) uses the `@firecrawl/anydoc` addon. The addon ships no Windows arm64 binary. On Windows arm64, document conversion fails with the error code `unsupportedPlatform`. Everything else works there. To convert documents on that machine, run Webular inside WSL, which uses the Linux arm64 build.
 - **Everything else** (search, scrape, crawl, and the rest) is the same on every build.
 
 ## npm, Bun, and pnpm

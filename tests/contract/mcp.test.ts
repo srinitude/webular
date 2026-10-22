@@ -65,18 +65,13 @@ const CALLS: Record<string, (o: string) => Record<string, unknown>> = {
 
 const connected = Effect.acquireRelease(
   Effect.gen(function* () {
-    const host = yield* mcpHostEnv
+    const host = { ...(yield* mcpHostEnv), WEBULAR_ALLOW_PRIVATE: '1' } // the fixture is local
     const client = new Client({ name: 'webular-contract', version: '0.0.0' })
     const transport = new StdioClientTransport({
       command: process.execPath,
       args: [`${ROOT}src/commands/mcp.ts`],
       cwd: ROOT,
-      env: {
-        ...host,
-        WEBULAR_NO_CACHE: '1',
-        WEBULAR_SOURCE_ORIGIN: fx.origin,
-        WEBULAR_ALLOW_PRIVATE: '1',
-      },
+      env: { ...host, WEBULAR_NO_CACHE: '1', WEBULAR_SOURCE_ORIGIN: fx.origin },
       stderr: 'ignore',
     })
     return yield* io(() => client.connect(transport)).pipe(Effect.as(client))
