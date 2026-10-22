@@ -75,5 +75,8 @@ describe('products found by their creator', () => {
   test('only queries that name a maker', () => {
     expect(creatorOf('terminal emulator made by Mitchell Hashimoto')).toBe('Mitchell Hashimoto')
     expect(creatorOf('Zed code editor homepage')).toBeUndefined()
+    // A bare "by" names the maker too: uv's Wikidata developer is Astral.
+    expect(creatorOf('official site of the Python package manager uv by Astral')).toBe('Astral')
+    expect(creatorOf('papers sorted by date')).toBeUndefined()
   })
 })

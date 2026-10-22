@@ -65,7 +65,42 @@ const insideCase = Effect.gen(function* () {
   expect(out[1]).toEqual(hits)
 })
 
+// Wikipedia's search needs every word, so a trailing qualifier ("for the Erlang
+// VM") hides the subject's article: the main query asks Wikipedia for the
+// subject alone. A query that opens with the nav words keeps its whole text.
+const subjectCase = Effect.gen(function* () {
+  const asked: string[] = []
+  const spy = (_: string, q: string) =>
+    Effect.sync(() => {
+      asked.push(q)
+      return hits
+    })
+  const gleam = withOfficial(
+    'Gleam programming language for the Erlang VM official website',
+    spy,
+    5,
+  )
+  const hop = withOfficial(
+    'official website of the Lisp for the JVM created by Rich Hickey',
+    spy,
+    5,
+  )
+  yield* serving(
+    '/sparql',
+    reply,
+    Effect.all([
+      gleam('wikipedia', 'Gleam programming language for the Erlang VM', 5),
+      hop('wikipedia', 'official website of the Lisp for the JVM created by Rich Hickey', 5),
+    ]),
+  )
+  expect(asked).toEqual([
+    'Gleam programming language',
+    'official website of the Lisp for the JVM created by Rich Hickey',
+  ])
+})
+
 describe('official sites from Wikidata', () => {
+  test("a trailing qualifier never hides the subject's article", () => run(subjectCase), 15_000)
   test(
     "the main query's Wikipedia list leads with its official sites",
     () => run(insideCase),

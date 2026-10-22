@@ -1,4 +1,5 @@
-// Queries that name a product only by its maker ("created by Evan You"): no
+// Queries that name a product only by its maker ("created by Evan You", "uv by
+// Astral"): no
 // keyless source returns the product. One SPARQL call finds the items whose
 // creator (P170), developer (P178) or founder (P112) carries that English
 // label, reads each one's official website (P856), and ranks by sitelinks.
@@ -43,7 +44,7 @@ export const sparql = Effect.fn('sparql')(function* <A>(
 
 const NAME = String.raw`\p{Lu}[\p{L}\p{M}'’.-]*`
 const MADE_BY = new RegExp(
-  String.raw`\b(?:created|made|developed|built|founded|designed|written)\s+by\s+(${NAME}(?:\s+${NAME})*)`,
+  String.raw`\b(?:(?:created|made|developed|built|founded|designed|written)\s+)?by\s+(${NAME}(?:\s+${NAME})*)`,
   'u',
 )
 export const creatorOf = (query: string) => query.match(MADE_BY)?.[1]
