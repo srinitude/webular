@@ -76,8 +76,6 @@ jobs:
         run: env -u MISE_TASK_SKIP mise run prune:fix
       - name: Commit, push the branch, and open a draft pull request
         run: |
-          # The PR body's backticks are Markdown, not shell expansions.
-          # shellcheck disable=SC2016
           if [ -z "$(git status --porcelain)" ]; then
             echo "prune:fix changed nothing; no pull request."
             exit 0
