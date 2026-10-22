@@ -27,6 +27,7 @@ Built on [Jev](src/lib/jev/AGENTS.md), TypeSafe's System One decision model, for
 - **One CLI.** Search, scrape, crawl, map, extract, answer, research, and feed share one command set and one JSON contract.
 <!-- bench:start readme -->
 - **Measured, not claimed.** On the committed peer run ([peers-2026-10-22T00-58-50-543Z.json](bench/results/peers-2026-10-22T00-58-50-543Z.json)), webular search scored 1.000 on 4 search tasks, while exa scored 1.000 on 4 and firecrawl scored 1.000 on 4. Read [the benchmark results](docs/benchmarks.md) for every score and the method behind it.
+- **Agent matrix.** 0 of 75 cells scored: webular with Jev off and on, and 23 alternatives, on 3 agent models. Source: no committed agent run.
 <!-- bench:end -->
 
 ## Quickstart

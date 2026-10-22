@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url'
 import { BunRuntime, BunServices } from '@effect/platform-bun'
 import { Console, Data, Effect, FileSystem } from 'effect'
 import { blocks, type Run } from './docs-blocks.ts'
+import { type MatrixRow, matrixBlock, matrixHeadline, pickModelsRun } from './matrix.ts'
 
 export const DOCS = ['README.md', 'docs/benchmarks.md'] as const
 const PREFIX: Record<(typeof DOCS)[number], string> = {
@@ -64,11 +65,36 @@ const loadRun = (root: string) =>
     return { name, sha, json, txt } satisfies Run
   })
 
-const renderDoc = (root: string, run: Run, path: (typeof DOCS)[number]) =>
+// The agent matrix rows from the committed three-model agent run, if any.
+const loadMatrix = (root: string) =>
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem
+    const name = pickModelsRun(yield* fs.readDirectory(`${root}bench/results/`))
+    if (!name) return { name, rows: [] as MatrixRow[] }
+    const raw = yield* fs.readFileString(`${root}bench/results/${name}`)
+    const rows = yield* Effect.try({
+      try: () => (JSON.parse(raw) as { runs: MatrixRow[] }).runs,
+      catch: () => new BenchDocsError({ message: `${name} is not JSON` }),
+    })
+    return { name, rows }
+  })
+
+type Matrix = Effect.Success<ReturnType<typeof loadMatrix>>
+
+const bodies = (run: Run, m: Matrix, prefix: string) => {
+  const b = blocks(run, prefix)
+  return {
+    ...b,
+    readme: `${b['readme']}\n${matrixHeadline(m.rows, m.name)}`,
+    matrix: matrixBlock(m.rows, m.name, prefix),
+  }
+}
+
+const renderDoc = (root: string, run: Run, m: Matrix, path: (typeof DOCS)[number]) =>
   Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem
     const current = yield* fs.readFileString(`${root}${path}`)
-    const { text, unknown } = fill(current, blocks(run, PREFIX[path]))
+    const { text, unknown } = fill(current, bodies(run, m, PREFIX[path]))
     if (unknown.length)
       return yield* new BenchDocsError({ message: `${path}: unknown blocks ${unknown.join(', ')}` })
     return { path, current, next: text }
@@ -78,7 +104,8 @@ const renderDoc = (root: string, run: Run, path: (typeof DOCS)[number]) =>
 export const render = (root: string) =>
   Effect.gen(function* () {
     const run = yield* loadRun(root)
-    return yield* Effect.forEach(DOCS, (path) => renderDoc(root, run, path), { concurrency: 1 })
+    const m = yield* loadMatrix(root)
+    return yield* Effect.forEach(DOCS, (path) => renderDoc(root, run, m, path), { concurrency: 1 })
   })
 
 if (import.meta.main) {

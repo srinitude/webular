@@ -20,7 +20,7 @@ import { allowedTools } from './run.ts'
 import type { Surface } from './scenarios.ts'
 
 const ownTools = (a: { surface: string; provider: string }) =>
-  a.provider === 'webular' ? allowedTools(a.surface as Surface) : [`mcp__${a.provider}`]
+  a.provider.startsWith('webular') ? allowedTools(a.surface as Surface) : [`mcp__${a.provider}`]
 
 export const guardProblems = (t: TrackRecord) => ({
   'three models ran': threeModelsRan(t),

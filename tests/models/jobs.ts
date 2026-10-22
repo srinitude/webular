@@ -1,7 +1,7 @@
 // The model x arm x scenario grid a matrix run walks, narrowed by flags. An
-// arm is a webular surface, or the peer surface once per provider. Within
+// arm is a webular surface with Jev off or on, or the peer surface once per provider. Within
 // each model and task, the arms run in a seeded random order.
-import { WEBULAR } from './agent/arm.ts'
+import { JEV_ARMS } from './agent/arm.ts'
 import type { Provider, Scenario, ScenarioFile, Surface } from './scenarios.ts'
 
 export interface Job {
@@ -36,7 +36,7 @@ const arms = (file: ScenarioFile, surfaces: readonly Surface[], only?: string[])
       ? (file.providers ?? [])
           .filter((p) => !only || only.includes(p.id))
           .map((p): Arm => ({ surface, provider: p.id, peer: p }))
-      : [{ surface, provider: WEBULAR, peer: undefined }],
+      : JEV_ARMS.map((provider): Arm => ({ surface, provider, peer: undefined })),
   )
 
 const fits = (file: ScenarioFile, s: Scenario) => (arm: Arm) =>

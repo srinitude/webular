@@ -10,7 +10,7 @@ import { BunRuntime, BunServices } from '@effect/platform-bun'
 import { Clock, Config, Console, Duration, Effect, FileSystem, Option } from 'effect'
 import { startFixture } from '../_support/fixture.ts'
 import { ROOT } from '../_support/root.ts'
-import { allowedTools, builtinTools, hint, peerKeys, peerServer, WEBULAR } from './agent/arm.ts'
+import { allowedTools, armKeys, builtinTools, hint, peerServer, WEBULAR } from './agent/arm.ts'
 import { grade } from './agent/judge.ts'
 import { RATES_SOURCE } from './agent/rates.ts'
 import { rowOf } from './agent/row.ts'
@@ -136,11 +136,10 @@ const runOne = (job: Job, keys: Keys) =>
     return rowOf(job, problems, run, Math.round(Duration.toMillis(took)))
   }).pipe(Effect.scoped)
 
-// A peer arm with a missing key is skipped with a clear reason, never run.
+// A peer arm or the Jev-on arm with a missing key is skipped with a clear reason, never run.
 const runArm = (job: Job) =>
   Effect.gen(function* () {
-    if (!job.peer) return yield* runOne(job, {})
-    const { env, missing } = yield* peerKeys(job.peer)
+    const { env, missing } = yield* armKeys(job.peer, job.provider)
     if (missing.length === 0) return yield* runOne(job, env)
     return rowOf(job, [`skipped: no key (${missing.join(', ')})`], parseStream(''), 0)
   })

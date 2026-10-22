@@ -5,6 +5,7 @@ The peer benchmark. It scores webular against other web research tools. The pare
 ## What lives here
 
 - [run.ts](run.ts): the entry. It replays recordings, or calls peers with `--live`. Other flags: `--seed N`, `--cold`, `--judge`, `--runs N`, `--peers a,b`, and `--max-calls N`.
+- [matrix.ts](matrix.ts): the agent matrix. It scores every tool arm under every agent model from the committed agent run, or skips a cell with its reason.
 - [providers.ts](providers.ts): webular and one Effect Layer per peer. A peer with no key is skipped, and the report says so. Jina Reader runs without a key on its free limits.
 - [peers.ts](peers.ts): the Firecrawl, Exa, Tavily, and Perplexity adapters, with each peer's published prices. Every other hosted peer has its own adapter file named after it, such as [apify.ts](apify.ts) and [serper.ts](serper.ts).
 - [baselines.ts](baselines.ts): free local baselines. A missing tool is skipped, never faked.

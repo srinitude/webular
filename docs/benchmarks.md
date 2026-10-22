@@ -127,6 +127,15 @@ Source: [the text report](../bench/results/peers-2026-10-22T00-58-50-543Z.txt).
 - The task counts are very small: 4 search, 6 scrape, 7 answer tasks. Treat every gap as a sign, not a proof.
 <!-- bench:end -->
 
+## Agent matrix
+<!-- bench:start matrix -->
+Each line is one agent model, and each entry is one tool arm, from no committed agent run. Every cell uses the same tasks, grader, seed, and prompt; only the tool changes. A cell says skipped when its key or its agent adapter is missing.
+
+- **claude-opus-5-5:** webular-jev-off not run; webular-jev-on not run; exa not run; firecrawl not run; parallel skipped: no agent adapter; tavily not run; perplexity not run; youcom skipped: no agent adapter; jina skipped: no agent adapter; linkup skipped: no agent adapter; valyu skipped: no agent adapter; serpapi skipped: no agent adapter; serper skipped: no agent adapter; gemini skipped: no agent adapter; apify skipped: no agent adapter; brightdata skipped: no agent adapter; browserbase skipped: no agent adapter; scrapegraph skipped: no agent adapter; nimble skipped: no agent adapter; tinyfish skipped: no agent adapter; contextdev skipped: no agent adapter; searxng skipped: no agent adapter; crawl4ai skipped: no agent adapter; trafilatura skipped: no agent adapter; readability skipped: no agent adapter.
+- **claude-sonnet-5-5:** webular-jev-off not run; webular-jev-on not run; exa not run; firecrawl not run; parallel skipped: no agent adapter; tavily not run; perplexity not run; youcom skipped: no agent adapter; jina skipped: no agent adapter; linkup skipped: no agent adapter; valyu skipped: no agent adapter; serpapi skipped: no agent adapter; serper skipped: no agent adapter; gemini skipped: no agent adapter; apify skipped: no agent adapter; brightdata skipped: no agent adapter; browserbase skipped: no agent adapter; scrapegraph skipped: no agent adapter; nimble skipped: no agent adapter; tinyfish skipped: no agent adapter; contextdev skipped: no agent adapter; searxng skipped: no agent adapter; crawl4ai skipped: no agent adapter; trafilatura skipped: no agent adapter; readability skipped: no agent adapter.
+- **claude-haiku-5-5:** webular-jev-off not run; webular-jev-on not run; exa not run; firecrawl not run; parallel skipped: no agent adapter; tavily not run; perplexity not run; youcom skipped: no agent adapter; jina skipped: no agent adapter; linkup skipped: no agent adapter; valyu skipped: no agent adapter; serpapi skipped: no agent adapter; serper skipped: no agent adapter; gemini skipped: no agent adapter; apify skipped: no agent adapter; brightdata skipped: no agent adapter; browserbase skipped: no agent adapter; scrapegraph skipped: no agent adapter; nimble skipped: no agent adapter; tinyfish skipped: no agent adapter; contextdev skipped: no agent adapter; searxng skipped: no agent adapter; crawl4ai skipped: no agent adapter; trafilatura skipped: no agent adapter; readability skipped: no agent adapter.
+<!-- bench:end -->
+
 ## Method
 
 The full method lives in the spec:

@@ -6,6 +6,22 @@ import type { Provider, Surface } from '../scenarios.ts'
 
 export const WEBULAR = 'webular'
 
+// Webular runs twice per surface: Jev off, then Jev on with the released model.
+export const JEV_OFF = 'webular-jev-off'
+export const JEV_ON = 'webular-jev-on'
+export const JEV_ARMS = [JEV_OFF, JEV_ON] as const
+export const JEV_RELEASED = 'jev-1.14.0'
+
+// The Jev-on arm's env, or the missing key's name; the value stays in memory.
+export const jevEnv = (provider: string) =>
+  provider === JEV_ON
+    ? Effect.map(readKey('TYPESAFE_API_KEY', 'typesafe-ai-api-key'), (key) =>
+        key
+          ? { env: { TYPESAFE_API_KEY: key, WEBULAR_JEV_MODEL: JEV_RELEASED }, missing: [] }
+          : { env: {}, missing: ['TYPESAFE_API_KEY or Keychain typesafe-ai-api-key'] },
+      )
+    : Effect.succeed({ env: { WEBULAR_JEV: 'off' }, missing: [] as string[] })
+
 type Own = Exclude<Surface, 'peer'>
 
 const ALLOWED: Record<Own, string[]> = {
@@ -59,3 +75,7 @@ export const peerKeys = (p: Provider) =>
     const env = Object.fromEntries(found.map((f) => [f.k.env, f.v ?? '']))
     return { env, missing }
   })
+
+// The keys and env an arm needs: a peer's keys, or the webular Jev setting.
+export const armKeys = (peer: Provider | undefined, provider: string) =>
+  peer ? peerKeys(peer) : jevEnv(provider)
