@@ -160,6 +160,11 @@ td {
   border: 0;
   padding: var(--space-4) 0;
 }
+/* Long tool names and env names may break, so the table fits its column. */
+.cards-table th[scope="row"],
+.cards-table td {
+  overflow-wrap: anywhere;
+}
 .cards-table tr {
   padding: var(--space-16);
   background: var(--color-surface);
