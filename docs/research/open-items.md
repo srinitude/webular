@@ -8,10 +8,10 @@ The totals and the method are in [research.md](../research.md). Each `#N` is tha
 
 The list is [retrieval-changes.md](retrieval-changes.md).
 
-- #1, waiting: built at 2ac0c187; its keep round waits on load under 40. In the code: the free-source rank picks its half-life from the query: 30 days for a fresh query, 3,650 for a history query, and 365 for the rest (`src/lib/sources/rank.ts:11`). A dated hit outside a named year window, such as "in 2024", scores zero (`src/lib/sources/rank.ts:19`). The build adds month and relative windows and a lower score for doubtful dates. Still missing after it: "supersedes" or "deprecated" cues.
+- #1, waiting: built at 2ac0c187, branch head 3929001a on the eighth batch; keep round needs load under 40. The 1-minute load read 46 to 254 between 09:58 and 10:13 on 2026-10-22, so no round ran. In the code: the free-source rank picks its half-life from the query: 30 days for a fresh query, 3,650 for a history query, and 365 for the rest (`src/lib/sources/rank.ts:11`). A dated hit outside a named year window, such as "in 2024", scores zero (`src/lib/sources/rank.ts:19`). The build adds month and relative windows and a lower score for doubtful dates. Still missing after it: "supersedes" or "deprecated" cues.
 - #2, waiting: tune the RRF k and class weights on a dev split (`src/lib/search.ts:102`, `src/lib/local-index.ts:135`).
 - #3, waiting: clue splitting beside the hop gate. In the code: "A vs B" questions search each entity at once (`src/lib/search-hop.ts:126`).
-- #4, waiting: built at 2ae00508; its keep round waits on load under 40. The build adds a rerank skip gate on score margin and overlap in [`src/lib/search-chain.ts`](../../src/lib/search-chain.ts).
+- #4, waiting: built at 2ae00508, branch head 8534dd9b on the eighth batch; keep round needs load under 40. The 1-minute load read 46 to 254 between 09:58 and 10:13 on 2026-10-22, so no round ran. The build adds a rerank skip gate on score margin and overlap in [`src/lib/search-chain.ts`](../../src/lib/search-chain.ts).
 - #5, waiting: needs its own decision-models-first receipt before any Jev change. The change scores the top 16 hits in one Jev choice.
 - #6, closed (out of scope): owned by task 11, which owns the local index. The change adds the query-to-question rewrite to the heading-tree chunks (`src/lib/local-chunks.ts:66`).
 - #7, waiting: add domain tiers, min(trust, freshness), and an intent-by-source-type table (`src/lib/sources/catalog.ts:44`).
@@ -31,7 +31,7 @@ The list is [extraction-changes.md](extraction-changes.md).
 - #7, waiting: join two extractors instead of picking the fuller one ([`src/lib/html.ts`](../../src/lib/html.ts)).
 - #8, landed in 365d7f75: each `math` element becomes its alt text, TeX source, or plain text before the sanitizer drops it (`src/lib/html-sanitize.ts:78`).
 - #9, landed in 365d7f75: alt text stops at 300 characters, and the image list skips hidden images (`src/lib/html-images.ts:30` and `:38`).
-- #10, waiting: built at 23433d16; its keep round waits on load under 40. In the code: stacked header rows join into one header-path row, such as "Price / 2024" (`src/lib/html-table.ts:54`). The build adds "Header: value" output for table rows in [`src/lib/html-table.ts`](../../src/lib/html-table.ts).
+- #10, waiting: built at 23433d16, branch head dedd4873 on the eighth batch; keep round needs load under 40. The 1-minute load read 46 to 254 between 09:58 and 10:13 on 2026-10-22, so no round ran. In the code: stacked header rows join into one header-path row, such as "Price / 2024" (`src/lib/html-table.ts:54`). The build adds "Header: value" output for table rows in [`src/lib/html-table.ts`](../../src/lib/html-table.ts).
 - #11, waiting: reuse a page's XHR or JSON endpoint in [`src/lib/driver.ts`](../../src/lib/driver.ts).
 - #12, closed (out of scope): owned by task 11, which owns the local index. The remainder is to chunk table rows with their header in [`src/lib/local-chunks.ts`](../../src/lib/local-chunks.ts). In the code: a chunk under 8 words joins the chunk after it, so a snippet is never a lone stub (`src/lib/local-chunks.ts:44`).
 - #13, waiting: finish the locator ladder (text, repeated sibling, per-host cache) in [`src/lib/select.ts`](../../src/lib/select.ts).
@@ -90,7 +90,7 @@ The root AGENTS.md sits at 12,282 of 12,288 bytes, so each addition must cut as 
 
 The list is [engineering-changes.md](engineering-changes.md).
 
-- #1, waiting: built at 0782a088; its keep round waits on load under 40. The build adds a per-host retry budget and a breaker beside `retryPause`.
+- #1, waiting: built at 0782a088, branch head 08b55f14 on the eighth batch, with its backoff test on TestClock; keep round needs load under 40. The 1-minute load read 46 to 254 between 09:58 and 10:13 on 2026-10-22, so no round ran. The build adds a per-host retry budget and a breaker beside `retryPause`.
 - #2, #4, #8, #10, #11, #14, #15, #16, #17, waiting: each change as the list writes it; see the list.
 - #3, closed (out of scope): owned by task 52, which owns the bench spec in [`scripts/bench`](../../scripts/bench). The change flags a case as not resolvable there.
 - #5, waiting: add a mutation gate.
