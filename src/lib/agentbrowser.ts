@@ -13,34 +13,45 @@ export const available = (): Effect.Effect<boolean, never, Path.Path> =>
 
 // The `agent-browser` shim is a node script that starts node, then spawns the
 // native binary: about 250 ms per batch. The package's own native binary for
-// this platform skips that, so every capture spawns it directly.
+// this platform skips that, so every capture spawns it directly. The package
+// ships no win32-arm64 build: its own launcher runs the x64 one through
+// Windows' emulation, and so does this.
 // ponytail: Linux keeps the shim, which tells glibc from musl; resolve the musl
 // build here too if Linux capture latency matters.
-const native =
-  process.platform === 'linux'
+export const nativeName = (platform: string, arch: string) =>
+  platform === 'linux'
     ? null
-    : `agent-browser-${process.platform}-${process.arch}${process.platform === 'win32' ? '.exe' : ''}`
+    : platform === 'win32'
+      ? `agent-browser-win32-${arch === 'arm64' ? 'x64' : arch}.exe`
+      : `agent-browser-${platform}-${arch}`
 
 // Package launchers: the node script on Unix, npm's .cmd/.ps1/.bat wrappers on
 // Windows, and bun's .exe launcher, which stays in node_modules/.bin.
 const SHIM = /\.(js|cmd|ps1|bat)$|[\\/]node_modules[\\/]\.bin[\\/]/i
 
+const packageBinDir = Effect.try(() =>
+  join(dirname(Bun.resolveSync('agent-browser/package.json', import.meta.dir)), 'bin'),
+).pipe(Effect.orElseSucceed(() => null))
+
 /**
  * A real `agent-browser` executable on PATH (an override or a test stub) wins.
- * When PATH holds only the node shim, spawn the package's native binary instead.
+ * When PATH holds only a launcher, spawn the package's native binary instead.
  */
-export const agentBin = Effect.fn('agentBin')(function* () {
-  const bin = yield* resolveBin('agent-browser')
+export const pickBin = Effect.fn('pickBin')(function* (
+  bin: string | null,
+  native: string | null,
+  binDir?: string,
+) {
   const fs = yield* FileSystem.FileSystem
   const real = bin ? yield* fs.realPath(bin).pipe(Effect.orElseSucceed(() => bin)) : null
   if (!native || (real && !SHIM.test(real))) return bin
-  const direct = yield* Effect.try(() =>
-    Bun.resolveSync('agent-browser/package.json', import.meta.dir),
-  ).pipe(
-    Effect.map((pkg) => Bun.which(native, { PATH: join(dirname(pkg), 'bin') })),
-    Effect.orElseSucceed(() => null),
-  )
-  return direct ?? bin
+  const dir = binDir ?? (yield* packageBinDir)
+  return (dir ? Bun.which(native, { PATH: dir }) : null) ?? bin
+})
+
+export const agentBin = Effect.fn('agentBin')(function* () {
+  const bin = yield* resolveBin('agent-browser')
+  return yield* pickBin(bin, nativeName(process.platform, process.arch))
 })
 
 // A named session keeps its browser warm between batches of one run. Every
@@ -54,7 +65,7 @@ const IDLE_MS = 120_000
 // The sessions opened since the last closeSessions, shared like ProcPermits.
 // ponytail: one set per process; two runs at once in one process (the MCP
 // server) close each other's warm sessions early: a cold start, never a leak.
-export const OpenSessions = Context.Reference<Set<string>>('webular/lib/OpenSessions', {
+const OpenSessions = Context.Reference<Set<string>>('webular/lib/OpenSessions', {
   defaultValue: () => new Set(),
 })
 
