@@ -17,7 +17,7 @@ The Astro layout, components, and styles, under [site/AGENTS.md](../AGENTS.md).
 ## Rules
 
 - Components are .astro files only, with no web fonts and no third-party script.
-- The only client script is the small vanilla script in [Base.astro](Base.astro), with no framework. Astro ships it as a same-origin file, because the content security policy allows only `'self'` scripts. The one exception is the tiny inline head script that applies the saved theme before first paint. Its sha256 hash sits in `script-src` in [_headers](../public/_headers), so a change to that script needs a new hash.
+- The only client script is the small vanilla script in [Base.astro](Base.astro), with no framework. Astro ships it as a same-origin file, because the content security policy allows only `'self'` scripts. The one exception is the tiny inline head script that applies the saved theme before first paint. Its sha256 hash sits in `script-src` in [_headers](../public/_headers), so a change to that script needs a matching hash.
 - Every style reads a custom property from [tokens.css](tokens.css). The design tokens replace that one file.
 - Styles are mobile first, and no page may scroll sideways at 320 px.
 
