@@ -21,10 +21,20 @@ export const RETRY_ON_TIMEOUT = false
 // this redirect fails instead of being followed.
 export const REDIRECT_LIMIT = 5
 
+// A key sent as a query parameter (OpenAlex api_key) never reaches error text.
+const SECRET_PARAM = /key|token|secret|password|auth|sig/i
+const safeUrl = (url: string) => {
+  const u = URL.parse(url)
+  if (!u) return url
+  for (const name of [...u.searchParams.keys()])
+    if (SECRET_PARAM.test(name)) u.searchParams.set(name, 'REDACTED')
+  return u.toString()
+}
+
 // Error text for each failed final state of the fetch machine.
 export const FETCH_ERROR = {
   httpFailed: (url: string, status: number, text: string) =>
-    `fetch ${url} failed: ${status} ${text}`,
-  offHostBlocked: (url: string) => `redirect off-site blocked: ${url}`,
-  tooManyRedirects: (url: string) => `too many redirects: ${url}`,
+    `fetch ${safeUrl(url)} failed: ${status} ${text}`,
+  offHostBlocked: (url: string) => `redirect off-site blocked: ${safeUrl(url)}`,
+  tooManyRedirects: (url: string) => `too many redirects: ${safeUrl(url)}`,
 } as const

@@ -31,6 +31,7 @@ Rules for the shared Effect services. They sit under [src/AGENTS.md](../AGENTS.m
 
 ## Checks
 
+- `mise run bugs:security` checks that fetch error text hides key-like query parameters (secrets).
 - `src/core/budget.ts:89` calls `Effect.runSync` outside the allowed process edges.
 - `src/core/output.ts:127` and `src/core/args.ts:85` write with `process.stdout.write`, which breaks JSON-RPC-only stdout for `webular mcp`.
 

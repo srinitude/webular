@@ -2,6 +2,7 @@
   "security": {
     "globs": [
       "tests/security/**/*.test.ts",
+      "tests/**/*.security.test.ts",
       "tests/core/{private-hosts,robots-txt,polite-crawler,fetch-layer-user-agent}*.test.ts",
       "tests/engine/{sanitize-injection,robots-gate}*.test.ts",
       "tests/ci/checkout-credentials.test.ts"

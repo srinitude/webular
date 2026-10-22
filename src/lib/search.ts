@@ -15,9 +15,6 @@ interface SearchHit {
   description: string
 }
 
-const UA =
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'
-
 const decodeHref = (href: string): string =>
   URL.parse(href.startsWith('http') ? href : `https:${href}`)?.searchParams.get('uddg') ?? href
 
@@ -40,7 +37,7 @@ export const webSearch = Effect.fn('webSearch')(function* (query: string, limit:
     yield* endpoint('https://html.duckduckgo.com/html/', { q: query }),
     {
       timeoutMs: SOURCE_TIMEOUT_MS,
-      headers: { 'user-agent': UA, accept: 'text/html,application/xhtml+xml' },
+      headers: { accept: 'text/html,application/xhtml+xml' }, // fetchText sends the webular User-Agent
     },
   )
   const { document } = parseHTML(html)
