@@ -54,6 +54,20 @@ const Cases = Schema.fromJsonString(
     'baseline-loses': Schema.Array(Schema.Struct({ input: Schema.Unknown, label: Schema.Unknown })),
   }),
 )
+// Labels of one case that are neither an option of a choice question nor derived.
+const badLabels = (def: Def, input: unknown, label: unknown, i: number): string[] => {
+  const choices = Object.values(def.payload(input as never).questions).filter(
+    (q) => q.type === 'choice',
+  )
+  if (choices.length === 0) return []
+  const options = new Set(choices.flatMap((q) => Object.keys(q.criteria ?? {})))
+  return (Array.isArray(label) ? label : [label])
+    .filter(
+      (l): l is string =>
+        typeof l === 'string' && !options.has(l) && !DERIVED[def.name]?.(l, input as never),
+    )
+    .map((l) => `${def.name}#${i}: ${l}`)
+}
 const run = <A>(e: Effect.Effect<A, unknown, FileSystem.FileSystem>) =>
   Effect.runPromise(e.pipe(Effect.provide(BunServices.layer)))
 
@@ -78,21 +92,8 @@ test('every choice label in an eval case is an option of that decision', () =>
       const bad: string[] = []
       for (const { def } of all) {
         const e = Schema.decodeUnknownSync(Cases)(yield* fs.readFileString(`${root}/${def.evals}`))
-        for (const [i, c] of [...e['baseline-wins'], ...e['baseline-loses']].entries()) {
-          const choices = Object.values(def.payload(c.input as never).questions).filter(
-            (q) => q.type === 'choice',
-          )
-          if (choices.length === 0) continue
-          const options = new Set(choices.flatMap((q) => Object.keys(q.criteria ?? {})))
-          const labels = Array.isArray(c.label) ? c.label : [c.label]
-          for (const l of labels)
-            if (
-              typeof l === 'string' &&
-              !options.has(l) &&
-              !DERIVED[def.name]?.(l, c.input as never)
-            )
-              bad.push(`${def.name}#${i}: ${l}`)
-        }
+        for (const [i, c] of [...e['baseline-wins'], ...e['baseline-loses']].entries())
+          bad.push(...badLabels(def, c.input, c.label, i))
       }
       expect(bad).toEqual([])
     }),

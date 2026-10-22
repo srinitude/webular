@@ -93,6 +93,16 @@ export const resolveKey = Effect.gen(function* () {
   return Option.map(out, (k) => Redacted.make(k))
 })
 
+// WEBULAR_JEV=off also turns replay off, so every decision uses its baseline.
+const replayFrom = (fs: FileSystem.FileSystem) =>
+  Effect.gen(function* () {
+    const record = Option.contains(yield* setting('WEBULAR_JEV_RECORD'), '1')
+    const off = Option.contains(yield* setting('WEBULAR_JEV'), 'off')
+    return Option.map(off ? Option.none<string>() : yield* setting('WEBULAR_JEV_REPLAY'), (d) =>
+      replayStore(fs, d, record),
+    )
+  })
+
 const make = Effect.gen(function* () {
   const route = yield* resolveRoute(resolveKey)
   const key = Option.map(route, (r) => r.key)
@@ -103,13 +113,7 @@ const make = Effect.gen(function* () {
     Option.getOrElse(() => JEV_LATEST_RELEASED),
   )
   const endpoint = Option.match(route, { onNone: () => '', onSome: systemOne })
-  const record = Option.contains(yield* setting('WEBULAR_JEV_RECORD'), '1')
-  // WEBULAR_JEV=off also turns replay off, so every decision uses its baseline.
-  const off = Option.contains(yield* setting('WEBULAR_JEV'), 'off')
-  const replay = Option.map(
-    off ? Option.none<string>() : yield* setting('WEBULAR_JEV_REPLAY'),
-    (d) => replayStore(fs, d, record),
-  )
+  const replay = yield* replayFrom(fs)
   const ask = makeAsk({
     model,
     replay,
