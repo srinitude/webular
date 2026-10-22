@@ -704,3 +704,7 @@
 {"path": "docs/research.md", "sha": "8b6285906a5215573d53f422ae1ed779119e7a75076d21fb0fc1c43f8175fff4"}
 {"path": "docs/bug-classes.md", "sha": "a3897a7a05d42e2fe27abc7404bd278ba201b7e9b79b9388ff8f33ea698c321d"}
 {"path": "scripts/bench/peers/AGENTS.md", "sha": "3cef2fbfee84d131b31436172e0699074f522e4bda24c61d5095390be239d7bc"}
+{"path": "docs/benchmarks-peers.md", "sha": "68ba310d5267af7faa9cae35317c457aeb3e4c276193a7cb60c5dc09b4160753"}
+{"path": "docs/scoreboard.md", "sha": "362dc32cb397f8e0ce81e37b8443d308d3eb520056a64f5f8d862b7a6fe6f857"}
+{"path": "docs/benchmarks.md", "sha": "d07ff5eafa11e23b72f224881caf334461d35002aeb381ff2255b33f8b7e8c02"}
+{"path": "README.md", "sha": "d93867360d0283be29a6949c80a19c42d11ca153987868b62bd96c747049c8c4"}

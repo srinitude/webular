@@ -5,10 +5,10 @@ This page shows how webular scores against other web research tools on the same 
 ## Source files
 
 <!-- bench:start run -->
-All numbers come from one committed peer run, with 3 runs per task (sha256 `148e92fdca02`):
+All numbers come from one committed peer run, with 3 runs per task (sha256 `a537f5c2c897`):
 
-- [peers-2026-10-22T09-01-56-691Z.json](../bench/results/peers-2026-10-22T09-01-56-691Z.json): one row per tool, task, and run, with its status and accuracy.
-- [peers-2026-10-22T09-01-56-691Z.txt](../bench/results/peers-2026-10-22T09-01-56-691Z.txt): the harness's text report for the same run.
+- [peers-2026-10-22T12-35-03-944Z.json](../bench/results/peers-2026-10-22T12-35-03-944Z.json): one row per tool, task, and run, with its status and accuracy.
+- [peers-2026-10-22T12-35-03-944Z.txt](../bench/results/peers-2026-10-22T12-35-03-944Z.txt): the harness's text report for the same run.
 <!-- bench:end -->
 
 The results file holds no confidence intervals, no paired tests, and no p values. So this page gives none, and it calls no win or loss as proven. `mise run bench:docs` writes every number on this page from the results file. A test fails when a number here differs from that file.
@@ -16,17 +16,17 @@ The results file holds no confidence intervals, no paired tests, and no p values
 ## Short answer
 
 <!-- bench:start short -->
-- **answer:** webular scores 1.000 on 7 tasks; exa scores 1.000 on 7 tasks; parallel scores 1.000 on 7 tasks; perplexity scores 1.000 on 7 tasks; tavily scores 1.000 on 7 tasks. Source: [peers-2026-10-22T09-01-56-691Z.json](../bench/results/peers-2026-10-22T09-01-56-691Z.json).
-- **scrape:** webular scores 1.000 on 6 tasks; exa scores 1.000 on 3 tasks; firecrawl scores 0.667 on 3 tasks; jina scores 0.667 on 3 tasks; readability scores 0.333 on 3 tasks. Source: [peers-2026-10-22T09-01-56-691Z.json](../bench/results/peers-2026-10-22T09-01-56-691Z.json).
-- **search:** webular scores 1.000 on 4 tasks; exa scores 1.000 on 4 tasks; firecrawl scores 1.000 on 4 tasks; parallel scores 1.000 on 4 tasks; tavily scores 1.000 on 4 tasks; youcom scores 1.000 on 4 tasks. Source: [peers-2026-10-22T09-01-56-691Z.json](../bench/results/peers-2026-10-22T09-01-56-691Z.json).
-- **Where webular leads:** it runs offline, needs 0 keys, and costs 0 USD per call. Source: [the text report](../bench/results/peers-2026-10-22T09-01-56-691Z.txt).
+- **answer:** webular scores 1.000 on 7 tasks; exa scores 1.000 on 7 tasks; parallel scores 1.000 on 7 tasks; perplexity scores 1.000 on 7 tasks; tavily scores 1.000 on 7 tasks. Source: [peers-2026-10-22T12-35-03-944Z.json](../bench/results/peers-2026-10-22T12-35-03-944Z.json).
+- **scrape:** webular scores 1.000 on 6 tasks; exa scores 1.000 on 3 tasks; firecrawl scores 0.667 on 3 tasks; jina scores 0.667 on 3 tasks; readability scores 0.333 on 6 tasks. Source: [peers-2026-10-22T12-35-03-944Z.json](../bench/results/peers-2026-10-22T12-35-03-944Z.json).
+- **search:** webular scores 1.000 on 4 tasks; exa scores 1.000 on 4 tasks; firecrawl scores 1.000 on 4 tasks; parallel scores 1.000 on 4 tasks; tavily scores 1.000 on 4 tasks; youcom scores 1.000 on 4 tasks. Source: [peers-2026-10-22T12-35-03-944Z.json](../bench/results/peers-2026-10-22T12-35-03-944Z.json).
+- **Where webular leads:** it runs offline, needs 0 keys, and costs 0 USD per call. Source: [the text report](../bench/results/peers-2026-10-22T12-35-03-944Z.txt).
 <!-- bench:end -->
 
 ## What ran
 
 <!-- bench:start ran -->
-The run has 17 tasks: 7 answer, 6 scrape, 4 search.
-Source: [peers-2026-10-22T09-01-56-691Z.json](../bench/results/peers-2026-10-22T09-01-56-691Z.json).
+The run has 17 tasks: 7 answer, 4 search, 6 scrape.
+Source: [peers-2026-10-22T12-35-03-944Z.json](../bench/results/peers-2026-10-22T12-35-03-944Z.json).
 <!-- bench:end -->
 
 Rows per tool, from the results file:
@@ -34,37 +34,37 @@ Rows per tool, from the results file:
 <!-- bench:start status -->
 | tool | ok | error | unsupported | skipped | unrecorded |
 | --- | --- | --- | --- | --- | --- |
-| webular | 51 | 0 | 0 | 0 | 0 |
-| parallel | 20 | 0 | 18 | 13 | 0 |
-| valyu | 0 | 0 | 0 | 51 | 0 |
-| readability | 9 | 0 | 33 | 0 | 9 |
-| zyte | 0 | 0 | 0 | 51 | 0 |
-| nimble | 0 | 0 | 0 | 51 | 0 |
-| serper | 0 | 0 | 0 | 51 | 0 |
-| trafilatura | 0 | 0 | 0 | 51 | 0 |
-| curl-html2text | 0 | 0 | 0 | 51 | 0 |
-| jina | 9 | 11 | 30 | 1 | 0 |
-| browserbase | 0 | 20 | 30 | 1 | 0 |
-| anthropic-web | 0 | 0 | 0 | 51 | 0 |
-| brightdata | 0 | 0 | 0 | 51 | 0 |
-| searxng | 0 | 0 | 0 | 51 | 0 |
-| tavily | 20 | 0 | 18 | 13 | 0 |
-| openai-web-search | 0 | 0 | 0 | 51 | 0 |
-| spider | 0 | 0 | 0 | 51 | 0 |
-| scrapegraph | 0 | 0 | 0 | 102 | 0 |
-| gemini | 0 | 20 | 30 | 1 | 0 |
-| youcom | 12 | 0 | 39 | 0 | 0 |
 | serpapi | 0 | 0 | 0 | 51 | 0 |
 | linkup | 0 | 0 | 0 | 51 | 0 |
+| tavily | 20 | 0 | 18 | 13 | 0 |
+| crawl4ai | 0 | 0 | 0 | 51 | 0 |
+| brightdata | 0 | 0 | 0 | 51 | 0 |
+| apify | 0 | 0 | 0 | 51 | 0 |
+| serper | 0 | 0 | 0 | 51 | 0 |
+| tinyfish | 0 | 0 | 0 | 51 | 0 |
+| anthropic-web | 0 | 0 | 0 | 51 | 0 |
+| zyte | 0 | 0 | 0 | 51 | 0 |
+| valyu | 0 | 0 | 0 | 51 | 0 |
+| parallel | 20 | 0 | 18 | 13 | 0 |
+| firecrawl | 20 | 0 | 30 | 1 | 0 |
+| scrapegraph | 0 | 0 | 0 | 102 | 0 |
+| browserbase | 0 | 20 | 30 | 1 | 0 |
+| gemini | 0 | 20 | 30 | 1 | 0 |
+| perplexity | 20 | 0 | 30 | 1 | 0 |
+| spider | 0 | 0 | 0 | 51 | 0 |
+| readability | 18 | 0 | 33 | 0 | 0 |
+| contextdev | 0 | 0 | 0 | 51 | 0 |
+| trafilatura | 0 | 0 | 0 | 51 | 0 |
 | bing-grounding | 0 | 0 | 0 | 51 | 0 |
 | vertex-grounding | 0 | 0 | 0 | 51 | 0 |
+| nimble | 0 | 0 | 0 | 51 | 0 |
+| openai-web-search | 0 | 0 | 0 | 51 | 0 |
+| jina | 9 | 11 | 30 | 1 | 0 |
 | exa | 20 | 0 | 9 | 22 | 0 |
-| contextdev | 0 | 0 | 0 | 51 | 0 |
-| tinyfish | 0 | 0 | 0 | 51 | 0 |
-| apify | 0 | 0 | 0 | 51 | 0 |
-| perplexity | 20 | 0 | 30 | 1 | 0 |
-| firecrawl | 20 | 0 | 30 | 1 | 0 |
-| crawl4ai | 0 | 0 | 0 | 51 | 0 |
+| curl-html2text | 0 | 0 | 0 | 51 | 0 |
+| youcom | 12 | 0 | 39 | 0 | 0 |
+| searxng | 0 | 0 | 0 | 51 | 0 |
+| webular | 51 | 0 | 0 | 0 | 0 |
 <!-- bench:end -->
 
 - A tool with no `ok` rows has no score. A missing score is never a zero. A tool with no key is skipped. The harness reads keys from the environment or the Keychain, and the text report names the missing key.
@@ -84,7 +84,7 @@ Each score keeps only rows with status `ok`. It averages each task over its runs
 | scrape | exa | 3 | 1.000 |
 | scrape | firecrawl | 3 | 0.667 |
 | scrape | jina | 3 | 0.667 |
-| scrape | readability | 3 | 0.333 |
+| scrape | readability | 6 | 0.333 |
 | scrape | webular | 6 | 1.000 |
 | search | exa | 4 | 1.000 |
 | search | firecrawl | 4 | 1.000 |

@@ -4,10 +4,10 @@
     "metric": "accuracy",
     "value": 1,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T09-01-56-691Z.json",
+    "eval": "bench/results/peers-2026-10-22T12-35-03-944Z.json",
     "set": "peer dev",
     "bestRival": {
-      "tool": "firecrawl",
+      "tool": "youcom",
       "value": 1
     }
   },
@@ -48,7 +48,7 @@
     "metric": "cost per success usd",
     "value": 0,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T09-01-56-691Z.json",
+    "eval": "bench/results/peers-2026-10-22T12-35-03-944Z.json",
     "set": "peer dev"
   },
   {
@@ -70,25 +70,25 @@
   {
     "command": "search",
     "metric": "determinism",
-    "value": 0,
+    "value": 0.5,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T09-01-56-691Z.json",
+    "eval": "bench/results/peers-2026-10-22T12-35-03-944Z.json",
     "set": "peer dev"
   },
   {
     "command": "search",
     "metric": "latency p50 ms",
-    "value": 798,
+    "value": 399,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T09-01-56-691Z.json",
+    "eval": "bench/results/peers-2026-10-22T12-35-03-944Z.json",
     "set": "peer dev"
   },
   {
     "command": "search",
     "metric": "latency p95 ms",
-    "value": 1124,
+    "value": 2505,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T09-01-56-691Z.json",
+    "eval": "bench/results/peers-2026-10-22T12-35-03-944Z.json",
     "set": "peer dev"
   },
   {
@@ -96,7 +96,7 @@
     "metric": "accuracy",
     "value": 1,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T09-01-56-691Z.json",
+    "eval": "bench/results/peers-2026-10-22T12-35-03-944Z.json",
     "set": "peer dev",
     "bestRival": {
       "tool": "exa",
@@ -149,23 +149,23 @@
     "metric": "determinism",
     "value": 1,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T09-01-56-691Z.json",
+    "eval": "bench/results/peers-2026-10-22T12-35-03-944Z.json",
     "set": "peer dev"
   },
   {
     "command": "scrape",
     "metric": "latency p50 ms",
-    "value": 397,
+    "value": 374,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T09-01-56-691Z.json",
+    "eval": "bench/results/peers-2026-10-22T12-35-03-944Z.json",
     "set": "peer dev"
   },
   {
     "command": "scrape",
     "metric": "latency p95 ms",
-    "value": 4387,
+    "value": 2082,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T09-01-56-691Z.json",
+    "eval": "bench/results/peers-2026-10-22T12-35-03-944Z.json",
     "set": "peer dev"
   },
   {
@@ -409,10 +409,10 @@
     "metric": "accuracy",
     "value": 1,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T09-01-56-691Z.json",
+    "eval": "bench/results/peers-2026-10-22T12-35-03-944Z.json",
     "set": "peer dev",
     "bestRival": {
-      "tool": "parallel",
+      "tool": "tavily",
       "value": 1
     }
   },
@@ -453,7 +453,7 @@
     "metric": "cost per success usd",
     "value": 0,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T09-01-56-691Z.json",
+    "eval": "bench/results/peers-2026-10-22T12-35-03-944Z.json",
     "set": "peer dev"
   },
   {
@@ -477,23 +477,23 @@
     "metric": "determinism",
     "value": 0.7143,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T09-01-56-691Z.json",
+    "eval": "bench/results/peers-2026-10-22T12-35-03-944Z.json",
     "set": "peer dev"
   },
   {
     "command": "answer",
     "metric": "latency p50 ms",
-    "value": 1978,
+    "value": 1093,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T09-01-56-691Z.json",
+    "eval": "bench/results/peers-2026-10-22T12-35-03-944Z.json",
     "set": "peer dev"
   },
   {
     "command": "answer",
     "metric": "latency p95 ms",
-    "value": 2677,
+    "value": 2445,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T09-01-56-691Z.json",
+    "eval": "bench/results/peers-2026-10-22T12-35-03-944Z.json",
     "set": "peer dev"
   },
   {

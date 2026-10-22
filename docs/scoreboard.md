@@ -8,26 +8,26 @@ evals on fixtures. `mise run bench:scoreboard` writes this table and
 <!-- scoreboard:start -->
 | Command | Metric | Value | Best rival | Eval | Set |
 |---|---|---|---|---|---|
-| `search` | accuracy | 1.0000 | firecrawl 1.0000 | [`bench/results/peers-2026-10-22T09-01-56-691Z.json`](../bench/results/peers-2026-10-22T09-01-56-691Z.json) | peer dev |
+| `search` | accuracy | 1.0000 | youcom 1.0000 | [`bench/results/peers-2026-10-22T12-35-03-944Z.json`](../bench/results/peers-2026-10-22T12-35-03-944Z.json) | peer dev |
 | `search` | hit@1 | gap |  |  |  |
 | `search` | hit@10 | gap |  |  |  |
 | `search` | precision | gap |  |  |  |
 | `search` | recall | gap |  |  |  |
-| `search` | cost per success usd | 0.0000 |  | [`bench/results/peers-2026-10-22T09-01-56-691Z.json`](../bench/results/peers-2026-10-22T09-01-56-691Z.json) | peer dev |
+| `search` | cost per success usd | 0.0000 |  | [`bench/results/peers-2026-10-22T12-35-03-944Z.json`](../bench/results/peers-2026-10-22T12-35-03-944Z.json) | peer dev |
 | `search` | robustness | gap |  |  |  |
 | `search` | test pass rate | gap |  |  |  |
-| `search` | determinism | 0.0000 |  | [`bench/results/peers-2026-10-22T09-01-56-691Z.json`](../bench/results/peers-2026-10-22T09-01-56-691Z.json) | peer dev |
-| `search` | latency p50 ms | 798 |  | [`bench/results/peers-2026-10-22T09-01-56-691Z.json`](../bench/results/peers-2026-10-22T09-01-56-691Z.json) | peer dev |
-| `search` | latency p95 ms | 1124 |  | [`bench/results/peers-2026-10-22T09-01-56-691Z.json`](../bench/results/peers-2026-10-22T09-01-56-691Z.json) | peer dev |
-| `scrape` | accuracy | 1.0000 | exa 1.0000 | [`bench/results/peers-2026-10-22T09-01-56-691Z.json`](../bench/results/peers-2026-10-22T09-01-56-691Z.json) | peer dev |
+| `search` | determinism | 0.5000 |  | [`bench/results/peers-2026-10-22T12-35-03-944Z.json`](../bench/results/peers-2026-10-22T12-35-03-944Z.json) | peer dev |
+| `search` | latency p50 ms | 399 |  | [`bench/results/peers-2026-10-22T12-35-03-944Z.json`](../bench/results/peers-2026-10-22T12-35-03-944Z.json) | peer dev |
+| `search` | latency p95 ms | 2505 |  | [`bench/results/peers-2026-10-22T12-35-03-944Z.json`](../bench/results/peers-2026-10-22T12-35-03-944Z.json) | peer dev |
+| `scrape` | accuracy | 1.0000 | exa 1.0000 | [`bench/results/peers-2026-10-22T12-35-03-944Z.json`](../bench/results/peers-2026-10-22T12-35-03-944Z.json) | peer dev |
 | `scrape` | recall | 0.8478 (ceiling below 1) |  | [`tests/bench/scrape-accuracy.test.ts`](../tests/bench/scrape-accuracy.test.ts) | dev |
 | `scrape` | leak | 0.0000 |  | [`tests/bench/scrape-accuracy.test.ts`](../tests/bench/scrape-accuracy.test.ts) | dev |
 | `scrape` | script pages routed to browser | 1.0000 |  | [`tests/bench/scrape-accuracy.test.ts`](../tests/bench/scrape-accuracy.test.ts) | dev |
 | `scrape` | robustness | gap |  |  |  |
 | `scrape` | test pass rate | gap |  |  |  |
-| `scrape` | determinism | 1.0000 |  | [`bench/results/peers-2026-10-22T09-01-56-691Z.json`](../bench/results/peers-2026-10-22T09-01-56-691Z.json) | peer dev |
-| `scrape` | latency p50 ms | 397 |  | [`bench/results/peers-2026-10-22T09-01-56-691Z.json`](../bench/results/peers-2026-10-22T09-01-56-691Z.json) | peer dev |
-| `scrape` | latency p95 ms | 4387 |  | [`bench/results/peers-2026-10-22T09-01-56-691Z.json`](../bench/results/peers-2026-10-22T09-01-56-691Z.json) | peer dev |
+| `scrape` | determinism | 1.0000 |  | [`bench/results/peers-2026-10-22T12-35-03-944Z.json`](../bench/results/peers-2026-10-22T12-35-03-944Z.json) | peer dev |
+| `scrape` | latency p50 ms | 374 |  | [`bench/results/peers-2026-10-22T12-35-03-944Z.json`](../bench/results/peers-2026-10-22T12-35-03-944Z.json) | peer dev |
+| `scrape` | latency p95 ms | 2082 |  | [`bench/results/peers-2026-10-22T12-35-03-944Z.json`](../bench/results/peers-2026-10-22T12-35-03-944Z.json) | peer dev |
 | `crawl` | precision | 1.0000 |  | [`tests/commands/crawl-accuracy.test.ts`](../tests/commands/crawl-accuracy.test.ts) | dev |
 | `crawl` | recall | 1.0000 |  | [`tests/commands/crawl-accuracy.test.ts`](../tests/commands/crawl-accuracy.test.ts) | dev |
 | `crawl` | F1 | 1.0000 |  | [`tests/commands/crawl-accuracy.test.ts`](../tests/commands/crawl-accuracy.test.ts) | dev |
@@ -57,17 +57,17 @@ evals on fixtures. `mise run bench:scoreboard` writes this table and
 | `summarize` | determinism | gap |  |  |  |
 | `summarize` | latency p50 ms | gap |  |  |  |
 | `summarize` | latency p95 ms | gap |  |  |  |
-| `answer` | accuracy | 1.0000 | parallel 1.0000 | [`bench/results/peers-2026-10-22T09-01-56-691Z.json`](../bench/results/peers-2026-10-22T09-01-56-691Z.json) | peer dev |
+| `answer` | accuracy | 1.0000 | tavily 1.0000 | [`bench/results/peers-2026-10-22T12-35-03-944Z.json`](../bench/results/peers-2026-10-22T12-35-03-944Z.json) | peer dev |
 | `answer` | citation faithfulness | gap |  |  |  |
 | `answer` | sure-but-wrong | gap |  |  |  |
 | `answer` | no-answer rate | gap |  |  |  |
 | `answer` | Jev eval pass rate | gap |  |  |  |
-| `answer` | cost per success usd | 0.0000 |  | [`bench/results/peers-2026-10-22T09-01-56-691Z.json`](../bench/results/peers-2026-10-22T09-01-56-691Z.json) | peer dev |
+| `answer` | cost per success usd | 0.0000 |  | [`bench/results/peers-2026-10-22T12-35-03-944Z.json`](../bench/results/peers-2026-10-22T12-35-03-944Z.json) | peer dev |
 | `answer` | robustness | gap |  |  |  |
 | `answer` | test pass rate | gap |  |  |  |
-| `answer` | determinism | 0.7143 |  | [`bench/results/peers-2026-10-22T09-01-56-691Z.json`](../bench/results/peers-2026-10-22T09-01-56-691Z.json) | peer dev |
-| `answer` | latency p50 ms | 1978 |  | [`bench/results/peers-2026-10-22T09-01-56-691Z.json`](../bench/results/peers-2026-10-22T09-01-56-691Z.json) | peer dev |
-| `answer` | latency p95 ms | 2677 |  | [`bench/results/peers-2026-10-22T09-01-56-691Z.json`](../bench/results/peers-2026-10-22T09-01-56-691Z.json) | peer dev |
+| `answer` | determinism | 0.7143 |  | [`bench/results/peers-2026-10-22T12-35-03-944Z.json`](../bench/results/peers-2026-10-22T12-35-03-944Z.json) | peer dev |
+| `answer` | latency p50 ms | 1093 |  | [`bench/results/peers-2026-10-22T12-35-03-944Z.json`](../bench/results/peers-2026-10-22T12-35-03-944Z.json) | peer dev |
+| `answer` | latency p95 ms | 2445 |  | [`bench/results/peers-2026-10-22T12-35-03-944Z.json`](../bench/results/peers-2026-10-22T12-35-03-944Z.json) | peer dev |
 | `research` | accuracy | gap |  |  |  |
 | `research` | citation faithfulness | gap |  |  |  |
 | `research` | sure-but-wrong | gap |  |  |  |
