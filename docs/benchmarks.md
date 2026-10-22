@@ -11,10 +11,10 @@ Every number here comes from one saved results file, and each one links to that 
 ## Source files
 
 <!-- bench:start run -->
-All numbers on this page except the agent matrix come from one committed peer run, with 2 runs per task. Its sha256 fingerprint, which changes if the file changes, is `cf7a9cce4785`.
+All numbers on this page except the agent matrix come from one committed peer run, with 3 runs per task. Its sha256 fingerprint, which changes if the file changes, is `65bcfa20edf7`.
 
-- [Full results of the peer run from Oct. 22, 2026 at 14:51 UTC](../bench/results/peers-2026-10-22T14-51-52-746Z.json): one row per tool, task, and run, with its status and accuracy.
-- [Text report of the same run](../bench/results/peers-2026-10-22T14-51-52-746Z.txt): the harness's summary, with the per-peer tables.
+- [Full results of the peer run from Oct. 22, 2026 at 17:42 UTC](../bench/results/peers-2026-10-22T17-42-50-204Z.json): one row per tool, task, and run, with its status and accuracy.
+- [Text report of the same run](../bench/results/peers-2026-10-22T17-42-50-204Z.txt): the harness's summary, with the per-peer tables.
 <!-- bench:end -->
 
 The results file holds no confidence intervals, no paired tests, and no p values. Those are the math checks that would show whether a difference is real or just luck. So this page gives none, and it calls no win or loss proven. The command `mise run bench:docs` writes every number on this page from the results file, and a test fails when a number here differs from that file.
@@ -25,27 +25,27 @@ Each line is one job, such as search or scrape. The score is mean accuracy: the 
 
 <!-- bench:start short -->
 - **act:** webular scores 0.000 on 1 task. No rival scored this job, so there is nothing to compare.
-- **answer:** webular scores 1.000 on 7 tasks; exa scores 1.000 on 7 tasks; perplexity scores 1.000 on 7 tasks; tavily scores 1.000 on 7 tasks. Webular is even with the best rival, exa.
-- **batch:** webular scores 1.000 on 2 tasks; exa scores 1.000 on 1 task; firecrawl scores 1.000 on 1 task; tavily scores 1.000 on 1 task. Webular is even with the best rival, exa.
+- **answer:** webular scores 1.000 on 7 tasks; exa scores 1.000 on 7 tasks. Webular is even with the best rival, exa.
+- **batch:** webular scores 1.000 on 4 tasks; exa scores 1.000 on 3 tasks; firecrawl scores 1.000 on 3 tasks. Webular is even with the best rival, exa.
 - **crawl:** webular scores 0.500 on 2 tasks; firecrawl scores 0.000 on 1 task. Webular is ahead of the best rival, firecrawl.
-- **extract:** webular scores 0.667 on 3 tasks; firecrawl scores 0.833 on 3 tasks. Webular is behind the best rival, firecrawl.
-- **map:** webular scores 0.667 on 3 tasks; firecrawl scores 0.333 on 3 tasks; tavily scores 0.000 on 3 tasks. Webular is ahead of the best rival, firecrawl.
+- **extract:** webular scores 1.000 on 3 tasks; firecrawl scores 1.000 on 3 tasks. Webular is even with the best rival, firecrawl.
+- **map:** webular scores 0.667 on 3 tasks; firecrawl scores 0.333 on 3 tasks. Webular is ahead of the best rival, firecrawl.
 - **media:** webular scores 1.000 on 2 tasks; firecrawl scores 1.000 on 1 task. Webular is even with the best rival, firecrawl.
-- **monitor:** webular scores 0.500 on 1 task. No rival scored this job, so there is nothing to compare.
+- **monitor:** webular scores 0.333 on 1 task. No rival scored this job, so there is nothing to compare.
 - **parse:** webular scores 1.000 on 1 task; firecrawl scores 1.000 on 1 task. Webular is even with the best rival, firecrawl.
-- **research:** webular scores 0.667 on 3 tasks; exa scores 1.000 on 3 tasks; perplexity scores 1.000 on 3 tasks. Webular is behind the best rival, exa.
-- **scrape:** webular scores 1.000 on 6 tasks; exa scores 1.000 on 3 tasks; firecrawl scores 0.667 on 3 tasks; readability scores 0.333 on 3 tasks. Webular is even with the best rival, exa.
-- **search:** webular scores 1.000 on 4 tasks; exa scores 1.000 on 4 tasks; firecrawl scores 1.000 on 4 tasks; tavily scores 1.000 on 4 tasks. Webular is even with the best rival, exa.
+- **research:** webular scores 1.000 on 3 tasks; exa scores 1.000 on 3 tasks. Webular is even with the best rival, exa.
+- **scrape:** webular scores 1.000 on 6 tasks; exa scores 1.000 on 2 tasks; firecrawl scores 0.667 on 3 tasks; readability scores 0.333 on 3 tasks. Webular is even with the best rival, exa.
+- **search:** webular scores 1.000 on 4 tasks; exa scores 1.000 on 4 tasks; firecrawl scores 1.000 on 4 tasks. Webular is even with the best rival, exa.
 - **summarize:** webular scores 0.500 on 2 tasks; exa scores 0.000 on 1 task. Webular is ahead of the best rival, exa.
-- **Where webular leads:** it runs offline, needs 0 keys, and costs 0 USD per call. Source: [the text report](../bench/results/peers-2026-10-22T14-51-52-746Z.txt).
-Source for every job score above: [the peer run from Oct. 22, 2026 at 14:51 UTC](../bench/results/peers-2026-10-22T14-51-52-746Z.json).
+- **Where webular leads:** it runs offline, needs 0 keys, and costs 0 USD per call. Source: [the text report](../bench/results/peers-2026-10-22T17-42-50-204Z.txt).
+Source for every job score above: [the peer run from Oct. 22, 2026 at 17:42 UTC](../bench/results/peers-2026-10-22T17-42-50-204Z.json).
 <!-- bench:end -->
 
 ## What ran
 
 <!-- bench:start ran -->
-The run has 37 tasks: 2 batch, 2 crawl, 7 answer, 3 extract, 6 scrape, 2 media, 4 search, 1 monitor, 3 research, 2 summarize, 1 act, 1 parse, 3 map.
-Source: [the peer run from Oct. 22, 2026 at 14:51 UTC](../bench/results/peers-2026-10-22T14-51-52-746Z.json).
+The run has 39 tasks: 4 search, 6 scrape, 3 extract, 4 batch, 7 answer, 2 crawl, 3 map, 2 media, 2 summarize, 3 research, 1 act, 1 monitor, 1 parse.
+Source: [the peer run from Oct. 22, 2026 at 17:42 UTC](../bench/results/peers-2026-10-22T17-42-50-204Z.json).
 <!-- bench:end -->
 
 Each run of each task makes one row per tool. The table counts each tool's rows by status: `ok` means it answered and was graded, `error` means the call failed, `unsupported` means the tool cannot do that job, `skipped` means it was not run, most often for lack of a key, and `unrecorded` means no saved answer exists to replay.
@@ -53,37 +53,37 @@ Each run of each task makes one row per tool. The table counts each tool's rows 
 <!-- bench:start status -->
 | tool | ok | error | unsupported | skipped | unrecorded |
 | --- | --- | --- | --- | --- | --- |
-| vertex-grounding | 0 | 0 | 0 | 74 | 0 |
-| tinyfish | 0 | 0 | 0 | 74 | 0 |
-| scrapegraph | 0 | 0 | 0 | 148 | 0 |
-| linkup | 0 | 0 | 0 | 74 | 0 |
-| serpapi | 0 | 0 | 0 | 74 | 0 |
-| openai-web-search | 0 | 0 | 0 | 74 | 0 |
-| gemini | 0 | 0 | 60 | 0 | 14 |
-| spider | 0 | 0 | 0 | 74 | 0 |
-| jina | 0 | 0 | 60 | 0 | 14 |
-| crawl4ai | 0 | 0 | 0 | 74 | 0 |
-| youcom | 0 | 0 | 66 | 0 | 8 |
-| apify | 0 | 0 | 0 | 74 | 0 |
-| readability | 6 | 0 | 62 | 0 | 6 |
-| brightdata | 0 | 0 | 0 | 74 | 0 |
-| browserbase | 0 | 0 | 60 | 0 | 14 |
-| curl-html2text | 0 | 0 | 0 | 74 | 0 |
-| tavily | 30 | 2 | 42 | 0 | 0 |
-| exa | 38 | 0 | 36 | 0 | 0 |
-| trafilatura | 0 | 0 | 0 | 74 | 0 |
-| firecrawl | 34 | 0 | 40 | 0 | 0 |
-| contextdev | 0 | 0 | 0 | 74 | 0 |
-| valyu | 0 | 0 | 0 | 74 | 0 |
-| zyte | 0 | 0 | 0 | 74 | 0 |
-| anthropic-web | 0 | 0 | 0 | 74 | 0 |
-| searxng | 0 | 0 | 0 | 74 | 0 |
-| bing-grounding | 0 | 0 | 0 | 74 | 0 |
-| parallel | 0 | 0 | 52 | 0 | 22 |
-| perplexity | 20 | 0 | 54 | 0 | 0 |
-| nimble | 0 | 0 | 0 | 74 | 0 |
-| serper | 0 | 0 | 0 | 74 | 0 |
-| webular | 74 | 0 | 0 | 0 | 0 |
+| webular | 117 | 0 | 0 | 0 | 0 |
+| exa | 20 | 0 | 54 | 43 | 0 |
+| jina | 0 | 0 | 96 | 0 | 21 |
+| contextdev | 0 | 0 | 0 | 117 | 0 |
+| perplexity | 0 | 0 | 87 | 0 | 30 |
+| openai-web-search | 0 | 0 | 0 | 117 | 0 |
+| zyte | 0 | 0 | 0 | 117 | 0 |
+| bing-grounding | 0 | 0 | 0 | 117 | 0 |
+| valyu | 0 | 0 | 0 | 117 | 0 |
+| gemini | 0 | 0 | 96 | 0 | 21 |
+| apify | 0 | 0 | 0 | 117 | 0 |
+| scrapegraph | 0 | 0 | 0 | 234 | 0 |
+| firecrawl | 20 | 0 | 60 | 37 | 0 |
+| serpapi | 0 | 0 | 0 | 117 | 0 |
+| curl-html2text | 0 | 0 | 0 | 117 | 0 |
+| browserbase | 0 | 0 | 96 | 0 | 21 |
+| tinyfish | 0 | 0 | 0 | 117 | 0 |
+| vertex-grounding | 0 | 0 | 0 | 117 | 0 |
+| searxng | 0 | 0 | 0 | 117 | 0 |
+| linkup | 0 | 0 | 0 | 117 | 0 |
+| nimble | 0 | 0 | 0 | 117 | 0 |
+| youcom | 0 | 0 | 105 | 0 | 12 |
+| serper | 0 | 0 | 0 | 117 | 0 |
+| crawl4ai | 0 | 0 | 0 | 117 | 0 |
+| tavily | 0 | 0 | 63 | 0 | 54 |
+| readability | 9 | 0 | 99 | 0 | 9 |
+| parallel | 0 | 0 | 84 | 0 | 33 |
+| brightdata | 0 | 0 | 0 | 117 | 0 |
+| spider | 0 | 0 | 0 | 117 | 0 |
+| trafilatura | 0 | 0 | 0 | 117 | 0 |
+| anthropic-web | 0 | 0 | 0 | 117 | 0 |
 <!-- bench:end -->
 
 - A tool with no `ok` rows has no score. A missing score is never a zero. A tool with no key is skipped. The test program, called the harness, reads keys from the environment or the macOS Keychain, and the text report names the missing key.
@@ -97,35 +97,29 @@ Each score keeps only rows with status `ok`. It averages each task over its runs
 | --- | --- | --- | --- |
 | act | webular | 1 | 0.000 |
 | answer | exa | 7 | 1.000 |
-| answer | perplexity | 7 | 1.000 |
-| answer | tavily | 7 | 1.000 |
 | answer | webular | 7 | 1.000 |
-| batch | exa | 1 | 1.000 |
-| batch | firecrawl | 1 | 1.000 |
-| batch | tavily | 1 | 1.000 |
-| batch | webular | 2 | 1.000 |
+| batch | exa | 3 | 1.000 |
+| batch | firecrawl | 3 | 1.000 |
+| batch | webular | 4 | 1.000 |
 | crawl | firecrawl | 1 | 0.000 |
 | crawl | webular | 2 | 0.500 |
-| extract | firecrawl | 3 | 0.833 |
-| extract | webular | 3 | 0.667 |
+| extract | firecrawl | 3 | 1.000 |
+| extract | webular | 3 | 1.000 |
 | map | firecrawl | 3 | 0.333 |
-| map | tavily | 3 | 0.000 |
 | map | webular | 3 | 0.667 |
 | media | firecrawl | 1 | 1.000 |
 | media | webular | 2 | 1.000 |
-| monitor | webular | 1 | 0.500 |
+| monitor | webular | 1 | 0.333 |
 | parse | firecrawl | 1 | 1.000 |
 | parse | webular | 1 | 1.000 |
 | research | exa | 3 | 1.000 |
-| research | perplexity | 3 | 1.000 |
-| research | webular | 3 | 0.667 |
-| scrape | exa | 3 | 1.000 |
+| research | webular | 3 | 1.000 |
+| scrape | exa | 2 | 1.000 |
 | scrape | firecrawl | 3 | 0.667 |
 | scrape | readability | 3 | 0.333 |
 | scrape | webular | 6 | 1.000 |
 | search | exa | 4 | 1.000 |
 | search | firecrawl | 4 | 1.000 |
-| search | tavily | 4 | 1.000 |
 | search | webular | 4 | 1.000 |
 | summarize | exa | 1 | 0.000 |
 | summarize | webular | 2 | 0.500 |
