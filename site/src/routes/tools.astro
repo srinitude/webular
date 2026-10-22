@@ -1,0 +1,62 @@
+---
+import Base from '../Base.astro'
+import { Content } from '../content/tools.md'
+import DocMeta from '../DocMeta.astro'
+import tools from '../generated/tools.json'
+
+const jobs: Record<string, string[]> = {
+  Find: ['search', 'map', 'feed'],
+  Read: ['scrape', 'crawl', 'batch', 'parse', 'media'],
+  Think: ['extract', 'summarize', 'answer', 'research'],
+  'Watch and act': ['monitor', 'act'],
+  'Tools and setup': ['doctor', 'mcp', 'tasks', 'diagram', 'audit', 'jev'],
+  'Flow machines': ['machine.next'],
+  'Low-level HTML': ['web.fetch', 'web.links', 'web.markdown', 'web.readability'],
+}
+// Tool names may use "." or "_" between parts; compare with "." only.
+const key = (name: string) => name.replace(/_/g, '.')
+const groups = Object.entries(jobs).map(
+  ([job, names]) => [job, tools.filter((tool) => names.includes(key(tool.name)))] as const,
+)
+const listed = new Set(groups.flatMap(([, rows]) => rows.map((tool) => tool.name)))
+const other = tools.filter((tool) => !listed.has(tool.name))
+if (other.length) groups.push(['Other', other])
+const flag = (value?: boolean) => (value === undefined ? 'not set' : value ? 'yes' : 'no')
+---
+
+<Base
+  title="MCP tools"
+  description="webular mcp has 24 tools. The table marks which ones only read and which ones reach the web."
+  doc
+>
+  <article class="doc">
+    <div class="doc-body"><Content /></div>
+    <DocMeta slug="tools" />
+    <table class="cards-table" style="order: 2">
+      <caption class="muted">The 24 MCP tools, grouped by job</caption>
+      <thead>
+        <tr>
+          <th scope="col">Tool</th>
+          <th scope="col">Use it when</th>
+          <th scope="col">Read-only</th>
+          <th scope="col">Reaches the web</th>
+          <th scope="col">Destructive</th>
+        </tr>
+      </thead>
+      {groups.filter(([, rows]) => rows.length).map(([job, rows]) => (
+        <tbody>
+          <tr><th scope="colgroup" colspan="5">{job}</th></tr>
+          {rows.map((tool) => (
+            <tr>
+              <th scope="row"><code>{tool.name}</code></th>
+              <td data-label="Use it when">{tool.description}</td>
+              <td data-label="Read-only">{flag(tool.annotations?.readOnlyHint)}</td>
+              <td data-label="Reaches the web">{flag(tool.annotations?.openWorldHint)}</td>
+              <td data-label="Destructive">{flag(tool.annotations?.destructiveHint)}</td>
+            </tr>
+          ))}
+        </tbody>
+      ))}
+    </table>
+  </article>
+</Base>

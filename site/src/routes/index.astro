@@ -1,0 +1,182 @@
+---
+import Base from '../Base.astro'
+import CommandGroups from '../CommandGroups.astro'
+import InstallBlock from '../InstallBlock.astro'
+
+const release = import.meta.env.PUBLIC_RELEASE_VERSION ?? '0.3.0'
+const description =
+  'Search, scrape, crawl, and answer with sources, from your own machine. A CLI and MCP server with one optional key: Jev.'
+const jsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'webular',
+  description,
+  applicationCategory: 'DeveloperApplication',
+  operatingSystem: 'macOS, Linux, Windows',
+  license: 'https://www.apache.org/licenses/LICENSE-2.0',
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  downloadUrl: 'https://webular.dev/install.sh',
+  installUrl: 'https://webular.dev/install',
+  softwareVersion: release,
+  author: { '@type': 'Person', name: 'Kiren Srinivasan' },
+  sameAs: ['https://github.com/srinitude/webular', 'https://www.npmjs.com/package/webular'],
+})
+const search = `$ webular search "bun javascript runtime" --limit 2
+1. Bun: Fast JavaScript runtime, bundler, transpiler and package manager
+   https://github.com/Jarred-Sumner/bun
+   https://news.ycombinator.com/item?id=31993622
+2. Bun: Fast JavaScript runtime, transpiler, and NPM client written in Zig
+   https://bun.sh/?launch
+   https://news.ycombinator.com/item?id=31993429`
+const scrape = `$ webular scrape https://example.com
+# Example Domain
+
+This domain is for use in documentation examples without needing permission. This is not a service; avoid relying on it for testing and monitoring purposes.`
+const summarize = `$ webular summarize --text "Bun is a fast runtime. It runs TypeScript." --sentences 1 --json
+{"figures":[],"picks":[{"end":22,"index":0,"source_url":null,"start":0,"text":"Bun is a fast runtime."}],"sentences":["Bun is a fast runtime."],"source_url":null,"summary":"Bun is a fast runtime."}`
+const askAgent =
+  "Install webular with `curl --proto '=https' --tlsv1.2 -fsSL https://webular.dev/install.sh | sh`. Ask me before you run it. Then add it as an MCP server that runs `webular mcp`. Read https://webular.dev/llms.txt first."
+const keychain = `security add-generic-password -a "$USER" -s typesafe-ai-api-key -w`
+const readKey = 'read -rs TYPESAFE_API_KEY && export TYPESAFE_API_KEY'
+const pin = `curl --proto '=https' --tlsv1.2 -fsSL https://webular.dev/v${release}/install.sh | sh`
+const rivals = [
+  ['webular', 'None (Jev is optional)', 'Your machine', 'Scored'],
+  ['Exa', 'Yes', 'Hosted API with its own search index', 'Scored'],
+  ['Firecrawl', 'Yes', 'Hosted API', 'Scored'],
+  ['Tavily', 'Yes', 'Hosted API', 'No scored calls; its calls had no recorded answers to grade'],
+  [
+    'Perplexity',
+    'Yes',
+    'Hosted API',
+    'No scored calls; its calls were unsupported or had no recorded answers',
+  ],
+]
+const docCards = [
+  ['Install', '/install'],
+  ['Commands', '/commands'],
+  ['MCP setup', '/install#agents'],
+  ['For agents: llms.txt', '/llms.txt'],
+]
+---
+
+<Base title="webular: search, scrape, crawl, and answer with sources" description={description} home>
+  <script is:inline type="application/ld+json" slot="head" set:html={jsonLd} />
+
+  <section class="hero">
+    <div>
+      <h1>Search, scrape, crawl, and answer with sources.</h1>
+      <p>From your own machine. A CLI and MCP server with one optional key: <a href="/keys">Jev</a>.</p>
+    </div>
+    <InstallBlock firstId="hero-command" />
+  </section>
+
+  <section class="section" aria-labelledby="demo">
+    <h2 id="demo">That search ran with no key.</h2>
+    <pre tabindex="0"><code>{search}</code></pre>
+    <h3>Scrape</h3>
+    <pre tabindex="0"><code>{scrape}</code></pre>
+    <h3>Summarize</h3>
+    <pre tabindex="0"><code>{summarize}</code></pre>
+    <p>Add <code>--json</code> to any command for the same JSON shape every time.</p>
+  </section>
+
+  <section class="section" aria-labelledby="data">
+    <h2 id="data">Your machine, your data</h2>
+    <ul>
+      <li>No paid API. Every feature runs on open-source parts, on your machine, with no webular server in the middle.</li>
+      <li>Your searches go straight from your machine to DuckDuckGo, or to Wikipedia, Hacker News, or arXiv when you pick one. Jev calls go to TypeSafe only when you set a key.</li>
+      <li>One optional key. Jev makes the judgment calls sharper. Without it, each one uses a rule-based fallback.</li>
+      <li>Polite by default. It follows robots.txt unless you opt out for one page.</li>
+    </ul>
+  </section>
+
+  <section class="section" aria-labelledby="agent">
+    <h2 id="agent">Give your agent the web</h2>
+    <p><code>webular mcp</code> serves 24 tools over stdio. Install webular first, so <code>webular</code> is on your PATH.</p>
+    <h3>Ask your agent</h3>
+    <pre tabindex="0"><code>{askAgent}</code></pre>
+    <h3>Claude Code</h3>
+    <pre tabindex="0"><code>claude mcp add webular -- webular mcp</code></pre>
+    <p>The plugin bundles an MCP server and four skills: research, interview, plain language, and Markdown. The plugin's own server runs with Bun and has the 19 command tools. <code>webular mcp</code> has those 19 plus five more, for 24.</p>
+    <p><a href="/install#agents">Set up your client</a> · <a href="/tools">See all 24 tools</a></p>
+  </section>
+
+  <section class="section" aria-labelledby="commands">
+    <h2 id="commands">One tool, twenty commands</h2>
+    <CommandGroups />
+    <p><a href="/commands">Every command and flag</a></p>
+  </section>
+
+  <section class="section" aria-labelledby="keys">
+    <h2 id="keys">No key needed</h2>
+    <p>Every command runs with no key. Add a Jev key to make the judgment calls sharper.</p>
+    <p>Set <code>TYPESAFE_API_KEY</code>. On macOS, webular also reads the Keychain item <code>typesafe-ai-api-key</code>. <code>WEBULAR_JEV=off</code> turns Jev off.</p>
+    <h3>macOS Keychain</h3>
+    <pre tabindex="0"><code>{keychain}</code></pre>
+    <h3>bash or zsh, this shell only</h3>
+    <pre tabindex="0"><code>{readKey}</code></pre>
+    <p><a href="/keys">fish, PowerShell, cmd, and WSL</a></p>
+  </section>
+
+  <section class="section" aria-labelledby="compare">
+    <h2 id="compare">How it compares</h2>
+    <table class="cards-table">
+      <caption class="muted">Five tools, in the committed peer run</caption>
+      <thead>
+        <tr><th scope="col">Tool</th><th scope="col">Key needed</th><th scope="col">Runs</th><th scope="col">Peer run</th></tr>
+      </thead>
+      <tbody>
+        {rivals.map(([tool, key, runs, run]) => (
+          <tr>
+            <th scope="row">{tool}</th>
+            <td data-label="Key needed">{key}</td>
+            <td data-label="Runs">{runs}</td>
+            <td data-label="Peer run">{run}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <p>In the peer run of Oct. 22, 2026, all three scored tools tied on search: webular, Exa, and Firecrawl each scored 1.000 on 4 tasks. A score of 1 means every answer was right. The task sets are small, so treat a difference as a sign, not as proof.</p>
+    <p>Where others lead: Exa, Brave, and Google run their own search indexes, and Exa reports citation precision, which this run does not measure. Brave and Google are not in this table.</p>
+    <p>Agent tests: 18 of 75 scored. Each one is one tool used by one AI agent model, across 3 models. The rest were skipped for lack of a key or an agent adapter.</p>
+    <p><a href="/benchmarks">Every score and the method</a></p>
+  </section>
+
+  <section class="section" aria-labelledby="other">
+    <h2 id="other">Other ways to install</h2>
+    <p>npm, Bun, or pnpm work on every supported system.</p>
+    <pre tabindex="0"><code>npm i -g webular
+bun add -g webular
+pnpm add -g webular</code></pre>
+    <p>From source, with Bun:</p>
+    <pre tabindex="0"><code>git clone https://github.com/srinitude/webular.git
+cd webular
+bun install --frozen-lockfile
+bun bin/webular.ts --help</code></pre>
+    <p>Prebuilt for macOS (arm64, x64), Linux (x64 and arm64, glibc or musl), and Windows (x64, arm64). Anything else: run from source.</p>
+    <p>Pin a release:</p>
+    <pre tabindex="0"><code>{pin}</code></pre>
+    <p><a href="/install">Every channel, upgrade, and uninstall</a></p>
+  </section>
+
+  <section class="section" aria-labelledby="docs">
+    <h2 id="docs">Docs</h2>
+    <ul class="cards card-grid docs-cards">
+      {docCards.map(([label, href]) => <li class="card"><a href={href}>{label}</a></li>)}
+    </ul>
+    <p>Every page here has a Markdown copy. Add <code>.md</code> to the address.</p>
+  </section>
+
+  <section class="section" aria-labelledby="check">
+    <h2 id="check">Check what you run</h2>
+    <p>The install script checks the download against SHA256SUMS. Set <code>WEBULAR_VERIFY_ATTESTATION=1</code> with <code>gh</code> installed to also check the build attestation.</p>
+    <p><code>webular mcp</code> and the plugin run in agent mode. Agent mode blocks requests to your own network and keeps file writes inside one folder.</p>
+    <p>Found a flaw? Report it privately on GitHub.</p>
+    <p><a href="/security">Security details</a></p>
+  </section>
+
+  <section class="section" aria-labelledby="again">
+    <h2 id="again">Install webular</h2>
+    <InstallBlock />
+  </section>
+</Base>

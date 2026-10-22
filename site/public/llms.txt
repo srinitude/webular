@@ -1,0 +1,33 @@
+# webular
+
+> Search, scrape, crawl, and answer with sources, from your own machine. A CLI and MCP server with one optional key: Jev.
+
+webular runs every command with no key. `webular mcp` serves 24 MCP tools over stdio. With `--json`, every command prints the same JSON shape.
+
+## Install
+
+- [Install webular](https://webular.dev/install.md): the one-line install, npm, Bun, pnpm, from source, platforms, upgrade, and uninstall.
+- [Keys](https://webular.dev/keys.md): no key needed; set the optional Jev key per OS and shell.
+- [Security](https://webular.dev/security.md): verifying a download, what the tools reach, and reporting a flaw.
+
+## MCP tools
+
+- [Add webular to your agent](https://webular.dev/install.md#agents): the command or config block for each MCP client.
+- [MCP tools](https://webular.dev/tools.md): all 24 tools, grouped by job, read-only or not.
+- [Use webular from your agent](https://webular.dev/agents.md): the plugin, results and paging, and agent-mode safety.
+
+## Skills
+
+- [Skills](https://webular.dev/agents.md#skills): webular-research, webular-interview, human-language, and rich-and-native-markdown.
+
+## CLI
+
+- [Commands](https://webular.dev/commands.md): every command with an example, global options, and exit codes.
+
+## Optional
+
+- [Benchmarks](https://webular.dev/benchmarks.md): the committed peer run, losses included.
+- [Privacy](https://webular.dev/privacy.md): what webular sends where.
+- [Support](https://webular.dev/support.md): where to ask, report a bug, or report a flaw.
+- [Docs index](https://webular.dev/docs.md): every repo doc.
+- [Full text](https://webular.dev/llms-full.txt): every page above in one file.

@@ -1,0 +1,3 @@
+[install]
+# Minimum package version age, in seconds (one day), the same rule as the repo root.
+minimumReleaseAge = 86400

@@ -1,0 +1,11 @@
+# webular for agents
+
+- Install: `curl --proto '=https' --tlsv1.2 -fsSL https://webular.dev/install.sh | sh`. Windows: `irm https://webular.dev/install.ps1 | iex`. Or `npm i -g webular`.
+- MCP: run `webular mcp` over stdio. No hosted URL exists.
+- Use `--json` for a stable shape. Exit codes: 0 ok, 1 failure, 2 usage error, 3 some batch items failed, 127 a command could not start, 128 + n stopped by signal n (130 for SIGINT, 143 for SIGTERM).
+- Run `webular doctor --json` first when something fails. It names each missing tool.
+- Results over 8,000 characters come back with a `cursor`. Pass it to get the next part.
+- `webular mcp` runs in agent mode: it blocks requests to your own network and writes files only inside the start folder. Ask the user before setting `WEBULAR_ALLOW_PRIVATE=1` or `WEBULAR_SANDBOX=0`.
+- robots.txt is honored. Use `scrape --ignore-robots` only when the user asks.
+- The one optional key is `TYPESAFE_API_KEY`. Never print it or write it to a file.
+- Index: https://webular.dev/llms.txt

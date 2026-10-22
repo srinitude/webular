@@ -1,0 +1,115 @@
+// Runs after `astro build`: writes every machine file into dist/ from its one
+// source, so nothing here is copied by hand. Twins come from src/content, the
+// same Markdown each page renders; server.json comes from the repo root.
+import { BunRuntime, BunServices } from '@effect/platform-bun'
+import { Console, Effect, FileSystem, Schema } from 'effect'
+import { runProc } from '../../src/core/proc.ts'
+
+const SITE = new URL('../', import.meta.url).pathname
+const DIST = `${SITE}dist/`
+const ORIGIN = 'https://webular.dev'
+const INDEX_LINE = `> Docs index for agents: ${ORIGIN}/llms.txt`
+// The order of /llms.txt; index is the home page twin.
+const SLUGS = [
+  'install',
+  'keys',
+  'security',
+  'agents',
+  'tools',
+  'commands',
+  'benchmarks',
+  'privacy',
+  'support',
+  'docs',
+] as const
+
+const Server = Schema.fromJsonString(
+  Schema.Struct({ name: Schema.String, description: Schema.String, version: Schema.String }),
+)
+const Tools = Schema.fromJsonString(Schema.Array(Schema.Unknown))
+
+const twins = Effect.gen(function* () {
+  const fs = yield* FileSystem.FileSystem
+  const llms = yield* fs.readFileString(`${SITE}public/llms.txt`)
+  const pages = yield* Effect.forEach(
+    SLUGS,
+    (slug) =>
+      Effect.map(
+        fs.readFileString(`${SITE}src/content/${slug}.md`),
+        (body) => [slug, body] as const,
+      ),
+    { concurrency: 4 },
+  )
+  const all = [['index', llms] as const, ...pages]
+  yield* Effect.forEach(
+    all,
+    ([slug, body]) => fs.writeFileString(`${DIST}${slug}.md`, `${INDEX_LINE}\n\n${body}`),
+    { concurrency: 4, discard: true },
+  )
+  const full = all.map(([slug, body]) => `# ${ORIGIN}/${slug}.md\n\n${body}`).join('\n')
+  yield* fs.writeFileString(`${DIST}llms-full.txt`, full)
+  return all.map(([slug]) => slug)
+})
+
+const sitemap = (slugs: ReadonlyArray<string>, day: string) => {
+  const urls = slugs.flatMap((slug) => [slug === 'index' ? '/' : `/${slug}`, `/${slug}.md`])
+  const rows = urls.map((u) => `  <url><loc>${ORIGIN}${u}</loc><lastmod>${day}</lastmod></url>`)
+  return [
+    '<?xml version="1.0" encoding="UTF-8"?>',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ...rows,
+    '</urlset>',
+    '',
+  ].join('\n')
+}
+
+// RFC 9116 requires Expires: the build commit date plus 365 days.
+const securityTxt = (date: Date) =>
+  [
+    'Contact: https://github.com/srinitude/webular/security/advisories/new',
+    'Policy: https://github.com/srinitude/webular/blob/main/SECURITY.md',
+    `Canonical: ${ORIGIN}/.well-known/security.txt`,
+    'Preferred-Languages: en',
+    `Expires: ${new Date(date.getTime() + 365 * 86_400_000).toISOString()}`,
+    '',
+  ].join('\n')
+
+const serverFiles = Effect.gen(function* () {
+  const fs = yield* FileSystem.FileSystem
+  const serverText = yield* fs.readFileString(`${SITE}../server.json`)
+  const toolsText = yield* fs.readFileString(`${SITE}src/generated/tools.json`)
+  const server = yield* Schema.decodeUnknownEffect(Server)(serverText)
+  const tools = yield* Schema.decodeUnknownEffect(Tools)(toolsText)
+  yield* fs.writeFileString(`${DIST}server.json`, serverText)
+  yield* fs.writeFileString(`${DIST}tools.json`, toolsText)
+  yield* fs.makeDirectory(`${DIST}.well-known/mcp`, { recursive: true })
+  // ponytail: field names follow server.json; check them against SEP-2127 before launch (GATED in the plan).
+  const card = {
+    name: server.name,
+    title: 'webular',
+    description: server.description,
+    version: server.version,
+    transport: { type: 'stdio', command: 'webular', args: ['mcp'] },
+    tools,
+  }
+  const path = `${DIST}.well-known/mcp/server-card.json`
+  yield* fs.writeFileString(path, `${JSON.stringify(card, null, 2)}\n`)
+})
+
+const program = Effect.gen(function* () {
+  const fs = yield* FileSystem.FileSystem
+  const log = yield* runProc(['git', 'log', '-1', '--format=%cI'], { timeoutMs: 10_000, cwd: SITE })
+  const date = new Date(log.stdout.trim())
+  const slugs = yield* twins
+  yield* serverFiles
+  yield* fs.copyFile(`${SITE}scripts/agents.txt`, `${DIST}AGENTS.md`)
+  yield* fs.writeFileString(`${DIST}sitemap.xml`, sitemap(slugs, date.toISOString().slice(0, 10)))
+  yield* fs.writeFileString(`${DIST}.well-known/security.txt`, securityTxt(date))
+  yield* Console.log(`machine files: ${slugs.length} twins, llms-full.txt, sitemap, cards`)
+})
+
+program.pipe(
+  Effect.tapError((e) => Console.error(`site machine files failed: ${String(e)}`)),
+  Effect.provide(BunServices.layer),
+  BunRuntime.runMain,
+)

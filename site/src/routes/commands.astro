@@ -1,0 +1,12 @@
+---
+import Base from '../Base.astro'
+import { Content } from '../content/commands.md'
+import DocMeta from '../DocMeta.astro'
+---
+
+<Base title="Commands" description="Every webular command with a runnable example, plus global options and exit codes." doc>
+  <article class="doc">
+    <div class="doc-body"><Content /></div>
+    <DocMeta slug="commands" />
+  </article>
+</Base>

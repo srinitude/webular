@@ -1,0 +1,14 @@
+{
+  "name": "webular-dev-site",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.23.4"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.14.0",
+    "astro": "7.4.2",
+    "playwright": "1.64.1",
+    "wrangler": "4.151.3"
+  }
+}

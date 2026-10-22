@@ -1,0 +1,20 @@
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+/*.md
+  Content-Type: text/markdown; charset=utf-8
+
+/llms.txt
+  Content-Type: text/plain; charset=utf-8
+
+/llms-full.txt
+  Content-Type: text/plain; charset=utf-8
+
+/AGENTS.md
+  Content-Type: text/markdown; charset=utf-8
+
+/*.json
+  Access-Control-Allow-Origin: *

@@ -1,0 +1,12 @@
+---
+import Base from '../Base.astro'
+import { Content } from '../content/privacy.md'
+import DocMeta from '../DocMeta.astro'
+---
+
+<Base title="Privacy" description="webular runs on your machine. It has no webular server, so your searches and pages never pass through us." doc>
+  <article class="doc">
+    <div class="doc-body"><Content /></div>
+    <DocMeta slug="privacy" />
+  </article>
+</Base>

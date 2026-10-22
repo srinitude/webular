@@ -1,0 +1,9 @@
+{
+  "name": "webular",
+  "compatibility_date": "2026-10-22",
+  "assets": { "directory": "./dist", "not_found_handling": "404-page" },
+  "routes": [
+    { "pattern": "webular.dev", "custom_domain": true },
+    { "pattern": "www.webular.dev", "custom_domain": true }
+  ]
+}

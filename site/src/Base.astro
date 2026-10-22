@@ -1,0 +1,100 @@
+---
+import './tokens.css'
+import './site.css'
+
+interface Props {
+  title: string
+  description: string
+  home?: boolean
+  doc?: boolean
+}
+const { title, description, home = false, doc = false } = Astro.props
+
+const sha = import.meta.env.PUBLIC_BUILD_SHA ?? 'dev'
+const date = import.meta.env.PUBLIC_BUILD_DATE ?? 'dev'
+const github = 'https://github.com/srinitude/webular'
+const pages = [
+  ['Install', '/install'],
+  ['Agents', '/agents'],
+  ['Tools', '/tools'],
+  ['Commands', '/commands'],
+  ['Keys', '/keys'],
+  ['Benchmarks', '/benchmarks'],
+  ['Security', '/security'],
+  ['Docs', '/docs'],
+]
+const current = Astro.url.pathname.replace(/\/$/, '')
+const footerLinks = [
+  ['GitHub', github],
+  ['Docs', '/docs'],
+  ['Install', '/install'],
+  ['Agents', '/agents'],
+  ['Tools', '/tools'],
+  ['Benchmarks', '/benchmarks'],
+  ['Security', '/security'],
+  ['Privacy', '/privacy'],
+  ['Support', '/support'],
+  ['Releases', `${github}/releases`],
+  ['llms.txt', '/llms.txt'],
+]
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip-link" href={home ? "#hero-command" : "#content"}>{home ? "Skip to install" : "Skip to content"}</a>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="wordmark" href="/">webular</a>
+        <div class="header-end">
+          <a class="nav-768" href="/install">Install</a>
+          <a class="nav-768" href="/agents">Agents</a>
+          <a class="nav-1024" href="/tools">Tools</a>
+          <a class="nav-1024" href="/commands">Commands</a>
+          <a class="nav-1024" href="/benchmarks">Benchmarks</a>
+          <a class="nav-600" href="/docs">Docs</a>
+          <a class="nav-600" href={github}>GitHub</a>
+          <details class="menu">
+            <summary>Menu</summary>
+            <nav aria-label="Menu">
+              {pages.map(([label, href]) => <a href={href}>{label}</a>)}
+              <a href={github}>GitHub</a>
+            </nav>
+          </details>
+        </div>
+      </div>
+    </header>
+    <main id="content">
+      <div class:list={["wrap", { "has-sidebar": doc }]}>
+        {doc && (
+          <aside class="sidebar">
+            <nav aria-label="Pages">
+              <ul>
+                {pages.map(([label, href]) => (
+                  <li><a href={href} aria-current={href === current ? "page" : undefined}>{label}</a></li>
+                ))}
+              </ul>
+            </nav>
+          </aside>
+        )}
+        <div><slot /></div>
+      </div>
+    </main>
+    <footer class="site-footer">
+      <div class="wrap">
+        <ul>
+          {footerLinks.map(([label, href]) => <li><a href={href}>{label}</a></li>)}
+        </ul>
+        <p>Open source under Apache-2.0. © Kiren Srinivasan.</p>
+        <p class="muted">Built from commit <code>{sha}</code> on <code>{date}</code></p>
+      </div>
+    </footer>
+  </body>
+</html>

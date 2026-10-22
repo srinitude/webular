@@ -1,0 +1,5 @@
+/install.sh            https://github.com/srinitude/webular/releases/latest/download/install.sh   302
+/install.ps1           https://github.com/srinitude/webular/releases/latest/download/install.ps1  302
+/:version/install.sh   https://github.com/srinitude/webular/releases/download/:version/install.sh  302
+/:version/install.ps1  https://github.com/srinitude/webular/releases/download/:version/install.ps1 302
+/latest                https://github.com/srinitude/webular/releases/latest                        302

@@ -1,0 +1,26 @@
+---
+// The install commands, shown as stacked blocks so no script is needed.
+interface Props {
+  firstId?: string
+}
+const { firstId } = Astro.props
+const curl = "curl --proto '=https' --tlsv1.2 -fsSL https://webular.dev/install.sh | sh"
+const claude = 'claude mcp add webular -- webular mcp'
+---
+
+<div class="install-block">
+  <h3>Terminal: macOS and Linux</h3>
+  <pre id={firstId} tabindex="0"><code>{curl}</code></pre>
+  <p>Downloads the webular build that matches your machine (OS, CPU, and libc), checks it against SHA256SUMS, and puts it in <code>~/.webular/bin</code>. <a href="/install.sh">View the script</a>.</p>
+  <h3>Terminal: Windows</h3>
+  <pre tabindex="0"><code>irm https://webular.dev/install.ps1 | iex</code></pre>
+  <p>Checks the download against SHA256SUMS and puts it in <code>$HOME\.webular\bin</code>. <a href="/install.ps1">View the script</a>.</p>
+  <h3>Terminal: npm</h3>
+  <pre tabindex="0"><code>npm i -g webular</code></pre>
+  <p>Installs only the native build for your OS, CPU, and libc.</p>
+  <p>If the script says to add <code>~/.webular/bin</code> to your PATH, do that. Then open a new terminal and run <code>webular doctor</code>.</p>
+  <h3>Your agent: Claude Code</h3>
+  <p>First install webular with a Terminal block. Then run:</p>
+  <pre tabindex="0"><code>{claude}</code></pre>
+  <p>Other clients: <a href="/install#agents">add webular to your agent</a>.</p>
+</div>

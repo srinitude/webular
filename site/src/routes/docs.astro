@@ -1,0 +1,12 @@
+---
+import Base from '../Base.astro'
+import { Content } from '../content/docs.md'
+import DocMeta from '../DocMeta.astro'
+---
+
+<Base title="Docs" description="Every webular doc, grouped as Start here, Use it, and Build on it." doc>
+  <article class="doc">
+    <div class="doc-body"><Content /></div>
+    <DocMeta slug="docs" />
+  </article>
+</Base>
