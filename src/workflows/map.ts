@@ -37,14 +37,17 @@ type ChildResult =
   | { loc: string; ok: true; locs: string[] }
   | { loc: string; ok: false; reason: string }
 
-function locsOf(xml: string): string[] {
-  return [...xml.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/g)].map((m) => m[1] ?? '')
+// Each loc resolves against the sitemap's own URL, so relative locs count.
+function locsOf(xml: string, base: string): string[] {
+  return [...xml.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/g)].flatMap(
+    (m) => normalizeUrl(m[1] ?? '', base) ?? [],
+  )
 }
 
 const fetchChild = (loc: string, host: string, timeoutMs: number): Effect.Effect<ChildResult> =>
   Effect.match(fetchTextWithinHost(loc, host, { timeoutMs }), {
     onFailure: (err): ChildResult => ({ loc, ok: false, reason: errMsg(err) }),
-    onSuccess: (xml): ChildResult => ({ loc, ok: true, locs: locsOf(xml) }),
+    onSuccess: (xml): ChildResult => ({ loc, ok: true, locs: locsOf(xml, loc) }),
   })
 
 function mergeChildren(host: string, results: ChildResult[]): Discovery {
@@ -78,7 +81,7 @@ const sitemapAt = Effect.fn('map.sitemapAt')(function* (
   budget: number,
 ) {
   const xml = yield* fetchTextWithinHost(sitemapUrl, host, { timeoutMs: budget })
-  const sameHostLocs = locsOf(xml).filter((u) => sameHost(host, u))
+  const sameHostLocs = locsOf(xml, sitemapUrl).filter((u) => sameHost(host, u))
   if (/<sitemapindex[\s>]/i.test(xml)) return yield* childLinks(sameHostLocs, host, budget)
   return { links: sameHostLocs, errors: [] } satisfies Discovery
 })
@@ -95,12 +98,11 @@ const robotsSitemaps = Effect.fn('map.robotsSitemaps')(function* (
   host: string,
   budget: number,
 ) {
-  const txt = yield* Effect.option(
-    fetchTextWithinHost(new URL('/robots.txt', site).toString(), host, { timeoutMs: budget }),
-  )
+  const robotsUrl = new URL('/robots.txt', site).toString()
+  const txt = yield* Effect.option(fetchTextWithinHost(robotsUrl, host, { timeoutMs: budget }))
   if (txt._tag === 'None') return null
   const locs = [...txt.value.matchAll(/^\s*sitemap\s*:\s*(\S+)/gim)]
-    .map((m) => m[1] ?? '')
+    .map((m) => normalizeUrl(m[1] ?? '', robotsUrl) ?? '')
     .filter((u) => sameHost(host, u))
     .slice(0, MAX_CHILD_SITEMAPS)
   const results = yield* Effect.forEach(locs, (loc) => namedSitemap(loc, host, budget), {

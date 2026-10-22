@@ -62,6 +62,26 @@ describe('map — sitemap discovery', () => {
   )
 
   test(
+    'lists pages from a sitemap whose locs are relative paths',
+    eff(
+      Effect.gen(function* () {
+        const fx = yield* startFixture(
+          (): Routes => ({
+            '/sitemap.xml': () => xml(urlset(['index.html', 'a/p1.html', '/b/p2.html'])),
+          }),
+        )
+        const { links } = yield* runMap(`${fx.origin}/`)
+        expect(links).toEqual([
+          `${fx.origin}/index.html`,
+          `${fx.origin}/a/p1.html`,
+          `${fx.origin}/b/p2.html`,
+        ])
+      }),
+    ),
+    15_000,
+  )
+
+  test(
     'recurses one sitemapindex level in child order and surfaces child failures (B12)',
     eff(
       Effect.gen(function* () {
@@ -105,6 +125,26 @@ describe('map — sitemap discovery', () => {
 
 const text = (body: string): Response =>
   new Response(body, { headers: { 'content-type': 'text/plain' } })
+
+describe('map — relative robots.txt Sitemap: line', () => {
+  test(
+    'follows a relative robots.txt Sitemap: line and its relative locs',
+    eff(
+      Effect.gen(function* () {
+        const fx = yield* startFixture(
+          (): Routes => ({
+            '/robots.txt': () => text('Sitemap: /maps/site.xml\n'),
+            '/maps/site.xml': () => xml(urlset(['r1', '/r2'])),
+            '/': () => page(['/crawled']),
+          }),
+        )
+        const { links } = yield* runMap(fx.origin)
+        expect(links).toEqual([`${fx.origin}/maps/r1`, `${fx.origin}/r2`])
+      }),
+    ),
+    15_000,
+  )
+})
 
 describe('map — robots.txt Sitemap: fallback', () => {
   test(

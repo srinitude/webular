@@ -3,6 +3,7 @@
 // look up; Library of Congress treats it as search text.
 import { Config, Effect, Schema } from 'effect'
 import { fetchText } from '../../core/http.ts'
+import { asOfStamp } from '../as-of.ts'
 import { getJson, type Hit, politely, sourceUrl } from './polite.ts'
 
 const WaybackAvailable = Schema.fromJsonString(
@@ -16,7 +17,13 @@ const WaybackAvailable = Schema.fromJsonString(
 )
 
 const lookup = (query: string, limit: number) =>
-  getJson(WaybackAvailable, 'https://archive.org/wayback/available', { url: query }).pipe(
+  asOfStamp.pipe(
+    Effect.flatMap((timestamp) =>
+      getJson(WaybackAvailable, 'https://archive.org/wayback/available', {
+        url: query,
+        ...(timestamp ? { timestamp } : {}),
+      }),
+    ),
     Effect.map(({ archived_snapshots: { closest } }) =>
       closest && limit > 0
         ? [
@@ -134,7 +141,9 @@ export const commonCrawlCdx = (query: string, limit: number): Effect.Effect<Hit[
       fl: 'url,timestamp,status,mime',
     })
     const lines = text.split('\n').filter((line) => line.trim() !== '')
-    const rows = yield* Effect.forEach(lines, (line) => Schema.decodeUnknownEffect(CcRow)(line))
+    const rows = yield* Effect.forEach(lines, (line) => Schema.decodeUnknownEffect(CcRow)(line), {
+      concurrency: 1,
+    })
     return rows.map((r) => ({
       title: r.url,
       url: r.url,
