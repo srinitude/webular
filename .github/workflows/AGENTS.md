@@ -4,9 +4,9 @@ The GitHub Actions workflows. The parent [AGENTS.md](../AGENTS.md) lists the res
 
 ## What lives here
 
-- `.github/workflows/ci.yml`: runs `mise run ci` and `mise run e2e` on Linux, macOS, and Windows, and builds the executable on each.
+- `.github/workflows/ci.yml`: runs `mise run ci` and `mise run e2e` on Linux, macOS, and Windows, and builds the executable on each. The x64 Mac is the slowest runner, so its tests run in two shards on two runners. Each test file still runs once there.
 - `.github/workflows/plugin.yml`: runs the plugin chain.
-- `.github/workflows/release.yml`: builds and publishes a release, with an attested SPDX SBOM and npm provenance.
+- `.github/workflows/release.yml`: builds and publishes a release, with an attested SPDX SBOM and npm provenance. The release files build while the tests run. They are attested and attached to the draft release only after every test passes.
 - `.github/workflows/codeql.yml`: CodeQL analysis of the JavaScript and TypeScript sources on push to main, on pull requests, and weekly.
 - `.github/workflows/repo-settings.yml`: read-only weekly check that the GitHub description, homepage, and topics match [`.github/repo-settings.json`](../repo-settings.json). `mise run repo:settings` applies the file by hand.
 - `.github/workflows/bug-hunts.yml`: runs `mise run bugs:check` (every class in [docs/bug-classes.md](../../docs/bug-classes.md)) weekly and on demand on Linux, macOS, and Windows.
@@ -22,6 +22,8 @@ The GitHub Actions workflows. The parent [AGENTS.md](../AGENTS.md) lists the res
 - Every workflow sets a `concurrency` group. Use `cancel-in-progress: true` for checks and `false` for releases ([GitHub Actions](https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions)).
 - Cache `BUN_INSTALL_CACHE_DIR`, keyed on [`mise.toml`](../../mise.toml) and [`bun.lock`](../../bun.lock), and still run `bun install --frozen-lockfile` ([Bun](https://bun.com/docs/pm/cli/install), tag `bun-v1.4.3`).
 - Pass `${{ }}` values through `env:`, never inline in `run:` ([GitHub security hardening](https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions)).
+- A check workflow that runs on both `push` and `pull_request` skips the push run when an open pull request into main already checks that branch. One commit gets one run.
+- A speedup never drops a job, a system, or a check. [tests/ci/workflow-matrix.test.ts](../../tests/ci/workflow-matrix.test.ts) fails if one does.
 - Never use `pull_request_target` or `workflow_run` with untrusted code.
 - No `bun -e` or `node -e` steps ([`tests/quality/typescript-only.test.ts`](../../tests/quality/typescript-only.test.ts)).
 - The main branch moves only by fast-forward, after CI is green on all three systems.

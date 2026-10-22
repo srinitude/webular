@@ -797,3 +797,5 @@
 {"path": "docs/benchmarks-peers.md", "sha": "c05b852efae495ab0daf2aab00bb78bb249834c88f2a320df2f5a0a1c102f51c"}
 {"path": "scripts/bench/peers/AGENTS.md", "sha": "d90f6405983d35d8fc299ffce82742c5e096f4c9fd539b4734b057441a8da5e1"}
 {"path": "docs/scoreboard.md", "sha": "dcdb00359600335cd141a533f8bcbd95acb485b3a5e664fdd3a62b204976b6aa"}
+{"path": "tests/ci/AGENTS.md", "sha": "9ee68e96938d24757d0a56bfff248b63598f7402aaae1cd710ffab4127cc2687"}
+{"path": ".github/workflows/AGENTS.md", "sha": "e7dddb307abbbc896f272aa48cf669c719a9d7b4b29bcd67eb8d8e41bb2b1305"}
