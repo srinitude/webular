@@ -4,14 +4,24 @@
 // a Readability worker pool that closes with the test, and the robots.txt gate, as stepRuntime gives.
 import * as BunServices from '@effect/platform-bun/BunServices'
 import { Effect, FileSystem, Layer, type Scope } from 'effect'
+import { HostBudget } from '../../src/core/budget.ts'
 import { RobotsGate } from '../../src/lib/robots-gate.ts'
 import { ParsePool } from '../../src/lib/sources.ts'
 
-const testLayer = Layer.mergeAll(BunServices.layer, ParsePool.layer, RobotsGate.layer)
+const testLayer = Layer.mergeAll(
+  BunServices.layer,
+  ParsePool.layer,
+  RobotsGate.layer,
+  HostBudget.layer.pipe(Layer.provide(BunServices.layer)),
+)
 
 export const eff =
   <A, E>(
-    body: Effect.Effect<A, E, Scope.Scope | BunServices.BunServices | ParsePool | RobotsGate>,
+    body: Effect.Effect<
+      A,
+      E,
+      Scope.Scope | BunServices.BunServices | ParsePool | RobotsGate | HostBudget
+    >,
   ) =>
   () =>
     Effect.runPromise(Effect.provide(Effect.scoped(body), testLayer))

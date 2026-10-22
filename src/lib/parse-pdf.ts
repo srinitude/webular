@@ -64,15 +64,38 @@ const explain = (e: ParseError) =>
       })
 
 // PDF bytes to text; scrape reads a fetched PDF through this same reader.
+const LOAD_FLOOR_MS = 1_000
+
+// A load that never settles fails at WEBULAR_PDF_TIMEOUT_MS, floored at
+// LOAD_FLOOR_MS: pdf.js loads through timer tasks, so a short page deadline
+// (which still always reads page 1) would otherwise fail a healthy load.
+// A load that stops early has no proxy to destroy: unpdf's getDocumentProxy
+// does not expose its loading task.
+// ponytail: fixed floor; give the load its own setting if large PDFs need more.
+const loadPdf = (bytes: Uint8Array, timeoutMs: number) =>
+  attempt(() => import('unpdf')).pipe(
+    // a copy: pdf.js detaches its input and rejects a Buffer
+    Effect.flatMap(({ getDocumentProxy }) =>
+      attempt(() => getDocumentProxy(new Uint8Array(bytes))),
+    ),
+    Effect.timeoutOption(Math.max(timeoutMs, LOAD_FLOOR_MS)),
+    Effect.flatMap(
+      Option.match({
+        onNone: () =>
+          fail(
+            `parse: PDF text stopped before page 1 (WEBULAR_PDF_TIMEOUT_MS: over ${timeoutMs} ms)`,
+          ),
+        onSome: Effect.succeed,
+      }),
+    ),
+  )
+
 export const pdfText = Effect.fnUntraced(function* (bytes: Uint8Array) {
   const maxPages = yield* setting('WEBULAR_PDF_MAX_PAGES', 2_000)
   const timeoutMs = yield* setting('WEBULAR_PDF_TIMEOUT_MS', 60_000)
-  const { getDocumentProxy } = yield* attempt(() => import('unpdf'))
   // The pdf.js proxy holds a worker and page buffers: free it on success and failure.
-  return yield* Effect.acquireRelease(
-    attempt(() => getDocumentProxy(new Uint8Array(bytes))), // a copy: pdf.js detaches its input and rejects a Buffer
-    (pdf) =>
-      Effect.ignore(attempt(() => (pdf as unknown as { destroy(): Promise<void> }).destroy())),
+  return yield* Effect.acquireRelease(loadPdf(bytes, timeoutMs), (pdf) =>
+    Effect.ignore(attempt(() => (pdf as unknown as { destroy(): Promise<void> }).destroy())),
   ).pipe(
     Effect.flatMap((pdf) => readBounded(pdf, maxPages, timeoutMs)),
     Effect.scoped,

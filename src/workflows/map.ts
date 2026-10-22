@@ -5,6 +5,7 @@ import { Effect } from 'effect'
 import { z } from 'zod'
 import { hostConcurrency } from '../core/budget.ts'
 import { fetchTextWithinHost } from '../core/http.ts'
+import { HttpStatusError } from '../core/http-body.ts'
 import { errMsg } from '../core/output.ts'
 import { normalizeUrl, sameHost } from '../core/url.ts'
 import { archivedUrls } from '../lib/archive-urls.ts'
@@ -131,7 +132,14 @@ const fetchSitemap = Effect.fn('map.fetchSitemap')(function* (site: string, time
   const host = new URL(site).hostname
   const budget = timeoutMs ?? SITEMAP_TIMEOUT_MS
   const xmlUrl = new URL('/sitemap.xml', site).toString()
-  const primary = yield* Effect.orElseSucceed(sitemapAt(xmlUrl, host, budget), () => null)
+  // A 404 means "no sitemap" (silent); any other failure is reported in errors.
+  const primary = yield* Effect.catch(sitemapAt(xmlUrl, host, budget), (err) =>
+    Effect.succeed<Discovery | null>(
+      err instanceof HttpStatusError && err.status === 404
+        ? null
+        : { links: [], errors: [{ url: xmlUrl, reason: errMsg(err) }] },
+    ),
+  )
   if (primary && primary.links.length > 0) return { ...primary, fromSitemapXml: true }
   const robots = yield* robotsSitemaps(site, host, budget)
   const errors = [...(primary?.errors ?? []), ...(robots?.errors ?? [])]

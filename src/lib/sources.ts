@@ -4,7 +4,7 @@
 // completion-ordered. Readability runs on at most maxHtml characters when the
 // caller caps it (answer mode: it costs 1-3 s of CPU per ~1 MB page).
 import { availableParallelism } from 'node:os'
-import { Context, Effect, Exit, Layer, Ref, Semaphore } from 'effect'
+import { Cause, Config, Context, Effect, Exit, Layer, Option, Ref, Semaphore } from 'effect'
 import { z } from 'zod'
 import { hostConcurrency } from '../core/budget.ts'
 import { fetchText } from '../core/http.ts'
@@ -24,11 +24,15 @@ export const fetchErrorsSchema = z.array(z.object({ url: z.string(), reason: z.s
 // kills its worker; raise PARSE_POOL_CAP or transfer bytes if parse CPU or
 // copy cost still dominates.
 const PARSE_POOL_CAP = 4
+// A worker that never replies times out instead of holding its permit forever.
+// A ~1 MB page parses in 1-3 s; WEBULAR_PARSE_TIMEOUT_MS overrides the 30 s.
+const parseTimeoutMs = Config.Int('WEBULAR_PARSE_TIMEOUT_MS').pipe(Config.withDefault(30_000))
 // Bun's Worker carries ref/unref; the DOM lib type in scope does not.
 type BunWorker = Worker & { ref(): void; unref(): void }
 interface PoolState {
   readonly idle: Ref.Ref<readonly BunWorker[]>
   readonly broken: Ref.Ref<boolean>
+  readonly timeoutMs: number
 }
 
 // From src this module sits in src/lib beside parse-worker.ts; built, it
@@ -52,13 +56,15 @@ const takeWorker = ({ idle }: PoolState) =>
   )
 
 // A healthy reply (text or a parse error) returns the worker to the pool; a
-// crash (`undefined`) or an interrupt terminates it, and a crash also turns
-// the pool off for the rest of the pool's life.
+// crash (`undefined`), a timeout, or an interrupt terminates it (the next parse
+// starts a fresh one), and a crash also turns the pool off for its life.
 const releaseWorker =
   ({ idle, broken }: PoolState) =>
   (worker: BunWorker, exit: Exit.Exit<Parsed | undefined, unknown>) => {
     const crashed = Exit.isSuccess(exit) && exit.value === undefined
-    if (crashed || Exit.hasInterrupts(exit)) {
+    const timedOut =
+      Exit.isFailure(exit) && Option.exists(Cause.findErrorOption(exit.cause), Cause.isTimeoutError)
+    if (crashed || timedOut || Exit.hasInterrupts(exit)) {
       return Effect.sync(() => worker.terminate()).pipe(
         Effect.andThen(crashed ? Ref.set(broken, true) : Effect.void),
       )
@@ -86,7 +92,7 @@ const askWorker = (worker: BunWorker, html: string, base: string) =>
 const parseInWorker = (state: PoolState, html: string, base: string) =>
   Effect.acquireUseRelease(
     takeWorker(state),
-    (worker) => askWorker(worker, html, base),
+    (worker) => Effect.timeout(askWorker(worker, html, base), state.timeoutMs),
     releaseWorker(state),
   ).pipe(Effect.flatMap((p) => (p === undefined ? parseInThread(html, base) : Effect.succeed(p))))
 
@@ -107,6 +113,7 @@ const makePool = Effect.gen(function* () {
   const state: PoolState = {
     idle: yield* Effect.acquireRelease(Ref.make<readonly BunWorker[]>([]), terminateIdle),
     broken: yield* Ref.make(typeof Worker === 'undefined'),
+    timeoutMs: yield* Effect.orDie(parseTimeoutMs),
   }
   const parse = (html: string, base: string) =>
     Effect.flatMap(Ref.get(state.broken), (broken) =>
@@ -181,9 +188,7 @@ export const fetchSources = Effect.fn('fetchSources')(function* (
   const outcomes = yield* Effect.forEach(
     sources,
     (src) => fetchOne(src, timeoutMs, maxHtml, sources.length >= POOL_MIN_PAGES),
-    {
-      concurrency: yield* hostConcurrency,
-    },
+    { concurrency: yield* hostConcurrency },
   )
   const out: FetchedSources = { entries: [], errors: [] }
   for (const outcome of outcomes) {

@@ -173,9 +173,13 @@ export const searchEffect = Effect.fn('search')(function* (
 ) {
   const deadline = opts.deadlineMs ?? SEARCH_DEADLINE_MS
   const start = yield* Clock.currentTimeMillis
-  const first = yield* searchOnce(source, query, limit, opts).pipe(
-    Effect.timeoutOrElse({ duration: deadline, orElse: timedOut }),
-  )
+  // Deterministic mode: no wall-clock cut; each source still stops at its own cap.
+  const det = yield* deterministic
+  const cut =
+    <A>(duration: number, orElse: () => Effect.Effect<A>) =>
+    (self: Effect.Effect<A>) =>
+      det ? self : Effect.timeoutOrElse(self, { duration, orElse })
+  const first = yield* searchOnce(source, query, limit, opts).pipe(cut(deadline, timedOut))
   const free = (found: Found): Effect.Effect<Searched> =>
     source === 'web' && !opts.runSource
       ? withFreeSources(query, limit, found)
@@ -184,7 +188,7 @@ export const searchEffect = Effect.fn('search')(function* (
   const left = deadline - ((yield* Clock.currentTimeMillis) - start)
   const round = (q: string, n: number) => searchOnce('web', q, n, { runSource: opts.runSource })
   return yield* secondHop(query, limit, first, round).pipe(
-    Effect.timeoutOrElse({ duration: Math.max(0, left), orElse: () => Effect.succeed(first) }),
+    cut(Math.max(0, left), () => Effect.succeed(first)),
     Effect.flatMap(free),
   )
 })

@@ -16,6 +16,7 @@ import * as FetchHttpClient from 'effect/http/FetchHttpClient'
 import * as HttpClient from 'effect/http/HttpClient'
 import * as ChildProcess from 'effect/process/ChildProcess'
 import { ChildProcessSpawner } from 'effect/process/ChildProcessSpawner'
+import { requestLog } from '../request-log.ts'
 import { docsStore } from './docs-cache.ts'
 import { committedSnapshot } from './docs-guard.ts'
 import type { JevError } from './errors.ts'
@@ -140,7 +141,12 @@ export class Jev extends Context.Service<
   static readonly layer = Layer.effect(Jev, make)
 
   static readonly live = Jev.layer.pipe(
-    Layer.provide(Layer.mergeAll(FetchHttpClient.layer, BunServices.layer)),
+    Layer.provide(
+      Layer.mergeAll(
+        FetchHttpClient.layer.pipe(Layer.provide(Layer.orDie(requestLog))),
+        BunServices.layer,
+      ),
+    ),
   )
 }
 
