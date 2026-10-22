@@ -22,7 +22,54 @@ const failureCase = Effect.gen(function* () {
   expect(out).toEqual([])
 })
 
+// The maker's best-linked products come first in Wikidata; the one whose
+// description shares the query's words ("terminal emulator") must lead.
+const HASHIMOTO = 'official website of the terminal emulator created by Mitchell Hashimoto'
+const made = (site: string, name: string, desc: string) => ({
+  site: { value: site },
+  name: { value: name },
+  desc: { value: desc },
+})
+const hashimoto = JSON.stringify({
+  results: {
+    bindings: [
+      made('https://www.terraform.io/', 'Terraform', 'infrastructure as code software'),
+      made('https://www.hashicorp.com/', 'HashiCorp', 'American software company'),
+      made('https://www.vagrantup.com/', 'Vagrant', 'software for virtual machine environments'),
+      made('https://ghostty.org/', 'Ghostty', 'cross-platform terminal emulator'),
+    ],
+  },
+})
+const rankCase = Effect.gen(function* () {
+  const { out, seen } = yield* serving('/sparql', hashimoto, creatorProducts(HASHIMOTO, 2))
+  expect(out.map((h) => h.url)).toEqual(['https://ghostty.org/', 'https://www.terraform.io/'])
+  expect(out[0]?.description).toContain('terminal emulator')
+  expect(seen.query.get('query')).toContain('schema:description')
+})
+
+// A repeat lookup is answered in-process: one request, no second politeness wait.
+// A failed answer is never kept, so the next lookup asks again.
+const cacheCase = Effect.gen(function* () {
+  let calls = 0
+  const route = () => {
+    calls += 1
+    return calls === 1 ? json('nope', 500) : json(hashimoto)
+  }
+  const twice = Effect.gen(function* () {
+    expect(yield* creatorProducts(HASHIMOTO, 2)).toEqual([])
+    const first = yield* creatorProducts(HASHIMOTO, 2)
+    const again = yield* creatorProducts(HASHIMOTO, 2)
+    return { first, again }
+  })
+  const { first, again } = yield* against({ '/sparql': route }, twice)
+  expect(calls).toBe(2)
+  expect(again).toEqual(first)
+  expect(first[0]?.url).toBe('https://ghostty.org/')
+})
+
 describe('products found by their creator', () => {
+  test('the product the query describes leads the maker list', () => run(rankCase), 15_000)
+  test('a repeat lookup is cached, a failure is not', () => run(cacheCase), 15_000)
   test('the vite creator query yields vite.dev in the top 5', () => run(viteCase), 15_000)
   test('a failed lookup gives no list', () => run(failureCase), 15_000)
   test('only queries that name a maker', () => {

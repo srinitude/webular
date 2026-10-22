@@ -35,8 +35,9 @@ const reply = JSON.stringify({
 
 const sitesCase = Effect.gen(function* () {
   const { out, seen } = yield* serving('/sparql', reply, officialSites(hits, 5))
-  expect(out.map((h) => h.url)).toEqual(['https://nodejs.org', 'https://deno.com'])
-  expect(out[1]?.title).toBe('Deno (software)')
+  expect(out.length).toBe(1)
+  expect(out[0]?.map((h) => h.url)).toEqual(['https://nodejs.org', 'https://deno.com'])
+  expect(out[0]?.[1]?.title).toBe('Deno (software)')
   expect(seen.query.get('query')).toContain('<https://en.wikipedia.org/wiki/Deno_(software)>')
   expect(seen.query.get('query')).not.toContain('news.ycombinator.com')
 })
@@ -58,7 +59,7 @@ const besideCase = Effect.gen(function* () {
     return yield* official.take
   })
   const { out } = yield* serving('/sparql', reply, flow)
-  expect(out.map((h) => h.url)).toEqual(['https://nodejs.org', 'https://deno.com'])
+  expect(out[0]?.map((h) => h.url)).toEqual(['https://nodejs.org', 'https://deno.com'])
 })
 const noWikiCase = Effect.gen(function* () {
   const official = yield* officialBeside('deno official site', runner, 5)
@@ -77,10 +78,50 @@ const navCoreCase = Effect.gen(function* () {
     return yield* official.take
   })
   const { out } = yield* serving('/sparql', reply, flow)
-  expect(out.map((h) => h.url)).toEqual(['https://nodejs.org', 'https://deno.com'])
+  expect(out[0]?.map((h) => h.url)).toEqual(['https://nodejs.org', 'https://deno.com'])
+})
+
+// A navigational query that names a maker: the maker's products come in the
+// lookup's one call, so a second Wikidata request never takes the host's slot
+// and pushes the lookup past its window (the politeness gap stays 1 s).
+const MADE = 'official website of the JavaScript runtime created by Ryan Dahl'
+const product = (site: string, name: string, links: string) => ({
+  site: { value: site },
+  name: { value: name },
+  links: { value: links },
+})
+const both = JSON.stringify({
+  results: {
+    bindings: [
+      product('https://nodejs.org', 'Node.js', '60'),
+      product('https://deno.com', 'Deno', '20'),
+      row(wiki('Deno (software)').url, 'https://deno.com'),
+    ],
+  },
+})
+const makerCase = Effect.gen(function* () {
+  let calls = 0
+  const flow = Effect.gen(function* () {
+    const official = yield* officialBeside(MADE, runner, 5)
+    yield* official.run('wikipedia', MADE, 5)
+    yield* Effect.sleep(300) // the rest of the fan-out
+    return yield* official.take
+  })
+  const route = (_: Request, url: URL) => {
+    calls += 1
+    expect(url.searchParams.get('query')).toContain('"Ryan Dahl"@en')
+    return json(both)
+  }
+  const out = yield* against({ '/sparql': route }, flow)
+  expect(calls).toBe(1)
+  expect(out.map((list) => list.map((h) => h.url))).toEqual([
+    ['https://deno.com'],
+    ['https://nodejs.org', 'https://deno.com'],
+  ])
 })
 
 describe('official sites from Wikidata', () => {
+  test('a named maker rides the same call, inside the window', () => run(makerCase), 15_000)
   test('the main query feeds the lookup beside the fan-out', () => run(besideCase), 15_000)
   test('the fan-out call, trailing nav words cut, feeds the lookup', () => run(navCoreCase), 15_000)
   test('no Wikipedia answer for the main query gives no list', () => run(noWikiCase), 15_000)

@@ -12,6 +12,7 @@ import { dropPrivateHosts, fuseRanked, searchLocalIndex } from '../lib/local-ind
 import { searchEffect } from '../lib/search-chain.ts'
 import { MAX_VARIANTS } from '../lib/search-source-names.ts'
 import { creatorProducts } from '../lib/sources/creator-products.ts'
+import { isNavigational } from '../lib/sources/official-sites.ts'
 import { FREE_SOURCE_NAMES } from '../lib/sources/registry.ts'
 import { SEARCH_SOURCES } from '../lib/sources-search.ts'
 import { stepRuntime } from './runtime.ts'
@@ -48,11 +49,14 @@ const searchStep = createStep({
   execute: ({ inputData: { query, limit, source, variants } }) =>
     stepRuntime.runPromise(
       Effect.gen(function* () {
-        // A product named only by its maker comes from Wikidata, beside the web round.
+        // A product named only by its maker comes from Wikidata, beside the web round;
+        // a navigational query asks in the official-site lookup's call instead.
         const [web, made] = yield* Effect.all(
           [
             searchEffect(source, query, limit, { variants: variants ?? [] }),
-            source === 'web' ? creatorProducts(query, limit) : Effect.succeed([]),
+            source === 'web' && !isNavigational(query)
+              ? creatorProducts(query, limit)
+              : Effect.succeed([]),
           ],
           { concurrency: 2 },
         )

@@ -130,7 +130,7 @@ const searchOnce = Effect.fn('searchOnce')(function* (
   const { ran, sites, judgeAt } = yield* fanOut(source, query, limit, opts)
   if (traced === '1') yield* logErr(traceLine(start, ran, judgeAt))
   const scored = scoreHits(
-    [sites, ...ran.flatMap((r) => r.lists), ...(opts.local ? [opts.local] : [])],
+    [...sites, ...ran.flatMap((r) => r.lists), ...(opts.local ? [opts.local] : [])],
     query,
   )
   const ok = ran.filter((r) => r.status === 'ok').length

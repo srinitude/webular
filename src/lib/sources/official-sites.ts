@@ -1,10 +1,19 @@
 // Navigational queries ("official website of X"): Wikipedia finds X's article
 // but never X's own site, and no other keyless source ranks it. One SPARQL
 // call reads each article's Wikidata official website (P856); those sites form
-// a list in article order, fused like any source list.
+// a list in article order, fused like any source list. A query that also names
+// a maker ("created by Rich Hickey") asks for the maker's products in the same
+// call, so Wikidata's one-request-a-second slot never makes the lookup wait.
 import { Deferred, Effect, Fiber, Option, Schema } from 'effect'
 import { navCore, type SourceRunner } from '../search-source-run.ts'
-import { getJson, type Hit } from './polite.ts'
+import {
+  creatorOf,
+  productHits,
+  queryFor as productsQuery,
+  Row,
+  sparql,
+} from './creator-products.ts'
+import type { Hit } from './polite.ts'
 
 const NAVIGATIONAL = /\b(official|website|homepage|home page)\b/i
 export const isNavigational = (query: string) =>
@@ -14,33 +23,45 @@ const Binding = Schema.Struct({ value: Schema.String })
 const Sparql = Schema.fromJsonString(
   Schema.Struct({
     results: Schema.Struct({
-      bindings: Schema.Array(Schema.Struct({ a: Binding, site: Binding })),
+      bindings: Schema.Array(Schema.Struct({ ...Row.fields, a: Schema.optional(Binding) })),
     }),
   }),
 )
 
 // ponytail: article URLs as Wikipedia hits spell them (encodeURIComponent); a
 // title Wikidata encodes differently (an apostrophe) simply finds no site.
-const queryFor = (articles: ReadonlyArray<string>) =>
-  `SELECT ?a ?site WHERE { VALUES ?a { ${articles.map((u) => `<${u}>`).join(' ')} } ?a schema:about ?item . ?item wdt:P856 ?site . }`
+const articlesPart = (articles: ReadonlyArray<string>) =>
+  `{ VALUES ?a { ${articles.map((u) => `<${u}>`).join(' ')} } ?a schema:about ?item . ?item wdt:P856 ?site . }`
+
+// Article rows carry ?a; product rows carry ?links, most-linked first.
+const queryFor = (articles: ReadonlyArray<string>, creator: string | undefined, limit: number) => {
+  const parts = [
+    ...(articles.length > 0 ? [articlesPart(articles)] : []),
+    ...(creator ? [`{ ${productsQuery(creator, limit * 2)} }`] : []),
+  ]
+  return `SELECT ?a ?site ?name ?desc ?links WHERE { ${parts.join(' UNION ')} } ORDER BY DESC(?links)`
+}
 
 const WIKI = /^https:\/\/en\.wikipedia\.org\/wiki\//
 
-// Official sites for the Wikipedia articles among `hits`, first site per article,
-// in article order; any failure gives no list, so the search stands as it was.
-export const officialSites = (hits: ReadonlyArray<Hit>, limit: number): Effect.Effect<Hit[]> => {
+// Two lists: official sites for the Wikipedia articles among `hits` (first site
+// per article, in article order), then the products of the maker `query` names.
+// Any failure gives no lists, so the search stands as it was.
+export const officialSites = (
+  hits: ReadonlyArray<Hit>,
+  limit: number,
+  query = '',
+): Effect.Effect<Hit[][]> => {
+  const creator = creatorOf(query)
   const articles = [...new Set(hits.map((h) => h.url).filter((u) => WIKI.test(u)))].slice(0, limit)
-  if (articles.length === 0) return Effect.succeed([])
+  if (articles.length === 0 && !creator) return Effect.succeed([])
   const titles = new Map(hits.map((h) => [h.url, h.title]))
-  return getJson(Sparql, 'https://query.wikidata.org/sparql', {
-    query: queryFor(articles),
-    format: 'json',
-  }).pipe(
+  return sparql(Sparql, queryFor(articles, creator, limit)).pipe(
     Effect.map(({ results }) => {
       const site = new Map<string, string>()
       for (const { a, site: s } of results.bindings)
-        if (!site.has(a.value)) site.set(a.value, s.value)
-      return articles.flatMap((u) => {
+        if (a && !site.has(a.value)) site.set(a.value, s.value)
+      const sites = articles.flatMap((u) => {
         const url = site.get(u)
         return url
           ? [
@@ -52,6 +73,8 @@ export const officialSites = (hits: ReadonlyArray<Hit>, limit: number): Effect.E
             ]
           : []
       })
+      const made = results.bindings.filter((r) => !r.a)
+      return creator ? [sites, productHits(made, creator, limit, query)] : [sites]
     }),
     Effect.catch(() => Effect.succeed([])),
   )
@@ -69,9 +92,10 @@ export const officialBeside = Effect.fn('officialBeside')(function* (
   runner: SourceRunner,
   articles: number,
 ) {
+  const maker = creatorOf(main)
   const wiki = yield* Deferred.make<ReadonlyArray<Hit>>()
   const lookup = yield* Effect.forkChild(
-    Effect.flatMap(Deferred.await(wiki), (hits) => officialSites(hits, articles)),
+    Effect.flatMap(Deferred.await(wiki), (hits) => officialSites(hits, articles, main)),
   )
   const sent = navCore(main)
   const run: SourceRunner = (source, query, limit) =>
@@ -79,9 +103,12 @@ export const officialBeside = Effect.fn('officialBeside')(function* (
       ? Effect.tap(runner(source, query, limit), (hits) => Deferred.succeed(wiki, hits))
       : runner(source, query, limit)
   const take = Effect.gen(function* () {
-    if (!(yield* Deferred.isDone(wiki))) return [] as Hit[]
-    const sites = yield* Effect.timeoutOption(Fiber.join(lookup), OFFICIAL_WAIT_MS)
-    return Option.getOrElse(sites, (): Hit[] => [])
+    if (!(yield* Deferred.isDone(wiki))) return [] as Hit[][]
+    // A named maker's products have no other source, so its call is awaited in
+    // full (the source timeout bounds it); a plain lookup gets the window.
+    const join = Fiber.join(lookup)
+    const lists = yield* maker ? Effect.asSome(join) : Effect.timeoutOption(join, OFFICIAL_WAIT_MS)
+    return Option.getOrElse(lists, (): Hit[][] => [])
   }).pipe(Effect.ensuring(Fiber.interrupt(lookup)))
   return { run, take }
 })
