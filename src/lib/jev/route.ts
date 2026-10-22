@@ -8,7 +8,7 @@
 // (client.ts posts it), and lists models at <base>/v1/models. Keys stay Redacted.
 import { Config, Effect, Option, type Redacted } from 'effect'
 
-export const TYPESAFE_BASE = 'https://api.typesafe.ai'
+const TYPESAFE_BASE = 'https://api.typesafe.ai'
 
 export interface JevRoute {
   readonly name: 'typesafe' | 'pydantic'
@@ -21,7 +21,7 @@ export interface JevRoute {
 // TypeSafe id. Pydantic: pydantic.dev/articles/jev-pydantic-ai-gateway.
 // Vercel is left out: its docs name only the alias `typesafe-ai/jev`, and no
 // versioned id, so webular cannot pin its released model there.
-export const GATEWAYS = [
+const GATEWAYS = [
   {
     name: 'pydantic',
     env: 'PYDANTIC_AI_GATEWAY_API_KEY',

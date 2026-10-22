@@ -3,7 +3,7 @@
 // then the macOS Keychain) through ./agent-jev.ts.
 import { Config, Effect, Option } from 'effect'
 
-export interface ModelRef {
+interface ModelRef {
   provider: 'jev'
   id: string
 }
