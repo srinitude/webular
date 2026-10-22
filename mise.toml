@@ -488,6 +488,44 @@ description = "Plugin: serve MCP over HTTPS at a stable portless URL (webular-mc
 depends = ["setup"]
 run = 'bunx portless webular-mcp bun "{{config_root}}/plugins/webular/src/server.ts" --http'
 
+# ───────────────────────── webular.dev site (off the CI spine) ─────────────────────────
+
+[tasks."site:build"]
+description = "Site: build webular.dev into site/dist: tools.json from the live `webular mcp` tools/list, the Astro pages, then every .md twin and machine file"
+depends = ["setup"]
+dir = "{{config_root}}/site"
+run = [
+  "bun install --frozen-lockfile 1>&2",
+  'bun "{{config_root}}/site/scripts/tools-json.ts"',
+  'PUBLIC_BUILD_SHA="$(git rev-parse --short HEAD)" PUBLIC_BUILD_DATE="$(git log -1 --format=%cs)" bun --bun "{{config_root}}/site/node_modules/astro/bin/astro.mjs" build',
+  'bun "{{config_root}}/site/scripts/machine-files.ts"',
+]
+
+[tasks."site:test"]
+description = "Site: on site/dist, no sideways scroll at 320 to 2560 px with the hero command on screen, zero serious or critical axe issues, and a home page under 100 KB gzip with no third-party script"
+depends = ["site:build"]
+dir = "{{config_root}}/site"
+run = [
+  'bun "{{config_root}}/site/node_modules/playwright/cli.js" install chromium-headless-shell 1>&2',
+  'bun "{{config_root}}/site/scripts/check-site.ts"',
+]
+
+[tasks."site:dev"]
+description = "Site: serve webular.dev from site/src with live reload (writes tools.json first)"
+depends = ["setup"]
+dir = "{{config_root}}/site"
+run = [
+  "bun install --frozen-lockfile 1>&2",
+  'bun "{{config_root}}/site/scripts/tools-json.ts"',
+  'bun --bun "{{config_root}}/site/node_modules/astro/bin/astro.mjs" dev',
+]
+
+[tasks."site:deploy"]
+description = "Site: deploy site/dist to Cloudflare Workers static assets for webular.dev and www.webular.dev (needs a signed-in wrangler; never in CI)"
+depends = ["site:build"]
+dir = "{{config_root}}/site"
+run = 'bun "{{config_root}}/site/node_modules/wrangler/bin/wrangler.js" deploy'
+
 # ───────────────────────── Default + benchmark ─────────────────────────
 
 [tasks.e2e]

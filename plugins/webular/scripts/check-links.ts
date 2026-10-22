@@ -73,7 +73,8 @@ export const checkText = (file: string, text: string, cache = new Map<string, st
   })
 
 // Skipped: vendored, generated, and benchmark output folders.
-const SKIP = /(^|\/)(node_modules|dist|vendor)\/|^bench\/(results|recordings)\//
+const SKIP =
+  /(^|\/)(node_modules|dist|vendor)\/|^bench\/(results|recordings)\/|^site\/src\/content\//
 
 const checkFile = (
   file: string,

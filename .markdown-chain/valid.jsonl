@@ -292,3 +292,47 @@
 {"path": "docs/install.md", "sha": "c1e38bb4a355a8fcf923711ade28700907e21e2b2c0b228738b2e55848cd9106", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/install-script.md", "sha": "04425ccbd8fe57e1fd33281c8fd7b818000a56422938d55bf1360793a0f9cf1e", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/install-more.md", "sha": "f90a56759d5d5885905cb87d0941842729b1124f20ff9d2d26fca45e406678ff", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/content/agents.md", "sha": "7ec607dd38619c92035c4c86c1fa105b0cf9ed1ac86a822c24fe42d42a51ca0d"}
+{"path": "site/src/content/benchmarks.md", "sha": "06730e2abc225ddf2ca54e0a8b87f5ecb017865ea2240c531a68bd20f2a88434"}
+{"path": "site/src/content/commands.md", "sha": "814e29017cb3259811bc7cff313cc736fc024afaa1a491a8965341283fc2cd38"}
+{"path": "site/src/content/docs.md", "sha": "98fe8334e5e8b90893d471bdba8cda78718e6054867ec1f2ed49520650ecc5ff"}
+{"path": "site/src/content/install.md", "sha": "1f6322a11c7820a65fe9d3206b1408759daebc8d0adc55e3f734b60d995403bd"}
+{"path": "site/src/content/keys.md", "sha": "c5befb371601a2014a900b8007fe6b960ce55601be2ed72400a9552c1e5d7c8c"}
+{"path": "site/src/content/privacy.md", "sha": "cea3f457e2d49cd7d2dd5e51c96a93c91bccdea6d15e21f17be6862971284002"}
+{"path": "site/src/content/security.md", "sha": "d3503ee2f80ab8def6fc1808601aa3d715dd8bfab50e5fcf57bb884e8be193ff"}
+{"path": "site/src/content/support.md", "sha": "edbf47499a5861358d57cd74e6a7a026122184e31326309d4e1ea532ca492a6d"}
+{"path": "site/src/content/tools.md", "sha": "11b914aeabdf2b2b6c94ea697df3244b6d2650e39a2be0cd504c2f0f00a701ba"}
+{"path": "site/AGENTS.md", "sha": "f01969c5ac28f7ef043b228f29ebec25293fb8e02c5b71935723171c792b245f", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/public/AGENTS.md", "sha": "594c22652b6c3569679e1c07fb3e8c711027cc56559693cf58d36bc9cb5ebe83", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/public/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/scripts/AGENTS.md", "sha": "51ccd3a096951b85aed31c3cd5e157359450b457179de9bb4ea5be32a07f885b", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/scripts/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/AGENTS.md", "sha": "543821afaa73a452c03c2a10e2e06842eb99d0fa3148e748406acbb15420be7c", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/pages/AGENTS.md", "sha": "01d94d353852fc41006fe3cde06271a1eab0a81e876e081c5467a2bb68ca5863", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/pages/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/content/AGENTS.md", "sha": "0c1e56de997df92963462bf302f75ff55ca4cfe637c76a59712e4d41a318431b", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/content/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/content/benchmarks.md", "sha": "e46fe010b0e0433c6950005bd03b115cebc0cf4fc58cc89aeb6d2a9067757e65", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/tasks.md", "sha": "2b10afef5cfb20a9d3b3dfd5ad8d5d08070e06d86c1af0c6a40a850aa4fbcf9d", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/content/agents.md", "sha": "0c1e56de997df92963462bf302f75ff55ca4cfe637c76a59712e4d41a318431b", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/content/commands.md", "sha": "814e29017cb3259811bc7cff313cc736fc024afaa1a491a8965341283fc2cd38", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/content/docs.md", "sha": "98fe8334e5e8b90893d471bdba8cda78718e6054867ec1f2ed49520650ecc5ff", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/content/install.md", "sha": "1f6322a11c7820a65fe9d3206b1408759daebc8d0adc55e3f734b60d995403bd", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/content/keys.md", "sha": "c5befb371601a2014a900b8007fe6b960ce55601be2ed72400a9552c1e5d7c8c", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/content/privacy.md", "sha": "cea3f457e2d49cd7d2dd5e51c96a93c91bccdea6d15e21f17be6862971284002", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/content/security.md", "sha": "d3503ee2f80ab8def6fc1808601aa3d715dd8bfab50e5fcf57bb884e8be193ff", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/content/support.md", "sha": "edbf47499a5861358d57cd74e6a7a026122184e31326309d4e1ea532ca492a6d", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/content/tools.md", "sha": "11b914aeabdf2b2b6c94ea697df3244b6d2650e39a2be0cd504c2f0f00a701ba", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/AGENTS.md", "sha": "3b12860bc7c59e3da0968476bc2e9bdb6062909e6b169cf4bd16627e7c579e36", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/routes/AGENTS.md", "sha": "c93368ab9cf98f6c346550fa93c1a553cafd33f3cd2a7befb01a6e21db4f61aa", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/routes/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "AGENTS.md", "sha": "600b33c66a1e4b0a4b2c00ada7663822610f408c1ded1e9d0e3f9bcd4eadb5d2", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/AGENTS.md", "sha": "d066470dbb0d589a769613d3937703a7a528b63c702ddc842bf5d3638ae0bee8", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/public/AGENTS.md", "sha": "afa22eec50b5b24111ce220996c4d6938ae992bb30743440b86f07cbba68bf7a", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/AGENTS.md", "sha": "60e7d0bb563ba00409107eb0bef2f09cd42b3be54b9d40de3f2fd5575be4d58a", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/routes/AGENTS.md", "sha": "ab99cd2e1217cd240507e6737e28159d00d0546a50a9a79be58d7d6caf3b3679", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/AGENTS.md", "sha": "1c827cb45f098693812b5375ed6b03c346cae132af79c1b29976cca3d62d8b83", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/tasks.md", "sha": "cd80ad1204e33eeeaca4845355080c10859d248454f0e67b7fdd6722ff30774e"}
+{"path": "docs/tasks.md", "sha": "cd80ad1204e33eeeaca4845355080c10859d248454f0e67b7fdd6722ff30774e", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}

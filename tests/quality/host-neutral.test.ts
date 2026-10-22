@@ -34,6 +34,13 @@ const DATA = [
   ':!tests/quality/host-neutral.test.ts',
 ]
 
+// The install page, its content, and the home page show one setup line per agent host.
+const SITE_ADAPTERS: Readonly<Record<string, string>> = {
+  'site/src/InstallBlock.astro': 'install block names each agent host',
+  'site/src/content/install.md': 'one setup line per MCP client',
+  'site/src/routes/index.astro': 'home page shows the Claude Code install line',
+}
+
 const ADAPTERS: Readonly<Record<string, string>> = {
   '.claude-plugin/AGENTS.md': 'Claude Code marketplace adapter note',
   '.claude/AGENTS.md': 'Claude Code project-settings adapter',
@@ -49,6 +56,7 @@ const ADAPTERS: Readonly<Record<string, string>> = {
   'plugins/webular/.mcp.json': 'Claude Code server adapter manifest',
   'plugins/webular/evals/harness.json': 'eval of the Claude Code manifest drift',
   'plugins/webular/tests/manifests.test.ts': 'adapter drift test',
+  ...SITE_ADAPTERS,
   'tests/contract/plugin-tools.test.ts': 'checks the Claude Code adapter manifest',
   'tests/contract/skills.test.ts': 'checks the Claude Code adapter manifest',
   'tests/engine/cua-act-guard.test.ts': 'per-OS browser profile path fixtures',
