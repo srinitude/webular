@@ -45,6 +45,7 @@ const toTask = (type: PageType, n: number, seed: number, b: Built): PageTask => 
     family: 'scrape',
     input: { kind: 'scrape.page', path, format: 'markdown' },
     gold: goldOf(seed, b),
+    ...(b.reason === 'robots' ? { expect: { status: 'blocked', reason: 'robots' } as const } : {}),
     aliases: [b.title, id],
     source: {
       url: `fixture://pages/${type}/${id}.${b.ext}`,

@@ -9,29 +9,10 @@ import { runProc } from '../../src/core/proc.ts'
 import { BUST_PARAM, coldProblems, rowsWithPrivateUrls, settingsProblems } from './guards.ts'
 import { type Slot, schedule } from './order.ts'
 import { readRecordings, rowSetProblems, writeRecording } from './recordings.ts'
-import { OutboundCall, type Row, RunConfig, Status, Task } from './schema.ts'
+import { type Row, RunConfig, Task } from './schema.ts'
+import { type Adapter, readRequests, type Settings, WorkerOut } from './worker-io.ts'
 
 class RunError extends Data.TaggedError('RunError')<{ readonly message: string }> {}
-
-type Settings = 'default' | 'best'
-// The shape every peer adapter (scripts/bench/peers/<provider>.ts) exports.
-interface Adapter {
-  readonly provider: string
-  readonly run: (input: string, settings: Settings) => Effect.Effect<AdapterResult, unknown>
-}
-const AdapterResult = Schema.Struct({
-  results: Schema.Array(Schema.String),
-  requestBody: Schema.String,
-  status: Status,
-  cached: Schema.Boolean,
-  calls: Schema.Array(OutboundCall),
-})
-type AdapterResult = typeof AdapterResult.Type
-const WorkerOut = Schema.Struct({
-  ...AdapterResult.fields,
-  latencyMs: Schema.Number,
-  cpuMs: Schema.Number,
-})
 
 const fail = (message: string) => Effect.fail(new RunError({ message }))
 
@@ -91,22 +72,37 @@ interface Call {
   readonly commit: string
 }
 
-const callOnce = (c: Call, query: string) =>
-  runProc(['bun', import.meta.path, '--worker', c.provider, c.settings, query], {
-    timeoutMs: c.cfg.timeoutMs,
-    extendEnv: true,
-    env: { WEBULAR_CACHE_DIR: c.cache, WEBULAR_NO_CACHE: c.phase === 'cold' ? '1' : '0' },
-  }).pipe(
+const callOnce = (c: Call, query: string) => {
+  const log = `${c.cache}/requests.jsonl`
+  return FileSystem.FileSystem.pipe(
+    Effect.flatMap((fs) => fs.remove(log).pipe(Effect.ignore)),
+    Effect.andThen(
+      runProc(['bun', import.meta.path, '--worker', c.provider, c.settings, query], {
+        timeoutMs: c.cfg.timeoutMs,
+        extendEnv: true,
+        env: {
+          WEBULAR_CACHE_DIR: c.cache,
+          WEBULAR_NO_CACHE: c.phase === 'cold' ? '1' : '0',
+          WEBULAR_REQUEST_LOG: log,
+        },
+      }),
+    ),
     Effect.flatMap((r) =>
       r.code === 0 ? Effect.succeed(r.stdout) : fail(`${c.provider}: exit ${r.code}`),
     ),
     Effect.flatMap((out) =>
       Schema.decodeUnknownEffect(Schema.fromJsonString(WorkerOut))(out.trim()),
     ),
+    Effect.flatMap((out) => Effect.map(readRequests(log), (requests) => ({ ...out, requests }))),
   )
+}
 
 // Results are cut to the same count for every provider after the call.
-const toRow = (c: Call, query: string, out: typeof WorkerOut.Type): Row => {
+const toRow = (
+  c: Call,
+  query: string,
+  out: typeof WorkerOut.Type & { requests: Row['requests'] },
+): Row => {
   const settingsHash = String(Hash.string(`${c.provider}|${c.settings}|${out.requestBody}`) >>> 0)
   const { provider, commit, round, settings, phase, task } = c
   return {
@@ -124,6 +120,7 @@ const toRow = (c: Call, query: string, out: typeof WorkerOut.Type): Row => {
     loadAvg: loadavg()[0] ?? 0,
     cpuMs: out.cpuMs,
     calls: out.calls,
+    requests: out.requests,
   }
 }
 

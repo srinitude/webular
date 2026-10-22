@@ -400,3 +400,5 @@
 {"path": "tests/jev/fixtures/AGENTS.md", "sha": "f27a87d822e3b892c904f68d795be2737998a724b256f16826817e4f15ceb67a"}
 {"path": "README.md", "sha": "2a52c04746300ca1ed3e8b3a1a0cc6c76e3598c20dfd4c535f965bbf0968d048"}
 {"path": "docs/benchmarks.md", "sha": "df2e1b8f46275f765e8b5e3224fe363e01c554f1434061174a4312fb3f54fdbc"}
+{"path": "scripts/bench/AGENTS.md", "sha": "9d984c023701c4416af908656cbd1097281ef5ef6df8b22092a281bde91f97a3"}
+{"path": "scripts/bench/peers/AGENTS.md", "sha": "3f28da0fc00b6cc9df2879d4f18dfbdb3a1440f0e53efffdd89f393e58f3c58a"}

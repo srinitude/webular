@@ -18,6 +18,7 @@ The peer benchmark that scores webular against other web research tools. The par
 - [report.ts](report.ts): the text report.
 - [keys.ts](keys.ts): reads a peer key from the environment, then the macOS Keychain.
 - [cases.ts](cases.ts): joins Jev calibration rows to bench cases.
+- [skip.ts](skip.ts): why a provider and task pair does not run. A robots-gold task is unsupported, since no peer exposes its target-site requests.
 
 ## Rules
 

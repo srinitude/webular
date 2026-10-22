@@ -38,3 +38,19 @@ test(
     }),
   ),
 )
+
+test(
+  'the dev scrape set marks its three robots-blocked pages with expect',
+  eff(
+    Effect.gen(function* () {
+      const { tasks } = yield* loadSetFile(DIR, 'dev/scrape.jsonl')
+      const robots = tasks.filter((t) => t.expect !== undefined)
+      expect(robots.map((t) => t.id)).toEqual([
+        'scrape-page-blocked-02',
+        'scrape-page-blocked-06',
+        'scrape-page-blocked-10',
+      ])
+      for (const t of robots) expect(t.expect).toEqual({ status: 'blocked', reason: 'robots' })
+    }),
+  ),
+)

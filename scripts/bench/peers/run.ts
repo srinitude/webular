@@ -26,6 +26,7 @@ import { Peers, PeersLive } from './providers.ts'
 import { livePath, replayPath } from './recording-paths.ts'
 import { report } from './report.ts'
 import { recordMetrics } from './score.ts'
+import { skipReason } from './skip.ts'
 import { builtinTasks, loadPlan, startPages } from './tasks.ts'
 import { CALL_TIMEOUT_MS } from './timeout.ts'
 
@@ -93,15 +94,6 @@ const obtain = (p: Provider, task: Task, run: number, ctx: Ctx) =>
     const text = yield* ctx.fs.readFileString(file)
     return yield* Schema.decodeUnknownEffect(Schema.fromJsonString(Recording))(text)
   })
-
-const skipReason = (p: Provider, task: Task) =>
-  p.skip
-    ? (['skipped', p.skip] as const)
-    : !p.jobs[task.job]
-      ? (['unsupported', `no ${task.job} API`] as const)
-      : task.localOnly && !p.local
-        ? (['unsupported', 'local fixture unreachable from a hosted API'] as const)
-        : undefined
 
 const runOne = (p: Provider, task: Task, run: number, ctx: Ctx) =>
   Effect.gen(function* () {

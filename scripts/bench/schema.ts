@@ -22,7 +22,6 @@ export const Family = Schema.Literals([
   'feed.items',
 ])
 export type Family = typeof Family.Type
-
 export const Split = Schema.Literals(['dev', 'sealed'])
 
 // Diversity axes used by the quota guard and the slices part of the report.
@@ -95,6 +94,7 @@ export const SetTask = Schema.Struct({
   split: Schema.optional(Schema.Literals(['dev', 'test', 'private'])),
   input: Schema.Record(Schema.String, Schema.Unknown),
   gold: Schema.Record(Schema.String, Schema.Unknown),
+  expect: Task.fields.expect,
   aliases: Schema.Array(Schema.String),
   source: Schema.Struct({ url: Schema.String, asOf: Schema.String, license: Schema.String }),
   author: Schema.String,
