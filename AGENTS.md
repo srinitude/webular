@@ -10,15 +10,12 @@ Every repeatable command is a `mise` task in [mise.toml](mise.toml). Never call 
 Run `mise trust ./mise.toml` once. [docs/tasks.md](docs/tasks.md) lists every task.
 
 ```bash
-mise run setup                # install pinned packages (frozen lockfile)
+mise run setup                # install pinned packages
 mise run lint                 # Biome lint and format check
 mise run typecheck            # strict tsc for the CLI and the plugin
 mise run test:file tests/core # only the named test files or folders
 mise run test                 # the full suite (runs build first)
 mise run ci                   # lint, docs, prune, typecheck, build, test
-mise run prune:check          # knip: unused files, exports, packages
-mise run prune:fix --dry      # what prune:fix would remove
-mise run sync:check           # drift checks
 mise run                      # default: ci, plugin:ci, then e2e
 ```
 

@@ -8,6 +8,7 @@ User and developer docs; the root [AGENTS.md](../AGENTS.md) holds the repo-wide 
 - [`docs/agent-contract.md`](agent-contract.md): what an agent needs from the CLI, MCP server, plugin, and skills. [`tests/contract/`](../tests/contract/) checks each item.
 - [`docs/best-practices.md`](best-practices.md): each practice webular follows, with its source and the test that checks it.
 - [`docs/development.md`](development.md), [`docs/build-and-run.md`](build-and-run.md), and [`docs/install.md`](install.md): how to build, test, and install.
+- [`docs/tasks.md`](tasks.md): every `mise` task, written by `mise run docs:tasks`.
 - [`docs/commands.md`](commands.md), [`docs/architecture.md`](architecture.md), [`docs/reliability.md`](reliability.md), and [`docs/cua-browser-mode.md`](cua-browser-mode.md): reference pages.
 - [`docs/jev.md`](jev.md): how to set up the Jev key on any OS, and each route to Jev that webular supports.
 - [`docs/how-it-works.md`](how-it-works.md) and [`docs/why-webular.md`](why-webular.md): how webular works inside, and why to pick it.

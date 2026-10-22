@@ -467,3 +467,5 @@
 {"path": "tests/jev/AGENTS.md", "sha": "eed5e1bab588538438416342f906767e2953ebf76a3dbc6b5a82c8f0d5ec5a91"}
 {"path": "tests/jev/evals/AGENTS.md", "sha": "6f41283d036da6d3d887453f0c8a3b5b75f133acdf75c5767de2d4417f4dacb3"}
 {"path": "tests/ci/AGENTS.md", "sha": "e53f54d5340f636ef5a2933b427c2f514880ca4f030c800f51cde40af69d02f6"}
+{"path": "AGENTS.md", "sha": "1e45b511bc2e139df21c5a9fcd5f7f18a6b09745b2f88d3802e041b548b7ba89"}
+{"path": "docs/AGENTS.md", "sha": "3f03fec61842ceea9ef624b0ec1bd8aeddd1d97651e03171f1e7f8e49b2a2095"}
