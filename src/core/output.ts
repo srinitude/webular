@@ -64,6 +64,15 @@ export function selectFields(data: unknown, fields: readonly string[] | undefine
   return Object.fromEntries(fields.filter((f) => f in data).map((f) => [f, data[f]]))
 }
 
+// A --select name the output does not hold, with the names it does: the stderr
+// note that keeps a typo from passing silently as `{}`.
+export function unknownFieldsNote(data: unknown, fields: readonly string[] | undefined) {
+  if (!fields?.length || !isRec(data)) return undefined
+  const unknown = fields.filter((f) => !(f in data))
+  if (!unknown.length) return undefined
+  return `select: no field ${unknown.map((f) => `"${f}"`).join(', ')} in this output; fields: ${Object.keys(data).sort().join(', ')}`
+}
+
 export const parseFields = (raw: string | undefined): string[] | undefined =>
   raw
     ?.split(',')
@@ -135,8 +144,11 @@ export function emit(
   opts: EmitOptions,
 ): Effect.Effect<void, OutputError | SandboxError, FileSystem.FileSystem | Path.Path> {
   const text = formatOutput(data, opts)
-  if (opts.output) return Effect.flatMap(outPath(opts.output), (path) => writeFile(path, text))
-  return Effect.sync(() => {
-    process.stdout.write(`${text}\n`)
-  })
+  const note = unknownFieldsNote(data, opts.fields)
+  const write = opts.output
+    ? Effect.flatMap(outPath(opts.output), (path) => writeFile(path, text))
+    : Effect.sync(() => {
+        process.stdout.write(`${text}\n`)
+      })
+  return Effect.andThen(write, note ? logErr(note) : Effect.void)
 }

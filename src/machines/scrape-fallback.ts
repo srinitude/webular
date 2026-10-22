@@ -4,8 +4,9 @@
 // capture; the plain fetch either returns a page or is refused as a PDF; a page whose
 // main text is a script shell renders in the background driver unless render
 // is 'off'; a failed render keeps the fetched page; a refused PDF reads
-// through the parse reader. Final states: the page as fetched (`fetchedPage`,
-// `keptFetched`), the rendered page, the PDF text, a robots block, or a failure.
+// through the parse reader, and a PDF with no text layer (scanned) is
+// PDF_FAILED. Final states: the page as fetched (`fetchedPage`, `keptFetched`),
+// the rendered page, the PDF text, a robots block, or a failure.
 // tests/machines/machine-sync.test.ts ties each event to its branch in the code.
 import { setup } from 'xstate'
 

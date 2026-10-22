@@ -11,6 +11,7 @@ import {
   shortError,
   stableJson,
   toNdjson,
+  unknownFieldsNote,
 } from '../../src/core/output.ts'
 
 describe('stableJson', () => {
@@ -30,6 +31,14 @@ describe('selectFields / toNdjson', () => {
   test('keeps only named top-level fields, skips unknown ones', () => {
     expect(selectFields({ a: 1, b: 2, c: 3 }, ['c', 'a', 'nope'])).toEqual({ c: 3, a: 1 })
     expect(selectFields({ a: 1 }, undefined)).toEqual({ a: 1 })
+  })
+
+  test('a --select name the output lacks gets a stderr note listing the fields', () => {
+    expect(unknownFieldsNote({ b: 1, a: 2 }, ['a', 'nope'])).toBe(
+      'select: no field "nope" in this output; fields: a, b',
+    )
+    expect(unknownFieldsNote({ a: 1 }, ['a'])).toBeUndefined()
+    expect(unknownFieldsNote([1], ['a'])).toBeUndefined()
   })
 
   test('one sorted-key line per item of the first array field', () => {

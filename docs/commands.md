@@ -28,6 +28,20 @@ usage line, the global options, the exit codes, and examples.
 | `feed`      | Reads an RSS 2.0 or Atom 1.0 feed and lists its items (title, link, date, summary) |
 | `jev`       | Learns from recorded Jev calls (`learn`), or labels one call as an eval case (`correct`) |
 
+### Missing fields and missing text
+
+- `--select` with a field the output lacks still prints the fields it has and
+  exits `0`. A stderr note names each missing field and lists the fields there
+  are, for example:
+  `select: no field "titel" in this output; fields: ...`.
+  The check runs after the command ends, so the finished work is never lost.
+- `parse` and `scrape` exit `1` on a PDF with no text layer, such as a scanned
+  or image-only PDF. webular has no OCR, so the error says to run the PDF
+  through an OCR tool, such as `ocrmypdf`, first.
+- `answer` and `research` keep a page when Readability finds no main text on
+  it, and read the page's body text instead. A run whose pages load exits `0`,
+  even when another fetch fails.
+
 ### Related pages
 
 - [Browser mode (Cua)](cua-browser-mode.md): read it before `scrape --render cua` or

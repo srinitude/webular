@@ -45,7 +45,13 @@ const readBounded = Effect.fnUntraced(function* (pdf: Pdf, maxPages: number, tim
     Effect.timeoutOption(timeoutMs),
   )
   const text = merge(texts)
-  if (texts.length === pdf.numPages) return text
+  // An image-only (scanned) PDF has no text layer; empty text would read as success.
+  if (texts.length === pdf.numPages)
+    return text.trim()
+      ? text
+      : yield* fail(
+          'parse: PDF has no text layer (scanned or image-only); webular has no OCR, so run it through an OCR tool such as ocrmypdf first',
+        )
   const stop = Option.isNone(done)
     ? `WEBULAR_PDF_TIMEOUT_MS: over ${timeoutMs} ms`
     : `WEBULAR_PDF_MAX_PAGES: ${maxPages}-page cap`

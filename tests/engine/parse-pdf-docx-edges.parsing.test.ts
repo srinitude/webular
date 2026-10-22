@@ -31,6 +31,20 @@ test(
   ),
 )
 
+// "page 1" drawn as six spaces: same byte length, so the xref stays valid; no text.
+const imageOnlyPdf = () => encode(decode(textPdf(1)).replace('(page 1)', '(      )'))
+
+test(
+  'an image-only PDF (no text layer) fails and names the OCR next step',
+  eff(
+    Effect.gen(function* () {
+      expect(yield* failMsg(pdfText(imageOnlyPdf()))).toBe(
+        'parse: PDF has no text layer (scanned or image-only); webular has no OCR, so run it through an OCR tool such as ocrmypdf first',
+      )
+    }),
+  ),
+)
+
 test(
   'an encrypted PDF fails and says it is password-protected',
   eff(

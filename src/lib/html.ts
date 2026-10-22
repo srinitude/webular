@@ -86,22 +86,23 @@ function articleFrom(document: DomDocument, rawHtml: string): Article {
   const doc = document as unknown as Document
   // The readerable check skips Readability's scoring pass on non-article pages;
   // those pages still keep their body text.
-  if (!isProbablyReaderable(doc)) {
-    dropBoilerplate(document.body)
-    return {
-      title: docTitle,
-      contentHtml: sanitizeHtml(document.body.innerHTML),
-      text: bodyText(document.body),
-    }
-  }
+  if (!isProbablyReaderable(doc)) return bodyArticle(document.body, docTitle)
   return readableArticle(doc, docTitle, rawHtml)
+}
+
+// The page's boilerplate-free body text: the path for non-article pages and the
+// fallback when Readability finds no main text (trafilatura's baseline does the same).
+function bodyArticle(body: DomDocument['body'], title: string): Article {
+  dropBoilerplate(body)
+  return { title, contentHtml: sanitizeHtml(body.innerHTML), text: bodyText(body) }
 }
 
 // The serializer hands back the article element itself, so its HTML is read
 // before the alt swap and its text after, with no second parse.
 function readableArticle(doc: Document, docTitle: string, rawHtml: string): Article {
   const parsed = new Readability(doc, { serializer: (node) => node as Element }).parse()
-  if (!parsed) return { title: docTitle, contentHtml: sanitizeHtml(rawHtml), text: '' }
+  // Readability strips the document it scores, so the fallback reads a fresh parse.
+  if (!parsed?.content?.textContent?.trim()) return freshBody(rawHtml, docTitle)
   const contentHtml = sanitizeHtml(parsed.content?.innerHTML ?? '')
   if (parsed.content) inlineAlts(parsed.content as unknown as DomDocument['body'])
   return {
@@ -109,6 +110,12 @@ function readableArticle(doc: Document, docTitle: string, rawHtml: string): Arti
     contentHtml,
     text: dropInvisible(parsed.content?.textContent ?? ''),
   }
+}
+
+function freshBody(rawHtml: string, title: string): Article {
+  const { body } = parseHTML(rawHtml).document
+  dropHidden(body)
+  return bodyArticle(body, title)
 }
 
 // ONE linkedom parse per page: titles, links, and images are read BEFORE
