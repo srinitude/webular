@@ -62,7 +62,8 @@ export function pageBodyHtml(html: string): string {
 // already cleared of non-text and hidden elements.
 function bodyText(body: DomDocument['body']): string {
   inlineAlts(body)
-  return dropInvisible(textOf(body))
+  // Invisible characters go first: \s matches U+FEFF, so textOf would turn it into a space.
+  return textOf({ textContent: dropInvisible(body.textContent ?? '') })
 }
 
 function articleFrom(document: DomDocument, rawHtml: string): Article {
