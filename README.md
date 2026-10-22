@@ -1,169 +1,178 @@
 # webular
 
-[![npm](https://img.shields.io/npm/v/webular.svg)](https://www.npmjs.com/package/webular)
 [![CI](https://github.com/srinitude/webular/actions/workflows/ci.yml/badge.svg)](https://github.com/srinitude/webular/actions/workflows/ci.yml)
-[![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![CodeQL](https://github.com/srinitude/webular/actions/workflows/codeql.yml/badge.svg)](https://github.com/srinitude/webular/actions/workflows/codeql.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/srinitude/webular/badge)](https://scorecard.dev/viewer/?uri=github.com/srinitude/webular)
+[![license](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
-`webular` is a web research CLI and MCP server. It searches, scrapes, crawls, maps, extracts, summarizes, and answers with sources. It uses one optional key: Jev (`TYPESAFE_API_KEY`).
+Search, scrape, crawl, and answer with sources, from your own machine. A CLI and MCP server with one optional key: Jev.
 
-With `--json`, every command prints the same JSON shape. Each command but `mcp` is also an MCP tool with the same name.
+```console
+$ webular search "bun javascript runtime" --limit 2
+1. Bun: Fast JavaScript runtime, bundler, transpiler and package manager
+   https://github.com/Jarred-Sumner/bun
+   https://news.ycombinator.com/item?id=31993622
+2. Bun: Fast JavaScript runtime, transpiler, and NPM client written in Zig
+   https://bun.sh/?launch
+   https://news.ycombinator.com/item?id=31993429
+```
 
-[Jev](src/lib/jev/AGENTS.md), TypeSafe's System One decision model, makes the judgment calls. The rest is built on [Mastra](src/workflows/AGENTS.md) workflows, Effect, [XState](src/machines/AGENTS.md) with the Stately agent, and Bun. Readability, linkedom, Turndown, unpdf, mammoth, and anydoc read pages. agent-browser and Cua drive real browsers and apps. mise's task graph runs the builds and checks. [Architecture](docs/architecture.md) has the details.
-
-## Why it's different
-
-- It runs on your machine, with no webular server in the middle, and it is open source under Apache-2.0.
-- One key: Jev (`TYPESAFE_API_KEY`), reached through the direct TypeSafe endpoint. Without it, each decision falls back to its rule-based baseline.
-- One tool covers search, scrape, crawl, map, extract, summarize, answer, and research, as a CLI, an MCP server, an agent plugin, and skills.
-- It respects robots.txt by default (`scrape --ignore-robots` opts out). A date-pinned replay with recorded Jev answers can give the same output again, but live pages still change.
-- Where others are ahead: Exa gives stronger answers, and Exa, Brave, and Google run their own search indexes. [The benchmark results](docs/benchmarks.md) hold every number.
-
-[How it works](docs/how-it-works.md) and [Why webular](docs/why-webular.md) go deeper. To set up the Jev key on any OS, read [Jev in webular](docs/jev.md). The [docs index](docs/README.md) links every doc.
+That search ran with no key. webular is also an MCP server, an agent plugin, and a set of skills. With `--json`, every command prints the same JSON shape.
 
 ## Why webular
 
-- **No paid API.** Every feature runs on open-source parts. The one optional key, Jev, only sharpens the judgment calls. Without it, each decision uses its rule-based baseline.
-- **One CLI.** Search, scrape, crawl, map, extract, answer, research, and feed share one command set and one JSON contract.
+- **No paid API.** Every feature runs on open-source parts, on your machine, with no webular server in the middle. It is open source under Apache-2.0.
+- **One optional key.** Jev (`TYPESAFE_API_KEY`), reached through the direct TypeSafe endpoint, sharpens the judgment calls. Without it, each decision falls back to its rule-based baseline.
+- **One tool.** Search, scrape, crawl, map, extract, summarize, answer, research, and feed share one command set and one JSON contract.
+- **Polite and repeatable.** It respects robots.txt by default (`scrape --ignore-robots` opts out). A date-pinned replay with recorded Jev answers can give the same output again, but live pages still change.
+
+[Why webular](docs/why-webular.md) goes deeper.
+
+## How it compares
+
+| Tool | Key needed | Where it runs | In the committed peer run |
+|---|---|---|---|
+| webular | None (Jev is optional) | Your machine | Scored |
+| Exa | Yes | Hosted API with its own search index | Scored |
+| Firecrawl | Yes | Hosted API | Scored |
+| Tavily | Yes | Hosted API | No scored calls |
+| Perplexity | Yes | Hosted API | No scored calls |
+
 <!-- bench:start readme -->
 - **Measured, not claimed.** In [the peer run from Oct. 22, 2026 at 17:42 UTC](bench/results/peers-2026-10-22T17-42-50-204Z.json), webular search scored 1.000 on 4 search tasks, while exa scored 1.000 on 4 and firecrawl scored 1.000 on 4. A score of 1 means every answer was right. Webular is even with the best rival, exa. Read [the benchmark results](docs/benchmarks.md) for every score and the method behind it.
 - **Agent matrix.** 18 of 75 cells scored: webular with Jev off and on, and 23 alternatives, on 3 agent models. A cell is one tool used by one AI agent model; the rest were skipped for lack of a key or an agent adapter. Source: the agent run from Oct. 22, 2026 at 06:24 UTC.
 <!-- bench:end -->
 
-## Quickstart
-
-Run it once with no install. The first two commands need no network.
-
-```bash
-npx webular --help
-npx webular summarize --text "Bun is a fast runtime. It runs TypeScript." --sentences 1 --json
-npx webular scrape https://example.com --json
-```
-
-`bunx webular` and `pnpm dlx webular` work the same way. `webular doctor` checks your setup.
+Where others are ahead: Exa, Brave, and Google run their own search indexes, and Exa reports citation precision, which webular does not measure in that run. [Peer benchmarks](docs/benchmarks-peers.md) has each rival's row, and [the benchmarks guide](docs/benchmarks-guide.md) explains every metric.
 
 ## Install
 
-The npm package is a small Node launcher. It lists eight `webular-<platform>` packages, and npm, Bun, and pnpm install only the one whose `os`, `cpu`, and `libc` fit. Nothing downloads after install.
+Run from source with [Bun](https://bun.sh):
 
 ```bash
-npm i -g webular      # needs Node
-bun add -g webular    # needs Bun, plus Node on PATH for the launcher
-pnpm add -g webular
+git clone https://github.com/srinitude/webular.git
+cd webular
+bun install --frozen-lockfile
+bun bin/webular.ts --help
 ```
 
-[Install channels](docs/install.md) lists every supported OS, CPU, and libc, and shows how to set `TYPESAFE_API_KEY` in bash, zsh, fish, PowerShell, and cmd. It covers Homebrew, Scoop, winget, release binaries with `SHA256SUMS` and provenance, and the `install.sh` and `install.ps1` scripts. It also covers upgrade, uninstall, and shell completions.
+[Install channels](docs/install.md) covers every package channel, release binaries with `SHA256SUMS` and provenance, upgrade, uninstall, and shell completions.
+
+## Quickstart
+
+1. Check your setup. `doctor` names each missing tool (trimmed output):
+
+   ```console
+   $ webular doctor
+   ok   network HTTP 200
+   ok   upgrade https://github.com/srinitude/webular/releases/latest
+   fail deepsec exit 143
+   ok   jev off (WEBULAR_JEV=off)
+   ```
+
+2. Read a page as clean markdown:
+
+   ```console
+   $ webular scrape https://example.com
+   # Example Domain
+
+   This domain is for use in documentation examples without needing permission. This is not a service; avoid relying on it for testing and monitoring purposes.
+   ```
+
+3. Summarize text with no network and no model:
+
+   ```console
+   $ webular summarize --text "Bun is a fast runtime. It runs TypeScript." --sentences 1 --json
+   {"figures":[],"picks":[{"end":22,"index":0,"source_url":null,"start":0,"text":"Bun is a fast runtime."}],"sentences":["Bun is a fast runtime."],"source_url":null,"summary":"Bun is a fast runtime."}
+   ```
+
+## Keys
+
+- **No key:** every command runs. Each Jev decision uses its built-in baseline.
+- **Jev key:** set `TYPESAFE_API_KEY`, from TypeSafe or another provider of Jev. On macOS, webular also reads the Keychain item `typesafe-ai-api-key`. `WEBULAR_JEV=off` turns Jev off.
+
+```bash
+security add-generic-password -a "$USER" -s typesafe-ai-api-key -w   # macOS Keychain
+read -rs TYPESAFE_API_KEY && export TYPESAFE_API_KEY                  # this shell only
+```
+
+[Jev in webular](docs/jev.md) shows the setup for every OS and shell.
+
+## Commands
+
+| Command | What it does | Example |
+|---|---|---|
+| `search`    | Searches the web with no key, or one keyless source | `webular search "bun runtime" --source wikipedia` |
+| `scrape`    | Reads one URL as clean markdown or JSON | `webular scrape https://example.com --json` |
+| `crawl`     | Reads a site page by page on the same host | `webular crawl https://example.com` |
+| `map`       | Finds all URLs for a domain | `webular map https://example.com` |
+| `extract`   | Pulls fields with CSS selectors or a schema | `webular extract --help` |
+| `summarize` | Picks the key sentences (no model) | `webular summarize --text "..." --sentences 1` |
+| `answer`    | Answers from sources | `webular answer --help` |
+| `research`  | Runs a multi-step research loop → cited markdown report | `webular research "web scraping in 2026" --depth 3 -o report.md` |
+| `parse`     | Turns local docs into markdown | `webular parse --help` |
+| `media`     | Downloads media; takes a screenshot or PDF in a real browser | `webular media --help` |
+| `monitor`   | Tracks changes to a URL over time | `webular monitor --help` |
+| `batch`     | Scrapes many URLs at once | `webular batch --help` |
+| `doctor`    | Checks your setup and toolchain | `webular doctor --json` |
+| `tasks`     | Lists the mise task graph that defines the commands | `webular tasks` |
+| `mcp`       | Serves webular's features as an MCP server | `webular mcp` |
+| `diagram`   | Lists the XState machines that model the CLI flows | `webular diagram` |
+| `audit`     | Reports whether `deepsec` is there, plus a scan plan | `webular audit` |
+| `act`       | Drives a real browser | `webular act --help` |
+| `feed`      | Reads an RSS 2.0 or Atom 1.0 feed and lists its items | `webular feed https://hnrss.org/frontpage --limit 5` |
+| `jev`       | Learns from recorded Jev calls, or labels one as an eval case | `webular jev --help` |
+
+`search --source` also takes `hackernews` and `arxiv`. `webular <command> --help` lists every flag. [Command reference](docs/commands.md) describes each command.
 
 ## Use it from an agent
 
-An agent can use webular in three ways. Pick one. Each way runs the same Mastra workflows, and each judgment call inside them goes to Jev, or to a rule-based fallback when no key is set.
+Each way runs the same Mastra workflows, and each judgment call inside them goes to Jev, or to a rule-based fallback when no key is set.
 
-- **MCP server.** `webular mcp` serves every command as a tool over stdio. Any MCP client can run it. Most clients read this block under `mcpServers`; VS Code uses `servers` instead:
+- **MCP server.** `webular mcp` serves every command as a tool over stdio. Most clients read this block under `mcpServers`; VS Code uses `servers` instead:
 
   ```json
   { "mcpServers": { "webular": { "command": "webular", "args": ["mcp"] } } }
   ```
 
-  Some hosts also have a one-line add command. In Claude Code:
+  In Claude Code, run `claude mcp add webular -- webular mcp`. In Codex CLI, run `codex mcp add webular -- webular mcp`. [Install channels](docs/install.md#mcp-clients) has the setup for Claude Desktop, Cursor, Windsurf, Cline, Gemini CLI, VS Code, and Zed.
 
-  ```bash
-  claude mcp add webular -- webular mcp
-  ```
-
-  In Codex CLI:
-
-  ```bash
-  codex mcp add webular -- webular mcp
-  ```
-
-  [Install channels](docs/install.md#mcp-clients) has the setup for each client, including Claude Desktop, Cursor, Windsurf, Cline, Gemini CLI, VS Code, and Zed.
-
-- **Agent plugin.** It bundles the MCP server and four skills: research, interview, plain language, and Markdown. Hosts that read plugin marketplaces can install it. In Claude Code:
-
-  ```text
-  /plugin install webular --marketplace srinitude/webular
-  ```
-
+- **Agent plugin.** It bundles the MCP server and four skills: research, interview, plain language, and Markdown. In Claude Code, run `/plugin install webular --marketplace srinitude/webular`.
 - **Skills only.** Copy a folder from [`plugins/webular/skills`](plugins/webular/skills) into your agent's skills folder. Each skill names only real commands and flags.
 
-The plugin's server has 19 command tools: `search`, `scrape`, `map`, `summarize`, `crawl`, `extract`, `answer`, `research`, `jev`, `parse`, `media`, `monitor`, `batch`, `act`, `feed`, `doctor`, `tasks`, `diagram`, and `audit`. `webular mcp` has 24 MCP tools: those 19, `machine.next`, and four low-level HTML tools (`web.fetch`, `web.links`, `web.markdown`, and `web.readability`). Each result holds at most 8,000 characters. A longer one comes back with a `cursor` for the next part. [Agent contract](docs/agent-contract.md) lists what each surface promises. [The plugin README](plugins/webular/README.md) covers the HTTP server for local work.
+The plugin's server has 19 command tools: every command but `mcp`. `webular mcp` has 24 MCP tools: those 19, `machine.next`, and four low-level HTML tools (`web.fetch`, `web.links`, `web.markdown`, and `web.readability`). Each result holds at most 8,000 characters; a longer one comes back with a `cursor` for the next part. `machine.next` replays events on one of webular's flow machines (`cliDispatch`, `commandLifecycle`, `fetch`, `jevCommand`, `mcpServe`, or `scrapeFallback`) and returns its state and allowed next events, with no model call. [Agent contract](docs/agent-contract.md) lists what each surface promises. [The plugin README](plugins/webular/README.md) covers the HTTP server for local work.
 
-The `machine.next` tool replays events on one of webular's flow machines (`cliDispatch`, `commandLifecycle`, `fetch`, `jevCommand`, `mcpServe`, or `scrapeFallback`). It returns the machine's state and the events it allows next, using the Stately agent's replay. It calls no model.
+## How it works
 
-## Commands
+- **[Jev](src/lib/jev/AGENTS.md)**, TypeSafe's System One decision model, makes the judgment calls inside each command. A System One model gives a fast, typed answer to one narrow question.
+- **[Mastra](src/workflows/AGENTS.md)** workflows run each command as a series of steps.
+- **Effect** is the base of all the code, so errors and config are typed values the code must handle.
+- **[XState](src/machines/AGENTS.md)** machines, with the Stately agent, model each CLI flow so it can be tested and replayed.
 
-| Command | What it does |
-|---|---|
-| `search`    | Searches the web with no key, or one keyless source |
-| `scrape`    | Reads one URL as clean markdown or JSON |
-| `crawl`     | Reads a site page by page on the same host |
-| `map`       | Finds all URLs for a domain |
-| `extract`   | Pulls fields with CSS selectors or a schema |
-| `summarize` | Picks the key sentences (no model) |
-| `answer`    | Answers from sources |
-| `research`  | Runs a multi-step research loop → cited markdown report |
-| `parse`     | Turns local docs into markdown |
-| `media`     | Downloads media; takes a screenshot or PDF in a real browser |
-| `monitor`   | Tracks changes to a URL over time |
-| `batch`     | Scrapes many URLs at once |
-| `doctor`    | Checks your setup and toolchain |
-| `tasks`     | Lists the mise task graph that defines the commands |
-| `mcp`       | Serves webular's features as an MCP server |
-| `diagram`   | Lists the XState machines that model the CLI flows |
-| `audit`     | Reports whether `deepsec` is there, plus a scan plan |
-| `act`       | Drives a real browser |
-| `feed`      | Reads an RSS 2.0 or Atom 1.0 feed and lists its items |
-| `jev`       | Learns from recorded Jev calls, or labels one as an eval case |
+Bun runs it. Readability, linkedom, Turndown, unpdf, mammoth, and anydoc read pages. agent-browser and Cua drive real browsers and apps. mise's task graph runs the builds and checks. [How it works](docs/how-it-works.md) and [Architecture](docs/architecture.md) have the details. The [docs index](docs/README.md) links every doc.
 
-```bash
-webular search "bun javascript runtime" --json
-webular search "bun runtime" --source wikipedia --json   # also: hackernews, arxiv
-webular feed https://hnrss.org/frontpage --limit 5
-webular map https://example.com
-webular research "web scraping in 2026" --depth 3 -o report.md
-```
+## Output, exit codes, and behavior
 
-`webular <command> --help` lists every flag. [Command reference](docs/commands.md) describes each command.
-
-## Output and exit codes
-
-Global options: `--json`, `--ndjson`, `--select <a,b>`, `-o/--output <file>`, `--timeout <ms>` (per network try), `--no-cache`, `-h/--help`, and `-V/--version`. `--json` prints JSON with sorted keys and a stable shape.
-
-- `0`: success
-- `1`: failure
-- `2`: usage error
-- `3`: some `batch` items failed
-- `127`: a command could not start
-- `128 + n`: stopped by signal `n` (`130` for SIGINT, `143` for SIGTERM)
-
-## How it behaves
+Global options: `--json`, `--ndjson`, `--select <a,b>`, `-o/--output <file>`, `--timeout <ms>` (per network try), `--no-cache`, `-h/--help`, and `-V/--version`. `--json` prints JSON with sorted keys and a stable shape. Exit codes: `0` success, `1` failure, `2` usage error, `3` some `batch` items failed, `127` a command could not start, and `128 + n` stopped by signal `n` (`130` for SIGINT, `143` for SIGTERM).
 
 - **robots.txt.** `scrape` returns status `blocked` for a page that robots.txt disallows. `--ignore-robots` fetches one URL anyway and marks it `disallowed`. `crawl`, `map`, and `batch` always honor robots.txt.
-- **One optional key.** The only key webular uses is a Jev key, `TYPESAFE_API_KEY`, from TypeSafe or another provider of Jev. Without it, each Jev decision uses its built-in baseline, and every command still runs.
 - **Same input, same result.** Pages are cached in `~/.cache/webular`. `WEBULAR_DETERMINISTIC=1` makes search wait for every source. `WEBULAR_AS_OF` pins the run date that answers cite.
 - **Offline.** `summarize --text`, `parse`, `tasks`, `diagram`, and `--help` need no network.
+- **Settings.** All optional: `WEBULAR_CACHE_DIR` (default `~/.cache/webular`), `WEBULAR_NO_CACHE=1` (same as `--no-cache`), `WEBULAR_MAILTO` (an email for the polite pool of scholarly sources), `WEBULAR_TRACE=1` (source notes on stderr, such as a spent rate limit), and `WEBULAR_BIN` (the binary the plugin's MCP server calls).
 
-[Reliability](docs/reliability.md) covers retries, archive copies, and what happens when a site will not answer.
-
-## Configuration
-
-Every setting is optional and has a default.
-
-- `TYPESAFE_API_KEY`: the Jev key. On macOS, webular also reads it from the Keychain item `typesafe-ai-api-key`. `WEBULAR_JEV=off` turns Jev off.
-- `WEBULAR_CACHE_DIR`: the cache folder (default `~/.cache/webular`).
-- `WEBULAR_NO_CACHE=1`: fetch every page fresh, the same as `--no-cache`.
-- `WEBULAR_DETERMINISTIC=1` and `WEBULAR_AS_OF`: see above.
-- `WEBULAR_MAILTO`: an email address for the polite pool of scholarly sources.
-- `WEBULAR_TRACE=1`: prints source notes on stderr, such as a spent rate limit.
-- `WEBULAR_BIN`: the `webular` binary that the plugin's MCP server calls.
-
-Browser mode uses agent-browser or Cua. Read [Browser mode (Cua)](docs/cua-browser-mode.md) before `scrape --render cua` or `act --goal`.
+Browser mode uses agent-browser or Cua; read [Browser mode (Cua)](docs/cua-browser-mode.md) before `scrape --render cua` or `act --goal`. [Reliability](docs/reliability.md) covers retries, archive copies, and sites that will not answer.
 
 ## Platforms
 
 Prebuilt binaries cover `darwin-arm64`, `darwin-x64`, `linux-x64`, `linux-arm64`, `linux-x64-musl`, `linux-arm64-musl`, `windows-x64`, and `windows-arm64`. On any other platform, run from source with Bun.
 
-## Develop
+## Troubleshooting
+
+- Run `webular doctor --json` first. It names each missing tool.
+- Exit code `127` means a helper tool is missing. Install it, or run `doctor`.
+- For a dead page or a site that will not answer, read [Reliability](docs/reliability.md).
+
+## Contributing
 
 Install [mise](https://mise.jdx.dev). It pins Bun and every other tool.
 
@@ -174,18 +183,15 @@ mise run test:file tests/contract       # one folder; the full `mise run test` i
 mise run                                # the whole CI chain
 ```
 
-Agents start at [AGENTS.md](AGENTS.md). People start at [CONTRIBUTING.md](CONTRIBUTING.md). [Development](docs/development.md) covers build rules and live-internet tests. [Architecture](docs/architecture.md) shows how a command runs.
+People start at [CONTRIBUTING.md](CONTRIBUTING.md); agents start at [AGENTS.md](AGENTS.md). [Development](docs/development.md) covers build rules and live-internet tests.
 
-## Troubleshooting
+## Community
 
-- Run `webular doctor --json` first. It names each missing tool.
-- Exit code `127` means a helper tool is missing. Install it, or run `doctor`.
-- For a dead page or a site that will not answer, read [Reliability](docs/reliability.md).
-
-## Project
-
+- Questions and help: [SUPPORT.md](SUPPORT.md) and [GitHub issues](https://github.com/srinitude/webular/issues).
+- Rules: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and [GOVERNANCE.md](GOVERNANCE.md).
 - Security: report a flaw privately through [Report a vulnerability](https://github.com/srinitude/webular/security/advisories/new). See [SECURITY.md](SECURITY.md).
-- Changes: [CHANGELOG.md](CHANGELOG.md) and [GitHub releases](https://github.com/srinitude/webular/releases).
-- Help: [SUPPORT.md](SUPPORT.md). Rules: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) and [GOVERNANCE.md](GOVERNANCE.md).
-- Cite: [CITATION.cff](CITATION.cff).
-- License: Apache-2.0 © Kiren Srinivasan. See [LICENSE](LICENSE).
+- Changes: [CHANGELOG.md](CHANGELOG.md) and [GitHub releases](https://github.com/srinitude/webular/releases). Cite: [CITATION.cff](CITATION.cff).
+
+## License
+
+Apache-2.0 © Kiren Srinivasan. See [LICENSE](LICENSE).
