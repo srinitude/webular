@@ -6,7 +6,7 @@
 import { expect, test } from 'bun:test'
 import { fileURLToPath } from 'node:url'
 import { Effect } from 'effect'
-import { fill, pickRun, render, strays } from '../../scripts/bench/peers/docs.ts'
+import { DOCS, fill, pickRun, render, strays } from '../../scripts/bench/peers/docs.ts'
 import { eff } from '../_support/run.ts'
 
 const root = fileURLToPath(new URL('../../', import.meta.url))
@@ -48,3 +48,19 @@ test('a stale number inside a block is rewritten, and unknown blocks are reporte
     'webular scored 0.999 in 12 ms',
   ])
 })
+
+test(
+  'the bench:docs task description names every doc it rewrites',
+  eff(
+    Effect.gen(function* () {
+      for (const file of ['mise.toml', 'docs/tasks.md']) {
+        const text = yield* Effect.promise(() => Bun.file(`${root}${file}`).text())
+        const line = text.match(
+          /^(?:description = "Rewrite the generated benchmark|bench:docs: ).*$/m,
+        )
+        const missing = DOCS.filter((d) => !line?.[0].includes(d))
+        expect({ file, missing }).toEqual({ file, missing: [] })
+      }
+    }),
+  ),
+)

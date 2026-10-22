@@ -534,7 +534,7 @@ depends = ["setup"]
 run = "bun scripts/bench/scoreboard.ts"
 
 [tasks."bench:docs"]
-description = "Rewrite the generated benchmark blocks in README.md and docs/benchmarks.md from the committed peer run with the highest timestamp in bench/results"
+description = "Rewrite the generated benchmark blocks in README.md, docs/benchmarks.md, and docs/benchmarks-peers.md from the committed peer run with the highest timestamp in bench/results"
 depends = ["setup"]
 run = "bun scripts/bench/peers/docs.ts"
 

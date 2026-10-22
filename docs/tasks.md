@@ -8,7 +8,7 @@ Run `mise run <task>`. Each line gives the task, what it does, and the tasks it 
 bench: Benchmark cold start (wall + CPU) of the CLI and its network-free commands with hyperfine, then the summarizer scaling run at 10, 1,000 and 100,000 sentences (off the CI spine) [after setup]
 bench:data: Download the pinned public bench datasets (WebMainBench subset, Firecrawl scrape set) into .cache/bench-data and check each sha256 against bench/datasets (off the CI spine; a cached file makes no network call) [after setup]
 bench:data:pin: Rewrite bench/datasets/*.json from the cached files after a revision bump (off the CI spine) [after setup]
-bench:docs: Rewrite the generated benchmark blocks in README.md and docs/benchmarks.md from the committed peer run with the highest timestamp in bench/results [after setup]
+bench:docs: Rewrite the generated benchmark blocks in README.md, docs/benchmarks.md, and docs/benchmarks-peers.md from the committed peer run with the highest timestamp in bench/results [after setup]
 bench:matrix: Agent benchmark matrix: `test:models --agent` runs the Jev-off, Jev-on, and rival arms on the three subscription models into bench/results (paid and live; off the CI spine) [after build]
 bench:peers: Peer benchmark from recordings: webular vs Firecrawl, Exa, Tavily, Perplexity, Parallel; free and deterministic (off the CI spine) [after setup]
 bench:peers:live: Peer benchmark live: calls each keyed provider (at most 20 calls per peer), records responses, writes bench/results (off the CI spine) [after setup]
