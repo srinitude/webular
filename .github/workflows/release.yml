@@ -260,6 +260,7 @@ jobs:
           subject-path: dist/bin/webular-*
           sbom-path: dist/bin/webular.spdx.json
       - name: Attest build provenance for every release file
+        id: provenance
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
           subject-path: |
@@ -278,6 +279,15 @@ jobs:
           set -- dist/bin/webular-* dist/bin/SHA256SUMS dist/bin/install.sh dist/bin/install.ps1 dist/bin/webular.rb dist/bin/webular.json dist/bin/webular.1 dist/bin/webular.spdx.json
           gh release create "$GITHUB_REF_NAME" --draft $prerelease --title "$GITHUB_REF_NAME" --generate-notes --verify-tag "$@" \
             || gh release upload "$GITHUB_REF_NAME" "$@" --clobber
+      # OpenSSF Scorecard Signed-Releases looks for a *.sigstore.json release asset.
+      # The name stays outside the webular-* globs the publish job downloads.
+      - name: Attach the provenance bundle to the draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BUNDLE_PATH: ${{ steps.provenance.outputs.bundle-path }}
+        run: |
+          cp "$BUNDLE_PATH" dist/bin/webular.sigstore.json
+          gh release upload "$GITHUB_REF_NAME" dist/bin/webular.sigstore.json --clobber
 
   # Run each built executable on its native runner (musl ones in Alpine) before
   # anything is published. The draft release is readable with contents: write.
