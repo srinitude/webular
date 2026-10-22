@@ -86,10 +86,9 @@ function articleFrom(document: DomDocument, rawHtml: string): Article {
   // libraries' type worlds don't overlap, hence the one sanctioned cast.
   // Readability mutates its document; no caller reads it afterwards, so no clone.
   const doc = document as unknown as Document
-  // The readerable check skips Readability's scoring pass on non-article pages,
-  // and the size cap skips it on huge ones; both still keep their body text.
-  if (rawHtml.length > READABLE_MAX_CHARS || !isProbablyReaderable(doc))
-    return bodyArticle(document.body, docTitle)
+  // Non-article and huge pages keep body text; Readability has no size cap, scrape no byte cap.
+  const skip = rawHtml.length > READABLE_MAX_CHARS || !isProbablyReaderable(doc)
+  if (skip) return bodyArticle(document.body, docTitle)
   return readableArticle(doc, docTitle, rawHtml)
 }
 
@@ -117,12 +116,7 @@ function readableArticle(doc: Document, docTitle: string, rawHtml: string): Arti
   const body = freshBody(rawHtml, article.title)
   return body.text.trim().length > article.text.trim().length ? body : article
 }
-
-// Readability scores the whole tree with no size limit of its own; past this many
-// HTML characters a page keeps its body text instead. The answer path caps pages
-// at 400,000 characters, so only uncapped callers (scrape) reach it.
 export const READABLE_MAX_CHARS = 2_000_000
-
 // ponytail: length rule. A thin pick loses to fuller body text (code, math kept).
 const THIN_TEXT = 200
 
