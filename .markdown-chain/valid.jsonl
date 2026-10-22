@@ -655,3 +655,7 @@
 {"path": "plugins/webular/skills/webular-research/SKILL.md", "sha": "288ddd0933631c2e86bbcd4783e516a37c869210a40eecf6dc7fd76a2e05eb9e"}
 {"path": "plugins/webular/src/AGENTS.md", "sha": "c34ba5ae44676dffd239de1beb61fc286cce550e487efca6464222f5b96ac9a9"}
 {"path": "tests/commands/AGENTS.md", "sha": "6f35bb0f07a0cb3490c09a1bd73524f83a645a41fa590239b818f93f3170c90d"}
+{"path": "tests/lib/AGENTS.md", "sha": "5c9ad1812d4f2e9d2b645d2e2a2c002318b532e6be606316d8319b2eb9d27435"}
+{"path": "src/workflows/AGENTS.md", "sha": "ae3838e95cc4ed2e031ea4026fbf8b948eb7b38557f14be2b67fb8a504e1256d"}
+{"path": "src/lib/AGENTS.md", "sha": "0bf26d9604366f82a91d6203de28d78e869fd6f455534fd429ea827d24dbd8f6"}
+{"path": "plugins/webular/skills/webular-research/SKILL.md", "sha": "aba51fde9c55fd4abc120b07092aaecf9bf98b108683da7c1edc40d20aa45023"}
