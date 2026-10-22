@@ -1,10 +1,11 @@
-// robots.txt gate: a one-off scrape, batch, and map never GET a disallowed
+// robots.txt gate: a one-off scrape, batch, map, and crawl never GET a disallowed
 // path; only `ignoreRobots` on a named URL fetches it anyway. RFC 9309 status
 // rules: a 4xx robots.txt allows all, a 5xx one disallows all.
 import { expect, test } from 'bun:test'
 import { Effect } from 'effect'
 import { isAllowed, robotsFromResponse } from '../../src/lib/robots-txt.ts'
 import { batchWorkflow } from '../../src/workflows/batch.ts'
+import { crawlWorkflow } from '../../src/workflows/crawl.ts'
 import { mapWorkflow } from '../../src/workflows/map.ts'
 import { scrapeWorkflow } from '../../src/workflows/scrape.ts'
 import { type Routes, startFixture } from '../_support/fixture.ts'
@@ -105,6 +106,43 @@ const mapBlocked = Effect.gen(function* () {
   expect(fx.hits('/private/page')).toBe(0)
 })
 test('map: a disallowed target is never fetched for its page links', eff(mapBlocked), 15_000)
+
+const crawl = (input: Record<string, unknown>) =>
+  runFlow(() => crawlWorkflow.createRun({ runId: `robots-crawl:${input['url']}` }), input)
+
+const crawlRootBlocked = Effect.gen(function* () {
+  const fx = yield* startFixture(disallowPrivate)
+  const url = `${fx.origin}/private/page`
+  const out = yield* crawl({ url })
+  expect(out).toMatchObject({ root: url, count: 0, pages: [] })
+  expect(out['errors']).toEqual([{ url, reason: 'blocked: robots.txt disallows /private/' }])
+  expect(fx.hits('/private/page')).toBe(0)
+})
+test(
+  'crawl: a disallowed root is never fetched and gets no archive fallback',
+  eff(crawlRootBlocked),
+  15_000,
+)
+
+const crawlPageBlocked = Effect.gen(function* () {
+  const link = (href: string) => `<a href="${href}">${href}</a>`
+  const root = () =>
+    new Response(
+      `<!doctype html><html><head><title>Root</title></head><body>${PROSE}${link('/open')}${link('/private/page')}</body></html>`,
+      {
+        headers: { 'content-type': 'text/html' },
+      },
+    )
+  const fx = yield* startFixture(() => ({ ...disallowPrivate(), '/': root }))
+  const out = yield* crawl({ url: `${fx.origin}/`, concurrency: 1 })
+  expect((out['pages'] as { url: string }[]).map((p) => p.url)).toContain(`${fx.origin}/open`)
+  expect(fx.hits('/private/page')).toBe(0)
+})
+test(
+  'crawl: a page the root links to and robots.txt disallows is never fetched',
+  eff(crawlPageBlocked),
+  30_000,
+)
 
 test('robots.txt status rules: 4xx allows all; 5xx, status 0, and no reply disallow all', () => {
   const allowed = (r: { status: number; body: string } | null) =>

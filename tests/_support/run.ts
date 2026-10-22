@@ -1,15 +1,18 @@
 // Bun's runner has no Effect adapter: one place runs a test body as an Effect.
 // Scoped, so a body may acquire fixtures that release when the test ends, and
 // given the Bun platform services (FileSystem, Path, ChildProcessSpawner) and
-// a Readability worker pool that closes with the test, as stepRuntime gives.
+// a Readability worker pool that closes with the test, and the robots.txt gate, as stepRuntime gives.
 import * as BunServices from '@effect/platform-bun/BunServices'
 import { Effect, FileSystem, Layer, type Scope } from 'effect'
+import { RobotsGate } from '../../src/lib/robots-gate.ts'
 import { ParsePool } from '../../src/lib/sources.ts'
 
-const testLayer = Layer.mergeAll(BunServices.layer, ParsePool.layer)
+const testLayer = Layer.mergeAll(BunServices.layer, ParsePool.layer, RobotsGate.layer)
 
 export const eff =
-  <A, E>(body: Effect.Effect<A, E, Scope.Scope | BunServices.BunServices | ParsePool>) =>
+  <A, E>(
+    body: Effect.Effect<A, E, Scope.Scope | BunServices.BunServices | ParsePool | RobotsGate>,
+  ) =>
   () =>
     Effect.runPromise(Effect.provide(Effect.scoped(body), testLayer))
 

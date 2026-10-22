@@ -425,3 +425,5 @@
 {"path": "docs/how-it-works.md", "sha": "72ca0d3dab4f710683a7f7ae462f3c498f3aeefac06b440fb7223f8504bfb8b1"}
 {"path": "docs/why-webular.md", "sha": "f23ea5f2bf359837ec625eeafa70feb6af29f67e648b80e9ed78b711badff493"}
 {"path": "docs/how-it-works.md", "sha": "a35b19556acc4109a3c3a81af46eaffdc0f345a35fe22fc5ae89eaf4faced665"}
+{"path": "src/lib/AGENTS.md", "sha": "f15ab4278bb65c0e7db899b45ee6bac1d0e99eaf5eaf2792b9521bdf42397af0"}
+{"path": "src/workflows/AGENTS.md", "sha": "821200abd5ebb205a9ff6c2e459353aecc2ef50141fcad20521b71ec24d3a2e6"}

@@ -6,8 +6,8 @@ Capability code behind the workflows, under [src/AGENTS.md](../AGENTS.md).
 
 - Fetching: [fetch-layer](fetch-layer.ts) is the one fetch layer: deadline, conditional GET, jittered retry, validator cache. [http](fetch-http.ts), [cache](fetch-cache.ts), [types](fetch-types.ts) support it.
 - Search: [search](search.ts), [search-chain](search-chain.ts), and `search-*.ts` fuse free-source lists. [sources-search](sources-search.ts) and [sources](sources.ts) fetch evidence for `answer` and `research`.
-- Crawl: [crawl](crawl.ts), [frontier](crawl-frontier.ts), [heap](crawl-heap.ts), [resume](crawl-resume.ts), [polite-crawler](polite-crawler.ts).
-- robots.txt: [robots](robots-txt.ts) reads it. [robots-gate](robots-gate.ts) gates scrape, batch, and map's root page ([map-root](map-root.ts)), caching each origin's rules for `ROBOTS_TTL_MS`.
+- Crawl: [crawl](crawl.ts), [root](crawl-root.ts), [frontier](crawl-frontier.ts), [heap](crawl-heap.ts), [resume](crawl-resume.ts), [polite-crawler](polite-crawler.ts).
+- robots.txt: [robots](robots-txt.ts) reads it. [robots-gate](robots-gate.ts) gates scrape, batch, and the root page of map ([map-root](map-root.ts)) and crawl ([crawl](crawl.ts)), caching each origin's rules for `ROBOTS_TTL_MS`.
 - Pages and text: [html](html.ts), [table](html-table.ts), [parse](parse.ts), [select](select.ts), [summarize](summarize.ts), [simhash](simhash.ts), [readability](readability-chain.ts), [json-ld](json-ld.ts).
 - Browser drivers: [driver](driver.ts) runs headless Chrome. [cua](driver-cua.ts) and `cua-*.ts` drive the user's window.
 - Local state: [snapshot](snapshot.ts) and [index](local-index.ts) use `bun:sqlite`.
@@ -35,7 +35,7 @@ Capability code behind the workflows, under [src/AGENTS.md](../AGENTS.md).
 mise run test:file tests/lib tests/core tests/commands/search.test.ts
 ```
 
-[crawl](crawl.ts) fetches the root before a robots check. [http](fetch-http.ts) sends no User-Agent and [search](search.ts) a Chrome one. [snapshot](snapshot.ts) and [resume](crawl-resume.ts) skip WAL. [driver](driver.ts) and [cua](driver-cua.ts) name layers `Live`.
+[http](fetch-http.ts) sends no User-Agent and [search](search.ts) a Chrome one. [snapshot](snapshot.ts) and [resume](crawl-resume.ts) skip WAL. [driver](driver.ts) and [cua](driver-cua.ts) name layers `Live`.
 
 ## Children
 

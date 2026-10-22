@@ -1,14 +1,13 @@
-// Crawl command core. The root is fetched first (redirects followed, scope
-// re-anchored on the final host), then the polite crawler (Mercator frontier,
+// Crawl command core. The root passes the robots gate and is fetched first (redirects
+// followed, scope re-anchored on the final host), then the polite crawler (Mercator frontier,
 // RFC 9309 robots, adaptive per-host delay) runs over the fetch layer. The
 // crawl stays on one host and the frontier keeps one fetch in flight per
 // host, so its FIFO order is BFS order and the output is deterministic.
 // Every 2xx page also lands in the local index, which search fuses with web hits.
 import { Data, Effect } from 'effect'
-import { fetchRoot } from '../core/http.ts'
-import { errMsg } from '../core/output.ts'
 import { canonicalUrl, normalizeUrl, sameHost } from '../core/url.ts'
 import { archivedUrls } from './archive-urls.ts'
+import { fetchRootPage } from './crawl-root.ts'
 import { headingText } from './crawl-types.ts'
 import { type FetchError, type FetchPage, makeFetchLayer } from './fetch-layer.ts'
 import { titleAndLinks } from './html.ts'
@@ -48,18 +47,6 @@ interface CrawlOptions {
 }
 
 class CrawlError extends Data.TaggedError('CrawlError')<{ readonly message: string }> {}
-
-type RootOutcome = { ok: true; finalUrl: string; html: string } | { ok: false; reason: string }
-
-// The root is the user's explicit target — its redirects are followed freely
-// and the crawl scope re-anchors on the FINAL host (apex→www).
-const fetchRootPage = (url: string, timeoutMs?: number) =>
-  fetchRoot(url, { timeoutMs }).pipe(
-    Effect.match({
-      onSuccess: ({ finalUrl, html }): RootOutcome => ({ ok: true, finalUrl, html }),
-      onFailure: (err): RootOutcome => ({ ok: false, reason: errMsg(err) }),
-    }),
-  )
 
 interface Scope {
   readonly host: string
@@ -194,6 +181,8 @@ export const bfsCrawl = Effect.fn('bfsCrawl')(function* (root: string, opts: Cra
   const rootUrl = normalizeUrl(root)
   if (!rootUrl) return yield* new CrawlError({ message: `crawl: invalid URL ${root}` })
   const entry = yield* fetchRootPage(rootUrl, opts.timeoutMs)
+  if (!entry.ok && entry.blocked)
+    return { root: rootUrl, pages: [], errors: [{ url: rootUrl, reason: entry.reason }] }
   if (!entry.ok) return yield* archivedCrawl(rootUrl, opts.limit, entry.reason)
   return yield* Effect.scoped(crawlFrom(rootUrl, entry.finalUrl, entry.html, opts))
 })

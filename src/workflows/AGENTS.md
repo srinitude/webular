@@ -25,7 +25,7 @@ One workflow per command, such as [`search.ts`](search.ts), [`scrape.ts`](scrape
 - A disallowed page is never fetched, and no browser or archive fallback runs for it.
 - Scrape returns `status: "blocked"` with `reason: "robots"`, the matched `rule`, and `userAgent: "webular"`.
 - Only scrape's `ignoreRobots` fetches a disallowed page, and only for the one URL the user named. Its output carries `robots: "disallowed"`.
-- Batch and map have no override.
+- Batch, map, and crawl have no override.
 
 ### Mastra
 
