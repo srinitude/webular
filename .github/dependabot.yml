@@ -1,4 +1,4 @@
-# Keeps SHA-pinned actions and Bun dependencies current through reviewed PRs.
+# Keeps SHA-pinned actions, Bun dependencies, and the Docker base image current through reviewed PRs.
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -19,3 +19,9 @@ updates:
     groups:
       effect:
         patterns: ['effect', '@effect/*']
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
