@@ -8,7 +8,7 @@ import { runWorkflow } from '../cli/run.ts'
 import { emitOpts, parseFlags, timeoutFlag } from '../core/args.ts'
 import { CliError, runMain } from '../core/effect.ts'
 import { errMsg } from '../core/output.ts'
-import { outPath, sandboxEnabled } from '../core/safepath.ts'
+import { inPath, outPath, sandboxEnabled } from '../core/safepath.ts'
 
 // Per-user, per-project default (keyed by realpath of the INVOKING directory —
 // the gateway pins process cwd to the package root). A tmpdir default would
@@ -36,8 +36,15 @@ const resolveDbPath = Effect.fn('monitor.resolveDbPath')(function* (flagValue: u
 
 // The path work touches the disk (realpath, mkdir) and the sandbox check can
 // reject the path; both surface as a CliError with exit code 1.
+// WEBULAR_DB is the operator's own setting, not a tool argument, so the sandbox leaves it alone.
 const dbPathFor = (flagValue: unknown) =>
-  resolveDbPath(flagValue).pipe(Effect.flatMap((p) => outPath(p).pipe(Effect.mapError(toCliError))))
+  resolveDbPath(flagValue).pipe(
+    Effect.flatMap((p) =>
+      p === process.env['WEBULAR_DB'] && p !== flagValue
+        ? inPath(p)
+        : outPath(p).pipe(Effect.mapError(toCliError)),
+    ),
+  )
 
 const main = Effect.gen(function* () {
   const { values, positionals } = yield* parseFlags(Bun.argv.slice(2), {

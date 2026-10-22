@@ -106,6 +106,15 @@ Syntax checked on 2026-10-21 against the [fish `set` page](https://fishshell.com
 
 `webular mcp` serves 24 MCP tools over stdio: one for each command but `mcp`, plus `machine.next` and four low-level `web.*` tools. Install webular first, so `webular` is on your PATH. The only key webular uses is the optional Jev key. The recommended way to reach Jev is the direct TypeSafe endpoint, with `TYPESAFE_API_KEY` or the macOS Keychain item `typesafe-ai-api-key`.
 
+### Safety in agent mode
+
+`webular mcp` and the plugin run in agent mode (`WEBULAR_AGENT_MODE=1`). Page text can steer an agent, so agent mode turns on two guards:
+
+- Requests to your own network, such as `localhost` or `192.168.x.x`, are blocked. Set `WEBULAR_ALLOW_PRIVATE=1` in the server's `env` to allow them. The rules are in [Private addresses](commands.md#private-addresses).
+- Files are written only inside the folder the server starts in, or `WEBULAR_OUTPUT_DIR`. Set `WEBULAR_SANDBOX=0` to allow any path. The rules are in [Output paths](commands.md#output-paths).
+
+At the command line, neither guard is on, so you can scrape your own dev server and save files anywhere.
+
 ### Claude Code
 
 ```bash

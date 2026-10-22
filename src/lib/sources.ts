@@ -7,12 +7,9 @@ import { availableParallelism } from 'node:os'
 import { Cause, Config, Context, Effect, Exit, Layer, Option, Ref, Semaphore } from 'effect'
 import { z } from 'zod'
 import { hostConcurrency } from '../core/budget.ts'
-import { fetchText } from '../core/http.ts'
-import { errMsg } from '../core/output.ts'
 import { textAndImages } from './html.ts'
 import type { PageImage } from './html-images.ts'
-import { fetchTextObeyingRobots } from './robots-gate.ts'
-import { withArchiveCopy } from './sources/archive-copy.ts'
+import { fetchOne } from './sources/fetch-one.ts'
 
 // The one zod mirror of the {url, reason} partial-failure shape — composed
 // into every fan-out workflow's output schema so they cannot drift.
@@ -152,40 +149,24 @@ interface FetchedSources {
   errors: { url: string; reason: string }[]
 }
 
-type Outcome = { ok: true; entry: SourceEntry } | { ok: false; url: string; reason: string }
-
 // Small batches parse in-thread: in a fresh CLI process a worker's startup
 // (it loads Readability again) costs more than the overlap saves. Measured
 // medians: 1 page 1958 ms in-thread vs 5870 ms pool, 3 pages 5002 vs 6088,
 // 6 pages 6284 vs 2825.
 // ponytail: fixed cut from one machine's medians; re-measure if parse cost moves.
 const POOL_MIN_PAGES = 4
-// A dead page (404, 410, 5xx, network failure, timeout) reads from the Internet
-// Archive's closest capture, so one dead source does not drop out of an answer.
-const fetchOne = (src: SourceRef, timeoutMs: number, maxHtml: number, pooled: boolean) =>
-  withArchiveCopy(src.url, fetchTextObeyingRobots(src.url, { timeoutMs }), (capture) =>
-    fetchText(capture, { timeoutMs }),
-  ).pipe(
-    Effect.flatMap(({ value: html }) =>
-      (pooled ? parseArticleText : parseInThread)(html.slice(0, maxHtml), src.url),
-    ),
-    Effect.match({
-      onSuccess: ({ text, images }): Outcome => ({
-        ok: true,
-        entry: { title: src.title, url: src.url, text, images },
-      }),
-      onFailure: (err): Outcome => ({ ok: false, url: src.url, reason: errMsg(err) }),
-    }),
-  )
 
 export const fetchSources = Effect.fn('fetchSources')(function* (
   sources: SourceRef[],
   timeoutMs = 15_000,
   maxHtml = Number.POSITIVE_INFINITY,
+  typed = false,
 ) {
+  const pooled = sources.length >= POOL_MIN_PAGES
   const outcomes = yield* Effect.forEach(
     sources,
-    (src) => fetchOne(src, timeoutMs, maxHtml, sources.length >= POOL_MIN_PAGES),
+    (src) =>
+      fetchOne(src, { timeoutMs, maxHtml, typed }, pooled ? parseArticleText : parseInThread),
     { concurrency: yield* hostConcurrency },
   )
   const out: FetchedSources = { entries: [], errors: [] }

@@ -23,7 +23,13 @@ const answer = eff(
     const fx = yield* fixture
     const PATH = yield* Config.String('PATH').pipe(Config.orElse(() => Config.String('Path')))
     const HOME = yield* Config.String('HOME').pipe(Config.withDefault('/tmp'))
-    const env = { PATH, HOME, WEBULAR_SOURCE_ORIGIN: fx.origin, WEBULAR_SOURCE_GAP_MS: '0' }
+    const env = {
+      PATH,
+      HOME,
+      WEBULAR_SOURCE_ORIGIN: fx.origin,
+      WEBULAR_SOURCE_GAP_MS: '0',
+      WEBULAR_ALLOW_PRIVATE: '1',
+    }
     const run = yield* runCli('src/commands/answer.ts', ['--query', 'douglas adams', '--json'], {
       env,
     })

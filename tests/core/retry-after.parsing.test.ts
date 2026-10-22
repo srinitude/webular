@@ -2,7 +2,7 @@
 // omits the zone. Each parser must read the same header the same way in every
 // time zone and locale: no hex or exponent, no "1,5", no empty value.
 import { describe, expect, test } from 'bun:test'
-import { retryAfterMs as coreRetryAfter } from '../../src/core/http.ts'
+import { retryAfterMs as coreRetryAfter } from '../../src/core/retry-after.ts'
 import { retryAfterMs as jevRetryAfter } from '../../src/lib/jev/errors.ts'
 
 const NOW = Date.UTC(2026, 9, 21, 7, 27, 55)

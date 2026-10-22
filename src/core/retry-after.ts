@@ -23,6 +23,14 @@ export const delayHeaderMs = (
 // fetch at once, so a hostile value cannot stall the CLI.
 const MAX_RETRY_AFTER_MS = 10_000
 
+// Retry-After (RFC 9110 section 10.2.3): delay-seconds or an HTTP-date.
+export function retryAfterMs(header: string | null, now: number): number | undefined {
+  const ms = delayHeaderMs(header, now)
+  // A past HTTP-date is ignored, while delay-seconds of 0 is a real "retry now".
+  const past = ms === 0 && !/^\s*[\d.]+\s*$/.test(header ?? '')
+  return past ? undefined : ms
+}
+
 /** The error text for a wait over the cap; undefined when the wait is allowed. */
 export const retryAfterOverCap = (ms: number | undefined): string | undefined =>
   ms === undefined || ms <= MAX_RETRY_AFTER_MS

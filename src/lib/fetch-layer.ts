@@ -4,10 +4,11 @@
 // escalation to a caller-supplied render hook, and bounded sockets
 // (16 overall, one per host).
 import { BunServices } from '@effect/platform-bun'
-import { Config, Effect, FileSystem, Path, type Scope, Semaphore } from 'effect'
+import { Config, Effect, FileSystem, Layer, Path, type Scope, Semaphore } from 'effect'
 import * as FetchHttpClient from 'effect/http/FetchHttpClient'
 import * as HttpClient from 'effect/http/HttpClient'
 import { setHeader } from 'effect/http/HttpClientRequest'
+import { guardTarget } from '../core/address-guard.ts'
 import { USER_AGENT } from '../core/http.ts'
 import { openCache } from './fetch-cache.ts'
 import { type Ctx, escalate, type Gate, httpWithRetry, perHost } from './fetch-http.ts'
@@ -29,19 +30,21 @@ const parseUrl = (url: string) =>
     }),
     (u) =>
       u.protocol === 'http:' || u.protocol === 'https:'
-        ? Effect.succeed(u)
+        ? Effect.mapBoth(guardTarget(u.href), {
+            onFailure: (cause) => fail(url, 'invalid-url', 'give-up', { cause }),
+            onSuccess: (originPrivate) => ({ u, originPrivate }),
+          })
         : Effect.fail(fail(url, 'invalid-url', 'give-up')),
   )
 
 const fetchWith =
   (ctx: Ctx): FetchPage =>
   (url, opts = {}) =>
-    Effect.flatMap(parseUrl(url), (u) => {
+    Effect.flatMap(parseUrl(url), ({ u, originPrivate }) => {
       const tiers = opts.tiers ?? ctx.layer.tiers ?? []
       const gate: Gate = (eff) => perHost(ctx, u.host, ctx.global.withPermits(1)(eff))
-      const work = Effect.catchTag(httpWithRetry(ctx, u.href, gate), 'FetchError', (e) =>
-        escalate(u.href, tiers, e, gate),
-      )
+      const http = httpWithRetry(ctx, u.href, gate, originPrivate)
+      const work = Effect.catchTag(http, 'FetchError', (e) => escalate(u.href, tiers, e, gate))
       // The deadline covers queueing, retries, and tiers.
       return Effect.timeoutOrElse(work, {
         duration: opts.deadlineMs ?? ctx.layer.deadlineMs ?? 10_000,
@@ -69,6 +72,12 @@ const validatorPath = Effect.gen(function* () {
   Effect.mapError((cause) => fail('fetch-validators.sqlite', 'network', 'give-up', { cause })),
 )
 
+// Redirects come back to httpOnce, which checks each hop (src/core/address-guard.ts).
+const manualRedirects = Layer.mergeAll(
+  FetchHttpClient.layer,
+  Layer.succeed(FetchHttpClient.RequestInit, { redirect: 'manual' }),
+)
+
 /** Builds the fetch closure. The Scope owns the validator database; semaphores live in the closure. */
 export const makeFetchLayer = (
   layer: FetchLayerOptions = {},
@@ -84,7 +93,7 @@ export const makeFetchLayer = (
     )
     const client = yield* Effect.provide(
       Effect.map(HttpClient.HttpClient, HttpClient.mapRequest(setHeader('user-agent', USER_AGENT))),
-      FetchHttpClient.layer,
+      manualRedirects,
     )
     return fetchWith({
       cache,

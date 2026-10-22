@@ -106,7 +106,12 @@ describe('withArchiveCopy — fetch, then the Internet Archive copy', () => {
     eff(
       Effect.gen(function* () {
         const { out } = yield* inFixture(true, (origin) =>
-          fetchSources([{ title: 'Dead', url: `${origin}/dead` }], 5_000),
+          fetchSources(
+            [{ title: 'Dead', url: `${origin}/dead` }],
+            5_000,
+            Number.POSITIVE_INFINITY,
+            true,
+          ),
         )
         expect(out.errors).toEqual([])
         expect(out.entries[0]?.text).toContain('Internet Archive')
@@ -119,7 +124,12 @@ describe('withArchiveCopy — fetch, then the Internet Archive copy', () => {
     eff(
       Effect.gen(function* () {
         const { out } = yield* inFixture(false, (origin) =>
-          fetchSources([{ title: 'Dead', url: `${origin}/dead` }], 5_000),
+          fetchSources(
+            [{ title: 'Dead', url: `${origin}/dead` }],
+            5_000,
+            Number.POSITIVE_INFINITY,
+            true,
+          ),
         )
         expect(out.entries).toEqual([])
         expect(out.errors[0]?.reason).toMatch(/live fetch failed .*410.*archive has no capture/)

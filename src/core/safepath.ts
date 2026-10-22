@@ -1,5 +1,6 @@
-// Opt-in path confinement for untrusted-automation embedders. Enabled with
-// WEBULAR_SANDBOX=1; otherwise paths pass through unchanged (default CLI UX).
+// Output-path confinement. On by default in agent mode (WEBULAR_AGENT_MODE=1, set by
+// `webular mcp`), where page content can steer the agent; off for a person at the CLI.
+// WEBULAR_SANDBOX=1 turns it on and WEBULAR_SANDBOX=0 turns it off in either mode.
 // Confines to WEBULAR_OUTPUT_DIR (cwd by default) using realpath canonicalization
 // so a symlinked parent directory cannot escape the sandbox.
 import { Data, Effect, FileSystem, Path } from 'effect'
@@ -7,7 +8,10 @@ import { Data, Effect, FileSystem, Path } from 'effect'
 export class SandboxError extends Data.TaggedError('SandboxError')<{ readonly message: string }> {}
 
 export function sandboxEnabled(): Effect.Effect<boolean> {
-  return Effect.sync(() => process.env['WEBULAR_SANDBOX'] === '1')
+  return Effect.sync(() => {
+    const set = process.env['WEBULAR_SANDBOX']
+    return set === '1' || (set !== '0' && process.env['WEBULAR_AGENT_MODE'] === '1')
+  })
 }
 
 // The directory the user invoked webular from — the gateway pins the command

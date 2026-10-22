@@ -60,14 +60,10 @@ test(
       const page = yield* httpGet(`${fx.origin}${path}`)
       const body = yield* Effect.promise(() => page.text())
       const missing = yield* httpGet(`${fx.origin}/gone/x.html`)
-      const moved = yield* httpGet(`${fx.origin}/r${path}`, { redirect: 'manual' })
+      const moved = yield* httpGet(`${fx.origin}/r${path}`) // redirects are followed by hand
       const robots = yield* httpGet(`${fx.origin}/robots.txt`)
       expect(body).toContain(CANARY)
-      expect([missing.status, moved.status, moved.headers.get('location')]).toEqual([
-        404,
-        301,
-        path,
-      ])
+      expect([missing.status, moved.status, new URL(moved.url).pathname]).toEqual([404, 200, path])
       expect(yield* Effect.promise(() => robots.text())).toContain('Disallow: /pages/blocked/')
       expect(leaksFixtureUrl(`see ${fx.origin}/x`)).toBe(true)
     }),

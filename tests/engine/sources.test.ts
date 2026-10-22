@@ -19,7 +19,12 @@ describe('fetchSources — index-ordered bounded fan-out', () => {
           { title: 'Gamma', url: `${fx.origin}/c` },
           { title: 'Alpha', url: `${fx.origin}/a` },
         ]
-        const { entries, errors } = yield* fetchSources(sources)
+        const { entries, errors } = yield* fetchSources(
+          sources,
+          15_000,
+          Number.POSITIVE_INFINITY,
+          true,
+        )
         expect(entries.map((e) => e.title)).toEqual(['Slow', 'Gamma', 'Alpha'])
         expect(entries.every((e) => e.text.length > 0)).toBe(true)
         expect(errors).toEqual([])
@@ -37,7 +42,12 @@ describe('fetchSources — index-ordered bounded fan-out', () => {
           { title: 'Broken', url: `${fx.origin}/status?code=404` },
           { title: 'Alpha', url: `${fx.origin}/a` },
         ]
-        const { entries, errors } = yield* fetchSources(sources)
+        const { entries, errors } = yield* fetchSources(
+          sources,
+          15_000,
+          Number.POSITIVE_INFINITY,
+          true,
+        )
         expect(entries.map((e) => e.title)).toEqual(['Gamma', 'Alpha'])
         expect(errors).toEqual([
           { url: `${fx.origin}/status?code=404`, reason: expect.stringContaining('404') },
@@ -55,7 +65,9 @@ describe('fetchSources — index-ordered bounded fan-out', () => {
           { title: 'A', url: `${fx.origin}/a` },
           { title: 'B', url: `${fx.origin}/b` },
         ]
-        expect(yield* fetchSources(sources)).toEqual(yield* fetchSources(sources))
+        expect(yield* fetchSources(sources, 15_000, Number.POSITIVE_INFINITY, true)).toEqual(
+          yield* fetchSources(sources, 15_000, Number.POSITIVE_INFINITY, true),
+        )
       }),
     ),
     15_000,

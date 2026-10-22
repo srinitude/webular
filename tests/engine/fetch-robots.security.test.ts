@@ -19,10 +19,16 @@ test(
   'answer and research sources skip a disallowed url and a disallowed redirect hop',
   eff(
     Effect.gen(function* () {
-      const { entries, errors } = yield* fetchSources([
-        { title: 'direct', url: `${fx.origin}/private` },
-        { title: 'hop', url: `${fx.origin}/hop` },
-      ])
+      // Typed urls (answer --urls), so the private-address guard lets the local fixture through.
+      const { entries, errors } = yield* fetchSources(
+        [
+          { title: 'direct', url: `${fx.origin}/private` },
+          { title: 'hop', url: `${fx.origin}/hop` },
+        ],
+        15_000,
+        Number.POSITIVE_INFINITY,
+        true,
+      )
       expect(entries).toEqual([])
       expect(errors.map((e) => e.reason).join(' ')).toContain('robots.txt disallows')
       expect(fx.hits('/private')).toBe(0)

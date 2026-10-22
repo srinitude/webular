@@ -41,6 +41,8 @@ const INSTRUCTIONS =
   'When you have two or more URLs, call batch once instead of calling scrape for each. Built on Mastra and Jev: with TYPESAFE_API_KEY set, judgment calls go to Jev; without it, rules decide.'
 
 const serve = Effect.gen(function* () {
+  // Agent mode blocks private targets and confines writes; every tool's child process inherits it.
+  yield* Effect.sync(() => Object.assign(process.env, { WEBULAR_AGENT_MODE: '1' }))
   const [{ McpServer }, { StdioServerTransport }] = yield* loadSdk
   const { registerAll } = yield* lazy(() => import('../tools/web.ts'))
   const server = yield* Effect.acquireRelease(

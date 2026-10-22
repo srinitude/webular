@@ -132,12 +132,12 @@ describe('bfsCrawl — deterministic order, membership and errors', () => {
   )
 
   test(
-    'a cross-host redirect of the ROOT URL re-anchors the crawl (apex→www pattern)',
+    'a cross-host redirect of the ROOT URL is refused (docs/commands.md#private-addresses)',
     eff(
       Effect.gen(function* () {
-        // 127.0.0.1 and localhost are different hostnames for the same fixture —
-        // the root is the user's explicit target, so its redirect must be followed
-        // and the crawl scope re-anchored to the final host.
+        // 127.0.0.1 and localhost are different hostnames for the same fixture.
+        // A root redirect may only move within the same site (a leading www.
+        // aside), so a hop to another host must not re-anchor the crawl there.
         const local = yield* startFixture(
           (origin): Routes => ({
             '/enter': () =>
@@ -146,13 +146,11 @@ describe('bfsCrawl — deterministic order, membership and errors', () => {
                 headers: { location: origin.replace('127.0.0.1', 'localhost') },
               }),
             '/': jittered('WwwRoot', ['/a']),
-            '/a': jittered('WwwAlpha'),
           }),
         )
         const { pages, errors } = yield* bfsCrawl(`${local.origin}/enter`, OPTS)
-        expect(errors).toEqual([])
-        expect(pages.map((p) => p.title)).toEqual(['WwwRoot', 'WwwAlpha'])
-        expect(pages.every((p) => p.url.includes('localhost'))).toBe(true)
+        expect(pages).toEqual([])
+        expect(errors.length).toBe(1)
       }),
     ),
     30_000,

@@ -10,6 +10,7 @@ Rules for the free source adapters, under [src/lib/AGENTS.md](../AGENTS.md).
 - [`rank.ts`](rank.ts) orders merged hits by the adapter's `SOURCE_TRUST` score times recency. Recency halves for every 365 days of age.
 - [`polite.ts`](polite.ts) is the shared plumbing: one request in flight per host, a minimum gap, a contact User-Agent, and a schema-checked JSON GET.
 - [`archive-copy.ts`](archive-copy.ts) fetches an archive capture when a live page is dead.
+- [`fetch-one.ts`](fetch-one.ts) fetches one `answer` or `research` source, behind the address guard and robots.txt.
 
 ## Rules
 

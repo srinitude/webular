@@ -7,7 +7,7 @@
       "tests/engine/{sanitize-injection,robots-gate}*.test.ts",
       "tests/ci/checkout-credentials.test.ts"
     ],
-    "unguarded": ["SSRF on scrape and fetch targets and on each redirect hop"]
+    "unguarded": []
   },
   "effect": {
     "globs": [

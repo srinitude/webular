@@ -83,6 +83,7 @@ const gather = Effect.fn('answer.gather')(function* (input: z.infer<typeof answe
     hits.map((h) => ({ title: h.title, url: h.url })),
     input.timeoutMs ?? ANSWER_FETCH_MS,
     ANSWER_MAX_HTML,
+    input.urls !== undefined,
   )
   const withText = yield* subjectSources(
     input.query,

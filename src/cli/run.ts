@@ -62,6 +62,17 @@ function rendered(failures: number, policy: number): LifecycleEvent {
   return failures > 0 ? { type: 'SOME_ERRORS' } : { type: 'NO_ERRORS' }
 }
 
+// A page read from an archive is never a fresh check: the payload says so in
+// `archivedFrom`, and people reading the terminal get the same word here.
+function archiveNote(name: string, result: unknown) {
+  const archived = (result as { archivedFrom?: unknown } | null)?.archivedFrom
+  return typeof archived === 'string'
+    ? logErr(
+        `${name}: warning: the live page did not load; this is the archived copy at ${safeText(archived)}`,
+      )
+    : Effect.void
+}
+
 function report(
   name: string,
   outcome: Outcome,
@@ -85,17 +96,8 @@ function report(
           `${name}: ${failures} fetch${failures === 1 ? '' : 'es'} failed. Run again with --json to see each error.`,
         )
       : Effect.void
-  // A page read from an archive is never a fresh check: the payload says so in
-  // `archivedFrom`, and people reading the terminal get the same word here.
-  const archived = (outcome.result as { archivedFrom?: unknown } | null)?.archivedFrom
-  const archiveNote =
-    typeof archived === 'string'
-      ? logErr(
-          `${name}: warning: the live page did not load; this is the archived copy at ${safeText(archived)}`,
-        )
-      : Effect.void
   return note.pipe(
-    Effect.andThen(archiveNote),
+    Effect.andThen(archiveNote(name, outcome.result)),
     Effect.andThen(emit(outcome.result, { ...emitOpts, render: renderFor(name) })),
     Effect.as(exit),
   )

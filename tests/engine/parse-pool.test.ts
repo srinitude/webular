@@ -45,7 +45,12 @@ const batch = (n: number) =>
   Effect.gen(function* () {
     const fx = yield* startFixture(defaultRoutes)
     const urls = ['/a', '/b', '/c', '/d', '/e'].slice(0, n)
-    return yield* fetchSources(urls.map((p) => ({ title: p, url: `${fx.origin}${p}` })))
+    return yield* fetchSources(
+      urls.map((p) => ({ title: p, url: `${fx.origin}${p}` })),
+      15_000,
+      Number.POSITIVE_INFINITY,
+      true,
+    )
   })
 
 // Runs first, so no earlier parse in this file has warmed a worker.

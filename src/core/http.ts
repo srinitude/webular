@@ -1,7 +1,6 @@
-// HttpClient layer: timeout, user-agent, scoped redirects, textual-content guard,
-// deterministic bounded retry, disk-cache revalidation. The fetch machine
-// (src/machines/fetch.ts) decides every retry, redirect, and failure; this
-// file only performs the requests it asks for.
+// HttpClient layer: timeout, user-agent, guarded redirects, textual-content guard, bounded
+// retry, disk-cache revalidation. The fetch machine (src/machines/fetch.ts) decides every
+// retry, redirect, and failure; this file only performs the requests it asks for.
 import { BunServices } from '@effect/platform-bun'
 import { Clock, Effect, Exit, Scope } from 'effect'
 import * as FetchHttpClient from 'effect/http/FetchHttpClient'
@@ -9,13 +8,14 @@ import * as HttpClient from 'effect/http/HttpClient'
 import { type EventFromLogic, initialTransition, type SnapshotFrom, transition } from 'xstate'
 import pkg from '../../package.json' with { type: 'json' }
 import { failureEvent, fetchMachine } from '../machines/fetch.ts'
-import { hop, manualIfAuth } from './auth-headers.ts'
+import { guardTarget } from './address-guard.ts'
+import { hop } from './auth-headers.ts'
 import { type CacheOptions, cachedGetText } from './cache.ts'
 import { FetchError } from './decode.ts'
 import { FETCH_ERROR, RETRY_BACKOFF_MS, RETRY_STATUS, retryPause } from './fetch-policy.ts'
 import { dropBody, type HttpStatusError, okText } from './http-body.ts'
 import { errMsg } from './output.ts'
-import { delayHeaderMs, retryAfterOverCap } from './retry-after.ts'
+import { retryAfterMs, retryAfterOverCap } from './retry-after.ts'
 import { sameHost } from './url.ts'
 
 export const USER_AGENT = `webular/${pkg.version} (+https://github.com/srinitude/webular)`
@@ -26,19 +26,10 @@ export interface FetchOptions extends CacheOptions {
   gunzip?: boolean // fetchTextWithinHost: gunzip the body; maxBytes counts decompressed bytes
   headers?: Record<string, string>
   signal?: AbortSignal
-  redirect?: RequestRedirect
   // onResponse sees every response, retries included, before its body is read (rate-limit
-  // headers). hopGate runs on each redirect target first; set, redirects are followed by hand.
+  // headers). hopGate runs on each redirect target, after the address guard.
   onResponse?: (res: Response) => void
   hopGate?: (url: string) => Effect.Effect<void, FetchError>
-}
-
-// Retry-After (RFC 9110 section 10.2.3): delay-seconds or an HTTP-date.
-export function retryAfterMs(header: string | null, now: number): number | undefined {
-  const ms = delayHeaderMs(header, now)
-  // A past HTTP-date is ignored, while delay-seconds of 0 is a real "retry now".
-  const past = ms === 0 && !/^\s*[\d.]+\s*$/.test(header ?? '')
-  return past ? undefined : ms
 }
 
 type FetchSnapshot = SnapshotFrom<typeof fetchMachine>
@@ -67,7 +58,7 @@ const send = Effect.fn('send')(function* (url: string, opts: FetchOptions) {
     Scope.provide(scope),
     Effect.onInterrupt(() => Scope.close(scope, Exit.void)),
     Effect.provideService(FetchHttpClient.Fetch, viaOwn),
-    Effect.provideService(FetchHttpClient.RequestInit, { redirect: opts.redirect ?? 'follow' }),
+    Effect.provideService(FetchHttpClient.RequestInit, { redirect: 'manual' }),
     Effect.provideService(HttpClient.TracerDisabledWhen, () => true), // no spans, no trace headers
   )
   return yield* Effect.promise(() => pending as Promise<Response>) // settled: the client resolved it
@@ -84,13 +75,19 @@ const fetchOnce = (url: string, opts: FetchOptions): Effect.Effect<Response, Fet
 
 const isRedirect = (status: number) => status >= 300 && status < 400
 
-// One fetch run: `host` scopes hand-followed redirects; `deadline` is when a retry would outlast it.
-type Run = { origin: string; host?: string | undefined; opts: FetchOptions; deadline: number }
+// One run: redirects are followed by hand and guarded; `host` scopes hops; `deadline` caps retries.
+interface Run {
+  origin: string
+  originPrivate: boolean
+  host?: string | undefined
+  opts: FetchOptions
+  deadline: number
+}
 
 const startRun = (origin: string, opts: FetchOptions, host?: string) =>
-  Effect.map(Clock.currentTimeMillis, (now): Run => {
+  Effect.zipWith(guardTarget(origin), Clock.currentTimeMillis, (originPrivate, now): Run => {
     const deadline = now + (opts.timeoutMs ?? Number.POSITIVE_INFINITY)
-    return { origin, host, opts, deadline }
+    return { origin, originPrivate, host, opts, deadline }
   })
 
 type Landed = { res: Response; url: string }
@@ -99,13 +96,12 @@ type Landed = { res: Response; url: string }
 function responseEvent(run: Run, res: Response, url: string): Landed & { event: FetchEvent } {
   const settled = { res, url, event: { type: res.ok ? 'OK' : 'HTTP_ERROR' } } as const
   if (RETRY_STATUS.has(res.status)) return { res, url, event: { type: 'RETRYABLE_STATUS' } }
-  const byHand = run.host !== undefined || run.opts.redirect === 'manual'
-  if (!byHand || !isRedirect(res.status)) return settled
+  if (!isRedirect(res.status)) return settled
   const location = res.headers.get('location')
   if (!location || !URL.canParse(location, url)) return settled
   const next = new URL(location, url).toString()
-  const type =
-    run.host === undefined || sameHost(run.host, next) ? 'REDIRECT_SAME_HOST' : 'REDIRECT_OFF_HOST'
+  const onHost = run.host === undefined || sameHost(run.host, next)
+  const type = onHost ? 'REDIRECT_SAME_HOST' : 'REDIRECT_OFF_HOST'
   return { res, url: next, event: { type } }
 }
 
@@ -140,6 +136,7 @@ function drive(run: Run, url: string, snap: FetchSnapshot): Effect.Effect<Landed
       if (next.status === 'done') return settle(run, next, landed)
       if (next.context.hops > snap.context.hops)
         return dropBody(res).pipe(
+          Effect.andThen(guardTarget(landed.url, { url, originPrivate: run.originPrivate })),
           Effect.andThen(run.opts.hopGate?.(landed.url) ?? Effect.void),
           Effect.andThen(drive(hop(run, url, landed.url), landed.url, next)),
         )
@@ -147,9 +144,8 @@ function drive(run: Run, url: string, snap: FetchSnapshot): Effect.Effect<Landed
         const waitMs = retryAfterMs(res.headers.get('retry-after'), now)
         if ((waitMs ?? 0) > run.deadline - now) return Effect.succeed(landed)
         const over = retryAfterOverCap(waitMs)
-        if (over)
-          return Effect.andThen(dropBody(res), Effect.fail(new FetchError({ message: over })))
-        return Effect.andThen(dropBody(res), retry(run, url, next, waitMs))
+        const err = over && new FetchError({ message: over })
+        return Effect.andThen(dropBody(res), err ? Effect.fail(err) : retry(run, url, next, waitMs))
       })
     },
   })
@@ -160,9 +156,8 @@ export const httpGet = (
   url: string,
   opts: FetchOptions = {},
 ): Effect.Effect<Response, FetchError> =>
-  Effect.flatMap(
-    startRun(url, manualIfAuth(opts.hopGate ? { ...opts, redirect: 'manual' } : opts)),
-    (run) => Effect.map(drive(run, url, START), (landed) => landed.res),
+  Effect.flatMap(startRun(url, opts), (run) =>
+    Effect.map(drive(run, url, START), (landed) => landed.res),
   )
 
 // Text GETs revalidate through the disk cache; a cache config error surfaces
@@ -182,14 +177,23 @@ export const fetchText = (
   )
 
 // The ROOT of a crawl/map is the user's explicit target: follow its redirects
-// freely (apex→www) and report the FINAL url to re-anchor the host scope on.
+// and report the FINAL url to re-anchor the host scope on. The final host must
+// be the same site (equal once a leading `www.` is dropped), so a root redirect
+// never moves the scope to another host.
+// ponytail: `www.` stripping, not a public-suffix list; add one if sites need sibling subdomains.
+const site = (u: string) => (URL.parse(u)?.hostname ?? '').replace(/^www\./, '')
 export const fetchRoot = Effect.fn('fetchRoot')(function* (url: string, opts: FetchOptions = {}) {
   const res = yield* httpGet(url, opts)
-  return { finalUrl: res.url || url, html: yield* okText(res, url) }
+  const finalUrl = res.url || url
+  if (site(finalUrl) !== site(url)) {
+    yield* dropBody(res)
+    return yield* Effect.fail(new FetchError({ message: FETCH_ERROR.offHostBlocked(finalUrl) }))
+  }
+  return { finalUrl, html: yield* okText(res, url) }
 })
 
 // Fetch text, following redirects MANUALLY and blocking any hop off `host` (exact match, not an SSRF filter).
 export const fetchTextWithinHost = (url: string, host: string, opts: FetchOptions = {}) =>
-  Effect.flatMap(startRun(url, { ...opts, redirect: 'manual' }, host), (run) =>
+  Effect.flatMap(startRun(url, opts, host), (run) =>
     Effect.flatMap(drive(run, url, START), (l) => okText(l.res, l.url, opts.maxBytes, opts.gunzip)),
   )

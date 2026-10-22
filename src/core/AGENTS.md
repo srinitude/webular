@@ -4,10 +4,10 @@ Rules for the shared Effect services, under [src/AGENTS.md](../AGENTS.md).
 
 ## What lives here
 
-- Process edge: [effect](effect.ts) (typed CLI failures and exit codes), [args](args.ts) (flag parsing), [output](output.ts) (stdout, stderr, and the `-o` file).
+- Process edge: [effect](effect.ts) (typed failures and exit codes), [args](args.ts) (flag parsing), [output](output.ts) (stdout, stderr, and the `-o` file).
 - Fetching: [http](http.ts) runs requests, [http-body](http-body.ts) reads bodies, [decode](decode.ts) turns bytes into text, [gunzip](gunzip.ts) inflates gzip sitemaps, [cache](cache.ts) is the disk cache, [archive](archive.ts) is the Wayback fallback.
-- Policy: [fetch-policy](fetch-policy.ts) holds the retry, redirect, and failure rules. [budget](budget.ts) sizes fan-out from the host's real limits.
-- Scope and safety: [url](url.ts) is the one place that sets URL identity and host scope. [safepath](safepath.ts) confines paths when `WEBULAR_SANDBOX=1`.
+- Policy: [fetch-policy](fetch-policy.ts) holds the retry, redirect, and failure rules. [budget](budget.ts) sizes fan-out from real host limits.
+- Scope and safety: [address-guard](address-guard.ts) blocks private addresses. [url](url.ts) sets URL identity and host scope. [safepath](safepath.ts) confines output paths.
 - Host: [proc](proc.ts) runs subprocesses, [root](root.ts) finds the package root, [platform](platform.ts) picks the executable that fits the machine.
 - Small helpers: [auth-headers](auth-headers.ts), [capped-bytes](capped-bytes.ts), [feed-source](feed-source.ts), [retry-after](retry-after.ts), and [utc-date](utc-date.ts).
 

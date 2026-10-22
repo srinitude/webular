@@ -42,6 +42,48 @@ usage line, the global options, the exit codes, and examples.
   it, and read the page's body text instead. A run whose pages load exits `0`,
   even when another fetch fails.
 
+## Private addresses
+
+Webular guards against requests to your own network (SSRF). A private address is
+loopback, RFC 1918, link-local such as `169.254.169.254`, CGNAT, IPv6 `::1`,
+`fc00::/7`, or `fe80::/10`, or an IPv4-mapped IPv6 form of any of them.
+`localhost` counts too. [`src/core/address-guard.ts`](../src/core/address-guard.ts)
+applies these rules to every request:
+
+- **You typed it.** A private URL you give on the command line is fetched, so you
+  can scrape your own dev server.
+- **Agent mode.** Under `webular mcp` and the agent plugin, page text can steer
+  the agent, so every private target is blocked. Set `WEBULAR_ALLOW_PRIVATE=1`
+  to allow them.
+- **Redirects.** A redirect may reach a private address only when the request
+  started on one. A redirect from `https` to `http` is always blocked.
+- **Search results.** `answer` and `research` treat a link from a search result
+  page like a redirect from a public page, so a private link is blocked. A URL
+  you pass with `answer --urls` counts as typed.
+- **Crawl and map roots.** A root that redirects to another site fails. It never
+  moves the scope. Only a leading `www.` may differ.
+- **DNS.** The guard resolves the host and checks every address before it
+  connects. Bun's fetch can't connect to a pinned address, so a DNS answer that
+  changes between the check and the connect (rebinding) is not caught.
+
+`WEBULAR_ALLOW_PRIVATE=1` lifts every private-address block.
+
+## Output paths
+
+Webular can write files: `-o`, `media` downloads, `act` screenshots, and the
+`monitor` database. [`src/core/safepath.ts`](../src/core/safepath.ts) decides
+where those files may go:
+
+- **You typed it.** At the command line, a path goes where you say, like `curl -o`.
+- **Agent mode.** Under `webular mcp` and the agent plugin, the sandbox is on: a write
+  must stay inside the folder webular started in, or `WEBULAR_OUTPUT_DIR` when you set it. An
+  absolute path, a `..` that climbs out, or a symlink that points out is refused.
+- **Your own settings.** `WEBULAR_DB` is yours, not the agent's, so the sandbox leaves
+  it alone.
+
+`WEBULAR_SANDBOX=1` turns the sandbox on at the command line. `WEBULAR_SANDBOX=0`
+turns it off in agent mode.
+
 ### Related pages
 
 - [Browser mode (Cua)](cua-browser-mode.md): read it before `scrape --render cua` or

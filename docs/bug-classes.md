@@ -72,7 +72,7 @@ Tasks by class: `bugs:security` (8, 10, 11), `bugs:effect` (4, 7), `bugs:mcp-cli
 
 - Risk: a URL from a user, an agent, or injected page text can reach localhost, a private network, or cloud metadata. A redirect can move a public URL to a private one. Each redirect hop needs the same check, and loops need a cap.
 - Where: [src/core/http.ts](../src/core/http.ts) (redirects follow by default), [src/lib/local-index.ts](../src/lib/local-index.ts) (search results drop private hosts).
-- Guard: [private-hosts.test.ts](../tests/core/private-hosts.test.ts) covers search results only. Scrape and fetch targets and redirect hops are not guarded yet (owner: the security and network hunt).
+- Guard: [private-hosts.test.ts](../tests/core/private-hosts.test.ts) covers search results. [private-address.security.test.ts](../tests/lib/private-address.security.test.ts) covers scrape and fetch targets and every redirect hop.
 - Sources: [OWASP SSRF prevention](https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html); [RFC 9110, section 15.4](https://www.rfc-editor.org/rfc/rfc9110#section-15.4).
 
 ## 9. Huge pages, gzip bombs, and charset
