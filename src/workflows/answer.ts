@@ -6,15 +6,10 @@ import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
 import { nameCountry } from '../lib/answer-country.ts'
-import { answerFigure, figureNote, pageImageSchema } from '../lib/answer-figure.ts'
-import { answerPassage, isHeading, isSentence } from '../lib/answer-passage.ts'
-import { asOfDate } from '../lib/as-of.ts'
+import { figureNote } from '../lib/answer-figure.ts'
 import { answerSentences } from '../lib/jev/decisions/answer.ts'
-import { citedSources } from '../lib/jev/decisions/answer-citation.ts'
-import { answerCandidates } from '../lib/jev/decisions/answer-sentences.ts'
 import { decisions } from '../lib/jev/decisions.ts'
 import { onJevRuntime } from '../lib/jev/run.ts'
-import { decisionStep } from '../lib/jev/steps.ts'
 import { readabilitySchema, withReadability } from '../lib/readability-chain.ts'
 import { searchEffect } from '../lib/search-chain.ts'
 import { searchErrors } from '../lib/search-errors.ts'
@@ -23,7 +18,10 @@ import { nestedBridge } from '../lib/search-nested.ts'
 import { subjectSources } from '../lib/source-subject.ts'
 import { fetchErrorsSchema, fetchSources, withRows } from '../lib/sources.ts'
 import { fetchedOnly, finishAnswer } from './answer-guard.ts'
+import { evidenceSchema, leadFirst, prepareSynth, sourceRef } from './answer-synth.ts'
 import { stepRuntime } from './runtime.ts'
+
+export { leadFirst }
 
 const answerInput = z.object({
   query: z.string().min(1),
@@ -41,8 +39,6 @@ const ANSWER_FETCH_MS = 3_000
 // HTML cap before Readability: ~400 KB parses in about 1 s and keeps the lead.
 const ANSWER_MAX_HTML = 400_000
 
-const sourceRef = z.object({ title: z.string(), url: z.string() })
-
 const answerBody = z.object({
   query: z.string(),
   answer: z.string(),
@@ -52,18 +48,6 @@ const answerBody = z.object({
   errors: fetchErrorsSchema,
 })
 const answerOutput = answerBody.extend({ readability: readabilitySchema })
-
-const evidenceSchema = z.object({
-  query: z.string(),
-  sentences: z.number(),
-  // The lead hit names the entity when the question does not (a bridge hop).
-  entity: z.string().optional(),
-  used: z.array(
-    sourceRef.extend({ text: z.string(), images: z.array(pageImageSchema).optional() }),
-  ),
-  errors: fetchErrorsSchema,
-})
-type Evidence = z.infer<typeof evidenceSchema>
 
 const searchHits = (query: string, n: number) =>
   searchEffect('web', query, n, { hop: true, deadlineMs: ANSWER_SEARCH_MS })
@@ -122,60 +106,25 @@ const searchStep = createStep({
     stepRuntime.runPromise(gatherBridged(inputData), { signal: abortSignal }),
 })
 
-const topSentences = (data: Evidence) =>
-  answerPassage(
-    data.used.map((e) => e.text),
-    data.sentences,
-    { query: data.query, entity: data.entity },
-  )
-
-// The sentences Jev keeps as stating facts that answer the query (answer.sentences),
-// then the summarizer's top ones, led by the sentence Jev picks as the direct answer.
-// Cited sources are those that back one of these top sentences (answer.citation).
-// Jev sees the summarizer's best 18 sentences, ranked over the whole page.
-// ponytail: citations are checked against the top sentences, not the Jev lead.
-const prepareSynth = Effect.fn('answer.prepare')(function* (data: Evidence) {
-  const text = data.used.map((e) => e.text).join('\n\n')
-  const candidates = answerCandidates(data.query, text)
-  const kept =
-    candidates.length === 0
-      ? []
-      : yield* onJevRuntime(decisions.answerFollowers, { question: data.query, candidates })
-  const top = [...new Set([...kept.map((i) => candidates[i] ?? ''), ...topSentences(data)])]
-    .filter(isSentence)
-    .slice(0, data.sentences)
-  const cited = yield* citedSources(top, data.used, (c) =>
-    onJevRuntime(decisions.answerCitation, c),
-  )
-  // The image router puts the lead source's answer in a figure: cite it, claim no sure sentence.
-  const lead = data.used[0]
-  const figure = yield* onJevRuntime(answerFigure, { question: data.query, lead })
-  const sources = figure && lead && !cited.includes(lead) ? [lead, ...cited] : cited
-  return { ...data, text, top, cited: sources, figure, asOf: yield* asOfDate }
-})
-// Jev's direct answer opens the answer, never repeated; a heading line never leads it.
-export const leadFirst = (top: ReadonlyArray<string>, lead: string | undefined, n: number) =>
-  lead === undefined || isHeading(lead)
-    ? [...top]
-    : [lead, ...top.filter((s) => s !== lead)].slice(0, n)
-const synthStep = decisionStep({
+// The lead index is Jev's answer.sentence pick, asked alongside the other synth calls.
+const synthOut = (p: Effect.Success<ReturnType<typeof prepareSynth>>) => {
+  const { query, text, sentences, top, cited, used, figure, errors, asOf, lead } = p
+  const first = lead === undefined ? undefined : answerSentences(text)[lead]
+  const body = finishAnswer(query, cited, leadFirst(top, first, sentences).join(' '))
+  return {
+    query,
+    answer: nameCountry(query, figure ? `${figureNote(figure)} ${body}` : body),
+    asOf,
+    sources: fetchedOnly(cited, used).map((e) => ({ title: e.title, url: e.url })),
+    errors,
+  }
+}
+const synthStep = createStep({
   id: 'fetch-and-summarize',
   inputSchema: evidenceSchema,
   outputSchema: answerBody,
-  decide: decisions.answerSentence,
-  prepare: (data: Evidence) => stepRuntime.runPromise(prepareSynth(data)),
-  pick: ({ query, text, figure }) => (text && !figure ? { question: query, text } : undefined),
-  output: ({ query, text, sentences, top, cited, used, figure, errors, asOf }, lead) => {
-    const first = lead === undefined ? undefined : answerSentences(text)[lead]
-    const body = finishAnswer(query, cited, leadFirst(top, first, sentences).join(' '))
-    return {
-      query,
-      answer: nameCountry(query, figure ? `${figureNote(figure)} ${body}` : body),
-      asOf,
-      sources: fetchedOnly(cited, used).map((e) => ({ title: e.title, url: e.url })),
-      errors,
-    }
-  },
+  execute: ({ inputData, abortSignal }) =>
+    stepRuntime.runPromise(Effect.map(prepareSynth(inputData), synthOut), { signal: abortSignal }),
 })
 
 // The readability chain checks the finished answer text; the text stays as is.

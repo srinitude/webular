@@ -1,6 +1,6 @@
 # Browser mode (Cua)
 
-Cua browser mode keeps your own browser safe. Webular drives only a throwaway window, never your everyday browser. It covers `scrape --render cua` and `act --goal`.
+Cua browser mode keeps your own browser safe. Webular drives only a throwaway window, never your everyday browser. This mode covers `scrape --render cua` and `act --goal`.
 
 ## Set up the window
 

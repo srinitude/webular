@@ -122,13 +122,17 @@ const startRun = (inputData: unknown) => (created: WorkflowRun) =>
     Effect.onInterrupt(() => Effect.promise(() => created.cancel())),
   )
 
-// The run ends by stopping the parse pool's idle workers. The shared step
-// runtime stays usable for the next run in this process. The module is cached:
-// the workflow loaded it.
-const disposeSteps = Effect.promise(() => import('../workflows/runtime.ts')).pipe(
-  Effect.flatMap((m) => m.drainParsePool),
-  Effect.ignore,
-)
+// The run ends by stopping the parse pool's idle workers and closing the
+// browser sessions it opened. The shared step runtime stays usable for the
+// next run in this process. The module is cached: the workflow loaded it.
+const disposeSteps = Effect.gen(function* () {
+  const { drainParsePool, closeBrowserSessions } = yield* Effect.promise(
+    () => import('../workflows/runtime.ts'),
+  )
+  yield* Effect.all([Effect.ignore(drainParsePool), Effect.ignore(closeBrowserSessions)], {
+    concurrency: 2,
+  })
+}).pipe(Effect.ignore)
 
 // The Mastra run is the Promise edge; it surfaces input-validation failures by
 // rejecting from start, which reports as a plain failure (exit 1). The

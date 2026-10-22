@@ -106,9 +106,19 @@ export function buildSection(
   kept: ReadonlyArray<number> = [],
 ) {
   const all = researchSentences(entry.text)
-  const top = researchSentences(entry.text, topN, topic)
+  const ask = hopAsk(topic, entry.title)
+  const top = researchSentences(entry.text, topN, ask ?? topic)
   const lead = kept.flatMap((i) => (all[i] === undefined ? [] : [all[i]]))
-  return [...new Set([...lead, ...top])].slice(0, topN)
+  return [...new Set(ask ? [...top, ...lead] : [...lead, ...top])].slice(0, topN)
+}
+
+// A hop page (its title shares no topic word, like "Marie Curie" for a Nobel
+// question) answers only the question's ask, its last word ("In which city
+// was ... born?" asks "born"). Adding "city" ranked a "City of Paris" passage first.
+export const hopAsk = (topic: string, title: string): string | undefined => {
+  const topicWords = words(topic)
+  if ([...words(title)].some((w) => topicWords.has(w))) return undefined
+  return topic.match(/(\w+)\W*$/)?.[1]
 }
 
 export function renderSection(

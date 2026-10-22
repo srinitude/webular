@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url'
 import { BunRuntime, BunServices } from '@effect/platform-bun'
 import { Console, Effect, FileSystem, Schema } from 'effect'
 import { pickRun } from './peers/docs.ts'
+import { runDate } from './peers/plain-words.ts'
 import { APPLIES, COMMAND_LIST, OFFLINE } from './scoreboard-rows.ts'
 
 const PeerRecord = Schema.Struct({
@@ -103,13 +104,24 @@ export const buildRows = (records: readonly PeerRecord[], source: string): Row[]
 
 const fmt = (v: number | null) =>
   v === null ? 'gap' : Number.isInteger(v) && v > 1 ? String(v) : v.toFixed(4)
+// A results file shows as its run date in words; a test file keeps its path.
+const evalLink = (e: string) =>
+  e.startsWith('bench/results/') ? `[peer run from ${runDate(e)}](../${e})` : `[\`${e}\`](../${e})`
+const against = (r: Row) => {
+  if (!r.bestRival || r.value === null) return ''
+  const [mine, theirs] = [fmt(r.value), fmt(r.bestRival.value)]
+  return mine > theirs ? 'ahead' : mine < theirs ? 'behind' : 'even'
+}
 const line = (r: Row) =>
   `| \`${r.command}\` | ${r.metric} | ${fmt(r.value)}${r.ceiling ? ' (ceiling below 1)' : ''} | ${
     r.bestRival ? `${r.bestRival.tool} ${fmt(r.bestRival.value)}` : ''
-  } | ${r.eval ? `[\`${r.eval}\`](../${r.eval})` : ''} | ${r.set ?? ''} |`
+  } | ${against(r)} | ${r.eval ? evalLink(r.eval) : ''} | ${r.set ?? ''} |`
 
 export const markdown = (rows: readonly Row[]) =>
-  ['| Command | Metric | Value | Best rival | Eval | Set |', '|---|---|---|---|---|---|']
+  [
+    '| Command | Metric | Value | Best rival | Webular vs best rival | Measured by | Set |',
+    '|---|---|---|---|---|---|---|',
+  ]
     .concat(rows.map(line))
     .join('\n')
 

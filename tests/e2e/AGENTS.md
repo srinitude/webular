@@ -2,7 +2,7 @@
 
 The user-side surface, run against one local fixture server. The parent rules are in [tests/AGENTS.md](../AGENTS.md).
 
-This folder has no `*.test.ts` files. `mise run e2e` runs [`run.ts`](run.ts), which prints one pass or FAIL line per case and exits non-zero on any failure.
+This folder has no `*.test.ts` files. `mise run e2e` runs [`run.ts`](run.ts). It prints one pass or FAIL line per case and exits non-zero on any failure.
 
 ## What lives here
 

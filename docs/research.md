@@ -1,6 +1,6 @@
 # Research status
 
-This page says how much research backs webular and how much of it is in the code. Each ranked change from the research is marked applied, rejected, or open. The papers and the change lists are in [the research ledger](research/README.md).
+This page shows how much research backs webular and how much of it is in the code. Each ranked change from the research is marked applied, rejected, or open. The papers and the change lists are in [the research ledger](research/README.md).
 
 ## What was read
 

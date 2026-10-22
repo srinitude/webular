@@ -2,7 +2,8 @@
 // marker string tied to the machine event that stands for it: the marker is in
 // the code exactly when the event is in the machine, so a code branch missing
 // from the machine, or a machine event with no code branch, fails here.
-// Every workflow must also be run by a command, through the command lifecycle.
+// Every workflow must also be run by a command, through the command lifecycle:
+// directly, or started with createRun inside a workflow that a command runs.
 import { expect, test } from 'bun:test'
 import { Effect, FileSystem } from 'effect'
 import type { AnyStateMachine } from 'xstate'
@@ -57,11 +58,16 @@ test(
   'every workflow is run by a command through the lifecycle machine',
   eff(
     Effect.gen(function* () {
-      const flows = names(
-        yield* readAll('src/workflows'),
-        /export const (\w+Workflow) = createWorkflow\(/g,
-      )
-      const run = new Set(names(yield* readAll('src/commands'), /m\.(\w+Workflow)/g))
+      const code = yield* readAll('src/workflows')
+      const flows = names(code, /export const (\w+Workflow) = createWorkflow\(/g)
+      const direct = new Set(names(yield* readAll('src/commands'), /m\.(\w+Workflow)/g))
+      // A sub-run (batch starts scrapeTitleWorkflow) shares its parent command's lifecycle.
+      const nested = code
+        .filter((text) =>
+          names([text], /export const (\w+Workflow) = /g).some((n) => direct.has(n)),
+        )
+        .flatMap((text) => names([text], /(\w+Workflow)\.createRun\(/g))
+      const run = new Set([...direct, ...nested])
       expect(flows.length).toBeGreaterThan(0)
       expect(flows.filter((n) => !run.has(n))).toEqual([])
     }),

@@ -73,7 +73,10 @@ Most papers measured other models and other tasks. Treat each paper's number as 
 ## 7. Domain trust tiers and fit to the question's field
 
 - **File:** [`src/lib/sources/rank.ts`](../../src/lib/sources/rank.ts).
-- **Change:** Add a static trust table with tiers (government, education, rank-listed, low-credibility list). Combine trust with freshness as the smaller of the two, not their product. Add an intent-by-source-type table: medical and legal questions need official or research sources, and code questions prefer forums. Enforce it in code, because a trusted-domain list in a prompt barely changes citations.
+- **Change:** Add a static trust table with tiers (government, education, rank-listed, low-credibility list).
+  - Combine trust with freshness as the smaller of the two, not their product.
+  - Add an intent-by-source-type table: medical and legal questions need official or research sources, and code questions prefer forums.
+  - Enforce the table in code, because a trusted-domain list in a prompt barely changes citations.
 - **Papers:** 2603.25092, 2604.20856, 2607.22584, 2609.23354, 2605.28565, 2602.16942, 2607.05217.
 - **Metric:** the share of top-5 sources that suit the question's field, and source-ranking P@5.
 - **Proof:** Label the source type for 100 or more dev queries. Count unsuitable sources in the top 5 with and without the table.

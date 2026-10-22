@@ -88,7 +88,11 @@ The `gold.checked` field of each row says how its answer was read and checked, a
 
 ## Peer benchmark set sources
 
-[dev/peers.jsonl](dev/peers.jsonl) is the live peer benchmark set. It has seven categories: factual lookup, multi-hop, fresh, official site, extract, PDF, and comparison. Each row names its category in `tags.category`, and its source URL and license in `source`. We wrote every question. No row is copied from SimpleQA, FRAMES, WebWalkerQA, BrowseComp, or GAIA; those sets only shaped the style. A helper fetched each source page with Firecrawl or Exa when the set was built. The evidence spans are quotes from those pages.
+[dev/peers.jsonl](dev/peers.jsonl) is the live peer benchmark set. It has seven categories: factual lookup, multi-hop, fresh, official site, extract, PDF, and comparison.
+Each row names its category in `tags.category`, and its source URL and license in `source`.
+
+We wrote every question. No row is copied from SimpleQA, FRAMES, WebWalkerQA, BrowseComp, or GAIA; those sets only shaped the style.
+A helper fetched each source page with Firecrawl or Exa when the set was built. The evidence spans are quotes from those pages.
 
 - **Wikipedia** (CC BY-SA 4.0): factual, multi-hop, fresh, extract, and comparison rows.
 - **Wikidata** (CC0-1.0): one extract row.
@@ -98,7 +102,12 @@ The `gold.checked` field of each row says how its answer was read and checked, a
 
 ## Known limits
 
-- **Multilingual queries are not written by native speakers.** The spec asks for `search.multilingual` queries written by native speakers. These queries are Wikidata labels in each language, set into fixed question templates. No cited source with a fitting license gives native-written queries. BrowseComp-ZH is internal only, so its rows are not copied. Read scores on these tasks as label-matching scores, not as scores on natural native queries. A native speaker should rewrite each query before the set meets this part of the spec.
+- **Multilingual queries are not written by native speakers.**
+  - The spec asks for `search.multilingual` queries written by native speakers.
+  - These queries are Wikidata labels in each language, set into fixed question templates.
+  - No cited source with a fitting license gives native-written queries. BrowseComp-ZH is internal only, so its rows are not copied.
+  - Read scores on these tasks as label-matching scores, not as scores on natural native queries.
+  - A native speaker should rewrite each query before the set meets this part of the spec.
 - **Fresh Wikidata answers follow recent edits.** Each fresh `answer.short` gold value is the statement on the cited entity page at build time. A recent edit can be wrong or vandalized, so check a sample of rows against the entity page before trusting the set.
 - **Some image pilot pages differ from the pilot plan.**
   - Chart-02 and chart-03 use Our World in Data pages, not BLS and climate.gov. The BLS chart is drawn in the browser, and its alt text gives the answer. The climate.gov static image stops at 2022.

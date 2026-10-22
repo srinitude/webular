@@ -12,7 +12,7 @@ when a page is dead or a site will not answer.
 
 ## Archive and index fallbacks
 
-These flags and fallbacks cover a dead page and a site that will not answer.
+These flags and fallbacks help when a page is dead or a site will not answer.
 
 ### Archive flags
 
@@ -21,7 +21,7 @@ These flags and fallbacks cover a dead page and a site that will not answer.
 
 ### Reads without a flag
 
-- `answer`, `research`, `extract`, and `media` (download) read a dead page from its archive copy without a flag; they find the capture through the availability API, then the Wayback CDX index.
+- `answer`, `research`, `extract`, and `media` (download) read a dead page from its archive copy without a flag. They find the capture through the availability API, then the Wayback CDX index.
 
 ### When a site's root will not answer
 

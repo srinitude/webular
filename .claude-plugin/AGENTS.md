@@ -1,6 +1,6 @@
 # .claude-plugin/AGENTS.md
 
-The plugin marketplace for this repo; the root [AGENTS.md](../AGENTS.md) holds the repo-wide rules.
+The plugin marketplace for this repo. The root [AGENTS.md](../AGENTS.md) holds the repo-wide rules.
 
 ## What lives here
 

@@ -17,6 +17,7 @@ import {
   dedupeSentences,
   findConflicts,
   gapsSection,
+  hopAsk,
   renderSection,
 } from './research-report.ts'
 import { stepRuntime } from './runtime.ts'
@@ -112,10 +113,15 @@ const fetchAndFilter = Effect.fn('research.fetchSources')(function* (
 ) {
   const fetched = yield* fetchSources(input.sources, input.timeoutMs)
   const withText = fetched.entries.filter((e) => e.text.length > 0)
-  const entries =
+  const kept =
     withText.length === 0
       ? withText
       : yield* onJevRuntime(decisions.answerSources, { question: input.topic, sources: withText })
+  // Hop pages (the bridge entity's page) stay: answer.sources judges them against
+  // the whole question, which only the hop chain answers.
+  const keptUrls = new Set(kept.map((e) => e.url))
+  const hops = withText.filter((e) => !keptUrls.has(e.url) && hopAsk(input.topic, e.title))
+  const entries = [...kept, ...hops]
   return {
     topic: input.topic,
     sentences: input.sentences,

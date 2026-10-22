@@ -12,7 +12,7 @@ Rules for the XState flow machines, under [src/AGENTS.md](../AGENTS.md).
 - Don't trust a stated confidence right after a web search. Ask for a second source first. Source: [arXiv 2601.07264](https://arxiv.org/abs/2601.07264).
 - Don't let the agent loop run without a step cap. Most search sessions end within ten steps. Source: [arXiv 2601.17617](https://arxiv.org/abs/2601.17617).
 - Bug classes here ([bug classes](../../docs/bug-classes.md)): machine drift. Guard tasks: `mise run bugs:jev`.
-- A machine is the flow doc. Do not draw a diagram of it.
+- A machine is the flow doc, so do not draw a diagram of it.
 - A final state carries an `exit-<code>` tag from [`src/cli/exit-codes.ts`](../cli/exit-codes.ts).
 - Code that runs a flow reads its decisions from the machine. [`src/core/http.ts`](../core/http.ts) performs only what [`fetch.ts`](fetch.ts) asks.
 - [`tests/machines/flow-coverage.test.ts`](../../tests/machines/flow-coverage.test.ts) needs a machine for every command and MCP tool, and a test for every machine.

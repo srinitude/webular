@@ -22,7 +22,7 @@
 - Find the target in the request or its files, and use only the forms it supports. A form the target does not support may stay literal.
 - Never invent facts, citations, image details, or syntax support.
 - MMD6 and MMD7 mean MultiMarkdown 6 and 7. In examples, `\n` is a real newline, and any indentation described is real spaces.
-- Test ambiguous marks (blank lines, indentation, fence length) and clashes. For example, `---` can be a thematic break, a heading underline, or a metadata fence.
+- Test marks that can read two ways (blank lines, indentation, fence length) and any clashes. For example, `---` can be a thematic break, a heading underline, or a metadata fence.
 - `~` can mean strikethrough or subscript. `^` can mean superscript, a block ID, or a block end. `$` can mean currency, math, or a host reference. Braces can hold attributes, data, or code that runs.
 - Details, tabs, comments, footnotes, and eager includes remove no source lines and save no context. Use linked files with reading triggers instead.
 - Includes, imports, partials, transclusions, substitutions, and required cross-references are dependencies when they supply content the reader needs. Keep links that only help navigation apart from them.

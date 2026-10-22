@@ -1,6 +1,6 @@
 # Best practices checklist
 
-This list names the practices webular follows for each library and tool it uses, plus practices that hold for any TypeScript CLI. Each item names its source, the source's date, and how the item is checked. A final audit across every branch uses this list.
+This list names the practices webular follows for each library and tool it uses. It also covers practices that hold for any TypeScript CLI. Each item names its source, the source's date, and how it is checked. The final audit across every branch uses this list.
 
 How to read each item:
 

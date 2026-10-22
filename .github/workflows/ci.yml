@@ -64,9 +64,20 @@ jobs:
           - os: macos-latest # arm64
             timeout: 11
             locked: 1
+          # The x64 Mac is the slowest runner, so its tests run in two shards
+          # on two runners: shard 1/2 runs the whole `mise run ci` spine and
+          # e2e, shard 2/2 runs setup, build, and the other half of the files.
+          # `bun test --shard` splits the file list, so each test file runs
+          # exactly once on this OS (tests/ci/workflow-matrix.test.ts checks
+          # that the shards are 1..n of n).
           - os: macos-15-intel # x64; macos-13 is retired
             timeout: 14
             locked: 0
+            shard: 1/2
+          - os: macos-15-intel
+            timeout: 14
+            locked: 0
+            shard: 2/2
           - os: windows-latest
             timeout: 11
             locked: 1
@@ -77,6 +88,8 @@ jobs:
     timeout-minutes: ${{ matrix.timeout }}
     env:
       MISE_LOCKED: ${{ matrix.locked }}
+      # Empty on unsharded runners, so `mise run test` runs every file there.
+      WEBULAR_TEST_SHARD: ${{ matrix.shard }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -107,15 +120,28 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get update -q && sudo apt-get install -y -q --no-install-recommends mandoc
       - name: Run the single CI dependency path
+        if: matrix.shard != '2/2'
         env:
           BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
         run: mise run ci
       # Every command, flag, MCP tool, and the executable, from the user's
       # side, against a local fixture server (no network).
       - name: Run the end-to-end surface check
+        if: matrix.shard != '2/2'
         env:
           BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
         run: mise run e2e
+      # Shard 2/2: the build the tests read, then this shard's test files.
+      # Lint, typecheck, and the bug checks run once, in shard 1/2.
+      - name: Run the second test shard
+        if: matrix.shard == '2/2'
+        env:
+          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
+          MISE_TASK_SKIP_DEPENDS: "1"
+        run: |
+          mise run setup
+          mise run build
+          mise run test
 
   # musl: the same suite on Alpine, where the linux-*-musl executables run.
   # A docker run on the host (not a job container), because the JavaScript

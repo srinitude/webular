@@ -4,6 +4,9 @@ import { JEV_CONCURRENCY, Jev, jevRuntime } from '../client.ts'
 import { decide, defineDecision } from '../define.ts'
 import { agreed, bothOrders, type Options, SUBTASKS } from '../fetch-page.ts'
 import { batches, CAPS, CONFIDENCE_BAR, NONE_OPTION, purpose } from '../payload/index.ts'
+import { bridgeEntity, keywordQuery } from './research-hop.ts'
+
+export { bridgeEntity, keywordQuery }
 
 interface ResearchState {
   readonly topic: string
@@ -127,24 +130,44 @@ const roundDone = (s: ResearchState) =>
     ),
   ).pipe(Effect.orElseSucceed(() => true))
 
+const evidenceOf = (hits: ReadonlyArray<Hit>) =>
+  hits.map((h) => `${h.title}: ${h.description}`).join('\n')
+const mergeHits = <H extends Hit>(hits: ReadonlyArray<H>, more: ReadonlyArray<H>) => {
+  const seen = new Set(hits.map((h) => h.url))
+  return [...hits, ...more.filter((h) => !seen.has(h.url))]
+}
+
 // Search rounds: another round runs only when research.done says the hits
-// miss the topic. A failed later search keeps the earlier hits.
-// ponytail: one code-built sub-question (the topic) and a fixed widening query;
-// split the topic into sub-questions if multi-part topics need it.
+// miss the topic, or the topic is a question. That round searches the topic as keywords, then hops to the
+// bridge entity the hits name (topic → person → fact). A failed later search
+// keeps the earlier hits.
 export const searchRounds = <H extends Hit, E, R>(
   topic: string,
   depth: number,
   search: (query: string, limit: number) => Effect.Effect<ReadonlyArray<H>, E, R>,
 ) =>
   Effect.gen(function* () {
-    let hits = yield* search(topic, depth)
+    let hits: ReadonlyArray<H> = yield* search(topic, depth)
+    const safe = (q: string, limit = depth) =>
+      search(q, limit).pipe(Effect.orElseSucceed((): ReadonlyArray<H> => []))
     for (let round = 1; round < RESEARCH_ROUNDS; round++) {
-      const bestEvidence = hits.map((h) => `${h.title}: ${h.description}`).join('\n')
-      const subQuestions = [{ question: topic, bestEvidence }]
-      if (yield* roundDone({ topic, subQuestions, round, maxRounds: RESEARCH_ROUNDS })) break
-      const seen = new Set(hits.map((h) => h.url))
-      const more = yield* search(`${topic} explained`, depth).pipe(Effect.orElseSucceed(() => []))
-      hits = [...hits, ...more.filter((h) => !seen.has(h.url))]
+      const subQuestions = [{ question: topic, bestEvidence: evidenceOf(hits) }]
+      // A question always hops: research.done judged "Nobel Prize" pages as done
+      // for a question whose answer sits one entity further.
+      const question = /\?\s*$/.test(topic)
+      if (
+        !question &&
+        (yield* roundDone({ topic, subQuestions, round, maxRounds: RESEARCH_ROUNDS }))
+      )
+        break
+      // A wider search finds the bridge; only its top `depth` hits become sources.
+      const wide = yield* safe(keywordQuery(topic), depth * 2)
+      hits = mergeHits(hits, wide.slice(0, depth))
+      const bridge = bridgeEntity(
+        topic,
+        [...hits, ...wide].map((h) => h.description),
+      )
+      if (bridge) hits = mergeHits(hits, yield* safe(bridge))
     }
     return hits
   })

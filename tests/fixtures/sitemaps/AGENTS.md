@@ -1,6 +1,6 @@
 # tests/fixtures/sitemaps/AGENTS.md
 
-This folder holds hand-written sitemaps for the parsing guards, and it follows [tests/fixtures/AGENTS.md](../AGENTS.md).
+This folder holds hand-written sitemaps for the parsing guards. It follows [tests/fixtures/AGENTS.md](../AGENTS.md).
 
 ## What lives here
 

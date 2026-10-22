@@ -25,10 +25,10 @@ route order is in [`src/lib/jev/route.ts`](../src/lib/jev/route.ts).
 
 ## Recommended setup: the direct TypeSafe API
 
-This is the way webular is built to reach Jev.
+Webular is built to reach Jev this way.
 
 1. Make a key at [console.typesafe.ai/keys](https://console.typesafe.ai/keys).
-2. Store it in one of the two places webular reads, shown in the next section.
+2. Store it in one of the two places webular reads. The next section shows how.
 3. Check it with the steps in [Check your setup](#check-your-setup).
 
 Webular picks its route in this order. The first match wins:

@@ -8,7 +8,7 @@ The peer benchmark. It scores webular against other web research tools. The pare
 - [matrix.ts](matrix.ts): the agent matrix. It scores every tool arm under every agent model from the committed agent run, or skips a cell with its reason.
 - [providers.ts](providers.ts): webular's own provider from [webular.ts](webular.ts), plus one Effect Layer per peer. A peer with no key is skipped, and the report says so. Jina Reader runs without a key on its free limits.
 - [peers.ts](peers.ts): the Firecrawl, Exa, Tavily, and Perplexity adapters, with each peer's published prices. Every other hosted peer has its own adapter file named after it, such as [apify.ts](apify.ts) and [serper.ts](serper.ts).
-- Each job has a `<job>-jobs.ts` and `<job>-tasks.ts` pair, and webular and the rivals in the parity map run the same tasks. The pairs: map-jobs.ts, map-tasks.ts; extract-jobs.ts, extract-tasks.ts; research-jobs.ts, research-tasks.ts; crawl-jobs.ts, crawl-tasks.ts; batch-jobs.ts, batch-tasks.ts; summarize-jobs.ts, summarize-tasks.ts; monitor-jobs.ts, monitor-tasks.ts; parse-jobs.ts, parse-tasks.ts; media-jobs.ts, media-tasks.ts; act-jobs.ts, act-tasks.ts.
+- Each job has a `<job>-jobs.ts` and `<job>-tasks.ts` pair: map-jobs.ts, map-tasks.ts; extract-jobs.ts, extract-tasks.ts; research-jobs.ts, research-tasks.ts; crawl-jobs.ts, crawl-tasks.ts; batch-jobs.ts, batch-tasks.ts; summarize-jobs.ts, summarize-tasks.ts; monitor-jobs.ts, monitor-tasks.ts; parse-jobs.ts, parse-tasks.ts; media-jobs.ts, media-tasks.ts; act-jobs.ts, act-tasks.ts. Webular and the parity-map rivals run the same tasks. [parity.ts](parity.ts) checks a run against that map.
 - [baselines.ts](baselines.ts): free local baselines. A missing tool is skipped, never faked.
 - [awaiting-approval.ts](awaiting-approval.ts): peers that need a cost, a card, or a cloud project the user has not approved. The report shows them as skipped.
 - [model.ts](model.ts), [tasks.ts](tasks.ts), and [score.ts](score.ts): the provider contract and metric registry, the tasks, and the pure scoring functions. [plan.ts](plan.ts) adds the plan file's tasks.
@@ -16,8 +16,8 @@ The peer benchmark. It scores webular against other web research tools. The pare
 - [cache.ts](cache.ts): the cache folder for each round, and the `cached` flag.
 - [family.ts](family.ts): paired tests per task family, and the shared-task headline.
 - [grade.ts](grade.ts): the grader and the judge gate. For an answer job, `contains` and `regex` checks read the answer field (a JSON `answer` or an `Answer:` line, else the bare output). A scrape or extract job has no answer field, so those checks read the whole output text. Every peer is graded the same way.
-- [timeout.ts](timeout.ts): the 60 s call timeout, and latency that keeps failed rows.
-- [report.ts](report.ts): the text report.
+- [timeout.ts](timeout.ts): the call timeout and failed-row latency.
+- [report.ts](report.ts), [plain-words.ts](plain-words.ts): the text report, and the page words.
 - [keys.ts](keys.ts): reads a peer key from the environment, then the macOS Keychain.
 - [cases.ts](cases.ts): joins Jev calibration rows to bench cases.
 - [skip.ts](skip.ts): why a provider and task pair does not run. A robots-gold task is unsupported, since no peer exposes its target-site requests.

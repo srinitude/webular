@@ -17,10 +17,10 @@ type Step = { name?: string; run?: string; env?: Record<string, string> }
 const jobs = (release as { jobs: Record<string, { steps: Step[] }> }).jobs
 const steps = (job: string) => jobs[job]?.steps ?? []
 const graph = loadGraph()
-const indexOf = (text: string) => steps('assets').findIndex((s) => s.run?.includes(text))
+const indexOf = (text: string) => steps('build-assets').findIndex((s) => s.run?.includes(text))
 
 // {job, step, task} for every `mise run package:*` whose task depends on compile:all.
-const rebuilders = ['assets', 'publish'].flatMap((job) =>
+const rebuilders = ['build-assets', 'publish'].flatMap((job) =>
   steps(job).flatMap((step) =>
     [...(step.run ?? '').matchAll(/mise run (package:[\w-]+)/g)]
       .map((m) => m[1] as string)
@@ -59,7 +59,8 @@ test(
         discard: true,
       })
       yield* fs.writeFileString(join(bin, 'webular'), 'host build, not a release file')
-      const run = steps('assets').find((s) => s.run?.includes('sha256sum webular-*'))?.run ?? ''
+      const run =
+        steps('build-assets').find((s) => s.run?.includes('sha256sum webular-*'))?.run ?? ''
       expect((yield* runProc(['sh', '-c', run], { cwd: dir, timeoutMs: 20_000 })).code).toBe(0)
       const sums = yield* fs.readFileString(join(bin, 'SHA256SUMS'))
       // The parser the release uses: Windows sha256sum marks binary mode with "*".
@@ -84,7 +85,7 @@ test(
         (n) => fs.writeFileString(join(bin, n), n),
         { concurrency: 2, discard: true },
       )
-      const run = steps('assets')[cleanup]?.run ?? ''
+      const run = steps('build-assets')[cleanup]?.run ?? ''
       expect(
         (yield* runProc(['sh', '-c', run], { cwd: join(bin, '..', '..'), timeoutMs: 20_000 })).code,
       ).toBe(0)

@@ -10,7 +10,7 @@ Rules for the MCP tools, under [src/AGENTS.md](../AGENTS.md).
 
 - Don't put a format rule only in a parameter description. Enforce it in the zod schema. Source: [arXiv 2509.18420](https://arxiv.org/abs/2509.18420).
 - Don't return fetched page text as if it were instructions. Mark it as untrusted data. Source: [arXiv 2510.15994](https://arxiv.org/abs/2510.15994).
-- A tool shares its name, input shape, and error text with its CLI command. Ask first before you rename one.
+- A tool shares its name, input shape, and error text with its CLI command. Ask before you rename one.
 - Bad tool input (an unknown key or a bad paging cursor) gets an `isError` result, never a silent drop. `mise run bugs:mcp-cli` checks it.
 - A handler parses its input again with the same zod schema. A failing tool returns `isError` content and never breaks the protocol.
 - Load machines and the MCP SDK lazily, so `mcp --list` stays fast.

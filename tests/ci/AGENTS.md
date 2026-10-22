@@ -9,6 +9,7 @@ Contract tests for the CI/CD task graph. The parent rules are in [tests/AGENTS.m
 - [action-pins.test.ts](action-pins.test.ts) checks that every workflow `uses:` is pinned to the commit its version comment names (an annotated tag's own id is not a commit).
 - [workflow-hardening.test.ts](workflow-hardening.test.ts) checks that every workflow starts with read-only or empty permissions, interpolates no `${{ }}` into `run:`, avoids `pull_request_target`, and publishes to npm by OIDC with provenance and no stored token.
 - [checkout-credentials.test.ts](checkout-credentials.test.ts) checks that every workflow checkout drops its token from `.git/config`, and that no job pushes to main. Only [prune.yml](../../.github/workflows/prune.yml) runs `git push`, and only to its own `prune/auto-*` branch.
+- [workflow-matrix.test.ts](workflow-matrix.test.ts) checks that no speedup shrinks what CI runs. Every workflow keeps its jobs, its systems, and its lint, typecheck, build, and test steps. A system whose tests are split into shards has shards 1 through n of n, so each test file runs once on it.
 - [repo-settings.test.ts](repo-settings.test.ts) checks the shape of `.github/repo-settings.json` and that its workflow is read-only and runs `repo:settings:check`.
 
 ## Rules

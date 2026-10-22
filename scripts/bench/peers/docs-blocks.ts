@@ -1,6 +1,7 @@
 // Generated benchmark block text from one peer run: records give status counts and
 // job scores, the text report gives the shared-task tables. docs.ts places them.
 import type { RunRecord } from './model.ts'
+import { runDate, SHARED, verdict } from './plain-words.ts'
 
 export interface Run {
   name: string
@@ -49,17 +50,6 @@ const txtTable = (txt: string, title: string): Rows => {
 
 const cell = (rows: Rows, k: string, i: number) => rows.get(k)?.[i] ?? 'n/a'
 
-const SHARED = [
-  ['accuracy', 'accuracy'],
-  ['citationPrecision', 'citation precision'],
-  ['latencyP50Ms', 'latency p50 (ms)'],
-  ['latencyP95Ms', 'latency p95 (ms)'],
-  ['successRate', 'success rate'],
-  ['determinism', 'determinism'],
-  ['costPerCallUsd', 'cost per call (USD)'],
-  ['keysNeeded', 'keys needed'],
-] as const
-
 interface Ctx {
   run: Run
   json: string
@@ -81,7 +71,7 @@ const context = (run: Run, prefix: string): Ctx => {
     run,
     json,
     txt: json.replace(/\.json$/, '.txt'),
-    src: `Source: [${run.name}](${json})`,
+    src: `Source: [the peer run from ${runDate(run.name)}](${json})`,
     scores,
     web: (job) => scores.find((s) => s.job === job && s.tool === 'webular'),
     taskCounts: [...byJob].map(([j, g]) => [j, g.length]),
@@ -98,31 +88,35 @@ const counts = (c: Ctx) => c.taskCounts.map(([j, n]) => `${n} ${j}`).join(', ')
 
 const runBlock = (c: Ctx) =>
   [
-    `All numbers come from one committed peer run, with ${c.run.json.runs} runs per task (sha256 \`${c.run.sha}\`):`,
+    `All numbers on this page except the agent matrix come from one committed peer run, with ${c.run.json.runs} runs per task. Its sha256 fingerprint, which changes if the file changes, is \`${c.run.sha}\`.`,
     '',
-    `- [${c.run.name}](${c.json}): one row per tool, task, and run, with its status and accuracy.`,
-    `- [${c.run.name.replace(/\.json$/, '.txt')}](${c.txt}): the harness's text report for the same run.`,
+    `- [Full results of the peer run from ${runDate(c.run.name)}](${c.json}): one row per tool, task, and run, with its status and accuracy.`,
+    `- [Text report of the same run](${c.txt}): the harness's summary, with the per-peer tables.`,
   ].join('\n')
 
 const readmeBlock = (c: Ctx) => {
   const w = c.web('search')
   const peers = c.scores.filter((s) => s.job === 'search' && s.tool !== 'webular')
-  const ps = peers.map((s) => `${s.tool} scored ${f3(s.score)} on ${s.tasks}`).join(' and ')
-  return `- **Measured, not claimed.** On the committed peer run ([${c.run.name}](${c.json})), webular search scored ${f3(w?.score ?? 0)} on ${w?.tasks ?? 0} search tasks, while ${ps}. Read [the benchmark results](docs/benchmarks.md) for every score and the method behind it.`
+  const ps = new Intl.ListFormat('en-US').format(
+    peers.map((s) => `${s.tool} scored ${f3(s.score)} on ${s.tasks}`),
+  )
+  return `- **Measured, not claimed.** In [the peer run from ${runDate(c.run.name)}](${c.json}), webular search scored ${f3(w?.score ?? 0)} on ${w?.tasks ?? 0} search tasks, while ${ps}. A score of 1 means every answer was right. ${verdict(w, peers)} Read [the benchmark results](docs/benchmarks.md) for every score and the method behind it.`
 }
 
+const tasksOf = (n: number) => `${n} task${n === 1 ? '' : 's'}`
 const jobLine = (c: Ctx, job: string) => {
   const w = c.web(job)
-  const head = w ? `webular scores ${f3(w.score)} on ${w.tasks} tasks` : 'webular has no score'
+  const head = w ? `webular scores ${f3(w.score)} on ${tasksOf(w.tasks)}` : 'webular has no score'
   const peers = c.scores.filter((s) => s.job === job && s.tool !== 'webular')
-  const ps = peers.map((s) => `${s.tool} scores ${f3(s.score)} on ${s.tasks} tasks`)
-  return `- **${job}:** ${[head, ...ps].join('; ')}. ${c.src}.`
+  const ps = peers.map((s) => `${s.tool} scores ${f3(s.score)} on ${tasksOf(s.tasks)}`)
+  return `- **${job}:** ${[head, ...ps].join('; ')}. ${verdict(w, peers)}`
 }
 
 const shortBlock = (c: Ctx) =>
   [
     ...[...new Set(c.scores.map((s) => s.job))].map((job) => jobLine(c, job)),
     `- **Where webular leads:** it runs offline, needs ${cell(c.all, 'keysNeeded', 0)} keys, and costs ${cell(c.all, 'costPerCallUsd', 0)} USD per call. Source: [the text report](${c.txt}).`,
+    `${c.src.replace('Source:', 'Source for every job score above:')}.`,
   ].join('\n')
 
 const statusBlock = (c: Ctx) => {
@@ -146,11 +140,14 @@ const sharedBlock = (c: Ctx) => {
   const a = (k: string) => cell(c.all, k, 0)
   const pair = (rows: Rows, k: string) => ` ${cell(rows, k, 0)} | ${cell(rows, k, 1)} |`
   return [
-    `| metric |${c.shared.map((s) => ` webular | ${s.peer} (${s.n} shared tasks) |`).join('')}`,
-    `| --- |${' --- | --- |'.repeat(c.shared.length)}`,
-    ...SHARED.map(([k, label]) => `| ${label} |${c.shared.map((s) => pair(s.rows, k)).join('')}`),
+    `| metric | better is |${c.shared.map((s) => ` webular | ${s.peer} (${s.n} shared tasks) |`).join('')}`,
+    `| --- | --- |${' --- | --- |'.repeat(c.shared.length)}`,
+    ...SHARED.map(
+      ([k, label, better]) =>
+        `| ${label} | ${better} |${c.shared.map((s) => pair(s.rows, k)).join('')}`,
+    ),
     '',
-    `Across all of its own tasks, webular has an accuracy of ${a('accuracy')}, a success rate of ${a('successRate')}, a p50 latency of ${a('latencyP50Ms')} ms, and a p95 latency of ${a('latencyP95Ms')} ms.`,
+    `Across all of its own tasks, webular has an accuracy of ${a('accuracy')}, a success rate of ${a('successRate')}, a median wait (p50) of ${a('latencyP50Ms')} ms, and a slow-case wait (p95) of ${a('latencyP95Ms')} ms. One ms is a thousandth of a second.`,
     `Source: [the text report](${c.txt}).`,
   ].join('\n')
 }
@@ -163,13 +160,17 @@ const notesBlock = (c: Ctx) => {
     const word = w < p ? 'trails' : w > p ? 'leads' : 'ties'
     return `- On the ${n} tasks it shares with ${peer}, webular ${word} on accuracy, ${w} against ${p}.`
   })
-  const p50 = c.shared.map(({ peer, rows }) => {
-    const [w = 0, p = 0] = pairOf(rows, 'latencyP50Ms')
-    return `${w <= p ? 'faster' : 'slower'} than ${peer} at p50 (${w} ms against ${p} ms)`
-  })
+  const wait = (rows: Rows, k: string) => {
+    const [w = 0, p = 0] = pairOf(rows, k)
+    return `${w <= p ? 'faster' : 'slower'}, ${w} ms against ${p} ms`
+  }
+  const waits = c.shared.map(
+    ({ peer, rows }) =>
+      `- Against ${peer}, webular's median wait (p50) is ${wait(rows, 'latencyP50Ms')}. Its slow-case wait (p95) is ${wait(rows, 'latencyP95Ms')}.`,
+  )
   return [
     ...acc,
-    `- Webular is ${p50.join(', and ')}.`,
+    ...waits,
     `- The task counts are very small: ${counts(c)} tasks. Treat every gap as a sign, not a proof.`,
   ].join('\n')
 }

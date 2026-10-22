@@ -55,17 +55,17 @@ const searchStep = createStep({
       Effect.gen(function* () {
         // A product named only by its maker comes from Wikidata, beside the web round;
         // a navigational query asks in the official-site lookup's call instead.
-        const [web, made] = yield* Effect.all(
+        // Local BM25 hits answer alongside the free APIs: one SQLite query, run beside them.
+        const [web, made, local] = yield* Effect.all(
           [
             searchEffect(source, query, limit, { variants: variants ?? [] }),
             source === 'web' && !isNavigational(query)
               ? creatorProducts(query, limit)
               : Effect.succeed([]),
+            searchLocalIndex(query, limit),
           ],
-          { concurrency: 2 },
+          { concurrency: 3 },
         )
-        // Local BM25 hits answer alongside the free APIs: one SQLite query, a few ms.
-        const local = yield* searchLocalIndex(query, limit)
         const fused = yield* dropPrivateHosts(query, fuseRanked([made, web.results, local]))
         const results = fused.slice(0, limit)
         const answered = web.source && { source: web.source }

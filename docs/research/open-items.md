@@ -1,6 +1,10 @@
 # Open research items
 
-Each ranked change from the research lists has one line here, and each line carries one of three statuses right after its id. `landed in <sha>` means the change is in the code at that commit, and the line names the file and line that hold it. `closed (<reason>)` means the change leaves this list; the reason is `duplicate`, `superseded`, `measured no gain`, or `out of scope`, and the line says why. `waiting:` means the change is not done, and the line says what it still needs.
+Each ranked change from the research lists has one line here. Each line carries one of three statuses right after its id:
+
+- `landed in <sha>`: the change is in the code at that commit, and the line names the file and line that hold it.
+- `closed (<reason>)`: the change leaves this list. The reason is `duplicate`, `superseded`, `measured no gain`, or `out of scope`, and the line says why.
+- `waiting:` the change is not done, and the line says what it still needs.
 
 The totals and the method are in [research.md](../research.md). Each `#N` is that change's number in its topic list.
 

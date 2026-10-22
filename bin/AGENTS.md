@@ -1,10 +1,10 @@
 # bin/AGENTS.md
 
-The CLI entry; the root [AGENTS.md](../AGENTS.md) holds the repo-wide rules.
+The CLI entry point. The root [AGENTS.md](../AGENTS.md) holds the repo-wide rules.
 
 ## What lives here
 
-- [`bin/webular.ts`](webular.ts): the entry the executable and `bun bin/webular.ts` start. It routes to a command through [`src/cli/dispatch-table.ts`](../src/cli/dispatch-table.ts).
+- [`bin/webular.ts`](webular.ts): the entry that the executable and `bun bin/webular.ts` start. It routes to a command through [`src/cli/dispatch-table.ts`](../src/cli/dispatch-table.ts).
 
 ## Rules
 

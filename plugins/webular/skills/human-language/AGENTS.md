@@ -1,6 +1,6 @@
 # plugins/webular/skills/human-language/AGENTS.md
 
-This folder holds the human-language skill, a real copy of the readability skill. The skills rules are in [AGENTS.md](../AGENTS.md).
+This folder holds the human-language skill, a real copy of the readability skill. The skills folder rules are in [AGENTS.md](../AGENTS.md).
 
 ## What lives here
 

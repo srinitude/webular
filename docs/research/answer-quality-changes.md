@@ -5,7 +5,7 @@ Source ledger: [papers.jsonl](papers.jsonl), topic `answer-quality`. It holds 77
 Limits that apply to every item:
 
 - The `date` field has month precision only, taken from the arXiv id. The arXiv API returned HTTP 429, so exact days are missing.
-- A paper's claim is checked against its full text only when the ledger row says `read: full`. Every other claim comes from an abstract, so read the paper in full first.
+- A paper's claim is checked against its full text only when the ledger row says `read: full`. Every other claim comes from an abstract, so read that paper in full before relying on it.
 - No change was run. Each proof is a with-and-without run on the dev set (`bench/tasks/dev/*.jsonl`), never on the sealed test split.
 - "Needs decision-models-first receipt" marks a change that touches a Jev decision.
 - Paths are relative to the repo root.

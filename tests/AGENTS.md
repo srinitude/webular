@@ -1,6 +1,6 @@
 # tests/AGENTS.md
 
-The Bun test suite. The root [AGENTS.md](../AGENTS.md) holds the commands and the code gates.
+The Bun test suite lives here. The root [AGENTS.md](../AGENTS.md) holds the commands and the code gates.
 
 ## What lives here
 
@@ -17,7 +17,7 @@ The Bun test suite. The root [AGENTS.md](../AGENTS.md) holds the commands and th
 
 - Run each test body as an Effect through `eff` in [tests/_support/run.ts](_support/run.ts).
 - Serve pages from the local fixture in [tests/_support/fixture.ts](_support/fixture.ts) (`Bun.serve` on `127.0.0.1`, port 0). Never call the live internet in a default run.
-- Gate a live case behind `WEBULAR_TEST_LIVE=1`.
+- Put a live case behind `WEBULAR_TEST_LIVE=1`.
 - Get temp folders from `tmpDir` in [tests/_support/run.ts](_support/run.ts). They clean up when the test ends.
 - `bun test --parallel` runs files in worker processes and implies `--isolate`. `[test] preload` in [bunfig.toml](../bunfig.toml) runs setup scripts for `bun test`.
 - Under `bun test --parallel`, key any per-worker file, database path, or port on `BUN_TEST_WORKER_ID`, never on a fixed path.

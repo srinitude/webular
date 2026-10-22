@@ -25,8 +25,8 @@ code. The CLI passes a SIGINT or SIGTERM on to the command.
 
 mise owns **one task graph with no cycles**
 (`setup → format → lint → typecheck → build → test → validate → ci`). Each
-command branches off `setup`. Each command is a **Mastra workflow**. It is built
-from **Mastra tools that use no model** and wrap open-source libraries.
+command branches off `setup`. Each command is a **Mastra workflow** built from
+**Mastra tools that use no model** and wrap open-source libraries.
 
 ## State machines
 

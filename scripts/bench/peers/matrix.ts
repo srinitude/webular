@@ -4,6 +4,7 @@
 // is filled in.
 import { JEV_ARMS } from '../../../tests/models/agent/arm.ts'
 import scenarios from '../../../tests/models/scenarios.json'
+import { runDate, verdict } from './plain-words.ts'
 
 export const AGENT_MODELS = ['claude-opus-5-5', 'claude-sonnet-5-5', 'claude-haiku-5-5'] as const
 
@@ -96,7 +97,20 @@ const cells = (rows: readonly MatrixRow[], model: string) =>
   MATRIX_ARMS.map((a) => cell(rows, a, model))
 
 const source = (name: string | undefined, prefix: string) =>
-  name ? `[${name}](${prefix}${name})` : 'no committed agent run'
+  name ? `[the agent run from ${runDate(name)}](${prefix}${name})` : 'no committed agent run'
+
+// Jev-on webular against the best-scoring rival arm for one model, in words.
+const modelVerdict = (cs: readonly string[]) => {
+  const s = cs.flatMap((c) => {
+    const m = /^(\S+) (\d\.\d{3}) \(/.exec(c)
+    return m?.[1] && m[2] ? [{ tool: m[1], score: Number(m[2]) }] : []
+  })
+  const mine = s.find((x) => x.tool === 'webular-jev-on')
+  return `With Jev on: ${verdict(
+    mine,
+    s.filter((x) => !x.tool.startsWith('webular')),
+  )}`
+}
 
 // Plain sample size, counted from the rows: the most runs in any one cell.
 const sample = (rows: readonly MatrixRow[]) => {
@@ -106,20 +120,22 @@ const sample = (rows: readonly MatrixRow[]) => {
       per.set(`${r.model}/${r.provider}`, (per.get(`${r.model}/${r.provider}`) ?? 0) + 1)
   const runs = Math.max(0, ...per.values())
   return runs
-    ? ` Each cell is at most ${runs} runs, one per task, a small sample, so treat a gap of one run as noise.`
+    ? ` Each cell is at most ${runs} runs, one per task, a small sample, so treat a difference of one run as noise.`
     : ''
 }
 
 // One line per model, naming every arm, so no cell can drop out unseen.
 export const matrixBlock = (rows: readonly MatrixRow[], name: string | undefined, prefix: string) =>
   [
-    `Each line is one agent model, and each entry is one tool arm, from ${source(name, prefix)}. Every cell uses the same tasks, grader, seed, and prompt; only the tool changes. A cell says skipped when its key or its agent adapter is missing. A no tool call run is one where the model never called the arm's tool, so no graded answer came back. Sure-but-wrong counts only graded wrong answers.${sample(rows)}`,
+    `Each line is one agent model, and each entry is one tool arm, from ${source(name, prefix)}. Every cell uses the same tasks, grader, seed, and prompt; only the tool changes. A cell says skipped when its key or its agent adapter is missing. A no tool call run is one where the model never called the arm's tool, so no graded answer came back. Sure-but-wrong counts graded wrong answers that came back with no timeout or error, as if the model were sure of them. The first number is the share of runs graded right, from 0 (none) to 1 (all). p50 is the median wait per run in ms (thousandths of a second). Tool calls is the average per run. Tokens (units of text the model read and wrote) and USD (the model bill) are totals over the cell's runs. A higher first number is better; a lower p50, fewer tokens, and fewer USD are better.${sample(rows)}`,
     '',
-    ...AGENT_MODELS.map((m) => `- **${m}:** ${cells(rows, m).join('; ')}.`),
+    ...AGENT_MODELS.map(
+      (m) => `- **${m}:** ${cells(rows, m).join('; ')}. ${modelVerdict(cells(rows, m))}`,
+    ),
   ].join('\n')
 
 export const matrixHeadline = (rows: readonly MatrixRow[], name: string | undefined) => {
   const scored = AGENT_MODELS.flatMap((m) => cells(rows, m)).filter((c) => /\d\.\d{3} \(/.test(c))
   const all = AGENT_MODELS.length * MATRIX_ARMS.length
-  return `- **Agent matrix.** ${scored.length} of ${all} cells scored: webular with Jev off and on, and ${ALTERNATIVES.length} alternatives, on ${AGENT_MODELS.length} agent models. Source: ${name ?? 'no committed agent run'}.`
+  return `- **Agent matrix.** ${scored.length} of ${all} cells scored: webular with Jev off and on, and ${ALTERNATIVES.length} alternatives, on ${AGENT_MODELS.length} agent models. A cell is one tool used by one AI agent model; the rest were skipped for lack of a key or an agent adapter. Source: ${name ? `the agent run from ${runDate(name)}` : 'no committed agent run'}.`
 }

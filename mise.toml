@@ -211,7 +211,9 @@ description = "Run the bun test suite (CI/CD graph + contracts + integration)"
 depends = ["build"]
 # One worker per core: most test time is waiting (timeouts, retries, child
 # processes), so files run side by side. Each file still gets a fresh global.
-run = "bun test --timeout 30000 --parallel"
+# WEBULAR_TEST_SHARD=k/n runs shard k of n (bun test --shard), for CI
+# runners that split the suite; unset, every file runs.
+run = "bun test --timeout 30000 --parallel{% if get_env(name='WEBULAR_TEST_SHARD', default='') != '' %} --shard={{ get_env(name='WEBULAR_TEST_SHARD', default='') }}{% endif %}"
 
 [tasks."test:shuffled"]
 description = "Run the bun test suite in random order; a failure prints its seed so the order-dependent test reproduces (off the CI spine)"

@@ -1,11 +1,19 @@
 # Command parity with Exa, Tavily, Firecrawl, and Perplexity
 
-This page maps each `webular` command to the rival endpoints that do the same
-job. It shows which ones the peer bench in
-[scripts/bench/peers/](../scripts/bench/peers/) scores, and the metric that fits.
-Webular is on par for a command when its accuracy is at least the rival's,
-and its p50 latency is within the noise bar or behind only by a written,
-evidenced ceiling.
+**What this shows:** for each `webular` command, the matching features of the
+four paid rivals. A rival's feature is called an endpoint: the web address a
+program calls to use it. The page also says which match-ups the benchmark in
+[scripts/bench/peers/](../scripts/bench/peers/) scores, and how each is graded.
+
+**Why it matters:** a fair test compares a webular command only with a rival
+feature that does the same job.
+
+**How to read it:** webular is on par, meaning as good, for a command when its
+accuracy, the share of answers right, is at least the rival's, and its p50
+latency, the median wait, is within the noise bar or behind only for a
+written, proven reason. The noise bar is the smallest gap that counts as real
+rather than luck. [How to read the benchmarks](benchmarks-guide.md) defines
+every term.
 
 ## Rival keys
 
@@ -15,6 +23,12 @@ All four rivals have a key: `FIRECRAWL_API_KEY`, `EXA_API_KEY`,
 `TAVILY_API_KEY`, and `PERPLEXITY_API_KEY`.
 
 ## Commands with a rival
+
+In the table, "Bench job" names the job the benchmark runs and, in brackets,
+the rivals it scores there. "Metric" says how an answer counts as right.
+"Gold" means the known right answer for a task. "Recall" means the share of
+the right pages or facts that were found. "Aliases" are other accepted
+spellings of a right answer. "Page chrome" is menus, ads, and footers.
 
 | Command | Rival endpoints | Bench job | Metric |
 |---|---|---|---|

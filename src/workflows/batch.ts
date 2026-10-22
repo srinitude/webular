@@ -1,4 +1,4 @@
-// BATCH workflow: scrape many targets concurrently with a bounded
+// BATCH workflow: scrape many targets (title only) concurrently with a bounded
 // Effect.forEach. Results keep input order, never completion order; sub-runs
 // get deterministic runIds (the target URL).
 import { createStep, createWorkflow } from '@mastra/core/workflows'
@@ -7,7 +7,7 @@ import { z } from 'zod'
 import { hostConcurrency } from '../core/budget.ts'
 import { errMsg } from '../core/output.ts'
 import { stepRuntime } from './runtime.ts'
-import { scrapeWorkflow } from './scrape.ts'
+import { scrapeTitleWorkflow } from './scrape.ts'
 
 const batchInput = z.object({
   // Only web URLs: a bare z.url() also takes file:, javascript:, and data:.
@@ -41,7 +41,7 @@ const ROBOTS_BLOCKED = 'blocked: robots.txt disallows this URL'
 // Index-prefixed runId: deterministic AND unique — Mastra caches Run
 // instances by id; targets are deduped first, so the index is per distinct URL.
 const scrapeRun = (url: string, index: number, timeoutMs?: number, archive?: boolean) =>
-  Effect.tryPromise(() => scrapeWorkflow.createRun({ runId: `${index}:${url}` })).pipe(
+  Effect.tryPromise(() => scrapeTitleWorkflow.createRun({ runId: `${index}:${url}` })).pipe(
     Effect.flatMap((run) =>
       Effect.tryPromise(() => run.start({ inputData: { url, timeoutMs, archive } })).pipe(
         // Interrupting the batch step must also stop the nested scrape run.

@@ -1,0 +1,27 @@
+[
+  {
+    "command": "scrape",
+    "reason": "Webular fetches the live page and cleans it on this machine on every cold call. Exa and Firecrawl can serve the page from their own hosted copies, so their cold calls skip the fetch. Accuracy ties; only speed is behind.",
+    "evidence": "run peers-2026-10-22T17-42-50-204Z: p50 +472 ms vs exa (bar 140 ms, n=2) and +218 ms vs firecrawl (bar 109 ms, n=3), with accuracy inside the bar for both."
+  },
+  {
+    "command": "answer",
+    "reason": "Webular searches, fetches the pages, and then asks a model, all on each cold call. Exa answers from its own index in one hosted call. Accuracy ties with every rival; only speed vs Exa is behind.",
+    "evidence": "run peers-2026-10-22T17-42-50-204Z: p50 +306 ms vs exa (bar 227 ms, n=7), with accuracy inside the bar; tavily and perplexity pass."
+  },
+  {
+    "command": "act",
+    "reason": "The act workflow opens the page, takes a snapshot, and closes it. It picks the next element for the goal but never clicks it, so a goal that needs a click cannot be reached.",
+    "evidence": "src/workflows/act.ts runs agent-browser open, snapshot, an optional screenshot, then close; tests/bench/peers-act.test.ts shows the gold text is absent before the click."
+  },
+  {
+    "command": "monitor",
+    "reason": "The one monitor task needs a page that changes between two fetches, which only the local fixture serves. Firecrawl's hosted changeTracking API cannot reach a 127.0.0.1 page, so no rival can score it.",
+    "evidence": "scripts/bench/peers/monitor-tasks.ts marks monitor-fixture-edit localOnly with url {fixture}/monitor; run peers-2026-10-22T17-42-50-204Z has status unsupported for exa, tavily, firecrawl, and perplexity on every run."
+  },
+  {
+    "command": "media",
+    "reason": "Webular starts a local headless browser for each cold screenshot. Firecrawl takes the screenshot on browsers it already keeps running, so the cold start is not on its clock.",
+    "evidence": "run peers-2026-10-22T17-42-50-204Z: p50 +1944 ms vs firecrawl (bar 10 ms, n=1), with accuracy inside the bar."
+  }
+]

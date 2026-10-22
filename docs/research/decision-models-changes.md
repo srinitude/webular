@@ -7,7 +7,7 @@ This file ranks changes drawn from [papers.jsonl](papers.jsonl), topic `decision
 - Every change names a file under [`src/lib/jev/`](../../src/lib/jev/), the paper ids that support it, the metric it should move, and how to prove it on a dev set.
 - Every Jev change carries "needs decision-models-first receipt" in its heading. No change lowers a threshold or leans a payload toward an answer. Confidence rises only through better inputs.
 - Proof always uses the existing dev sets in `tests/jev/evals/*.json` ("baseline-wins" and "baseline-loses" cases) and replay through `WEBULAR_JEV_REPLAY`. A change stays only if the pass rate holds or rises and mean confidence rises. This is the same rule `learn/` uses for lessons.
-- Most ledger rows come from abstracts and search-index summaries. Only rows marked `full` were read in full. Treat each ranked change as a lead to test, not as a proven result. Rows dated on the first of a month took their date from the arXiv id month.
+- Most ledger rows come from abstracts and search-index summaries. Only rows marked `full` were read in full. Treat each ranked change as a lead to test, not as a proven result. Rows dated on the first of a month took their date from the month in the arXiv id.
 
 ## What webular already does
 

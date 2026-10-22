@@ -33,4 +33,20 @@ export const batchTasks: readonly Task[] = [
       { kind: 'contains', values: ['Reserved'] },
     ],
   ),
+  batch(
+    'batch-public-wikipedia-computing',
+    ['https://en.wikipedia.org/wiki/Ada_Lovelace', 'https://en.wikipedia.org/wiki/Alan_Turing'],
+    [
+      { kind: 'contains', values: ['Ada Lovelace'] },
+      { kind: 'contains', values: ['Alan Turing'] },
+    ],
+  ),
+  batch(
+    'batch-public-wikipedia-information',
+    ['https://en.wikipedia.org/wiki/Grace_Hopper', 'https://en.wikipedia.org/wiki/Claude_Shannon'],
+    [
+      { kind: 'contains', values: ['Grace Hopper'] },
+      { kind: 'contains', values: ['Claude Shannon'] },
+    ],
+  ),
 ]

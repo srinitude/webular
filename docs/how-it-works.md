@@ -8,7 +8,7 @@ Jev is TypeSafe's System One decision model. It makes fast, narrow choices, such
 
 - Webular sends its judgment calls to Jev. Examples from [`src/lib/jev/decisions/`](../src/lib/jev/decisions/): picking search results (`search.ts`), choosing pages to crawl (`crawl.ts`), checking that an answer cites its source (`answer-citation.ts`), and sorting images (`image-kind.ts`).
 - The model is pinned to `jev-1.14.0`, held in one constant in [`src/lib/jev/model.ts`](../src/lib/jev/model.ts).
-- One key: Jev (`TYPESAFE_API_KEY`), or the macOS Keychain item `typesafe-ai-api-key`.
+- Jev is the only key webular uses. Set `TYPESAFE_API_KEY`, or store the key in the macOS Keychain item `typesafe-ai-api-key`.
 - The direct TypeSafe endpoint is the recommended way to reach Jev.
 - `WEBULAR_JEV=off` turns Jev off.
 - With no key, each decision falls back to a rule-based baseline, so every command still runs.
