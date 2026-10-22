@@ -4,7 +4,7 @@
     "search": "Search the web, Wikipedia, Hacker News, or arXiv, with no API key. Returns titles, URLs, and snippets.",
     "scrape": "Read one web page by URL as clean Markdown, without menus or ads. For two or more URLs, use batch. Returns the title and Markdown.",
     "map": "List a site's URLs from its sitemap and links, to see its pages before you scrape. Returns the URLs.",
-    "summarize": "Pick the key sentences of a text or page, with no model call. Returns the top sentences.",
+    "summarize": "Pick the key sentences of a text or page, with no model call. Returns them verbatim with offsets and the page read.",
     "crawl": "Visit a page and the pages it links to, up to a depth and page limit. Returns each page's URL and Markdown.",
     "extract": "Get named parts of a page by CSS selector, like a price. Pass fields as name:selector pairs, or one selector. Returns the matched text.",
     "answer": "Answer a question from a few web sources, with no model call. Pass urls to read only those pages, with no search. Returns the key sentences and their source URLs.",

@@ -121,4 +121,18 @@ export const outputs: Partial<Record<keyof typeof schemas, z.ZodObject>> = {
   search: z.looseObject({
     source: z.enum(searchSources).optional().describe('The source that answered'),
   }),
+  summarize: z.looseObject({
+    picks: z
+      .array(
+        z.looseObject({
+          index: z.number().int(),
+          start: z.number().int(),
+          end: z.number().int(),
+          text: z.string(),
+        }),
+      )
+      .describe('Verbatim sentences; start and end are offsets into the cleaned page text'),
+    source_url: z.string().nullable().describe('The page read, which differs after a fallback'),
+    reason: z.string().optional().describe('Why the result is empty'),
+  }),
 }

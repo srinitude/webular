@@ -6,7 +6,7 @@ export const COMMANDS = {
   crawl: 'Follow links on a site and collect its pages',
   map: 'Find all the URLs on a domain (sitemap and links)',
   extract: 'Pull named fields out of pages using a schema',
-  summarize: 'Summarize a page or text (picks key sentences, no model)',
+  summarize: 'Summarize a page or text (key sentences with offsets, no model)',
   answer: 'Answer a question using fresh web results (--urls <a,b> reads only those pages)',
   research: 'Research a topic in several steps and write a report',
   parse: 'Turn local files (PDF/DOCX/HTML/MD/CSV/JSON/TXT) into markdown',

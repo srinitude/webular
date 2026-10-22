@@ -1,6 +1,6 @@
 // Summarizer complexity contract: the single-scan sentence split and
-// tokenize-once scoring must pick exactly what the original lookbehind-split,
-// tokenize-twice algorithm picked, and stay near-linear on big inputs.
+// tokenize-once scoring must pick exactly what a plain segment-then-score,
+// tokenize-twice algorithm picks, and stay near-linear on big inputs.
 import { describe, expect, test } from 'bun:test'
 import { summarizeText } from '../../src/lib/summarize.ts'
 
@@ -15,9 +15,10 @@ const tok = (t: string) =>
 // The original algorithm, kept as the reference oracle. Only the stopword
 // list is trimmed, and the corpus below uses no other stopwords.
 function reference(text: string, topN: number): string[] {
-  const sentences = text
-    .split(/(?<=[.!?])\s+(?=[A-Z"'])/)
-    .map((s) => s.trim())
+  // The split is the Unicode sentence break (UAX #29) the summarizer uses;
+  // the corpus holds no abbreviations, so no break is skipped.
+  const sentences = Array.from(new Intl.Segmenter('en', { granularity: 'sentence' }).segment(text))
+    .map((s) => s.segment.trim())
     .filter((s) => s.length > 0)
   const freq = new Map<string, number>()
   for (const w of tok(text)) freq.set(w, (freq.get(w) ?? 0) + 1)

@@ -73,7 +73,7 @@ function tokenize(text: string): string[] {
 // Sentences are kept as [start, end) offsets into the text, not as strings:
 // holding one string per sentence plus its token strings makes every GC walk
 // a heap that grows with the page, so total time goes superlinear.
-interface Spans {
+export interface Spans {
   starts: number[]
   ends: number[]
 }
@@ -87,18 +87,19 @@ function pushTrimmed(spans: Spans, text: string, from: number, to: number): void
   spans.ends.push(start + trimmed.length)
 }
 
-// A sentence ends at [.!?] plus whitespace before an uppercase letter or a
-// quote. One forward scan, O(B), with no lookbehind.
-const BOUNDARY = /[.!?]\s+(?=[A-Z"'])/g
-
-function splitSentences(text: string): Spans {
+// UAX #29 sentence breaks, skipping one after an abbreviation ("Dr. Smith").
+// ponytail: fixed English abbreviation list; a per-locale list if pages need it.
+const SEGMENTER = new Intl.Segmenter('en', { granularity: 'sentence' })
+const ABBR = /(?:^|\s)(?:Mr|Mrs|Ms|Dr|Prof|Sr|Jr|St|vs|etc|e\.g|i\.e|U\.S|No|Inc|Ltd|Co|Fig)\.\s*$/
+export function splitSentences(text: string): Spans {
   const spans: Spans = { starts: [], ends: [] }
   let last = 0
-  for (const m of text.matchAll(BOUNDARY)) {
-    pushTrimmed(spans, text, last, m.index + 1)
-    last = m.index + m[0].length
+  for (const { index, segment } of SEGMENTER.segment(text)) {
+    const end = index + segment.length
+    if (end < text.length && ABBR.test(segment.slice(-12))) continue
+    pushTrimmed(spans, text, last, end)
+    last = end
   }
-  pushTrimmed(spans, text, last, text.length)
   return spans
 }
 
@@ -106,13 +107,13 @@ function splitSentences(text: string): Spans {
 // one flat array, so the only strings that outlive a sentence are the
 // distinct words. Sentence cuts fall on whitespace, so the joined sentence
 // tokens equal the whole text's tokens.
-interface TokenIds {
+export interface TokenIds {
   ids: number[]
   offsets: number[]
   freq: number[]
 }
 
-function tokenIds(text: string, spans: Spans): TokenIds {
+export function tokenIds(text: string, spans: Spans): TokenIds {
   const vocab = new Map<string, number>()
   const out: TokenIds = { ids: [], offsets: [0], freq: [] }
   for (let i = 0; i < spans.starts.length; i++) {
@@ -139,7 +140,7 @@ function maxFrequency(freq: number[]): number {
   return max
 }
 
-function scores(t: TokenIds): Float64Array {
+export function scores(t: TokenIds): Float64Array {
   const maxFreq = maxFrequency(t.freq)
   const out = new Float64Array(t.offsets.length - 1)
   for (let i = 0; i < out.length; i++) {
@@ -194,6 +195,5 @@ export function summarizeText(text: string, topN: number, focus?: Focus): Summar
     .slice(0, topN)
     .sort((a, b) => a - b)
     .map((i) => text.slice(spans.starts[i], spans.ends[i]))
-
   return { sentences: picked, summary: picked.join(' ') }
 }
