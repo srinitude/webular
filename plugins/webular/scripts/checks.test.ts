@@ -1,7 +1,7 @@
 // Contract tests for the check scripts' pure rules, on in-memory fixtures.
 import { expect, test } from 'bun:test'
 import { BunServices } from '@effect/platform-bun'
-import { Effect } from 'effect'
+import { Effect, FileSystem } from 'effect'
 import { barePaths, pathSet } from './bare-paths.ts'
 import { caseCount } from './check-evals.ts'
 import { anchors, checkText, lineAnchorOk, slug } from './check-links.ts'
@@ -48,6 +48,27 @@ test('missing targets and bad line anchors fail; real files, folders, and lines 
     ])
     expect(lineAnchorOk('L3', 'a\nb\nc\n')).toBe(true)
     expect(lineAnchorOk('L2-L4', 'a\nb\nc\n')).toBe(false)
+  }).pipe(Effect.provide(BunServices.layer), Effect.runPromise))
+
+test('one run reads each link target once', () =>
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem
+    const reads: string[] = []
+    const spy = {
+      ...fs,
+      readFileString: (path: string, enc?: string) => (
+        reads.push(path), fs.readFileString(path, enc)
+      ),
+    }
+    const cache = new Map<string, string>()
+    const md = '[a](../package.json#L1) [b](../package.json#L2)'
+    yield* checkText(`${repoRoot}docs/a.md`, md, cache).pipe(
+      Effect.provideService(FileSystem.FileSystem, spy),
+    )
+    yield* checkText(`${repoRoot}docs/b.md`, md, cache).pipe(
+      Effect.provideService(FileSystem.FileSystem, spy),
+    )
+    expect(reads).toEqual([`${repoRoot}package.json`])
   }).pipe(Effect.provide(BunServices.layer), Effect.runPromise))
 
 test('links skip fenced code and read titles', () => {

@@ -42,13 +42,17 @@ export const lineAnchorOk = (anchor: string, text: string) => {
 }
 
 // The problem with one link in file, or undefined when it resolves.
-const linkProblem = (file: string, text: string, target: string) =>
+const linkProblem = (file: string, text: string, target: string, cache: Map<string, string>) =>
   Effect.gen(function* () {
     const [pathPart = '', anchor] = decodeURI(target).split('#')
     const dest = pathPart === '' ? file : resolve(file, pathPart)
     if (!(yield* exists(dest))) return `broken link ${target}`
     if (!anchor || (yield* (yield* FileSystem.FileSystem).stat(dest)).type !== 'File') return
-    const body = dest === file ? text : yield* read(dest)
+    let body = dest === file ? text : cache.get(dest)
+    if (body === undefined) {
+      body = yield* read(dest)
+      cache.set(dest, body)
+    }
     if (/\.mdx?$/.test(dest))
       return anchors(body).has(anchor.toLowerCase())
         ? undefined
@@ -57,12 +61,12 @@ const linkProblem = (file: string, text: string, target: string) =>
   })
 
 // Every link problem in one Markdown text that lives at absolute path file.
-export const checkText = (file: string, text: string) =>
+export const checkText = (file: string, text: string, cache = new Map<string, string>()) =>
   Effect.gen(function* () {
     const out: string[] = []
     for (const { line, target } of links(text)) {
       if (isExternal(target)) continue
-      const problem = yield* linkProblem(file, text, target)
+      const problem = yield* linkProblem(file, text, target, cache)
       if (problem) out.push(`${rel(file)}:${line}: ${problem}`)
     }
     return out
@@ -71,13 +75,18 @@ export const checkText = (file: string, text: string) =>
 // Skipped: vendored, generated, and benchmark output folders.
 const SKIP = /(^|\/)(node_modules|dist|vendor)\/|^bench\/(results|recordings)\//
 
-const checkFile = (file: string, paths: ReadonlySet<string>, fix: boolean) =>
+const checkFile = (
+  file: string,
+  paths: ReadonlySet<string>,
+  fix: boolean,
+  cache: Map<string, string>,
+) =>
   Effect.gen(function* () {
     const text = yield* read(file)
     const bare = barePaths(rel(file), text, paths)
     if (fix && bare.hits.length > 0)
       yield* (yield* FileSystem.FileSystem).writeFileString(file, bare.fixed)
-    const found = yield* checkText(file, fix ? bare.fixed : text)
+    const found = yield* checkText(file, fix ? bare.fixed : text, cache)
     const shown = fix ? [] : bare.hits
     return [
       ...found,
@@ -94,6 +103,9 @@ if (import.meta.main)
         : (yield* files(pluginDir)).filter((f) => f.endsWith('.md'))
       const paths = pathSet(all)
       const fix = Bun.argv.includes('--fix')
-      return (yield* Effect.forEach(md, (f) => checkFile(f, paths, fix), { concurrency: 8 })).flat()
+      const cache = new Map<string, string>() // one read per link target per run
+      return (yield* Effect.forEach(md, (f) => checkFile(f, paths, fix, cache), {
+        concurrency: 8,
+      })).flat()
     }),
   )

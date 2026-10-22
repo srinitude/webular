@@ -90,7 +90,30 @@ const teardown: Runtime.Teardown = (exit, onExit) =>
 // Runs a program that yields its exit code with the Bun platform services
 // (FileSystem, Path, ChildProcessSpawner). BunRuntime.runMain ends the process
 // on any non-zero code, so an open handle never holds a failed command alive.
-export function runMain(program: Effect.Effect<number, unknown, BunServices.BunServices>): void {
+type MainProgram = Effect.Effect<number, unknown, BunServices.BunServices>
+
+// In-process seam for tests: while this global holds a function, runMain hands
+// it the program instead of starting and ending the process.
+export const IN_PROCESS = Symbol.for('webular.runMain.inProcess')
+
+// The exit code runMain ends with, failure message printed, without the process.
+export const exitCodeOf = (program: MainProgram): Effect.Effect<number> =>
+  Effect.onExit(
+    Effect.provide(Effect.scoped(Effect.andThen(recordSignals, program)), BunServices.layer),
+    reportFailure,
+  ).pipe(
+    Effect.exit,
+    Effect.map((exit) =>
+      Exit.isSuccess(exit) ? Number(exit.value ?? 0) : failureOfCause(exit.cause).exitCode,
+    ),
+  )
+
+export function runMain(program: MainProgram): void {
+  const seam = (globalThis as { [IN_PROCESS]?: (p: MainProgram) => void })[IN_PROCESS]
+  if (seam) {
+    seam(program)
+    return
+  }
   const main = Effect.scoped(Effect.andThen(recordSignals, program))
   bunRunMain(Effect.onExit(Effect.provide(main, BunServices.layer), reportFailure), {
     disableErrorReporting: true,

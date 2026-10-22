@@ -9,11 +9,14 @@ import { join } from 'node:path'
 import type { AnyWorkflow } from '@mastra/core/workflows'
 import { Effect, Schema } from 'effect'
 import { COMMAND_NAMES } from '../../src/cli/commands.ts'
-import { runCli } from '../_support/cli.ts'
+import { runCli, runInProcess } from '../_support/cli.ts'
 import { useFixture } from '../_support/fixture.ts'
 import { eff, io, tmpDir } from '../_support/run.ts'
 
-const cli = (cmd: string, args: string[]) => runCli(`src/commands/${cmd}.ts`, args)
+// Commands run in this process; scrape --json is the one real-process smoke run.
+const SMOKE = 'scrape'
+const cli = (cmd: string, args: string[]) => runInProcess(`src/commands/${cmd}.ts`, args)
+const spawned = (cmd: string, args: string[]) => runCli(`src/commands/${cmd}.ts`, args)
 
 const PAGE =
   '<html><head><title>Fixture</title></head><body><h1>Hello</h1><p>Plain text here.</p></body></html>'
@@ -96,7 +99,10 @@ describe('URL commands print --json matching their output schema', () => {
       eff(
         Effect.gen(function* () {
           const dir = yield* tmpDir('webular-contract-')
-          const run = yield* cli(cmd, [...args(fx.origin, dir), '--json'])
+          const run = yield* (cmd === SMOKE ? spawned : cli)(cmd, [
+            ...args(fx.origin, dir),
+            '--json',
+          ])
           expect(run.err).toBe('')
           expect(run.code).toBe(0)
           yield* decodeWith(yield* workflowOf(cmd))(run.out)

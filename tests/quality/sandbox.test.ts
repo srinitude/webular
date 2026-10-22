@@ -3,7 +3,7 @@
 import { afterAll, describe, expect, test } from 'bun:test'
 import { join } from 'node:path'
 import { Effect, FileSystem } from 'effect'
-import { runCli } from '../_support/cli.ts'
+import { runCli, runInProcess } from '../_support/cli.ts'
 import { useFixture } from '../_support/fixture.ts'
 import { ROOT } from '../_support/root.ts'
 import { defaultRoutes } from '../_support/routes.ts'
@@ -22,8 +22,9 @@ afterAll(
   ),
 )
 
-const scrape = (args: string[]) =>
-  runCli('src/commands/scrape.ts', ['--url', `${fx.origin}/`, ...args], {
+// Cases run in this process; the absolute -o case is the one real-process smoke run.
+const scrape = (args: string[], run: typeof runCli = runInProcess) =>
+  run('src/commands/scrape.ts', ['--url', `${fx.origin}/`, ...args], {
     env: { ...process.env, WEBULAR_SANDBOX: '1' },
   })
 
@@ -32,7 +33,7 @@ describe('WEBULAR_SANDBOX confines output paths (opt-in hardening)', () => {
     'rejects an absolute -o path',
     eff(
       Effect.gen(function* () {
-        const { code, err } = yield* scrape(['-o', '/tmp/webular-evil.md'])
+        const { code, err } = yield* scrape(['-o', '/tmp/webular-evil.md'], runCli)
         expect(code).not.toBe(0)
         expect(err.toLowerCase()).toContain('sandbox')
       }),
@@ -70,7 +71,7 @@ describe('WEBULAR_SANDBOX confines output paths (opt-in hardening)', () => {
         const base = yield* tmpDir('webular-sb-')
         const target = yield* tmpDir('webular-tgt-')
         yield* (yield* FileSystem.FileSystem).symlink(target, join(base, 'link'))
-        const { code, err } = yield* runCli(
+        const { code, err } = yield* runInProcess(
           'src/commands/scrape.ts',
           ['--url', `${fx.origin}/`, '-o', 'link/evil.md'],
           { env: { ...process.env, WEBULAR_SANDBOX: '1', WEBULAR_OUTPUT_DIR: base } },
@@ -86,7 +87,7 @@ describe('WEBULAR_SANDBOX confines output paths (opt-in hardening)', () => {
     'sandboxed monitor accepts its default database path',
     eff(
       Effect.gen(function* () {
-        const { code, out } = yield* runCli(
+        const { code, out } = yield* runInProcess(
           'src/commands/monitor.ts',
           ['--url', `${fx.origin}/c`, '--json'],
           { env: { ...process.env, WEBULAR_SANDBOX: '1' } },
@@ -103,7 +104,7 @@ describe('WEBULAR_SANDBOX confines output paths (opt-in hardening)', () => {
     eff(
       Effect.gen(function* () {
         const base = yield* tmpDir('webular-sb-inv-')
-        const { code } = yield* runCli(
+        const { code } = yield* runInProcess(
           'src/commands/scrape.ts',
           ['--url', `${fx.origin}/`, '-o', 'inv-out.md'],
           { env: { ...process.env, WEBULAR_SANDBOX: '1', WEBULAR_INVOKE_DIR: base } },
@@ -125,9 +126,13 @@ describe('WEBULAR_SANDBOX confines output paths (opt-in hardening)', () => {
         const dir = yield* tmpDir('webular-sb-read-')
         const file = join(dir, 'note.txt')
         yield* (yield* FileSystem.FileSystem).writeFileString(file, 'readable sandbox input')
-        const { code, out } = yield* runCli('src/commands/parse.ts', ['--file', file, '--json'], {
-          env: { ...process.env, WEBULAR_SANDBOX: '1' },
-        })
+        const { code, out } = yield* runInProcess(
+          'src/commands/parse.ts',
+          ['--file', file, '--json'],
+          {
+            env: { ...process.env, WEBULAR_SANDBOX: '1' },
+          },
+        )
         expect(code).toBe(0)
         expect(out).toContain('readable sandbox input')
       }),

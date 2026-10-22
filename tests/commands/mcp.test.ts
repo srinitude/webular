@@ -28,7 +28,7 @@ describe('webular mcp — MCP server tool listing', () => {
   )
 
   // A stdio MCP server lives as long as its stdin: it answers what arrives,
-  // then exits 0 once stdin closes.
+  // then exits 0 once stdin closes. No network; the 40 s limit is for load (a start takes ~10 s on a busy host).
   test(
     'serves until stdin closes, then exits 0',
     eff(
@@ -45,7 +45,7 @@ describe('webular mcp — MCP server tool listing', () => {
         }
         const { code, stdout } = yield* runProc(['bun', `${ROOT}src/commands/mcp.ts`], {
           cwd: ROOT,
-          timeoutMs: 12_000,
+          timeoutMs: 40_000,
           stdin: `${JSON.stringify(init)}\n`,
         })
         expect(code).toBe(0)
@@ -56,7 +56,7 @@ describe('webular mcp — MCP server tool listing', () => {
         )
       }),
     ),
-    15_000,
+    45_000,
   )
 
   test(

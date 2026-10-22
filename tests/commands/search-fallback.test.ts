@@ -115,6 +115,7 @@ describe('webular search — free-source fallback', () => {
 })
 
 describe('webular search --source crossref|openalex', () => {
+  // Local fixture, no network. The 45 s limit is for load: a CLI start takes ~9 s when the host runs hundreds of processes.
   test(
     'crossref: first title, DOI URL, tag-free abstract; no source field',
     () =>
@@ -125,7 +126,7 @@ describe('webular search --source crossref|openalex', () => {
         expect(first?.description).toStartWith('Abstract: This paper explores')
         expect(first?.description).not.toContain('<')
       }),
-    15_000,
+    45_000,
   )
 
   test(
@@ -137,6 +138,6 @@ describe('webular search --source crossref|openalex', () => {
         expect(first?.description).toStartWith('Práce se zabývá podrobným srovnáním')
         expect(second?.url).toBe('https://doi.org/10.5281/zenodo.7945165')
       }),
-    15_000,
+    45_000,
   )
 })

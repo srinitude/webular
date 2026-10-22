@@ -2,6 +2,7 @@
 // search found, against a real local Bun.serve fixture. No network, no mocks.
 import { describe, expect, test } from 'bun:test'
 import { Deferred, Effect } from 'effect'
+import { TestClock } from 'effect/testing'
 import { querySource } from '../../../src/lib/search-source-run.ts'
 import {
   isNavigational,
@@ -49,6 +50,9 @@ const failureCase = Effect.gen(function* () {
 
 // Beside the fan-out: the main query's Wikipedia hits feed the lookup; a
 // variant's hits never do, and with no Wikipedia answer `take` gives none.
+// `take` waits OFFICIAL_WAIT_MS on the Effect clock; under TestClock that window
+// never closes by itself, so only the real local SPARQL reply decides the result.
+const frozen = <A, E>(eff: Effect.Effect<A, E>) => Effect.provide(eff, TestClock.layer())
 const runner = () => Effect.succeed(hits)
 const besideCase = Effect.gen(function* () {
   const flow = Effect.gen(function* () {
@@ -58,7 +62,7 @@ const besideCase = Effect.gen(function* () {
     yield* official.run('wikipedia', 'deno', 5)
     return yield* official.take
   })
-  const { out } = yield* serving('/sparql', reply, flow)
+  const { out } = yield* serving('/sparql', reply, frozen(flow))
   expect(out[0]?.map((h) => h.url)).toEqual(['https://nodejs.org', 'https://deno.com'])
 })
 const noWikiCase = Effect.gen(function* () {
@@ -77,7 +81,7 @@ const navCoreCase = Effect.gen(function* () {
     yield* querySource('wikipedia', [main], 5, official.run, settle)
     return yield* official.take
   })
-  const { out } = yield* serving('/sparql', reply, flow)
+  const { out } = yield* serving('/sparql', reply, frozen(flow))
   expect(out[0]?.map((h) => h.url)).toEqual(['https://nodejs.org', 'https://deno.com'])
 })
 
@@ -104,7 +108,7 @@ const makerCase = Effect.gen(function* () {
   const flow = Effect.gen(function* () {
     const official = yield* officialBeside(MADE, runner, 5)
     yield* official.run('wikipedia', MADE, 5)
-    yield* Effect.sleep(300) // the rest of the fan-out
+    yield* TestClock.adjust(300) // the rest of the fan-out
     return yield* official.take
   })
   const route = (_: Request, url: URL) => {
@@ -112,7 +116,7 @@ const makerCase = Effect.gen(function* () {
     expect(url.searchParams.get('query')).toContain('"Ryan Dahl"@en')
     return json(both)
   }
-  const out = yield* against({ '/sparql': route }, flow)
+  const out = yield* against({ '/sparql': route }, frozen(flow))
   expect(calls).toBe(1)
   expect(out.map((list) => list.map((h) => h.url))).toEqual([
     ['https://deno.com'],
