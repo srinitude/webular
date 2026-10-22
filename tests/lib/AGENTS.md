@@ -4,7 +4,7 @@ Tests for helpers in [src/lib/](../../src/lib/). The parent rules are in [tests/
 
 ## What lives here
 
-- [answer-country.test.ts](answer-country.test.ts) checks that a country question names the country beside the demonym.
+- [answer-country.test.ts](answer-country.test.ts) checks that an answer to a country question names the country beside the demonym.
 - [as-of.test.ts](as-of.test.ts) checks date grounding: `WEBULAR_AS_OF` pins the run date, and without it the clock gives an ISO date.
 - [home-fallback.test.ts](home-fallback.test.ts) checks that Windows, which sets `USERPROFILE` but not `HOME`, keeps Jev state in the user's folder.
 - [driver.test.ts](driver.test.ts) checks that the `agent-browser` driver retries a failed render once, only when a retry can fix it.

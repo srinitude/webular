@@ -16,7 +16,7 @@
 - For stdio, run `bun ./src/server.ts` from the plugin folder.
 - For HTTP, run `mise run plugin:dev` from the repo root. Portless then serves it at `https://webular-mcp.localhost/mcp`.
 - Without portless, run `bun ./src/server.ts --http`. It listens on `http://127.0.0.1:$PORT/mcp`, and the port is 3939 when `PORT` is not set.
-- Run `mise run build` once. Each tool call then starts a prebuilt command file. It starts much faster than the source files. Set `WEBULAR_DEV=1` to run the source files instead.
+- Run `mise run build` once. Each tool call then starts a prebuilt command file. That starts much faster than the source files. Set `WEBULAR_DEV=1` to run the source files instead.
 
 ## search
 

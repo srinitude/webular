@@ -1,6 +1,6 @@
 # scripts/bench/AGENTS.md
 
-The benchmarks. The root [AGENTS.md](../../AGENTS.md) holds the repo-wide rules. These rules keep scores fair and hard to game.
+The benchmark code. The root [AGENTS.md](../../AGENTS.md) holds the repo-wide rules. These rules keep scores fair and hard to game.
 
 ## What lives here
 

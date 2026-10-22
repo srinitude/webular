@@ -1,6 +1,6 @@
 # src/core/AGENTS.md
 
-Rules for the shared Effect services, under [src/AGENTS.md](../AGENTS.md).
+Rules for the shared Effect services. They sit under [src/AGENTS.md](../AGENTS.md).
 
 ## What lives here
 

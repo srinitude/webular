@@ -1,6 +1,6 @@
 # scripts/bench/peers/AGENTS.md
 
-The peer benchmark that scores webular against other web research tools. The parent [AGENTS.md](../AGENTS.md) holds the integrity rules.
+The peer benchmark. It scores webular against other web research tools. The parent [AGENTS.md](../AGENTS.md) holds the integrity rules.
 
 ## What lives here
 

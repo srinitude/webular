@@ -1,6 +1,6 @@
 # .github/AGENTS.md
 
-GitHub settings for this repo; the root [AGENTS.md](../AGENTS.md) holds the repo-wide rules.
+The GitHub settings for this repo. The root [AGENTS.md](../AGENTS.md) holds the repo-wide rules.
 
 ## What lives here
 

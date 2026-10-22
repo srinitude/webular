@@ -1,6 +1,6 @@
 # .github/workflows/AGENTS.md
 
-The GitHub Actions workflows; the parent [AGENTS.md](../AGENTS.md) lists the rest of the GitHub settings.
+The GitHub Actions workflows. The parent [AGENTS.md](../AGENTS.md) lists the rest of the GitHub settings.
 
 ## What lives here
 

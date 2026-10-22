@@ -1,6 +1,6 @@
 # scripts/AGENTS.md
 
-Build and maintenance scripts that `mise` tasks run. The root [AGENTS.md](../AGENTS.md) holds the repo-wide rules.
+The build and maintenance scripts that `mise` tasks run. The root [AGENTS.md](../AGENTS.md) holds the repo-wide rules.
 
 ## What lives here
 
