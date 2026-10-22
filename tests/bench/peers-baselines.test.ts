@@ -118,7 +118,7 @@ test('scrape baselines run the CLI with the documented args and map stdout to Ou
       const argvs = calls.map((c) => c.argv.join(' '))
       expect(argvs).toContain(`trafilatura -u ${url} --markdown`)
       expect(argvs).toContain(`crwl ${url} -o markdown`)
-      expect(argvs).toContain(`curl -sL ${url}`)
+      expect(argvs).toContain(`curl -sL -- ${url}`)
       expect(calls.find((c) => c.argv[0] === 'html2text' && c.stdin)?.stdin).toBe('<h1>Hi</h1>')
       expect(tra).toEqual({
         text: 'trafilatura md',
