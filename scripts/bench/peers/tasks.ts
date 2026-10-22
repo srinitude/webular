@@ -1,7 +1,6 @@
 // Benchmark task set: local fixtures (free, deterministic), public pages,
 // search, and SimpleQA/FRAMES-style questions with known answers. A plan file
-// (BENCH_PLAN, default bench/benchmark-plan.json) adds tasks and metrics.
-import { Effect, Schema } from 'effect'
+// (plan.ts) adds tasks and metrics.
 import { startFixture } from '../../../tests/_support/fixture.ts'
 import { actPage, actTasks } from './act-tasks.ts'
 import { batchTasks } from './batch-tasks.ts'
@@ -9,7 +8,7 @@ import { crawlRoutes, crawlTasks } from './crawl-tasks.ts'
 import { extractTasks } from './extract-tasks.ts'
 import { mapTasks } from './map-tasks.ts'
 import { mediaTasks } from './media-tasks.ts'
-import { type MetricDef, Plan, type Task } from './model.ts'
+import type { Task } from './model.ts'
 import { monitorRoute, monitorTasks } from './monitor-tasks.ts'
 import { parseTasks } from './parse-tasks.ts'
 import { researchTasks } from './research-tasks.ts'
@@ -180,25 +179,3 @@ export const builtinTasks: readonly Task[] = [
   ...actTasks,
   ...monitorTasks,
 ]
-
-export const loadPlan = (path: string) =>
-  Effect.gen(function* () {
-    const file = Bun.file(path)
-    if (!(yield* Effect.promise(() => file.exists())))
-      return { tasks: [], metrics: [], note: `no plan at ${path}` }
-    const raw = yield* Effect.tryPromise(() => file.json())
-    const plan = yield* Schema.decodeUnknownEffect(Plan)(raw)
-    return {
-      tasks: plan.tasks ?? [],
-      metrics: plan.metrics ?? ([] as MetricDef[]),
-      note: `plan ${path}`,
-    }
-  }).pipe(
-    Effect.catch((e) =>
-      Effect.succeed({
-        tasks: [] as Task[],
-        metrics: [] as MetricDef[],
-        note: `plan unreadable: ${String(e)}`,
-      }),
-    ),
-  )

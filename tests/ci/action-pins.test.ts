@@ -52,3 +52,29 @@ test(
     }),
   ),
 )
+
+// Every container image (Dockerfile FROM, `docker run` in a workflow) names a
+// sha256 digest beside its tag, so a moved tag cannot change what runs
+// (OpenSSF Scorecard Pinned-Dependencies). Dependabot's docker updates bump it.
+test(
+  'every container image is pinned to a sha256 digest',
+  eff(
+    Effect.gen(function* () {
+      const images: Array<[string, string]> = []
+      const docker = yield* io(() => Bun.file(`${ROOT}Dockerfile`).text())
+      for (const m of docker.matchAll(/^FROM\s+(\S+)/gm)) images.push(['Dockerfile', m[1] ?? ''])
+      for (const path of new Bun.Glob('.github/workflows/*.yml').scanSync(ROOT)) {
+        const yml = yield* io(() => Bun.file(`${ROOT}${path}`).text())
+        for (const line of yml.split('\n').filter((l) => l.includes('docker run')))
+          for (const m of line.matchAll(/\s((?:[a-z0-9-]+\/)?[a-z0-9-]+:[\w.-]+(?:@\S+)?)\s/g))
+            images.push([path, m[1] ?? ''])
+      }
+      expect(images.length).toBeGreaterThan(2)
+      for (const [path, image] of images)
+        expect([path, image]).toEqual([
+          path,
+          expect.stringMatching(/:[\w.-]+@sha256:[0-9a-f]{64}$/),
+        ])
+    }),
+  ),
+)

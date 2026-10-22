@@ -22,12 +22,13 @@ import {
   type Task,
 } from './model.ts'
 import { resolveSeed, schedule } from './order.ts'
+import { loadPlan } from './plan.ts'
 import { Peers, PeersLive } from './providers.ts'
 import { livePath, replayPath } from './recording-paths.ts'
 import { report } from './report.ts'
 import { recordMetrics } from './score.ts'
 import { skipReason } from './skip.ts'
-import { builtinTasks, loadPlan, startPages } from './tasks.ts'
+import { builtinTasks, startPages } from './tasks.ts'
 import { CALL_TIMEOUT_MS } from './timeout.ts'
 
 const flag = (name: string) => {

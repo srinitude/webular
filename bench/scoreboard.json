@@ -4,10 +4,10 @@
     "metric": "accuracy",
     "value": 1,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T13-13-46-776Z.json",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
     "set": "peer dev",
     "bestRival": {
-      "tool": "youcom",
+      "tool": "tavily",
       "value": 1
     }
   },
@@ -48,7 +48,7 @@
     "metric": "cost per success usd",
     "value": 0,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T13-13-46-776Z.json",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
     "set": "peer dev"
   },
   {
@@ -70,25 +70,25 @@
   {
     "command": "search",
     "metric": "determinism",
-    "value": 0.5,
+    "value": 0.75,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T13-13-46-776Z.json",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
     "set": "peer dev"
   },
   {
     "command": "search",
     "metric": "latency p50 ms",
-    "value": 520,
+    "value": 714,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T13-13-46-776Z.json",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
     "set": "peer dev"
   },
   {
     "command": "search",
     "metric": "latency p95 ms",
-    "value": 859,
+    "value": 1080,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T13-13-46-776Z.json",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
     "set": "peer dev"
   },
   {
@@ -96,7 +96,7 @@
     "metric": "accuracy",
     "value": 1,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T13-13-46-776Z.json",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
     "set": "peer dev",
     "bestRival": {
       "tool": "exa",
@@ -149,23 +149,23 @@
     "metric": "determinism",
     "value": 1,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T13-13-46-776Z.json",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
     "set": "peer dev"
   },
   {
     "command": "scrape",
     "metric": "latency p50 ms",
-    "value": 380,
+    "value": 76,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T13-13-46-776Z.json",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
     "set": "peer dev"
   },
   {
     "command": "scrape",
     "metric": "latency p95 ms",
-    "value": 2987,
+    "value": 3208,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T13-13-46-776Z.json",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
     "set": "peer dev"
   },
   {
@@ -211,18 +211,18 @@
   {
     "command": "crawl",
     "metric": "latency p50 ms",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 1167,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev"
   },
   {
     "command": "crawl",
     "metric": "latency p95 ms",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 4794,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev"
   },
   {
     "command": "map",
@@ -259,26 +259,26 @@
   {
     "command": "map",
     "metric": "determinism",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 1,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev"
   },
   {
     "command": "map",
     "metric": "latency p50 ms",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 363,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev"
   },
   {
     "command": "map",
     "metric": "latency p95 ms",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 847,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev"
   },
   {
     "command": "extract",
@@ -307,26 +307,26 @@
   {
     "command": "extract",
     "metric": "determinism",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 1,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev"
   },
   {
     "command": "extract",
     "metric": "latency p50 ms",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 143,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev"
   },
   {
     "command": "extract",
     "metric": "latency p95 ms",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 742,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev"
   },
   {
     "command": "summarize",
@@ -383,36 +383,36 @@
   {
     "command": "summarize",
     "metric": "determinism",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 1,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev"
   },
   {
     "command": "summarize",
     "metric": "latency p50 ms",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 52,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev"
   },
   {
     "command": "summarize",
     "metric": "latency p95 ms",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 214,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev"
   },
   {
     "command": "answer",
     "metric": "accuracy",
     "value": 1,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T13-13-46-776Z.json",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
     "set": "peer dev",
     "bestRival": {
-      "tool": "parallel",
+      "tool": "tavily",
       "value": 1
     }
   },
@@ -453,7 +453,7 @@
     "metric": "cost per success usd",
     "value": 0,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T13-13-46-776Z.json",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
     "set": "peer dev"
   },
   {
@@ -475,34 +475,38 @@
   {
     "command": "answer",
     "metric": "determinism",
-    "value": 0.5714,
+    "value": 0.7143,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T13-13-46-776Z.json",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
     "set": "peer dev"
   },
   {
     "command": "answer",
     "metric": "latency p50 ms",
-    "value": 1525,
+    "value": 2679,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T13-13-46-776Z.json",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
     "set": "peer dev"
   },
   {
     "command": "answer",
     "metric": "latency p95 ms",
-    "value": 2997,
+    "value": 4141,
     "status": "measured",
-    "eval": "bench/results/peers-2026-10-22T13-13-46-776Z.json",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
     "set": "peer dev"
   },
   {
     "command": "research",
     "metric": "accuracy",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 0.6667,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev",
+    "bestRival": {
+      "tool": "exa",
+      "value": 1
+    }
   },
   {
     "command": "research",
@@ -539,10 +543,10 @@
   {
     "command": "research",
     "metric": "cost per success usd",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 0,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev"
   },
   {
     "command": "research",
@@ -563,26 +567,26 @@
   {
     "command": "research",
     "metric": "determinism",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 0.6667,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev"
   },
   {
     "command": "research",
     "metric": "latency p50 ms",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 4781,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev"
   },
   {
     "command": "research",
     "metric": "latency p95 ms",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 5970,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev"
   },
   {
     "command": "parse",
@@ -603,34 +607,38 @@
   {
     "command": "parse",
     "metric": "determinism",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 1,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev"
   },
   {
     "command": "parse",
     "metric": "latency p50 ms",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 119,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev"
   },
   {
     "command": "parse",
     "metric": "latency p95 ms",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 473,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev"
   },
   {
     "command": "media",
     "metric": "accuracy",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 1,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev",
+    "bestRival": {
+      "tool": "firecrawl",
+      "value": 1
+    }
   },
   {
     "command": "media",
@@ -643,34 +651,34 @@
   {
     "command": "media",
     "metric": "determinism",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 1,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev"
   },
   {
     "command": "media",
     "metric": "latency p50 ms",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 2598,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev"
   },
   {
     "command": "media",
     "metric": "latency p95 ms",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 15661,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev"
   },
   {
     "command": "monitor",
     "metric": "accuracy",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 0.5,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev"
   },
   {
     "command": "monitor",
@@ -683,26 +691,26 @@
   {
     "command": "monitor",
     "metric": "determinism",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 0,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev"
   },
   {
     "command": "monitor",
     "metric": "latency p50 ms",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 150,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev"
   },
   {
     "command": "monitor",
     "metric": "latency p95 ms",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 242,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev"
   },
   {
     "command": "batch",
@@ -731,18 +739,18 @@
   {
     "command": "batch",
     "metric": "latency p50 ms",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 1250,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev"
   },
   {
     "command": "batch",
     "metric": "latency p95 ms",
-    "value": null,
-    "status": "gap",
-    "eval": null,
-    "set": null
+    "value": 15721,
+    "status": "measured",
+    "eval": "bench/results/peers-2026-10-22T14-51-52-746Z.json",
+    "set": "peer dev"
   },
   {
     "command": "doctor",
