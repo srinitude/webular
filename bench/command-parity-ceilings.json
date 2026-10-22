@@ -1,0 +1,12 @@
+[
+  {
+    "command": "act",
+    "reason": "The act workflow opens the page, takes a snapshot, and closes it. It picks the next element for the goal but never clicks it, so a goal that needs a click cannot be reached.",
+    "evidence": "src/workflows/act.ts runs agent-browser open, snapshot, an optional screenshot, then close; tests/bench/peers-act.test.ts shows the gold text is absent before the click."
+  },
+  {
+    "command": "monitor",
+    "reason": "The one monitor task needs a page that changes between two fetches, which only the local fixture serves. Firecrawl's hosted changeTracking API cannot reach a 127.0.0.1 page, so no rival can score it.",
+    "evidence": "scripts/bench/peers/monitor-tasks.ts marks monitor-fixture-edit localOnly with url {fixture}/monitor; run peers-2026-10-22T14-51-52-746Z has status unsupported for exa, tavily, firecrawl, and perplexity on both runs, and status ok for webular."
+  }
+]

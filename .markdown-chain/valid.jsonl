@@ -261,3 +261,8 @@
 {"path": "tests/workflows/AGENTS.md", "sha": "c982b7dbcbfee7dda301fbf256d951714424c1a55dd05e3b03c7321d38e7df70", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/workflows/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "src/lib/jev/decisions/AGENTS.md", "sha": "757c38d6db91b65a086d363ebdaf96ccba04faeda8e4f4b9f5e869f07ad0dacf"}
+{"path": "tests/bench/AGENTS.md", "sha": "f6d1f58e847c83d5ebdeedfc2c2e08b079091c0e9c6e71f844cd4fd5dd1ade63"}
+{"path": "scripts/bench/peers/AGENTS.md", "sha": "4d4e5ec5eb1cde2ba9a5b64b568f2f2744a8889d48a64a2f1b179603cc9830be"}
+{"path": "tests/bench/AGENTS.md", "sha": "f6d1f58e847c83d5ebdeedfc2c2e08b079091c0e9c6e71f844cd4fd5dd1ade63", "stages": ["rich-and-native-markdown", "human-language"]}
+{"path": "scripts/bench/peers/AGENTS.md", "sha": "4d4e5ec5eb1cde2ba9a5b64b568f2f2744a8889d48a64a2f1b179603cc9830be", "stages": ["rich-and-native-markdown", "human-language"]}
+{"path": "bench/AGENTS.md", "sha": "20556abbeee846b9bba9f2e98210d2ca8b4b84cef1878599c4af229412133644", "stages": ["rich-and-native-markdown", "human-language"]}

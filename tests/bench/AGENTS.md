@@ -8,6 +8,7 @@ Benchmark tests and the scaling run. The parent rules are in [tests/AGENTS.md](.
 - [`peers-map.test.ts`](peers-map.test.ts) checks the map job: the Firecrawl and Tavily request shapes, and that a map task passes only when every gold page is listed.
 - [`peers-extract.test.ts`](peers-extract.test.ts) checks the extract job: the Firecrawl request shape, the gold grading, and the task count.
 - The [research](peers-research.test.ts), [crawl](peers-crawl.test.ts), [batch](peers-batch.test.ts), [summarize](peers-summarize.test.ts), [monitor](peers-monitor.test.ts), [parse](peers-parse.test.ts), [media](peers-media.test.ts), and [act](peers-act.test.ts) tests each check one job: its request shapes and its gold grading.
+- [command-parity.test.ts](command-parity.test.ts) fails when a command in the parity map neither passes nor has a written ceiling in the committed run.
 - The guards-NAME tests check the bench guards: the set, the run, grading, and the report. [set-loader.test.ts](set-loader.test.ts) checks that the task sets load and that one edited byte is refused.
 - [grade-semantic.test.ts](grade-semantic.test.ts) checks the answer grader: number grammar, answer extraction, hedges, and shotgun lists.
 - [answer-quality-stats.test.ts](answer-quality-stats.test.ts) checks the Wilson interval, the kappa report, the closed-book ratio column, and the small-sample note in the report.

@@ -9,6 +9,7 @@ Benchmark data and inputs. The root [AGENTS.md](../AGENTS.md) holds the repo-wid
 - [datasets/](datasets/): manifests for public datasets that `mise run bench:data` downloads into the gitignored cache. The data is never committed.
 - [fixtures/](fixtures/): local pages and sites that the fixture server serves.
 - [`scoreboard.json`](scoreboard.json): every metric for every command, with its value, eval, and set. `mise run bench:scoreboard` writes it. Never edit it by hand.
+- [`command-parity-ceilings.json`](command-parity-ceilings.json): a written ceiling, with its reason and evidence, for each command that cannot match the rivals. [tests/bench/command-parity.test.ts](../tests/bench/command-parity.test.ts) reads it.
 - [spec/](spec/): the benchmark spec.
 - [tasks/](tasks/): the frozen task sets.
 
