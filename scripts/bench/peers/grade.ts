@@ -31,10 +31,11 @@ export function gradeCheck(check: Check, out: Out, bare = false): boolean {
   return answer !== undefined && checkPasses(check, { text: answer, urls: [] })
 }
 
+// An extract job's output is its JSON text, read whole like a page.
+const bareJobs = new Set<Task['job']>(['answer', 'scrape', 'extract'])
+
 export const answerAccuracy = (task: Task, out: Out): number =>
-  task.checks.every((c) => gradeCheck(c, out, task.job === 'answer' || task.job === 'scrape'))
-    ? 1
-    : 0
+  task.checks.every((c) => gradeCheck(c, out, bareJobs.has(task.job))) ? 1 : 0
 
 // Blinding: every tool and provider name becomes `[tool]`. The spec's cap is
 // per task and no task sets one, so nothing is cut here.

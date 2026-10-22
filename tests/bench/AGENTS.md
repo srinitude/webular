@@ -5,6 +5,8 @@ Benchmark tests and the scaling run. The parent rules are in [tests/AGENTS.md](.
 ## What lives here
 
 - [`peers-cases.test.ts`](peers-cases.test.ts) and [`peers-score.test.ts`](peers-score.test.ts) check the peer benchmark in [`scripts/bench/peers/`](../../scripts/bench/peers/): case markers, exact checks, per-provider summaries, and winners. Each other peers-NAME test checks one peer adapter.
+- [`peers-map.test.ts`](peers-map.test.ts) checks the map job: the Firecrawl and Tavily request shapes, and that a map task passes only when every gold page is listed.
+- [`peers-extract.test.ts`](peers-extract.test.ts) checks the extract job: the Firecrawl request shape, the gold grading, and the task count.
 - The guards-NAME tests check the bench guards: the set, the run, grading, and the report. [set-loader.test.ts](set-loader.test.ts) checks that the task sets load and that one edited byte is refused.
 - [grade-semantic.test.ts](grade-semantic.test.ts) checks the answer grader: number grammar, answer extraction, hedges, and shotgun lists.
 - [answer-quality-stats.test.ts](answer-quality-stats.test.ts) checks the Wilson interval, the kappa report, the closed-book ratio column, and the small-sample note in the report.

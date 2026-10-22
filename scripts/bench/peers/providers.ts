@@ -4,6 +4,8 @@
 import { Context, Effect, Layer, Schema } from 'effect'
 import { HttpClient } from 'effect/http'
 import { answerWorkflow } from '../../../src/workflows/answer.ts'
+import { extractWorkflow } from '../../../src/workflows/extract.ts'
+import { mapWorkflow } from '../../../src/workflows/map.ts'
 import { scrapeWorkflow } from '../../../src/workflows/scrape.ts'
 import { searchWorkflow } from '../../../src/workflows/search.ts'
 import { apify } from './apify.ts'
@@ -12,10 +14,13 @@ import { baselines } from './baselines.ts'
 import { brightdata } from './brightdata.ts'
 import { browserbase } from './browserbase.ts'
 import { contextdev } from './contextdev.ts'
+import { extracted, firecrawlExtract } from './extract-jobs.ts'
+import { extractSpecs } from './extract-tasks.ts'
 import { gemini } from './gemini.ts'
 import { jina } from './jina.ts'
 import { readKey } from './keys.ts'
 import { linkup } from './linkup.ts'
+import { firecrawlMap, listed, MAP_LIMIT, tavilyMap } from './map-jobs.ts'
 import type { Provider } from './model.ts'
 import { nimble } from './nimble.ts'
 import { parallel } from './parallel.ts'
@@ -50,6 +55,8 @@ const SearchOut = Schema.Struct({
   results: Schema.Array(Schema.Struct({ ...Ref.fields, description: Schema.String })),
 })
 const ScrapeOut = Schema.Struct({ markdown: Schema.String })
+const MapOut = Schema.Struct({ links: Schema.Array(Schema.String) })
+const ExtractOut = Schema.Struct({ data: Schema.Record(Schema.String, Schema.String) })
 const AnswerOut = Schema.Struct({ answer: Schema.String, sources: Schema.Array(Ref) })
 
 export const webular: Provider = {
@@ -76,6 +83,14 @@ export const webular: Provider = {
           costUsd: 0,
           sentBytes: 0,
         })),
+      ),
+    map: ({ url = '' }) =>
+      runFlow(mapWorkflow, MapOut, { url, limit: MAP_LIMIT }).pipe(
+        Effect.map((r) => listed(r.links, 0, 0)),
+      ),
+    extract: ({ url = '' }) =>
+      runFlow(extractWorkflow, ExtractOut, { url, fields: extractSpecs[url]?.fields }).pipe(
+        Effect.map((r) => extracted(r.data, url, 0, 0)),
       ),
     // Citations carry no text: the answer workflow returns only title and url.
     answer: ({ query = '' }) =>
@@ -110,9 +125,16 @@ export const PeersLive = Layer.effect(
   Peers,
   Effect.all([
     Effect.succeed(webular),
-    peer('firecrawl', 'FIRECRAWL_API_KEY', 'firecrawl', firecrawl),
+    peer('firecrawl', 'FIRECRAWL_API_KEY', 'firecrawl', (p, k) => ({
+      ...firecrawl(p, k),
+      ...firecrawlMap(p, k),
+      ...firecrawlExtract(p, k),
+    })),
     peer('exa', 'EXA_API_KEY', 'exa-api-key', exa),
-    peer('tavily', 'TAVILY_API_KEY', 'tavily-api-key', tavily),
+    peer('tavily', 'TAVILY_API_KEY', 'tavily-api-key', (p, k) => ({
+      ...tavily(p, k),
+      ...tavilyMap(p, k),
+    })),
     peer('perplexity', 'PERPLEXITY_API_KEY', 'perplexity-api-key', perplexity),
     peer('parallel', 'PARALLEL_API_KEY', 'parallel-api-key', parallel),
     peer('youcom', 'YOUCOM_API_KEY', 'youcom-api-key', youcom),

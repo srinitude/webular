@@ -3,6 +3,8 @@
 // (BENCH_PLAN, default bench/benchmark-plan.json) adds tasks and metrics.
 import { Effect, Schema } from 'effect'
 import { startFixture } from '../../../tests/_support/fixture.ts'
+import { extractTasks } from './extract-tasks.ts'
+import { mapTasks } from './map-tasks.ts'
 import { type MetricDef, Plan, type Task } from './model.ts'
 
 const html = (body: string) =>
@@ -156,6 +158,8 @@ export const builtinTasks: readonly Task[] = [
     checks: [{ kind: 'urlMatches', values: ['^https://bun\\.(sh|com)'] }],
   },
   qa('qa-cholera-author', 'Who wrote the novel Love in the Time of Cholera?', ['Garcia Marquez']),
+  ...mapTasks,
+  ...extractTasks,
 ]
 
 export const loadPlan = (path: string) =>

@@ -4,7 +4,7 @@
 // Flags: --live, --runs N (3), --peers a,b (live peers; default firecrawl,exa),
 // --max-calls N (20 per peer), --seed N (arm and task order; random if absent),
 // --cold (WEBULAR_NO_CACHE=1), --judge (blinded LLM judge, used only once
-// calibrated). BENCH_PLAN points at an extra plan file.
+// calibrated), --jobs a,b (run only those jobs). BENCH_PLAN points at an extra plan file.
 import { fileURLToPath } from 'node:url'
 import { BunRuntime, BunServices } from '@effect/platform-bun'
 import { Clock, Config, Console, Effect, FileSystem, Layer, Ref, Schema } from 'effect'
@@ -39,6 +39,7 @@ const cold = Bun.argv.includes('--cold')
 const runs = Number(flag('runs') ?? 3)
 const livePeers = new Set(['webular', ...(flag('peers') ?? 'firecrawl,exa').split(',')])
 const maxCalls = Number(flag('max-calls') ?? 20)
+const jobs = flag('jobs')?.split(',')
 const root = fileURLToPath(new URL('../../../bench/', import.meta.url))
 
 const Recording = Schema.Union([
@@ -153,7 +154,8 @@ const main = Effect.gen(function* () {
   const judgeOn = Bun.argv.includes('--judge')
   const judge = { judge: judgeOn ? defaultJudge : undefined, calibration: undefined, names }
   const ctx: Ctx = { fs, calls, origin: pages.origin, planMetrics: plan.metrics, judge }
-  const { seed, records } = yield* runRound([...builtinTasks, ...plan.tasks], providers, ctx)
+  const tasks = [...builtinTasks, ...plan.tasks].filter((t) => !jobs || jobs.includes(t.job))
+  const { seed, records } = yield* runRound(tasks, providers, ctx)
   const mode = `${live ? 'live' : 'offline replay'}, ${runs} runs`
   const header = `peer benchmark (${mode}; ${plan.note}; seed ${seed}${cold ? ', cold' : ''})`
   const text = report(providers, records, defs, header)

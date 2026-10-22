@@ -9,6 +9,7 @@ This page links every doc in this folder. The first group is the best place to b
 - [Why webular](why-webular.md): where webular differs from hosted rivals, and where they do better.
 - [Benchmarks](benchmarks.md): scores against other web research tools, losses included.
 - [Benchmarks by peer](benchmarks-peers.md): webular against each peer on the tasks both answered.
+- [Command parity](command-parity.md): each command's rival endpoints, whether the bench scores it, and the metric that fits.
 
 ## Use it
 
