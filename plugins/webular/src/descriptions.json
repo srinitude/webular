@@ -1,5 +1,5 @@
 {
-  "server": "Web research tools for agents: search, read, crawl, extract, and watch web pages, with typed inputs and capped output. No API key needed.",
+  "server": "Web research tools for agents, built on Mastra and Jev (TypeSafe's decision model): search, read, crawl, extract, and watch web pages, with typed inputs and capped output. TYPESAFE_API_KEY lets Jev make the judgment calls; with no key, rules decide.",
   "tools": {
     "search": "Search the web, Wikipedia, Hacker News, or arXiv, with no API key. Returns titles, URLs, and snippets.",
     "scrape": "Read one web page by URL as clean Markdown, without menus or ads. For two or more URLs, use batch. Returns the title and Markdown.",

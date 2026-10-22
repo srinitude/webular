@@ -1,7 +1,7 @@
 {
   "name": "webular",
   "version": "0.2.0",
-  "description": "Web research for agents: search the web, read a page as Markdown, map a site, and summarize text, through typed MCP tools and four skills: research, interview, plain language, and Markdown.",
+  "description": "Web research for agents, built on Jev (TypeSafe's System One decision model) and Mastra: search the web, read a page as Markdown, map a site, and summarize text, through typed MCP tools and four skills: research, interview, plain language, and Markdown. It runs on your machine, follows robots.txt by default, and works without a key; Jev's key is the only one.",
   "author": { "name": "Kiren Srinivasan", "email": "kiren@fantasymetals.com" },
   "homepage": "https://github.com/srinitude/webular",
   "repository": "https://github.com/srinitude/webular",

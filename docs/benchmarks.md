@@ -3,6 +3,7 @@
 This page shows how webular scores against other web research tools on the same tasks, and it shows losses as plainly as wins.
 Every number on this page comes from one committed results file, and each one links to that file.
 Read it as one small run, not as a final ranking.
+On webular's side, every score comes from its own open-source parts and Jev, TypeSafe's decision model, with no paid web API. [The README](../README.md) lists what webular is built on.
 
 ## Source files
 

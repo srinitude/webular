@@ -1,0 +1,21 @@
+{
+  "description": "A web research CLI that runs on your machine: search, scrape, crawl, map, extract, summarize, answer, and research. Each command is a Mastra workflow built with Effect, XState, and Bun. Jev, TypeSafe's decision model, makes the judgment calls. Its key is the only key and is optional. Respects robots.txt. Also an MCP server and Claude Code plugin.",
+  "homepage": "https://www.npmjs.com/package/webular",
+  "topics": [
+    "bun",
+    "claude-code-plugin",
+    "cli",
+    "effect",
+    "jev",
+    "mastra",
+    "mastra-workflows",
+    "mcp-server",
+    "mise",
+    "open-source",
+    "typesafe",
+    "web-crawler",
+    "web-scraping",
+    "web-search",
+    "xstate"
+  ]
+}

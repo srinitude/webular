@@ -2,7 +2,7 @@
   "name": "webular",
   "version": "0.2.0",
   "mcpName": "io.github.srinitude/webular",
-  "description": "Universal web research CLI — scrape, crawl, map, extract, search, summarize and gather context by composing free & open-source libraries into Mastra workflows/tools, orchestrated through a deterministic mise task graph.",
+  "description": "Web research CLI that sends its judgment calls to Jev, TypeSafe's System One decision model, and does the rest with free and open-source parts: scrape, crawl, map, extract, search, summarize, and gather context as Mastra workflows on Bun, run with Effect and XState from a fixed mise task graph. It runs on your machine, is open source, respects robots.txt by default, and can replay a run with the same result. Jev's key is the only API key, and it works without one.",
   "type": "module",
   "license": "Apache-2.0",
   "author": "Kiren Srinivasan <kiren@fantasymetals.com>",
@@ -28,7 +28,12 @@
     "context",
     "cli",
     "mastra",
-    "bun"
+    "bun",
+    "jev",
+    "typesafe",
+    "mastra-workflows",
+    "effect",
+    "xstate"
   ],
   "bin": {
     "webular": "./dist/webular.js"

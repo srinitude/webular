@@ -38,7 +38,7 @@ const sibling = (command: string) => join(import.meta.dir, `${command}${extname(
 
 // Sent in the initialize result; the client shows it to the model.
 const INSTRUCTIONS =
-  'When you have two or more URLs, call batch once instead of calling scrape for each.'
+  'When you have two or more URLs, call batch once instead of calling scrape for each. Built on Mastra and Jev: with TYPESAFE_API_KEY set, judgment calls go to Jev; without it, rules decide.'
 
 const serve = Effect.gen(function* () {
   const [{ McpServer }, { StdioServerTransport }] = yield* loadSdk
