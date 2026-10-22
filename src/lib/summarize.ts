@@ -138,9 +138,26 @@ interface Focus {
   query: string
   entity?: string | undefined
 }
+// A describing clause ("the physicist who formulated the uncertainty
+// principle") names the subject; it is not what is asked. It starts at
+// who/that/whom/whose after a word other than and/or/but, and runs to the
+// end, except a final verb when the question fronts its auxiliary ("In which
+// city was ... born?"). Clause words only break ties, like the entity.
+// ponytail: regex clause cut; a parser would catch clauses that end mid-question.
+const CLAUSE = /(?<=\b(?!and\b|or\b|but\b)[\p{L}\d]+,?\s+)(?:who|that|whom|whose)\b.*$/iu
+const FRONTED =
+  /^(?:\w+\s+)?(?:which|what)\s+\w+\s+(?:is|was|are|were|did|does|do)\b|^(?:where|when)\s+(?:is|was|are|were|did|does|do)\b/i
+export function splitQuestion(query: string): { asked: string; clause: string } {
+  const m = CLAUSE.exec(query)
+  if (!m) return { asked: query, clause: '' }
+  const verb = FRONTED.test(query) ? (/\s(\p{L}+)\W*$/u.exec(m[0])?.[1] ?? '') : ''
+  const clause = verb ? m[0].replace(/\s\p{L}+\W*$/u, '') : m[0]
+  return { asked: `${query.slice(0, m.index)} ${verb}`.trim(), clause }
+}
 function focusScores(text: string, spans: Spans, focus: Focus): number[] {
-  const keys = new Set(tokenize(focus.query).filter((w) => !QUESTION_WORDS.has(w)))
-  const entity = new Set(tokenize(focus.entity ?? '').filter((w) => !keys.has(w)))
+  const { asked, clause } = splitQuestion(focus.query)
+  const keys = new Set(tokenize(asked).filter((w) => !QUESTION_WORDS.has(w)))
+  const entity = new Set(tokenize(`${focus.entity ?? ''} ${clause}`).filter((w) => !keys.has(w)))
   const sets = spans.starts.map((from, i) => new Set(tokenize(text.slice(from, spans.ends[i]))))
   const df = new Map<string, number>()
   for (const set of sets) for (const k of keys) if (set.has(k)) df.set(k, (df.get(k) ?? 0) + 1)

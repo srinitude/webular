@@ -4,6 +4,7 @@
 // Fixtures follow benchmark misses; the check is the bench's folded `contains`.
 import { expect, test } from 'bun:test'
 import { answerPassage } from '../../src/lib/answer-passage.ts'
+import { splitQuestion, summarizeText } from '../../src/lib/summarize.ts'
 
 const fold = (s: string) => s.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
 const holds = (pages: string[], query: string, want: string) =>
@@ -56,4 +57,32 @@ test('a "which country ... born" question gets the birthplace, without page chro
   expect(fold(passage)).toContain('ukraine')
   expect(passage).not.toContain('Archived from the original')
   expect(passage).not.toContain('From Wikipedia')
+})
+
+// A describing clause ("who formulated the uncertainty principle") names the
+// subject; its rare words must not outrank the asked relation ("born").
+const HEISENBERG = [
+  'Werner Karl Heisenberg (5 December 1901 – 1 February 1976) was a German theoretical physicist, one of the main pioneers of the theory of quantum mechanics.',
+  'Heisenberg published his uncertainty principle in 1927, and the uncertainty principle made him famous.',
+  'It was in Copenhagen, in 1927, that Heisenberg developed his uncertainty principle while working on the mathematical foundations of quantum mechanics.',
+  'The uncertainty principle states a limit on the precision of certain pairs of physical quantities.',
+  'Werner Karl Heisenberg was born in Würzburg, Germany, the son of a teacher of classical languages.',
+  'In a letter to Wolfgang Pauli he set out the uncertainty principle for the first time.',
+].join(' ')
+const HEIS_Q = 'In which city was the physicist who formulated the uncertainty principle born?'
+
+test('a describing clause does not outrank the asked verb, and an accented place counts', () => {
+  expect(holds([HEISENBERG], HEIS_Q, 'Würzburg')).toBe(true)
+})
+
+test('focus ranking keeps the "born" sentence over clause-word sentences', () => {
+  const top = summarizeText(HEISENBERG, 1, { query: HEIS_Q }).sentences.join(' ')
+  expect(top).toContain('Würzburg')
+})
+
+test('a fronted question keeps its final verb as the asked part', () => {
+  expect(splitQuestion(HEIS_Q).clause).toBe('who formulated the uncertainty principle')
+  expect(splitQuestion(HEIS_Q).asked).toContain('born')
+  expect(splitQuestion('Which novel won the prize, and who wrote it?').clause).toBe('')
+  expect(splitQuestion('Who received the award?').clause).toBe('')
 })

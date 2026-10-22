@@ -2,7 +2,7 @@
 // reference lines drop out before scoring, the top entity page's lead
 // sentence ("X is a 2024 novel by ...") comes first, and sentences that hold
 // an answer of the asked type (a place for "where", a name for "who") lead.
-import { summarizeText } from './summarize.ts'
+import { splitQuestion, summarizeText } from './summarize.ts'
 
 // Chrome glued into page text: archive stamps, the site tagline, "Retrieved"
 // stamps, and quoted reference titles (`"ACM's Turing Award prize".`).
@@ -22,8 +22,9 @@ const LEAD =
   /(?:^|[.!?\n]\s*)([A-Z][^.!?\n]{0,300}?\b(?:is|was) (?:a|an|the)\b[^\n]*?[.!?])(?=\s|$)/
 const leadSentence = (text: string) => LEAD.exec(text.slice(0, 4_000))?.[1]?.trim()
 
-const NAME = /\b[A-Z][a-z]+(?: [A-Z]\.)? [A-Z][a-z]+\b/g
-const PLACE = /\b(?:born|in|from)\s+(?:[A-Z][a-z]+,?\s*)+/g
+// Unicode letter classes, so "Würzburg" and "José Martí" count.
+const NAME = /(?<!\p{L})\p{Lu}\p{Ll}+(?: \p{Lu}\.)? \p{Lu}\p{Ll}+(?!\p{L})/gu
+const PLACE = /\b(?:born|in|from)\s+(?:\p{Lu}\p{Ll}+,?\s*)+/gu
 const answerType = (query: string) =>
   /\bwhere\b|\bwhich (?:country|city|state)\b/i.test(query)
     ? PLACE
@@ -33,7 +34,7 @@ const answerType = (query: string) =>
 // The sentence names a person or place the question does not.
 const holdsType = (sentence: string, re: RegExp, asked: Set<string>) =>
   [...sentence.matchAll(re)].some((m) =>
-    m[0].split(/[\s,]+/).some((w) => /^[A-Z]/.test(w) && !asked.has(w.toLowerCase())),
+    m[0].split(/[\s,]+/).some((w) => /^\p{Lu}/u.test(w) && !asked.has(w.toLowerCase())),
   )
 
 // A sentence ends on terminal punctuation, before any citation markers
@@ -65,7 +66,8 @@ export function answerPassage(pages: ReadonlyArray<string>, n: number, focus: Fo
   const pool = summarizeText(clean.join('\n\n'), n * 3, focus).sentences.filter(isSentence)
   const asked = new Set(stems(focus.query))
   const re = answerType(focus.query)
-  const score = termScore(pool, asked)
+  // Only the asked part weighs; a describing clause's rare words would win.
+  const score = termScore(pool, new Set(stems(splitQuestion(focus.query).asked)))
   const typed = pool
     .map((s, i) => ({ s, k: score(i) }))
     .filter(({ s }) => re === undefined || holdsType(s, re, asked))
