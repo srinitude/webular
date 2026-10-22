@@ -21,8 +21,9 @@ const native =
     ? null
     : `agent-browser-${process.platform}-${process.arch}${process.platform === 'win32' ? '.exe' : ''}`
 
-// npm's launchers: the node script on Unix, the .cmd/.ps1/.bat wrappers on Windows.
-const SHIM = /\.(js|cmd|ps1|bat)$/i
+// Package launchers: the node script on Unix, npm's .cmd/.ps1/.bat wrappers on
+// Windows, and bun's .exe launcher, which stays in node_modules/.bin.
+const SHIM = /\.(js|cmd|ps1|bat)$|[\\/]node_modules[\\/]\.bin[\\/]/i
 
 /**
  * A real `agent-browser` executable on PATH (an override or a test stub) wins.
