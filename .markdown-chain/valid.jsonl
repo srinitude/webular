@@ -349,3 +349,5 @@
 {"path": ".github/workflows/AGENTS.md", "sha": "a8be5016e3068129e6981e833e6026ebf0c37c1a703a1995db505d5a9a6bc1fd", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": ".github/workflows/AGENTS.md", "sha": "5651a5411906d5a6bc870a87c5072d8fe0ac2998f3eed100c8eab993055712a0"}
 {"path": ".github/workflows/AGENTS.md", "sha": "5651a5411906d5a6bc870a87c5072d8fe0ac2998f3eed100c8eab993055712a0", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/content/for-agents.md", "sha": "3693cd8d5c3233a3dbbf5406aa3dd830fb3a2ab9840e03c620bf095fe31f657d", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/content/AGENTS.md", "sha": "2e9f4230be93a661c74df5db34d75d1c340896eda47ac01e9c5fad3398d52a92", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}

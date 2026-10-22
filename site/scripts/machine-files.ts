@@ -33,7 +33,7 @@ const twins = Effect.gen(function* () {
     SLUGS,
     (slug) =>
       Effect.map(
-        fs.readFileString(`${SITE}src/content/${slug}.md`),
+        fs.readFileString(`${SITE}src/content/${slug === 'agents' ? 'for-agents' : slug}.md`),
         (body) => [slug, body] as const,
       ),
     { concurrency: 4 },
