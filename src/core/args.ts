@@ -10,10 +10,7 @@ import { CliError, commandName } from './effect.ts'
 import { logErr, parseFields } from './output.ts'
 
 type FlagValue = string | boolean | string[] | undefined
-interface ParsedArgs {
-  values: Record<string, FlagValue>
-  positionals: string[]
-}
+type ParsedArgs = { values: Record<string, FlagValue>; positionals: string[] }
 
 type OptionSpec = {
   type: 'string' | 'boolean'
@@ -49,15 +46,12 @@ function warnRemoved(values: Record<string, FlagValue>): Effect.Effect<void> {
   })
 }
 
-type Near = { name: string; d: number }
-
 // The declared flag at most 2 edits away from a mistyped one, if any.
 const didYouMean = (unknown: string, known: string[]): string => {
-  const near = known.reduce<Near | undefined>((best, name) => {
-    const d = distance(unknown, name)
-    const fits = d <= 2 && d < name.length
-    return fits && (best === undefined || d < best.d) ? { name, d } : best
-  }, undefined)
+  const near = known
+    .map((name) => ({ name, d: distance(unknown, name) }))
+    .filter(({ name, d }) => d <= 2 && d < name.length)
+    .sort((x, y) => x.d - y.d)[0]
   return near === undefined ? '' : ` Did you mean '--${near.name}'?`
 }
 
@@ -72,11 +66,7 @@ export const listFlag = (raw: unknown): string[] | undefined =>
         .filter(Boolean)
     : undefined
 
-type Described = {
-  description?: string
-  def?: { type?: string }
-  unwrap?: () => Described
-}
+type Described = { description?: string; def?: { type?: string }; unwrap?: () => Described }
 
 // One OPTIONS line per flag, described from the zod schema the MCP tool uses,
 // so the CLI help and the MCP schema cannot drift.
@@ -145,15 +135,10 @@ export function parseFlags(
   })
 }
 
-interface IntRange {
-  min: number
-  max: number
-}
-
+type IntRange = { min: number; max: number }
 function toInt(raw: FlagValue): number | null {
   const text = String(raw ?? '').trim()
-  if (text === '') return null
-  const n = Number(text)
+  const n = text === '' ? Number.NaN : Number(text)
   return Number.isInteger(n) ? n : null
 }
 

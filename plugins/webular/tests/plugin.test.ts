@@ -18,18 +18,11 @@ const verify =
   <A>(check: (a: A) => void) =>
   <E, R>(self: Effect.Effect<A, E, R>) =>
     Effect.flatMap(self, (a) => Effect.sync(() => check(a)))
-
-const readJson = <S extends Schema.Top>(path: string, schema: S) =>
-  files((fs) => fs.readFileString(`${root}${path}`)).pipe(
-    Effect.flatMap(Schema.decodeUnknownEffect(Schema.fromJsonString(schema))),
-  )
-
 const Manifest = Schema.Struct({ $schema: Schema.String, name: Schema.String })
 const Evals = Schema.Struct({
   skill_name: Schema.String,
   evals: Schema.Array(Schema.Struct({ id: Schema.String, prompt: Schema.String })),
 })
-
 type Skill = { name: string; body: string; front: string; rest: string; texts: Map<string, string> }
 
 // ponytail: a path with an extension and no leading dot is a file; use fs.stat if not.
@@ -86,8 +79,8 @@ const eachSkill = (check: (skill: Skill) => void) =>
     ),
   )
 
-const anchor = (heading: string) =>
-  `#${heading
+const anchor = (h: string) =>
+  `#${h
     .toLowerCase()
     .replace(/[^a-z0-9 -]/g, '')
     .replace(/ /g, '-')}`
@@ -121,7 +114,8 @@ const checkReference = (body: string) => {
 
 test('plugin.json names the plugin and the spec schema', () =>
   Effect.runPromise(
-    readJson('plugin.json', Manifest).pipe(
+    files((fs) => fs.readFileString(`${root}plugin.json`)).pipe(
+      Effect.flatMap(Schema.decodeUnknownEffect(Schema.fromJsonString(Manifest))),
       verify((manifest) => {
         expect(manifest.$schema).toBe('https://agent-plugins.org/schemas/1.0.0/plugin.schema.json')
         expect(manifest.name).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/)
@@ -163,23 +157,12 @@ test('every skill file stays host-agnostic', () =>
   }))
 
 test('every skill ships at least three evals for its own name', () =>
-  Effect.runPromise(
-    skillNames.pipe(
-      Effect.flatMap((names) =>
-        Effect.forEach(
-          names,
-          (name) =>
-            readJson(`skills/${name}/evals/evals.json`, Evals).pipe(
-              verify((evals) => {
-                expect(evals.skill_name).toBe(name)
-                expect(evals.evals.length).toBeGreaterThanOrEqual(3)
-              }),
-            ),
-          { concurrency: 4 },
-        ),
-      ),
-    ),
-  ))
+  eachSkill(({ name, texts }) => {
+    const decode = Schema.decodeUnknownSync(Schema.fromJsonString(Evals))
+    const evals = decode(texts.get('evals/evals.json'))
+    expect(evals.skill_name).toBe(name)
+    expect(evals.evals.length).toBeGreaterThanOrEqual(3)
+  }))
 
 test('every reference file opens with a table of contents whose links resolve', () =>
   eachSkill(({ texts }) => {

@@ -87,12 +87,7 @@ const fetchOnce = (url: string, opts: FetchOptions): Effect.Effect<Response, Fet
 const isRedirect = (status: number) => status >= 300 && status < 400
 
 // One fetch run: `host` scopes hand-followed redirects; `deadline` is when a retry would outlast it.
-interface Run {
-  origin: string
-  host?: string | undefined
-  opts: FetchOptions
-  deadline: number
-}
+type Run = { origin: string; host?: string | undefined; opts: FetchOptions; deadline: number }
 
 const startRun = (origin: string, opts: FetchOptions, host?: string) =>
   Effect.map(Clock.currentTimeMillis, (now): Run => {

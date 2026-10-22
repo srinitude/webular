@@ -12,15 +12,11 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { type Duration, Effect } from 'effect'
 import type { ChildProcessSpawner } from 'effect/process'
 import type { z } from 'zod'
-import {
-  CommandFailed,
-  commandTools,
-  type EntryOf,
-  runCommand,
-} from '../../plugins/webular/src/commands.ts'
+import { commandTools, type EntryOf } from '../../plugins/webular/src/commands.ts'
 import { fetchText } from '../core/http.ts'
 import { errMsg, pageText, selectFields, shortError, stableJson } from '../core/output.ts'
 import { extractLinks, htmlToArticle, htmlToMarkdown } from '../lib/html.ts'
+import { type CallExtra, failure, type McpText, runTool, withProgress } from './web-call.ts'
 import { machineSchema, machineState, ToolArgsError } from './web-machine.ts'
 import { hintsOnly, lenient, webMeta } from './web-register.ts'
 import {
@@ -94,13 +90,6 @@ export const webTools: McpToolDef[] = [
   },
 ]
 
-interface McpText {
-  [key: string]: unknown
-  content: { type: 'text'; text: string }[]
-  isError?: boolean
-}
-const failure = (text: string): McpText => ({ content: [{ type: 'text', text }], isError: true })
-
 // ponytail: each page re-runs the tool; web.fetch pages lean on the HTTP cache.
 function execute(tool: McpToolDef, args: Record<string, unknown>): Effect.Effect<McpText> {
   return Effect.gen(function* () {
@@ -125,88 +114,6 @@ export const NOT_ON_MCP = {
 
 // Every tool `webular mcp` lists, in tools/list order.
 export const mcpToolIds = [...webTools.map((t) => t.id), ...commandTools.map((t) => t.id)].sort()
-
-// A command tool: the plugin's runCommand, with the result as compact JSON text.
-// The plugin's own numeric cursor pages a long result. A call that runs past
-// `limit` stops (its child process with it) and returns isError.
-const timedOut = (id: string) =>
-  Effect.fail(
-    new CommandFailed({
-      message: `webular ${id} stopped at its time limit. Call it again with a smaller input, or tell the user it took too long.`,
-    }),
-  )
-
-const runTool = (
-  id: string,
-  args: Record<string, unknown>,
-  limit: Duration.Input,
-  entryOf?: EntryOf,
-) =>
-  Effect.gen(function* () {
-    const { cursor = 0, ...input } = args
-    // lenient() passes a bad cursor through; refuse it rather than page from 0.
-    if (typeof cursor !== 'number' || !Number.isInteger(cursor) || cursor < 0) {
-      return failure('cursor: use the cursor value from the previous result')
-    }
-    const result = yield* runCommand(id, input, cursor, entryOf).pipe(
-      Effect.timeoutOrElse({
-        duration: limit,
-        orElse: () => timedOut(id),
-      }),
-    )
-    return {
-      content: [{ type: 'text', text: stableJson(result) }],
-      structuredContent: result,
-    } satisfies McpText
-  }).pipe(
-    Effect.catch((e) =>
-      Effect.succeed(failure(e instanceof CommandFailed ? e.message : shortError(e))),
-    ),
-  )
-
-// Tools that can run for minutes; they report progress when the caller asks.
-const LONG_TOOLS = new Set(['batch', 'crawl', 'research'])
-
-// What each MCP handler gets besides its arguments (a slice of the SDK's extra).
-interface CallExtra {
-  signal: AbortSignal
-  _meta?: { progressToken?: string | number | undefined }
-  sendNotification: (n: {
-    method: 'notifications/progress'
-    params: { progressToken: string | number; progress: number; total: number }
-  }) => Promise<void>
-}
-
-// With a progressToken, a long tool sends notifications/progress: 0 at the
-// start, a rising beat every 5 seconds (it resets a client's request timeout),
-// and 1 at the end. A lost notification never fails the call.
-const progressSender = (extra: CallExtra, token: string | number) => (progress: number) =>
-  Effect.ignore(
-    Effect.tryPromise(() =>
-      extra.sendNotification({
-        method: 'notifications/progress',
-        params: { progressToken: token, progress, total: 1 },
-      }),
-    ),
-  )
-
-const heartbeats = (send: (progress: number) => Effect.Effect<void>) =>
-  Effect.gen(function* () {
-    for (let n = 1; ; n++) {
-      yield* Effect.sleep('5 seconds')
-      yield* send(n / (n + 1))
-    }
-  })
-
-const withProgress = <A, E, R>(id: string, extra: CallExtra, work: Effect.Effect<A, E, R>) => {
-  const token = extra._meta?.progressToken
-  if (token === undefined || !LONG_TOOLS.has(id)) return work
-  const send = progressSender(extra, token)
-  return send(0).pipe(
-    Effect.andThen(Effect.raceFirst(work, heartbeats(send))),
-    Effect.tap(() => send(1)),
-  )
-}
 
 // Registering mutates the server, so it is an Effect: it captures the caller's
 // context once, and each MCP Promise handler runs its tool Effect with it.

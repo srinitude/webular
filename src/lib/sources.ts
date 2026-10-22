@@ -138,10 +138,7 @@ export class ParsePool extends Context.Service<
 export const parseArticleText = (html: string, base = '') =>
   ParsePool.use((pool) => pool.parse(html, base))
 
-interface SourceRef {
-  title: string
-  url: string
-}
+type SourceRef = { title: string; url: string }
 
 export interface SourceEntry {
   title: string

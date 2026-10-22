@@ -7,6 +7,7 @@ Rules for the MCP tools, under [src/AGENTS.md](../AGENTS.md).
 - [`web.ts`](web.ts) holds the tool definitions. It is the one source for `webular mcp`, so `--list` and serve register the same tools.
 - [`web-schemas.ts`](web-schemas.ts) holds the input schemas of the web tools. Their URL fields accept only `http` and `https`.
 - [`web-register.ts`](web-register.ts) loosens a tool's input schema at registration, so the tool's own handler gives the error text.
+- [`web-call.ts`](web-call.ts) runs a command tool: time limit, progress, errors.
 - [`web-machine.ts`](web-machine.ts) is the `machine.next` tool. It shows a machine's state after replaying events.
 - [`sdk-errors.ts`](sdk-errors.ts) adds the JSON-RPC error replies the SDK does not send.
 
@@ -20,7 +21,7 @@ Rules for the MCP tools, under [src/AGENTS.md](../AGENTS.md).
 
 ### MCP SDK
 
-- `registerTool(name, config, handler)` takes a Zod shape or a Zod object for `inputSchema` and `outputSchema`. The web tools pass their strict object, so the SDK refuses unknown keys instead of dropping them. An `outputSchema` pairs with `structuredContent`, which the SDK validates. A failure is a tool result with `isError: true` and a text recovery hint.
+- `registerTool(name, config, handler)` takes a Zod shape or a Zod object for `inputSchema` and `outputSchema`. The web tools pass their strict object, so the SDK refuses unknown keys instead of dropping them. An `outputSchema` pairs with `structuredContent`, which the SDK validates.
 - Stdio is `new StdioServerTransport()` then `server.connect(transport)`. On stdio, stdout carries only JSON-RPC and logs go to stderr (unverified at this pin).
 - Never import first- and second-generation SDK objects in one file.
 - In SDK `1.32.1`, an unknown tool name becomes an `isError` result: `dist/esm/server/mcp.js` line 144 throws `InvalidParams`, and the SDK's catch at line 175 wraps it as that result. A non-JSON stdin line gets no reply: `dist/esm/shared/stdio.js` line 35 throws, `dist/esm/server/stdio.js` line 50 stays silent, and only `onerror` sees it.
