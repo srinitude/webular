@@ -42,11 +42,7 @@ const rouge = (summaries: string[], n: number) =>
 test('summarize rule pick scores against human lead summaries', () => {
   const summaries = picks()
   const [r1, r2] = [rouge(summaries, 1), rouge(summaries, 2)]
-  Effect.runSync(
-    Console.log(
-      `summarize ROUGE-1 F1 ${r1.toFixed(4)} ROUGE-2 F1 ${r2.toFixed(4)}`,
-    ),
-  )
+  Effect.runSync(Console.log(`summarize ROUGE-1 F1 ${r1.toFixed(4)} ROUGE-2 F1 ${r2.toFixed(4)}`))
   expect(r1).toBeGreaterThan(0.17)
   expect(r2).toBeGreaterThan(0.04)
 })

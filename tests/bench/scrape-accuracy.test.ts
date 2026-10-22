@@ -10,7 +10,11 @@ import { htmlToMarkdown, pageBodyHtml, parsePage } from '../../src/lib/html.ts'
 import { eff } from '../_support/run.ts'
 
 const root = `${import.meta.dir}/../..`
-const norm = (s: string) => s.replace(/[\\*_`]/g, '').replace(/\s+/g, ' ').trim()
+const norm = (s: string) =>
+  s
+    .replace(/[\\*_`]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
 const SCRIPT_RENDERED = /\/(spa|lazy-scroll)\//
 
 const Gold = Schema.Struct({
@@ -48,7 +52,9 @@ test(
     Effect.gen(function* () {
       const fs = yield* FileSystem.FileSystem
       const lines = (yield* fs.readFileString(`${root}/bench/tasks/dev/scrape.jsonl`)).split('\n')
-      const decoded = yield* Effect.forEach(lines.filter(Boolean), (l) => decodeRow(l), { concurrency: 1 })
+      const decoded = yield* Effect.forEach(lines.filter(Boolean), (l) => decodeRow(l), {
+        concurrency: 1,
+      })
       const rows = decoded.filter(
         (r) => r.input?.kind === 'scrape.page' && r.input.path?.endsWith('.html'),
       )
