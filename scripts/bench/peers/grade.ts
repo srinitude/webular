@@ -44,7 +44,7 @@ export interface JudgeSetup {
 }
 
 // The judge's verdict counts only once it passes calibration (kappa >= 0.8,
-// accuracy >= 95%, 200+ items); otherwise the containment verdict stands.
+// accuracy >= 95%, 200+ items, flip rate under 2%); otherwise the containment verdict stands.
 export const judgedAccuracy = (setup: JudgeSetup, task: Task, out: Out): Effect.Effect<number> => {
   const fallback = answerAccuracy(task, out)
   const [gold, ...aliases] = task.answers ?? []

@@ -60,12 +60,12 @@ test(
     Effect.gen(function* () {
       expect(J.defaultJudge).toBeUndefined()
       const judge = { model: 'pinned', judge: () => Effect.succeed('correct' as const) }
-      const weak = { n: 200, kappa: 0.7, accuracy: 0.96 }
+      const weak = { n: 200, kappa: 0.7, accuracy: 0.96, flipRate: 0 }
       expect(yield* failMsg(J.useJudge(judge, weak))).toContain('not calibrated')
       expect(yield* failMsg(J.useJudge(judge, { ...weak, kappa: 0.9, n: 50 }))).toContain('n 50')
-      expect(yield* J.useJudge(judge, { n: 200, kappa: 0.85, accuracy: 0.97 })).toBe(judge)
+      expect(yield* J.useJudge(judge, { ...weak, kappa: 0.85, accuracy: 0.97 })).toBe(judge)
       const human = ['correct', 'incorrect', 'correct', 'not_attempted'] as const
-      expect(J.calibrate(human, human)).toEqual({ n: 4, kappa: 1, accuracy: 1 })
+      expect(J.calibrate(human, human, human)).toEqual({ n: 4, kappa: 1, accuracy: 1, flipRate: 0 })
       expect(cohensKappa(['correct', 'incorrect'], ['incorrect', 'correct'])).toBe(-1)
     }),
   ),

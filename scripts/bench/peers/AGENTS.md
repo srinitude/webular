@@ -29,7 +29,7 @@ The peer benchmark. It scores webular against other web research tools. The pare
 - Compare two arms only on the tasks both scored, one family at a time.
 - Every call uses the 60 s timeout, webular's too. An error row counts as 60 s in latency.
 - Live runs write recordings under [`bench/results/`](../../../bench/results/), in a `recordings` folder. They never overwrite [`bench/recordings/`](../../../bench/recordings/).
-- The judge decides a grade only when its calibration passes: kappa at least 0.8, accuracy at least 95%, and at least 200 items.
+- The judge decides a grade only when its calibration passes: kappa at least 0.8, accuracy at least 95%, at least 200 items, and under 2% of labels changed when the answer order is swapped.
 - Give each adapter a test in [tests/bench/](../../../tests/bench/) named `peers-<peer>.test.ts`.
 
 ## Checks

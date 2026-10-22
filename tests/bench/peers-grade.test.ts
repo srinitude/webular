@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import { Effect } from 'effect'
-import type { Calibration } from '../../scripts/bench/judge.ts'
+import { type Calibration, calibrate } from '../../scripts/bench/judge.ts'
 import {
   answerAccuracy,
   answerField,
@@ -64,8 +64,8 @@ describe('judge kappa gate', () => {
     Effect.runSync(
       judgedAccuracy({ judge: judge(label), calibration: cal, names: ['exa'] }, task, out(text)),
     )
-  const good: Calibration = { n: 200, kappa: 0.85, accuracy: 0.96 }
-  const weak: Calibration = { n: 200, kappa: 0.79, accuracy: 0.96 }
+  const good: Calibration = { n: 200, kappa: 0.85, accuracy: 0.96, flipRate: 0.01 }
+  const weak: Calibration = { n: 200, kappa: 0.79, accuracy: 0.96, flipRate: 0 }
 
   test('a calibrated judge decides', () => {
     expect(run(good, 'correct', 'Paris')).toBe(1)
@@ -75,6 +75,14 @@ describe('judge kappa gate', () => {
   test('kappa under 0.8 falls back to containment', () => {
     expect(run(weak, 'correct', 'Lyon')).toBe(0)
     expect(run(weak, 'incorrect', 'Answer: Paris')).toBe(1)
+  })
+
+  test('a judge that flips 2% or more of labels on swapped order falls back to containment', () => {
+    const human: JudgeLabel[] = ['correct', 'incorrect', 'correct', 'not_attempted']
+    const swapped: JudgeLabel[] = ['correct', 'incorrect', 'incorrect', 'not_attempted']
+    expect(calibrate(human, human, swapped).flipRate).toBe(0.25)
+    expect(calibrate(human, human, human)).toEqual({ n: 4, kappa: 1, accuracy: 1, flipRate: 0 })
+    expect(run({ ...good, flipRate: 0.02 }, 'incorrect', 'Answer: Paris')).toBe(1)
   })
 
   test('no judge configured falls back to containment', () => {

@@ -23,11 +23,16 @@ export const defaultJudge: ReferenceJudge | undefined = undefined
 const MIN_KAPPA = 0.8
 const MIN_ACCURACY = 0.95
 const MIN_CALIBRATION_ITEMS = 200
+// Answer-quality #8: a judge that changes 2% or more of its labels when the
+// answer order is swapped has a position bias, so it is not usable.
+const MAX_FLIP_RATE = 0.02
 
 export interface Calibration {
   readonly n: number
   readonly kappa: number
   readonly accuracy: number
+  // Share of items whose label changed when the same items were judged in swapped order.
+  readonly flipRate: number
 }
 
 // Paired item count and the share of pairs where judge and human agree.
@@ -39,9 +44,11 @@ const agreement = (judged: readonly JudgeLabel[], human: readonly JudgeLabel[]) 
 export const calibrate = (
   judged: readonly JudgeLabel[],
   human: readonly JudgeLabel[],
+  swapped: readonly JudgeLabel[],
 ): Calibration => {
   const { n, rate: accuracy } = agreement(judged, human)
-  return { n, kappa: cohensKappa(judged, human), accuracy }
+  const flipRate = 1 - agreement(judged, swapped).rate
+  return { n, kappa: cohensKappa(judged, human), accuracy, flipRate }
 }
 
 // Guard test 20: a judge is usable only after it passes calibration.
@@ -49,11 +56,14 @@ export const useJudge = <J extends { readonly model: string }>(
   judge: J,
   cal: Calibration,
 ): Effect.Effect<J, Error> =>
-  cal.n >= MIN_CALIBRATION_ITEMS && cal.kappa >= MIN_KAPPA && cal.accuracy >= MIN_ACCURACY
+  cal.n >= MIN_CALIBRATION_ITEMS &&
+  cal.kappa >= MIN_KAPPA &&
+  cal.accuracy >= MIN_ACCURACY &&
+  cal.flipRate < MAX_FLIP_RATE
     ? Effect.succeed(judge)
     : Effect.fail(
         new Error(
-          `judge ${judge.model} not calibrated: n ${cal.n}, kappa ${cal.kappa}, accuracy ${cal.accuracy}`,
+          `judge ${judge.model} not calibrated: n ${cal.n}, kappa ${cal.kappa}, accuracy ${cal.accuracy}, flip rate ${cal.flipRate}`,
         ),
       )
 
