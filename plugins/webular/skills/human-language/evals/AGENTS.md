@@ -4,11 +4,11 @@ This folder holds the eval cases of the human-language skill. The skill rules ar
 
 ## What lives here
 
-- `plugins/webular/skills/human-language/evals/evals.json` holds the cases. `plugins/webular/tests/human-language-evals.test.ts` runs them against plain.ts.
+- [`plugins/webular/skills/human-language/evals/evals.json`](evals.json) holds the cases. [`plugins/webular/tests/human-language-evals.test.ts`](../../../tests/human-language-evals.test.ts) runs them against plain.ts.
 
 ## Rules
 
-- Give each case a unique id. `plugins/webular/evals/harness.json` maps every id to a grader.
+- Give each case a unique id. [`plugins/webular/evals/harness.json`](../../../evals/harness.json) maps every id to a grader.
 - Write assertions that proseIssues can judge, or that a reader can check on the text.
 
 ## Checks

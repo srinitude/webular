@@ -13,9 +13,9 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and 
 ### Added
 
 - `effect` as a dependency.
-- `docs/best-practices.md`, a checklist of the practices this repo follows. `tests/quality/practices-config.test.ts` and `tests/quality/practices-source.test.ts` check it.
+- [`docs/best-practices.md`](docs/best-practices.md), a checklist of the practices this repo follows. [`tests/quality/practices-config.test.ts`](tests/quality/practices-config.test.ts) and [`tests/quality/practices-source.test.ts`](tests/quality/practices-source.test.ts) check it.
 - Dependabot for GitHub Actions and npm.
-- `SECURITY.md` and this changelog.
+- [`SECURITY.md`](SECURITY.md) and this changelog.
 
 ## [0.2.0] - 2026-07-02
 

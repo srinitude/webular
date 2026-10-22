@@ -4,10 +4,10 @@ Rules for call recording and lessons, under [src/lib/jev/AGENTS.md](../AGENTS.md
 
 ## What lives here
 
-- `recorder.ts` writes one row per Jev call. It rotates the log at a byte cap and keeps a fixed number of rotated files.
-- `lessons.ts` proposes payload changes and keeps only the ones that prove better.
-- `lint.ts` and `definition-lint.ts` check payloads and decision definitions against the decision-model rules. Errors block a definition. Warnings advise.
-- `cli.ts` runs `webular jev learn` and `webular jev correct`. `src/commands/jev.ts` calls it.
+- [`recorder.ts`](recorder.ts) writes one row per Jev call. It rotates the log at a byte cap and keeps a fixed number of rotated files.
+- [`lessons.ts`](lessons.ts) proposes payload changes and keeps only the ones that prove better.
+- [`lint.ts`](lint.ts) and [`definition-lint.ts`](definition-lint.ts) check payloads and decision definitions against the decision-model rules. Errors block a definition. Warnings advise.
+- [`cli.ts`](cli.ts) runs `webular jev learn` and `webular jev correct`. [`src/commands/jev.ts`](../../../commands/jev.ts) calls it.
 
 ## Rules
 

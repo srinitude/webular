@@ -4,10 +4,10 @@ Build and maintenance scripts that `mise` tasks run. The root [AGENTS.md](../AGE
 
 ## What lives here
 
-- `scripts/gen-dispatch.ts` writes `src/cli/dispatch-table.ts` from the `run:*` tasks in `mise.toml`. `mise run build` runs it first, and a test fails on drift.
-- `scripts/clean.ts` deletes build output on every OS. `mise run build` runs it before each bundle.
-- `scripts/jev-docs.ts` refreshes and proves the Jev docs snapshot for `mise run jev:docs`.
-- `scripts/install.sh` and `scripts/install.ps1` install a release binary.
+- [gen-dispatch.ts](gen-dispatch.ts) writes [src/cli/dispatch-table.ts](../src/cli/dispatch-table.ts) from the `run:*` tasks in [`mise.toml`](../mise.toml). `mise run build` runs it first, and a test fails on drift.
+- [clean.ts](clean.ts) deletes build output on every OS. `mise run build` runs it before each bundle.
+- [jev-docs.ts](jev-docs.ts) refreshes and proves the Jev docs snapshot for `mise run jev:docs`.
+- [install.sh](install.sh) and [install.ps1](install.ps1) install a release binary.
 
 ## Rules
 
@@ -16,7 +16,7 @@ Build and maintenance scripts that `mise` tasks run. The root [AGENTS.md](../AGE
 
 ## Checks
 
-- `scripts/jev-docs.ts:45` ends with `Effect.runPromise(...)` instead of `BunRuntime.runMain`.
+- [jev-docs.ts](jev-docs.ts) ends with `Effect.runPromise(...)` instead of `BunRuntime.runMain`.
 
 ```bash
 mise run build

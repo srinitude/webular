@@ -22,7 +22,7 @@ usage line, the global options, the exit codes, and examples.
 | `doctor`    | Checks your setup and toolchain |
 | `tasks`     | Lists the mise task graph that defines the commands |
 | `mcp`       | Serves webular's features as an MCP server |
-| `diagram`   | Lists the XState machines that model the CLI flows (src/machines) |
+| `diagram`   | Lists the XState machines that model the CLI flows ([src/machines](../src/machines)) |
 | `audit`     | Reports whether `deepsec` is there, plus a scan plan (keyless; scans need LLM keys) |
 | `act`       | Drives a real browser: open, snapshot, screenshot, interact (agent-browser). With `--goal`, it drives a Cua window (see [Browser mode](cua-browser-mode.md)) |
 | `feed`      | Reads an RSS 2.0 or Atom 1.0 feed and lists its items (title, link, date, summary) |

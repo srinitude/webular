@@ -4,7 +4,7 @@ This folder holds the detail the human-language skill loads on demand. The skill
 
 ## What lives here
 
-- `plugins/webular/skills/human-language/references/situations.md` is a table of situations. Each row gives a section, when to use it, when not to, and related sections.
+- [`plugins/webular/skills/human-language/references/situations.md`](situations.md) is a table of situations. Each row gives a section, when to use it, when not to, and related sections.
 
 ## Rules
 

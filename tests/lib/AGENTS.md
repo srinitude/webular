@@ -1,9 +1,14 @@
 # tests/lib/AGENTS.md
 
-Tests for helpers in `src/lib/`. The parent rules are in [tests/AGENTS.md](../AGENTS.md).
+Tests for helpers in [src/lib/](../../src/lib/). The parent rules are in [tests/AGENTS.md](../AGENTS.md).
 
-- `answer-country.test.ts` checks that a country question names the country beside the demonym.
-- `sources/` holds the source adapter tests. See [tests/lib/sources/AGENTS.md](sources/AGENTS.md).
+## What lives here
+
+- [answer-country.test.ts](answer-country.test.ts) checks that a country question names the country beside the demonym.
+- [as-of.test.ts](as-of.test.ts) checks date grounding: `WEBULAR_AS_OF` pins the run date, and without it the clock gives an ISO date.
+- [driver.test.ts](driver.test.ts) checks that the `agent-browser` driver retries a failed render once, only when a retry can fix it.
+- [sqlite-pragmas.test.ts](sqlite-pragmas.test.ts) checks the shared SQLite open: busy timeout always, WAL only on request.
+- [sources/](sources/) holds the source adapter tests. See [tests/lib/sources/AGENTS.md](sources/AGENTS.md).
 
 ## Checks
 

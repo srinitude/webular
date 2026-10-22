@@ -4,12 +4,12 @@ The agent scenarios and their runner. The parent rules are in [tests/AGENTS.md](
 
 ## What lives here
 
-- Scenarios: `scenarios.json` (data: intent, outcome, eval, routes) and `scenarios.ts` (schema, loader, shared fixture).
-- Evals: `check.ts` gives the same problems list for the same reply.
-- Runner: `run.ts` (the `mise run test:models` entry), `jobs.ts` (the model, surface, and scenario grid, with arms in a seeded order), `report.ts` (reads stream-json, writes the summary).
-- Baseline: `baseline.ts` runs each reference call against the fixture. `baseline/` holds the raw output. See [tests/models/baseline/AGENTS.md](baseline/AGENTS.md).
+- Scenarios: [`scenarios.json`](scenarios.json) (data: intent, outcome, eval, routes) and [`scenarios.ts`](scenarios.ts) (schema, loader, shared fixture).
+- Evals: [`check.ts`](check.ts) gives the same problems list for the same reply.
+- Runner: [`run.ts`](run.ts) (the `mise run test:models` entry), [`jobs.ts`](jobs.ts) (the model, surface, and scenario grid, with arms in a seeded order), [`report.ts`](report.ts) (reads stream-json, writes the summary).
+- Baseline: [`baseline.ts`](baseline.ts) runs each reference call against the fixture. [`baseline/`](baseline/) holds the raw output. See [tests/models/baseline/AGENTS.md](baseline/AGENTS.md).
 - Guards: [guards.ts](guards.ts) checks track rows, and [tracks-dry-run.ts](tracks-dry-run.ts) records a dry run for them.
-- Tests: `harness.test.ts`, [guards.test.ts](guards.test.ts), and one test in each child folder.
+- Tests: [`harness.test.ts`](harness.test.ts), [guards.test.ts](guards.test.ts), and one test in each child folder.
 - [agent/](agent/): the agent track. [grader/](grader/): the grader track. [fixtures/](fixtures/): kept run results.
 
 ## Rules

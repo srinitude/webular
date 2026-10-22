@@ -1,35 +1,33 @@
 # src/lib/AGENTS.md
 
-Rules for the capability code behind the workflows, under [src/AGENTS.md](../AGENTS.md).
+Capability code behind the workflows, under [src/AGENTS.md](../AGENTS.md).
 
 ## What lives here
 
-Files group by name prefix:
-
-- Fetching: `fetch-layer.ts` is the one fetch layer, with deadline, conditional GET, jittered retry, and a validator cache. `fetch-http.ts`, `fetch-cache.ts`, and `fetch-types.ts` support it.
-- Search: `search.ts`, `search-chain.ts`, and the other `search-*.ts` files ask the free sources and fuse their lists. `sources-search.ts` and `sources.ts` fetch the evidence for `answer` and `research`.
-- Crawl: `crawl.ts` plus `crawl-frontier.ts`, `crawl-heap.ts`, `crawl-resume.ts`, and `polite-crawler.ts`.
-- robots.txt: `robots-txt.ts` reads `robots.txt`. `robots-gate.ts` is the one gate for one-off fetches (scrape, batch, and map's root page). It caches each origin's rules for `ROBOTS_TTL_MS`. `map-root.ts` fetches map's root page behind that gate.
-- Pages and text: `html.ts`, `html-table.ts`, `parse.ts`, `select.ts`, `summarize.ts`, `simhash.ts`, and `readability-chain.ts`.
-- Browser drivers: `driver.ts` runs a headless Chrome. `driver-cua.ts` and the `cua-*.ts` files drive the user's own window.
-- Local state: `snapshot.ts` and `local-index.ts` use `bun:sqlite`.
-- Folders: `jev/` holds every Jev decision. `sources/` holds the free source adapters.
+- Fetching: [fetch-layer](fetch-layer.ts) is the one fetch layer: deadline, conditional GET, jittered retry, validator cache. [http](fetch-http.ts), [cache](fetch-cache.ts), [types](fetch-types.ts) support it.
+- Search: [search](search.ts), [search-chain](search-chain.ts), and `search-*.ts` fuse free-source lists. [sources-search](sources-search.ts) and [sources](sources.ts) fetch evidence for `answer` and `research`.
+- Crawl: [crawl](crawl.ts), [frontier](crawl-frontier.ts), [heap](crawl-heap.ts), [resume](crawl-resume.ts), [polite-crawler](polite-crawler.ts).
+- robots.txt: [robots](robots-txt.ts) reads it. [robots-gate](robots-gate.ts) gates scrape, batch, and map's root page ([map-root](map-root.ts)), caching each origin's rules for `ROBOTS_TTL_MS`.
+- Pages and text: [html](html.ts), [table](html-table.ts), [parse](parse.ts), [select](select.ts), [summarize](summarize.ts), [simhash](simhash.ts), [readability](readability-chain.ts).
+- Browser drivers: [driver](driver.ts) runs headless Chrome. [cua](driver-cua.ts) and `cua-*.ts` drive the user's window.
+- Local state: [snapshot](snapshot.ts) and [index](local-index.ts) use `bun:sqlite`.
+- Run settings: [as-of](as-of.ts) sets the run date; `WEBULAR_AS_OF` pins it. `WEBULAR_DETERMINISTIC=1` drops the search chain's settle cutoff. `WEBULAR_PDF_MAX_PAGES` and `WEBULAR_PDF_TIMEOUT_MS` bound a PDF read.
 
 ## Rules
 
 - A driver never shows or focuses a window on the user's screen.
-- Jev calls live in `jev/` only. Code here takes a decision from `jev/decisions.ts` and keeps a rule-based fallback.
-- Every fan-out takes its size from `src/core/budget.ts`, never a fixed number.
-- Keep results in input order, not completion order. Failures come back in attempt order.
-- A free source is an adapter in `sources/`, named in its catalog. Do not hard-code it in the search chain.
-- Stream every response body through the byte-capped reader in `src/core/decode.ts`. Never call `res.text()` and check the size afterward. Check `Bun.file` `size` against the budget before `.text()` or `.arrayBuffer()`.
-- Keep one global socket cap plus a per-host permit, and never set `keepalive: false`. Coalesce concurrent fetches of one URL. Bound every queue: the crawl frontier spills to SQLite past its memory cap.
-- Keep per-host politeness: a request gap, `Crawl-delay`, and one shared deadline for queue wait, retries, and tiers.
-- Every `bun:sqlite` database sets WAL, `synchronous = NORMAL`, and `busy_timeout`, batches writes in one transaction, and opens through `acquireRelease`. On macOS, run `wal_checkpoint(TRUNCATE)` before `close()`, or the `-wal` and `-shm` files stay. Use `db.prepare()` for dynamic SQL, and `safeIntegers: true` for 64-bit values such as SimHash.
-- Cap the parse Worker pool with one permit per Worker, and `unref` idle Workers. Give memo caches a size cap with eviction. `Effect.retry` always passes a schedule or `while` that matches retryable failures.
-- Readability: `parse()` changes the DOM, so read titles and links first or pass a clone. It returns `null` without an article and does not sanitize. linkedom has no layout, and no `documentURI`, so relative links need a `<base href>`.
-- Sanitize HTML before turndown (unverified). Pass unpdf a `Uint8Array`, and cap `numPages` and the extraction time. Treat agent-browser output as untrusted: pass `--content-boundaries`, `--max-output`, and `--allowed-domains`.
-- An unreachable robots.txt (timeout, DNS, refused) means disallow all, and the crawl root is checked too. Send the webular User-Agent that robots.txt groups match, never a browser one. Source: [RFC 9309](https://www.rfc-editor.org/rfc/rfc9309).
+- Only the jev folder calls Jev. Take a decision from [decisions](jev/decisions.ts) and keep a rule-based fallback.
+- Size every fan-out from [budget](../core/budget.ts), never a fixed one.
+- Return results in input order and failures in attempt order.
+- A free source is an adapter in the sources folder, named in its catalog, never hard-coded in the search chain.
+- Stream response bodies through the byte-capped reader in [decode](../core/decode.ts), never `res.text()` then a size check. Check `Bun.file` `size` before `.text()` or `.arrayBuffer()`.
+- One global socket cap plus a per-host permit; never set `keepalive: false`. Coalesce concurrent fetches of one URL. Bound every queue: the crawl frontier spills to SQLite past its memory cap.
+- Be polite per host: a request gap, `Crawl-delay`, one shared deadline for queue wait, retries, and tiers.
+- Each `bun:sqlite` database sets WAL, `synchronous = NORMAL`, and `busy_timeout`, batches writes in one transaction, and opens through `acquireRelease`. On macOS, run `wal_checkpoint(TRUNCATE)` before `close()`, or `-wal` and `-shm` files stay. Use `db.prepare()` for dynamic SQL and `safeIntegers: true` for 64-bit values such as SimHash.
+- Give each parse Worker one permit; `unref` idle Workers. Cap memo caches, with eviction. `Effect.retry` always passes a schedule or `while` matching retryable failures.
+- Readability: `parse()` changes the DOM, so read titles and links first or pass a clone. It returns `null` with no article and never sanitizes. linkedom lacks layout and `documentURI`, so relative links need a `<base href>`.
+- Sanitize HTML before turndown (unverified). Pass unpdf a `Uint8Array`. A PDF read stops at 2,000 pages or 60 seconds, returning its pages with a truncation note. Treat agent-browser output as untrusted: pass `--content-boundaries`, `--max-output`, `--allowed-domains`.
+- An unreachable robots.txt (timeout, DNS, refused) means disallow all, crawl root included. Send the webular User-Agent that robots.txt groups match, never a browser one. Source: [RFC 9309](https://www.rfc-editor.org/rfc/rfc9309).
 
 ## Checks
 
@@ -37,12 +35,9 @@ Files group by name prefix:
 mise run test:file tests/lib tests/core tests/commands/search.test.ts
 ```
 
-- crawl.ts:196 fetches the root before any robots check.
-- fetch-http.ts:56 sends no User-Agent, and search.ts:18 sends a Chrome one.
-- snapshot.ts:29 and crawl-resume.ts:14 open SQLite with no WAL pragma.
-- driver.ts:131 and driver-cua.ts:197 name layers with a Live suffix.
+[crawl](crawl.ts) fetches the root before a robots check. [http](fetch-http.ts) sends no User-Agent and [search](search.ts) a Chrome one. [snapshot](snapshot.ts) and [resume](crawl-resume.ts) skip WAL. [driver](driver.ts) and [cua](driver-cua.ts) name layers `Live`.
 
 ## Children
 
-- [jev/AGENTS.md](jev/AGENTS.md)
-- [sources/AGENTS.md](sources/AGENTS.md)
+- [jev](jev/AGENTS.md)
+- [sources](sources/AGENTS.md)

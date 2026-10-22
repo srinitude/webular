@@ -4,4 +4,4 @@ Gemini CLI settings; the root [AGENTS.md](../AGENTS.md) holds the repo-wide rule
 
 ## What lives here
 
-- `.gemini/settings.json`: sets `context.fileName` to `AGENTS.md`, so Gemini CLI loads the AGENTS.md tree. Source: [Gemini CLI](https://geminicli.com/docs/cli/gemini-md/).
+- `.gemini/settings.json`: sets `context.fileName` to [`AGENTS.md`](AGENTS.md), so Gemini CLI loads the AGENTS.md tree. Source: [Gemini CLI](https://geminicli.com/docs/cli/gemini-md/).

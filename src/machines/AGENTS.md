@@ -4,15 +4,15 @@ Rules for the XState flow machines, under [src/AGENTS.md](../AGENTS.md).
 
 ## What lives here
 
-- Flows: `cli-dispatch.ts` (route or answer locally), `command-lifecycle.ts` (validate, run, render), `fetch.ts` (retry, redirect, failure), `scrape-fallback.ts` (render or read a PDF), `jev-command.ts` (the `jev` command), and `mcp-serve.ts` (serve over stdio).
-- Agent: `agent.ts` is a Stately agent that picks the next event of a machine. `agent-model.ts` chooses its model from `WEBULAR_AGENT_MODEL`. `agent-jev.ts` lets Jev be the planner.
+- Flows: [`cli-dispatch.ts`](cli-dispatch.ts) (route or answer locally), [`command-lifecycle.ts`](command-lifecycle.ts) (validate, run, render), [`fetch.ts`](fetch.ts) (retry, redirect, failure), [`scrape-fallback.ts`](scrape-fallback.ts) (render or read a PDF), [`jev-command.ts`](jev-command.ts) (the `jev` command), and [`mcp-serve.ts`](mcp-serve.ts) (serve over stdio).
+- Agent: [`agent.ts`](agent.ts) is a Stately agent that picks the next event of a machine. [`agent-model.ts`](agent-model.ts) chooses its model from `WEBULAR_AGENT_MODEL`. [`agent-jev.ts`](agent-jev.ts) lets Jev be the planner.
 
 ## Rules
 
 - A machine is the flow doc. Do not draw a diagram of it.
-- A final state carries an `exit-<code>` tag from `src/cli/exit-codes.ts`.
-- Code that runs a flow reads its decisions from the machine. `src/core/http.ts` performs only what `fetch.ts` asks.
-- `tests/machines/flow-coverage.test.ts` needs a machine for every command and MCP tool, and a test for every machine.
+- A final state carries an `exit-<code>` tag from [`src/cli/exit-codes.ts`](../cli/exit-codes.ts).
+- Code that runs a flow reads its decisions from the machine. [`src/core/http.ts`](../core/http.ts) performs only what [`fetch.ts`](fetch.ts) asks.
+- [`tests/machines/flow-coverage.test.ts`](../../tests/machines/flow-coverage.test.ts) needs a machine for every command and MCP tool, and a test for every machine.
 - The agent takes an event only when the machine allows it from the current state. Jev's pick counts only at the bar. Otherwise the observed event stays.
 - Provider keys for the agent come from the environment. Only Jev's key may also come from the macOS Keychain. Provider packages load lazily.
 

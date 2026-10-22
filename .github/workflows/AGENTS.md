@@ -12,15 +12,15 @@ The GitHub Actions workflows; the parent [AGENTS.md](../AGENTS.md) lists the res
 
 ## Rules
 
-- A workflow runs `mise` tasks only. Tool versions come from `mise.toml`, never from a workflow.
+- A workflow runs `mise` tasks only. Tool versions come from [`mise.toml`](../../mise.toml), never from a workflow.
 - Pin every action to a full commit SHA, with its tag in a comment.
 - Start each workflow with `permissions: {}` or `contents: read`. Grant each job only the `permissions` it needs, and set `persist-credentials: false` on checkout.
 - Every job sets `timeout-minutes`, because the default is 360 ([GitHub Actions](https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions)).
 - Every workflow sets a `concurrency` group. Use `cancel-in-progress: true` for checks and `false` for releases ([GitHub Actions](https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions)).
-- Cache `BUN_INSTALL_CACHE_DIR`, keyed on `mise.toml` and `bun.lock`, and still run `bun install --frozen-lockfile` ([Bun](https://bun.com/docs/pm/cli/install), tag `bun-v1.4.3`).
+- Cache `BUN_INSTALL_CACHE_DIR`, keyed on [`mise.toml`](../../mise.toml) and [`bun.lock`](../../bun.lock), and still run `bun install --frozen-lockfile` ([Bun](https://bun.com/docs/pm/cli/install), tag `bun-v1.4.3`).
 - Pass `${{ }}` values through `env:`, never inline in `run:` ([GitHub security hardening](https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions)).
 - Never use `pull_request_target` or `workflow_run` with untrusted code.
-- No `bun -e` or `node -e` steps (`tests/quality/typescript-only.test.ts`).
+- No `bun -e` or `node -e` steps ([`tests/quality/typescript-only.test.ts`](../../tests/quality/typescript-only.test.ts)).
 - The main branch moves only by fast-forward, after CI is green on all three systems.
 
 ## Checks

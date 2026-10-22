@@ -1,11 +1,54 @@
 // Contract tests for the check scripts' pure rules, on in-memory fixtures.
 import { expect, test } from 'bun:test'
+import { BunServices } from '@effect/platform-bun'
+import { Effect } from 'effect'
+import { barePaths, pathSet } from './bare-paths.ts'
 import { caseCount } from './check-evals.ts'
-import { anchors, slug } from './check-links.ts'
+import { anchors, checkText, lineAnchorOk, slug } from './check-links.ts'
 import { untested } from './check-test-first.ts'
 import { findings } from './check-timeless.ts'
 import { violations } from './code-limits.ts'
-import { links } from './lib.ts'
+import { links, repoRoot } from './lib.ts'
+
+const paths = pathSet(['src/core/cache.ts', 'docs/a.md', 'README.md'])
+
+test('a bare repo path is flagged with its file-relative link and fixed', () => {
+  const { hits, fixed } = barePaths('docs/a.md', 'See `src/core/cache.ts` and src/core/.', paths)
+  expect(hits.map((h) => `${h.line} ${h.path} ${h.link}`)).toEqual([
+    '1 src/core/cache.ts ../src/core/cache.ts',
+    '1 src/core/ ../src/core/',
+  ])
+  expect(fixed).toBe(
+    'See [`src/core/cache.ts`](../src/core/cache.ts) and [src/core/](../src/core/).',
+  )
+})
+
+test('linked paths, fences, front matter, commands, globs, URLs, and missing examples pass', () => {
+  const md = [
+    '---',
+    'description: uses src/core/cache.ts',
+    '---',
+    '[`src/core/cache.ts`](../src/core/cache.ts)',
+    '```',
+    'src/core/cache.ts',
+    '```',
+    '`mise run src/core/cache.ts`, `src/**/*.ts`, https://x.dev/src/core, `src/nope.ts`',
+  ].join('\n')
+  expect(barePaths('docs/a.md', md, paths).hits).toEqual([])
+})
+
+const probe = (md: string) => checkText(`${repoRoot}docs/probe.md`, md)
+
+test('missing targets and bad line anchors fail; real files, folders, and lines pass', () =>
+  Effect.gen(function* () {
+    expect(yield* probe('[a](../package.json#L1-L2) [d](../src/) [e](../README.md)')).toEqual([])
+    expect(yield* probe('[b](../nope.ts)\n[c](../package.json#L99999)')).toEqual([
+      'docs/probe.md:1: broken link ../nope.ts',
+      'docs/probe.md:2: missing line #L99999 in package.json',
+    ])
+    expect(lineAnchorOk('L3', 'a\nb\nc\n')).toBe(true)
+    expect(lineAnchorOk('L2-L4', 'a\nb\nc\n')).toBe(false)
+  }).pipe(Effect.provide(BunServices.layer), Effect.runPromise))
 
 test('links skip fenced code and read titles', () => {
   const md = '[a](x.md "t")\n```\n[b](y.md)\n```\n[c](z.md#h)'

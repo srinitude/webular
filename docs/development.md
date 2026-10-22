@@ -4,7 +4,7 @@ Read this page before you change webular or run its tests.
 
 ## Setup and commands
 
-This project is built test-first. `mise.toml` pins the toolchain.
+This project is built test-first. [`mise.toml`](../mise.toml) pins the toolchain.
 In a fresh clone, run `mise trust ./mise.toml` once first.
 
 ```bash

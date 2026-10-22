@@ -4,7 +4,7 @@ This folder holds the detail the webular-research skill loads on demand. The ski
 
 ## What lives here
 
-- `plugins/webular/skills/webular-research/references/tools.md` is a table of the webular tools. Each row gives a section, when to use it, when not to, and related sections.
+- [`plugins/webular/skills/webular-research/references/tools.md`](tools.md) is a table of the webular tools. Each row gives a section, when to use it, when not to, and related sections.
 
 ## Rules
 

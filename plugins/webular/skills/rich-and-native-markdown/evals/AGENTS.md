@@ -4,11 +4,11 @@ This folder holds the eval cases of the rich-and-native-markdown skill. The skil
 
 ## What lives here
 
-- `plugins/webular/skills/rich-and-native-markdown/evals/evals.json` holds the cases. `plugins/webular/tests/markdown-evals.test.ts` runs them against check.ts.
+- [`plugins/webular/skills/rich-and-native-markdown/evals/evals.json`](evals.json) holds the cases. [`plugins/webular/tests/markdown-evals.test.ts`](../../../tests/markdown-evals.test.ts) runs them against check.ts.
 
 ## Rules
 
-- Give each case a unique id. `plugins/webular/evals/harness.json` maps every id to a grader.
+- Give each case a unique id. [`plugins/webular/evals/harness.json`](../../../evals/harness.json) maps every id to a grader.
 
 ## Checks
 

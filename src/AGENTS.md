@@ -8,7 +8,7 @@ The CLI source; the root [AGENTS.md](../AGENTS.md) holds the commands and the re
 
 - Write every module in Effect 4 (`effect` and `@effect/platform-bun`). No bare `Promise`, `async` function, callback, `throw`, or module-level mutable singleton. Source: [Effect-TS/effect@effect@4.0.5](https://github.com/Effect-TS/effect).
 - Wrap a Promise API once at its edge with `Effect.tryPromise`, and give it a typed error.
-- Typed errors extend `Data.TaggedError`. A CLI failure carries its exit code through `src/core/effect.ts`, the one process edge.
+- Typed errors extend `Data.TaggedError`. A CLI failure carries its exit code through [`src/core/effect.ts`](core/effect.ts), the one process edge.
 - Read files and run processes through Effect services (`FileSystem`, `ChildProcessSpawner`), not `node:fs` or `Bun.spawn` in place.
 - Decode outside data with `Schema` or `zod` at the boundary. Read secrets with `Config.Redacted`.
 - Bound every fan-out with a numeric `concurrency` option, and every retry with a schedule and a limit. This covers every `Effect.forEach` and `Effect.all` over a collection.
@@ -20,15 +20,15 @@ The CLI source; the root [AGENTS.md](../AGENTS.md) holds the commands and the re
 
 ### Commands and flows
 
-- Each command in `src/commands/` has a workflow in `src/workflows/` and a flow in `src/machines/`.
-- A flow is an XState machine. `tests/machines/flow-coverage.test.ts` fails when a command or MCP tool has no machine, or a machine has no test. Source: [statelyai/xstate@xstate@5.33.3](https://github.com/statelyai/xstate).
-- Exit codes live in `src/cli/exit-codes.ts`. Never reuse a code for another meaning.
+- Each command in [`src/commands/`](commands/) has a workflow in [`src/workflows/`](workflows/) and a flow in [`src/machines/`](machines/).
+- A flow is an XState machine. [`tests/machines/flow-coverage.test.ts`](../tests/machines/flow-coverage.test.ts) fails when a command or MCP tool has no machine, or a machine has no test. Source: [statelyai/xstate@xstate@5.33.3](https://github.com/statelyai/xstate).
+- Exit codes live in [`src/cli/exit-codes.ts`](cli/exit-codes.ts). Never reuse a code for another meaning.
 - Each CLI command and its MCP tool share one name, one input shape, and one error text.
 
 ### Jev and decision models
 
-- Only `src/lib/jev/` asks Jev or calls a model. Everything else goes through `defineDecision`, by way of `decisionStep` or `machineDecision` (`tests/jev/no-direct-calls.test.ts`).
-- Each decision has a labeled eval file in `tests/jev/evals/`, the 0.95 confidence bar, a code fallback, and a code check after the pick.
+- Only [`src/lib/jev/`](lib/jev/) asks Jev or calls a model. Everything else goes through `defineDecision`, by way of `decisionStep` or `machineDecision` ([`tests/jev/no-direct-calls.test.ts`](../tests/jev/no-direct-calls.test.ts)).
+- Each decision has a labeled eval file in [`tests/jev/evals/`](../tests/jev/evals/), the 0.95 confidence bar, a code fallback, and a code check after the pick.
 - When a Jev result is wrong, fix its input payload. Never lower the bar.
 
 ## Checks
@@ -41,4 +41,4 @@ mise run test:file tests/machines tests/quality
 
 ## Children
 
-Each folder below `src/` holds its own AGENTS.md, such as [cli/AGENTS.md](cli/AGENTS.md) and [lib/jev/AGENTS.md](lib/jev/AGENTS.md).
+Each folder below [`src/`](./) holds its own AGENTS.md, such as [cli/AGENTS.md](cli/AGENTS.md) and [lib/jev/AGENTS.md](lib/jev/AGENTS.md).

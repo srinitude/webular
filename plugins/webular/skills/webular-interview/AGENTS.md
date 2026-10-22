@@ -4,9 +4,9 @@ This folder holds the webular-interview skill. The skills rules are in [AGENTS.m
 
 ## What lives here
 
-- `plugins/webular/skills/webular-interview/SKILL.md` is the skill. It asks one question at a time to settle intent, outcome, done-when criteria, proof, and boundaries before work starts.
-- `plugins/webular/skills/webular-interview/evals/evals.json` holds three eval cases.
-- `plugins/webular/skills/webular-interview/references/questions.md` is the question bank.
+- [`plugins/webular/skills/webular-interview/SKILL.md`](SKILL.md) is the skill. It asks one question at a time to settle intent, outcome, done-when criteria, proof, and boundaries before work starts.
+- [`plugins/webular/skills/webular-interview/evals/evals.json`](evals/evals.json) holds three eval cases.
+- [`plugins/webular/skills/webular-interview/references/questions.md`](references/questions.md) is the question bank.
 
 ## Rules
 

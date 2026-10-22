@@ -4,9 +4,10 @@ Rules for the MCP tool definitions, under [src/AGENTS.md](../AGENTS.md).
 
 ## What lives here
 
-- `web.ts` holds the tool definitions. It is the one source for `webular mcp`, so `--list` and serve register the same tools.
-- `web-register.ts` loosens a tool's input schema at registration, so the tool's own handler gives the error text.
-- `web-machine.ts` is the `machine.next` tool. It shows a machine's state after replaying events.
+- [`web.ts`](web.ts) holds the tool definitions. It is the one source for `webular mcp`, so `--list` and serve register the same tools.
+- [`web-schemas.ts`](web-schemas.ts) holds the input schemas of the web tools. Their URL fields accept only `http` and `https`.
+- [`web-register.ts`](web-register.ts) loosens a tool's input schema at registration, so the tool's own handler gives the error text.
+- [`web-machine.ts`](web-machine.ts) is the `machine.next` tool. It shows a machine's state after replaying events.
 
 ## Rules
 
@@ -36,9 +37,6 @@ Rules for the MCP tool definitions, under [src/AGENTS.md](../AGENTS.md).
 mise run test:file tests/commands/mcp.test.ts tests/commands/mcp-server.test.ts tests/machines/machine-next.test.ts tests/machines/mcp-serve.test.ts
 ```
 
-- web.ts:164 drops `outputSchema`, and web.ts:168-183 registers no title or annotations.
-- web.ts:171 and web.ts:183 ignore the abort signal.
-- web.ts has no rate limit, and `web.fetch` fetches any URL.
-- web.ts:57-95 gives five ids a `.`, such as `web.fetch`.
-- web.ts:36 and web.ts:44 use a bare `z.url()` with no shared http-only URL helper.
-- web.ts:193 runs an Effect outside the allowed process edges.
+- [`web.ts`](web.ts) registers no `outputSchema` for the web tools, and has no rate limit. `web.fetch` fetches any `http` or `https` URL.
+- Five ids have a `.`: `machine.next`, `web.fetch`, `web.links`, `web.markdown`, and `web.readability`.
+- `registerAll` in [`web.ts`](web.ts) runs an Effect outside the allowed process edges.

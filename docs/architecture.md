@@ -16,7 +16,7 @@ you ▸ webular CLI ▸ command process (table from mise.toml) ▸ Mastra workfl
 ### Dispatch
 
 The CLI never imports feature code. It parses argv and looks the command up in
-the table built from the `run:<command>` tasks in `mise.toml`. Then it starts
+the table built from the `run:<command>` tasks in [`mise.toml`](../mise.toml). Then it starts
 that command in its own process at the package root, with the same Bun that
 runs the CLI. The command's exit code becomes the CLI's exit code. A SIGINT or
 SIGTERM sent to the CLI goes on to the command.

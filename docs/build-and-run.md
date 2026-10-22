@@ -9,11 +9,11 @@ To run from source, you need [Bun](https://bun.com).
 
 ### Dispatch table
 
-The `run:<command>` tasks in `mise.toml` define every subcommand.
+The `run:<command>` tasks in [`mise.toml`](../mise.toml) define every subcommand.
 `mise run build` turns them into a committed table,
-`src/cli/dispatch-table.ts`. The CLI reads that table and starts the command
+[`src/cli/dispatch-table.ts`](../src/cli/dispatch-table.ts). The CLI reads that table and starts the command
 itself, so no mise process runs per command. A test fails when the table and
-`mise.toml` disagree.
+[`mise.toml`](../mise.toml) disagree.
 
 ### mise
 
@@ -25,9 +25,9 @@ your PATH, webular uses that copy.
 
 Commands run from minified bundles in `dist/commands`. A bundle starts with
 about half the CPU that the TypeScript source needs. `mise run build` makes the
-bundles. To run straight from `src/` while you edit, set `WEBULAR_DEV=1`.
+bundles. To run straight from [`src/`](../src/) while you edit, set `WEBULAR_DEV=1`.
 Then you need no build step. When a bundle is missing, the CLI runs that
-command from `src/`.
+command from [`src/`](../src/).
 
 ## Standalone executable
 
@@ -43,8 +43,8 @@ and x64, Linux x64 and arm64 with glibc or musl, and Windows x64 and arm64.
 
 The executable starts faster and uses less CPU than `bun bin/webular.ts`. It
 runs each command with itself as the Bun runtime, so you need no separate Bun.
-It finds its commands by walking up from its own folder to `mise.toml`. Keep
-it in the package folder, below `mise.toml` and `dist/commands`. The default
+It finds its commands by walking up from its own folder to [`mise.toml`](../mise.toml). Keep
+it in the package folder, below [`mise.toml`](../mise.toml) and `dist/commands`. The default
 path is `dist/bin/webular`.
 
 Return to the [README](../README.md) (navigation only).

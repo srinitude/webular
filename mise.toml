@@ -53,9 +53,14 @@ description = "Lint + format-verify with Biome (check-only CI gate)"
 depends = ["setup"]
 run = "bunx biome check ."
 
+[tasks."docs:links"]
+description = "Docs: every tracked Markdown file links each repo path it names, and every relative link, heading anchor, and line anchor resolves (--fix links bare paths)"
+depends = ["lint"]
+run = 'bun "{{config_root}}/plugins/webular/scripts/check-links.ts" --repo'
+
 [tasks.typecheck]
 description = "Compilation: strict TypeScript typecheck of the CLI and of plugins/webular (its own tsconfig, outside the root include)"
-depends = ["lint"]
+depends = ["docs:links"]
 run = ["bunx tsc --noEmit", "bunx tsc --noEmit -p plugins/webular"]
 
 [tasks.build]

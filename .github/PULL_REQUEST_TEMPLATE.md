@@ -16,5 +16,5 @@ Paste the real output of each check.
 - [ ] Files stay at 200 lines, constructs at 30 lines, and nesting at depth 3 ([docs/development.md](../docs/development.md)).
 - [ ] I ran `mise run bench` on the same input before and after. I keep the change only because the numbers and the tests both hold.
 - [ ] Markdown files went through the Markdown chain.
-- [ ] No secrets, no `dist/`, `bench/results/`, or `bench/recordings/` files, and no AI co-attribution.
+- [ ] No secrets, no `dist/`, [`bench/results/`](../bench/results/), or [`bench/recordings/`](../bench/recordings/) files, and no AI co-attribution.
 - [ ] A new folder has an AGENTS.md and a CLAUDE.md that holds `@AGENTS.md`.

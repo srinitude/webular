@@ -58,7 +58,7 @@ The platforms are `darwin-arm64`, `darwin-x64`, `linux-x64`, `linux-arm64`,
 
 ### Install scripts
 
-On macOS and Linux, including musl, `scripts/install.sh` picks the right
+On macOS and Linux, including musl, [`scripts/install.sh`](../scripts/install.sh) picks the right
 asset, checks it against `SHA256SUMS`, and installs it to
 `~/.webular/bin/webular`:
 
@@ -66,7 +66,7 @@ asset, checks it against `SHA256SUMS`, and installs it to
 curl -fsSL https://github.com/srinitude/webular/releases/latest/download/install.sh | sh
 ```
 
-On Windows, `scripts/install.ps1` does the same in PowerShell and installs
+On Windows, [`scripts/install.ps1`](../scripts/install.ps1) does the same in PowerShell and installs
 to `~\.webular\bin\webular.exe`:
 
 ```powershell

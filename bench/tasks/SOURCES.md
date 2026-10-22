@@ -8,7 +8,7 @@ The licenses of the public sets are in [LICENSES.md](LICENSES.md).
 
 ## Hand-curated answer sources
 
-These pages back the tasks in `scripts/bench/tasks/answer-seed.json`.
+These pages back the tasks in [`scripts/bench/tasks/answer-seed.json`](../../scripts/bench/tasks/answer-seed.json).
 Each page was fetched with Firecrawl on 2026-10-21, and each gold answer is quoted from the fetched text.
 
 - **Wikipedia**
@@ -38,7 +38,7 @@ Each page was fetched with Firecrawl on 2026-10-21, and each gold answer is quot
 
 ## Fresh task sources
 
-`scripts/bench/tasks/generate-fresh.ts` builds `fresh.jsonl` from three live sources.
+[`scripts/bench/tasks/generate-fresh.ts`](../../scripts/bench/tasks/generate-fresh.ts) builds `fresh.jsonl` from three live sources.
 Each task keeps its source URL, the source date, and the license below.
 
 - **arXiv API** (<https://export.arxiv.org/api/query>): `search.fresh` tasks. The metadata is CC0-1.0, per <https://info.arxiv.org/help/license/index.html>.
@@ -47,7 +47,7 @@ Each task keeps its source URL, the source date, and the license below.
 
 ## Image pilot sources
 
-`dev/pilot-images.jsonl` holds the 28 image pilot tasks: 6 charts, 5 table images, 5 scans, 4 product photos, 4 diagrams, and 4 infographics.
+[`dev/pilot-images.jsonl`](dev/pilot-images.jsonl) holds the 28 image pilot tasks: 6 charts, 5 table images, 5 scans, 4 product photos, 4 diagrams, and 4 infographics.
 Each task runs a text-only arm and an image arm on the same page.
 
 Each gold answer was read from the image on 2026-10-21.

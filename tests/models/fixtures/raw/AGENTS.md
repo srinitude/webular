@@ -4,5 +4,5 @@ This folder holds the raw output of model runs. It follows [tests/models/fixture
 
 - Each subfolder has the same name as one results file in the parent folder, without the JSON ending.
 - The `raw` field of each run in that results file points into its subfolder.
-- `tests/models/harness.test.ts` checks that every one of those files exists.
+- [`tests/models/harness.test.ts`](../../harness.test.ts) checks that every one of those files exists.
 - Do not edit anything here by hand.

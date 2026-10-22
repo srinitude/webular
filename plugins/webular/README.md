@@ -1,12 +1,12 @@
 # Webular plugin
 
-This plugin gives an agent the webular tools over MCP. The plugin folder runs on its own: copy just `plugins/webular` into your agent app, and its server calls the `webular` command for each tool.
+This plugin gives an agent the webular tools over MCP. The plugin folder runs on its own: copy just [`plugins/webular`](.) into your agent app, and its server calls the `webular` command for each tool.
 
 ## Install
 
 1. Install webular, so the `webular` command is on your PATH. To use another copy, set `WEBULAR_BIN` to its path.
-2. Add the plugin folder `plugins/webular` to your agent app. In Claude Code, install it from this repo's marketplace with `/plugin install webular --marketplace srinitude/webular`.
-3. The app reads `mcp.json` (or `.mcp.json` in Claude Code) and starts one server: `webular`.
+2. Add the plugin folder [`plugins/webular`](.) to your agent app. In Claude Code, install it from this repo's marketplace with `/plugin install webular --marketplace srinitude/webular`.
+3. The app reads [`mcp.json`](mcp.json) (or [`.mcp.json`](.mcp.json) in Claude Code) and starts one server: `webular`.
 
 ## Output size
 

@@ -18,7 +18,7 @@
 
 ### Run it
 
-- From the plugin folder `plugins/webular`, run `bun skills/rich-and-native-markdown/scripts/check.ts <files...>`.
+- From the plugin folder [`plugins/webular`](../../..), run `bun skills/rich-and-native-markdown/scripts/check.ts <files...>`.
 - Pass every Markdown file in the output set. Add `--manifest <file.json>` to check a declared reading graph.
 - It prints JSON and exits with code 1 when it finds an error.
 - If the checker cannot run, report that check as not run, never as passed.

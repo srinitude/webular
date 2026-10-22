@@ -4,7 +4,7 @@ This folder holds the agent plugins of the repo. The repo-wide rules are in [AGE
 
 ## What lives here
 
-- `plugins/webular` is the one plugin. It has its own manifests, MCP server, skills, evals, and tests.
+- [`plugins/webular`](webular) is the one plugin. It has its own manifests, MCP server, skills, evals, and tests.
 
 ## Checks
 

@@ -4,8 +4,8 @@ Benchmark data and inputs. The root [AGENTS.md](../AGENTS.md) holds the repo-wid
 
 ## What lives here
 
-- `bench/recordings/`: recorded peer responses, keyed by the sha256 of each request.
-- `bench/results/`: scored results and reports from each run.
+- [`bench/recordings/`](recordings/): recorded peer responses, keyed by the sha256 of each request.
+- [`bench/results/`](results/): scored results and reports from each run.
 - [datasets/](datasets/): manifests for public datasets that `mise run bench:data` downloads into the gitignored cache. The data is never committed.
 - [fixtures/](fixtures/): local pages and sites that the fixture server serves.
 - [spec/](spec/): the benchmark spec.

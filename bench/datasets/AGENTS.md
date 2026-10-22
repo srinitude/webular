@@ -4,8 +4,8 @@ Manifests for public datasets that the bench downloads at run time. The parent r
 
 ## What lives here
 
-- `webmainbench.json`: 100 rows of the WebMainBench 545-row subset file (Apache-2.0), at one pinned Hugging Face revision.
-- `firecrawl-scrape.json`: all 1000 rows of the Firecrawl scrape content dataset (MIT), at one pinned revision.
+- [`webmainbench.json`](webmainbench.json): 100 rows of the WebMainBench 545-row subset file (Apache-2.0), at one pinned Hugging Face revision.
+- [`firecrawl-scrape.json`](firecrawl-scrape.json): all 1000 rows of the Firecrawl scrape content dataset (MIT), at one pinned revision.
 
 Each manifest holds the repo, the revision, the file name, its size, its sha256, how the rows were chosen, and one entry per row: the id, the URL, and the sha256 of the row.
 
@@ -16,7 +16,7 @@ Each manifest holds the repo, the revision, the file name, its size, its sha256,
 - No CI step may run `bench:data`. Tests use a local fixture and a stub client.
 - Row choice: the sets rank rows by the sha256 of the id, and the first N stay. The rule ignores file order and never looks at a webular result.
 - Change a manifest only with `mise run bench:data:pin`, after you bump a revision and fetch its file. Never edit one by hand.
-- A loader reads a row through `loadRows` in `scripts/bench/dataset-manifest.ts`, which refuses a row whose hash differs.
+- A loader reads a row through `loadRows` in [`scripts/bench/dataset-manifest.ts`](../../scripts/bench/dataset-manifest.ts), which refuses a row whose hash differs.
 
 ## Checks
 

@@ -4,7 +4,7 @@ This folder holds the detail the webular-interview skill loads on demand. The sk
 
 ## What lives here
 
-- `plugins/webular/skills/webular-interview/references/questions.md` is a table of question groups. Each row gives a section, when to use it, when not to, and related sections.
+- [`plugins/webular/skills/webular-interview/references/questions.md`](questions.md) is a table of question groups. Each row gives a section, when to use it, when not to, and related sections.
 
 ## Rules
 

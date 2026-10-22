@@ -20,7 +20,7 @@ The repo's report builds the 11 parts that need no model track; the agent-track 
 
 ## What exists, and what this spec adds
 
-The harness lives at `scripts/bench/peers/` in the benchmarks harness, with the plan in `benchmarks/benchmark-plan.json`.
+The harness lives at [`scripts/bench/peers/`](../../scripts/bench/peers/) in the benchmarks harness, with the plan in `benchmarks/benchmark-plan.json`.
 
 - It has search 18, scrape 6, and answer 19 tasks, and none for batch, map and crawl, research, or feed.
 - Its checks are `contains`, `excludes`, `regex`, and `urlMatches`, with text folded to lowercase ASCII.
