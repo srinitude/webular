@@ -1,0 +1,52 @@
+{
+  "baseline-wins": [
+    {
+      "id": "facts-in-text-logo-only",
+      "page": {
+        "url": "https://example.org/lyon",
+        "text": "Lyon has a population of 522,000 people. It sits where the Rhone and Saone rivers meet. The old town is a world heritage site.",
+        "images": [
+          { "src": "https://example.org/img/site-logo.png", "alt": "Site logo", "srcset": "", "width": "120", "height": "40", "caption": "" }
+        ]
+      },
+      "router": { "choice": "text", "confidence": 0.98 },
+      "gold": { "kind": "text", "fact": "522,000" }
+    },
+    {
+      "id": "facts-in-text-no-images",
+      "page": {
+        "url": "https://example.org/bridge",
+        "text": "The bridge opened on 4 May 1932 after six years of work. It carries four lanes of traffic.",
+        "images": []
+      },
+      "router": null,
+      "gold": { "kind": "text", "fact": "1932" }
+    }
+  ],
+  "baseline-loses": [
+    {
+      "id": "sales-growth-in-chart",
+      "page": {
+        "url": "https://example.org/q4-report",
+        "text": "Our fourth quarter report is out. The chart below shows how sales changed across the year. Thanks to every team for the hard work.",
+        "images": [
+          { "src": "https://example.org/img/sales-chart.png", "alt": "Quarterly sales: Q4 up 40% over Q3", "srcset": "", "width": "800", "height": "500", "caption": "Sales by quarter" }
+        ]
+      },
+      "router": { "choice": "image", "confidence": 0.97 },
+      "gold": { "kind": "figure", "src": "https://example.org/img/sales-chart.png" }
+    },
+    {
+      "id": "plan-prices-in-table",
+      "page": {
+        "url": "https://example.org/pricing",
+        "text": "Pick the plan that fits your team. Every plan comes with email support. See the table for prices.",
+        "images": [
+          { "src": "https://example.org/img/price-table.png", "alt": "Plan prices per month", "srcset": "", "width": "900", "height": "400", "caption": "Prices: Basic $9, Team $29, Business $99" }
+        ]
+      },
+      "router": { "choice": "both", "confidence": 0.96 },
+      "gold": { "kind": "figure", "src": "https://example.org/img/price-table.png" }
+    }
+  ]
+}

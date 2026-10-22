@@ -3,12 +3,14 @@
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
-import { htmlToArticle } from '../lib/html.ts'
+import { textAndImages } from '../lib/html.ts'
 import { type SummaryPick, topIndexes } from '../lib/jev/decisions/summarize.ts'
 import { summaryFollowUp } from '../lib/jev/decisions/summary-follow-up.ts'
 import { decisions } from '../lib/jev/decisions.ts'
 import { decisionStep } from '../lib/jev/steps.ts'
+import { onJevRuntime } from '../lib/jev/run.ts'
 import { fetchTextObeyingRobots } from '../lib/robots-gate.ts'
+import { sourceFigures } from '../lib/router-images.ts'
 import { freeSourceFallback } from '../lib/sources/registry.ts'
 import { rankSpans, type Span, sentenceSpans } from '../lib/summarize-rank.ts'
 import { stepRuntime } from './runtime.ts'
@@ -32,6 +34,7 @@ const summarizeOutput = z.object({
   sentences: z.array(z.string()),
   summary: z.string(),
   picks: z.array(pick),
+  figures: z.array(z.string()),
   source_url: z.string().nullable(),
   reason: z.string().optional(),
 })
@@ -41,6 +44,7 @@ const resolved = z.object({
   text: z.string(),
   sentences: z.number(),
   source_url: z.string().nullable(),
+  figures: z.array(z.string()),
 })
 type Resolved = z.infer<typeof resolved>
 
@@ -60,7 +64,12 @@ const fetchPage = (url: string, timeoutMs?: number) =>
     ),
   )
 
-// Only the extracted article text feeds the summarizer, never raw HTML.
+// The image router's ask for a summary: do the page's key facts sit in a figure?
+export const SUMMARY_QUESTION = 'What are the main points and key facts of this page?'
+
+// Only the extracted article text feeds the summarizer, never raw HTML. The
+// page's chart and table figures join when the image router says its key
+// facts sit in a picture.
 const resolveStep = createStep({
   id: 'resolve',
   inputSchema: summarizeInput,
@@ -68,15 +77,19 @@ const resolveStep = createStep({
   execute: ({ inputData, abortSignal }) => {
     const { url, sentences } = inputData
     const page = url
-      ? Effect.map(
-          fetchPage(url, inputData.timeoutMs),
-          (p): Resolved => ({
-            text: htmlToArticle(p.html).text,
-            sentences,
-            source_url: p.url,
-          }),
-        )
-      : Effect.succeed<Resolved>({ text: inputData.text ?? '', sentences, source_url: null })
+      ? Effect.flatMap(fetchPage(url, inputData.timeoutMs), (p) => {
+          const { text, images } = textAndImages(p.html, p.url)
+          return Effect.map(
+            onJevRuntime(sourceFigures, { question: SUMMARY_QUESTION, url: p.url, text, images }),
+            (figures): Resolved => ({ text, sentences, source_url: p.url, figures }),
+          )
+        })
+      : Effect.succeed<Resolved>({
+          text: inputData.text ?? '',
+          sentences,
+          source_url: null,
+          figures: [],
+        })
     return stepRuntime.runPromise(page, { signal: abortSignal })
   },
 })
@@ -85,7 +98,7 @@ const sameIndexes = (a: ReadonlyArray<number>, b: ReadonlyArray<number>) =>
   a.length === b.length && a.every((x, i) => x === b[i])
 
 // Jev's swap stands; otherwise the MMR rule picks, keeping Jev's agreed lead.
-// An empty source gets a reason.
+// An empty source gets a reason. Figure lines close the summary.
 export const result = (r: Resolved & { all: Span[] }, d?: SummaryPick) => {
   const chosen =
     d === undefined || sameIndexes(d.picks, topIndexes(r.text, r.sentences))
@@ -94,8 +107,9 @@ export const result = (r: Resolved & { all: Span[] }, d?: SummaryPick) => {
   const reason = r.source_url ? 'The page has no readable text.' : 'The text has no sentences.'
   return {
     sentences: chosen.map((s) => s.text),
-    summary: chosen.map((s) => s.text).join(' '),
+    summary: [chosen.map((s) => s.text).join(' '), ...r.figures].filter(Boolean).join('\n'),
     picks: chosen.map((s) => ({ ...s, source_url: r.source_url })),
+    figures: r.figures,
     source_url: r.source_url,
     ...(chosen.length === 0 ? { reason } : {}),
   }

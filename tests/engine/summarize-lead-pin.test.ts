@@ -19,7 +19,7 @@ test('a lead that is a frequency pick stays when MMR re-ranks', () => {
   const picks = topIndexes(PAGE, 2)
   expect(picks).toContain(LEAD)
   expect(rankSpans(PAGE, 2).map((s) => s.index)).not.toContain(LEAD)
-  const r = { text: PAGE, sentences: 2, source_url: null, all: sentenceSpans(PAGE) }
+  const r = { text: PAGE, sentences: 2, source_url: null, figures: [], all: sentenceSpans(PAGE) }
   const out = result(r, { picks, lead: LEAD })
   expect(out.picks.map((p) => p.index)).toContain(LEAD)
   expect(out.picks).toHaveLength(2)
