@@ -26,7 +26,7 @@ With `--json`, every command prints the same JSON shape. Each command but `mcp` 
 - **No paid API.** Every feature runs on open-source parts. The one optional key, Jev, only sharpens the judgment calls. Without it, each decision uses its rule-based baseline.
 - **One CLI.** Search, scrape, crawl, map, extract, answer, research, and feed share one command set and one JSON contract.
 <!-- bench:start readme -->
-- **Measured, not claimed.** On the committed peer run ([peers-2026-10-22T13-13-46-776Z.json](bench/results/peers-2026-10-22T13-13-46-776Z.json)), webular search scored 1.000 on 4 search tasks, while exa scored 1.000 on 4 and firecrawl scored 1.000 on 4 and parallel scored 1.000 on 4 and tavily scored 1.000 on 4 and youcom scored 1.000 on 4. Read [the benchmark results](docs/benchmarks.md) for every score and the method behind it.
+- **Measured, not claimed.** On the committed peer run ([peers-2026-10-22T14-51-52-746Z.json](bench/results/peers-2026-10-22T14-51-52-746Z.json)), webular search scored 1.000 on 4 search tasks, while exa scored 1.000 on 4 and firecrawl scored 1.000 on 4 and tavily scored 1.000 on 4. Read [the benchmark results](docs/benchmarks.md) for every score and the method behind it.
 - **Agent matrix.** 18 of 75 cells scored: webular with Jev off and on, and 23 alternatives, on 3 agent models. Source: models-2026-10-22-062400-merged.json.
 <!-- bench:end -->
 
