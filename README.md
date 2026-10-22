@@ -23,7 +23,7 @@ With `--json`, every command prints the same JSON shape. Each command but `mcp` 
 
 ## Why webular
 
-- **No paid API.** Every feature runs on open-source parts.
+- **No paid API.** Every feature runs on open-source parts. The one optional key, Jev, only sharpens the judgment calls. Without it, each decision uses its rule-based baseline.
 - **One CLI.** Search, scrape, crawl, map, extract, answer, research, and feed share one command set and one JSON contract.
 <!-- bench:start readme -->
 - **Measured, not claimed.** On the committed peer run ([peers-2026-10-22T00-58-50-543Z.json](bench/results/peers-2026-10-22T00-58-50-543Z.json)), webular search scored 1.000 on 4 search tasks, while exa scored 1.000 on 4 and firecrawl scored 1.000 on 4. Read [the benchmark results](docs/benchmarks.md) for every score and the method behind it.

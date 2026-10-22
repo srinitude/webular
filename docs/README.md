@@ -21,6 +21,8 @@ This page links every doc in this folder. The first group is the best place to b
 - [Architecture](architecture.md): how a command runs and which XState machines model it.
 - [Development](development.md): read before you change webular or run its tests.
 - [Build and run](build-and-run.md): run from source, use the bundles, or build the executable.
+- [Bug classes](bug-classes.md): each kind of bug webular can hit, where it shows up, and what guards against it.
+- [Mise tasks](tasks.md): every `mise` task, what it does, and what it runs first.
 - [Best practices](best-practices.md): each practice webular follows, with its source and check.
 - [Jev in webular](jev.md): how to set up the Jev key on any OS, and each route webular takes to Jev for its judgment calls.
 - [Docs rules](AGENTS.md): the rules for writing these pages.
