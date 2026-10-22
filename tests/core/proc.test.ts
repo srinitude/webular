@@ -1,5 +1,6 @@
 // Subprocess-runner contract: concurrent pipe draining (no 64KB deadlock),
-// mandatory timeout, exit-code capture — against real child processes.
+// mandatory timeout, exit-code capture — against real child processes. Each
+// child is the running Bun itself: a `bun` on PATH may be a slow version-manager shim.
 import { describe, expect, test } from 'bun:test'
 import { Clock, Effect } from 'effect'
 import { MAX_OUTPUT_BYTES, runProc } from '../../src/core/proc.ts'
@@ -11,7 +12,7 @@ describe('runProc — spawn with drain + timeout', () => {
     eff(
       Effect.gen(function* () {
         const { code, stdout, stderr, timedOut } = yield* runProc(
-          ['bun', '-e', 'console.log("hi"); console.error("there")'],
+          [process.execPath, '-e', 'console.log("hi"); console.error("there")'],
           { timeoutMs: 10_000 },
         )
         expect(code).toBe(0)
@@ -56,7 +57,7 @@ describe('runProc — spawn with drain + timeout', () => {
     eff(
       Effect.gen(function* () {
         const script = 'process.stderr.write("e".repeat(128 * 1024)); console.log("done")'
-        const { code, stdout, stderr } = yield* runProc(['bun', '-e', script], {
+        const { code, stdout, stderr } = yield* runProc([process.execPath, '-e', script], {
           timeoutMs: 10_000,
         })
         expect(code).toBe(0)
@@ -72,7 +73,9 @@ describe('runProc — spawn with drain + timeout', () => {
     eff(
       Effect.gen(function* () {
         const started = yield* Clock.currentTimeNanos
-        const result = yield* runProc(['bun', '-e', 'await Bun.sleep(60000)'], { timeoutMs: 500 })
+        const result = yield* runProc([process.execPath, '-e', 'await Bun.sleep(60000)'], {
+          timeoutMs: 500,
+        })
         const elapsedMs = Number((yield* Clock.currentTimeNanos) - started) / 1e6
         expect(elapsedMs).toBeLessThan(10_000)
         expect(result.timedOut).toBe(true)
@@ -86,9 +89,12 @@ describe('runProc — spawn with drain + timeout', () => {
     'a child killed by a non-timeout signal is NOT reported as timedOut',
     eff(
       Effect.gen(function* () {
-        const result = yield* runProc(['bun', '-e', 'process.kill(process.pid, "SIGKILL")'], {
-          timeoutMs: 10_000,
-        })
+        const result = yield* runProc(
+          [process.execPath, '-e', 'process.kill(process.pid, "SIGKILL")'],
+          {
+            timeoutMs: 10_000,
+          },
+        )
         expect(result.timedOut).toBe(false)
         expect(result.code).not.toBe(0)
       }),
@@ -99,7 +105,7 @@ describe('runProc — spawn with drain + timeout', () => {
     'reports a nonzero exit code',
     eff(
       Effect.gen(function* () {
-        const { code, timedOut } = yield* runProc(['bun', '-e', 'process.exit(3)'], {
+        const { code, timedOut } = yield* runProc([process.execPath, '-e', 'process.exit(3)'], {
           timeoutMs: 10_000,
         })
         expect(code).toBe(3)
@@ -113,7 +119,7 @@ describe('runProc — spawn with drain + timeout', () => {
     eff(
       Effect.gen(function* () {
         const script = 'process.stdout.write(await new Response(Bun.stdin.stream()).text())'
-        const { code, stdout } = yield* runProc(['bun', '-e', script], {
+        const { code, stdout } = yield* runProc([process.execPath, '-e', script], {
           timeoutMs: 10_000,
           stdin: 'echo-me',
         })
@@ -128,7 +134,7 @@ describe('runProc — spawn with drain + timeout', () => {
     eff(
       Effect.gen(function* () {
         const script = `process.stdout.write("x".repeat(${MAX_OUTPUT_BYTES} + 1024 * 1024)); await Bun.sleep(60000)`
-        const result = yield* runProc(['bun', '-e', script], { timeoutMs: 30_000 })
+        const result = yield* runProc([process.execPath, '-e', script], { timeoutMs: 30_000 })
         expect(result.truncated).toBe(true)
         expect(result.timedOut).toBe(false)
         expect(result.stdout.length).toBe(MAX_OUTPUT_BYTES)
@@ -144,7 +150,7 @@ describe('runProc — spawn with drain + timeout', () => {
       Effect.gen(function* () {
         const script = 'process.on("SIGTERM", () => {}); setInterval(() => {}, 1000)'
         const started = yield* Clock.currentTimeNanos
-        const result = yield* runProc(['bun', '-e', script], { timeoutMs: 500 })
+        const result = yield* runProc([process.execPath, '-e', script], { timeoutMs: 500 })
         const elapsedMs = Number((yield* Clock.currentTimeNanos) - started) / 1e6
         expect(result.timedOut).toBe(true)
         expect(elapsedMs).toBeLessThan(20_000)

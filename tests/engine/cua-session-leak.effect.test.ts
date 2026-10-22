@@ -45,7 +45,10 @@ test(
         timeoutMs: 30_000,
         extendEnv: true,
         env: {
+          // Windows keeps its own Path key beside an added PATH and either can win,
+          // so both name the fake driver's folder first.
           PATH: `${dir}${delimiter}${PATH}`,
+          Path: `${dir}${delimiter}${PATH}`,
           FAKE_CUA_LOG: path.join(dir, 'calls.log'),
           WEBULAR_CUA_WINDOW: `${browser.pid}:1`,
         },

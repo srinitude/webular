@@ -22,7 +22,9 @@ const connect = (env: Record<string, string>) => {
     command: 'bun',
     args: [`${ROOT}dist/commands/mcp.js`],
     cwd: ROOT,
-    env: { ...getDefaultEnvironment(), ...env },
+    // Agent mode blocks private addresses, and every web.* case fetches the
+    // 127.0.0.1 fixture, so the MCP run opts in; the CLI cases keep the guard.
+    env: { ...getDefaultEnvironment(), ...env, WEBULAR_ALLOW_PRIVATE: '1' },
     stderr: 'ignore',
   })
   return Effect.acquireRelease(

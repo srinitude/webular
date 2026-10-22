@@ -135,7 +135,7 @@ jobs:
       - name: Run mise run ci and mise run e2e on Alpine
         run: |
           docker run --rm -v "$PWD:/w" -w /w -e MISE_LOCKED=1 oven/bun:1.4.3-alpine sh -ec '
-            apk add --no-cache git fish mandoc libgcc libstdc++ bash curl nodejs npm
+            apk add --no-cache git fish mandoc libgcc libstdc++ bash curl nodejs npm procps
             apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community mise
             git config --global --add safe.directory /w
             mise trust

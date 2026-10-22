@@ -34,7 +34,8 @@ const MonitorJson = Schema.fromJsonString(
 
 const monitor = (path: string, dbPath: string) =>
   Effect.gen(function* () {
-    const PATH = yield* Config.String('PATH')
+    // Windows names the variable Path.
+    const PATH = yield* Config.String('PATH').pipe(Config.orElse(() => Config.String('Path')))
     const HOME = yield* Config.String('HOME').pipe(Config.withDefault('/tmp'))
     const env = { PATH, HOME, WEBULAR_SOURCE_ORIGIN: fx.origin, WEBULAR_SOURCE_GAP_MS: '0' }
     const args = ['--url', `${fx.origin}${path}`, '--db', dbPath, '--json']

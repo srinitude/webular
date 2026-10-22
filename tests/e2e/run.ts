@@ -55,7 +55,7 @@ const problems = (c: CliCase, r: Result, ms: number): string[] => [
 
 const runCase = (c: CliCase, fill: (s: string) => string, env: Record<string, string>) => {
   const [cmd, args] = argv(c, c.args.map(fill))
-  return spawn(cmd, args, env).pipe(
+  return spawn(cmd, args, { ...env, ...c.env }).pipe(
     Effect.timed,
     Effect.map(([took, r]) => {
       const ms = Duration.toMillis(took)
