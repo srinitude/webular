@@ -80,3 +80,12 @@ function diversify<H extends Hit>(entries: Entry<H>[]): Entry<H>[] {
 
 export const cleanHits = <H extends Hit>(entries: Entry<H>[]): Scored<H>[] =>
   diversify(mergeCopies(entries)).map((e, i) => ({ ...e, rank: i + 1 }))
+
+// Rerank skip gate (retrieval-changes #4): when two or more lists agree on the top hit and it
+// leads the next by at least one first-place RRF vote (1/61), BM25 would not move it; keep the
+// fused order and skip the rerank.
+const CLEAR_LEAD = 1 / 61
+export const clearLead = <H extends Hit>(scored: ReadonlyArray<Scored<H>>): boolean => {
+  const [top, next] = scored
+  return !!top && top.lists.length >= 2 && top.score - (next?.score ?? 0) >= CLEAR_LEAD
+}

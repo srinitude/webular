@@ -1,11 +1,11 @@
-// Search across keyless sources. Web asks its free APIs at once, each under SOURCE_TIMEOUT_MS,
-// and fuses their lists (plus variants and a local index list) by class-weighted RRF + the
-// official-domain signal. DuckDuckGo HTML runs only when no free API had hits, then the
-// free sources answer. Crossref and OpenAlex: scholarly.ts.
+// Search across keyless sources. Web asks its free APIs at once, each under SOURCE_TIMEOUT_MS, and
+// fuses their lists (plus variants and the local index) by class-weighted RRF + official domains.
+// DuckDuckGo HTML runs only if no free API had hits, then free sources; scholarly: scholarly.ts.
 import { Clock, Config, Deferred, Effect } from 'effect'
 import { logErr } from '../core/output.ts'
 import { crossref, npm, openalex } from './scholarly.ts'
 import { lexicalRerank, scoreHits, WEAK_SCORE, webSearch } from './search.ts'
+import { clearLead } from './search-diversify.ts'
 import { secondHop } from './search-hop.ts'
 import { pickSources, pickSourcesJudged } from './search-intent.ts'
 import { type Constraints, constraintsOf, matchesConstraints } from './search-query.ts'
@@ -137,7 +137,7 @@ const searchOnce = Effect.fn('searchOnce')(function* (
   const hits = scored.map((e) => e.hit)
   // Web only (other sources keep their own order), never under the answer hop: BM25 over
   // a multi-hop question lifts pages sharing its bridge words over the hop's fused order.
-  const rerank = source === 'web' && !opts.hop
+  const rerank = source === 'web' && !opts.hop && !clearLead(scored)
   return { results: (rerank ? lexicalRerank(hits, query) : hits).slice(0, limit), meta }
 })
 
