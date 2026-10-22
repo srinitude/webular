@@ -801,3 +801,7 @@
 {"path": ".github/workflows/AGENTS.md", "sha": "e7dddb307abbbc896f272aa48cf669c719a9d7b4b29bcd67eb8d8e41bb2b1305"}
 {"path": "tests/workflows/AGENTS.md", "sha": "f894b3a08a33ec124a91b608fe3bac5bdb479bba7f69376bca173ffaf7147d6c"}
 {"path": "tests/bench/AGENTS.md", "sha": "74af8f2b5fbdd4c37617ffbf623d7c8f2b98fb12214da556bea9079a4925f9ec", "stages": ["rich-and-native-markdown", "human-language"]}
+{"path": "tests/workflows/AGENTS.md", "sha": "c982b7dbcbfee7dda301fbf256d951714424c1a55dd05e3b03c7321d38e7df70"}
+{"path": "tests/workflows/AGENTS.md", "sha": "c982b7dbcbfee7dda301fbf256d951714424c1a55dd05e3b03c7321d38e7df70", "stages": ["rich-and-native-markdown", "human-language"]}
+{"path": "tests/lib/AGENTS.md", "sha": "ec6d6e30392200f5e823e886ffd85f6ba448ef2af00656225e5ece2d3ed6a0dd", "stages": ["rich-and-native-markdown", "human-language"]}
+{"path": "tests/jev/AGENTS.md", "sha": "dc80f6681311d48c4b4d5e6f5a4f54917968001096d40f037caead96be6679d1", "stages": ["rich-and-native-markdown", "human-language"]}
