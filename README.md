@@ -17,7 +17,7 @@ It needs **no paid API**. Every feature uses open-source parts.
 - **No paid API.** Every feature runs on open-source parts.
 - **One CLI.** Search, scrape, crawl, map, extract, answer, research, and feed share one command set and one JSON contract.
 <!-- bench:start readme -->
-- **Measured, not claimed.** On the committed peer run ([peers-2026-10-21T03-51-21-982Z.json](bench/results/peers-2026-10-21T03-51-21-982Z.json)), webular search scored 0.222 on 3 search tasks, while exa scored 1.000 on 3 and firecrawl scored 1.000 on 3. Read [the benchmark results](docs/benchmarks.md) for every score and the method behind it.
+- **Measured, not claimed.** On the committed peer run ([peers-2026-10-22T00-58-50-543Z.json](bench/results/peers-2026-10-22T00-58-50-543Z.json)), webular search scored 1.000 on 4 search tasks, while exa scored 1.000 on 4 and firecrawl scored 1.000 on 4. Read [the benchmark results](docs/benchmarks.md) for every score and the method behind it.
 <!-- bench:end -->
 
 ## Install

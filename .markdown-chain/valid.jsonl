@@ -396,3 +396,7 @@
 {"path": "tests/quality/AGENTS.md", "sha": "52f4ae3d80f993fd8a59397a6bc32751f7ed7748f179474df29b935ba7467d93"}
 {"path": "README.md", "sha": "1b492127b71698f5ef9b4f171222ab95188e499f8f74775b5928f67a74cecf7d"}
 {"path": "docs/benchmarks.md", "sha": "675c678fc01a9b22fd734c1f4d4d8d76fc979b322eee19ad3a5d9a2498fe2193"}
+{"path": "tests/fixtures/html/AGENTS.md", "sha": "8908bab2109a16588826e04cbf9913b1bcba9e44005b52b581f9ae07b2deb6de"}
+{"path": "tests/jev/fixtures/AGENTS.md", "sha": "f27a87d822e3b892c904f68d795be2737998a724b256f16826817e4f15ceb67a"}
+{"path": "README.md", "sha": "2a52c04746300ca1ed3e8b3a1a0cc6c76e3598c20dfd4c535f965bbf0968d048"}
+{"path": "docs/benchmarks.md", "sha": "df2e1b8f46275f765e8b5e3224fe363e01c554f1434061174a4312fb3f54fdbc"}
