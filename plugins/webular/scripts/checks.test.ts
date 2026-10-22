@@ -56,9 +56,10 @@ test('one run reads each link target once', () =>
     const reads: string[] = []
     const spy = {
       ...fs,
-      readFileString: (path: string, enc?: string) => (
-        reads.push(path), fs.readFileString(path, enc)
-      ),
+      readFileString: (path: string, enc?: string) => {
+        reads.push(path)
+        return fs.readFileString(path, enc)
+      },
     }
     const cache = new Map<string, string>()
     const md = '[a](../package.json#L1) [b](../package.json#L2)'

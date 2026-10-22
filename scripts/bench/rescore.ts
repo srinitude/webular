@@ -124,7 +124,7 @@ if (import.meta.main) {
     const dup = pairs.map((p) => key(p.before)).find((k, i, ks) => ks.indexOf(k) !== i)
     if (dup) return yield* Effect.die(`duplicate row ${dup}`)
     const rescoredFrom = files.map((f) => f.split('/').at(-1))
-    const merged = { ...chunks[0]!.head, rescoredFrom, runs: pairs.map((p) => p.after) }
+    const merged = { ...chunks[0]?.head, rescoredFrom, runs: pairs.map((p) => p.after) }
     const out = join(results, `models-2026-10-22-${stamp}-merged.json`)
     yield* fs.writeFileString(out, `${JSON.stringify(merged, null, 2)}\n`)
     yield* Console.log(`wrote ${out}: ${pairs.length} rows`)

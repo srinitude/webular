@@ -24,7 +24,7 @@ test('a peer arm runs once per provider, allows only its own server, and names t
 test('the peer config names keys by env var, never by value', () =>
   withFile((file) => {
     const exa = file.providers?.find((p) => p.id === 'exa')
-    expect(exa && JSON.stringify(peerServer(exa))).toContain('${EXA_API_KEY}')
+    expect(exa && JSON.stringify(peerServer(exa))).toContain(`\${EXA_API_KEY}`)
   }))
 
 test('every npx peer server is pinned to an exact version', () =>

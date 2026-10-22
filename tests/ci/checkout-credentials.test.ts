@@ -41,7 +41,7 @@ test(
         expect(yml).toMatch(/^\s*PRUNE_BRANCH: prune\/auto-\$\{\{ github\.run_id \}\}$/m)
         expect(pushes.length).toBeGreaterThan(0)
         for (const line of pushes) {
-          expect(line).toEndWith('"HEAD:refs/heads/${PRUNE_BRANCH}"')
+          expect(line).toEndWith(`"HEAD:refs/heads/\${PRUNE_BRANCH}"`)
           expect(line).not.toMatch(/\bmain\b|--force|\s-f\b|--mirror|--all|--tags|--delete/)
         }
       }
