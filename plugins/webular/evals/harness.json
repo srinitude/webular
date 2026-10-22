@@ -73,7 +73,7 @@
       "grader": "bun test: MCP handshake and a tool call for each protocol version"
     },
     {
-      "assertion": "every tool is a CLI command, and mcp is the only command without one",
+      "assertion": "every tool is a CLI command, and only the NOT_ON_MCP commands have none",
       "source": "tests/commands.test.ts",
       "kind": "deterministic",
       "grader": "bun test: name parity with src/cli/commands.ts"
