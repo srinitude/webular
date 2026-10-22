@@ -11,6 +11,7 @@ import { fetchText } from '../core/http.ts'
 import { errMsg } from '../core/output.ts'
 import { textAndImages } from './html.ts'
 import type { PageImage } from './html-images.ts'
+import { fetchTextObeyingRobots } from './robots-gate.ts'
 import { withArchiveCopy } from './sources/archive-copy.ts'
 
 // The one zod mirror of the {url, reason} partial-failure shape — composed
@@ -165,7 +166,7 @@ const POOL_MIN_PAGES = 4
 // A dead page (404, 410, 5xx, network failure, timeout) reads from the Internet
 // Archive's closest capture, so one dead source does not drop out of an answer.
 const fetchOne = (src: SourceRef, timeoutMs: number, maxHtml: number, pooled: boolean) =>
-  withArchiveCopy(src.url, fetchText(src.url, { timeoutMs }), (capture) =>
+  withArchiveCopy(src.url, fetchTextObeyingRobots(src.url, { timeoutMs }), (capture) =>
     fetchText(capture, { timeoutMs }),
   ).pipe(
     Effect.flatMap(({ value: html }) =>

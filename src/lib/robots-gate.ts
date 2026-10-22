@@ -6,8 +6,8 @@
 // gives no HTTP answer at all fails with that fetch error itself,
 // uncached: RFC 9309 assumes disallow only on a 5xx answer.
 import { Cache, Context, Effect, Exit, Layer } from 'effect'
-import type { FetchError as HttpFetchError } from '../core/decode.ts'
-import { httpGet } from '../core/http.ts'
+import { FetchError as HopError, type FetchError as HttpFetchError } from '../core/decode.ts'
+import { type FetchOptions, fetchText, httpGet } from '../core/http.ts'
 import { dropBody, okText } from '../core/http-body.ts'
 import { ROBOTS_TTL_MS } from './crawl-types.ts'
 import { FetchError, fail } from './fetch-types.ts'
@@ -63,3 +63,35 @@ export const robotsGate = Effect.fn('robotsGate')(function* (url: string) {
 
 export const isRobotsBlock = (err: unknown): err is FetchError =>
   err instanceof FetchError && err.reason === 'robots'
+
+/** A robotsGate failure as one line: the disallow rule, or the fetch error of a host that gave no answer. */
+export const refusalText = (err: FetchError | HttpFetchError): string =>
+  isRobotsBlock(err) ? `blocked: robots.txt disallows ${err.rule ?? '/'}` : err.message
+
+/** The robots check as a FetchOptions.hopGate: one call per url, the first and each redirect hop. */
+export const robotsHopGate = RobotsGate.use((gate) =>
+  Effect.succeed((u: string) =>
+    robotsGate(u).pipe(
+      Effect.provideService(RobotsGate, gate),
+      // A host with no robots.txt answer fails with its own fetch error, unwrapped.
+      Effect.mapError((err) =>
+        isRobotsBlock(err)
+          ? new HopError({
+              message: `blocked: robots.txt disallows ${err.rule} (${u})`,
+              cause: err,
+            })
+          : err,
+      ),
+    ),
+  ),
+)
+
+/** fetchText for commands that always obey robots.txt: the url and every redirect hop are gated. */
+export const fetchTextObeyingRobots = (url: string, opts: FetchOptions = {}) =>
+  Effect.flatMap(robotsHopGate, (allow) =>
+    Effect.andThen(allow(url), fetchText(url, { ...opts, hopGate: allow })),
+  )
+
+/** A redirect hop's robots block, back as the robots FetchError it wraps. */
+export const hopBlockToRobots = <E>(err: E): E | FetchError =>
+  err instanceof HopError && isRobotsBlock(err.cause) ? err.cause : err

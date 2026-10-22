@@ -11,6 +11,7 @@ import { errMsg } from '../core/output.ts'
 interface DownloadOptions {
   maxBytes?: number | undefined
   idleMs?: number
+  timeoutMs?: number // whole download, headers and body
 }
 
 type Reader = ReadableStreamDefaultReader<Uint8Array>
@@ -20,6 +21,7 @@ class DownloadError extends Data.TaggedError('DownloadError')<{ readonly message
 const DEFAULT_MAX_BYTES = 100 * 1024 * 1024
 const CONNECT_TIMEOUT_MS = 30_000
 const DEFAULT_IDLE_MS = 30_000
+const DEFAULT_TIMEOUT_MS = 30 * 60_000 // 100 MB at about 60 KB/s
 
 const failWith = (message: string) => Effect.fail(new DownloadError({ message }))
 const attempt = <A>(run: () => PromiseLike<A> | A) =>
@@ -122,7 +124,7 @@ export const downloadToFile = Effect.fn('downloadToFile')(function* (
   opts: DownloadOptions = {},
 ) {
   const maxBytes = opts.maxBytes ?? DEFAULT_MAX_BYTES
-  const res = yield* httpGet(url).pipe(
+  const res = yield* httpGet(url, { timeoutMs: opts.timeoutMs ?? DEFAULT_TIMEOUT_MS }).pipe(
     Effect.timeoutOrElse({
       duration: CONNECT_TIMEOUT_MS,
       orElse: () => failWith(`download ${url} timed out connecting`),

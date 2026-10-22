@@ -22,7 +22,7 @@ const HIDDEN_CANDIDATES = '[hidden], [aria-hidden], [style]'
 const HIDDEN_STYLE = /display\s*:\s*none|visibility\s*:\s*hidden/i
 const COMMENT = /<!--[\s\S]*?-->/g
 // Zero-width, bidi marks, word joiners, BOM, and Unicode tag characters.
-const INVISIBLE_CHARS = /[​-‏⁠-⁤﻿\u{E0000}-\u{E007F}]/gu
+const INVISIBLE_CHARS = /[​-‏‪-‮⁠-⁤⁦-⁩﻿\u{E0000}-\u{E007F}]/gu
 
 export const dropInvisible = (text: string): string => text.replace(INVISIBLE_CHARS, '')
 

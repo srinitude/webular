@@ -2,7 +2,8 @@
 // - a page whose main content is a script shell renders in the background
 //   driver the caller picked (agent-browser or Cua; 'off' skips the render);
 // - a PDF that the text fetch refuses reads through the parse reader.
-import { Effect } from 'effect'
+import { Effect, Stream } from 'effect'
+import { collectCapped } from '../core/capped-bytes.ts'
 import { httpGet } from '../core/http.ts'
 import { AgentBrowserLive, type Backend, Driver } from '../lib/driver.ts'
 import { CuaLive } from '../lib/driver-cua.ts'
@@ -14,7 +15,7 @@ import { needsBrowser } from '../lib/jev/fetch-browser.ts'
 import { pdfText } from '../lib/parse.ts'
 
 const MIN_MAIN_TEXT = 200
-// ponytail: a PDF is buffered whole; stream it to disk if larger files matter.
+// ponytail: a PDF is buffered up to this cap; stream it to disk if larger files matter.
 const PDF_MAX_BYTES = 50 * 1024 * 1024
 
 // A full sentence (40+ characters ending in . ! or ?) is real content, so a
@@ -39,16 +40,23 @@ const renderInBackground = (url: string, backend: Backend) =>
 const isPdfRefusal = (err: unknown) =>
   err instanceof Error && err.message.includes('"application/pdf"')
 
-const readPdf = (url: string) =>
+export const readPdf = (url: string, maxBytes = PDF_MAX_BYTES) =>
   Effect.gen(function* () {
     const res = yield* httpGet(url)
-    if (!res.ok || Number(res.headers.get('content-length') ?? 0) > PDF_MAX_BYTES) {
+    if (!res.ok || Number(res.headers.get('content-length') ?? 0) > maxBytes) {
       yield* Effect.promise(() => res.body?.cancel() ?? Promise.resolve())
       return yield* Effect.fail(
-        new Error(`pdf ${url}: status ${res.status} or over ${PDF_MAX_BYTES} bytes`),
+        new Error(`pdf ${url}: status ${res.status} or over ${maxBytes} bytes`),
       )
     }
-    const bytes = new Uint8Array(yield* Effect.tryPromise(() => res.arrayBuffer()))
+    const bytes = yield* collectCapped(
+      Stream.fromReadableStream({
+        evaluate: () => res.body as ReadableStream<Uint8Array>,
+        onError: (err) => new Error(`pdf ${url}: ${String(err)}`),
+      }),
+      maxBytes,
+      () => new Error(`pdf ${url}: exceeded ${maxBytes} bytes`),
+    )
     return yield* pdfText(bytes)
   })
 

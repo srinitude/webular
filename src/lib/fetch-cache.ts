@@ -1,5 +1,6 @@
 // Bounded bun:sqlite validator cache for conditional GETs.
 
+import { safeUrl } from '../core/fetch-policy.ts'
 import type { Reply } from './fetch-types.ts'
 import { openSqlite } from './sqlite-open.ts'
 
@@ -29,14 +30,22 @@ export const openCache = (path: string, rows: number) => {
   const touch = db.query('UPDATE validators SET used = ? WHERE url = ?')
   const put = db.query('INSERT OR REPLACE INTO validators VALUES (?, ?, ?, ?, ?)')
   const evict = db.query(EVICT_SQL)
+  // The key is the URL with secret params redacted, so a key never lands on disk.
   const lookup = (url: string) => {
-    const row = get.get(url) as Validator | null
-    if (row) touch.run(++tick, url)
+    const key = safeUrl(url)
+    const row = get.get(key) as Validator | null
+    if (row) touch.run(++tick, key)
     return row
   }
   // One transaction: one commit (one fsync) per store, and a failed evict undoes the put.
   const store = db.transaction((url: string, r: Reply) => {
-    put.run(url, r.headers['etag'] ?? null, r.headers['last-modified'] ?? null, r.body, ++tick)
+    put.run(
+      safeUrl(url),
+      r.headers['etag'] ?? null,
+      r.headers['last-modified'] ?? null,
+      r.body,
+      ++tick,
+    )
     evict.run(rows)
   })
   return { db, lookup, store }

@@ -6,13 +6,19 @@ import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
 import { fetchTextOrArchive } from '../core/archive.ts'
-import { fetchText } from '../core/http.ts'
+import { type FetchOptions, fetchText } from '../core/http.ts'
 import { mdHeading } from '../core/output.ts'
 import { htmlToMarkdown, pageBodyHtml, parsePage } from '../lib/html.ts'
 import { decisions } from '../lib/jev/decisions.ts'
 import { decisionStep } from '../lib/jev/steps.ts'
 import { metadataSchema } from '../lib/json-ld.ts'
-import { isRobotsBlock, ROBOTS_AGENT, robotsGate } from '../lib/robots-gate.ts'
+import {
+  hopBlockToRobots,
+  isRobotsBlock,
+  ROBOTS_AGENT,
+  robotsGate,
+  robotsHopGate,
+} from '../lib/robots-gate.ts'
 import { stepRuntime } from './runtime.ts'
 import { withFallbacks } from './scrape-fallback.ts'
 
@@ -61,12 +67,17 @@ const fetched = z.object({
   robots: robotsFields.robots,
 })
 
-const staticFetch = ({ url, timeoutMs, archive }: z.infer<typeof scrapeInput>) =>
-  archive
-    ? Effect.map(fetchTextOrArchive(url, { timeoutMs }), ({ html, archivedFrom }) =>
+// Every redirect hop obeys robots.txt, even under ignoreRobots (it covers the named url only).
+const staticFetch = (
+  { url, timeoutMs, archive }: z.infer<typeof scrapeInput>,
+  hopGate: NonNullable<FetchOptions['hopGate']>,
+) =>
+  (archive
+    ? Effect.map(fetchTextOrArchive(url, { timeoutMs, hopGate }), ({ html, archivedFrom }) =>
         archivedFrom ? { html, archivedFrom } : { html },
       )
-    : Effect.map(fetchText(url, { timeoutMs }), (html) => ({ html }))
+    : Effect.map(fetchText(url, { timeoutMs, hopGate }), (html) => ({ html }))
+  ).pipe(Effect.mapError(hopBlockToRobots))
 
 // robots.txt first: a block skips the fetch and every fallback, unless
 // ignoreRobots, which marks the page `robots: disallowed`.
@@ -76,11 +87,11 @@ const robotsMark = (input: z.infer<typeof scrapeInput>) =>
   )
 
 const fetchPage = (input: z.infer<typeof scrapeInput>) =>
-  Effect.flatMap(robotsMark(input), (mark) =>
+  Effect.flatMap(Effect.all([robotsMark(input), robotsHopGate]), ([mark, hopGate]) =>
     Effect.map(
       withFallbacks(
         input.url,
-        staticFetch(input),
+        staticFetch(input, hopGate),
         input.render ?? 'agent-browser',
         input.timeoutMs,
       ),

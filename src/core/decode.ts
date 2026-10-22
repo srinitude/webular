@@ -6,6 +6,7 @@ import { errMsg } from './output.ts'
 export class FetchError extends Data.TaggedError('FetchError')<{
   readonly message: string
   readonly aborted?: boolean
+  readonly cause?: unknown
 }> {}
 
 const PRESCAN_BYTES = 1024

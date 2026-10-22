@@ -41,6 +41,7 @@ const doctorUrl = Config.String('WEBULAR_DOCTOR_URL').pipe(
 function checkNetwork(): Effect.Effect<Check> {
   return Effect.gen(function* () {
     const res = yield* httpGet(yield* doctorUrl, { timeoutMs: 10_000 })
+    yield* Effect.promise(() => res.body?.cancel() ?? Promise.resolve())
     return { name: 'network', ok: res.ok, detail: `HTTP ${res.status}` }
   }).pipe(Effect.catch((e) => Effect.succeed({ name: 'network', ok: false, detail: String(e) })))
 }

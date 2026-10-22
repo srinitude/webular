@@ -9,6 +9,7 @@ import * as HttpClient from 'effect/http/HttpClient'
 import { type EventFromLogic, initialTransition, type SnapshotFrom, transition } from 'xstate'
 import pkg from '../../package.json' with { type: 'json' }
 import { failureEvent, fetchMachine } from '../machines/fetch.ts'
+import { hop, manualIfAuth } from './auth-headers.ts'
 import { type CacheOptions, cachedGetText } from './cache.ts'
 import { FetchError } from './decode.ts'
 import { FETCH_ERROR, RETRY_BACKOFF_MS, RETRY_STATUS, retryPause } from './fetch-policy.ts'
@@ -28,8 +29,10 @@ export interface FetchOptions extends CacheOptions {
   headers?: Record<string, string>
   signal?: AbortSignal
   redirect?: RequestRedirect
-  // Sees every response, retries included, before its body is read (rate-limit headers).
+  // onResponse sees every response, retries included, before its body is read (rate-limit
+  // headers). hopGate runs on each redirect target first; set, redirects are followed by hand.
   onResponse?: (res: Response) => void
+  hopGate?: (url: string) => Effect.Effect<void, FetchError>
 }
 
 // Retry-After (RFC 9110 section 10.2.3): delay-seconds or an HTTP-date.
@@ -46,16 +49,16 @@ type FetchEvent = EventFromLogic<typeof fetchMachine>
 const [START] = initialTransition(fetchMachine)
 const step = (snap: FetchSnapshot, event: FetchEvent) => transition(fetchMachine, snap, event)[0]
 
-function isAbort(err: unknown): boolean {
-  return err instanceof DOMException && (err.name === 'TimeoutError' || err.name === 'AbortError')
-}
+const isAbort = (err: unknown): boolean =>
+  err instanceof DOMException && (err.name === 'TimeoutError' || err.name === 'AbortError')
 
 // HttpClient over FetchHttpClient, scoped so no GC hook aborts a body mid-read.
 // The caller signal or a per-attempt timeout covers headers and body; fiber
 // interrupt closes the scope, aborting only while headers are pending.
 const send = Effect.fn('send')(function* (url: string, opts: FetchOptions) {
   const base = yield* FetchHttpClient.Fetch
-  const own = opts.signal ?? AbortSignal.timeout(opts.timeoutMs ?? 30_000)
+  const timeout = AbortSignal.timeout(opts.timeoutMs ?? 30_000)
+  const own = opts.signal ? AbortSignal.any([opts.signal, timeout]) : timeout
   let pending: Promise<Response> | undefined
   const both = (s?: AbortSignal | null) => (s ? AbortSignal.any([own, s]) : own)
   const viaOwn = ((input: RequestInfo | URL, init: RequestInit) =>
@@ -83,8 +86,7 @@ const fetchOnce = (url: string, opts: FetchOptions): Effect.Effect<Response, Fet
 
 const isRedirect = (status: number) => status >= 300 && status < 400
 
-// One fetch run. With `host` set, redirects are followed by hand within it.
-// `deadline` is the wall time after which a retry would outlast the caller's timeout.
+// One fetch run: `host` scopes hand-followed redirects; `deadline` is when a retry would outlast it.
 interface Run {
   origin: string
   host?: string | undefined
@@ -98,30 +100,27 @@ const startRun = (origin: string, opts: FetchOptions, host?: string) =>
     return { origin, host, opts, deadline }
   })
 
-interface Landed {
-  res: Response
-  url: string
-}
+type Landed = { res: Response; url: string }
 
 // Names a response as a machine event, with the url the next step uses.
 function responseEvent(run: Run, res: Response, url: string): Landed & { event: FetchEvent } {
   const settled = { res, url, event: { type: res.ok ? 'OK' : 'HTTP_ERROR' } } as const
   if (RETRY_STATUS.has(res.status)) return { res, url, event: { type: 'RETRYABLE_STATUS' } }
-  if (run.host === undefined || !isRedirect(res.status)) return settled
+  const byHand = run.host !== undefined || run.opts.redirect === 'manual'
+  if (!byHand || !isRedirect(res.status)) return settled
   const location = res.headers.get('location')
   if (!location || !URL.canParse(location, url)) return settled
   const next = new URL(location, url).toString()
-  const type = sameHost(run.host, next) ? 'REDIRECT_SAME_HOST' : 'REDIRECT_OFF_HOST'
+  const type =
+    run.host === undefined || sameHost(run.host, next) ? 'REDIRECT_SAME_HOST' : 'REDIRECT_OFF_HOST'
   return { res, url: next, event: { type } }
 }
 
 const retry = (run: Run, url: string, snap: FetchSnapshot, waitMs?: number) =>
-  Effect.andThen(
-    waitMs === undefined
-      ? retryPause(RETRY_BACKOFF_MS[snap.context.attempt - 1] ?? 750)
-      : Effect.sleep(waitMs),
-    Effect.suspend(() => drive(run, url, snap)),
-  )
+  (waitMs === undefined
+    ? retryPause(RETRY_BACKOFF_MS[snap.context.attempt - 1] ?? 750)
+    : Effect.sleep(waitMs)
+  ).pipe(Effect.andThen(Effect.suspend(() => drive(run, url, snap))))
 
 // A rejected redirect's body is never read; free its connection.
 function settle(run: Run, snap: FetchSnapshot, landed: Landed): Effect.Effect<Landed, FetchError> {
@@ -134,8 +133,7 @@ function settle(run: Run, snap: FetchSnapshot, landed: Landed): Effect.Effect<La
 }
 
 // Fetch, name the outcome as an event, and do what the machine's next state says.
-// A retried status waits the server's Retry-After when it sends one; a wait past
-// the deadline returns the status at once instead.
+// A retried status waits its Retry-After (capped); one past the deadline returns the status.
 function drive(run: Run, url: string, snap: FetchSnapshot): Effect.Effect<Landed, FetchError> {
   return Effect.matchEffect(fetchOnce(url, run.opts), {
     onFailure: (err) =>
@@ -148,7 +146,10 @@ function drive(run: Run, url: string, snap: FetchSnapshot): Effect.Effect<Landed
       const next = step(snap, landed.event)
       if (next.status === 'done') return settle(run, next, landed)
       if (next.context.hops > snap.context.hops)
-        return Effect.andThen(dropBody(res), drive(run, landed.url, next))
+        return dropBody(res).pipe(
+          Effect.andThen(run.opts.hopGate?.(landed.url) ?? Effect.void),
+          Effect.andThen(drive(hop(run, url, landed.url), landed.url, next)),
+        )
       return Effect.flatMap(Clock.currentTimeMillis, (now) => {
         const waitMs = retryAfterMs(res.headers.get('retry-after'), now)
         return (waitMs ?? 0) > run.deadline - now
@@ -159,14 +160,14 @@ function drive(run: Run, url: string, snap: FetchSnapshot): Effect.Effect<Landed
   })
 }
 
-// GET with retry: network-level failures and retryable statuses retry on the
-// fixed backoff (or the server's Retry-After); other statuses return as-is.
+// GET: network failures and retryable statuses retry on the backoff or Retry-After.
 export const httpGet = (
   url: string,
   opts: FetchOptions = {},
 ): Effect.Effect<Response, FetchError> =>
-  Effect.flatMap(startRun(url, opts), (run) =>
-    Effect.map(drive(run, url, START), (landed) => landed.res),
+  Effect.flatMap(
+    startRun(url, manualIfAuth(opts.hopGate ? { ...opts, redirect: 'manual' } : opts)),
+    (run) => Effect.map(drive(run, url, START), (landed) => landed.res),
   )
 
 // Text GETs revalidate through the disk cache; a cache config error surfaces

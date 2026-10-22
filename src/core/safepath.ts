@@ -16,17 +16,27 @@ function invokeDir(): string {
   return process.env['WEBULAR_INVOKE_DIR'] ?? process.cwd()
 }
 
+const deny = (message: string) => Effect.fail(new SandboxError({ message }))
+
 // Canonical realpath of the deepest existing ancestor (the target may not exist
 // yet) — resolves symlinks in every parent component, defeating symlink escapes.
+// A dangling symlink "does not exist" to fs.exists, so each component is tried
+// with readLink first and a link is followed to where it points (bounded hops).
+const MAX_LINK_HOPS = 40
 const realAncestor = Effect.fn('safepath.realAncestor')(function* (full: string) {
   const fs = yield* FileSystem.FileSystem
   const path = yield* Path.Path
   let dir = full
-  while (!(yield* fs.exists(dir))) dir = path.resolve(dir, '..')
-  return yield* fs.realPath(dir)
+  for (let hops = 0; hops <= MAX_LINK_HOPS; ) {
+    const link = yield* fs.readLink(dir).pipe(Effect.option)
+    if (link._tag === 'Some') {
+      dir = path.resolve(path.dirname(dir), link.value)
+      hops++
+    } else if (yield* fs.exists(dir)) return yield* fs.realPath(dir)
+    else dir = path.resolve(dir, '..')
+  }
+  return yield* deny(`sandbox: too many symlink hops (${full})`)
 })
-
-const deny = (message: string) => Effect.fail(new SandboxError({ message }))
 
 const confine = Effect.fn('safepath.confine')(function* (p: string) {
   const fs = yield* FileSystem.FileSystem
@@ -35,7 +45,8 @@ const confine = Effect.fn('safepath.confine')(function* (p: string) {
   const resolved = yield* Effect.gen(function* () {
     const base = yield* fs.realPath(path.resolve(process.env['WEBULAR_OUTPUT_DIR'] ?? invokeDir()))
     const full = path.resolve(base, p)
-    return { base, full, escapes: path.relative(base, yield* realAncestor(full)).startsWith('..') }
+    const rel = path.relative(base, yield* realAncestor(full))
+    return { base, full, escapes: path.isAbsolute(rel) || rel.split(path.sep)[0] === '..' }
   }).pipe(Effect.mapError((err) => new SandboxError({ message: `sandbox: ${err.message}` })))
   if (resolved.escapes) return yield* deny(`sandbox: path escapes ${resolved.base} (${p})`)
   return resolved.full

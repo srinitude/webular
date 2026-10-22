@@ -10,6 +10,7 @@ import { outPath } from '../core/safepath.ts'
 import { runBatch } from '../lib/agentbrowser.ts'
 import { downloadToFile } from '../lib/download.ts'
 import { MAX_CAPTURE_BYTES } from '../lib/driver-screenshot.ts'
+import { refusalText, robotsGate } from '../lib/robots-gate.ts'
 import { withArchiveCopy } from '../lib/sources/archive-copy.ts'
 import { stepRuntime } from './runtime.ts'
 
@@ -29,6 +30,7 @@ const mediaOutput = z.object({
 })
 
 const fail = (message: string) => new CliError({ message, exitCode: EXIT.failure })
+const robotsRefusal = (err: Parameters<typeof refusalText>[0]) => fail(refusalText(err))
 
 const browserCapture = Effect.fn('media.browserCapture')(function* (
   url: string,
@@ -44,6 +46,7 @@ const browserCapture = Effect.fn('media.browserCapture')(function* (
 
 const media = Effect.fn('media')(function* (input: z.infer<typeof mediaInput>) {
   const { url, action, maxBytes } = input
+  yield* robotsGate(url).pipe(Effect.mapError(robotsRefusal))
   const dest = yield* outPath(input.dest)
   if (action === 'download') {
     const opts = { maxBytes }

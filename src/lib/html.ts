@@ -105,7 +105,7 @@ function readableArticle(doc: Document, docTitle: string, rawHtml: string): Arti
   const contentHtml = sanitizeHtml(parsed.content?.innerHTML ?? '')
   if (parsed.content) inlineAlts(parsed.content as unknown as DomDocument['body'])
   return {
-    title: parsed.title ?? docTitle,
+    title: dropInvisible(parsed.title ?? docTitle),
     contentHtml,
     text: dropInvisible(parsed.content?.textContent ?? ''),
   }
@@ -116,7 +116,7 @@ function readableArticle(doc: Document, docTitle: string, rawHtml: string): Arti
 // `title` is the rule's pick; the page.title Jev decision may pick another of `titles`.
 export function parsePage(html: string, base: string): PageDoc {
   const { document } = parseHTML(html)
-  const docTitle = document.title ?? ''
+  const docTitle = dropInvisible(document.title ?? '')
   const og = document.querySelector('meta[property="og:title"]')?.getAttribute('content') ?? ''
   const h1 = textOf(document.querySelector('h1'))
   const links = linksFrom(document, base)
@@ -124,7 +124,12 @@ export function parsePage(html: string, base: string): PageDoc {
   const ogImage = ogImageOf(document, base)
   const metadata = pageMetadata(document)
   const article = articleFrom(document, html)
-  const titles = { readability: article.title, document: docTitle, og: og.trim(), h1 }
+  const titles = {
+    readability: article.title,
+    document: docTitle,
+    og: dropInvisible(og).trim(),
+    h1: dropInvisible(h1),
+  }
   const title = titleBaseline({ url: base, candidates: titles })
   return { title, titles, links, images, ogImage, ...(metadata ? { metadata } : {}), article }
 }
@@ -145,7 +150,10 @@ export function titleAndLinks(
   withLinks = true,
 ): { title: string; links: string[] } {
   const { document } = parseHTML(html)
-  return { title: document.title ?? '', links: withLinks ? linksFrom(document, base) : [] }
+  return {
+    title: dropInvisible(document.title ?? ''),
+    links: withLinks ? linksFrom(document, base) : [],
+  }
 }
 
 export function htmlToArticle(html: string): Article {

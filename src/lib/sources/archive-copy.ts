@@ -16,7 +16,8 @@ export class ArchiveCopyError extends Data.TaggedError('ArchiveCopyError')<{
 
 // A refusal is a live page the caller cannot take, not a dead one; 4xx other
 // than 404 and 410 (in a download's message) is the live host saying no.
-const REFUSAL = /unsupported content-type|max \d+ bytes|failed: 4(?!04|10)\d\d/
+const REFUSAL =
+  /unsupported content-type|max \d+ bytes|failed: 4(?!04|10)\d\d|robots\.txt disallows/
 
 const isDeadPage = (err: unknown): boolean =>
   err instanceof HttpStatusError

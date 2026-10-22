@@ -22,7 +22,7 @@ type FetchFailure = HttpStatusError | FetchError
 const isDeadPage = (err: FetchFailure): boolean =>
   err instanceof HttpStatusError
     ? err.status === 404 || err.status === 410 || err.status >= 500
-    : !/unsupported content-type/.test(err.message)
+    : !/unsupported content-type|robots\.txt disallows/.test(err.message)
 
 // The raw capture (no Wayback toolbar): `id_` after the timestamp, https for
 // the real archive host.

@@ -23,7 +23,7 @@ export const REDIRECT_LIMIT = 5
 
 // A key sent as a query parameter (OpenAlex api_key) never reaches error text.
 const SECRET_PARAM = /key|token|secret|password|auth|sig/i
-const safeUrl = (url: string) => {
+export const safeUrl = (url: string) => {
   const u = URL.parse(url)
   if (!u) return url
   for (const name of [...u.searchParams.keys()])

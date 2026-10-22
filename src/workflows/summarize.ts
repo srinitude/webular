@@ -3,12 +3,12 @@
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
-import { fetchText } from '../core/http.ts'
 import { htmlToArticle } from '../lib/html.ts'
 import { type SummaryPick, topIndexes } from '../lib/jev/decisions/summarize.ts'
 import { summaryFollowUp } from '../lib/jev/decisions/summary-follow-up.ts'
 import { decisions } from '../lib/jev/decisions.ts'
 import { decisionStep } from '../lib/jev/steps.ts'
+import { fetchTextObeyingRobots } from '../lib/robots-gate.ts'
 import { freeSourceFallback } from '../lib/sources/registry.ts'
 import { rankSpans, type Span, sentenceSpans } from '../lib/summarize-rank.ts'
 import { stepRuntime } from './runtime.ts'
@@ -45,7 +45,7 @@ const resolved = z.object({
 type Resolved = z.infer<typeof resolved>
 
 const fetchFrom = (url: string, timeoutMs?: number) =>
-  Effect.map(fetchText(url, { timeoutMs }), (html) => ({ html, url }))
+  Effect.map(fetchTextObeyingRobots(url, { timeoutMs }), (html) => ({ html, url }))
 
 // The url first; when its fetch fails, the free sources routed to summarize
 // name a page for it and that page is fetched instead (2603.01548). An empty

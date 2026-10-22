@@ -63,7 +63,7 @@ const scrapeCli =
 const curlHtml2text =
   (spawner: Spawner) =>
   ({ url = '' }: TaskInput) =>
-    exec(spawner, ['curl', '-sL', url]).pipe(
+    exec(spawner, ['curl', '-sL', '--', url]).pipe(
       Effect.flatMap((html) => exec(spawner, ['html2text'], html)),
       Effect.map((text) => out(text, [url], 0, 0)),
     )

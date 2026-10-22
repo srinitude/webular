@@ -6,6 +6,7 @@ import { parseHTML } from 'linkedom'
 import { z } from 'zod'
 import { fetchText } from '../core/http.ts'
 import { metadataSchema, pageMetadata } from '../lib/json-ld.ts'
+import { fetchTextObeyingRobots } from '../lib/robots-gate.ts'
 import {
   type InvalidFieldSpecError,
   parseFieldSpecs,
@@ -50,8 +51,10 @@ const fetchStep = createStep({
   }),
   execute: ({ inputData, abortSignal }) => {
     const opts = { timeoutMs: inputData.timeoutMs }
-    const fetched = withArchiveCopy(inputData.url, fetchText(inputData.url, opts), (capture) =>
-      fetchText(capture, opts),
+    const fetched = withArchiveCopy(
+      inputData.url,
+      fetchTextObeyingRobots(inputData.url, opts),
+      (capture) => fetchText(capture, opts),
     )
     return stepRuntime.runPromise(
       Effect.map(fetched, ({ value: html, archivedFrom }) => ({

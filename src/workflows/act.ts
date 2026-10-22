@@ -11,6 +11,7 @@ import { runBatch } from '../lib/agentbrowser.ts'
 import { actCandidates } from '../lib/jev/decisions/act.ts'
 import { decisions } from '../lib/jev/decisions.ts'
 import { decisionStep } from '../lib/jev/steps.ts'
+import { refusalText, robotsGate } from '../lib/robots-gate.ts'
 import { stepRuntime } from './runtime.ts'
 
 const actInput = z.object({
@@ -30,6 +31,15 @@ const actOutput = z.object({
 const browsed = actOutput.omit({ next: true }).extend({ goal: z.string().optional() })
 
 const act = Effect.fn('act')(function* (input: z.infer<typeof actInput>) {
+  yield* robotsGate(input.url).pipe(
+    Effect.mapError(
+      (err) =>
+        new CliError({
+          message: refusalText(err),
+          exitCode: EXIT.failure,
+        }),
+    ),
+  )
   const cmds: string[][] = [['open', input.url], ['snapshot']]
   if (input.screenshot) cmds.push(['screenshot', yield* outPath(input.screenshot)])
   cmds.push(['close'])
