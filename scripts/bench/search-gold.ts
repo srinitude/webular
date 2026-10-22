@@ -3,8 +3,9 @@
 // A row counts as a hit when any gold URL appears in the top 10 results.
 // Usage: bun scripts/bench/search-gold.ts [rows=30] [concurrency=4]
 
+import { fileURLToPath } from 'node:url'
 import { BunRuntime, BunServices } from '@effect/platform-bun'
-import { Duration, Effect, Schema } from 'effect'
+import { Duration, Effect, FileSystem, Schema } from 'effect'
 import { runProc } from '../../src/core/proc.ts'
 import { normalizeUrl } from './grade.ts'
 import { percentile } from './peers/score.ts'
@@ -17,7 +18,7 @@ const Row = Schema.fromJsonString(
   }),
 )
 
-const root = new URL('../..', import.meta.url).pathname
+const root = fileURLToPath(new URL('../../', import.meta.url))
 const [rows = 30, concurrency = 4] = Bun.argv.slice(2).map(Number)
 
 export const hitAt10 = (output: string, gold: readonly string[]): boolean => {
@@ -49,7 +50,8 @@ const runOne = (row: typeof Row.Type) =>
 
 const main = Effect.gen(function* () {
   // Tuning reads the dev set only; the sealed test set is for final scoring (bench/AGENTS.md).
-  const text = yield* Effect.promise(() => Bun.file(`${root}bench/tasks/dev/search.jsonl`).text())
+  const fs = yield* FileSystem.FileSystem
+  const text = yield* fs.readFileString(`${root}bench/tasks/dev/search.jsonl`)
   const lines = text
     .split('\n')
     .filter((l) => l.includes('"gold"'))
