@@ -81,17 +81,27 @@ const setting = (name: string) => optional(Config.option(Config.String(name)))
 
 // Key order: TYPESAFE_API_KEY, then the macOS Keychain item typesafe-ai-api-key
 // (on macOS only; other systems spawn nothing). WEBULAR_JEV=off turns Jev off,
-// so every decision uses its baseline.
+// so every decision uses its baseline. CI has no Keychain item and `security`
+// can block there on a locked keychain, so CI never spawns it and any other
+// lookup gets 3 seconds before it counts as no key.
 export const resolveKey = Effect.gen(function* () {
   if (Option.contains(yield* setting('WEBULAR_JEV'), 'off'))
     return Option.none<Redacted.Redacted<string>>()
   const env = yield* optional(Config.option(Config.Redacted('TYPESAFE_API_KEY')))
   if (Option.isSome(env) || process.platform !== 'darwin') return env
+  if (Option.isSome(yield* setting('CI'))) return env
   const spawner = yield* ChildProcessSpawner
   const out = yield* optional(
     spawner
-      .string(ChildProcess.make`security find-generic-password -s typesafe-ai-api-key -w`)
-      .pipe(Effect.map((s) => Option.liftPredicate(s.trim(), (k) => k.length > 0))),
+      .string(
+        ChildProcess.make('security', ['find-generic-password', '-s', 'typesafe-ai-api-key', '-w'], {
+          stdin: 'ignore',
+        }),
+      )
+      .pipe(
+        Effect.map((s) => Option.liftPredicate(s.trim(), (k) => k.length > 0)),
+        Effect.timeout('3 seconds'),
+      ),
   )
   return Option.map(out, (k) => Redacted.make(k))
 })

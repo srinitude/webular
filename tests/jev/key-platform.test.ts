@@ -1,8 +1,10 @@
 // The Jev key lookup: TYPESAFE_API_KEY works on every system, and the macOS
-// Keychain CLI runs only on darwin; elsewhere it is skipped with no spawn.
+// Keychain CLI runs only on darwin, never under CI, and for at most 3 seconds;
+// elsewhere it is skipped with no spawn.
 import { afterEach, expect, test } from 'bun:test'
-import { ConfigProvider, Effect, Layer, Option, Redacted } from 'effect'
+import { ConfigProvider, Effect, Fiber, Layer, Option, Redacted } from 'effect'
 import { ChildProcessSpawner } from 'effect/process/ChildProcessSpawner'
+import { TestClock } from 'effect/testing'
 import { resolveKey } from '../../src/lib/jev/client.ts'
 
 const real = process.platform
@@ -37,3 +39,28 @@ for (const platform of ['linux', 'win32']) {
 
 test('darwin: the Keychain is read when the env var is absent', () =>
   check('darwin', {}, { key: Option.some('from-keychain'), spawned: 1 }))
+
+test('darwin under CI: no Keychain spawn, so CI never blocks on it', () =>
+  check('darwin', { CI: 'true' }, { key: Option.none(), spawned: 0 }))
+
+test('darwin: a Keychain lookup that never answers counts as no key after 3 seconds', () => {
+  setPlatform('darwin')
+  const spawner = { string: () => Effect.never }
+  return Effect.runPromise(
+    Effect.gen(function* () {
+      const fiber = yield* Effect.forkChild(resolveKey)
+      yield* TestClock.adjust('3 seconds')
+      const key = yield* Fiber.join(fiber)
+      expect(Option.isNone(key)).toBe(true)
+    }).pipe(
+      Effect.scoped,
+      Effect.provide(
+        Layer.mergeAll(
+          TestClock.layer(),
+          Layer.succeed(ChildProcessSpawner, spawner as never),
+          ConfigProvider.layer(ConfigProvider.fromUnknown({})),
+        ),
+      ),
+    ),
+  )
+})
