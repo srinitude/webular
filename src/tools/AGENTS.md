@@ -23,7 +23,7 @@ Rules for the MCP tools, under [src/AGENTS.md](../AGENTS.md).
 - `registerTool(name, config, handler)` takes a Zod shape or a Zod object for `inputSchema` and `outputSchema`. The web tools pass their strict object, so the SDK refuses unknown keys instead of dropping them. An `outputSchema` pairs with `structuredContent`, which the SDK validates. A failure is a tool result with `isError: true` and a text recovery hint.
 - Stdio is `new StdioServerTransport()` then `server.connect(transport)`. On stdio, stdout carries only JSON-RPC and logs go to stderr (unverified at this pin).
 - Never import first- and second-generation SDK objects in one file.
-- In SDK `1.32.1`, an unknown tool name becomes an `isError` result: `dist/esm/server/mcp.js` line 144 throws `InvalidParams`, and line 175 wraps it in `createToolError`. A non-JSON stdin line gets no reply: `dist/esm/shared/stdio.js` line 35 throws, `dist/esm/server/stdio.js` line 50 stays silent, and only `onerror` sees it.
+- In SDK `1.32.1`, an unknown tool name becomes an `isError` result: `dist/esm/server/mcp.js` line 144 throws `InvalidParams`, and the SDK's catch at line 175 wraps it as that result. A non-JSON stdin line gets no reply: `dist/esm/shared/stdio.js` line 35 throws, `dist/esm/server/stdio.js` line 50 stays silent, and only `onerror` sees it.
 - [`sdk-errors.ts`](sdk-errors.ts) adds the spec's `-32602` and `-32700` replies for `webular mcp`. Source: [MCP tools errors, spec 2026-07-28](https://modelcontextprotocol.io/specification/2026-07-28/server/tools#error-handling).
 
 ### Standards
