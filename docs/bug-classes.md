@@ -15,7 +15,7 @@ Tasks by class: `bugs:security` (8, 10, 11), `bugs:effect` (4, 7), `bugs:mcp-cli
 - [ ] Crawl and scrape read robots.txt before the first page on a host.
 - [ ] Home paths fall back from `HOME` to `USERPROFILE`, and paths are joined with `node:path`.
 - [ ] URL changes keep one canonical form, and tracking-param tests use a real tracking name such as `ref_src`.
-- [ ] A change to the sanitizer or the archive fallback keeps page facts: formulas, code-block line breaks, and only 200-status HTML captures.
+- [ ] A change to the sanitizer or the archive fallback keeps page facts: formulas, code-block line breaks, header paths, and only 200-status HTML captures.
 - [ ] Docs, AGENTS.md files, machines, and tool descriptions match the code in the same commit.
 - [ ] Two branches that touch the same string (the MCP instructions, a tool description) are joined by hand, and the joined text is tested.
 - [ ] Tests wait on events, use port 0 and their own temp folder, and pass under `bun test --parallel`.
@@ -92,9 +92,9 @@ Tasks by class: `bugs:security` (8, 10, 11), `bugs:effect` (4, 7), `bugs:mcp-cli
 
 ## 11. Prompt injection in page text
 
-- Risk: page text can carry instructions that steer the model that reads it. Hidden text and invisible characters slip past a reader. An image inside a hidden element, or a very long alt text, carries the same instructions into the image list.
-- Where: [src/lib/html.ts](../src/lib/html.ts), [src/lib/parse.ts](../src/lib/parse.ts), [src/lib/html-images.ts](../src/lib/html-images.ts), every Jev or model call that reads page text.
-- Guard: [sanitize-injection.test.ts](../tests/engine/sanitize-injection.test.ts). Hidden images and the 300-character alt cap: the image-list case in [invisible-titles.security.test.ts](../tests/lib/invisible-titles.security.test.ts).
+- Risk: page text can carry instructions that steer the model that reads it. Hidden text and invisible characters slip past a reader. An image inside a hidden element, or a very long alt text, carries the same instructions into the image list. A Markdown image loads its URL as soon as a reader renders it, so a page could send data to any host it names.
+- Where: [src/lib/html.ts](../src/lib/html.ts), [src/lib/parse.ts](../src/lib/parse.ts), [src/lib/html-images.ts](../src/lib/html-images.ts) (each Markdown image becomes a plain link whose text starts with `image:`), every Jev or model call that reads page text.
+- Guard: [sanitize-injection.test.ts](../tests/engine/sanitize-injection.test.ts). Hidden images and the 300-character alt cap: the image-list case in [invisible-titles.security.test.ts](../tests/lib/invisible-titles.security.test.ts). Marked image links and stripped tag-block characters: "an image becomes a marked link, and tag-block characters are gone" in [html-extraction.parsing.test.ts](../tests/lib/html-extraction.parsing.test.ts).
 - Sources: [OWASP LLM01 prompt injection](https://genai.owasp.org/llmrisk/llm01-prompt-injection/); [OWASP prompt injection cheat sheet](https://cheatsheetseries.owasp.org/cheatsheets/LLM_Prompt_Injection_Prevention_Cheat_Sheet.html).
 
 ## 12. URL and Unicode normalization
@@ -148,7 +148,7 @@ Tasks by class: `bugs:security` (8, 10, 11), `bugs:effect` (4, 7), `bugs:mcp-cli
 
 ## 19. Page facts lost in extraction
 
-- Risk: the sanitizer drops foreign elements, so a MathML formula vanishes with its words. Turndown reads a code block's text, so a `<br>` inside `<pre>` glues two lines into one. An archive fallback that keeps error pages, non-HTML files, or the same capture twice returns text that is not the page.
-- Where: [src/lib/html-sanitize.ts](../src/lib/html-sanitize.ts) (MathML becomes its alt text, TeX source, or plain text before sanitizing, and a `<br>` in `<pre>` becomes a newline), [src/lib/archive-urls.ts](../src/lib/archive-urls.ts) (the fallback keeps only HTML captures with status 200, once each).
-- Guard: "a formula keeps its words when the MathML element is stripped" and "a `<br>` inside a code block stays a line break in Markdown" in [html-extraction.parsing.test.ts](../tests/lib/html-extraction.parsing.test.ts); "archive fallback keeps only same-host HTML captures that returned 200, once each" in [archives.test.ts](../tests/lib/sources/archives.test.ts).
-- Sources: [open items](research/open-items.md), extraction rows 8 and 14, and dependency row 56 for turndown.
+- Risk: the sanitizer drops foreign elements, so a MathML formula vanishes with its words. Turndown reads a code block's text, so a `<br>` inside `<pre>` glues two lines into one. An archive fallback that keeps error pages, non-HTML files, or the same capture twice returns text that is not the page. A GFM table has one header row, so a second header row reads as body text and each column loses its parent header.
+- Where: [src/lib/html-sanitize.ts](../src/lib/html-sanitize.ts) (MathML becomes its alt text, TeX source, or plain text before sanitizing, and a `<br>` in `<pre>` becomes a newline), [src/lib/archive-urls.ts](../src/lib/archive-urls.ts) (the fallback keeps only HTML captures with status 200, once each), [src/lib/html-table.ts](../src/lib/html-table.ts) (stacked header rows join into one header-path row, such as "Price / 2024").
+- Guard: "a formula keeps its words when the MathML element is stripped", "a `<br>` inside a code block stays a line break in Markdown", and "two header rows join into one header-path row" in [html-extraction.parsing.test.ts](../tests/lib/html-extraction.parsing.test.ts); "archive fallback keeps only same-host HTML captures that returned 200, once each" in [archives.test.ts](../tests/lib/sources/archives.test.ts).
+- Sources: [open items](research/open-items.md), extraction rows 8, 10, and 14, and dependency row 56 for turndown.

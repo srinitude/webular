@@ -42,10 +42,10 @@ An open mark means the search did not find the whole change. It does not prove t
 | Answer quality | 10 | 0 | 0 | 10 | 5 |
 | Decision models | 13 | 0 | 0 | 13 | 0 |
 | Agents and AGENTS.md | 19 | 3 | 0 | 16 | 4 |
-| Engineering | 18 | 1 | 0 | 17 | 3 |
+| Engineering | 18 | 2 | 0 | 16 | 2 |
 | Dependencies top 10 | 10 | 2 | 0 | 8 | 0 |
 | Dependency rows | 77 | 25 | 1 | 51 | 2 |
-| **All** | **175** | **39** | **1** | **135** | **25** |
+| **All** | **175** | **40** | **1** | **134** | **24** |
 
 ## Applied
 
@@ -58,6 +58,7 @@ An open mark means the search did not find the whole change. It does not prove t
 - Agents #2: the MCP server's directive and worked example, `plugins/webular/src/descriptions.json:3`.
 - AGENTS.md #2 and #6: a short intro with no project map, and nested files under their size caps.
 - Engineering #13: shuffled test order, the `test:shuffled` task in [`mise.toml`](../mise.toml).
+- Engineering #18: each Markdown image becomes a marked plain link that loads nothing until someone opens it, `src/lib/html-images.ts:91`.
 - Dependencies top 10 #8: bounded parsers. `diff` uses `maxEditLength` (`src/lib/snapshot.ts:35`), `unpdf` uses `maxImageSize` (`src/lib/parse-pdf.ts:125`), and Readability skips pages past `READABLE_MAX_CHARS` ([`src/lib/html.ts`](../src/lib/html.ts)).
 - Dependencies top 10 #5: a SIGTERM during startup still exits 143, `tests/cli/dispatch.test.ts:142`.
 - Dependency rows #45 (the Readability cap above) and #37 (`Object.hasOwn` for tool names, [`src/tools/sdk-errors.ts`](../src/tools/sdk-errors.ts)).

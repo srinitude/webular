@@ -29,7 +29,7 @@ The list is [extraction-changes.md](extraction-changes.md).
 - #7, partly: join two extractors instead of picking the fuller one ([`src/lib/html.ts`](../../src/lib/html.ts)).
 - #8, applied: each `math` element becomes its alt text, TeX source, or plain text before the sanitizer drops it (`src/lib/html-sanitize.ts:78`).
 - #9, applied: alt text stops at 300 characters, and the image list skips hidden images (`src/lib/html-images.ts:30` and `:38`).
-- #10, partly: add header-path rows and "header: value" output to [`src/lib/html-table.ts`](../../src/lib/html-table.ts).
+- #10, partly: stacked header rows join into one header-path row, such as "Price / 2024" (`src/lib/html-table.ts:54`). Still missing: "header: value" output for table rows in [`src/lib/html-table.ts`](../../src/lib/html-table.ts).
 - #11: reuse a page's XHR or JSON endpoint in [`src/lib/driver.ts`](../../src/lib/driver.ts).
 - #12, partly: merge small chunks and chunk table rows with their header ([`src/lib/local-chunks.ts`](../../src/lib/local-chunks.ts)).
 - #13, partly: finish the locator ladder (text, repeated sibling, per-host cache) in [`src/lib/select.ts`](../../src/lib/select.ts).
@@ -96,7 +96,7 @@ The list is [engineering-changes.md](engineering-changes.md).
 - #7: add stale-if-error and single-flight to the fetch cache.
 - #9: hedge slow sources in `search-chain.ts`.
 - #12, partly: add flaky-retry limits and a double-build hash check to `release.yml`.
-- #18, partly: mark auto-loading Markdown images (invisible characters are stripped in `src/lib/html-sanitize.ts:24`).
+- #18, applied: each Markdown image becomes a plain link whose text starts with `image:`, which loads nothing until someone opens it (`src/lib/html-images.ts:91`). Invisible characters are stripped in `src/lib/html-sanitize.ts:24`.
 
 ## Dependencies: top 10
 
