@@ -8,6 +8,7 @@ The task-set generators. The parent rules are in [scripts/bench/AGENTS.md](../AG
 - [generate-common.ts](generate-common.ts): the canary, the task record, the exact 30/35/35 split per family, and the JSONL writer.
 - [manifest.ts](manifest.ts): writes the set manifest with the sha256 of every committed dev and test file.
 - [private-crypt.sh](private-crypt.sh): encrypts the private split into one archive outside git. The passphrase comes from the macOS Keychain.
+- [generate-peers.ts](generate-peers.ts) writes the 28-task peer set from [peers-seed.json](peers-seed.json); [generate-peers.test.ts](generate-peers.test.ts) checks its categories, gold answers, and aliases.
 - The JSON files hold the seeds, plans, and templates the generators read.
 
 ## Rules

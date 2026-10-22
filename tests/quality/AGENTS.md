@@ -5,6 +5,7 @@ The code gates. The parent rules are in [tests/AGENTS.md](../AGENTS.md). The rul
 ## What lives here
 
 - Size and exports: [`limits.test.ts`](limits.test.ts) (200 lines per file, 30 per function, depth 3), [`exports.test.ts`](exports.test.ts) (no export without an importer).
+- PDF text: [`parse-pdf-fidelity.test.ts`](parse-pdf-fidelity.test.ts) (body text without running headers or footers, line-end hyphens joined).
 - Language and content: [`typescript-only.test.ts`](typescript-only.test.ts), [`no-diagrams.test.ts`](no-diagrams.test.ts), [`no-mcp-apps.test.ts`](no-mcp-apps.test.ts).
 - Best practices from [docs/best-practices.md](../../docs/best-practices.md): [`practices-config.test.ts`](practices-config.test.ts) (CI workflow and package metadata), [`practices-source.test.ts`](practices-source.test.ts) (compiler flags, docs, source patterns).
 - The command reference: [`commands-doc.test.ts`](commands-doc.test.ts) ([docs/commands.md](../../docs/commands.md), `--help`, and the run tasks name the same commands and flags).
