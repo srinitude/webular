@@ -58,7 +58,9 @@ test(
         'ci',
         'executable',
         'push-covered-by-pr',
+        'site',
       ])
+      expect(runs(ci.jobs['site'])).toMatch(/mise run site:build[\s\S]*mise run site:test/)
       expect(oses(ci.jobs['ci'])).toEqual(SIX_OS)
       expect(oses(ci.jobs['executable'])).toEqual(THREE_OS)
       expect(shardsComplete(ci.jobs['ci'])).toBe(true)

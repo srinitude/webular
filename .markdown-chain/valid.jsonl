@@ -345,3 +345,7 @@
 {"path": "site/src/routes/AGENTS.md", "sha": "ad59693c1fcd424d70f67a5d4fc55e2b8af87d11e71a8afa6ab2c17a0e032e2d", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "site/design/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "site/src/AGENTS.md", "sha": "25a1e8bc8e3207d6a37458e2369adea0f8f590e6c73fa0b15ba536c157e7ef01", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/AGENTS.md", "sha": "d4526de06b8d4121fc4b3dba3c8f914fd51c0243eef01b47294b19af70de6dfd", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": ".github/workflows/AGENTS.md", "sha": "a8be5016e3068129e6981e833e6026ebf0c37c1a703a1995db505d5a9a6bc1fd", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": ".github/workflows/AGENTS.md", "sha": "5651a5411906d5a6bc870a87c5072d8fe0ac2998f3eed100c8eab993055712a0"}
+{"path": ".github/workflows/AGENTS.md", "sha": "5651a5411906d5a6bc870a87c5072d8fe0ac2998f3eed100c8eab993055712a0", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}

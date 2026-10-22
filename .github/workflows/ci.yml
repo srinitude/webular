@@ -208,3 +208,43 @@ jobs:
           ./dist/bin/webular --version
           ./dist/bin/webular --help
           ./dist/bin/webular diagram --json
+
+  # webular.dev: build the site, then check every width from 320 to 2560 px in
+  # both themes (no sideways scroll, tap targets, focus ring, axe, home weight).
+  # The home screenshots at 390, 1024, and 1440 px are kept for a by-eye review.
+  site:
+    needs: push-covered-by-pr
+    if: ${{ !cancelled() && needs.push-covered-by-pr.outputs.covered != 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      MISE_LOCKED: 1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@fc42bcc7ddbf51124c30f95a877a0c5168a3bfde # v5.2.1
+        with:
+          experimental: true
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/bun-install-cache
+          key: bun-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('mise.toml', 'bun.lock', 'site/bun.lock') }}
+      - name: Trust the repo's mise.toml
+        run: mise trust
+      - name: Build the site
+        env:
+          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
+        run: mise run site:build
+      - name: Check the site at all 14 widths in both themes
+        env:
+          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
+          MISE_TASK_SKIP_DEPENDS: "1"
+        run: mise run site:test
+      - name: Upload the home screenshots
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: site-home-screenshots
+          path: site/dist-shots/
+          if-no-files-found: error

@@ -510,6 +510,7 @@ dir = "{{config_root}}/site"
 run = [
   'bun "{{config_root}}/site/node_modules/playwright/cli.js" install chromium-headless-shell 1>&2',
   'bun "{{config_root}}/site/scripts/check-site.ts"',
+  'bun "{{config_root}}/site/scripts/home-shots.ts"',
   'cd "{{config_root}}" && bun test --timeout 60000 tests/quality/site-routes.test.ts',
 ]
 
