@@ -65,7 +65,8 @@ const kind = (fs: FileSystem.FileSystem, path: string) =>
 
 for (const [name, hash] of Object.entries(pinned))
   test.skipIf(!sources)(`${name} source rules match the pinned hash`, () =>
-    withFs((fs) => checkSource(fs, name, hash)))
+    withFs((fs) => checkSource(fs, name, hash)),
+  )
 
 for (const [name, hash] of Object.entries(pinnedCopies))
   test(`${name} copy rules match the reviewed hash`, () =>

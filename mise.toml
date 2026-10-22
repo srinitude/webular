@@ -89,7 +89,7 @@ fi
 bunx knip --no-progress --no-exit-code --fix --fix-type exports,types,dependencies
 bun install 1>&2
 bunx biome check --write . >/dev/null || true
-if bunx tsc --noEmit && bunx tsc --noEmit -p plugins/webular && bun test --timeout 60000 ./tests/quality; then
+if bun node_modules/typescript/bin/tsc --noEmit && bun node_modules/typescript/bin/tsc --noEmit -p plugins/webular && bun test --timeout 60000 ./tests/quality; then
   git status --short
 else
   echo 'prune:fix: checks failed after the fixes; undoing them' >&2
@@ -132,7 +132,7 @@ run = 'bun "{{config_root}}/scripts/bugs-check.ts"'
 [tasks.typecheck]
 description = "Compilation: strict TypeScript typecheck of the CLI and of plugins/webular (its own tsconfig, outside the root include)"
 depends = ["bugs:static"]
-run = ["bunx tsc --noEmit", "bunx tsc --noEmit -p plugins/webular"]
+run = ["bun node_modules/typescript/bin/tsc --noEmit", "bun node_modules/typescript/bin/tsc --noEmit -p plugins/webular"]
 
 [tasks.build]
 description = "Build: bundle every command into dist/commands (shared chunks in dist/chunks), and compile the native webular executable into dist/bin"
@@ -415,7 +415,7 @@ run = "bunx biome check plugins/webular"
 [tasks."plugin:typecheck"]
 description = "Plugin: strict TypeScript typecheck of plugins/webular"
 depends = ["plugin:lint"]
-run = "bunx tsc --noEmit -p plugins/webular"
+run = "bun node_modules/typescript/bin/tsc --noEmit -p plugins/webular"
 
 [tasks."plugin:check-test-first"]
 description = "Plugin: each src file has a test that names or imports it"

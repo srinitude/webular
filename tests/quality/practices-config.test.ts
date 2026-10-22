@@ -37,10 +37,11 @@ describe('best practices: CI workflow', () => {
     }),
   )
   check(
-    'dependabot keeps action and npm pins current',
+    'dependabot opens no version-update PRs for actions, bun, or docker',
     Effect.map(read('.github/dependabot.yml'), (yml) => {
       expect(yml).toContain('package-ecosystem: github-actions')
       expect(yml).toContain('package-ecosystem: bun')
+      expect(yml.match(/open-pull-requests-limit: 0$/gm)).toHaveLength(3)
     }),
   )
 })

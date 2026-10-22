@@ -1,7 +1,6 @@
 # AGENTS.md
 
 Webular is a web research CLI on Bun. Its jobs run as [Mastra workflows](src/workflows/AGENTS.md) on Effect, with judgment calls sent to [Jev](src/lib/jev/AGENTS.md), TypeSafe's decision model, and flows in [XState](src/machines/AGENTS.md).
-Every command runs through the `mise` task graph in [mise.toml](mise.toml).
 This file is for coding agents on any host. People start at [README.md](README.md).
 
 ## Commands and mise
@@ -74,6 +73,7 @@ Never:
 - No AI co-attribution of any kind: no `Co-Authored-By` trailer and no "generated with" line.
 - Subjects follow Conventional Commits with a scope, such as `fix(search): drop loopback hits`.
 - One pull request, #4, holds all open work. Never push to main or force-push.
+- Dependabot opens no version-update PRs; fold dependency updates into #4 by hand.
 - Land work by picking whole files or hunks, with a `Landed-from:` trailer. Never merge, rebase, squash, or cherry-pick between agent branches.
 - Main moves only by fast-forward, after CI is green on Linux, macOS, and Windows and all 117 three-model runs of `mise run test:models` pass.
 - A pull request lists the checks it ran, with their real output.
@@ -82,7 +82,7 @@ Never:
 ## Resources
 
 - Measure before and after each change on the same input with `mise run bench`. Keep it only if the numbers and tests both hold ([hyperfine](https://github.com/sharkdp/hyperfine)).
-- Bun does not type-check, so keep `bunx tsc --noEmit` on the CI spine ([Bun](https://bun.com/docs/runtime/typescript), tag `bun-v1.4.3`).
+- Bun does not type-check, so keep `bun node_modules/typescript/bin/tsc --noEmit` on the CI spine ([Bun](https://bun.com/docs/runtime/typescript), tag `bun-v1.4.3`).
 - Bundle with `--target=bun`; the default is the browser. ESM bytecode needs `--compile`, so keep `--compile --bytecode --format=esm --minify` together ([Bun](https://bun.com/docs/bundler/bytecode), tag `bun-v1.4.3`).
 - List every Worker entry file on the `--compile` command when the binary starts that Worker. One left off loads from disk and fails ([Bun](https://bun.com/docs/bundler/executables), tag `bun-v1.4.3`).
 - Install with `bun install --frozen-lockfile` and keep [bun.lock](bun.lock) tracked. A frozen install with no lockfile writes none ([Bun](https://bun.com/docs/pm/cli/install), tag `bun-v1.4.3`).
@@ -96,7 +96,7 @@ Never:
 - Keep CLAUDE.local.md and AGENTS.local.md out of git ([Claude Code memory](https://code.claude.com/docs/en/memory)).
 - A root llms.txt opens with one H1, then a `>` summary, then intro lines with no headings. H2 sections list one Markdown link per bullet, with a short note. Links are absolute https URLs to Markdown pages and match the README docs list ([llms.txt v2](https://llmstxt.org)).
 - A root server.json uses the `2025-12-11` schema, the name io.github.srinitude/webular, a description of at most 100 characters, the package.json version, and an npm stdio package. package.json `mcpName` holds the same name ([MCP Registry server.json schema 2025-12-11](https://github.com/modelcontextprotocol/registry/blob/main/docs/reference/server-json/draft/server.schema.json)).
-- Violations: .gitignore lists neither local file. `ai` sits in `devDependencies` (package.json:94), not `dependencies`.
+- Violations: .gitignore lists neither local file. `ai` sits in `devDependencies`, not `dependencies`.
 
 ## Security
 
