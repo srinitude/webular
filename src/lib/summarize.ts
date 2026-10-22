@@ -137,6 +137,8 @@ const QUESTION_WORDS = new Set(['what', 'how', 'why', 'whose', 'whom'])
 interface Focus {
   query: string
   entity?: string | undefined
+  // Research topics rank on every word; only answer questions split off a clause.
+  wholeQuery?: boolean
 }
 // A describing clause ("the physicist who formulated the uncertainty
 // principle") names the subject; it is not what is asked. It starts at
@@ -155,7 +157,9 @@ export function splitQuestion(query: string): { asked: string; clause: string } 
   return { asked: `${query.slice(0, m.index)} ${verb}`.trim(), clause }
 }
 function focusScores(text: string, spans: Spans, focus: Focus): number[] {
-  const { asked, clause } = splitQuestion(focus.query)
+  const { asked, clause } = focus.wholeQuery
+    ? { asked: focus.query, clause: '' }
+    : splitQuestion(focus.query)
   const keys = new Set(tokenize(asked).filter((w) => !QUESTION_WORDS.has(w)))
   const entity = new Set(tokenize(`${focus.entity ?? ''} ${clause}`).filter((w) => !keys.has(w)))
   const sets = spans.starts.map((from, i) => new Set(tokenize(text.slice(from, spans.ends[i]))))

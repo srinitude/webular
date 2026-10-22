@@ -17,7 +17,7 @@ export const researchSentences = (text: string, topN = Number.POSITIVE_INFINITY,
   summarizeText(
     text,
     topN,
-    topic === undefined ? undefined : { query: topic },
+    topic === undefined ? undefined : { query: topic, wholeQuery: true },
     splitResearchSentences,
   ).sentences
 
