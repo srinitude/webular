@@ -93,3 +93,14 @@ test(
     }),
   ),
 )
+
+test(
+  'a title selector the page no longer matches returns the page title',
+  eff(
+    Effect.gen(function* () {
+      const html = '<html><head><title>Example Domain</title></head><body><p>Hi</p></body></html>'
+      const got = yield* selectFields(html, [{ name: 'title', selector: 'h1' }])
+      expect(got).toEqual({ title: 'Example Domain' })
+    }),
+  ),
+)

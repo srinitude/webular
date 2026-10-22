@@ -136,6 +136,7 @@ const pickField = (
   document: ReturnType<typeof parseHTML>['document'],
   { name, selector }: FieldSpec,
   known: Known,
+  pageTitle: string,
 ) => {
   const structured = selector ? undefined : structuredOf(known, name)
   if (structured) return Effect.succeed(structured)
@@ -143,6 +144,13 @@ const pickField = (
   if (located) return Effect.succeed(located)
   const matched: Element[] = selector ? Array.from(document.querySelectorAll(selector)) : []
   if (matched.length === 1 && matched[0]) return Effect.succeed(textOf(matched[0]))
+  // A selector the page no longer matches falls back to the page metadata of that
+  // name (a "title" field to <title>) before any guess from body text.
+  const meta =
+    selector && matched.length === 0
+      ? (structuredOf(known, name) ?? (keyOf(name) === 'title' ? pageTitle : ''))
+      : ''
+  if (meta) return Effect.succeed(meta)
   const candidates =
     matched.length > 1
       ? candidatesOf(matched, false)
@@ -156,9 +164,10 @@ const pickField = (
 export const selectFields = (html: string, fields: ReadonlyArray<FieldSpec>) => {
   const { document } = parseHTML(html)
   // Read before dropHidden: meta tags and JSON-LD scripts are never rendered.
-  const known: Known = fields.some((f) => !f.selector) ? structuredValues(document) : new Map()
+  const known = structuredValues(document)
+  const pageTitle = document.title?.trim() ?? ''
   if (document.documentElement) dropHidden(document.documentElement)
-  return Effect.forEach(fields, (f) => pickField(document, f, known), {
+  return Effect.forEach(fields, (f) => pickField(document, f, known, pageTitle), {
     concurrency: JEV_CONCURRENCY,
   }).pipe(
     Effect.map((values) => Object.fromEntries(fields.map((f, i) => [f.name, values[i] ?? '']))),
