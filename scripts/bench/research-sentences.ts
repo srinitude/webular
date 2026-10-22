@@ -2,18 +2,20 @@
 // that states the answer? Cases are real: the bench's known-answer questions and
 // the page text peers fetched for them (bench/recordings). A case lists the
 // sentences that hold an answer string.
-//   bun scripts/bench/research-sentences.ts cases    -> writes tests/jev/evals/research.sentences.json
+//   bun scripts/bench/research-sentences.ts cases    -> writes the eval file the decision names
 //   bun scripts/bench/research-sentences.ts base|jev -> one run: pass rate (+ Jev clarity)
 // Run each arm in a fresh process: the Jev client caches answers in memory.
 import { BunRuntime, BunServices } from '@effect/platform-bun'
 import { Console, Effect, FileSystem, Layer, Schema } from 'effect'
 import { Jev } from '../../src/lib/jev/client.ts'
-import { answerSentences } from '../../src/lib/jev/decisions/answer.ts'
-import { researchSentence } from '../../src/lib/jev/decisions/research-sentences.ts'
-import { summarizeText } from '../../src/lib/summarize.ts'
+import {
+  researchSentence,
+  researchSentences,
+} from '../../src/lib/jev/decisions/research-sentences.ts'
 import { builtinTasks } from './peers/tasks.ts'
 
-const EVALS = 'tests/jev/evals/research.sentences.json'
+// Cases index into the decision's own splitter; the decision names its eval file.
+const EVALS = researchSentence.def.evals
 const TOP_N = 2 // the research command's default sentences per source
 const Citations = Schema.fromJsonString(
   Schema.Struct({
@@ -55,7 +57,7 @@ const caseFor = (topic: string, answers: ReadonlyArray<string>, text: string) =>
   const t = norm(text)
   const want = words(topic)
   if (want.filter((w) => t.includes(w)).length < Math.max(2, 0.6 * want.length)) return []
-  const all = answerSentences(text)
+  const all = researchSentences(text)
   const needed = all.flatMap((s, i) => (answers.some((a) => norm(s).includes(norm(a))) ? [i] : []))
   if (needed.length === 0 || all.length < 5) return []
   // The label is the fallback's pick when it is a needed sentence, else the first needed one.
@@ -66,12 +68,12 @@ const caseFor = (topic: string, answers: ReadonlyArray<string>, text: string) =>
 const leadWins = (c: Case) => Bun.deepEquals(researchSentence.def.fallback(c.input), c.label)
 // The section's sentences, as research.ts builds them: kept ones first, then the summarizer.
 const picks = (c: Case, kept: ReadonlyArray<number>) => {
-  const top = summarizeText(c.input.text, TOP_N, { query: c.input.topic }).sentences
-  const all = answerSentences(c.input.text)
+  const top = researchSentences(c.input.text, TOP_N, c.input.topic)
+  const all = researchSentences(c.input.text)
   return [...new Set([...kept.map((i) => all[i] ?? ''), ...top])].slice(0, TOP_N)
 }
 const passes = (c: Case, chosen: ReadonlyArray<string>) => {
-  const all = answerSentences(c.input.text)
+  const all = researchSentences(c.input.text)
   return c.needed.some((i) => chosen.includes(all[i] ?? '\u0000'))
 }
 const basePasses = (c: Case) => passes(c, picks(c, []))
