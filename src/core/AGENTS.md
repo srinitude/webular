@@ -15,6 +15,7 @@ Rules for the shared Effect services, under [src/AGENTS.md](../AGENTS.md).
 - Run subprocesses with argv arrays and a timeout. Never use a shell. Drain stdout and stderr together.
 - A cache failure skips the cache and never fails a fetch.
 - [platform](platform.ts) has one table of targets. Build, release, and the launcher all read it, so add a target there only.
+- Every x64 target has a `-baseline` sibling for CPUs without AVX2; the launcher picks it when the host lacks AVX2 or `WEBULAR_BASELINE=1` is set.
 
 ### Resources
 

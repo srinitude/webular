@@ -168,6 +168,10 @@ run = [
   'bun build "{{config_root}}/bin/webular.ts" --compile --minify --sourcemap --bytecode --format=esm --target=bun-linux-arm64-musl --outfile="{{config_root}}/dist/bin/webular-linux-arm64-musl"',
   'bun build "{{config_root}}/bin/webular.ts" --compile --minify --sourcemap --bytecode --format=esm --target=bun-windows-x64 --outfile="{{config_root}}/dist/bin/webular-windows-x64.exe"',
   'bun build "{{config_root}}/bin/webular.ts" --compile --minify --sourcemap --bytecode --format=esm --target=bun-windows-arm64 --outfile="{{config_root}}/dist/bin/webular-windows-arm64.exe"',
+  'bun build "{{config_root}}/bin/webular.ts" --compile --minify --sourcemap --bytecode --format=esm --target=bun-darwin-x64-baseline --outfile="{{config_root}}/dist/bin/webular-darwin-x64-baseline"',
+  'bun build "{{config_root}}/bin/webular.ts" --compile --minify --sourcemap --bytecode --format=esm --target=bun-linux-x64-baseline --outfile="{{config_root}}/dist/bin/webular-linux-x64-baseline"',
+  'bun build "{{config_root}}/bin/webular.ts" --compile --minify --sourcemap --bytecode --format=esm --target=bun-linux-x64-musl-baseline --outfile="{{config_root}}/dist/bin/webular-linux-x64-musl-baseline"',
+  'bun build "{{config_root}}/bin/webular.ts" --compile --minify --sourcemap --bytecode --format=esm --target=bun-windows-x64-baseline --outfile="{{config_root}}/dist/bin/webular-windows-x64-baseline.exe"',
 ]
 
 [tasks."package:platforms"]

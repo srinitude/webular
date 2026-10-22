@@ -1,13 +1,15 @@
 // One table and one resolver for "which webular executable fits this machine".
 // The CLI launcher, the release packaging, and the parity test all read
 // TARGETS, so build targets, release assets, npm package names, and runtime
-// picks never drift apart. Detection runs in-process (no child process), once
-// per process: the launcher is its only runtime caller.
-// Bun ships one x64 binary per OS that picks AVX2/AVX-512 paths at runtime, so
-// no -baseline build exists to choose (https://bun.com/docs/bundler/executables).
+// picks never drift apart. Detection runs in-process, once per process: the
+// launcher is its only runtime caller.
+// Every x64 target has a -baseline sibling built for CPUs without AVX2
+// (https://bun.com/docs/bundler/executables); arm64 has none. The picker takes
+// the baseline build only when the host reports no AVX2 or WEBULAR_BASELINE=1.
 import { cpus } from 'node:os'
 import { dirname, join } from 'node:path'
-import { Effect, FileSystem, Option } from 'effect'
+import { Config, Effect, FileSystem, Option } from 'effect'
+import { ChildProcess, ChildProcessSpawner } from 'effect/process'
 
 type Os = 'darwin' | 'linux' | 'win32'
 type Cpu = 'arm64' | 'x64'
@@ -18,18 +20,29 @@ export interface Target {
   os: Os
   cpu: Cpu
   libc?: Libc | undefined
+  baseline?: boolean | undefined // x64 build for CPUs without AVX2
 }
 
-const t = (os: Os, cpu: Cpu, libc?: Libc): Target => ({
-  key: [os === 'win32' ? 'windows' : os, cpu, libc === 'musl' ? 'musl' : '']
+const t = (os: Os, cpu: Cpu, libc?: Libc, baseline = false): Target => ({
+  key: [
+    os === 'win32' ? 'windows' : os,
+    cpu,
+    libc === 'musl' ? 'musl' : '',
+    baseline ? 'baseline' : '',
+  ]
     .filter(Boolean)
     .join('-'),
   os,
   cpu,
   libc,
+  baseline,
 })
 
-export const TARGETS: readonly Target[] = [
+// Each x64 entry is followed by its baseline sibling.
+const withBaseline = (targets: readonly Target[]): Target[] =>
+  targets.flatMap((x) => (x.cpu === 'x64' ? [x, t(x.os, x.cpu, x.libc, true)] : [x]))
+
+export const TARGETS: readonly Target[] = withBaseline([
   t('darwin', 'arm64'),
   t('darwin', 'x64'),
   t('linux', 'x64', 'glibc'),
@@ -38,7 +51,7 @@ export const TARGETS: readonly Target[] = [
   t('linux', 'arm64', 'musl'),
   t('win32', 'x64'),
   t('win32', 'arm64'),
-]
+])
 
 const exeSuffix = (target: Target): string => (target.os === 'win32' ? '.exe' : '')
 export const packageName = (target: Target): string => `webular-${target.key}`
@@ -51,13 +64,20 @@ export interface Facts {
   arch: string
   libc?: Libc | undefined
   rosetta?: boolean
+  // false = no AVX2, so x64 takes the baseline build; unknown counts as AVX2.
+  avx2?: boolean | undefined
 }
 
 // The build for this machine, or none when it is unsupported.
 export function targetFor(facts: Facts): Target | undefined {
   const cpu = facts.rosetta ? 'arm64' : facts.arch
+  const baseline = cpu === 'x64' && facts.avx2 === false
   return TARGETS.find(
-    (x) => x.os === facts.platform && x.cpu === cpu && (x.os !== 'linux' || x.libc === facts.libc),
+    (x) =>
+      x.os === facts.platform &&
+      x.cpu === cpu &&
+      Boolean(x.baseline) === baseline &&
+      (x.os !== 'linux' || x.libc === facts.libc),
   )
 }
 
@@ -74,9 +94,40 @@ const underRosetta = (): boolean =>
   process.arch === 'x64' &&
   (cpus()[0]?.model ?? '').startsWith('Apple')
 
+// Linux lists CPU flags in /proc/cpuinfo; macOS lists leaf-7 features in sysctl.
+// Windows is assumed to have AVX2. A source that cannot be read, or a missing
+// process spawner (the plain-Node launcher has none), is "unknown" (undefined).
+const linuxAvx2 = Effect.gen(function* () {
+  const fs = yield* FileSystem.FileSystem
+  const info = yield* fs.readFileString('/proc/cpuinfo').pipe(Effect.option)
+  const text = Option.getOrElse(info, () => '')
+  return /^flags\s*:/im.test(text) ? /^flags\s*:.*\bavx2\b/im.test(text) : undefined
+})
+
+const darwinAvx2 = Effect.gen(function* () {
+  const spawner = yield* Effect.serviceOption(ChildProcessSpawner.ChildProcessSpawner)
+  if (Option.isNone(spawner)) return undefined
+  const sysctl = ChildProcess.make('sysctl', ['-n', 'machdep.cpu.leaf7_features'])
+  const run = spawner.value.lines(sysctl).pipe(Effect.timeoutOption('2 seconds'), Effect.option)
+  const lines = Option.flatten(yield* run)
+  const text = Option.isSome(lines) ? lines.value.join(' ') : ''
+  return text.trim() ? /\bAVX2\b/.test(text) : undefined
+})
+
+// WEBULAR_BASELINE=1 forces the baseline build on any OS. Only x64 hosts are probed.
+const hostAvx2 = Effect.gen(function* () {
+  const forced = yield* Config.String('WEBULAR_BASELINE').pipe(Config.withDefault(''))
+  if (forced === '1') return false
+  if (process.arch !== 'x64') return undefined
+  if (process.platform === 'linux') return yield* linuxAvx2
+  return process.platform === 'darwin' ? yield* darwinAvx2 : undefined
+})
+
 export const hostFacts = Effect.gen(function* () {
   const libc = process.platform === 'linux' ? yield* linuxLibc : undefined
-  return { platform: process.platform, arch: process.arch, libc, rosetta: underRosetta() }
+  const rosetta = underRosetta()
+  const avx2 = rosetta ? undefined : yield* hostAvx2
+  return { platform: process.platform, arch: process.arch, libc, rosetta, avx2 }
 })
 
 // Magic bytes plus the CPU field for each OS: a wrong-OS, wrong-CPU,

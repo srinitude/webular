@@ -9,16 +9,18 @@
 // this file to dist/webular.js, so the .js stays generated build output and
 // the repo keeps no JavaScript source (tests/quality/typescript-only.test.ts).
 import { spawnSync } from 'node:child_process'
-import { existsSync, readdirSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { Console, Effect, FileSystem, Option } from 'effect'
 import { exeName, hostFacts, packageName, targetFor } from '../core/platform.ts'
 
-// hostFacts reads only /lib (the musl check), so a one-method file system runs it under Node.
+// hostFacts reads only /lib (musl check) and /proc/cpuinfo (AVX2 check), so a two-method file system
+// runs it under Node. With no process spawner, macOS reports AVX2 as unknown (default build).
 const nodeFs = FileSystem.layerNoop({
   readDirectory: (path) => Effect.sync(() => (existsSync(path) ? readdirSync(path) : [])),
+  readFileString: (path) => Effect.sync(() => (existsSync(path) ? readFileSync(path, 'utf8') : '')),
 })
 
 const run = (command: string, args: string[]) =>

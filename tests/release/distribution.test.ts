@@ -50,11 +50,16 @@ test('every target has a package, an asset, a checksum line, and an install path
         expect(packageName(target)).toBe(`webular-${target.key}`)
         expect(sums.get(asset)).toBe(shaOf(asset))
         const viaManager = formula.includes(asset) || manifest.includes(asset)
+        // Baseline builds ship as npm packages and release assets, not through Homebrew or Scoop.
+        if (target.baseline) {
+          expect([asset, viaManager]).toEqual([asset, false])
+          continue
+        }
         const viaInstaller = target.libc === 'musl' && installer.includes('suffix=-musl')
         expect([asset, viaManager || viaInstaller]).toEqual([asset, true])
       }
       expect(brewTargets.length + scoopTargets.length).toBe(
-        TARGETS.filter((x) => x.libc !== 'musl').length,
+        TARGETS.filter((x) => x.libc !== 'musl' && !x.baseline).length,
       )
     }),
   ))

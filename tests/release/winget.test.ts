@@ -13,7 +13,7 @@ const ID = 'Srinitude.Webular'
 const shaOf = (asset: string) =>
   new Bun.CryptoHasher('sha256').update(asset).digest('hex') as string
 const SUMS = TARGETS.map((x) => `${shaOf(assetName(x))}  ${assetName(x)}`).join('\n')
-const windows = TARGETS.filter((x) => x.os === 'win32')
+const windows = TARGETS.filter((x) => x.os === 'win32' && !x.baseline)
 
 type Doc = Record<string, unknown>
 const build = () =>

@@ -14,6 +14,7 @@ Rules for the release steps, under [src/AGENTS.md](../AGENTS.md).
 - Each step is a script that a `mise` task runs (see `package:*` and `compile:all` in [`mise.toml`](../../mise.toml)). Run it through that task.
 - Steps read checksums from `dist/bin/SHA256SUMS` and write only under `dist/`. Never edit `dist/` by hand.
 - Targets come from the one table in [`src/core/platform.ts`](../core/platform.ts). Never list a platform again here.
+- Homebrew, Scoop, and winget ship the default builds only; the `-baseline` builds ship as npm packages and release assets.
 - Completions and the manual page read the command list and flags from the code. Never type them out.
 - [`upgrade.ts`](upgrade.ts) is pure. Callers pass the paths and the environment, so each channel is provable without touching the machine.
 - [`node-launcher.ts`](node-launcher.ts) runs on plain Node, so it uses only Node built-ins.

@@ -57,8 +57,8 @@ test(
   60_000,
 )
 
-test('the root package lists exactly the 8 platform packages', () => {
+test('the root package lists exactly the 12 platform packages', () => {
   const names = Object.keys(platformDependencies('1.2.3')).sort()
-  expect(names).toHaveLength(8)
+  expect(names).toHaveLength(12)
   expect(names).toEqual(TARGETS.map(packageName).sort())
 })

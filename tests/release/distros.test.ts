@@ -88,7 +88,7 @@ test(
       const assets = new Set(TARGETS.map(assetName))
       expect(named.length).toBeGreaterThan(0)
       for (const n of named) expect(assets.has(n)).toBe(true)
-      for (const t of TARGETS.filter((x) => x.os === 'linux' && x.libc === 'musl'))
+      for (const t of TARGETS.filter((x) => x.os === 'linux' && x.libc === 'musl' && !x.baseline))
         expect(named).toContain(assetName(t))
       expect(text).toContain('ARG TARGETARCH')
       expect(text).toContain('ENTRYPOINT ["webular"]')

@@ -14,6 +14,7 @@ Tests for packaging and release. The parent rules are in [tests/AGENTS.md](../AG
 
 - These tests read the workflows in `.github/workflows/` and the generators in [`src/release/`](../../src/release/). Changing a workflow needs a yes first.
 - Nothing here publishes or pushes. These tests check files and local runs only.
+- Baseline targets are exempt from the Homebrew, Scoop, winget, and Dockerfile checks; they have their own npm package and asset checks.
 
 ## Checks
 

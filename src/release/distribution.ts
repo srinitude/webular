@@ -25,8 +25,11 @@ export const parseSums = (text: string): Sums =>
       .flatMap((m) => (m?.[1] && m[2] ? [[m[2], m[1]] as const] : [])),
   )
 
-export const brewTargets = TARGETS.filter((x) => x.os !== 'win32' && x.libc !== 'musl')
-export const scoopTargets = TARGETS.filter((x) => x.os === 'win32')
+// Package managers ship the default builds; baseline builds ship as npm packages and release assets.
+export const brewTargets = TARGETS.filter(
+  (x) => x.os !== 'win32' && x.libc !== 'musl' && !x.baseline,
+)
+export const scoopTargets = TARGETS.filter((x) => x.os === 'win32' && !x.baseline)
 
 export const sumFor = (sums: Sums, target: Target) => {
   const asset = assetName(target)
