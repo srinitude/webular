@@ -3,13 +3,17 @@
 # (default $HOME\.webular\bin\webular.exe), then adds that folder to the user PATH.
 #   irm https://github.com/srinitude/webular/releases/latest/download/install.ps1 | iex
 # WEBULAR_VERSION=<x.y.z> pins a release (a baked copy pins its own release and
-# checks the sums baked into it). WEBULAR_BASE_URL replaces the download folder
-# (an https:// URL, a file:// URL, or a local folder; http:// is refused).
+# checks the sums baked into it). WEBULAR_BASE_URL replaces the folder the
+# binary comes from (an https:// URL, a file:// URL, or a local folder; http://
+# is refused); the sums never come from it: the baked sums win, and an unbaked
+# copy reads SHA256SUMS from the GitHub release.
 # WEBULAR_PRINT_ASSET=1 prints the asset name and stops.
 # WEBULAR_BASELINE=1 picks the -baseline x64 asset (chosen on its own without AVX2).
 # WEBULAR_NO_MODIFY_PATH=1 leaves PATH alone. WEBULAR_UNINSTALL=1 removes the
-# program and its PATH entry. WEBULAR_VERIFY_ATTESTATION=1 also runs
-# `gh attestation verify`. HTTPS_PROXY sets a proxy. WEBULAR_OS and WEBULAR_ARCH
+# program and its PATH entry. With gh on PATH, `gh attestation verify` runs and
+# must pass; without gh, a note says it was skipped.
+# WEBULAR_VERIFY_ATTESTATION=1 requires gh, and 0 skips the check.
+# HTTPS_PROXY sets a proxy. WEBULAR_OS and WEBULAR_ARCH
 # override detection, so the tests can run this script on any OS with pwsh.
 & {
   $ErrorActionPreference = 'Stop'
@@ -26,21 +30,21 @@ __WEBULAR_SUMS__
   $baked = $DefaultVersion -ne ('__WEBULAR_' + 'VERSION__')
   function Fail($message) { throw $message }
 
-  function Fetch($name) {
+  function Fetch($from, $name) {
     $out = Join-Path $tmp $name
     try {
-      if ($base -match '^https://') {
+      if ($from -match '^https://') {
         $proxy = @{}
         if ($env:HTTPS_PROXY) { $proxy.Proxy = $env:HTTPS_PROXY }
-        Invoke-WebRequest -UseBasicParsing @proxy -Uri "$base/$name" -OutFile $out
+        Invoke-WebRequest -UseBasicParsing @proxy -Uri "$from/$name" -OutFile $out
       } else {
-        $folder = if ($base -match '^file://') { ([uri]$base).LocalPath } else { $base }
+        $folder = if ($from -match '^file://') { ([uri]$from).LocalPath } else { $from }
         Copy-Item -LiteralPath (Join-Path $folder $name) -Destination $out
       }
     } catch {
       $status = try { [int]$_.Exception.Response.StatusCode } catch { 0 }
       if ($status -eq 404 -and $ver) { Fail "release v$ver not found; see https://github.com/$repo/releases" }
-      Fail "download failed: $base/$name; check your network, then run the installer again"
+      Fail "download failed: $from/$name; check your network, then run the installer again"
     }
     $out
   }
@@ -119,24 +123,25 @@ __WEBULAR_SUMS__
       $ver = $ver -replace '^v', ''
       if ($ver -notmatch '^\d+\.\d+\.\d+$') { Fail "bad version '$ver'; use <x.y.z>, for example from https://github.com/$repo/releases" }
     }
-    $base = $env:WEBULAR_BASE_URL
-    if (-not $base) {
-      $base = if ($ver) { "https://github.com/$repo/releases/download/v$ver" }
-      else { "https://github.com/$repo/releases/latest/download" }
-    }
+    $release = if ($ver) { "https://github.com/$repo/releases/download/v$ver" }
+    else { "https://github.com/$repo/releases/latest/download" }
+    $base = if ($env:WEBULAR_BASE_URL) { $env:WEBULAR_BASE_URL } else { $release }
     if ($base -match '^http://') { Fail 'refusing http:// base URL; use https://, file://, or a folder' }
     if ($base -match '^[A-Za-z][A-Za-z0-9+.-]+://' -and $base -notmatch '^(https|file)://') { Fail "unsupported base URL $base" }
 
     New-Item -ItemType Directory -Path $tmp | Out-Null
-    $file = Fetch $asset
-    $useBaked = $baked -and $ver -eq $DefaultVersion -and -not $env:WEBULAR_BASE_URL
-    $sums = if ($useBaked) { $BakedSums } else { Get-Content -Raw -LiteralPath (Fetch 'SHA256SUMS') }
+    $file = Fetch $base $asset
+    # Baked sums win; a mirror never supplies its own sums.
+    $useBaked = $baked -and $ver -eq $DefaultVersion
+    $sums = if ($useBaked) { $BakedSums } else { Get-Content -Raw -LiteralPath (Fetch $release 'SHA256SUMS') }
     $want = Get-Sha256Entry $sums $asset
     $got = (Get-FileHash -Algorithm SHA256 -LiteralPath $file).Hash.ToLowerInvariant()
     if ($got -ne $want) { Fail "checksum mismatch for $asset (want $want, got $got); do not run it, and report it at https://github.com/$repo/blob/main/SECURITY.md" }
 
-    if ($env:WEBULAR_VERIFY_ATTESTATION -eq '1') {
-      if (-not (Get-Command gh -ErrorAction SilentlyContinue)) { Fail 'WEBULAR_VERIFY_ATTESTATION=1 needs gh; install it from https://cli.github.com, run `gh auth login`, then try again' }
+    $hasGh = [bool](Get-Command gh -ErrorAction SilentlyContinue)
+    if ($env:WEBULAR_VERIFY_ATTESTATION -eq '1' -and -not $hasGh) { Fail 'WEBULAR_VERIFY_ATTESTATION=1 needs gh; install it from https://cli.github.com, run `gh auth login`, then try again' }
+    if ($env:WEBULAR_VERIFY_ATTESTATION -ne '0' -and -not $hasGh) { Write-Host 'note: gh is not on PATH, so the build attestation was not checked' }
+    if ($env:WEBULAR_VERIFY_ATTESTATION -ne '0' -and $hasGh) {
       gh attestation verify $file --repo $repo --signer-workflow "$repo/.github/workflows/release.yml" | Out-Host
       if ($LASTEXITCODE -ne 0) { Fail "attestation check failed; do not run it. See https://github.com/$repo/blob/main/SECURITY.md" }
     }

@@ -50,7 +50,7 @@ Run `webular completions <shell>` for bash, zsh, fish, or PowerShell, as the ins
 
 ## Upgrade and uninstall
 
-Upgrade with the channel you installed from. A copy from the install script upgrades itself:
+Upgrade with the channel you installed from. `webular upgrade` finds that channel from where the program lives, so a copy from an install script upgrades itself:
 
 ```bash
 webular upgrade

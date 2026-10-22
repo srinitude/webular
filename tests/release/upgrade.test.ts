@@ -6,6 +6,7 @@ import { upgradeFor } from '../../src/release/upgrade.ts'
 
 const RELEASES = 'https://github.com/srinitude/webular/releases/latest'
 const INSTALL_SH = "curl --proto '=https' --tlsv1.2 -fsSL https://webular.dev/install.sh | sh"
+const INSTALL_PS1 = 'irm https://webular.dev/install.ps1 | iex'
 const BREW = 'brew upgrade webular'
 const NPM = 'npm install -g webular@latest'
 const SCOOP = 'scoop update webular'
@@ -47,6 +48,15 @@ describe('upgradeFor — one command per install channel', () => {
     expect(got).toEqual({
       channel: 'install.sh',
       command: INSTALL_SH.replace(/\| sh$/, '| WEBULAR_INSTALL=/opt/tools sh'),
+    })
+  })
+
+  test('a webular.exe under .webular\\bin is an install.ps1 install, and keeps a custom dir', () => {
+    const exe = 'C:\\Users\\a\\.webular\\bin\\webular.exe'
+    expect(upgradeFor([exe], {})).toEqual({ channel: 'install.ps1', command: INSTALL_PS1 })
+    expect(upgradeFor(['D:\\tools\\bin\\webular.exe'], { WEBULAR_INSTALL: 'D:\\tools' })).toEqual({
+      channel: 'install.ps1',
+      command: `$env:WEBULAR_INSTALL='D:/tools'; ${INSTALL_PS1}`,
     })
   })
 

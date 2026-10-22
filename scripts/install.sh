@@ -6,11 +6,15 @@
 #   curl --proto '=https' --tlsv1.2 -fsSL https://webular.dev/install.sh | sh -s -- --version <x.y.z>
 # Options: --version <x.y.z>, --no-modify-path, --uninstall, --quiet; or their
 # twins WEBULAR_VERSION, WEBULAR_NO_MODIFY_PATH=1, WEBULAR_UNINSTALL=1, WEBULAR_QUIET=1.
-# WEBULAR_INSTALL sets the install root. WEBULAR_BASE_URL replaces the download
-# folder (https://, file://, or http:// on loopback). WEBULAR_BASELINE=1 or 0
+# WEBULAR_INSTALL sets the install root. WEBULAR_BASE_URL replaces the folder the
+# binary comes from (https://, file://, or http:// on loopback); the checksums
+# never come from it: the SHA256SUMS baked in at release win, and an unbaked
+# copy reads SHA256SUMS from the GitHub release. WEBULAR_BASELINE=1 or 0
 # forces or skips the x64 build for CPUs without AVX2. WEBULAR_OS, WEBULAR_ARCH,
-# WEBULAR_LIBC override detection. WEBULAR_VERIFY_ATTESTATION=1 runs `gh
-# attestation verify` and fails closed. WEBULAR_ALLOW_SUDO=1 allows sudo.
+# WEBULAR_LIBC override detection. With gh on PATH, `gh attestation verify` runs
+# and must pass; without gh, a note says it was skipped.
+# WEBULAR_VERIFY_ATTESTATION=1 requires gh, and 0 skips the check.
+# WEBULAR_ALLOW_SUDO=1 allows sudo.
 # curl and wget read HTTPS_PROXY and NO_PROXY on their own.
 set -eu
 
@@ -96,29 +100,38 @@ resolve_release() {
   if [ -n "$version" ] && ! printf '%s\n' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
     fail "version must look like 1.2.3, not $version"
   fi
-  base="https://github.com/$repo/releases/latest/download"
-  [ -z "$version" ] || base="https://github.com/$repo/releases/download/v$version"
-  base="${WEBULAR_BASE_URL:-$base}"
+  release="https://github.com/$repo/releases/latest/download"
+  [ -z "$version" ] || release="https://github.com/$repo/releases/download/v$version"
+  base="${WEBULAR_BASE_URL:-$release}"
   case "$base" in
     https://* | file://* | http://127.0.0.1[:/]* | http://localhost[:/]*) ;;
     *) fail "WEBULAR_BASE_URL must start with https:// (or file://, or http:// on loopback)" ;;
   esac
 }
+verify_attestation() { # file
+  [ "${WEBULAR_VERIFY_ATTESTATION:-}" != 0 ] || return 0
+  if ! command -v gh >/dev/null 2>&1; then
+    [ "${WEBULAR_VERIFY_ATTESTATION:-}" != 1 ] || fail "WEBULAR_VERIFY_ATTESTATION=1 needs gh; install it from https://cli.github.com"
+    say "note: gh is not on PATH, so the build attestation was not checked" >&2
+    return 0
+  fi
+  gh attestation verify "$1" --repo "$repo" \
+    --signer-workflow "$repo/.github/workflows/release.yml" >&2 ||
+    fail "attestation check failed; do not run it, and report it as $security says"
+}
 verify_download() { # file
-  if [ -z "${WEBULAR_BASE_URL:-}" ] && [ -n "$version" ] && [ "$version" = "$default_version" ]; then
+  # Baked sums win; a mirror never supplies its own sums.
+  if [ -n "$version" ] && [ "$version" = "$default_version" ]; then
     printf '%s\n' "$baked_sums" > "$tmp/SHA256SUMS"
   else
-    fetch "$base/SHA256SUMS" "$tmp/SHA256SUMS" || fail "download failed: $base/SHA256SUMS"
+    fetch "$release/SHA256SUMS" "$tmp/SHA256SUMS" || fail "download failed: $release/SHA256SUMS"
   fi
   want="$(awk -v f="$asset" '$2 == f || $2 == "*" f { print $1 }' "$tmp/SHA256SUMS")"
   printf '%s\n' "$want" | grep -Eq '^[0-9a-f]{64}$' || fail "no checksum for $asset in SHA256SUMS"
   got="$(sha256_of "$1")"
   [ "$got" = "$want" ] ||
     fail "checksum mismatch for $asset (want $want, got $got); do not run it, and report it as $security says"
-  [ "${WEBULAR_VERIFY_ATTESTATION:-0}" = 1 ] || return 0
-  command -v gh >/dev/null 2>&1 || fail "WEBULAR_VERIFY_ATTESTATION=1 needs gh"
-  gh attestation verify "$1" --repo "$repo" \
-    --signer-workflow "$repo/.github/workflows/release.yml" >&2 || fail "attestation check failed"
+  verify_attestation "$1"
 }
 
 install_binary() {

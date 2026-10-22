@@ -51,7 +51,7 @@ irm https://webular.dev/install.ps1 | iex
 
 Copy the command only from the [README](../README.md) or webular.dev, because fake install pages swap the host name. To pin a release, pass `--version <x.y.z>`.
 
-Two checks guard the download, and they prove different things. `SHA256SUMS` proves the file is intact (integrity), but not who built it (origin). The attestation check proves origin. It is pinned to the signer workflow `srinitude/webular/.github/workflows/release.yml`. With `WEBULAR_VERIFY_ATTESTATION=1`, the installer runs the attestation check and fails closed. The [install script reference](install-script.md) covers reading the script before it runs, every option, where it installs, PATH changes, verification, proxies, and telemetry.
+Two checks guard the download, and they prove different things. `SHA256SUMS` proves the file is intact (integrity), but not who built it (origin). The attestation check proves origin. It is pinned to the signer workflow `srinitude/webular/.github/workflows/release.yml`. The checksums baked into the installer at release always win, and a `WEBULAR_BASE_URL` mirror never supplies its own. When `gh` is on your PATH, the installer runs the attestation check and stops if it fails. Without `gh`, it prints a note and goes on. `WEBULAR_VERIFY_ATTESTATION=1` makes `gh` required, and `0` skips the check. The [install script reference](install-script.md) covers reading the script before it runs, every option, where it installs, PATH changes, verification, proxies, and telemetry.
 
 ## npm, Bun, and pnpm
 

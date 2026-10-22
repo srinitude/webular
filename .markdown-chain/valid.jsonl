@@ -288,3 +288,7 @@
 {"path": "docs/install-more.md", "sha": "607f012220952b0d172292da95549405c3add8d8fe514d8662c2734dc1af7396", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "README.md", "sha": "99fee16d330b7192204913f557948427249d9a032cfa50fc4f2b111ccd834637", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "src/lib/AGENTS.md", "sha": "e23e470d39258382d7b633243857f45e30d9b373e2219fced418e526622788af", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "README.md", "sha": "1a8ba7705787c754f86bea7e78f1217157512b33599f7efee808530326648d46", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/install.md", "sha": "c1e38bb4a355a8fcf923711ade28700907e21e2b2c0b228738b2e55848cd9106", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/install-script.md", "sha": "04425ccbd8fe57e1fd33281c8fd7b818000a56422938d55bf1360793a0f9cf1e", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/install-more.md", "sha": "f90a56759d5d5885905cb87d0941842729b1124f20ff9d2d26fca45e406678ff", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}

@@ -1,8 +1,5 @@
-// scripts/install.ps1 under pwsh against a local release folder inside the repo
-// (out/, gitignored). WEBULAR_OS and WEBULAR_ARCH force the windows-x64 asset,
-// so this runs on any OS with pwsh: a matching checksum installs webular.exe,
-// and a SHA256SUMS that disagrees with the download installs nothing. The script
-// also parses cleanly and refuses a plain http:// base URL.
+// scripts/install.ps1 under pwsh against a release folder in out/ (gitignored);
+// WEBULAR_OS and WEBULAR_ARCH force the windows-x64 asset on any OS with pwsh.
 import { afterAll, expect, test } from 'bun:test'
 import { BunServices } from '@effect/platform-bun'
 import { Effect, FileSystem, ManagedRuntime } from 'effect'
@@ -16,28 +13,28 @@ afterAll(() => runtime.dispose())
 const BINARY = 'MZ fixture-ok\n'
 const sha256 = (text: string) => new Bun.CryptoHasher('sha256').update(text).digest('hex')
 const windowsX64 = TARGETS.find((target) => target.os === 'win32' && target.cpu === 'x64')
+const SCRIPT = `${ROOT}scripts/install.ps1`
+const PWSH = Bun.which('pwsh') ?? 'pwsh'
 
-// Runs install.ps1 for windows-x64 from `base` into `home`; yields its exit code.
-const runInstaller = (base: string, home: string) =>
+// Runs an installer script with env and returns its exit code and combined output.
+const run = (env: Record<string, string>, script = SCRIPT) =>
   Effect.gen(function* () {
     const spawner = yield* ChildProcessSpawner.ChildProcessSpawner
-    return yield* spawner.exitCode(
-      ChildProcess.make('pwsh', ['-NoProfile', '-File', `${ROOT}scripts/install.ps1`], {
-        env: {
-          WEBULAR_BASE_URL: base,
-          WEBULAR_INSTALL: home,
-          WEBULAR_OS: 'windows',
-          WEBULAR_ARCH: 'x64',
-          WEBULAR_NO_MODIFY_PATH: '1',
-        },
-        extendEnv: true,
-        stdout: 'ignore',
-        stderr: 'ignore',
-      }),
-    )
-  })
+    const command = ChildProcess.make(PWSH, ['-NoProfile', '-File', script], {
+      env: { WEBULAR_OS: 'windows', ...env },
+      extendEnv: true,
+    })
+    const output = yield* spawner.string(command, { includeStderr: true })
+    const code = yield* spawner.exitCode(command)
+    return { code: Number(code), output: output.trim() }
+  }).pipe(Effect.scoped)
 
-const install = (sum: string, baseFor: (dir: string) => string) =>
+const QUIET = { WEBULAR_ARCH: 'x64', WEBULAR_NO_MODIFY_PATH: '1', WEBULAR_VERIFY_ATTESTATION: '0' }
+
+// A release folder whose SHA256SUMS always matches, and a copy of install.ps1
+// baked as release.yml bakes it, with `sum` as the asset's only line (or the
+// unbaked script when `sum` is undefined). Runs it into <dir>/home.
+const install = (sum: string | undefined, baseFor: (dir: string) => string, env = {}) =>
   Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem
     if (!windowsX64) return yield* Effect.die('no windows-x64 target')
@@ -48,11 +45,16 @@ const install = (sum: string, baseFor: (dir: string) => string) =>
     })
     const asset = assetName(windowsX64)
     yield* fs.writeFileString(`${dir}/${asset}`, BINARY)
-    yield* fs.writeFileString(`${dir}/SHA256SUMS`, `${sum}  ${asset}\n`)
-    const code = yield* runInstaller(baseFor(dir), `${dir}/home`)
+    yield* fs.writeFileString(`${dir}/SHA256SUMS`, `${sha256(BINARY)}  ${asset}\n`)
+    const text = yield* fs.readFileString(SCRIPT)
+    const baked = sum === undefined ? text : text.replaceAll('__WEBULAR_VERSION__', '1.0.0')
+    const script = `${dir}/install.ps1`
+    yield* fs.writeFileString(script, baked.replace('__WEBULAR_SUMS__', `${sum}  ${asset}`))
+    const where = { WEBULAR_BASE_URL: baseFor(dir), WEBULAR_INSTALL: `${dir}/home` }
+    const out = yield* run({ ...QUIET, ...where, ...env }, script)
     const exe = `${dir}/home/bin/webular.exe`
     const installed = (yield* fs.exists(exe)) ? yield* fs.readFileString(exe) : undefined
-    return { code: Number(code), installed }
+    return { ...out, installed }
   }).pipe(Effect.scoped)
 
 // pwsh takes seconds to start cold, past the 5 s default under a busy suite.
@@ -83,7 +85,7 @@ withPwshOffWindows(
 )
 
 withPwsh(
-  'refuses a download whose checksum does not match',
+  'refuses a download that misses the baked checksum, whatever the folder sums say',
   () =>
     runtime.runPromise(
       Effect.map(
@@ -97,7 +99,41 @@ withPwsh(
   PWSH_TIMEOUT,
 )
 
-const SCRIPT = `${ROOT}scripts/install.ps1`
+withPwsh(
+  'an unbaked copy asks the GitHub release for SHA256SUMS, never the mirror',
+  () =>
+    runtime.runPromise(
+      Effect.map(
+        install(undefined, (dir) => dir, { HTTPS_PROXY: 'http://127.0.0.1:9' }),
+        ({ code, output, installed }) => {
+          expect(code).not.toBe(0)
+          expect(output).toContain(
+            'download failed: https://github.com/srinitude/webular/releases/latest/download/SHA256SUMS',
+          )
+          expect(installed).toBeUndefined()
+        },
+      ),
+    ),
+  PWSH_TIMEOUT,
+)
+
+withPwsh(
+  'with no gh on PATH it notes the skipped attestation; WEBULAR_VERIFY_ATTESTATION=1 stops',
+  () =>
+    runtime.runPromise(
+      Effect.gen(function* () {
+        const noGh = { PATH: `${ROOT}out`, WEBULAR_VERIFY_ATTESTATION: '' }
+        const ok = yield* install(sha256(BINARY), (dir) => dir, noGh)
+        expect(ok.code).toBe(0)
+        expect(ok.output).toContain('gh is not on PATH, so the build attestation was not checked')
+        const required = { ...noGh, WEBULAR_VERIFY_ATTESTATION: '1' }
+        const stop = yield* install(sha256(BINARY), (dir) => dir, required)
+        expect(stop.output).toContain('WEBULAR_VERIFY_ATTESTATION=1 needs gh')
+        expect(stop.installed).toBeUndefined()
+      }),
+    ),
+  PWSH_TIMEOUT,
+)
 
 withPwsh(
   'parses with no syntax errors',
@@ -106,7 +142,7 @@ withPwsh(
       Effect.gen(function* () {
         const spawner = yield* ChildProcessSpawner.ChildProcessSpawner
         const probe = `$e = $null; [System.Management.Automation.Language.Parser]::ParseFile($env:INSTALL_PS1, [ref]$null, [ref]$e) | Out-Null; $e | ForEach-Object { $_.Message }; exit $e.Count`
-        const command = ChildProcess.make('pwsh', ['-NoProfile', '-Command', probe], {
+        const command = ChildProcess.make(PWSH, ['-NoProfile', '-Command', probe], {
           env: { INSTALL_PS1: SCRIPT },
           extendEnv: true,
         })
@@ -118,60 +154,25 @@ withPwsh(
   PWSH_TIMEOUT,
 )
 
-withPwsh(
-  'refuses a plain http:// base URL before any download',
-  () =>
-    runtime.runPromise(
-      Effect.gen(function* () {
-        const spawner = yield* ChildProcessSpawner.ChildProcessSpawner
-        const command = ChildProcess.make('pwsh', ['-NoProfile', '-File', SCRIPT], {
-          env: {
-            WEBULAR_BASE_URL: 'http://127.0.0.1:9',
-            WEBULAR_OS: 'windows',
-            WEBULAR_ARCH: 'x64',
-          },
-          extendEnv: true,
-        })
-        const output = yield* spawner.string(command, { includeStderr: true })
-        const code = yield* spawner.exitCode(command)
-        expect(Number(code)).not.toBe(0)
-        expect(output).toContain('refusing http://')
-      }).pipe(Effect.scoped),
-    ),
-  PWSH_TIMEOUT,
-)
+// Each row: the env, then a line the installer must print as it refuses.
+const REFUSALS: readonly (readonly [Record<string, string>, string])[] = [
+  [{ WEBULAR_BASE_URL: 'http://127.0.0.1:9' }, 'refusing http://'],
+  [{ WEBULAR_VERSION: '1.2', WEBULAR_BASE_URL: 'https://127.0.0.1:9' }, "bad version '1.2'"],
+]
 
-// Runs the installer with env and returns its exit code and combined output.
-const run = (env: Record<string, string>) =>
-  Effect.gen(function* () {
-    const spawner = yield* ChildProcessSpawner.ChildProcessSpawner
-    const command = ChildProcess.make('pwsh', ['-NoProfile', '-File', SCRIPT], {
-      env: { WEBULAR_OS: 'windows', ...env },
-      extendEnv: true,
-    })
-    const output = yield* spawner.string(command, { includeStderr: true })
-    const code = yield* spawner.exitCode(command)
-    return { code: Number(code), output: output.trim() }
-  }).pipe(Effect.scoped)
-
-withPwsh(
-  'refuses a version that is not N.N.N before any download',
-  () =>
-    runtime.runPromise(
-      Effect.map(
-        run({
-          WEBULAR_ARCH: 'x64',
-          WEBULAR_VERSION: '1.2',
-          WEBULAR_BASE_URL: 'https://127.0.0.1:9',
-        }),
-        ({ code, output }) => {
+for (const [env, refusal] of REFUSALS) {
+  withPwsh(
+    `refuses before any download: ${refusal}`,
+    () =>
+      runtime.runPromise(
+        Effect.map(run({ WEBULAR_ARCH: 'x64', ...env }), ({ code, output }) => {
           expect(code).not.toBe(0)
-          expect(output).toContain("bad version '1.2'")
-        },
+          expect(output).toContain(refusal)
+        }),
       ),
-    ),
-  PWSH_TIMEOUT,
-)
+    PWSH_TIMEOUT,
+  )
+}
 
 // Each row: WEBULAR_ARCH, then the asset a dry run prints.
 const ASSET_CHOICES: readonly (readonly [string, string])[] = [

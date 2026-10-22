@@ -33,11 +33,12 @@ Each release attaches its own `install.sh` and `install.ps1`, with that release'
 
 1. Finds your OS, CPU, libc, and AVX2 support, and maps them to one build in the [Platforms table](install.md#platforms). A Mac shell under Rosetta gets the arm64 build. An x64 CPU without AVX2 gets the `-baseline` build. On Linux it checks for glibc first, so a glibc system that also has the musl loader still gets the glibc build.
 2. Downloads `webular-<build>` (`webular-<build>.exe` on Windows) over HTTPS with TLS 1.2 at least, with three retries.
-3. Checks the file's SHA-256 against the hash for its build, from the baked table or the release's `SHA256SUMS`. A mismatch, a missing hash, or no SHA-256 tool stops the install.
-4. Runs `webular --version` on the new file before it replaces anything. A build that cannot run here is never installed.
-5. Moves the binary into the install folder in one step, so a running copy is never half-written.
-6. Adds that folder to your PATH, once.
-7. Warns when another `webular` comes first on your PATH.
+3. Checks the file's SHA-256 against the hash for its build. The hashes baked into the script at release always win. A copy without them reads `SHA256SUMS` from the GitHub release, never from a `WEBULAR_BASE_URL` mirror. A mismatch, a missing hash, or no SHA-256 tool stops the install.
+4. Runs `gh attestation verify` when `gh` is on your PATH, and stops if it fails. Without `gh`, it prints a one-line note and goes on.
+5. Runs `webular --version` on the new file before it replaces anything. A build that cannot run here is never installed.
+6. Moves the binary into the install folder in one step, so a running copy is never half-written.
+7. Adds that folder to your PATH, once.
+8. Warns when another `webular` comes first on your PATH.
 
 ## Options
 
@@ -48,9 +49,9 @@ Each release attaches its own `install.sh` and `install.ps1`, with that release'
 | `--uninstall` | `WEBULAR_UNINSTALL=1` | Remove the binary and the PATH lines the script added. |
 | `--quiet` | `WEBULAR_QUIET=1` | Print only errors. |
 | | `WEBULAR_INSTALL` | The install root. The binary goes in `$WEBULAR_INSTALL/bin`. |
-| | `WEBULAR_BASE_URL` | The folder to download from: `https://`, `file://`, or `http://` on loopback only. Its `SHA256SUMS` is used. |
+| | `WEBULAR_BASE_URL` | The folder the build downloads from: `https://`, `file://`, or `http://` on loopback only. It serves only the build; its own `SHA256SUMS` is never used. |
 | | `WEBULAR_BASELINE` | `1` forces the no-AVX2 x64 build, `0` skips it. |
-| | `WEBULAR_VERIFY_ATTESTATION=1` | Also run `gh attestation verify`, and fail if it fails or cannot run. |
+| | `WEBULAR_VERIFY_ATTESTATION=1` or `0` | `1` makes `gh` required, so a missing `gh` stops the install. `0` skips the attestation check. |
 | | `WEBULAR_ALLOW_SUDO=1` | Allow a run under `sudo`. |
 | | `WEBULAR_OS`, `WEBULAR_ARCH`, `WEBULAR_LIBC` | Override detection (`install.sh` only). |
 
@@ -79,7 +80,7 @@ Run the install command again to upgrade, or run `webular upgrade`, which prints
 ## Verification
 
 - **SHA-256 proves integrity.** A match shows the download is intact. It does not show who built it.
-- **Attestation proves origin.** With `WEBULAR_VERIFY_ATTESTATION=1`, the script runs `gh attestation verify`, pinned to the signer workflow `srinitude/webular/.github/workflows/release.yml`. It fails closed.
+- **Attestation proves origin.** When `gh` is on your PATH, the script runs `gh attestation verify`, pinned to the signer workflow `srinitude/webular/.github/workflows/release.yml`, and stops if it fails. Without `gh`, it prints a note and goes on. `WEBULAR_VERIFY_ATTESTATION=1` makes `gh` required, and `WEBULAR_VERIFY_ATTESTATION=0` skips the check.
 
 To check a build by hand, see [Download and verify by hand](install-more.md#download-and-verify-by-hand).
 

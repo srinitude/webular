@@ -4,7 +4,15 @@
 // no channel gets the GitHub releases page.
 import { WINGET_ID } from './winget.ts'
 
-type Channel = 'homebrew' | 'scoop' | 'winget' | 'bun' | 'npm' | 'install.sh' | 'unknown'
+type Channel =
+  | 'homebrew'
+  | 'scoop'
+  | 'winget'
+  | 'bun'
+  | 'npm'
+  | 'install.sh'
+  | 'install.ps1'
+  | 'unknown'
 interface Upgrade {
   channel: Channel
   command: string
@@ -12,6 +20,7 @@ interface Upgrade {
 
 const RELEASES = 'https://github.com/srinitude/webular/releases/latest'
 const INSTALL_SH = "curl --proto '=https' --tlsv1.2 -fsSL https://webular.dev/install.sh | sh"
+const INSTALL_PS1 = 'irm https://webular.dev/install.ps1 | iex'
 
 // node_modules rules come first: a Homebrew- or Scoop-installed Node keeps its
 // global packages under its own prefix, and those upgrade through the package
@@ -30,31 +39,26 @@ const RULES: readonly (readonly [Channel, RegExp, string])[] = [
 
 const normalize = (path: string): string => path.replaceAll('\\', '/')
 
-// install.sh lands in $WEBULAR_INSTALL/bin, or ~/.webular/bin when it is unset.
-function installShCommand(path: string, env: Readonly<Record<string, string | undefined>>) {
+// install.sh and install.ps1 land in $WEBULAR_INSTALL/bin, or ~/.webular/bin
+// when it is unset; install.ps1 installs webular.exe.
+function installerOf(path: string, env: Readonly<Record<string, string | undefined>>): Upgrade {
   const dir = normalize(env['WEBULAR_INSTALL'] ?? '').replace(/\/$/, '')
-  if (dir && path.startsWith(`${dir}/bin/`))
-    return INSTALL_SH.replace('| sh', `| WEBULAR_INSTALL=${dir} sh`)
-  return /\/\.webular\/bin\//i.test(path) ? INSTALL_SH : undefined
+  const custom = dir !== '' && path.startsWith(`${dir}/bin/`)
+  if (!custom && !/\/\.webular\/bin\//i.test(path)) return { channel: 'unknown', command: RELEASES }
+  if (/\.exe$/i.test(path)) {
+    const pin = custom ? `$env:WEBULAR_INSTALL='${dir}'; ` : ''
+    return { channel: 'install.ps1', command: `${pin}${INSTALL_PS1}` }
+  }
+  const pin = custom ? `| WEBULAR_INSTALL=${dir} sh` : '| sh'
+  return { channel: 'install.sh', command: INSTALL_SH.replace('| sh', pin) }
 }
 
 function channelOf(raw: string, env: Readonly<Record<string, string | undefined>>): Upgrade {
   const path = normalize(raw)
   const rule = RULES.find(([, re]) => re.test(path))
   if (rule) return { channel: rule[0], command: rule[2] }
-  const script = installShCommand(path, env)
-  return script
-    ? { channel: 'install.sh', command: script }
-    : { channel: 'unknown', command: RELEASES }
+  return installerOf(path, env)
 }
-
-// An installer receipt names its script, which re-runs to upgrade in place.
-const RECEIPT_COMMANDS: Readonly<Record<string, string>> = {
-  'install.sh': INSTALL_SH,
-  'install.ps1': 'irm https://webular.dev/install.ps1 | iex',
-}
-export const receiptCommand = (source: unknown): string | undefined =>
-  typeof source === 'string' ? RECEIPT_COMMANDS[source] : undefined
 
 // The first path that names a channel wins; none names one -> unknown.
 export function upgradeFor(
