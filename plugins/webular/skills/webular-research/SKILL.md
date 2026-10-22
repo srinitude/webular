@@ -38,7 +38,6 @@ The webular MCP server can take a few seconds to start. If no webular tool is in
 | Watch a page for changes | `webular:monitor` |
 | Click, type, or fill a form on a page | `webular:act` |
 | Read an RSS or Atom feed, even from a plain page URL | `webular:feed` |
-| Test Jev lessons, or label one recorded Jev call right | `webular:jev` |
 | Check that webular and its tools are set up | `webular:doctor` |
 | List the mise tasks webular runs | `webular:tasks` |
 | List the state machines that model the flows | `webular:diagram` |

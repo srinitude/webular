@@ -127,7 +127,9 @@ test('the research skill documents real tools and their real input fields', () =
 const isNamed = (docs: Doc[], cmd: string) =>
   docs.some(
     ({ text }) =>
-      spans(text).some((s) => s === cmd || s.startsWith(`webular ${cmd}`)) ||
+      spans(text).some(
+        (s) => s === cmd || s === `webular:${cmd}` || s.startsWith(`webular ${cmd}`),
+      ) ||
       new RegExp(`^## ${cmd}$`, 'm').test(text),
   )
 
