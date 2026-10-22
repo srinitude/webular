@@ -10,6 +10,7 @@
     "tests/**/*.test.ts",
     "tests/**/*.eval.ts",
     "tests/models/run.ts",
+    "tests/engine/cua-open-once.ts",
     "plugins/webular/src/server.ts",
     "plugins/webular/scripts/*.ts",
     "plugins/webular/**/*.test.ts"
