@@ -50,7 +50,12 @@ test(
         identifier: pkg.name,
         version: pkg.version,
         transport: { type: 'stdio' },
+        environmentVariables: [
+          { name: 'TYPESAFE_API_KEY', isRequired: false, isSecret: true, format: 'string' },
+        ],
       })
+      // npx runs the npm package with Node only; a bunx hint would require Bun.
+      expect(server.packages[0].runtimeHint).toBeUndefined()
     }),
   ),
 )

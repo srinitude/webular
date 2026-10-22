@@ -133,6 +133,19 @@ posixOnly(
   ),
 )
 
+test(
+  'the installer downloads with the same TLS flags as the README one-liner',
+  eff(
+    Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem
+      const text = yield* fs.readFileString(script)
+      expect(text).toContain(`*) proto='=https' ;;`)
+      expect(text).toContain('curl --proto "$proto" --tlsv1.2 --retry 3 -fsSL')
+      expect(text).not.toMatch(/scoop|homebrew|winget/i)
+    }),
+  ),
+)
+
 posixOnly(
   'the installer parses as POSIX sh and passes shellcheck when present',
   eff(

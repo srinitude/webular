@@ -48,16 +48,16 @@ Where others are ahead: Exa, Brave, and Google run their own search indexes, and
 
 ## Install
 
-Run from source with [Bun](https://bun.sh):
-
+macOS and Linux:
 ```bash
-git clone https://github.com/srinitude/webular.git
-cd webular
-bun install --frozen-lockfile
-bun bin/webular.ts --help
+curl --proto '=https' --tlsv1.2 -fsSL https://webular.dev/install.sh | sh
+```
+Windows (PowerShell):
+```powershell
+irm https://webular.dev/install.ps1 | iex
 ```
 
-[Install channels](docs/install.md) covers every package channel, [GitHub Packages](docs/install.md#from-github-packages) included, release binaries with `SHA256SUMS` and provenance, upgrade, uninstall, and shell completions.
+The script picks the build for your OS, CPU, and libc, and the no-AVX2 build on older x64 CPUs. It checks the SHA-256 before it installs, and installs nothing on a mismatch. [The install script guide](docs/install-script.md) shows how to read it first, pin a release with `--version`, and uninstall. [Install channels](docs/install.md) covers npm, running from source with [Bun](https://bun.sh), [GitHub Packages](docs/install.md#from-github-packages), release binaries with `SHA256SUMS` and provenance, upgrade, and shell completions.
 
 ## Quickstart
 

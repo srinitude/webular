@@ -9,8 +9,16 @@
       "registryType": "npm",
       "identifier": "webular",
       "version": "0.3.0",
-      "runtimeHint": "bunx",
       "transport": { "type": "stdio" },
+      "environmentVariables": [
+        {
+          "name": "TYPESAFE_API_KEY",
+          "description": "Optional Jev key; without it each decision uses its rule-based baseline",
+          "isRequired": false,
+          "isSecret": true,
+          "format": "string"
+        }
+      ],
       "packageArguments": [{ "type": "positional", "value": "mcp" }]
     }
   ]
