@@ -55,7 +55,7 @@ export const webTools: McpToolDef[] = [
   {
     id: 'web.fetch',
     description:
-      'Low-level: fetch a URL and return its raw HTML, not Markdown. To read a page, use scrape; use this only to feed web_links, web_markdown, or web_readability.',
+      'Low-level: fetch a URL, return raw HTML. To read a page use scrape; use this only to feed web_links, web_markdown, or web_readability.',
     schema: fetchSchema,
     run: (args) =>
       Effect.gen(function* () {

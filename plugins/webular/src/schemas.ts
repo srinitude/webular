@@ -62,9 +62,7 @@ export const schemas = {
       .min(1)
       .max(10)
       .optional()
-      .describe(
-        'Read only these pages, with no web search, and cite them (each is its own --urls flag)',
-      ),
+      .describe('Read only these pages, with no web search, and cite them (repeat --urls)'),
   }),
   research: z.strictObject({
     topic: words('The topic to research'),
@@ -82,12 +80,7 @@ export const schemas = {
   }),
   monitor: z.strictObject({ url }),
   batch: z.strictObject({
-    urls: z
-      .array(url)
-      .min(1)
-      .max(1000)
-      .optional()
-      .describe('The URLs to scrape (each is its own --urls flag)'),
+    urls: z.array(url).min(1).max(1000).optional().describe('The URLs to scrape (repeat --urls)'),
     input: words('Path to a file with one URL per line').optional(),
     concurrency: count(32, 'Pages to fetch at once (default 4)'),
   }),
