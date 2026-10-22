@@ -264,24 +264,27 @@ jobs:
     timeout-minutes: 5
     permissions:
       contents: write # gh release download of the draft release
+    env:
+      KEY: ${{ matrix.key }}
+      EXT: ${{ matrix.ext }}
     steps:
       - name: Download webular-${{ matrix.key }}
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release download "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --pattern "webular-${{ matrix.key }}${{ matrix.ext }}" --dir smoke
+        run: gh release download "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --pattern "webular-$KEY$EXT" --dir smoke
       - name: Run --version and --help
         if: ${{ !matrix.musl }}
         shell: bash
         run: |
           chmod +x smoke/*
-          ./smoke/webular-${{ matrix.key }}${{ matrix.ext }} --version
-          ./smoke/webular-${{ matrix.key }}${{ matrix.ext }} --help
+          "./smoke/webular-$KEY$EXT" --version
+          "./smoke/webular-$KEY$EXT" --help
       - name: Run --version and --help on Alpine
         if: ${{ matrix.musl }}
         run: |
           chmod +x smoke/*
-          docker run --rm -v "$PWD/smoke:/s:ro" alpine:3.22 sh -ec 'apk add --no-cache libgcc libstdc++ && /s/webular-${{ matrix.key }} --version && /s/webular-${{ matrix.key }} --help'
+          docker run --rm -e KEY -v "$PWD/smoke:/s:ro" alpine:3.22 sh -ec 'apk add --no-cache libgcc libstdc++ && /s/webular-$KEY --version && /s/webular-$KEY --help'
 
   publish:
     needs: [assets, smoke]
