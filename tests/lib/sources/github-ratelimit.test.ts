@@ -1,7 +1,7 @@
 // GitHub search rate limits against a real local Bun.serve fixture: once the
 // headers say the pool is empty (x-ratelimit-remaining 0, or a 403/429 with
 // retry-after), later searches skip GitHub until the reset with a 429 reason,
-// and GITHUB_TOKEN / GH_TOKEN go out as an Authorization header. No mocks.
+// and no Authorization header goes out, even with GITHUB_TOKEN or GH_TOKEN set. No mocks.
 import { describe, expect, test } from 'bun:test'
 import { Clock, Effect } from 'effect'
 import { freeSourceFallback } from '../../../src/lib/sources/registry.ts'
@@ -66,6 +66,25 @@ const retryAfter = Effect.gen(function* () {
   expect(out.seen.calls).toBe(1)
 })
 
+// Retry-After may be an HTTP-date instead of seconds (RFC 9110); a 403 only
+// counts as spent through it.
+const retryAfterDate = Effect.gen(function* () {
+  const now = yield* Clock.currentTimeMillis
+  const out = yield* twice(403, { 'retry-after': new Date(now + 90_000).toUTCString() })
+  skippedWith429(out.second)
+  expect(out.seen.calls).toBe(1)
+})
+
+// The asctime form has no zone and still means GMT, whatever zone the machine is in.
+const retryAfterAsctime = Effect.gen(function* () {
+  const now = yield* Clock.currentTimeMillis
+  const [, day, mon, year, time] = new Date(now + 90_000).toUTCString().split(/,? /)
+  const wd = new Date(now + 90_000).toUTCString().slice(0, 3)
+  const out = yield* twice(403, { 'retry-after': `${wd} ${mon} ${day} ${time} ${year}` })
+  skippedWith429(out.second)
+  expect(out.seen.calls).toBe(1)
+})
+
 const remainingLeft = Effect.gen(function* () {
   const reset = yield* resetIn60
   const out = yield* twice(200, { 'x-ratelimit-remaining': '9', 'x-ratelimit-reset': reset })
@@ -77,11 +96,8 @@ const tokens = Effect.gen(function* () {
   for (const key of ['GITHUB_TOKEN', 'GH_TOKEN']) {
     const { seen, routes } = counted(200, {})
     yield* against(routes, githubSearch('effect', 1), { [key]: 'fixture-token' })
-    expect(seen.auth).toBe('Bearer fixture-token')
+    expect(seen.auth).toBeNull()
   }
-  const { seen, routes } = counted(200, {})
-  yield* against(routes, githubSearch('effect', 1))
-  expect(seen.auth).toBeNull()
 })
 
 // The search fallback while GitHub is out of quota, in both of GitHub's forms
@@ -112,7 +128,9 @@ const fallbackSpent = Effect.gen(function* () {
 describe('github search rate limit', () => {
   test('remaining 0 skips GitHub until x-ratelimit-reset', () => run(remainingZero))
   test('403 with retry-after skips GitHub for that long', () => run(retryAfter))
+  test('403 with an HTTP-date retry-after skips GitHub until then', () => run(retryAfterDate))
+  test('403 with a zoneless asctime retry-after reads it as GMT', () => run(retryAfterAsctime))
   test('remaining above 0 keeps asking GitHub', () => run(remainingLeft))
-  test('GITHUB_TOKEN or GH_TOKEN goes out as a bearer token', () => run(fresh(tokens)))
+  test('GitHub search stays keyless with GITHUB_TOKEN or GH_TOKEN set', () => run(fresh(tokens)))
   test('search fallback answers from other sources while GitHub is spent', () => run(fallbackSpent))
 })

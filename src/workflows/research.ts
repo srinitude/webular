@@ -1,16 +1,24 @@
-// RESEARCH workflow: search DDG HTML → fetch top N → extract + summarize → markdown report
-// Composed as a Mastra non-model workflow over FOSS tools.
+// RESEARCH workflow: search → fetch top N → extract + summarize → markdown report (Mastra, no model call)
 import { createStep, createWorkflow } from '@mastra/core/workflows'
-import { Effect } from 'effect'
+import { Effect, Ref } from 'effect'
 import { z } from 'zod'
-import { answerSentences } from '../lib/jev/decisions/answer.ts'
+import { pageImageSchema } from '../lib/answer-figure.ts'
 import { searchRounds } from '../lib/jev/decisions/research.ts'
 import { decisions } from '../lib/jev/decisions.ts'
 import { onJevRuntime } from '../lib/jev/run.ts'
 import { readabilitySchema, withReadability } from '../lib/readability-chain.ts'
+import { sourceFigures } from '../lib/router-images.ts'
 import { searchEffect } from '../lib/search-chain.ts'
+import { searchErrors } from '../lib/search-errors.ts'
 import { fetchErrorsSchema, fetchSources, type SourceEntry } from '../lib/sources.ts'
-import { summarizeText } from '../lib/summarize.ts'
+import {
+  buildSection,
+  coverageLedger,
+  dedupeSentences,
+  findConflicts,
+  gapsSection,
+  renderSection,
+} from './research-report.ts'
 import { stepRuntime } from './runtime.ts'
 
 const researchInput = z.object({
@@ -20,13 +28,24 @@ const researchInput = z.object({
   timeoutMs: z.number().int().positive().optional(),
 })
 
-const sourceItem = z.object({ title: z.string(), url: z.string() })
+const sourceItem = z.object({
+  title: z.string(),
+  url: z.string(),
+  published: z.string().optional(),
+})
+
+const ledgerSchema = z.object({
+  url: z.string(),
+  status: z.enum(['answered', 'failed', 'no-evidence']),
+  reason: z.string().optional(),
+})
 
 const researchOutput = z.object({
   topic: z.string(),
   report: z.string(),
   sources: z.array(sourceItem),
   errors: fetchErrorsSchema,
+  coverage: z.array(ledgerSchema).optional(),
   readability: readabilitySchema,
 })
 
@@ -35,13 +54,24 @@ const foundSchema = z.object({
   sentences: z.number(),
   timeoutMs: z.number().optional(),
   sources: z.array(sourceItem),
+  // Search sources that failed when no round found anything.
+  errors: fetchErrorsSchema,
 })
 
 const entriesSchema = z.object({
   topic: z.string(),
   sentences: z.number(),
-  entries: z.array(z.object({ title: z.string(), url: z.string(), text: z.string() })),
+  entries: z.array(
+    z.object({
+      title: z.string(),
+      url: z.string(),
+      text: z.string(),
+      images: z.array(pageImageSchema).optional(),
+      published: z.string().optional(),
+    }),
+  ),
   errors: fetchErrorsSchema,
+  coverage: z.array(ledgerSchema),
 })
 
 const searchStep = createStep({
@@ -49,19 +79,30 @@ const searchStep = createStep({
   inputSchema: researchInput,
   outputSchema: foundSchema,
   // Bounded rounds: research.done asks for another search only when the hits miss the topic.
-  execute: ({ inputData }) =>
+  execute: ({ inputData, abortSignal }) =>
     stepRuntime.runPromise(
-      Effect.map(
-        searchRounds(inputData.topic, inputData.depth, (q, n) =>
-          Effect.map(searchEffect('web', q, n), (r) => r.results),
-        ),
-        (found) => ({
+      Effect.gen(function* () {
+        const failures = yield* Ref.make(new Map<string, { url: string; reason: string }>())
+        const found = yield* searchRounds(inputData.topic, inputData.depth, (q, n) =>
+          searchEffect('web', q, n).pipe(
+            Effect.tap((r) =>
+              Ref.update(
+                failures,
+                (m) => new Map([...m, ...searchErrors(r).map((e) => [e.url, e] as const)]),
+              ),
+            ),
+            Effect.map((r) => r.results),
+          ),
+        )
+        return {
           topic: inputData.topic,
           sentences: inputData.sentences,
           timeoutMs: inputData.timeoutMs,
           sources: found.map((h) => ({ title: h.title, url: h.url })),
-        }),
-      ),
+          errors: found.length === 0 ? [...(yield* Ref.get(failures)).values()] : [],
+        }
+      }),
+      { signal: abortSignal },
     ),
 })
 
@@ -79,7 +120,8 @@ const fetchAndFilter = Effect.fn('research.fetchSources')(function* (
     topic: input.topic,
     sentences: input.sentences,
     entries: [...entries],
-    errors: fetched.errors,
+    errors: [...input.errors, ...fetched.errors],
+    coverage: coverageLedger(input.sources, entries, fetched.errors),
   }
 })
 
@@ -87,26 +129,15 @@ const fetchSourcesStep = createStep({
   id: 'fetch-sources',
   inputSchema: foundSchema,
   outputSchema: entriesSchema,
-  execute: ({ inputData }) => stepRuntime.runPromise(fetchAndFilter(inputData)),
+  execute: ({ inputData, abortSignal }) =>
+    stepRuntime.runPromise(fetchAndFilter(inputData), { signal: abortSignal }),
 })
 
-// Each section opens with the sentences Jev keeps as the source's facts, in page
-// order (research.sentences, one call per source); the topic-focused summarizer
-// fills the rest, so sentences holding the topic's key terms rank first.
-function buildSection(
-  entry: SourceEntry,
-  idx: number,
-  topN: number,
-  topic: string,
-  kept: ReadonlyArray<number> = [],
-) {
-  const all = answerSentences(entry.text)
-  const top = summarizeText(entry.text, topN, { query: topic }).sentences
-  const lead = kept.flatMap((i) => (all[i] === undefined ? [] : [all[i]]))
-  const sentences = [...new Set([...lead, ...top])].slice(0, topN)
-  const body = sentences.length > 0 ? sentences.join(' ') : 'No extractable content.'
-  return `## ${entry.title || `Source ${idx + 1}`}\n\n${body}\n\n> Source [${idx + 1}]: ${entry.url}`
-}
+// image.router per source: figures only where the answer sits in a picture.
+const figuresOf = (topic: string, entries: ReadonlyArray<SourceEntry>) =>
+  Effect.forEach(entries, (e) => onJevRuntime(sourceFigures, { question: topic, ...e }), {
+    concurrency: 8,
+  })
 
 const assemble = Effect.fn('research.assemble')(function* (
   inputData: z.infer<typeof entriesSchema>,
@@ -120,24 +151,36 @@ const assemble = Effect.fn('research.assemble')(function* (
         : onJevRuntime(decisions.researchSentence, { topic, text: e.text }),
     { concurrency: 8 }, // Jev per-org bound; workflows never import the client
   )
-  const sections = entries.map((e, i) => buildSection(e, i, inputData.sentences, topic, leads[i]))
-  const report = `# Research: ${topic}\n\n${sections.join('\n\n')}`
-  const sources = entries.map((e) => ({ title: e.title, url: e.url }))
-  return { topic, report, sources, errors: inputData.errors }
+  const figures = yield* figuresOf(topic, entries)
+  const picked = dedupeSentences(
+    entries.map((e, i) => buildSection(e, inputData.sentences, topic, leads[i])),
+  )
+  const sections = entries.map((e, i) => renderSection(e, i, picked[i] ?? [], figures[i]))
+  const gaps = gapsSection(inputData.coverage, findConflicts(picked))
+  const report = `# Research: ${topic}\n\n${[...sections, ...(gaps ? [gaps] : [])].join('\n\n')}`
+  const sources = entries.map(({ title, url, published }) => ({
+    title,
+    url,
+    ...(published ? { published } : {}),
+  }))
+  return { topic, report, sources, errors: inputData.errors, coverage: inputData.coverage }
 })
 
 const assembleStep = createStep({
   id: 'assemble',
   inputSchema: entriesSchema,
   outputSchema: researchOutput,
-  execute: ({ inputData }) =>
-    stepRuntime.runPromise(assemble(inputData).pipe(Effect.flatMap(withReadability('report')))),
+  execute: ({ inputData, abortSignal }) =>
+    stepRuntime.runPromise(assemble(inputData).pipe(Effect.flatMap(withReadability('report'))), {
+      signal: abortSignal,
+    }),
 })
 
 export const researchWorkflow = createWorkflow({
   id: 'research',
   inputSchema: researchInput,
   outputSchema: researchOutput,
+  options: { shouldPersistSnapshot: () => false },
 })
   .then(searchStep)
   .then(fetchSourcesStep)

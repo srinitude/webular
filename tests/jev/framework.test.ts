@@ -5,6 +5,7 @@ import { BunServices } from '@effect/platform-bun'
 import { Effect, FileSystem, Schema } from 'effect'
 import { JEV_MODEL_DEFAULT } from '../../src/lib/jev/client.ts'
 import { decisions } from '../../src/lib/jev/decisions.ts'
+import { JEV_LATEST_RELEASED } from '../../src/lib/jev/model.ts'
 import {
   CAPS,
   CONFIDENCE_BAR,
@@ -98,8 +99,8 @@ test('the same input gives the same bytes, and the body names the model first', 
   const ba = requestBytes(JEV_MODEL_DEFAULT, a, Q)
   expect(requestBytes(JEV_MODEL_DEFAULT, b, Q)).toBe(ba)
   expect(cacheKey(requestBytes(JEV_MODEL_DEFAULT, b, Q))).toBe(cacheKey(ba))
-  expect(ba.startsWith('{"model":"jev-1.13.0","state":')).toBe(true)
-  expect(parseBody(ba).model).toBe('jev-1.13.0')
+  expect(ba.startsWith(`{"model":"${JEV_LATEST_RELEASED}","state":`)).toBe(true)
+  expect(parseBody(ba).model).toBe(JEV_LATEST_RELEASED)
 })
 
 test('choice menus put one default first and cap options at 240', () => {

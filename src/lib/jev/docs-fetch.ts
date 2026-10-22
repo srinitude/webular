@@ -4,6 +4,8 @@
 import { Data, Effect } from 'effect'
 import type * as HttpClient from 'effect/http/HttpClient'
 import * as HttpClientRequest from 'effect/http/HttpClientRequest'
+import { collectCapped } from '../../core/capped-bytes.ts'
+import { USER_AGENT } from '../../core/http.ts'
 import { type DecisionModel, type DocsSnapshot, type Headers, prove } from './docs-snapshot.ts'
 
 export class DocsRefused extends Data.TaggedError('DocsRefused')<{ readonly reason: string }> {}
@@ -14,19 +16,31 @@ interface Fetched extends Headers {
 }
 export type Fetcher = (url: string, cond: Headers) => Effect.Effect<Fetched, unknown>
 
+// The docs are a few hundred lines; a body past this cap is refused, not buffered.
+const DOCS_MAX_BYTES = 4 * 1024 * 1024
+
 // Webular's fetch layer for Jev is effect/http HttpClient, the same one client.ts uses.
 export const httpFetcher =
-  (http: HttpClient.HttpClient): Fetcher =>
+  (http: HttpClient.HttpClient, maxBytes = DOCS_MAX_BYTES): Fetcher =>
   (url, cond) =>
     Effect.gen(function* () {
-      let req = HttpClientRequest.get(url)
+      let req = HttpClientRequest.setHeader(HttpClientRequest.get(url), 'user-agent', USER_AGENT)
       if (cond.etag) req = HttpClientRequest.setHeader(req, 'If-None-Match', cond.etag)
       if (cond.lastModified)
         req = HttpClientRequest.setHeader(req, 'If-Modified-Since', cond.lastModified)
       const res = yield* http.execute(req)
       return {
         status: res.status,
-        text: res.status === 200 ? yield* res.text : '',
+        text:
+          res.status === 200
+            ? new TextDecoder().decode(
+                yield* collectCapped(
+                  res.stream,
+                  maxBytes,
+                  () => new Error(`docs response exceeded ${maxBytes} bytes`),
+                ),
+              )
+            : '',
         etag: res.headers['etag'],
         lastModified: res.headers['last-modified'],
       }

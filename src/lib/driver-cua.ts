@@ -120,14 +120,14 @@ export const throwawayProfile = (command: string) => {
   return dir !== undefined && dir !== '' && !DEFAULT_PROFILE.test(dir.replace(/\\/g, '/'))
 }
 
-// Windows has no `ps`; its command line comes from the process table.
+// Windows has no `ps`; Console.Out.Write skips the formatter's line wrap.
 export const commandLineArgv = (os: string, pid: number): [string, ...string[]] =>
   os === 'win32'
     ? [
         'powershell',
         '-NoProfile',
         '-Command',
-        `(Get-CimInstance Win32_Process -Filter 'ProcessId=${pid}').CommandLine`,
+        `[Console]::Out.Write((Get-CimInstance Win32_Process -Filter 'ProcessId=${pid}').CommandLine)`,
       ]
     : ['ps', '-ww', '-o', 'command=', '-p', String(pid)]
 
@@ -162,8 +162,10 @@ const open = Effect.fnUntraced(function* (url: string) {
   yield* requireThrowaway(target.pid)
   const session = `webular-${yield* Random.nextInt}`
   yield* cuaCall('start_session', { session })
-  const ids = yield* idsFromBind(yield* cuaCall('get_browser_state', { ...target, session }))
-  yield* cuaCall('browser_navigate', { ...ids, url, session })
+  yield* Effect.gen(function* () {
+    const ids = yield* idsFromBind(yield* cuaCall('get_browser_state', { ...target, session }))
+    yield* cuaCall('browser_navigate', { ...ids, url, session })
+  }).pipe(Effect.onError(() => Effect.ignore(cuaCall('end_session', { session }))))
   return { ...target, session } satisfies Opened
 })
 

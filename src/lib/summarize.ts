@@ -1,118 +1,33 @@
 // FOSS extractive summarizer: score sentences by normalized word frequency,
 // ignore stopwords, return top-N in original order. No external dependencies.
 
-const STOPWORDS = new Set([
-  'a',
-  'an',
-  'the',
-  'and',
-  'or',
-  'but',
-  'in',
-  'on',
-  'at',
-  'to',
-  'for',
-  'of',
-  'with',
-  'by',
-  'from',
-  'is',
-  'it',
-  'its',
-  'are',
-  'was',
-  'were',
-  'be',
-  'been',
-  'being',
-  'have',
-  'has',
-  'had',
-  'do',
-  'does',
-  'did',
-  'will',
-  'would',
-  'could',
-  'should',
-  'may',
-  'might',
-  'shall',
-  'can',
-  'that',
-  'this',
-  'these',
-  'those',
-  'i',
-  'you',
-  'he',
-  'she',
-  'we',
-  'they',
-  'as',
-  'if',
-  'not',
-  'so',
-  'than',
-  'then',
-  'when',
-  'where',
-  'which',
-  'who',
-])
+import { type Spans, splitSentences } from './summarize-sentences.ts'
+
+const STOPWORDS = new Set(
+  'a an the and or but in on at to for of with by from is it its are was were be been being have has had do does did will would could should may might shall can that this these those i you he she we they as if not so than then when where which who'.split(
+    ' ',
+  ),
+)
 
 // match() yields the same maximal [a-z0-9] runs as replace-then-split, with
 // one fewer full-size copy and no empty tokens to filter.
-function tokenize(text: string): string[] {
+export function tokenize(text: string): string[] {
   return (text.toLowerCase().match(/[a-z0-9]+/g) ?? []).filter(
     (w) => w.length > 1 && !STOPWORDS.has(w),
   )
-}
-
-// Sentences are kept as [start, end) offsets into the text, not as strings:
-// holding one string per sentence plus its token strings makes every GC walk
-// a heap that grows with the page, so total time goes superlinear.
-interface Spans {
-  starts: number[]
-  ends: number[]
-}
-
-function pushTrimmed(spans: Spans, text: string, from: number, to: number): void {
-  const piece = text.slice(from, to)
-  const trimmed = piece.trim()
-  if (trimmed.length === 0) return
-  const start = from + piece.length - piece.trimStart().length
-  spans.starts.push(start)
-  spans.ends.push(start + trimmed.length)
-}
-
-// A sentence ends at [.!?] plus whitespace before an uppercase letter or a
-// quote. One forward scan, O(B), with no lookbehind.
-const BOUNDARY = /[.!?]\s+(?=[A-Z"'])/g
-
-function splitSentences(text: string): Spans {
-  const spans: Spans = { starts: [], ends: [] }
-  let last = 0
-  for (const m of text.matchAll(BOUNDARY)) {
-    pushTrimmed(spans, text, last, m.index + 1)
-    last = m.index + m[0].length
-  }
-  pushTrimmed(spans, text, last, text.length)
-  return spans
 }
 
 // Each sentence is tokenized once; tokens become small-integer word ids in
 // one flat array, so the only strings that outlive a sentence are the
 // distinct words. Sentence cuts fall on whitespace, so the joined sentence
 // tokens equal the whole text's tokens.
-interface TokenIds {
+export interface TokenIds {
   ids: number[]
   offsets: number[]
   freq: number[]
 }
 
-function tokenIds(text: string, spans: Spans): TokenIds {
+export function tokenIds(text: string, spans: Spans): TokenIds {
   const vocab = new Map<string, number>()
   const out: TokenIds = { ids: [], offsets: [0], freq: [] }
   for (let i = 0; i < spans.starts.length; i++) {
@@ -139,7 +54,7 @@ function maxFrequency(freq: number[]): number {
   return max
 }
 
-function scores(t: TokenIds): Float64Array {
+export function scores(t: TokenIds): Float64Array {
   const maxFreq = maxFrequency(t.freq)
   const out = new Float64Array(t.offsets.length - 1)
   for (let i = 0; i < out.length; i++) {
@@ -167,22 +82,65 @@ const QUESTION_WORDS = new Set(['what', 'how', 'why', 'whose', 'whom'])
 interface Focus {
   query: string
   entity?: string | undefined
+  // Research topics rank on every word; only answer questions split off a clause.
+  wholeQuery?: boolean
 }
+// A describing clause ("the physicist who formulated the uncertainty
+// principle") names the subject; it is not what is asked. It starts at
+// who/that/whom/whose after a word other than and/or/but, and runs to the
+// end, except a final verb when the question fronts its auxiliary ("In which
+// city was ... born?"). Clause words only break ties, like the entity.
+// ponytail: regex clause cut; a parser would catch clauses that end mid-question.
+const CLAUSE = /(?<=\b(?!and\b|or\b|but\b)[\p{L}\d]+,?\s+)(?:who|that|whom|whose)\b.*$/iu
+const FRONTED =
+  /^(?:\w+\s+)?(?:which|what)\s+\w+\s+(?:is|was|are|were|did|does|do)\b|^(?:where|when)\s+(?:is|was|are|were|did|does|do)\b/i
+export function splitQuestion(query: string): { asked: string; clause: string } {
+  const m = CLAUSE.exec(query)
+  if (!m) return { asked: query, clause: '' }
+  const verb = FRONTED.test(query) ? (/\s(\p{L}+)\W*$/u.exec(m[0])?.[1] ?? '') : ''
+  const clause = verb ? m[0].replace(/\s\p{L}+\W*$/u, '') : m[0]
+  return { asked: `${query.slice(0, m.index)} ${verb}`.trim(), clause }
+}
+// A capitalized word may be a name: "Born" (Max Born, "Born, M.") is not the
+// verb "born". A key the question writes in lowercase that the page also uses
+// in lowercase matches only lowercase forms, so a cited surname cannot inflate
+// its count. Other keys ("Heisenberg", or "rust" for a page that only says
+// "Rust") match any case.
+// ponytail: a sentence-initial verb ("Born in 1901, ...") stops counting too;
+// a part-of-speech tagger would tell the two apart.
+const NAMES = /\p{Lu}\p{L}*/gu
+const plainWords = (s: string) => new Set(tokenize(s.replace(NAMES, ' ')))
 function focusScores(text: string, spans: Spans, focus: Focus): number[] {
-  const keys = new Set(tokenize(focus.query).filter((w) => !QUESTION_WORDS.has(w)))
-  const entity = new Set(tokenize(focus.entity ?? '').filter((w) => !keys.has(w)))
-  const sets = spans.starts.map((from, i) => new Set(tokenize(text.slice(from, spans.ends[i]))))
+  const { asked, clause } = focus.wholeQuery
+    ? { asked: focus.query, clause: '' }
+    : splitQuestion(focus.query)
+  const keys = new Set(tokenize(asked).filter((w) => !QUESTION_WORDS.has(w)))
+  const entity = new Set(tokenize(`${focus.entity ?? ''} ${clause}`).filter((w) => !keys.has(w)))
+  const sentences = spans.starts.map((from, i) => text.slice(from, spans.ends[i]))
+  const sets = sentences.map((s) => new Set(tokenize(s)))
+  const plain = sentences.map(plainWords)
+  // Research topics match every case, like their whole-query keys.
+  const plainKeys = new Set(
+    focus.wholeQuery ? [] : [...plainWords(asked)].filter((k) => plain.some((set) => set.has(k))),
+  )
+  const holds = (i: number, k: string) => (plainKeys.has(k) ? plain[i] : sets[i])?.has(k) === true
   const df = new Map<string, number>()
-  for (const set of sets) for (const k of keys) if (set.has(k)) df.set(k, (df.get(k) ?? 0) + 1)
-  return sets.map((set) => {
+  for (let i = 0; i < sets.length; i++)
+    for (const k of keys) if (holds(i, k)) df.set(k, (df.get(k) ?? 0) + 1)
+  return sets.map((set, i) => {
     let score = 0
-    for (const [k, n] of df) if (set.has(k)) score += Math.log((sets.length + 1) / n)
+    for (const [k, n] of df) if (holds(i, k)) score += Math.log((sets.length + 1) / n)
     for (const e of entity) if (set.has(e)) return score * 1.5
     return score
   })
 }
-export function summarizeText(text: string, topN: number, focus?: Focus): SummarizeResult {
-  const spans = splitSentences(text)
+export function summarizeText(
+  text: string,
+  topN: number,
+  focus?: Focus,
+  split: (text: string) => Spans = splitSentences,
+): SummarizeResult {
+  const spans = split(text)
   if (spans.starts.length === 0) return { sentences: [], summary: '' }
   const score = scores(tokenIds(text, spans))
   const key = focus ? focusScores(text, spans, focus) : undefined
@@ -194,6 +152,5 @@ export function summarizeText(text: string, topN: number, focus?: Focus): Summar
     .slice(0, topN)
     .sort((a, b) => a - b)
     .map((i) => text.slice(spans.starts[i], spans.ends[i]))
-
   return { sentences: picked, summary: picked.join(' ') }
 }

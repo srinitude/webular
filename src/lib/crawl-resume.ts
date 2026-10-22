@@ -1,21 +1,21 @@
 // Crawl setup and resume: opens the database, starts or reloads a run, and
 // restores its fingerprints, host delays, and robots cache.
-import { Database } from 'bun:sqlite'
-import { Effect, Random } from 'effect'
+import type { Database } from 'bun:sqlite'
+import { Effect, Random, Schema } from 'effect'
 import { attempt, CrawlError, type Frontier } from './crawl-frontier.ts'
 import { initSchema } from './crawl-schema.ts'
 import type { CrawlOptions, Run } from './crawl-types.ts'
 import { emptyFingerprints, remember } from './fingerprints.ts'
-import type { Robots } from './robots-txt.ts'
+import { closeSqlite, openSqlite } from './sqlite-open.ts'
 
 export const openDb = (path: string) =>
   Effect.acquireRelease(
     attempt(() => {
-      const db = new Database(path, { create: true })
+      const db = openSqlite(path, true)
       initSchema(db)
       return db
     }),
-    (db) => Effect.sync(() => db.close()),
+    (db) => Effect.sync(() => closeSqlite(db)),
   )
 
 const startRun = (db: Database, o: CrawlOptions) =>
@@ -51,16 +51,35 @@ type FingerprintRow = { lo: number; hi: number }
 type DelayRow = { host: string; ms: number }
 type RobotsRow = { origin: string; rules: string; at: number }
 
+const decodeRobots = Schema.decodeUnknownEffect(
+  Schema.fromJsonString(
+    Schema.Struct({
+      rules: Schema.Array(Schema.Struct({ allow: Schema.Boolean, pattern: Schema.String })),
+      crawlDelayMs: Schema.Number,
+    }),
+  ),
+)
+
 // Reads one run's resume state: O(pages + hosts + origins) time and memory.
 export const restore = (r: Run) =>
-  attempt(() => {
-    const q = (sql: string) => r.db.query(sql).all(r.token)
-    for (const f of q('SELECT lo, hi FROM crawl_fingerprints WHERE token = ?') as FingerprintRow[])
-      remember(r.fingerprints, f.lo, f.hi)
-    for (const d of q('SELECT host, ms FROM crawl_delays WHERE token = ?') as DelayRow[])
-      r.delays.set(d.host, d.ms)
-    for (const b of q('SELECT origin, rules, at FROM crawl_robots WHERE token = ?') as RobotsRow[])
-      r.robots.set(b.origin, { rules: JSON.parse(b.rules) as Robots, at: b.at })
+  Effect.gen(function* () {
+    const robots = yield* attempt(() => {
+      const q = (sql: string) => r.db.query(sql).all(r.token)
+      for (const f of q(
+        'SELECT lo, hi FROM crawl_fingerprints WHERE token = ?',
+      ) as FingerprintRow[])
+        remember(r.fingerprints, f.lo, f.hi)
+      for (const d of q('SELECT host, ms FROM crawl_delays WHERE token = ?') as DelayRow[])
+        r.delays.set(d.host, d.ms)
+      return q('SELECT origin, rules, at FROM crawl_robots WHERE token = ?') as RobotsRow[]
+    })
+    for (const b of robots) {
+      const rules = yield* Effect.mapError(
+        decodeRobots(b.rules),
+        (cause) => new CrawlError({ cause }),
+      )
+      r.robots.set(b.origin, { rules, at: b.at })
+    }
   })
 
 export const newRun = (

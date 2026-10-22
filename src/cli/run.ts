@@ -7,7 +7,7 @@ import { Effect, type FileSystem, type Path } from 'effect'
 import type { EventFromLogic } from 'xstate'
 import { CliError } from '../core/effect.ts'
 import { emit, errMsg, logErr, type OutputError } from '../core/output.ts'
-import type { SandboxError } from '../core/safepath.ts'
+import { outPath, type SandboxError } from '../core/safepath.ts'
 import { normalizeUrl } from '../core/url.ts'
 import { commandLifecycleMachine } from '../machines/command-lifecycle.ts'
 import { EXIT, payloadExit, settledExit } from './exit-codes.ts'
@@ -31,7 +31,7 @@ function errorCount(result: unknown): number {
   return Array.isArray(errors) ? errors.length : 0
 }
 
-// Discovery commands (crawl/map/answer/research) share ONE policy: partial
+// Discovery commands (search/crawl/map/answer/research) share ONE policy: partial
 // failures ride in the payload (exit 0 + stderr note); exit 1 only when the
 // primary payload is empty AND errors exist.
 export function discoveryExit(field: string): (result: unknown) => number {
@@ -62,6 +62,17 @@ function rendered(failures: number, policy: number): LifecycleEvent {
   return failures > 0 ? { type: 'SOME_ERRORS' } : { type: 'NO_ERRORS' }
 }
 
+// A page read from an archive is never a fresh check: the payload says so in
+// `archivedFrom`, and people reading the terminal get the same word here.
+function archiveNote(name: string, result: unknown) {
+  const archived = (result as { archivedFrom?: unknown } | null)?.archivedFrom
+  return typeof archived === 'string'
+    ? logErr(
+        `${name}: warning: the live page did not load; this is the archived copy at ${safeText(archived)}`,
+      )
+    : Effect.void
+}
+
 function report(
   name: string,
   outcome: Outcome,
@@ -86,6 +97,7 @@ function report(
         )
       : Effect.void
   return note.pipe(
+    Effect.andThen(archiveNote(name, outcome.result)),
     Effect.andThen(emit(outcome.result, { ...emitOpts, render: renderFor(name) })),
     Effect.as(exit),
   )
@@ -103,8 +115,20 @@ const checkUrl = (name: string, inputData: unknown): Effect.Effect<void, CliErro
   return Effect.fail(new CliError({ message, exitCode: EXIT.usage }))
 }
 
+// Ctrl-C interrupts this fiber; cancelling the run aborts each step's signal,
+// so its Effect (and any child process it holds) is interrupted too.
 const startRun = (inputData: unknown) => (created: WorkflowRun) =>
-  Effect.tryPromise({ try: () => created.start({ inputData }), catch: errMsg })
+  Effect.tryPromise({ try: () => created.start({ inputData }), catch: errMsg }).pipe(
+    Effect.onInterrupt(() => Effect.promise(() => created.cancel())),
+  )
+
+// The run ends by stopping the parse pool's idle workers. The shared step
+// runtime stays usable for the next run in this process. The module is cached:
+// the workflow loaded it.
+const disposeSteps = Effect.promise(() => import('../workflows/runtime.ts')).pipe(
+  Effect.flatMap((m) => m.drainParsePool),
+  Effect.ignore,
+)
 
 // The Mastra run is the Promise edge; it surfaces input-validation failures by
 // rejecting from start, which reports as a plain failure (exit 1). The
@@ -114,6 +138,7 @@ const startRun = (inputData: unknown) => (created: WorkflowRun) =>
 // it adopts it as a thenable and never settles. The logger loads with it: a
 // silent logger keeps the step's stack trace off stderr, and the failure line
 // still names the cause.
+// A bad -o path fails before the workflow module loads and the page is fetched.
 export function runWorkflow<M>(
   name: string,
   load: () => Promise<M>,
@@ -135,11 +160,12 @@ export function runWorkflow<M>(
         catch: errMsg,
       }),
     ),
-    Effect.flatMap(startRun(inputData)),
+    Effect.flatMap((created) => startRun(inputData)(created).pipe(Effect.ensuring(disposeSteps))),
     Effect.matchEffect({
       onFailure: (detail) => failed(name, detail, [{ type: 'INPUT_INVALID' }]),
       onSuccess: (outcome) => report(name, outcome, opts),
     }),
   )
-  return Effect.andThen(checkUrl(name, inputData), run)
+  const checkOut = opts.output ? Effect.asVoid(outPath(opts.output)) : Effect.void
+  return checkUrl(name, inputData).pipe(Effect.andThen(checkOut), Effect.andThen(run))
 }

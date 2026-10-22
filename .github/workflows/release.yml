@@ -4,7 +4,8 @@
 # Homebrew formula and Scoop manifest from it (src/release/distribution.ts),
 # write the winget manifest set (src/release/winget.ts) and upload it as the
 # build artifact "winget-manifests" (submitting it to microsoft/winget-pkgs is
-# a manual step), attest every file (actions/attest, Sigstore build provenance), and attach
+# a manual step), write an SPDX SBOM (anchore/sbom-action) and attest it, attest every file
+# (actions/attest, Sigstore build provenance), and attach
 # them all, plus scripts/install.sh and scripts/install.ps1, to a DRAFT GitHub release -> publish: one
 # npm package per target (webular-<key>, with os/cpu/libc fields), then the
 # root package that lists them as optionalDependencies, then un-draft the
@@ -23,8 +24,9 @@
 # tests/core/platform-parity.test.ts keeps this file, mise.toml, and the
 # resolver table in step; tests/release/gates.test.ts checks the gates.
 # npm auth is trusted publishing (OIDC): no NPM_TOKEN. Before the first run, add
-# this repo + workflow filename "release.yml" as a trusted publisher on npmjs.com
-# for webular and for every webular-<key> package.
+# a trusted publisher on npmjs.com for webular and for every webular-<key>
+# package, with these form values: user srinitude, repo webular, workflow
+# release.yml, environment release, and "npm publish" allowed (ticked).
 name: Release
 
 on:
@@ -34,17 +36,38 @@ on:
 permissions:
   contents: read
 
+# One release at a time per tag; a running publish is never cancelled.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
   # Keep equal to [tools] bun in mise.toml.
   BUN_VERSION: "1.4.3"
 
 jobs:
+  # The suite on every OS the CLI ships to (mise.lock lists only linux-x64,
+  # macos-arm64, windows-x64 and linux-x64-musl, so the other platforms run
+  # unlocked until `mise lock --platform macos-x64,linux-arm64,windows-arm64`).
   test:
-    runs-on: ubuntu-latest
-    timeout-minutes: 4 # about 3x a normal run
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, locked: 1 }
+          - { os: ubuntu-24.04-arm, locked: 0 }
+          - { os: macos-latest, locked: 1 } # arm64
+          - { os: macos-15-intel, locked: 0 } # x64; macos-13 is retired
+          - { os: windows-latest, locked: 1 }
+          - { os: windows-11-arm, locked: 0 }
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15 # the slowest runner (Windows arm64) with headroom
+    env:
+      MISE_LOCKED: ${{ matrix.locked }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          persist-credentials: false
           fetch-depth: 0 # full history, so the main-ancestry check below can run
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
@@ -55,20 +78,34 @@ jobs:
       - uses: jdx/mise-action@fc42bcc7ddbf51124c30f95a877a0c5168a3bfde # v5.2.1
         with:
           experimental: true
+      # The tag gates need one runner; they do not change per OS.
       - name: Tag must match package.json version
+        if: matrix.os == 'ubuntu-latest'
         run: test "v$(jq -r .version package.json)" = "${GITHUB_REF_NAME}"
       - name: Tag must point at a commit on main
+        if: matrix.os == 'ubuntu-latest'
         run: |
           git merge-base --is-ancestor "$GITHUB_SHA" origin/main \
             || { echo "::error::$GITHUB_REF_NAME ($GITHUB_SHA) is not on main"; exit 1; }
       - name: Version must not be on npm yet
-        if: github.run_attempt == 1 # a rerun may finish a partial publish
+        if: matrix.os == 'ubuntu-latest' && github.run_attempt == 1 # a rerun may finish a partial publish
         run: |
           version=$(jq -r .version package.json)
           if [ -n "$(npm view "webular@$version" version 2>/dev/null)" ]; then
             echo "::error::webular@$version is already on npm; bump package.json and tag again"
             exit 1
           fi
+      # The completions test parses webular.fish with fish; the manpage test
+      # lints webular.1 with mandoc. Each is missing from one runner image.
+      - name: Install fish (macOS)
+        if: runner.os == 'macOS'
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: 1
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
+        run: brew install fish
+      - name: Install mandoc (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update -q && sudo apt-get install -y -q --no-install-recommends mandoc
       # mise.toml defines tasks.test (depends on setup -> lint -> typecheck -> build).
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -78,8 +115,28 @@ jobs:
         env:
           BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
 
+  # musl: the same suite on Alpine, where the linux-*-musl executables run
+  # (docker run on the host: the JavaScript actions need glibc node). bash,
+  # curl, nodejs, and npm: the image has none of them (its `node` is a bun
+  # symlink), and the suite runs each one.
+  test-musl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Run mise run test on Alpine
+        run: |
+          docker run --rm -v "$PWD:/w" -w /w -e MISE_LOCKED=1 oven/bun:1.4.3-alpine sh -ec '
+            apk add --no-cache git fish mandoc libgcc libstdc++ bash curl nodejs npm procps
+            apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community mise
+            git config --global --add safe.directory /w
+            mise trust
+            MISE_EXPERIMENTAL=1 mise run test'
+
   assets:
-    needs: test
+    needs: [test, test-musl]
     runs-on: ubuntu-latest
     timeout-minutes: 10 # eight cross-compiles after the lint, typecheck, and build chain
     permissions:
@@ -88,6 +145,8 @@ jobs:
       attestations: write # store the attestations on the repo
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: ${{ env.BUN_VERSION }}
@@ -148,6 +207,24 @@ jobs:
           path: dist/packaging
           include-hidden-files: true
           if-no-files-found: error
+      # SPDX SBOM of the installed dependencies (node_modules exists after
+      # compile:all). The webular.spdx.json name stays outside the webular-*
+      # globs, so the checksum and per-file steps do not pick it up.
+      - name: Generate the SPDX SBOM
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+        with:
+          path: .
+          format: spdx-json
+          output-file: dist/bin/webular.spdx.json
+          upload-artifact: false
+          upload-release-assets: false
+        env:
+          SYFT_EXCLUDE: ./dist/**
+      - name: Attest the SBOM
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+        with:
+          subject-path: dist/bin/webular-*
+          sbom-path: dist/bin/webular.spdx.json
       - name: Attest build provenance for every release file
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
@@ -164,12 +241,54 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           prerelease=; case "$GITHUB_REF_NAME" in *-*) prerelease=--prerelease ;; esac
-          set -- dist/bin/webular-* dist/bin/SHA256SUMS dist/bin/install.sh dist/bin/install.ps1 dist/bin/webular.rb dist/bin/webular.json dist/bin/webular.1
+          set -- dist/bin/webular-* dist/bin/SHA256SUMS dist/bin/install.sh dist/bin/install.ps1 dist/bin/webular.rb dist/bin/webular.json dist/bin/webular.1 dist/bin/webular.spdx.json
           gh release create "$GITHUB_REF_NAME" --draft $prerelease --title "$GITHUB_REF_NAME" --generate-notes --verify-tag "$@" \
             || gh release upload "$GITHUB_REF_NAME" "$@" --clobber
 
-  publish:
+  # Run each built executable on its native runner (musl ones in Alpine) before
+  # anything is published. The draft release is readable with contents: write.
+  smoke:
     needs: assets
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: ubuntu-latest, key: linux-x64 }
+          - { os: ubuntu-24.04-arm, key: linux-arm64 }
+          - { os: ubuntu-latest, key: linux-x64-musl, musl: true }
+          - { os: ubuntu-24.04-arm, key: linux-arm64-musl, musl: true }
+          - { os: macos-latest, key: darwin-arm64 }
+          - { os: macos-15-intel, key: darwin-x64 }
+          - { os: windows-latest, key: windows-x64, ext: .exe }
+          - { os: windows-11-arm, key: windows-arm64, ext: .exe }
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    permissions:
+      contents: write # gh release download of the draft release
+    env:
+      KEY: ${{ matrix.key }}
+      EXT: ${{ matrix.ext }}
+    steps:
+      - name: Download webular-${{ matrix.key }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release download "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --pattern "webular-$KEY$EXT" --dir smoke
+      - name: Run --version and --help
+        if: ${{ !matrix.musl }}
+        shell: bash
+        run: |
+          chmod +x smoke/*
+          "./smoke/webular-$KEY$EXT" --version
+          "./smoke/webular-$KEY$EXT" --help
+      - name: Run --version and --help on Alpine
+        if: ${{ matrix.musl }}
+        run: |
+          chmod +x smoke/*
+          docker run --rm -e KEY -v "$PWD/smoke:/s:ro" alpine:3.22 sh -ec 'apk add --no-cache libgcc libstdc++ && /s/webular-$KEY --version && /s/webular-$KEY --help'
+
+  publish:
+    needs: [assets, smoke]
     runs-on: ubuntu-latest
     environment: release
     # The build (typecheck chain) runs here, plus nine npm publishes and up to
@@ -182,6 +301,8 @@ jobs:
       id-token: write # npm trusted publishing (OIDC) + provenance
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: ${{ env.BUN_VERSION }}
@@ -189,7 +310,12 @@ jobs:
         with:
           node-version: "24" # ships npm >= 11.5.1, required for OIDC publishing
           registry-url: https://registry.npmjs.org
-      - run: npm --version
+          package-manager-cache: false
+      - name: Require npm 11.5.1 or later (trusted publishing)
+        run: |
+          v=$(npm --version)
+          echo "npm $v"
+          [ "$(printf '%s\n11.5.1\n' "$v" | sort -V | head -n1)" = 11.5.1 ] || { echo "::error::npm $v is older than 11.5.1, which trusted publishing needs"; exit 1; }
       - uses: jdx/mise-action@fc42bcc7ddbf51124c30f95a877a0c5168a3bfde # v5.2.1
         with:
           experimental: true

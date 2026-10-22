@@ -57,6 +57,23 @@ const Snapshot = Schema.Struct({
   screenshot_height: Schema.optional(Schema.Number),
 })
 const decodeSnapshot = Schema.decodeUnknownEffect(Snapshot)
+// The screenshot bytes ride in the MCP content list as an image item.
+const Content = Schema.Array(
+  Schema.Struct({
+    type: Schema.String,
+    data: Schema.optional(Schema.String),
+    mimeType: Schema.optional(Schema.String),
+  }),
+)
+const FORMATS: Record<string, 'png' | 'jpg'> = { 'image/png': 'png', 'image/jpeg': 'jpg' }
+const imageOf = (content: unknown) =>
+  Option.flatMap(Schema.decodeUnknownOption(Content)(content), (items) =>
+    Option.fromNullishOr(
+      items
+        .filter((i) => i.type === 'image' && i.data && FORMATS[i.mimeType ?? ''])
+        .map((i) => ({ base64: i.data ?? '', format: FORMATS[i.mimeType ?? ''] ?? 'png' }))[0],
+    ),
+  )
 
 export interface AxElement {
   id: string
@@ -114,7 +131,8 @@ export const snapshot = (call: Call, target: Target, withShot: boolean) =>
       snap.screenshot_width && snap.screenshot_height
         ? { width: snap.screenshot_width, height: snap.screenshot_height }
         : undefined
-    return { elements: withStableIds(snap.elements), captureId: snap.capture_id, size }
+    const image = withShot ? imageOf(fields['content']) : Option.none()
+    return { elements: withStableIds(snap.elements), captureId: snap.capture_id, size, image }
   }).pipe(
     Effect.mapError((err) =>
       err._tag === 'DriverError' ? err : driverError('cua', 'get_window_state: no element tree'),

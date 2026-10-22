@@ -3,21 +3,38 @@
 // with the format read from the bytes. It never opts into anydoc's hosted
 // OCR, so a scanned PDF fails with code 'needsOcr' and the caller picks the
 // next parser (Tesseract). This is the one function the parse command and
-// scrape's document route call.
-import { toMarkdownBytes } from '@firecrawl/anydoc'
+// scrape's document route call. anydoc ships no Windows ARM64 binary, so the
+// addon loads on first use and that platform fails with a typed error instead
+// of crashing at import.
 import { Data, Effect } from 'effect'
+
+export const anydocUnsupportedPlatform = process.platform === 'win32' && process.arch === 'arm64'
 
 class DocumentConvertError extends Data.TaggedError('DocumentConvertError')<{
   // anydoc's ConvertErrorCode ('unsupported', 'needsOcr', 'malformed', ...).
   code: string
   message: string
+  // 1-indexed pages that need OCR, when code is 'needsOcr' (anydoc issue #144).
+  pages?: ReadonlyArray<number> | undefined
 }> {}
 
 const toError = (cause: unknown) =>
   new DocumentConvertError({
     code: (cause as { code?: unknown })?.code?.toString() ?? 'unknown',
     message: cause instanceof Error ? cause.message : String(cause),
+    pages: (cause as { pages?: ReadonlyArray<number> })?.pages,
   })
 
 export const documentToMarkdown = (bytes: Uint8Array) =>
-  Effect.tryPromise({ try: () => toMarkdownBytes(bytes), catch: toError })
+  anydocUnsupportedPlatform
+    ? Effect.fail(
+        new DocumentConvertError({
+          code: 'unsupportedPlatform',
+          message:
+            '@firecrawl/anydoc has no win32-arm64 binary, so documents cannot be converted on Windows ARM64',
+        }),
+      )
+    : Effect.tryPromise({
+        try: async () => (await import('@firecrawl/anydoc')).toMarkdownBytes(bytes),
+        catch: toError,
+      })

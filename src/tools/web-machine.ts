@@ -13,7 +13,7 @@ export const paging = {
   select: z.array(z.string()).optional().describe('Top-level result select to keep'),
 }
 
-export const machineSchema = z.object({
+export const machineSchema = z.strictObject({
   machine: z.enum([
     'cliDispatch',
     'commandLifecycle',

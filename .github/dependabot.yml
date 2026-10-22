@@ -1,14 +1,31 @@
-# Keeps SHA-pinned actions and Bun dependencies current through reviewed PRs.
+# Security updates still open their own PRs. Version updates are off (open-pull-requests-limit: 0):
+# they get folded into the one open PR by hand.
 version: 2
 updates:
   - package-ecosystem: github-actions
     directory: /
+    open-pull-requests-limit: 0
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ['*']
   - package-ecosystem: bun
     directory: /
+    open-pull-requests-limit: 0
     schedule:
       interval: weekly
+    cooldown:
+      default-days: 7
     groups:
       effect:
         patterns: ['effect', '@effect/*']
+  - package-ecosystem: docker
+    directory: /
+    open-pull-requests-limit: 0
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7

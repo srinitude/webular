@@ -4,7 +4,7 @@
 import { describe, expect, test } from 'bun:test'
 import { availableParallelism } from 'node:os'
 import { Effect, type FileSystem } from 'effect'
-import { deriveBudget, hostBudget, readHost } from '../../src/core/budget.ts'
+import { deriveBudget, type HostBudget, hostBudget, readHost } from '../../src/core/budget.ts'
 import { eff } from '../_support/run.ts'
 
 const GiB = 1024 ** 3
@@ -13,7 +13,7 @@ const hostOf = (map: Record<string, string>, os = 'linux') =>
   readHost((path) => Effect.succeed(map[path] ?? null), os)
 const cpusOf = (map: Record<string, string>, os = 'linux') =>
   hostOf(map, os).pipe(Effect.map((h) => h.cpus))
-const check = (body: () => Effect.Effect<void, never, FileSystem.FileSystem>) =>
+const check = (body: () => Effect.Effect<void, never, FileSystem.FileSystem | HostBudget>) =>
   eff(Effect.suspend(body))
 const splitHierarchy = (quota: string) => ({
   '/sys/fs/cgroup/cpu/cpu.cfs_quota_us': quota,

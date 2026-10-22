@@ -12,8 +12,13 @@
       "!!.claude/worktrees",
       "!!.claude/*.json",
       "!!bench/recordings",
+      "!!bench/fixtures/pages",
+      "!!bench/fixtures/sites",
       "!!bench/results",
-      "!!tests/jev/replay"
+      "!!tests/jev/replay",
+      "!tests/jev/candidates/research.sentences.segmenter.json",
+      "!tests/jev/evals/research.sentences.json",
+      "!plugins/webular/dist/server.js"
     ]
   },
   "formatter": {
@@ -27,15 +32,8 @@
     "rules": {
       "preset": "recommended",
       "complexity": { "useLiteralKeys": "off" }
-    },
-    "domains": { "react": "none" }
-  },
-  "overrides": [
-    {
-      "includes": ["plugins/webular/src/ui/**"],
-      "linter": { "domains": { "react": "recommended" } }
     }
-  ],
+  },
   "javascript": {
     "formatter": {
       "quoteStyle": "single",

@@ -18,14 +18,18 @@ const sessionArgs = (session?: string) => (session ? ['--session', session] : []
 const sessionEnv = (session?: string) =>
   session ? { env: { AGENT_BROWSER_IDLE_TIMEOUT_MS: String(IDLE_MS) }, extendEnv: true } : {}
 
-export const runBatch = Effect.fn('runBatch')(function* (commands: string[][], session?: string) {
+export const runBatch = Effect.fn('runBatch')(function* (
+  commands: string[][],
+  session?: string,
+  timeoutMs = 60_000,
+) {
   const bin = yield* resolveBin('agent-browser')
   if (!bin)
     return { stdout: '', stderr: 'agent-browser unavailable — reinstall webular', code: 127 }
   const { stdout, stderr, code } = yield* runProc(
     [bin, ...sessionArgs(session), 'batch', '--bail'],
     {
-      timeoutMs: 60_000,
+      timeoutMs,
       stdin: JSON.stringify(commands),
       ...sessionEnv(session),
     },

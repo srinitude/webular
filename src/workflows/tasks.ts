@@ -4,7 +4,7 @@
 
 import { join } from 'node:path'
 import { createStep, createWorkflow } from '@mastra/core/workflows'
-import { Effect, FileSystem } from 'effect'
+import { Effect, FileSystem, Schema } from 'effect'
 import { z } from 'zod'
 import { EXIT } from '../cli/exit-codes.ts'
 import { CliError } from '../core/effect.ts'
@@ -28,7 +28,12 @@ const tasksOutput = z.object({
   tasks: z.array(z.string()),
 })
 
-type TaskRow = { name?: string; source?: string }
+const TaskRows = Schema.fromJsonString(
+  Schema.Array(
+    Schema.Struct({ name: Schema.optional(Schema.String), source: Schema.optional(Schema.String) }),
+  ),
+)
+const decodeTasks = Schema.decodeUnknownEffect(TaskRows)
 
 const listTasks = Effect.fn('tasks.list')(function* () {
   const mise = yield* resolveMise()
@@ -40,10 +45,7 @@ const listTasks = Effect.fn('tasks.list')(function* () {
   if (code !== 0)
     return yield* fail(`mise tasks ls failed (${timedOut ? 'timeout' : stderr.trim() || code})`)
   const own = yield* canonical(join(PACKAGE_ROOT, 'mise.toml'))
-  const parsed = yield* Effect.try({
-    try: () => JSON.parse(stdout) as TaskRow[],
-    catch: (err) => fail(errMsg(err)),
-  })
+  const parsed = yield* Effect.mapError(decodeTasks(stdout), (err) => fail(errMsg(err)))
   const owned = yield* Effect.filter(parsed, (t) =>
     t.source === undefined
       ? Effect.succeed(false)
@@ -57,13 +59,14 @@ const listStep = createStep({
   id: 'list',
   inputSchema: tasksInput,
   outputSchema: tasksOutput,
-  execute: () => stepRuntime.runPromise(listTasks()),
+  execute: ({ abortSignal }) => stepRuntime.runPromise(listTasks(), { signal: abortSignal }),
 })
 
 export const tasksWorkflow = createWorkflow({
   id: 'tasks',
   inputSchema: tasksInput,
   outputSchema: tasksOutput,
+  options: { shouldPersistSnapshot: () => false },
 })
   .then(listStep)
   .commit()

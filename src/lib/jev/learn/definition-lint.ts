@@ -2,13 +2,14 @@
 // than lintPayload. Webular's JevRequest type still allows bare-string instructions
 // and options, so these rules run here instead of in defineDecision's type.
 // Errors block a definition; warnings advise.
+import { JEV_LATEST_RELEASED } from '../model.ts'
+
 type DefinitionRule =
   | 'instructions-object'
   | 'choice-criteria'
   | 'score-levels'
   | 'state-shape'
   | 'model-pin'
-  | 'box-model'
   | 'request-size'
   | 'question-size'
   | 'nesting'
@@ -43,8 +44,6 @@ const DEFINITION_LIMITS = {
 // Webular keeps motivation, outcome, why, and background under `state['purpose']`;
 // the mod's top-level spelling passes too.
 const STATE_KEYS = ['facts', 'motivation', 'outcome', 'why', 'background'] as const
-// Mirrors the PinnedModel type in define.ts.
-const PINNED = /^(jev-\d+\.\d+\.\d+|jev-preview)$/
 const NONE_KEYS = new Set(['none', 'noneoftheabove', 'noneofthese', 'neither', 'other'])
 const PRIMITIVES = new Set(['choice', 'score', 'noul'])
 const PATTERNS = new Set([
@@ -117,12 +116,7 @@ const scoreFindings = (at: string, c: unknown): DefinitionFinding[] => {
   )
 }
 
-const questionFindings = (
-  id: string,
-  q: unknown,
-  model: string,
-  state: unknown,
-): DefinitionFinding[] => {
+const questionFindings = (id: string, q: unknown, state: unknown): DefinitionFinding[] => {
   const at = `questions.${id}`
   if (!isObj(q)) return [err('instructions-object', at, 'needs a question object')]
   const out: DefinitionFinding[] = []
@@ -130,8 +124,6 @@ const questionFindings = (
     out.push(err('instructions-object', `${at}.instructions`, 'needs a structured object'))
   if (q['type'] === 'choice') out.push(...choiceFindings(at, q['criteria']))
   if (q['type'] === 'score') out.push(...scoreFindings(at, q['criteria']))
-  if (q['type'] === 'box' && model !== 'jev-preview')
-    out.push(err('box-model', `${at}.type`, 'box questions need model jev-preview'))
   if (estTokens({ state, q }) > DEFINITION_LIMITS.questionTokens)
     out.push(err('question-size', at, 'state plus question over an estimated 32,000 tokens'))
   return out
@@ -158,14 +150,14 @@ interface DefinitionPayload {
 
 export const lintDefinition = (req: DefinitionPayload): DefinitionFinding[] => {
   const out = stateFindings(req.state)
-  if (!PINNED.test(req.model))
+  if (req.model !== JEV_LATEST_RELEASED)
     out.push(
-      err('model-pin', 'model', `model ${req.model} is an alias (pin a version like jev-1.13.0)`),
+      err('model-pin', 'model', `${req.model} is not the pinned release ${JEV_LATEST_RELEASED}`),
     )
   if (!isObj(req.questions)) out.push(err('instructions-object', 'questions', 'needs a map'))
   else
     for (const [id, q] of Object.entries(req.questions))
-      out.push(...questionFindings(id, q, req.model, req.state))
+      out.push(...questionFindings(id, q, req.state))
   if (estTokens(req) > DEFINITION_LIMITS.requestTokens)
     out.push(err('request-size', '', 'request over an estimated 64,000 tokens'))
   if (depth(req) > DEFINITION_LIMITS.nesting) out.push(err('nesting', '', 'nesting over 64 levels'))

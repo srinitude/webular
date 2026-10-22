@@ -1,0 +1,24 @@
+{
+  "description": "Jev, TypeSafe's decision model, makes the judgment calls in this web research CLI. It searches, scrapes, crawls, maps, extracts, summarizes, and answers on your machine. Its plugin adds four skills: research, interview, plain language, and Markdown. Jev's key is the only key.",
+  "homepage": "https://www.npmjs.com/package/webular",
+  "topics": [
+    "agent-plugin",
+    "agent-skills",
+    "agents-md",
+    "bun",
+    "claude-code-plugin",
+    "cli",
+    "effect",
+    "jev",
+    "mastra",
+    "mastra-workflows",
+    "mcp-server",
+    "mise",
+    "open-source",
+    "typesafe",
+    "web-crawler",
+    "web-scraping",
+    "web-search",
+    "xstate"
+  ]
+}

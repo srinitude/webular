@@ -1,0 +1,514 @@
+{
+  "set": "webmainbench",
+  "repo": "opendatalab/WebMainBench",
+  "revision": "5da0972e9b58d0c7891ae75053ced97c268f52e3",
+  "file": "WebMainBench_545.jsonl",
+  "format": "jsonl",
+  "idField": "track_id",
+  "license": "Apache-2.0 (labels only; the pages stay under their owners)",
+  "subset": "The authors' 545-row subset file, not the 1.46 GB full set. Rows are ranked by sha256 of track_id and the first 100 are kept.",
+  "bytes": 109097918,
+  "sha256": "0efaa4b49a45e320a27fe6e5a0b6aad5b57259fc3321ac3448519cacc74c537e",
+  "rows": [
+    {
+      "id": "7cdb7231-9337-4104-a562-9b8f285add7d",
+      "url": "https://www.w3school.com.cn/python/numpy_creating_arrays.asp",
+      "sha256": "64388a13ee61ec51408bc42446409088e208e6e507d9fc28d1960415c95662ef"
+    },
+    {
+      "id": "40eac074-2b14-460d-9498-6c3f12d7c649",
+      "url": "https://www.thurrock.gov.uk/public-notices/high-street-grays-0",
+      "sha256": "4ffa58fcb32b8a0b97c7b9b40d313fbb253951aef60111992a7c44b37db5fdff"
+    },
+    {
+      "id": "96831dbb-7d47-4732-8b69-6b6f99846987",
+      "url": "http://www.gat55.com/2011xwzx/2011xqxkj/2011xkjdt/202103/t20210324_574182.html",
+      "sha256": "7abcd75efa16622ba9d8a81cdb6892397e633921bf821f53d9e26abc6994dacd"
+    },
+    {
+      "id": "841cd1f1-7262-40e4-b09c-1e8225f99be7",
+      "url": "https://www.developers.pub/faq/1312719",
+      "sha256": "59176bf8da89c8935d90e7eca5dbcfe4994319cc3c263ddfff77314522455440"
+    },
+    {
+      "id": "e6446866-f4d2-443a-bf38-c8d3daaa7d34",
+      "url": "https://aniruddhadeb.com/articles/2020/icosahedron-resistor-network.html",
+      "sha256": "1b398e1d56d860dfc4d1aa3875d59d6cf8648d5f169a58e4853a5353bb9a27b6"
+    },
+    {
+      "id": "862a50a8-1c91-45ed-bbcc-c90ee684aa1a",
+      "url": "https://services.datasport.com/2017/zkb/pfaeffiker/cup036.htm",
+      "sha256": "e5fdd6546cb6c1aac97114360b23667450b3f3796140c9f783271e8f58cc5377"
+    },
+    {
+      "id": "eee3877a-79db-4de8-bde8-77fb3e40e9f2",
+      "url": "https://todayshomeinspector.com/ir-thermometer-accuracy/",
+      "sha256": "1fb48fb0a554ded1aad50cc96eb229555c4abad104f1aeb70517e7f16fa6efe7"
+    },
+    {
+      "id": "2c38095b-f65f-494e-9752-d847dc6afca0",
+      "url": "https://lenblackwood.com/category/france/",
+      "sha256": "12f51816ea8089a099e732f7bdabb805242d58258d723ab25b297b736b921400"
+    },
+    {
+      "id": "00f36720-473c-4703-bece-c565ffe2aeb9",
+      "url": "http://www.bibmath.net/forums/viewtopic.php?pid=62876",
+      "sha256": "f5f40b15207c75ce68d6de3dec7239f122387ef781d3f54d7b90bfe886ae7a77"
+    },
+    {
+      "id": "09507bda-4020-44d3-8ebc-68b54fdf6365",
+      "url": "http://vintagewatchforums.com/viewtopic.php?f=39&t=9715&view=previous",
+      "sha256": "643cf5183ff8a251d8df40f6538484af7610dc63db240e1387c5903b481aeed6"
+    },
+    {
+      "id": "b115dc5f-bb53-46ed-ba92-8a19b107a953",
+      "url": "http://www.linuxdoc.org/HOWTO/Soundblaster-AWE-4.html",
+      "sha256": "85f43aeb68e6e4b8332c72ac0d076edc6d7a308d61e71c92564dedc87dfc71c6"
+    },
+    {
+      "id": "13238d86-cd3f-4aeb-b4ac-ca4f8f27e0f0",
+      "url": "https://www.digitalmars.com/d/archives/digitalmars/D/learn/Thread_synchronization_context_112324.html",
+      "sha256": "ede64895922542deb99c305ce519031275f36acc8e89aec6b10b00e973c8c808"
+    },
+    {
+      "id": "77bf4234-ee17-4fa5-9d1e-f1b3ea034920",
+      "url": "https://cnn.com/interactive/2017/politics/state/michael-brown-trump-disaster-response/",
+      "sha256": "f446048cfa1d4145982943ead8ce5f3aa2f2561dfbdb73a3db036e2724f6b78d"
+    },
+    {
+      "id": "65ed2a55-b41c-4e02-9deb-168190b370cf",
+      "url": "http://www.peartreegreetings.com/Graduation/Graduation-Announcements--Invitations/index.cat?categoryId=1231&parentCategoryId=1228&refIds=330000128",
+      "sha256": "32723db995234aff0261df542da4bf1b4259a0ee5c0f2f7a37cb2a6880f97134"
+    },
+    {
+      "id": "99037df0-9fed-445c-83bc-3ca39a15b038",
+      "url": "http://sports.news.cn/20240118/004c869467144ec091afe9772446bc5d/c.html",
+      "sha256": "e0c7a20a406fee7458148b571aa9e4a48e9a64f8cc92bba3b104f668e32628bb"
+    },
+    {
+      "id": "9ac50a30-4e84-4e1e-811d-147e3baef626",
+      "url": "https://nasional.kompas.com/read/2024/05/13/14045651/momen-jokowi-bersimpuh-sambil-makan-pisang-saat-kunjungi-pasar-di-sultra",
+      "sha256": "bcd62f71d9cfc5d8a6fc32791a9f43472a5e9230d99fc4407184bd596b7b85dc"
+    },
+    {
+      "id": "9dbd135a-d70c-4bf1-baba-8c9b024935b1",
+      "url": "http://en.people.cn/n3/2022/1123/c90000-10175286.html",
+      "sha256": "e0e16fb7b75f875b500cfe347df84384fd7514eef4ab84a7a1e2f3da9e75d93e"
+    },
+    {
+      "id": "994a11d8-7048-482c-b99d-43ca24c5680f",
+      "url": "https://zayzoon.com/partners/",
+      "sha256": "5f233276f40f4742448376aa477eb89ecf90ea9873f71f645aa30b1e7106e371"
+    },
+    {
+      "id": "686205e4-4549-42ce-bf42-f285f941c868",
+      "url": "https://www.w3school.com.cn/python/python_module_random.asp",
+      "sha256": "e36ee43296286ca9e586d745e3a8dda21a1bade62145ee23c8b731bb71947ec4"
+    },
+    {
+      "id": "dd4bd97e-1a6f-4a5c-9c05-0b79fba5ade6",
+      "url": "https://cracku.in/blog/cat-dilr-questions-pdf/",
+      "sha256": "1b451e62ae31f33a99e9eb194c8639316c60d81e7b6abc09d080b1d3f0e36476"
+    },
+    {
+      "id": "3bb7172c-5d5d-41c5-9834-af6a2b8c37f0",
+      "url": "http://realblog.zkiz.com/greatsoup/8118",
+      "sha256": "0f978ef9f4914c95a595afe18dc14276fc821e5ecda43223aa348501877b7814"
+    },
+    {
+      "id": "5cfd5dbd-fe70-4414-acbb-ae124871180d",
+      "url": "https://quotes.fatpitchfinancials.com/fatpitch.financials/action/getedgarwindow?accesscode=89109208000898",
+      "sha256": "c99a43f7690d1479c78a3b797c3142c5475e6575cffb21e50e96335450a5c929"
+    },
+    {
+      "id": "1319858a-531c-45c0-bcb2-b1ebd3094c1a",
+      "url": "https://ageconsearch.umn.edu/record/285044",
+      "sha256": "a154b047e05a26b5f9cbf92e392efe842a3aea74575464419f848b83bebe2ad7"
+    },
+    {
+      "id": "77e3c55f-3b1b-4e7a-9770-2ca930ff2267",
+      "url": "https://aniruddhadeb.com/articles/2023/l2-regularization/",
+      "sha256": "e3d08a2b139b6db09798c8612c89afcdfcebf1762781d5e4f833cceed9e4691a"
+    },
+    {
+      "id": "a5d51484-9886-4d81-b1a9-53e6a275a6cb",
+      "url": "http://de.ws.q3df.org/level_design/clipper/",
+      "sha256": "a6d04c97aaf4fb03c260adc845bf69183374880a00b11d2c179a1491415e04f4"
+    },
+    {
+      "id": "3cd19b42-03d8-4c87-ba9d-d363dba8c2ea",
+      "url": "https://fitnessquotesblog.com/category/apps/page/26/",
+      "sha256": "4ab44390867294a515b834aac15dc3fcdc2957f4646f3f9d9ce16f3817b836ab"
+    },
+    {
+      "id": "3f04f235-50ab-4554-a257-1b4d46aeef5c",
+      "url": "https://xlatio.de/artikel/lumix-smartphone---6774336-9262942-bHVtaXggc21hcnRwaG9uZQ==/",
+      "sha256": "52a9aecb4bdb6f84ebcc162acbcf482f32d6a770758fc4e2cda608f7820060bb"
+    },
+    {
+      "id": "666bff5d-28b4-4229-aba1-3f5333567498",
+      "url": "http://www.tikshare.com/forum/showPost/1466/Full-budget-speech-of-finance-minister-2015",
+      "sha256": "ed789c065c4b35f26d85b36704f10d962d0daada879fa4c5961223bf7416c8c2"
+    },
+    {
+      "id": "3cc861ef-a73f-4c68-89eb-6b18d45b8fa9",
+      "url": "https://prettybuyers.com/products/led-meteor-shower-rain-lights-30cm-50cm-waterproof-xmas-decoration-light-falling-string-lights-for-party-christmas-lights-d30",
+      "sha256": "cdd20d0b20f5a5b1b63d18720818f7716e42d03d7e9c72f4f980d1873ebb5730"
+    },
+    {
+      "id": "fd04d76f-41ff-4275-805e-945708586dab",
+      "url": "https://forums.debian.net/viewtopic.php?t=159270",
+      "sha256": "9f9a22a4fa856e65fbe27299b90b6da2763a70019cbf4f8dd3d5bf4fb47324ed"
+    },
+    {
+      "id": "0a4054a1-5d75-4f8e-a4c5-a828b828ee96",
+      "url": "http://rew-online.com/2017/11/02/madison-square-garden-ventures-leases-10000-sf-at-111-west-33rd-street/",
+      "sha256": "b8138348fd7c6f7cd243d1891f2a4320a70196b5b378dba19a1f9c1990ba8cc7"
+    },
+    {
+      "id": "3026972b-8a26-48c3-bc00-c181138702f2",
+      "url": "https://www.triumphhq.com/terms-of-use/",
+      "sha256": "49e0f0778809fbbded749eea74566a73f175843ef2fee2014425d39ea2ffaf1b"
+    },
+    {
+      "id": "e9e51e28-6091-401b-b23c-f12888ea9687",
+      "url": "https://lists.evolt.org/thechatarchive/Week-of-Mon-20010730/002924.html",
+      "sha256": "f247a44cc8ea250a7b2dc706b356122eb03c104e9602dc11308ae66a1db0b185"
+    },
+    {
+      "id": "7ba96b6c-9ea9-4ae4-842f-2942383ab63e",
+      "url": "https://www.codeproject.com/Questions/5382597/How-I-can-integrate-EID-reader-with-tablet",
+      "sha256": "f1cf9857261412617c7c1e26fd777b0358f93bb0b15ee59101b9279f2cfe3826"
+    },
+    {
+      "id": "e46647cf-6706-4b48-8fb5-7936049438be",
+      "url": "https://teneohg.com/member-hotel/radisson-collection-hotel-royal-copenhagen/",
+      "sha256": "e350f9e2eae2635f2175bc838a15881845e0e1f4168ab5936c0d90c1e430b59e"
+    },
+    {
+      "id": "ecc35774-1762-47a7-9ab1-c5bc23de2da0",
+      "url": "https://patternmemommy.com/tag/sheet-cake/",
+      "sha256": "bf2ab849c0ec32fa4a6c0ca2e048aa129c77829434c77bfc697a274459d14b4c"
+    },
+    {
+      "id": "3e238c9e-1b4c-4dd1-af93-307c90f7a6de",
+      "url": "https://studylibfr.com/doc/8494564/second-hand-tobacco-smoke",
+      "sha256": "dadf78567fb230a965229f02810a803b2fae4cc581e2f46ac392e45c4dc754bb"
+    },
+    {
+      "id": "c96c623a-12ed-439e-9042-6e51c7d61c1f",
+      "url": "https://review.coreboot.org/plugins/gitiles/bios_extract/+/c1886a367f726a6df92fa2ca0a8caaf0ba6844c2%5E%21/",
+      "sha256": "cfc3496e5b99bb0915517b94d9e50bc5ac99de98ae417a3a3640bcee9a9ce4fd"
+    },
+    {
+      "id": "3c426502-5324-4506-aa7b-10cbd729c49c",
+      "url": "http://hetq.am/eng/print/56760/",
+      "sha256": "7c9c247786eda43dd766fe1e108d098d40e86da982704ad000d1bc0cb5f2af03"
+    },
+    {
+      "id": "8d6b0aab-fbd2-4710-9a5b-72e932be68b2",
+      "url": "https://users.mai.liu.se/gunar97/Research/pLaplace_equation.html",
+      "sha256": "dd2170894e57705faed7a0601def2b64a2e6bf6603f3bb374a0cea1cee611992"
+    },
+    {
+      "id": "a6b273ad-86c5-4d56-987f-983efedcf6cb",
+      "url": "https://aniruddhadeb.com/articles/2021/note-on-random-variables.html",
+      "sha256": "d2358f1125863d2c5b412078e3be82f91e5cfe43fc18229791952fc5083d6e87"
+    },
+    {
+      "id": "3101dba7-8f8c-4a26-9c6e-531f69b61b1a",
+      "url": "https://www.lebanese-forces.com/2017/07/10/lebanese-electoral-law/",
+      "sha256": "4237f544263ad8fcbbbf18c36975e091c684aeeb54cf669ed32b32010df14147"
+    },
+    {
+      "id": "99e4ff1b-5d7f-4c8d-8c4f-f551304ee744",
+      "url": "http://studylibfr.com/doc/8949054/stromal-modulators-of-tgf--in-cancer-clinical-medicine-jo..",
+      "sha256": "3a78f0f213664936a5c216ec629dd475c9a89916c16fad0488a3180ca33055c2"
+    },
+    {
+      "id": "cd1b69ae-4b3d-441e-b4bf-447c1dbaff40",
+      "url": "http://blog.holcombephotography.com/?comments_popup=4928?KeepThis=true&TB_iframe=true&height=400&width=400",
+      "sha256": "c9b838189d319321bf136a3f152ec3284ec5cca385f1449a132f0b3da2708ed0"
+    },
+    {
+      "id": "d7b2426b-3acc-4648-8eac-a52854e1c5ad",
+      "url": "http://link.mymcpl.org/resource/JX_2BKaLtBQ/",
+      "sha256": "84e475d10da3f3f8cffc462426e9037e0a6422754e8e437ef9aee374ffb38c3f"
+    },
+    {
+      "id": "09929c46-5619-4acc-bd71-af8837e66f65",
+      "url": "https://www.homecrux.com/lighthouse-security-camera-uses-3d-sensing-identify-people-pets/69342/",
+      "sha256": "9a26e4b513da4b253b0d9713ad03e152db5763e76b0623b01b97ec4039703bdf"
+    },
+    {
+      "id": "9903c770-a7fa-4062-bb9d-8be59f766337",
+      "url": "http://spie.org/about-spie/press-room/press-releases/cellino-wins-spie-startup-challenge-with-pitch-for-gene-therapy-enabled-by-lasers-and-nonfabricated-materials-3-feb-2017?pf=true",
+      "sha256": "0bd496bc2561b278dc675fffc1cf5b7a5a35a1563cde0ee54bce709075d9b4ce"
+    },
+    {
+      "id": "204247e5-33cf-408a-90a6-30e01926a7d8",
+      "url": "https://politics.stackexchange.com/questions/88539/have-the-results-of-any-u-s-presidential-election-other-than-2000-2020-been-wi",
+      "sha256": "8aacccb1e64706fcad7455125773bd3b5f488a6ae58847b55d0a85fe16160099"
+    },
+    {
+      "id": "ada5f549-4a9a-4a5a-9400-aff560bf3217",
+      "url": "http://www.getholistichealth.com/22125/number-of-children-born-in-the-u-s-with-autism-on-the-rise/",
+      "sha256": "9f9877bfe9a88cf172c6d7e13a4f14bd42b17b423f16d00e4f1fa1adae8c31b0"
+    },
+    {
+      "id": "4cf6f146-3ee2-4280-b9be-9e5e1527d701",
+      "url": "https://www.ksrinc.com/about-us/10-questions/?qid=37",
+      "sha256": "2c169d331a0e0d13c2d0df35922220ecc7931988ca65c6e71c086fb666f9818a"
+    },
+    {
+      "id": "c2a932ca-7088-42f8-8fde-a59b0f597c51",
+      "url": "https://www.fiberoptics4sale.com/blogs/wave-optics/light-emitting-diodes-leds-1",
+      "sha256": "be7513595f61e5e222a1be6b50769546cb471b1d1b161aad489566464ffb5257"
+    },
+    {
+      "id": "30b05f1d-56b3-48d3-b587-aea4e99bc003",
+      "url": "https://www.hcqyfuwu.com/261.html",
+      "sha256": "d8fcc6accbe002485af5681931c7a70f1d50b11c75f3ea9ea3f0b296ccb31825"
+    },
+    {
+      "id": "48333a41-b72f-4eb2-906a-5a61d794b457",
+      "url": "https://www.ask.com/tv-movies/james-bond-movies-ranked",
+      "sha256": "ef08820de053dd901b600b06a4d1c8bcf77e2d250518da54bbb07715f93bc874"
+    },
+    {
+      "id": "862efbeb-f4b6-4d80-8d6a-c07434446c5f",
+      "url": "https://picclick.ca/Beautiful-Villages-Ireland-Ulster-Leinster-Connacht-Munster-Cork-122303956732.html",
+      "sha256": "deed4e5c083ecb653f2f455f7fd344449f53d8b6ce4d151abe8c9842f1508d62"
+    },
+    {
+      "id": "87da087c-8168-4796-9f8c-c493d4b2a6a5",
+      "url": "https://poynder.blogspot.com/2018/03/the-open-access-big-deal-back-to-future.html?showComment=1522409938835",
+      "sha256": "30e8ab905c37bbb066aa917326ca8dabf85c2d72c8c9f4099c0078113bf4bf56"
+    },
+    {
+      "id": "a467bce5-cc8c-4b83-89d4-a6d6caa19d47",
+      "url": "https://m.weibo.cn/detail/5061814331376054",
+      "sha256": "7538778c5da3bcb70cd7fde0aaeeae176ecbba7ba36b914a13d618dee2022895"
+    },
+    {
+      "id": "6fb02d24-c936-447e-8c4a-6cbcc06db2b8",
+      "url": "https://www.collectors.com/coin/1888-gold-g1-type-3-pr65-cameo/-8841431518485169178",
+      "sha256": "8df3e903e0dfd2a1274400888aa627567099c7e689a6c2459c6f15c74c86b737"
+    },
+    {
+      "id": "b9e2a63e-289d-400c-86d3-0d2ae9040f5d",
+      "url": "http://wiki.erights.org/mediawiki/index.php?title=Miranda_optUncall&diff=prev&oldid=1586",
+      "sha256": "98e973af9010e040679847522b53af64a3edc742905b59d99c32943fb9981027"
+    },
+    {
+      "id": "7b3a4421-2866-424d-8ac6-0432df0d737b",
+      "url": "http://www.zchocolat.com/en/international-gift-delivery/philippines/davao/",
+      "sha256": "35de13f3bf195d08470ef61578d8d7a420daa45b95efd339c6eee21708dfcc6f"
+    },
+    {
+      "id": "ac7701fa-9c10-4763-a84e-a5738dc5d938",
+      "url": "https://www.a3p.org/a3p-afi-survey-on-sampling-testing-practices-for-in-process-pre-filtration-bioburden-for-sterile-products/",
+      "sha256": "7a9703478b3bc803ff97eb56a3fa8903a730308180f21169908f1b4d83cd3c60"
+    },
+    {
+      "id": "29b2ccea-e015-45ee-b7b3-6c20b2a4e50a",
+      "url": "https://www.nytimes.com/interactive/2016/07/31/magazine/brynn-saito-stone-on-watch-at-dawn.html",
+      "sha256": "568fcda2e847380fce4e1de192e736d76cbbf7d3af32a36f1c99287410ad1c7a"
+    },
+    {
+      "id": "70744aa3-23f4-4b1b-8ff0-7f3c04bbffed",
+      "url": "https://ccmc.gsfc.nasa.gov/results/api/get_run_file.php?runnumber=Sarah_Henderson_072924_SH_3&filename=soho_GSE.dat",
+      "sha256": "5b27e2862961f89684eef75f22d9aa9dd6e48071c897ce02baed9207e35abc6e"
+    },
+    {
+      "id": "7e2872da-54c0-4b4f-a1bf-522543d69933",
+      "url": "http://www.pcper.com/news/General-Tech/Will-Intels-Ultrabook-form-factor-come-integral-Achilles-Heel",
+      "sha256": "30839c360530380ec8afee1c3b07c17726296de25d3aaea33d0bc955312cba85"
+    },
+    {
+      "id": "c6fc74e6-e164-4a4e-9916-729cef33b9f8",
+      "url": "https://www.aspi.org.au/report/working-smarter-not-harder",
+      "sha256": "6dc1df2f28506a2f62a5ad1e7d64f0ef5938df33dda57befcee87a9f4704a147"
+    },
+    {
+      "id": "019f4d9a-b7cf-424e-a993-da96cf16ce47",
+      "url": "https://vintagebooks.wordpress.com/2010/04/27/word-on-the-street-nyc-on-the-w-between-queensboro-plaza-and-lexington-ave/",
+      "sha256": "79f29806f3a960ecd7dc93affd308107af54549e88c4bbe414047f39dd4b9f7d"
+    },
+    {
+      "id": "a39d4831-d0b6-4cbd-9734-79096b8d183d",
+      "url": "http://cnn.com/ALLPOLITICS/time/1999/03/15/microsoft.html",
+      "sha256": "2349c4fbfec037c68675e334855437b337ce01c27b5325cd8020381566958add"
+    },
+    {
+      "id": "a46adffe-2dd8-43cc-b689-b95aa3d648d1",
+      "url": "https://help.feedbackfruits.com/en/articles/6748080-automated-feedback-setting-up-student-autonomy-teacher-perspective",
+      "sha256": "9bae747475dba38bb526f51468043fefda0c0ba894bb014eda37c49efe6c1f52"
+    },
+    {
+      "id": "b73a20db-0159-4a69-973a-b8e0c83dc630",
+      "url": "https://flyingcoloursmaths.co.uk/tamil-fractions/",
+      "sha256": "a4526ba5ec96daa595bca7e22a40de74f1a448bb491c1b0dad058e8ec719d145"
+    },
+    {
+      "id": "357c9ba1-1c6c-4d8f-a75e-0bc4a3bc9b3c",
+      "url": "https://sunseafashion.com/content/23-intimate-apparel-manufacturers",
+      "sha256": "fc4519c4141667815f8d0acb8e588dc490dccdae5ad14d56729f176bbfc5aecc"
+    },
+    {
+      "id": "4d0f20e7-ee39-4337-83d2-d49b8bff9080",
+      "url": "https://mossyskull.com/reading/tempests-challenge/",
+      "sha256": "b463d10fc85ad262bfc7941222d6b0c89e15c10b030c9c11efd9e5fceaaba5db"
+    },
+    {
+      "id": "15ba247e-de3b-4b42-bf7c-a35a70676621",
+      "url": "http://www.cnn.com/TRANSCRIPTS/1108/27/bn.03.html",
+      "sha256": "3f56b550eb6f5dbe2aaa882a05ab4bdda4ddbe303ca9cfcd71ce98bc013e1645"
+    },
+    {
+      "id": "cd1d782d-eba2-4d1a-a71c-1d0a48cd5819",
+      "url": "https://scienceon.kisti.re.kr/srch/selectPORSrchPatent.do?cn=USP2013098541637&dbt=USPA",
+      "sha256": "2bb8bc68a7a844e2f9f1e00064f3844ef580a0a406ef7de8a934ef0982c2ac24"
+    },
+    {
+      "id": "d8452e2f-1557-48fe-bb90-ea0e13f8f539",
+      "url": "https://libertyunbound.com/the-books-of-summer/",
+      "sha256": "1eb8f5a18c0037b0efb669e614674166ab9f72069c6f8fc8f6c4596d794b1e76"
+    },
+    {
+      "id": "2326247a-b76e-48ef-96e5-780261d21d27",
+      "url": "https://wjbq.com/maine-gas-stations/",
+      "sha256": "f20173d90431739fec19624244d76a4b038f954ca553da49c3cce1ae9c017a65"
+    },
+    {
+      "id": "ab6ab5eb-f29a-4a06-bbb6-af5b2c6e9989",
+      "url": "https://x.com/PKU1898/status/1734240373080572056",
+      "sha256": "5b3a6379f9278e70d62f952466e85868f5e4039b35e6dc91a8fec37e8a6054dd"
+    },
+    {
+      "id": "adb9e966-c6f5-44d2-b088-391153c0c156",
+      "url": "http://www.delgazette.com/news/691/owu-unveils-2015-16-calendar-of-events",
+      "sha256": "e6324df1a23c2a4e147c7664cf873be63654fa6e5181d698cc5494837fa07221"
+    },
+    {
+      "id": "f080fbec-9ec6-43c6-9bc6-0846c70cbe8d",
+      "url": "https://bbs.nanshengbbs.top/detail/171",
+      "sha256": "f0c826b0a741456d3d3321e168acfe7265dc9d0dc2bbc8daad641bcfa5063e74"
+    },
+    {
+      "id": "6b9ab18b-eca4-4c1d-983a-3f5e5c2a943e",
+      "url": "http://forum.zkoss.org/question/109839/zk-multiplecomposer-using-spring-use-composer-variable-in-zul/",
+      "sha256": "6d90b8934c953c91df6c28aaa0a95fa093e209dde5f200cb3348a019f7bb7ba8"
+    },
+    {
+      "id": "8798f93a-240c-46d7-a8d1-a5fb011279fc",
+      "url": "http://mcubed.net/mlb/nym/tstrkgwa.shtml",
+      "sha256": "8b843022ca2017dc9a810848321bf0f6f411e1d4546f7269696b2799d920a7db"
+    },
+    {
+      "id": "c46672f1-55e3-4dad-a248-3581746bdf2b",
+      "url": "http://opensource.apple.com/source/libxml2/libxml2-21.3/libxml2/doc/xmlcatalog.1",
+      "sha256": "4a190df85c1c82139e9b71c004987c7a3ffbd1854de5a74a57640c0ce2ced2b6"
+    },
+    {
+      "id": "df3ca748-d891-450e-8248-3848b2fd7bf5",
+      "url": "http://www.trialitfirst.com/kajabi-review/",
+      "sha256": "43565f39b669dcd66aca4c1254846dadfd7ee35fa057d2e445f641ce1fea5162"
+    },
+    {
+      "id": "09729122-6a76-46a0-82d9-65bb3451e8e9",
+      "url": "https://www.stackage.org/lts-12.0/package/general-games-1.1.1",
+      "sha256": "ab035845f58883a4c257e5a689a090c8094c34caf24a1161e91931aa54c79714"
+    },
+    {
+      "id": "4fe41300-7917-4a1c-9b23-6add9545b465",
+      "url": "http://demo.designwall.com/dwqa/question/a-few-quick-pre-sale-questions/",
+      "sha256": "1b3a8093dc1b80015f1f5dce1eaf0b06040bfc22479e24b911764b96c8fcb7f9"
+    },
+    {
+      "id": "8a65f973-4cc7-498f-8f22-a38d0275af23",
+      "url": "https://www.future-earth.co.uk/facebook-childrens-portrait-awards/",
+      "sha256": "24dfbec88520cc16b4792d91764616162c027a81610e75ceab140123dd4c0125"
+    },
+    {
+      "id": "e5d733d9-df3c-41b2-91a4-9881ced4299f",
+      "url": "https://snd.wordpress.org/plugins/pods-alternative-cache/",
+      "sha256": "57238c4983e25f25f6cc8c007788bb970647c69ffc975de5e2ec898e1012cbb4"
+    },
+    {
+      "id": "d93ee8a2-e141-4d04-858e-453ba94149cc",
+      "url": "http://koreascience.or.kr/article/JAKO201125136122510.page",
+      "sha256": "de7272925fe4a065349094ef33f27777f051bfbf6edddd7a90e5dc779a3d66e2"
+    },
+    {
+      "id": "6fb63b66-b1c5-433b-ab3c-dd2ef066c206",
+      "url": "https://juejin.im/post/5b5927eae51d4518e311a93f",
+      "sha256": "5934a1705b88156ccfe978a609d3e5358a1b73e1a21ed330105e104b9302fe58"
+    },
+    {
+      "id": "5e8a746e-81c6-4ab4-af59-e794c71bf95a",
+      "url": "https://newcanaanfarms.com/product/merry-mulling-spice/",
+      "sha256": "bc87deab04d61e85f9ac7d3af2bd63d7b4f9357fa95969ab5d01230ef9a2945b"
+    },
+    {
+      "id": "0f5d90f8-8798-47ae-99ed-9d224943b2ff",
+      "url": "https://peerj.com/articles/5182/",
+      "sha256": "1d0e3ce0849197d34645c95406ae11e0cc18d108e2a99988d41830dcb3653aac"
+    },
+    {
+      "id": "341840b1-9ac6-457b-9f8c-a1b883816c71",
+      "url": "http://www.dtcms.cn/news/show-126772.html",
+      "sha256": "fc924ec5bdb0c8f01e8baf1acb5ed8f6e1506bc3980a10fc9930de5a9db97576"
+    },
+    {
+      "id": "68cc1af7-baf6-47ea-bf3c-13867256708e",
+      "url": "https://www.maths.ox.ac.uk/outreach/oxford-online-maths-club/season-5-episode-2",
+      "sha256": "166578f1dfb88603a50b629fc5e0367765ef71b87ac24e849af9cd5101c3299b"
+    },
+    {
+      "id": "dcbeec6a-be09-4bf0-b4c8-813536338d20",
+      "url": "https://world.optimizely.com/articles/Items/Using-Vista-Gadgets-to-Extend-a-Web-Site-to-the-Desktop/",
+      "sha256": "8fcbec56a8725e49d98f77cf1bcbb9c42b05bfb96f4faa0047d3c75ef2ace7cc"
+    },
+    {
+      "id": "811694dc-56a5-465a-b52a-12ebc60fd7d2",
+      "url": "http://www.economagic.com/em-cgi/data.exe/beagmp/25500x900x065",
+      "sha256": "27e9d5d2fe50891b31d5fd4a6de06e2a6d699c068885cc88ab80958709312d11"
+    },
+    {
+      "id": "26487abc-da5b-44c3-b8c2-de855a855d3d",
+      "url": "https://holzmann-cfd.com/en/openfoam/numerical-schemes/code-explanation",
+      "sha256": "f4e1adf7fe79ed92076cea959c70a8ebcd494842ecfd6d110c612a1b780912b7"
+    },
+    {
+      "id": "f6059ea7-8d18-47a8-9de0-76ee35e67b42",
+      "url": "http://trac.pcbsd.org/browser/src-sh/pc-extractoverlay/server-overlay/etc/freebsd-update.conf?rev=41b1c3fcdda0936ebf96e1a03d63b1e3e02d1347",
+      "sha256": "a785e72cafbcbcc38089fb9cecdfb8f41e6953c71626b56f62dd05d7f504d841"
+    },
+    {
+      "id": "7c81df72-2ae3-4e7a-9af9-928375a39314",
+      "url": "https://magazine.tabelog.com/articles/373020",
+      "sha256": "4f7ff1d4698e30dc02b4f20a702bd8b65fdff0174b06f29a0cbe3de021fc0ed8"
+    },
+    {
+      "id": "3efa9e00-6cfa-49e5-8005-fb954d10eb84",
+      "url": "https://holzmann-cfd.com/community/developments/mesh-quality",
+      "sha256": "70d6a0f96ceab9cebfa8f3f0fbaa5e949ead0f5bac9fb81a2183c7c7fa4b5f53"
+    },
+    {
+      "id": "3ffdd3ab-b03c-415d-bc05-159372b658e2",
+      "url": "https://aniruddhadeb.com/articles/2023/l2-regularization.html",
+      "sha256": "e74c52ca227c885d8e7fd78e6d2885c70df026e365a968597b3d2de3dd3003aa"
+    },
+    {
+      "id": "6edcd7ea-0503-4ed9-b493-4a6aad2ee584",
+      "url": "https://packagist.org/packages/flarum-lang/icelandic",
+      "sha256": "e5adf2ba2ca1617b60fe0e824b9bce5df42a1d43ec91323a9fdc1689fa77562e"
+    },
+    {
+      "id": "aad10729-7da6-4276-b860-68db0b7be515",
+      "url": "https://repositorio.ifgoiano.edu.br/handle/prefix/850",
+      "sha256": "efbe6595b2e16e1104e16ff4b4226abc5270a6432fb68d663814265f3193dbab"
+    }
+  ]
+}

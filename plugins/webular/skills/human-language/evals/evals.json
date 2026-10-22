@@ -31,16 +31,16 @@
     },
     {
       "id": "write-jev-payload-question-text",
-      "prompt": "Write the state and question text for a Jev payload that asks whether a scraped page states the price of the 2026 model. Keep the JSON keys and the yes/no enum values exact, and put every decisive fact in the state.",
-      "expected_output": "State text that says what page was scraped and why, and a question that asks for `yes` or `no` on whether the page states the 2026 model's price.",
+      "prompt": "Write the state and question text for a Jev payload that asks whether a scraped page states the price of the Pro plan. Keep the JSON keys and the yes/no enum values exact, and put every decisive fact in the state.",
+      "expected_output": "State text that says what page was scraped and why, and a question that asks for `yes` or `no` on whether the page states the Pro plan's price.",
       "assertions": [
         "The state says a product page was scraped",
-        "The question asks only whether the page states the 2026 model's price",
+        "The question asks only whether the page states the Pro plan's price",
         "The enum values `yes` and `no` appear exactly",
         "Every sentence has 28 words or fewer"
       ],
-      "good": "State: we scraped one product page. We want to know if it gives the price of the 2026 model. Question: does the page state that price? Answer `yes` or `no`.",
-      "bad": "We would really like to know whether or not the page that we scraped earlier today happens to state the price of the 2026 model anywhere in a number of places on it.",
+      "good": "State: we scraped one product page. We want to know if it gives the price of the Pro plan. Question: does the page state that price? Answer `yes` or `no`.",
+      "bad": "We would really like to know whether or not the page that we scraped earlier today happens to state the price of the Pro plan anywhere in a number of places on it.",
       "bad_issues": ["filler: a number of", "cut: really", "long sentence: 33 words"]
     },
     {

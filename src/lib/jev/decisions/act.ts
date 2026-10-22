@@ -130,10 +130,10 @@ export const actDecision = defineDecision<ActInput, string>({
     },
   ],
   payload: actPayload,
-  read: (a, t) => agreedPick(a, 'next', t),
+  read: (a, t) => agreedPick(a, 'next', t, true),
   bar: CONFIDENCE_BAR,
   fallback: overlapBaseline,
   codeCheck: safeClick,
   evals: 'tests/jev/evals/act.next.json',
-  docs: '88a6a003018eaea50167565a766a0d4a91d039cf93cc7dc2965d3ceba3a72caf',
+  docs: 'b0b26ab933a61b5d43ccccae5fbd009f445bfdcfd2808cac9e410a84f0fd8ca4',
 })

@@ -72,19 +72,51 @@ const withHelpHint = (message: string, exitCode: number): string => {
   return `${message}\nRun '${help}' to see how to use it.`
 }
 
-// The teardown runs outside any fiber, so it writes stderr directly.
-const teardown: Runtime.Teardown = (exit, onExit) => {
-  if (Exit.isSuccess(exit)) return onExit(Number(exit.value ?? 0))
-  const { message: raw, exitCode } = failureOfCause(exit.cause)
-  const message = withHelpHint(raw, exitCode)
-  if (message !== '') process.stderr.write(`${Effect.runSync(errorPrefix)}${message}\n`)
-  onExit(exitCode)
-}
+// The failure message prints inside the main fiber, before the teardown runs.
+const reportFailure = (exit: Exit.Exit<number, unknown>) =>
+  Effect.gen(function* () {
+    if (Exit.isSuccess(exit)) return
+    const { message: raw, exitCode } = failureOfCause(exit.cause)
+    const message = withHelpHint(raw, exitCode)
+    if (message === '') return
+    const prefix = yield* errorPrefix
+    yield* Effect.sync(() => process.stderr.write(`${prefix}${message}\n`))
+  })
+
+// The teardown runs outside any fiber: it only maps the exit to a code.
+const teardown: Runtime.Teardown = (exit, onExit) =>
+  onExit(Exit.isSuccess(exit) ? Number(exit.value ?? 0) : failureOfCause(exit.cause).exitCode)
 
 // Runs a program that yields its exit code with the Bun platform services
 // (FileSystem, Path, ChildProcessSpawner). BunRuntime.runMain ends the process
 // on any non-zero code, so an open handle never holds a failed command alive.
-export function runMain(program: Effect.Effect<number, unknown, BunServices.BunServices>): void {
+type MainProgram = Effect.Effect<number, unknown, BunServices.BunServices>
+
+// In-process seam for tests: while this global holds a function, runMain hands
+// it the program instead of starting and ending the process.
+export const IN_PROCESS = Symbol.for('webular.runMain.inProcess')
+
+// The exit code runMain ends with, failure message printed, without the process.
+export const exitCodeOf = (program: MainProgram): Effect.Effect<number> =>
+  Effect.onExit(
+    Effect.provide(Effect.scoped(Effect.andThen(recordSignals, program)), BunServices.layer),
+    reportFailure,
+  ).pipe(
+    Effect.exit,
+    Effect.map((exit) =>
+      Exit.isSuccess(exit) ? Number(exit.value ?? 0) : failureOfCause(exit.cause).exitCode,
+    ),
+  )
+
+export function runMain(program: MainProgram): void {
+  const seam = (globalThis as { [IN_PROCESS]?: (p: MainProgram) => void })[IN_PROCESS]
+  if (seam) {
+    seam(program)
+    return
+  }
   const main = Effect.scoped(Effect.andThen(recordSignals, program))
-  bunRunMain(Effect.provide(main, BunServices.layer), { disableErrorReporting: true, teardown })
+  bunRunMain(Effect.onExit(Effect.provide(main, BunServices.layer), reportFailure), {
+    disableErrorReporting: true,
+    teardown,
+  })
 }

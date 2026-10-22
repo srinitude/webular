@@ -27,6 +27,8 @@ const summarize = eff(
     const args = ['--url', `${fx.origin}/gone`, '--json']
     const run = yield* runCli('src/commands/summarize.ts', args, { env })
     expect(run.out).toContain('English writer')
+    // source_url names the page actually read, not the url that failed.
+    expect(run.out).toContain(`"source_url":"${fx.origin}/doc"`)
   }),
 )
 

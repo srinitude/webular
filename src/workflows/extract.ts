@@ -2,11 +2,15 @@
 // non-model workflow over FOSS tools (linkedom).
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
+import { parseHTML } from 'linkedom'
 import { z } from 'zod'
 import { fetchText } from '../core/http.ts'
+import { metadataSchema, pageMetadata } from '../lib/json-ld.ts'
+import { fetchTextObeyingRobots } from '../lib/robots-gate.ts'
 import {
   type InvalidFieldSpecError,
   parseFieldSpecs,
+  repeatedRecordSelector,
   selectFields,
   selectMatches,
 } from '../lib/select.ts'
@@ -21,15 +25,18 @@ const extractInput = z.object({
 })
 
 const archivedFrom = z.string().optional()
+const metadata = metadataSchema.optional()
 const fieldDataSchema = z.object({
   url: z.string(),
   data: z.record(z.string(), z.string()),
   archivedFrom,
+  metadata,
 })
 const selectorDataSchema = z.object({
   url: z.string(),
   matches: z.array(z.string()),
   archivedFrom,
+  metadata,
 })
 const extractOutput = z.union([fieldDataSchema, selectorDataSchema])
 
@@ -43,10 +50,12 @@ const fetchStep = createStep({
     fields: z.string().optional(),
     selector: z.string().optional(),
   }),
-  execute: ({ inputData }) => {
+  execute: ({ inputData, abortSignal }) => {
     const opts = { timeoutMs: inputData.timeoutMs }
-    const fetched = withArchiveCopy(inputData.url, fetchText(inputData.url, opts), (capture) =>
-      fetchText(capture, opts),
+    const fetched = withArchiveCopy(
+      inputData.url,
+      fetchTextObeyingRobots(inputData.url, opts),
+      (capture) => fetchText(capture, opts),
     )
     return stepRuntime.runPromise(
       Effect.map(fetched, ({ value: html, archivedFrom }) => ({
@@ -56,6 +65,7 @@ const fetchStep = createStep({
         fields: inputData.fields,
         selector: inputData.selector,
       })),
+      { signal: abortSignal },
     )
   },
 })
@@ -70,7 +80,8 @@ const selectStep = createStep({
     selector: z.string().optional(),
   }),
   outputSchema: extractOutput,
-  execute: ({ inputData }) => stepRuntime.runPromise(select(inputData)),
+  execute: ({ inputData, abortSignal }) =>
+    stepRuntime.runPromise(select(inputData), { signal: abortSignal }),
 })
 
 function select(inputData: {
@@ -81,7 +92,12 @@ function select(inputData: {
   selector?: string | undefined
 }): Effect.Effect<z.infer<typeof extractOutput>, InvalidFieldSpecError> {
   const { url, html, fields, selector } = inputData
-  const from = inputData.archivedFrom ? { archivedFrom: inputData.archivedFrom } : {}
+  // The cheap text check skips a second parse on pages with no JSON-LD.
+  const meta = /ld\+json/i.test(html) ? pageMetadata(parseHTML(html).document) : undefined
+  const from = {
+    ...(inputData.archivedFrom ? { archivedFrom: inputData.archivedFrom } : {}),
+    ...(meta ? { metadata: meta } : {}),
+  }
   if (fields) {
     return Effect.flatMap(parseFieldSpecs(fields), (specs) =>
       Effect.map(selectFields(html, specs), (data) => ({ url, data, ...from })),
@@ -90,13 +106,18 @@ function select(inputData: {
   if (selector) {
     return Effect.succeed({ url, matches: selectMatches(html, selector), ...from })
   }
-  return Effect.succeed({ url, data: {}, ...from })
+  // No fields or selector: a listing page's repeated records are the answer.
+  const derived = repeatedRecordSelector(html)
+  return Effect.succeed(
+    derived ? { url, matches: selectMatches(html, derived), ...from } : { url, data: {}, ...from },
+  )
 }
 
 export const extractWorkflow = createWorkflow({
   id: 'extract',
   inputSchema: extractInput,
   outputSchema: extractOutput,
+  options: { shouldPersistSnapshot: () => false },
 })
   .then(fetchStep)
   .then(selectStep)

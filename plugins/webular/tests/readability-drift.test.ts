@@ -4,14 +4,15 @@
 // changes, this fails until the webular copy is reviewed and the hash updated.
 // The copy side is pinned too, so a copy edit also needs a reviewed hash, and
 // the copies must be real files that ship inside the plugin, never symlinks.
+// WEBULAR_READABILITY_SOURCES names the readability skills folder; the source
+// side skips when it is unset, and logs a skip when that folder is missing.
 import { expect, test } from 'bun:test'
 import { createHash } from 'node:crypto'
-import { homedir } from 'node:os'
 import { fileURLToPath } from 'node:url'
 import { BunServices } from '@effect/platform-bun'
 import { Effect, FileSystem, Option } from 'effect'
 
-const sources = `${homedir()}/.claude/mods/readability/skills`
+const sources = process.env['WEBULAR_READABILITY_SOURCES']
 const copies = fileURLToPath(new URL('../skills', import.meta.url))
 const pinned: Record<string, string> = {
   'human-language': '605c5e4b8f7f55050c49b40be22519b57779b0fb6621fcb6d337cb535e220955',
@@ -19,11 +20,11 @@ const pinned: Record<string, string> = {
 }
 const pinnedCopies: Record<string, string> = {
   'human-language': 'd6d980355aa50f8d7add5dd3cef6f00b79896d026f63eb9b19a670c081739437',
-  'rich-and-native-markdown': '2623974c9f508b9ee2bf85bf088405d397bcd3646e6ef5c097f67b2ea827378a',
+  'rich-and-native-markdown': '4cbfa3089f7d1b15b6d351c9967058fe2a5af3f8faf43a661cab3004bb82a206',
 }
 
 // Rule lines only, with Markdown marks, case, and spacing removed.
-export const ruleHash = (text: string) =>
+const ruleHash = (text: string) =>
   createHash('sha256')
     .update(
       text
@@ -51,7 +52,7 @@ const checkSource = (fs: FileSystem.FileSystem, name: string, hash: string) =>
     Effect.option,
     Effect.flatMap(
       Option.match({
-        onNone: () => Effect.logWarning(`skip: no readability source for ${name} on this machine`),
+        onNone: () => Effect.logWarning(`skip: no readability source for ${name} in ${sources}`),
         onSome: (text) =>
           Effect.sync(() => expect(`${name}: ${ruleHash(text)}`).toBe(`${name}: ${hash}`)),
       }),
@@ -63,8 +64,9 @@ const kind = (fs: FileSystem.FileSystem, path: string) =>
   fs.readLink(path).pipe(Effect.match({ onFailure: () => 'file', onSuccess: () => 'link' }))
 
 for (const [name, hash] of Object.entries(pinned))
-  test(`${name} source rules match the pinned hash`, () =>
-    withFs((fs) => checkSource(fs, name, hash)))
+  test.skipIf(!sources)(`${name} source rules match the pinned hash`, () =>
+    withFs((fs) => checkSource(fs, name, hash)),
+  )
 
 for (const [name, hash] of Object.entries(pinnedCopies))
   test(`${name} copy rules match the reviewed hash`, () =>

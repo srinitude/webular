@@ -8,9 +8,12 @@
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
-import { fuseRanked, searchLocalIndex } from '../lib/local-index.ts'
+import { dropPrivateHosts, fuseRanked, searchLocalIndex } from '../lib/local-index.ts'
 import { searchEffect } from '../lib/search-chain.ts'
+import { searchErrors } from '../lib/search-errors.ts'
 import { MAX_VARIANTS } from '../lib/search-source-names.ts'
+import { creatorProducts } from '../lib/sources/creator-products.ts'
+import { isNavigational } from '../lib/sources/official-sites.ts'
 import { FREE_SOURCE_NAMES } from '../lib/sources/registry.ts'
 import { SEARCH_SOURCES } from '../lib/sources-search.ts'
 import { stepRuntime } from './runtime.ts'
@@ -38,22 +41,42 @@ const searchOutput = z.object({
     degraded: z.boolean(),
     weak: z.boolean(),
   }),
+  // Only when nothing was found because the sources failed: one {url, reason}
+  // per failed source, and the command exits 1.
+  errors: z.array(z.object({ url: z.string(), reason: z.string() })).optional(),
 })
 
 const searchStep = createStep({
   id: 'search',
   inputSchema: searchInput,
   outputSchema: searchOutput,
-  execute: ({ inputData: { query, limit, source, variants } }) =>
+  execute: ({ inputData: { query, limit, source, variants }, abortSignal }) =>
     stepRuntime.runPromise(
       Effect.gen(function* () {
-        const web = yield* searchEffect(source, query, limit, { variants: variants ?? [] })
+        // A product named only by its maker comes from Wikidata, beside the web round;
+        // a navigational query asks in the official-site lookup's call instead.
+        const [web, made] = yield* Effect.all(
+          [
+            searchEffect(source, query, limit, { variants: variants ?? [] }),
+            source === 'web' && !isNavigational(query)
+              ? creatorProducts(query, limit)
+              : Effect.succeed([]),
+          ],
+          { concurrency: 2 },
+        )
         // Local BM25 hits answer alongside the free APIs: one SQLite query, a few ms.
         const local = yield* searchLocalIndex(query, limit)
-        const results = fuseRanked([web.results, local]).slice(0, limit)
+        const fused = yield* dropPrivateHosts(query, fuseRanked([made, web.results, local]))
+        const results = fused.slice(0, limit)
         const answered = web.source && { source: web.source }
-        return { query, count: results.length, ...answered, results, meta: web.meta }
+        // A source that answered "no results" worked; only an all-failed run is an error.
+        const statuses = Object.values(web.meta.sources).map((s) => s.status)
+        const allFailed = !statuses.some((s) => s === 'ok' || s === 'no-results')
+        const errors = allFailed ? searchErrors({ results, meta: web.meta }) : []
+        const failed = errors.length > 0 && { errors }
+        return { query, count: results.length, ...answered, results, meta: web.meta, ...failed }
       }),
+      { signal: abortSignal },
     ),
 })
 
@@ -61,6 +84,7 @@ export const searchWorkflow = createWorkflow({
   id: 'search',
   inputSchema: searchInput,
   outputSchema: searchOutput,
+  options: { shouldPersistSnapshot: () => false },
 })
   .then(searchStep)
   .commit()

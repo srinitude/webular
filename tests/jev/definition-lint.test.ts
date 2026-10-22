@@ -1,9 +1,11 @@
-// The jev mod's DEFINITION rules: the definer rejects an alias model at the type
-// level, and lintDefinition and lintSubtasks reject every other bad payload.
+// The jev mod's DEFINITION rules: the definer types only the pinned model; the lints reject the rest.
 import { expect, test } from 'bun:test'
 import { BunServices } from '@effect/platform-bun'
 import { Effect, FileSystem } from 'effect'
 import { JEV_MODEL_DEFAULT, type JevRequest } from '../../src/lib/jev/client.ts'
+import { decideCropBox } from '../../src/lib/jev/decisions/crop-box.ts'
+import { imageKindDecision } from '../../src/lib/jev/decisions/image-kind.ts'
+import { routeDecision } from '../../src/lib/jev/decisions/image-router.ts'
 import { decisions } from '../../src/lib/jev/decisions.ts'
 import type { DecisionDef } from '../../src/lib/jev/define.ts'
 import { fetchBlockDecision, fetchErrorDecision } from '../../src/lib/jev/fetch.ts'
@@ -11,13 +13,14 @@ import { fetchBrowserDecision } from '../../src/lib/jev/fetch-browser.ts'
 import { estTokens } from '../../src/lib/jev/learn/definition-lint.ts'
 import { lintDefinition, lintSubtasks } from '../../src/lib/jev/learn/lint.ts'
 import { nextEvent } from '../../src/lib/jev/machine.ts'
+import { JEV_LATEST_RELEASED } from '../../src/lib/jev/model.ts'
 
 const GOOD_STATE = {
   purpose: { motivation: 'm', outcome: 'o', why: 'w', background: 'b' },
   facts: { page: { url: 'https://a.dev' } },
 }
 const good = {
-  model: 'jev-1.13.0',
+  model: JEV_LATEST_RELEASED,
   state: GOOD_STATE,
   questions: {
     pick: {
@@ -62,12 +65,12 @@ test('definition: bare instructions, thin options and levels, and flat state are
   expect(rules({ ...good, questions: { q } })).toEqual(['score-levels'])
 })
 
-test('definition: alias models, box without jev-preview, size and nesting caps', () => {
-  for (const model of ['jev', 'jev-latest', '~fast', 'jev-1.13', 'gpt-5'])
-    expect(rules({ ...good, model })).toEqual(['model-pin'])
+test('definition: only the pinned release passes, box questions included, size and nesting caps', () => {
+  const unpinned = ['jev', 'jev-latest', 'jev-preview', '~fast', 'jev-1.13', 'jev-1.13.0', 'gpt-5']
+  for (const model of unpinned) expect(rules({ ...good, model })).toEqual(['model-pin'])
   const box = { b: { type: 'box', instructions: { t: 1 } } }
-  expect(rules({ ...good, questions: box })).toEqual(['box-model'])
-  expect(rules({ ...good, model: 'jev-preview', questions: box })).toEqual([])
+  expect(rules({ ...good, questions: box })).toEqual([])
+  expect(rules({ ...good, model: 'jev-preview', questions: box })).toEqual(['model-pin'])
   expect(rules({ ...good, questions: { a: noul('q'.repeat(130_000)) } })).toContain('question-size')
   const wide = {
     a: noul('q'.repeat(90_000)),
@@ -111,15 +114,16 @@ test('definition: a Jev step needs a primitive, a pattern, and a full payload', 
   ])
 })
 
-test('definition: defineDecision rejects an alias model at the type level', () => {
+test('definition: defineDecision takes only the pinned release at the type level', () => {
   type Model = NonNullable<DecisionDef<never, never>['model']>
-  const pinned: Model = 'jev-1.13.0'
+  const pinned: Model = JEV_LATEST_RELEASED
+  // @ts-expect-error an older release is not the pinned model
+  const older: Model = 'jev-1.13.0'
+  // @ts-expect-error jev-preview is not a release
   const preview: Model = 'jev-preview'
   // @ts-expect-error jev-latest is an alias, not a pinned model
   const latest: Model = 'jev-latest'
-  // @ts-expect-error a ~alias is not a pinned model
-  const tilde: Model = '~fast'
-  expect([pinned, preview, latest, tilde].length).toBe(4)
+  expect([pinned, older, preview, latest].length).toBe(4)
 })
 
 // Limits are tokens (llms-full.txt L14441, L14452-14457), estimated as chars / 4,
@@ -147,7 +151,15 @@ const listed = (d: object): ReadonlyArray<Listed> =>
   'payload' in (Reflect.get(d, 'def') ?? {}) ? [d as Listed] : []
 const ALL: ReadonlyArray<Listed> = [
   ...Object.values(decisions).flatMap(listed),
-  ...[fetchErrorDecision, fetchBlockDecision, fetchBrowserDecision, nextEvent].flatMap(listed),
+  ...[
+    fetchErrorDecision,
+    fetchBlockDecision,
+    fetchBrowserDecision,
+    nextEvent,
+    routeDecision,
+    decideCropBox,
+    imageKindDecision,
+  ].flatMap(listed),
 ]
 
 const scannedCalls = Effect.gen(function* () {

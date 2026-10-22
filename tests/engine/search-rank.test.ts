@@ -1,7 +1,7 @@
 // Search ranking contract: reciprocal rank fusion + official-domain signal +
 // URL dedupe. Pure functions, no network.
 import { describe, expect, test } from 'bun:test'
-import { domainSignal, hitKey, rankHits } from '../../src/lib/search.ts'
+import { domainSignal, hitKey, lexicalRerank, rankHits } from '../../src/lib/search.ts'
 
 const hit = (url: string) => ({ title: url, url, description: '' })
 const urls = (hits: ReadonlyArray<{ url: string }>) => hits.map((h) => h.url)
@@ -36,5 +36,46 @@ describe('rankHits — official site above Wikipedia and aggregators', () => {
   test('with no signal, a single list keeps its order', () => {
     const list = [hit('https://a.dev/1'), hit('https://b.dev/2'), hit('https://c.dev/3')]
     expect(urls(rankHits([list], 'zzz qqq'))).toEqual(urls(list))
+  })
+})
+
+describe('lexicalRerank — query overlap with title, host, and snippet', () => {
+  const h = (url: string, title: string, description = '') => ({ title, url, description })
+
+  test('a hit that matches the query terms beats an off-topic hit ranked above it', () => {
+    const hits = [
+      h('https://blog.example.com/a', 'Cooking pasta at home', 'Boil water and salt it.'),
+      h(
+        'https://example.org/b',
+        'Fredericton city guide',
+        'Fredericton is the capital of New Brunswick.',
+      ),
+    ]
+    expect(urls(lexicalRerank(hits, 'Fredericton')).at(0)).toBe('https://example.org/b')
+  })
+
+  test('the entity host and Wikipedia outrank a plain title match', () => {
+    const hits = [
+      h('https://news.example.com/x', 'Tychy news', 'Tychy tychy tychy'),
+      h('https://pl.wikipedia.org/wiki/Tychy', 'Tychy', ''),
+      h('https://www.tychy.pl/', 'Miasto Tychy', ''),
+    ]
+    expect(urls(lexicalRerank(hits, 'Tychy')).slice(0, 2).sort()).toEqual(
+      ['https://pl.wikipedia.org/wiki/Tychy', 'https://www.tychy.pl/'].sort(),
+    )
+  })
+
+  test('words from any script count, and equal scores keep the merged order', () => {
+    const hits = [
+      h('https://a.jp/1', '東京'),
+      h('https://b.jp/2', '大阪'),
+      h('https://c.jp/3', '東京'),
+    ]
+    expect(urls(lexicalRerank(hits, '東京'))).toEqual([
+      'https://a.jp/1',
+      'https://c.jp/3',
+      'https://b.jp/2',
+    ])
+    expect(urls(lexicalRerank(hits, 'zzz'))).toEqual(urls(hits))
   })
 })

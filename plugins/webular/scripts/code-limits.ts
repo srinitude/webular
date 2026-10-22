@@ -1,6 +1,7 @@
 // Code limits: files at most 200 lines, functions at most 30 lines, control nesting at most 3 deep.
+
+import ts from '@typescript/typescript6'
 import { Effect } from 'effect'
-import ts from 'typescript'
 import { files, pluginDir, read, rel, run } from './lib.ts'
 
 const MAX_FILE = 200

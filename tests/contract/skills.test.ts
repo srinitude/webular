@@ -14,9 +14,7 @@ const PLUGIN = `${ROOT}plugins/webular/`
 const CLAUDE_ROOT = ['$', '{CLAUDE_PLUGIN_ROOT}'].join('')
 
 // Commands no skill names, each with the reason. A stale entry fails the test.
-const UNDOCUMENTED: Record<string, string> = {
-  jev: 'It records and labels Jev calls for webular developers; no research flow uses it.',
-}
+const UNDOCUMENTED: Record<string, string> = {}
 // Flags that belong to a script, not to a webular command, and the file that reads them.
 const FOREIGN_FLAGS: Record<string, string> = {
   http: 'plugins/webular/src/server.ts',
@@ -30,7 +28,7 @@ const read = (path: string) => FileSystem.FileSystem.use((fs) => fs.readFileStri
 
 const skillDocs = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem
-  const names = yield* fs.readDirectory(`${PLUGIN}skills`)
+  const names = (yield* fs.readDirectory(`${PLUGIN}skills`)).filter((n) => !n.endsWith('.md'))
   const dirs = names.map((name) => `${PLUGIN}skills/${name}`)
   const paths = yield* Effect.forEach(dirs, (dir) =>
     fs
@@ -127,8 +125,9 @@ test('the research skill documents real tools and their real input fields', () =
 const isNamed = (docs: Doc[], cmd: string) =>
   docs.some(
     ({ text }) =>
-      spans(text).some((s) => s === cmd || s.startsWith(`webular ${cmd}`)) ||
-      new RegExp(`^## ${cmd}$`, 'm').test(text),
+      spans(text).some(
+        (s) => s === cmd || s === `webular:${cmd}` || s.startsWith(`webular ${cmd}`),
+      ) || new RegExp(`^## ${cmd}$`, 'm').test(text),
   )
 
 test('every command has a skill that names it, or a stated reason', () =>

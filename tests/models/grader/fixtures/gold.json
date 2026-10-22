@@ -1,0 +1,100 @@
+{
+  "rubrics": {
+    "exact-fact": "Pass only if the answer gives the reference fact correctly. A wrong, missing, or hedged fact fails. Extra correct detail is fine.",
+    "exact-number": "Pass only if the answer gives the reference number exactly (units may differ in form). Any other number fails."
+  },
+  "items": [
+    {
+      "id": "capital-australia",
+      "rubric": "exact-fact",
+      "task": "What is the capital of Australia?",
+      "expected": "Canberra",
+      "answer": "The capital of Australia is Canberra.",
+      "claudeWritten": true
+    },
+    {
+      "id": "capital-canada",
+      "rubric": "exact-fact",
+      "task": "What is the capital of Canada?",
+      "expected": "Ottawa",
+      "answer": "Canada's capital is Toronto, its largest city.",
+      "claudeWritten": true
+    },
+    {
+      "id": "author-1984",
+      "rubric": "exact-fact",
+      "task": "Who wrote the novel 1984?",
+      "expected": "George Orwell",
+      "answer": "According to https://exa.ai/search?q=1984 the novel 1984 was written by George Orwell.",
+      "claudeWritten": false
+    },
+    {
+      "id": "chemical-gold",
+      "rubric": "exact-fact",
+      "task": "What is the chemical symbol for gold?",
+      "expected": "Au",
+      "answer": "The chemical symbol for gold is Ag.",
+      "claudeWritten": false
+    },
+    {
+      "id": "largest-planet",
+      "rubric": "exact-fact",
+      "task": "Which planet in the solar system is the largest?",
+      "expected": "Jupiter",
+      "answer": "Jupiter is the largest planet, more than twice as massive as all the others combined.",
+      "claudeWritten": true
+    },
+    {
+      "id": "multiply",
+      "rubric": "exact-number",
+      "task": "What is 17 times 23?",
+      "expected": "391",
+      "answer": "17 times 23 is 391.",
+      "claudeWritten": true
+    },
+    {
+      "id": "boiling-point",
+      "rubric": "exact-number",
+      "task": "At sea level, what is the boiling point of water in degrees Celsius?",
+      "expected": "100",
+      "answer": "Water boils at about 90 degrees Celsius at sea level.",
+      "claudeWritten": true
+    },
+    {
+      "id": "moon-landing-year",
+      "rubric": "exact-number",
+      "task": "In what year did Apollo 11 first land people on the Moon?",
+      "expected": "1969",
+      "answer": "Webular search says Apollo 11 landed on the Moon in 1969.",
+      "claudeWritten": false
+    },
+    {
+      "id": "speed-of-light",
+      "rubric": "exact-number",
+      "task": "What is the speed of light in a vacuum, in kilometers per second, rounded to the nearest thousand?",
+      "expected": "300000",
+      "answer": "Roughly 300,000 km/s.",
+      "claudeWritten": true
+    },
+    {
+      "id": "sides-hexagon",
+      "rubric": "exact-number",
+      "task": "How many sides does a hexagon have?",
+      "expected": "6",
+      "answer": "A hexagon has eight sides.",
+      "claudeWritten": false
+    }
+  ],
+  "gold": {
+    "capital-australia": "pass",
+    "capital-canada": "fail",
+    "author-1984": "pass",
+    "chemical-gold": "fail",
+    "largest-planet": "pass",
+    "multiply": "pass",
+    "boiling-point": "fail",
+    "moon-landing-year": "pass",
+    "speed-of-light": "pass",
+    "sides-hexagon": "fail"
+  }
+}

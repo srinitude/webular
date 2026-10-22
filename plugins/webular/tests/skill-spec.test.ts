@@ -7,7 +7,9 @@ import { BunServices } from '@effect/platform-bun'
 import { Effect, FileSystem, Schema } from 'effect'
 
 const root = fileURLToPath(new URL('../skills', import.meta.url))
-const skills = ['human-language', 'rich-and-native-markdown']
+const skillDirs = () =>
+  Array.from(new Bun.Glob('*/SKILL.md').scanSync(root), (p) => p.split(/[\\/]/)[0] ?? p)
+const skills = skillDirs()
 const specKeys = ['name', 'description', 'license', 'compatibility', 'metadata', 'allowed-tools']
 
 const EvalCase = Schema.Struct({
@@ -70,3 +72,81 @@ const each = (check: (skill: string) => Effect.Effect<void, unknown, FileSystem.
 test('SKILL.md frontmatter follows the agentskills.io specification', () => each(checkFrontmatter))
 
 test('eval cases follow the agentskills.io case shape', () => each(checkEvalShape))
+
+test('all four skills are covered', () => expect(skills.length).toBe(4))
+
+// Docs that must agree with the code and with each other.
+const repo = fileURLToPath(new URL('../../..', import.meta.url))
+const readRepo = (path: string) =>
+  Effect.gen(function* () {
+    return yield* (yield* FileSystem.FileSystem).readFileString(`${repo}/${path}`)
+  })
+const Market = Schema.Struct({
+  plugins: Schema.Array(Schema.Struct({ description: Schema.String })),
+})
+const run = (eff: Effect.Effect<void, unknown, FileSystem.FileSystem>) =>
+  Effect.runPromise(eff.pipe(Effect.provide(BunServices.layer)))
+const toolNames =
+  /`(?:search|scrape|batch|map|summarize|crawl|extract|answer|research|parse|media|monitor|act|feed|doctor|tasks|diagram|audit)`/g
+
+test('the marketplace entry names the real number of skills', () =>
+  run(
+    Effect.gen(function* () {
+      const words = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight']
+      const market = yield* readRepo('.claude-plugin/marketplace.json').pipe(
+        Effect.flatMap(Schema.decodeUnknownEffect(Schema.fromJsonString(Market))),
+      )
+      expect(market.plugins[0]?.description).toContain(`${words[skills.length]} skills`)
+    }),
+  ))
+
+test('the plugin README names the file the manifest runs', () =>
+  run(
+    Effect.gen(function* () {
+      const readme = yield* readRepo('plugins/webular/README.md')
+      expect(readme).not.toContain('bun ./src/server.ts')
+      expect(readme).toContain('bun ./dist/server.js')
+    }),
+  ))
+
+test('the commands page says an unreachable robots.txt blocks the crawl', () =>
+  run(
+    Effect.gen(function* () {
+      const text = yield* readRepo('docs/commands.md')
+      expect(text).not.toContain('no robots.txt')
+      expect(text).toContain('unreachable robots.txt')
+    }),
+  ))
+
+test('the research skill writes tool names with the webular: prefix', () =>
+  run(
+    Effect.gen(function* () {
+      const text = yield* readSkill('webular-research', 'SKILL.md')
+      const bare = text
+        .split('\n')
+        .filter((l) => !l.includes('command line'))
+        .flatMap((l) => l.match(toolNames) ?? [])
+      expect(bare).toEqual([])
+    }),
+  ))
+
+test('skills and evals hold no time-tied wording', () =>
+  run(
+    Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem
+      const paths = (yield* fs.readDirectory(root, { recursive: true }))
+        .map((p) => p.replaceAll('\\', '/'))
+        .filter((p) => p.endsWith('.md') || p.endsWith('/evals/evals.json'))
+      const hits = yield* Effect.forEach(
+        paths,
+        (p) =>
+          Effect.map(
+            fs.readFileString(`${root}/${p}`),
+            (t) =>
+              /\b(currently|recently|as of|latest|now|2026 model|Bun 1\.3)\b/i.exec(t)?.[0] ?? '',
+          ),
+        { concurrency: 8 },
+      )
+      expect(hits.filter(Boolean)).toEqual([])
+    }),
+  ))

@@ -2,6 +2,7 @@
 // Bun.serve fixture whose origin reaches the adapters through the
 // ConfigProvider (WEBULAR_SOURCE_ORIGIN), and a fresh per-host slot table.
 import { ConfigProvider, Effect, type Scope } from 'effect'
+import { SparqlCache } from '../../../src/lib/sources/creator-products.ts'
 import { HostSlots } from '../../../src/lib/sources/polite.ts'
 import { type Routes, startFixture } from '../../_support/fixture.ts'
 
@@ -48,4 +49,9 @@ export const serving = <A, E>(
 }
 
 export const run = <A, E>(eff: Effect.Effect<A, E, Scope.Scope>) =>
-  eff.pipe(Effect.scoped, Effect.provideService(HostSlots, new Map()), Effect.runPromise)
+  eff.pipe(
+    Effect.scoped,
+    Effect.provideService(HostSlots, new Map()),
+    Effect.provideService(SparqlCache, new Map()),
+    Effect.runPromise,
+  )

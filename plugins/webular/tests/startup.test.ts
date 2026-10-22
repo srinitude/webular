@@ -1,9 +1,11 @@
 // Outcome eval: an agent host that starts the plugin's MCP server gets an
-// answer to initialize and tools/list in a few seconds, even when the optional
-// MCP App views were never built (a fresh checkout has no dist/ui).
+// answer to initialize and tools/list in a few seconds.
 import { expect, test } from 'bun:test'
 import { fileURLToPath } from 'node:url'
-import { Effect } from 'effect'
+import { Duration, Effect } from 'effect'
+import { runProc } from '../../../src/core/proc.ts'
+import { eff } from '../../../tests/_support/run.ts'
+import descriptions from '../src/descriptions.json' with { type: 'json' }
 
 const SERVER = fileURLToPath(new URL('../dist/server.js', import.meta.url))
 const requests = [
@@ -21,34 +23,26 @@ const requests = [
   { jsonrpc: '2.0', id: 2, method: 'tools/list' },
 ]
 
-const startServer = Effect.promise(async () => {
-  const started = performance.now()
-  const child = Bun.spawn(['bun', SERVER], {
-    stdin: new Blob([`${requests.map((r) => JSON.stringify(r)).join('\n')}\n`]),
-    stdout: 'pipe',
-    stderr: 'pipe',
-  })
-  const [out, err] = await Promise.all([
-    new Response(child.stdout).text(),
-    new Response(child.stderr).text(),
-  ])
-  return { out, err, seconds: (performance.now() - started) / 1000 }
-})
+// Effect.timed reads the monotonic clock, so the budget is real elapsed time.
+const startServer = runProc(['bun', SERVER], {
+  timeoutMs: 20_000,
+  stdin: `${requests.map((r) => JSON.stringify(r)).join('\n')}\n`,
+}).pipe(Effect.timed)
 
 test(
   'the plugin server answers initialize and tools/list within 10 seconds',
-  () =>
-    Effect.runPromise(
-      startServer.pipe(
-        Effect.tap(({ out, err, seconds }) =>
-          Effect.sync(() => {
-            expect(err).toBe('')
-            expect(out).toContain('"id":1')
-            expect(out).toContain('"id":2')
-            expect(seconds).toBeLessThan(10)
-          }),
-        ),
-      ),
-    ),
+  eff(
+    Effect.gen(function* () {
+      const [elapsed, { stdout, stderr }] = yield* startServer
+      expect(stderr).toBe('')
+      expect(stdout).toContain('"id":1')
+      expect(stdout).toContain('"id":2')
+      // The plugin server sends the call directive at initialize.
+      expect(JSON.parse(stdout.split('\n')[0] ?? '').result.instructions).toBe(
+        descriptions.instructions,
+      )
+      expect(Duration.toSeconds(elapsed)).toBeLessThan(10)
+    }),
+  ),
   30_000,
 )

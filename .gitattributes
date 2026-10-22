@@ -2,3 +2,9 @@
 # and Windows checkouts with core.autocrlf=true would otherwise turn every file CRLF.
 * text=auto eol=lf
 *.svg binary
+bench/fixtures/** linguist-generated
+bench/recordings/** linguist-generated
+plugins/webular/dist/** linguist-generated
+bun.lock linguist-generated
+mise.lock linguist-generated
+docs/** linguist-documentation

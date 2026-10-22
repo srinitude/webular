@@ -8,6 +8,7 @@ import {
   type EventObject,
   getInitialSnapshot,
 } from 'xstate'
+import { allowedEvents as agentAllowedEvents } from '../../machines/agent.ts'
 import type { JevRequest } from './client.ts'
 import { defineDecision } from './define.ts'
 import {
@@ -24,13 +25,15 @@ import {
 } from './payload/index.ts'
 
 // The machine says which moves are allowed; Jev picks one of them; the machine
-// takes it. The fallback is the observed event when the machine allows it.
-// Mirrors allowedEvents in src/machines/agent.ts (stately-agent-on-final-port);
-// import it from there once that branch lands.
-export const allowedEvents = (snapshot: AnyMachineSnapshot): string[] =>
-  [...new Set(snapshot._nodes.flatMap((node) => node.ownEvents))]
-    .filter((type) => snapshot.can({ type }))
-    .slice(0, CAPS.fields)
+// takes it. The fallback is the observed event when the machine allows it, so
+// a cut past the cap keeps it in the last slot.
+export const allowedEvents = (snapshot: AnyMachineSnapshot, observed?: string): string[] => {
+  const all = agentAllowedEvents(snapshot)
+  const capped = all.slice(0, CAPS.fields)
+  return observed === undefined || capped.includes(observed) || !all.includes(observed)
+    ? capped
+    : [...capped.slice(0, -1), observed]
+}
 
 const MACHINE_PURPOSE = purpose(
   'A webular command runs as a state machine, one move at a time.',
@@ -129,13 +132,13 @@ export const nextEvent = defineDecision<Allowed, string | undefined>({
   // The machine takes only a move it allows.
   codeCheck: (type, i) => type === undefined || i.allowed.includes(type),
   evals: 'tests/jev/evals/machine.next.json',
-  docs: '88a6a003018eaea50167565a766a0d4a91d039cf93cc7dc2965d3ceba3a72caf',
+  docs: 'b0b26ab933a61b5d43ccccae5fbd009f445bfdcfd2808cac9e410a84f0fd8ca4',
 })
 
 // The chosen event is always one the machine allows from `snapshot`, or
 // undefined when Jev gives no allowed pick and the observed event is not allowed.
 export const machineDecision = (i: MachineInput) => {
-  const allowed = allowedEvents(i.snapshot)
+  const allowed = allowedEvents(i.snapshot, i.observed.type)
   return allowed.length < 2
     ? Effect.succeed(observedIfAllowed(i, allowed))
     : nextEvent({ ...i, allowed })

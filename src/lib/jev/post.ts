@@ -1,27 +1,33 @@
 // One Jev HTTP call: docs guard, POST, reply decode, one jittered retry, and the
-// pinned-release fallback. client.ts owns the endpoint and wires this in.
-import { Clock, Effect, Option, Random, Redacted, Schema } from 'effect'
+// same-model retry. client.ts owns the endpoint and wires this in.
+import { Clock, Effect, identity, Option, Random, Redacted, Schema } from 'effect'
 import type * as HttpClient from 'effect/http/HttpClient'
 import * as HttpClientRequest from 'effect/http/HttpClientRequest'
 import { logErr } from '../../core/output.ts'
-import type { JevRequest } from './client.ts'
 import type { DocsState } from './docs-cache.ts'
 import { committedSnapshot, guarded, httpFetcher } from './docs-guard.ts'
 import { errorKind, JevError, nextAction, retryAfterMs, retryable } from './errors.ts'
-import { requestBytes } from './payload/index.ts'
 
-// If the alias call fails, the pinned stable release answers instead.
-const JEV_FALLBACK_MODEL = 'jev-1.13.0'
 const TIMEOUT_MS = 3_000 // Jev's slow tail is about 2 s
 const RETRY_BASE_MS = 200 // full jitter: one retry after a random 0 to 200 ms
 const MAX_RETRY_AFTER_MS = 5_000 // a longer server wait falls back instead of stalling the step
 const NO_KEY = 'no TypeSafe API key'
+const IMAGES_HEADER = 'TypeSafe-Danger-Zone-Images'
+const ASSETS_KEY = ',"assets":{' // only requestBytes writes this; quotes inside strings are escaped
 
 const Answer = Schema.Struct({
   type: Schema.String,
   noul: Schema.optional(Schema.Number),
   choice: Schema.optional(Schema.String),
   score: Schema.optional(Schema.Number),
+  box: Schema.optional(
+    Schema.Struct({
+      top: Schema.Number,
+      bottom: Schema.Number,
+      left: Schema.Number,
+      right: Schema.Number,
+    }),
+  ),
   confidence: Schema.optional(Schema.NullOr(Schema.Number)),
   probabilities: Schema.optional(Schema.Record(Schema.String, Schema.Number)),
 })
@@ -68,6 +74,14 @@ const httpError = (res: {
     })
   })
 
+export const jevRequest = (endpoint: string, key: Redacted.Redacted<string>, body: string) =>
+  HttpClientRequest.post(endpoint).pipe(
+    HttpClientRequest.bearerToken(Redacted.value(key)),
+    HttpClientRequest.bodyText(body, 'application/json'),
+    // Images are gated: the header is required on every request that carries one.
+    body.includes(ASSETS_KEY) ? HttpClientRequest.setHeader(IMAGES_HEADER, 'true') : identity,
+  )
+
 export const postOnce =
   (
     endpoint: string,
@@ -79,13 +93,13 @@ export const postOnce =
     Effect.gen(function* () {
       if (Option.isNone(key)) return yield* new JevError({ reason: NO_KEY, kind: 'no_key' })
       yield* guardDocs(http, body, docs)
-      const req = HttpClientRequest.post(endpoint).pipe(
-        HttpClientRequest.bearerToken(Redacted.value(key.value)),
-        HttpClientRequest.bodyText(body, 'application/json'),
-      )
+      const req = jevRequest(endpoint, key.value, body)
       const res = yield* http.execute(req)
       if (res.status >= 400) return yield* httpError(res)
-      const reply = yield* decodeReply(yield* res.json)
+      const reply = yield* res.json.pipe(
+        Effect.flatMap(decodeReply),
+        Effect.mapError((e) => new JevError({ reason: `reply: ${String(e)}`, kind: 'bad_reply' })),
+      )
       const { answers, model } = reply
       const inputTokens = reply.usage?.input_tokens ?? 0
       return { answers, inputTokens, model, source: 'jev' } satisfies typeof Result.Type
@@ -119,13 +133,6 @@ const retryJitter = <A>(eff: Effect.Effect<A, JevError>) =>
     }),
   )
 
-// The latest model first; on failure, the pinned stable release.
-const FINAL = new Set(['no_key', 'auth', 'forbidden'])
-export const withFallback = (post: Post, model: string) => (body: string, req: JevRequest) =>
-  retryJitter(post(body)).pipe(
-    Effect.catchTag('JevError', (e) =>
-      FINAL.has(e.kind ?? '') || model === JEV_FALLBACK_MODEL
-        ? Effect.fail(e)
-        : post(requestBytes(JEV_FALLBACK_MODEL, req.state, req.questions)),
-    ),
-  )
+// The retry stays on the same model: a failed call never moves to an older
+// release. When the retry fails too, the caller's rule-based fallback answers.
+export const withRetry = (post: Post) => (body: string) => retryJitter(post(body))

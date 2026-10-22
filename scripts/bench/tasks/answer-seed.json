@@ -1,0 +1,188 @@
+[
+  {
+    "kind": "no-answer",
+    "id": "diviciacus-birth-date",
+    "domain": "history",
+    "question": "What is the date of birth of Diviciacus (Aedui)?",
+    "url": "https://en.wikipedia.org/wiki/Diviciacus_(Aedui)",
+    "license": "CC-BY-SA-4.0",
+    "answers": [],
+    "spans": ["His date of birth is unknown, though he was an adult during the late 60s BC"],
+    "aliases": ["unknown", "not recorded", "not known"]
+  },
+  {
+    "kind": "no-answer",
+    "id": "artz-building-architect",
+    "domain": "architecture",
+    "question": "What is the architect of the Artz Building?",
+    "url": "https://en.wikipedia.org/wiki/Artz_Building",
+    "license": "CC-BY-SA-4.0",
+    "answers": [],
+    "spans": ["The Artz Building's architect is unknown."],
+    "aliases": ["unknown", "not recorded"]
+  },
+  {
+    "kind": "no-answer",
+    "id": "lake-peterson-house-architect",
+    "domain": "architecture",
+    "question": "What is the architect of the Lake–Peterson House?",
+    "url": "https://en.wikipedia.org/wiki/Lake%E2%80%93Peterson_House",
+    "license": "CC-BY-SA-4.0",
+    "answers": [],
+    "spans": [
+      "The architect, if there was one, is unknown, though it is probable that Lake himself was the builder."
+    ],
+    "aliases": ["unknown", "not recorded"]
+  },
+  {
+    "kind": "no-answer",
+    "id": "mier-wolf-house-architect",
+    "domain": "architecture",
+    "question": "What is the architect of the Mier Wolf House?",
+    "url": "https://en.wikipedia.org/wiki/Mier_Wolf_House",
+    "license": "CC-BY-SA-4.0",
+    "answers": [],
+    "spans": [
+      "While its architect is unknown, it exhibits similarities to Frank Lloyd Wright's Mayan Period."
+    ],
+    "aliases": ["unknown", "not recorded"]
+  },
+  {
+    "kind": "no-answer",
+    "id": "cheddar-man-cause-of-death",
+    "domain": "science",
+    "question": "What is the cause of death of Cheddar Man?",
+    "url": "https://en.wikipedia.org/wiki/Cheddar_Man",
+    "license": "CC-BY-SA-4.0",
+    "answers": [],
+    "spans": ["His cause of death is unknown."],
+    "aliases": ["unknown", "not established", "uncertain"]
+  },
+  {
+    "kind": "no-answer",
+    "id": "john-borrer-batting-style",
+    "domain": "sports",
+    "question": "What is the batting style of John Borrer?",
+    "url": "https://en.wikipedia.org/wiki/John_Borrer",
+    "license": "CC-BY-SA-4.0",
+    "answers": [],
+    "spans": ["Borrer's batting style is unknown."],
+    "aliases": ["unknown", "not recorded"]
+  },
+  {
+    "kind": "no-answer",
+    "id": "scheuchzer-cause-of-death",
+    "domain": "medicine",
+    "question": "What is the cause of death of Johann Caspar Scheuchzer?",
+    "url": "https://en.wikipedia.org/wiki/Johann_Caspar_Scheuchzer",
+    "license": "CC-BY-SA-4.0",
+    "answers": [],
+    "spans": ["his exact cause of death is unknown"],
+    "aliases": ["unknown", "not recorded"]
+  },
+  {
+    "kind": "no-answer",
+    "id": "goddard-bridge-construction-date",
+    "domain": "engineering",
+    "question": "What is the date of construction of the Goddard Bridge?",
+    "url": "https://en.wikipedia.org/wiki/Goddard_Bridge",
+    "license": "CC-BY-SA-4.0",
+    "answers": [],
+    "spans": [
+      "The actual date of construction is unknown, but it is built on the 1820 lattice design of"
+    ],
+    "aliases": ["unknown", "not recorded"]
+  },
+  {
+    "kind": "ambiguous",
+    "id": "switzerland-official-languages",
+    "domain": "language",
+    "question": "What are the official languages of Switzerland?",
+    "url": "https://en.wikipedia.org/wiki/Languages_of_Switzerland",
+    "license": "CC-BY-SA-4.0",
+    "answers": ["German", "French", "Italian", "Romansh"],
+    "spans": ["German, French, Italian, Romansh"],
+    "aliases": ["German, French, Italian, Romansh"]
+  },
+  {
+    "kind": "ambiguous",
+    "id": "holy-grail-directors",
+    "domain": "film",
+    "question": "Who directed the 1975 film Monty Python and the Holy Grail?",
+    "url": "https://en.wikipedia.org/wiki/Monty_Python_and_the_Holy_Grail",
+    "license": "CC-BY-SA-4.0",
+    "answers": ["Terry Gilliam", "Terry Jones"],
+    "spans": ["1975 British comedy film by Terry Gilliam and Terry Jones"],
+    "aliases": ["Gilliam", "Jones"]
+  },
+  {
+    "kind": "ambiguous",
+    "id": "good-omens-authors",
+    "domain": "literature",
+    "question": "Who wrote the novel Good Omens?",
+    "url": "https://en.wikipedia.org/wiki/Good_Omens",
+    "license": "CC-BY-SA-4.0",
+    "answers": ["Terry Pratchett", "Neil Gaiman"],
+    "spans": ["1990 novel by Terry Pratchett and Neil Gaiman"],
+    "aliases": ["Pratchett", "Gaiman"]
+  },
+  {
+    "kind": "ambiguous",
+    "id": "centre-pompidou-architects",
+    "domain": "architecture",
+    "question": "Who were the architects of the Centre Pompidou?",
+    "url": "https://en.wikipedia.org/wiki/Centre_Pompidou",
+    "license": "CC-BY-SA-4.0",
+    "answers": ["Renzo Piano", "Richard Rogers", "Gianfranco Franchini"],
+    "spans": ["Renzo Piano", "Richard Rogers", "Gianfranco Franchini"],
+    "aliases": ["Piano", "Rogers", "Franchini"]
+  },
+  {
+    "kind": "ambiguous",
+    "id": "euro-2008-hosts",
+    "domain": "sports",
+    "question": "Which countries hosted UEFA Euro 2008?",
+    "url": "https://en.wikipedia.org/wiki/UEFA_Euro_2008",
+    "license": "CC-BY-SA-4.0",
+    "answers": ["Austria", "Switzerland"],
+    "spans": ["Austria and Switzerland jointly bid to host the games"],
+    "aliases": ["Austria and Switzerland"]
+  },
+  {
+    "kind": "ambiguous",
+    "id": "apollo-11-crew",
+    "domain": "science",
+    "question": "Who were the astronauts on the Apollo 11 mission?",
+    "url": "https://www.nasa.gov/mission/apollo-11/",
+    "license": "public-domain-US-gov",
+    "answers": ["Neil Armstrong", "Buzz Aldrin", "Michael Collins"],
+    "spans": ["Neil Armstrong, Buzz Aldrin, Michael Collins"],
+    "aliases": ["Edwin \"Buzz\" Aldrin"]
+  },
+  {
+    "kind": "ambiguous",
+    "id": "bolivia-capitals",
+    "domain": "politics",
+    "question": "Which cities are capitals of Bolivia?",
+    "url": "https://en.wikipedia.org/wiki/List_of_countries_with_multiple_capitals",
+    "license": "CC-BY-SA-4.0",
+    "answers": ["Sucre", "La Paz"],
+    "spans": ["Sucre | Constitutional capital.", "La Paz | Seat of government;"],
+    "aliases": ["Sucre and La Paz"]
+  },
+  {
+    "kind": "ambiguous",
+    "id": "south-africa-capitals",
+    "domain": "government",
+    "question": "Which cities are capitals of South Africa?",
+    "url": "https://en.wikipedia.org/wiki/List_of_countries_with_multiple_capitals",
+    "license": "CC-BY-SA-4.0",
+    "answers": ["Pretoria", "Cape Town", "Bloemfontein"],
+    "spans": [
+      "Pretoria | Administrative and executive capital.",
+      "Cape Town | Legislative capital.",
+      "Bloemfontein | Judicial capital."
+    ],
+    "aliases": ["Pretoria and Cape Town and Bloemfontein"]
+  }
+]

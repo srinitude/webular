@@ -9,20 +9,23 @@
 // JSON, narrowed by `select`, paged under PAGE_MAX_CHARS with an opaque
 // `cursor`; errors are one short line.
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { Effect } from 'effect'
+import { type Duration, Effect } from 'effect'
 import type { ChildProcessSpawner } from 'effect/process'
-import { z } from 'zod'
-import {
-  CommandFailed,
-  commandTools,
-  type EntryOf,
-  runCommand,
-} from '../../plugins/webular/src/commands.ts'
+import type { z } from 'zod'
+import { commandTools, type EntryOf } from '../../plugins/webular/src/commands.ts'
 import { fetchText } from '../core/http.ts'
 import { errMsg, pageText, selectFields, shortError, stableJson } from '../core/output.ts'
 import { extractLinks, htmlToArticle, htmlToMarkdown } from '../lib/html.ts'
-import { machineSchema, machineState, paging, ToolArgsError } from './web-machine.ts'
-import { lenient, registerApps } from './web-register.ts'
+import { type CallExtra, failure, type McpText, runTool, withProgress } from './web-call.ts'
+import { machineSchema, machineState, ToolArgsError } from './web-machine.ts'
+import { hintsOnly, lenient, webMeta } from './web-register.ts'
+import {
+  fetchSchema,
+  linksSchema,
+  markdownSchema,
+  pagingSchema,
+  readabilitySchema,
+} from './web-schemas.ts'
 
 interface McpToolDef {
   id: string
@@ -31,20 +34,6 @@ interface McpToolDef {
   run(args: Record<string, unknown>): Effect.Effect<unknown, unknown>
 }
 
-const pagingSchema = z.object(paging)
-const fetchSchema = z.object({
-  url: z.url(),
-  timeoutMs: z.number().int().positive().optional(),
-  ...paging,
-})
-const readabilitySchema = z.object({ html: z.string(), ...paging })
-const markdownSchema = z.object({ html: z.string(), ...paging })
-const linksSchema = z.object({
-  html: z.string(),
-  base: z.url(),
-  limit: z.number().int().min(1).max(1000).optional(),
-  ...paging,
-})
 const parseArgs = <T>(schema: z.ZodType<T>, args: Record<string, unknown>) =>
   Effect.try({
     try: () => schema.parse(args),
@@ -65,7 +54,8 @@ export const webTools: McpToolDef[] = [
   },
   {
     id: 'web.fetch',
-    description: 'Fetch a URL and return its raw HTML (Bun.fetch).',
+    description:
+      'Low-level: fetch a URL, return raw HTML. To read a page use scrape; use this only to feed web_links, web_markdown, or web_readability.',
     schema: fetchSchema,
     run: (args) =>
       Effect.gen(function* () {
@@ -100,14 +90,6 @@ export const webTools: McpToolDef[] = [
   },
 ]
 
-interface McpText {
-  [key: string]: unknown
-  content: { type: 'text'; text: string }[]
-  isError?: boolean
-}
-
-const failure = (text: string): McpText => ({ content: [{ type: 'text', text }], isError: true })
-
 // ponytail: each page re-runs the tool; web.fetch pages lean on the HTTP cache.
 function execute(tool: McpToolDef, args: Record<string, unknown>): Effect.Effect<McpText> {
   return Effect.gen(function* () {
@@ -133,64 +115,61 @@ export const NOT_ON_MCP = {
 // Every tool `webular mcp` lists, in tools/list order.
 export const mcpToolIds = [...webTools.map((t) => t.id), ...commandTools.map((t) => t.id)].sort()
 
-// A command tool: the plugin's runCommand, with the result as compact JSON text.
-// The plugin's own numeric cursor pages a long result.
-const runTool = (id: string, args: Record<string, unknown>, entryOf?: EntryOf) => {
-  const { cursor, ...input } = args
-  return runCommand(id, input, typeof cursor === 'number' ? cursor : 0, entryOf).pipe(
-    Effect.map(
-      (result): McpText => ({
-        content: [{ type: 'text', text: stableJson(result) }],
-        structuredContent: result,
-      }),
-    ),
-    Effect.catch((e) =>
-      Effect.succeed(failure(e instanceof CommandFailed ? e.message : shortError(e))),
-    ),
-  )
-}
-
 // Registering mutates the server, so it is an Effect: it captures the caller's
 // context once, and each MCP Promise handler runs its tool Effect with it.
-// Command tools and MCP App views register on both servers alike.
-type RunWith = Parameters<typeof registerApps>[1]
+// Command tools register on both servers alike; extra.signal cancels a call.
+type RunWith = <A, E>(
+  effect: Effect.Effect<A, E, ChildProcessSpawner.ChildProcessSpawner>,
+  options: { signal: AbortSignal },
+) => Promise<A>
 
 // Registration order is tools/list order, so register every tool sorted by id.
-const toolRegistrations = (server: McpServer, runWith: RunWith, entryOf?: EntryOf) =>
-  [
-    ...commandTools.map(
-      ({ id, outputSchema: _, inputSchema, ...config }) =>
-        [
+const commandRegistration =
+  (server: McpServer, runWith: RunWith, limit: Duration.Input, entryOf?: EntryOf) =>
+  ({ id, outputSchema: _, inputSchema, ...config }: (typeof commandTools)[number]) =>
+    [
+      id,
+      () =>
+        server.registerTool(
           id,
-          () =>
-            server.registerTool(
-              id,
-              { ...config, inputSchema: lenient(inputSchema) },
-              (args: Record<string, unknown>) => runWith(runTool(id, args, entryOf)),
-            ),
-        ] as const,
-    ),
-    ...webTools.map(
-      (tool) =>
-        [
+          { ...hintsOnly(config), inputSchema: lenient(inputSchema) },
+          (args: Record<string, unknown>, extra: CallExtra) =>
+            runWith(withProgress(id, extra, runTool(id, args, limit, entryOf)), {
+              signal: extra.signal,
+            }),
+        ),
+    ] as const
+
+const webRegistration =
+  (server: McpServer, runWith: RunWith) => (tool: (typeof webTools)[number]) =>
+    [
+      tool.id,
+      () =>
+        server.registerTool(
           tool.id,
-          () =>
-            server.registerTool(
-              tool.id,
-              { description: tool.description, inputSchema: tool.schema.shape },
-              (args: Record<string, unknown>) => runWith(execute(tool, args)),
-            ),
-        ] as const,
-    ),
+          { ...webMeta(tool), inputSchema: tool.schema },
+          (args: Record<string, unknown>, { signal }) => runWith(execute(tool, args), { signal }),
+        ),
+    ] as const
+
+const toolRegistrations = (
+  server: McpServer,
+  runWith: RunWith,
+  limit: Duration.Input,
+  entryOf?: EntryOf,
+) =>
+  [
+    ...commandTools.map(commandRegistration(server, runWith, limit, entryOf)),
+    ...webTools.map(webRegistration(server, runWith)),
   ].sort(([x], [y]) => (x < y ? -1 : 1))
 
 export const registerAll = Effect.fn('registerAll')(function* (
   server: McpServer,
   entryOf?: EntryOf,
+  limit: Duration.Input = '10 minutes',
 ) {
   const runWith = Effect.runPromiseWith(
     yield* Effect.context<ChildProcessSpawner.ChildProcessSpawner>(),
   )
-  for (const [, register] of toolRegistrations(server, runWith, entryOf)) register()
-  registerApps(server, runWith)
+  for (const [, register] of toolRegistrations(server, runWith, limit, entryOf)) register()
 })

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security hole
+    url: https://github.com/srinitude/webular/security/advisories/new
+    about: Report a vulnerability in private. Never open a public issue for one.
+  - name: Read the docs
+    url: https://github.com/srinitude/webular/tree/main/docs
+    about: Setup, commands, and the agent contract are covered in the docs.

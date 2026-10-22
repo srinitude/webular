@@ -6,6 +6,7 @@ import { Effect } from 'effect'
 import { DOMParser } from 'linkedom'
 import { z } from 'zod'
 import { resolveFeed } from '../core/feed-source.ts'
+import { hasRelToken } from '../core/url.ts'
 import { stepRuntime } from './runtime.ts'
 
 const feedInput = z.object({
@@ -44,18 +45,22 @@ const text = (el: Element, ...tags: string[]): string => {
 // Atom puts the link in <link href>; prefer rel="alternate" (or no rel).
 function atomLink(el: Element): string {
   const links = [...el.getElementsByTagName('link')] as Element[]
-  const alt = links.find((l) => (l.getAttribute('rel') ?? 'alternate') === 'alternate')
+  const alt = links.find((l) => hasRelToken(l.getAttribute('rel') ?? 'alternate', 'alternate'))
   return (alt ?? links[0])?.getAttribute('href') ?? ''
 }
 
-function parseFeed(xml: string, limit: number) {
+// Relative item links resolve against the feed's own URL; an unparsable one stays as written.
+const absolute = (href: string, base: string): string =>
+  href ? (URL.parse(href, base)?.href ?? href) : ''
+
+function parseFeed(xml: string, limit: number, base: string) {
   const doc = new DOMParser().parseFromString(xml, 'text/xml')
   const root = doc.documentElement as unknown as Element
   const atom = root.tagName.toLowerCase() === 'feed'
   const nodes = [...doc.getElementsByTagName(atom ? 'entry' : 'item')] as unknown as Element[]
   const items = nodes.slice(0, limit).map((el) => ({
     title: text(el, 'title'),
-    url: atom ? atomLink(el) : text(el, 'link', 'guid'),
+    url: absolute(atom ? atomLink(el) : text(el, 'link', 'guid'), base),
     published: text(el, 'pubDate', 'published', 'updated', 'dc:date'),
     summary: text(el, 'description', 'summary', 'content'),
   }))
@@ -67,13 +72,14 @@ const feedStep = createStep({
   id: 'feed',
   inputSchema: feedInput,
   outputSchema: feedOutput,
-  execute: ({ inputData }) => {
+  execute: ({ inputData, abortSignal }) => {
     const { url, timeoutMs, limit, archive } = inputData
     return stepRuntime.runPromise(
       Effect.map(resolveFeed(url, { timeoutMs, archive }), ({ xml, feedUrl, archivedFrom }) => {
-        const { title, items } = parseFeed(xml, limit)
+        const { title, items } = parseFeed(xml, limit, feedUrl ?? url)
         return { url, feedUrl, archivedFrom, title, count: items.length, items }
       }),
+      { signal: abortSignal },
     )
   },
 })
@@ -82,6 +88,7 @@ export const feedWorkflow = createWorkflow({
   id: 'feed',
   inputSchema: feedInput,
   outputSchema: feedOutput,
+  options: { shouldPersistSnapshot: () => false },
 })
   .then(feedStep)
   .commit()

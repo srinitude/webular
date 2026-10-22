@@ -7,14 +7,15 @@ import type { Robots } from './robots-txt.ts'
 
 export const MIN_DELAY_MS = 250
 export const MAX_DELAY_MS = 2500
-/** max(Crawl-delay, 10x fetch time); doubles on 429/5xx/no response, eases 25% on success; clamped. */
+/** max(Crawl-delay, Retry-After, 10x fetch time); doubles on 429/5xx/no response, eases 25% on success; clamped. */
 export const nextDelay = (
   previousMs: number,
-  r: { status: number; fetchMs: number; crawlDelayMs: number },
+  r: { status: number; fetchMs: number; crawlDelayMs: number; retryAfterMs?: number | undefined },
   floorMs = MIN_DELAY_MS,
 ): number => {
   const failing = r.status === 429 || r.status >= 500 || r.status === 0
-  const d = Math.max(r.crawlDelayMs, 10 * r.fetchMs, failing ? previousMs * 2 : previousMs * 0.75)
+  const eased = failing ? previousMs * 2 : previousMs * 0.75
+  const d = Math.max(r.crawlDelayMs, r.retryAfterMs ?? 0, 10 * r.fetchMs, eased)
   return Math.min(MAX_DELAY_MS, Math.max(floorMs, d))
 }
 
@@ -76,7 +77,7 @@ interface CrawledPage {
   readonly status: number
   readonly body: string
 }
-type SkipReason = 'robots' | 'near-duplicate' | 'fetch-error'
+type SkipReason = 'robots' | 'noindex' | 'near-duplicate' | 'fetch-error'
 export interface CrawlResult {
   readonly pages: CrawledPage[]
   readonly skipped: { url: string; reason: SkipReason }[]

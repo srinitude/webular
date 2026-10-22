@@ -1,0 +1,129 @@
+{
+  "baseline-wins": [
+    {
+      "id": "population-in-text-logo-only",
+      "question": "What is the population of Lyon?",
+      "lead": {
+        "url": "https://example.org/lyon",
+        "text": "Lyon has a population of 522,000 people. It sits where the Rhone and Saone rivers meet.",
+        "images": [
+          {
+            "src": "https://example.org/img/site-logo.png",
+            "alt": "Site logo",
+            "srcset": "",
+            "width": "120",
+            "height": "40",
+            "caption": ""
+          }
+        ]
+      },
+      "textAnswer": "Lyon has a population of 522,000 people.",
+      "leadSure": true,
+      "router": { "choice": "text", "confidence": 0.98 },
+      "gold": { "kind": "text", "fact": "522,000" }
+    },
+    {
+      "id": "date-in-text-no-images",
+      "question": "When did the bridge open?",
+      "lead": {
+        "url": "https://example.org/bridge",
+        "text": "The bridge opened on 4 May 1932 after six years of work.",
+        "images": []
+      },
+      "textAnswer": "The bridge opened on 4 May 1932 after six years of work.",
+      "leadSure": true,
+      "router": null,
+      "gold": { "kind": "text", "fact": "1932" }
+    },
+    {
+      "id": "height-in-text-photo",
+      "question": "How tall is the tower?",
+      "lead": {
+        "url": "https://example.org/tower",
+        "text": "The tower stands 324 meters tall. Visitors climb to the second floor.",
+        "images": [
+          {
+            "src": "https://example.org/img/photo_tower.jpg",
+            "alt": "The tower at night",
+            "srcset": "",
+            "width": "1200",
+            "height": "800",
+            "caption": ""
+          }
+        ]
+      },
+      "textAnswer": "The tower stands 324 meters tall.",
+      "leadSure": true,
+      "router": { "choice": "text", "confidence": 0.97 },
+      "gold": { "kind": "text", "fact": "324 meters" }
+    }
+  ],
+  "baseline-loses": [
+    {
+      "id": "chart-only-value",
+      "question": "What share of sales came from Asia in 2024?",
+      "lead": {
+        "url": "https://example.org/report",
+        "text": "Sales grew in every region in 2024. The chart below shows each region's share.",
+        "images": [
+          {
+            "src": "https://example.org/img/region-share-chart.png",
+            "alt": "Sales share by region, 2024",
+            "srcset": "",
+            "width": "900",
+            "height": "600",
+            "caption": "Figure 2: Sales share by region"
+          }
+        ]
+      },
+      "textAnswer": "Sales grew in every region in 2024.",
+      "leadSure": true,
+      "router": { "choice": "image", "confidence": 0.97 },
+      "gold": { "kind": "figure", "src": "https://example.org/img/region-share-chart.png" }
+    },
+    {
+      "id": "table-only-number",
+      "question": "How many beds does the north wing have?",
+      "lead": {
+        "url": "https://example.org/hospital",
+        "text": "The hospital has three wings. Bed counts per wing are in the table.",
+        "images": [
+          {
+            "src": "https://example.org/img/beds-table.png",
+            "alt": "",
+            "srcset": "",
+            "width": "700",
+            "height": "400",
+            "caption": "Table 1: Beds per wing"
+          }
+        ]
+      },
+      "textAnswer": "The hospital has three wings.",
+      "leadSure": true,
+      "router": { "choice": "image", "confidence": 0.96 },
+      "gold": { "kind": "figure", "src": "https://example.org/img/beds-table.png" }
+    },
+    {
+      "id": "part-text-part-chart",
+      "question": "What was the peak temperature during the July heat wave?",
+      "lead": {
+        "url": "https://example.org/heat",
+        "text": "A heat wave hit the city in July. Daily highs are plotted below.",
+        "images": [
+          {
+            "src": "https://example.org/img/daily-highs-graph.png",
+            "alt": "Daily highs in July",
+            "srcset": "",
+            "width": "800",
+            "height": "500",
+            "caption": ""
+          }
+        ]
+      },
+      "textAnswer": "A heat wave hit the city in July.",
+      "leadSure": false,
+      "router": { "choice": "both", "confidence": 0.96 },
+      "gold": { "kind": "figure", "src": "https://example.org/img/daily-highs-graph.png" }
+    }
+  ]
+}

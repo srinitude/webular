@@ -7,6 +7,8 @@
 import { Clock, Config, Context, Effect, Schema, Semaphore } from 'effect'
 import pkg from '../../../package.json' with { type: 'json' }
 import { type FetchOptions, fetchText } from '../../core/http.ts'
+import { HttpStatusError } from '../../core/http-body.ts'
+import { delayHeaderMs } from '../../core/retry-after.ts'
 import { endpoint } from '../sources-search.ts'
 
 export interface Hit {
@@ -69,6 +71,55 @@ const spaced = <A, E, R>(slot: Slot, eff: Effect.Effect<A, E, R>) =>
 // Run `eff` alone for its host, at least GAP_MS after that host's last request.
 export const politely = <A, E, R>(host: string, eff: Effect.Effect<A, E, R>) =>
   Effect.flatMap(slotFor(host), (slot) => slot.lock.withPermits(1)(spaced(slot, eff)))
+
+// Process-wide: epoch ms before which a rate-limited source is skipped, one
+// Reference per source, so every caller shares it unless a test gives its own.
+type Limit = Context.Reference<{ until: number }>
+export const rateLimit = (name: string): Limit =>
+  Context.Reference(`webular/sources/${name}Limit`, { defaultValue: () => ({ until: 0 }) })
+
+// When the pool is spent: retry-after on a 403/429, else x-ratelimit-reset once
+// x-ratelimit-remaining is 0, else a minute on a bare 429 (GitHub's own advice).
+const spentUntil = (res: Response, now: number) => {
+  const wait = delayHeaderMs(res.headers.get('retry-after'), now) ?? 0
+  if ((res.status === 403 || res.status === 429) && wait > 0) return now + wait
+  if (res.headers.get('x-ratelimit-remaining') === '0')
+    return Number(res.headers.get('x-ratelimit-reset')) * 1000
+  return res.status === 429 ? now + 60_000 : 0
+}
+
+const skipped = (url: string, until: number) =>
+  new HttpStatusError({
+    url,
+    status: 429,
+    statusText: `rate limited until ${new Date(until).toISOString()}, skipped`,
+  })
+
+// After a request (success or failure), push the block out from the last response seen.
+const markSpent = (block: { until: number }, seen: { res?: Response }) =>
+  Effect.flatMap(Clock.currentTimeMillis, (now) =>
+    Effect.sync(() => {
+      if (seen.res) block.until = Math.max(block.until, spentUntil(seen.res, now))
+    }),
+  )
+
+// Skip `url` with a 429 while `limit` is spent; else run `call`, which passes
+// `onResponse` to its fetch so the rate-limit headers reach the block.
+export const unlessLimited = <A, E, R>(
+  limit: Limit,
+  url: string,
+  call: (onResponse: (res: Response) => void) => Effect.Effect<A, E, R>,
+) =>
+  Effect.gen(function* () {
+    const block = yield* limit
+    if ((yield* Clock.currentTimeMillis) < block.until)
+      return yield* Effect.fail(skipped(url, block.until))
+    const seen: { res?: Response } = {}
+    const onResponse = (res: Response) => {
+      seen.res = res
+    }
+    return yield* Effect.ensuring(call(onResponse), markSpent(block, seen))
+  })
 
 const userAgent = Effect.map(
   Config.String('WEBULAR_MAILTO').pipe(Config.withDefault('')),

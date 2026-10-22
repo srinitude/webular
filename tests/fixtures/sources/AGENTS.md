@@ -1,0 +1,9 @@
+# tests/fixtures/sources/AGENTS.md
+
+This folder holds one stored response body for each search source adapter, and it follows [tests/fixtures/AGENTS.md](../AGENTS.md).
+
+- Each file is named for its source and its call, such as [`tests/fixtures/sources/wayback-cdx.json`](wayback-cdx.json) or [`tests/fixtures/sources/site-home.html`](site-home.html).
+- The `body` helper in [`tests/lib/sources/support.ts`](../../lib/sources/support.ts) reads them. The adapter tests serve them from a local `Bun.serve` fixture, so no test calls the real service.
+- The other files follow the same naming: [`archive-copy-page.html`](archive-copy-page.html), [`bluesky-search.json`](bluesky-search.json), [`commoncrawl-cdx.ndjson`](commoncrawl-cdx.ndjson), [`commoncrawl-collinfo.json`](commoncrawl-collinfo.json), [`crossref-works.json`](crossref-works.json), [`europepmc-search.json`](europepmc-search.json), [`feedsearch.json`](feedsearch.json), [`gdelt-doc.json`](gdelt-doc.json), [`github-search.json`](github-search.json), [`hello.rtf`](hello.rtf), [`hn-algolia-search.json`](hn-algolia-search.json), [`loc-search.json`](loc-search.json), [`marginalia-search.json`](marginalia-search.json), [`ncbi-esearch.json`](ncbi-esearch.json), [`ncbi-esummary.json`](ncbi-esummary.json), [`openalex-works.json`](openalex-works.json), [`openlibrary-search.json`](openlibrary-search.json), [`reddit-search.json`](reddit-search.json), [`stackexchange-search.json`](stackexchange-search.json), [`two-paragraphs.rtf`](two-paragraphs.rtf), [`wayback-available.json`](wayback-available.json), [`wikidata-creator-products.json`](wikidata-creator-products.json), [`wikidata-search.json`](wikidata-search.json), [`wikidata-sparql.json`](wikidata-sparql.json).
+- [`tests/commands/search-fallback.test.ts`](../../commands/search-fallback.test.ts) reads two of them for the scholarly fallback.
+- The bodies are recorded, not made up. Do not edit one by hand. Record the source again when its shape changes.

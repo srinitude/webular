@@ -14,10 +14,10 @@ const html = `<!doctype html><html><body><article><h1>Dist</h1>${'<p>Dist worker
 const reply = (url: string) =>
   Effect.callback<string>((resume) => {
     const worker = new Worker(url)
-    worker.onmessage = (event: MessageEvent<{ text?: string; error?: string }>) =>
-      resume(Effect.succeed(`started: ${event.data.text ?? `error ${event.data.error}`}`))
+    worker.onmessage = (event: MessageEvent<{ parsed?: { text: string }; error?: string }>) =>
+      resume(Effect.succeed(`started: ${event.data.parsed?.text ?? `error ${event.data.error}`}`))
     worker.onerror = (event) => resume(Effect.succeed(`fallback: ${event.message}`))
-    worker.postMessage(html)
+    worker.postMessage({ html, base: '' })
     return Effect.sync(() => worker.terminate())
   }).pipe(Effect.timeout('10 seconds'))
 

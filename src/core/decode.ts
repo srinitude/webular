@@ -6,6 +6,7 @@ import { errMsg } from './output.ts'
 export class FetchError extends Data.TaggedError('FetchError')<{
   readonly message: string
   readonly aborted?: boolean
+  readonly cause?: unknown
 }> {}
 
 const PRESCAN_BYTES = 1024
@@ -25,23 +26,59 @@ function bomCharset(prefix: Uint8Array): string | null {
 }
 
 function headerCharset(contentType: string | null): string | null {
-  const m = /charset=["']?([\w.:-]+)/i.exec(contentType ?? '')
+  const m = /(?:^|[\s;])charset=["']?([\w.:-]+)/i.exec(contentType ?? '')
   return m?.[1] ?? null
-}
-
-function metaCharset(prefix: Uint8Array): string | null {
-  const head = new TextDecoder('latin1').decode(prefix)
-  const m = /<meta\s[^>]*charset\s*=\s*["']?\s*([\w.:-]+)/i.exec(head)
-  return m?.[1] ?? null
-}
-
-export function pickCharset(contentType: string | null, prefix: Uint8Array): string {
-  return bomCharset(prefix) ?? headerCharset(contentType) ?? metaCharset(prefix) ?? 'utf-8'
 }
 
 // Labels Bun's TextDecoder does not support fall back to utf-8 — deterministic
 // under the pinned runtime.
 const decoderFor = Option.liftThrowable((label: string) => new TextDecoder(label))
+
+// The canonical encoding name for a label, or null when it is unknown, so an
+// unknown label falls through to the next source (WHATWG).
+const known = (label: string | null): string | null =>
+  label === null ? null : Option.getOrNull(Option.map(decoderFor(label), (d) => d.encoding))
+
+// Comments and <meta> tags with their attribute text, in document order.
+const META_OR_COMMENT =
+  /<!--[\s\S]*?(?:-->|$)|<meta(?=[\s/])((?:\s*[^\s=>/]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]*))?|\/)*)\s*>?/gi
+const ATTRIBUTE = /([^\s=>/]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]*)))?/g
+const CONTENT_CHARSET = /(?:^|[\s;])charset\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s;"']*))/i
+
+// The charset label one <meta> tag declares: its charset attribute, else the
+// charset in a http-equiv=content-type content attribute (first of each wins).
+function metaTagLabel(attrs: string): string | null {
+  const seen = new Map<string, string>()
+  for (const [, name = '', ...vals] of attrs.matchAll(ATTRIBUTE)) {
+    const key = name.toLowerCase()
+    if (!seen.has(key)) seen.set(key, (vals.find((v) => v !== undefined) ?? '').trim())
+  }
+  const direct = seen.get('charset')
+  if (direct !== undefined) return direct || null
+  if (seen.get('http-equiv')?.toLowerCase() !== 'content-type') return null
+  const m = CONTENT_CHARSET.exec(seen.get('content') ?? '')
+  return (m?.[1] ?? m?.[2] ?? m?.[3] ?? '').trim() || null
+}
+
+// Only the first 1024 bytes are prescanned; a meta utf-16 label means utf-8
+// and x-user-defined means windows-1252 (WHATWG prescan rules). Comments are
+// skipped and a tag with an unknown label does not end the scan.
+function metaCharset(prefix: Uint8Array): string | null {
+  const head = new TextDecoder('latin1').decode(prefix.subarray(0, PRESCAN_BYTES))
+  for (const m of head.matchAll(META_OR_COMMENT)) {
+    if (m[1] === undefined) continue
+    const enc = known(metaTagLabel(m[1]))
+    if (enc === null) continue
+    if (enc.startsWith('utf-16')) return 'utf-8'
+    return enc === 'x-user-defined' ? 'windows-1252' : enc
+  }
+  return null
+}
+
+export function pickCharset(contentType: string | null, prefix: Uint8Array): string {
+  return bomCharset(prefix) ?? known(headerCharset(contentType)) ?? metaCharset(prefix) ?? 'utf-8'
+}
+
 const makeDecoder = (label: string): TextDecoder =>
   Option.getOrElse(decoderFor(label), () => new TextDecoder())
 

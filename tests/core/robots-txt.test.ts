@@ -50,6 +50,7 @@ const statusCases: [string, { status: number; body: string } | null, boolean][] 
   ['500 means disallow all', { status: 500, body: '' }, false],
   ['503 means disallow all', { status: 503, body: '' }, false],
   ['network error means disallow all', null, false],
+  ['status 0 (unreachable) means disallow all', { status: 0, body: '' }, false],
   ['200 parses the body', { status: 200, body: 'User-agent: *\nDisallow: /x' }, false],
 ]
 

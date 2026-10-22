@@ -1,5 +1,6 @@
 // Fetch layer types, typed errors, backoff math, and reply classification.
 import { Clock, Data, Effect } from 'effect'
+import { delayHeaderMs } from '../core/retry-after.ts'
 
 type FetchErrorKind = 'timeout' | 'network' | 'http' | 'blocked' | 'too-large' | 'invalid-url'
 type NextAction = 'retry' | 'escalate' | 'give-up' | 'slow-down'
@@ -10,6 +11,9 @@ export class FetchError extends Data.TaggedError('FetchError')<{
   readonly url: string
   readonly status?: number | undefined
   readonly retryAfterMs?: number | undefined
+  /** Why a `blocked` fetch was refused; `robots` carries the matched rule. */
+  readonly reason?: 'robots' | undefined
+  readonly rule?: string | undefined
   readonly cause?: unknown
 }> {}
 
@@ -19,6 +23,8 @@ export interface FetchResult {
   readonly headers: Record<string, string>
   readonly body: string
   readonly fromCache: boolean
+  /** Set when the origin failed with a 5xx and the stored copy stood in (stale-if-error). */
+  readonly stale?: true
   readonly tier: string
 }
 
@@ -36,7 +42,7 @@ interface CallOptions {
 }
 
 export interface FetchLayerOptions extends CallOptions {
-  /** SQLite file for validators; ':memory:' when absent. */
+  /** SQLite file for validators; the webular cache folder when absent. */
   readonly cachePath?: string
   readonly cacheRows?: number
   readonly globalSockets?: number
@@ -51,13 +57,7 @@ export const fullJitterDelay = (attempt: number, baseMs: number, capMs: number, 
   u * Math.min(capMs, baseMs * 2 ** attempt)
 
 /** `Retry-After` as delta-seconds or HTTP-date (RFC 9110), in ms; undefined when absent or bad. */
-const parseRetryAfter = (value: string | undefined, now: number): number | undefined => {
-  if (!value) return undefined
-  const seconds = Number(value)
-  if (Number.isFinite(seconds)) return Math.max(0, seconds * 1000)
-  const at = Date.parse(value)
-  return Number.isNaN(at) ? undefined : Math.max(0, at - now)
-}
+const parseRetryAfter = delayHeaderMs
 
 const CHALLENGE = /cf-chl|captcha|enable javascript|checking your browser/i
 

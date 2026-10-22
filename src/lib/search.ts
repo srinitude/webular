@@ -4,8 +4,10 @@
 import { Effect } from 'effect'
 import { parseHTML } from 'linkedom'
 import { fetchText } from '../core/http.ts'
+import { dedupeKey } from '../core/url.ts'
 import { searchRank } from './jev/decisions/search.ts'
 import { onJevRuntime } from './jev/run.ts'
+import { cleanHits, type Scored } from './search-diversify.ts'
 import { endpoint, SOURCE_TIMEOUT_MS } from './sources-search.ts'
 
 interface SearchHit {
@@ -13,9 +15,6 @@ interface SearchHit {
   url: string
   description: string
 }
-
-const UA =
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36'
 
 const decodeHref = (href: string): string =>
   URL.parse(href.startsWith('http') ? href : `https:${href}`)?.searchParams.get('uddg') ?? href
@@ -39,7 +38,7 @@ export const webSearch = Effect.fn('webSearch')(function* (query: string, limit:
     yield* endpoint('https://html.duckduckgo.com/html/', { q: query }),
     {
       timeoutMs: SOURCE_TIMEOUT_MS,
-      headers: { 'user-agent': UA, accept: 'text/html,application/xhtml+xml' },
+      headers: { accept: 'text/html,application/xhtml+xml' }, // fetchText sends the webular User-Agent
     },
   )
   const { document } = parseHTML(html)
@@ -53,12 +52,15 @@ export const webSearch = Effect.fn('webSearch')(function* (query: string, limit:
   return ranked.slice(0, limit)
 })
 
-// Dedupe key: host without www, no trailing slash, no utm_* params, no hash.
+const MOBILE_HOST = /^(www|m|amp)\./
+
+// Dedupe key (SearXNG-style): scheme, www./m./amp. host prefix, /amp suffix,
+// trailing slash, tracking params, and hash do not tell two URLs apart.
 export function hitKey(raw: string): string {
-  const u = URL.parse(raw)
+  const u = URL.parse(dedupeKey(raw) ?? '')
   if (!u) return raw
-  for (const k of [...u.searchParams.keys()]) if (k.startsWith('utm_')) u.searchParams.delete(k)
-  return `${u.hostname.replace(/^www\./, '')}${u.pathname.replace(/\/+$/, '')}${u.search}`
+  const path = u.pathname.replace(/\/amp\/?$/, '').replace(/\/+$/, '')
+  return `${u.hostname.replace(MOBILE_HOST, '')}${path}${u.search}`
 }
 
 const RRF_K = 60
@@ -94,27 +96,88 @@ export function domainSignal(raw: string, query: string): number {
 }
 
 // Reciprocal rank fusion, sum(1/(60+rank)), over every ranked list, plus the
-// domain signal once per URL; deduped by hitKey, ties keep first-seen order.
+// domain signal once per URL; deduped by hitKey, then near copies merge and a
+// host-heavy top is spread (search-diversify.ts). Ties keep
+// first-seen order; each entry carries its rank and the lists that returned it.
+// `weights[li]` scales list li's RRF term (source class weight); missing is 1.
 export function scoreHits<H extends SearchHit>(
   lists: ReadonlyArray<ReadonlyArray<H>>,
   query: string,
-): Array<{ hit: H; score: number }> {
-  const seen = new Map<string, { hit: H; score: number }>()
-  for (const list of lists) {
+  weights: ReadonlyArray<number> = [],
+): Scored<H>[] {
+  const seen = new Map<string, { hit: H; score: number; lists: number[] }>()
+  lists.forEach((list, li) => {
     list.forEach((hit, i) => {
       const key = hitKey(hit.url)
-      const entry = seen.get(key) ?? { hit, score: domainSignal(hit.url, query) }
-      entry.score += 1 / (RRF_K + i + 1)
+      const entry = seen.get(key) ?? { hit, score: domainSignal(hit.url, query), lists: [] }
+      entry.score += (weights[li] ?? 1) / (RRF_K + i + 1)
+      if (!entry.lists.includes(li)) entry.lists.push(li)
+      if (hit.description.length > entry.hit.description.length)
+        entry.hit = { ...entry.hit, description: hit.description }
       seen.set(key, entry)
     })
-  }
-  return [...seen.values()].sort((a, b) => b.score - a.score)
+  })
+  return cleanHits([...seen.values()].sort((a, b) => b.score - a.score))
 }
 
 export const rankHits = <H extends SearchHit>(
   lists: ReadonlyArray<ReadonlyArray<H>>,
   query: string,
 ): H[] => scoreHits(lists, query).map((e) => e.hit)
+
+// Lexical rerank of the merged list, no model call: BM25 of the query over each
+// hit's title, host, and snippet (Unicode word segmentation), scaled to 0..1,
+// plus the Jaccard overlap of query and title words (so the exact title beats a
+// longer one) and a boost for an official host or Wikipedia. The sort is stable,
+// so ties and a query with no overlap keep the fused order.
+const BM25_K1 = 1.2
+const BM25_B = 0.75
+const WIKI_BOOST = 0.25
+const HOST_BOOST = 0.5
+const segmenter = new Intl.Segmenter(undefined, { granularity: 'word' })
+const words = (s: string) =>
+  [...segmenter.segment(s.toLowerCase())].filter((w) => w.isWordLike).map((w) => w.segment)
+
+const bm25 = (docs: string[][], want: string[]) => {
+  const avg = docs.reduce((n, d) => n + d.length, 0) / (docs.length || 1)
+  const idf = (t: string) => {
+    const df = docs.filter((d) => d.includes(t)).length
+    return Math.log(1 + (docs.length - df + 0.5) / (df + 0.5))
+  }
+  const weights = want.map(idf)
+  return docs.map((d) =>
+    want.reduce((sum, t, i) => {
+      const tf = d.filter((w) => w === t).length
+      return (
+        sum +
+        (weights[i] ?? 0) *
+          ((tf * (BM25_K1 + 1)) / (tf + BM25_K1 * (1 - BM25_B + (BM25_B * d.length) / avg)))
+      )
+    }, 0),
+  )
+}
+
+export function lexicalRerank<H extends SearchHit>(hits: ReadonlyArray<H>, query: string): H[] {
+  const want = [...new Set(words(query))]
+  const docs = hits.map((h) =>
+    words(`${h.title} ${URL.parse(h.url)?.hostname.replace(/[.-]/g, ' ') ?? ''} ${h.description}`),
+  )
+  const raw = bm25(docs, want)
+  const top = Math.max(...raw)
+  if (!(top > 0)) return [...hits]
+  const score = hits.map((h, i) => {
+    const site = URL.parse(h.url)?.hostname.split('.').slice(-2).join('.')
+    const boost =
+      domainSignal(h.url, query) > 0 ? HOST_BOOST : site === 'wikipedia.org' ? WIKI_BOOST : 0
+    const title = new Set(words(h.title))
+    const shared = want.filter((t) => title.has(t)).length
+    return (raw[i] ?? 0) / top + shared / (want.length + title.size - shared) + boost
+  })
+  return hits
+    .map((h, i) => ({ h, s: score[i] ?? 0 }))
+    .sort((a, b) => b.s - a.s)
+    .map((e) => e.h)
+}
 
 // Weak: the top hit is only one list's first place, with no second list
 // agreeing and no official-site signal (1/61 = 0.0164; with either, >= 0.026).

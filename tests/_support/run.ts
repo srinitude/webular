@@ -1,15 +1,42 @@
 // Bun's runner has no Effect adapter: one place runs a test body as an Effect.
 // Scoped, so a body may acquire fixtures that release when the test ends, and
 // given the Bun platform services (FileSystem, Path, ChildProcessSpawner) and
-// a Readability worker pool that closes with the test, as stepRuntime gives.
+// a Readability worker pool that closes with the test, and the robots.txt gate, as stepRuntime gives.
 import * as BunServices from '@effect/platform-bun/BunServices'
 import { Effect, FileSystem, Layer, type Scope } from 'effect'
+import { HostBudget } from '../../src/core/budget.ts'
+import { RobotsGate } from '../../src/lib/robots-gate.ts'
 import { ParsePool } from '../../src/lib/sources.ts'
 
-const testLayer = Layer.mergeAll(BunServices.layer, ParsePool.layer)
+// Windows lists nested readDirectory entries with `\`; tests compare POSIX paths,
+// and `/` paths open fine on Windows too.
+const posixFileSystem = Layer.effect(
+  FileSystem.FileSystem,
+  Effect.map(FileSystem.FileSystem, (fs) => ({
+    ...fs,
+    readDirectory: (...args: Parameters<typeof fs.readDirectory>) =>
+      Effect.map(fs.readDirectory(...args), (names) =>
+        names.map((name) => name.replaceAll('\\', '/')),
+      ),
+  })),
+).pipe(Layer.provide(BunServices.layer))
+
+const testLayer = Layer.mergeAll(
+  BunServices.layer,
+  posixFileSystem,
+  ParsePool.layer,
+  RobotsGate.layer,
+  HostBudget.layer.pipe(Layer.provide(BunServices.layer)),
+)
 
 export const eff =
-  <A, E>(body: Effect.Effect<A, E, Scope.Scope | BunServices.BunServices | ParsePool>) =>
+  <A, E>(
+    body: Effect.Effect<
+      A,
+      E,
+      Scope.Scope | BunServices.BunServices | ParsePool | RobotsGate | HostBudget
+    >,
+  ) =>
   () =>
     Effect.runPromise(Effect.provide(Effect.scoped(body), testLayer))
 

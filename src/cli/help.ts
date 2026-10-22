@@ -28,6 +28,7 @@ export const GLOBAL_OPTIONS = [
 
 const HEAD = [
   'webular — a command line tool for web research',
+  "Built on Mastra and Effect. Jev, TypeSafe's decision model, makes its judgment calls.",
   '',
   'USAGE',
   '  webular <command> [options]',

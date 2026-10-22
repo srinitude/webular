@@ -89,5 +89,5 @@ metadata:
 - [ ] The output keeps the source's meaning, exact data, quotes, and source links.
 - [ ] Every Markdown file is at most 199 lines, with one H1, an H2, and an H3, and no skipped heading level.
 - [ ] The reading path has no cycle, and every moved section is reachable from the entry file.
-- [ ] The checker `scripts/check.ts` reports no error, or the report says it did not run.
+- [ ] The checker [`scripts/check.ts`](scripts/check.ts) reports no error, or the report says it did not run.
 - [ ] The whole output set has had a final review, and the report separates mechanical checks, semantic review, and reader tests.

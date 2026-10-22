@@ -51,7 +51,11 @@ type DocsStore = ReturnType<typeof fileStore>
 // WEBULAR_CACHE_DIR/jev-docs.json (default ~/.cache/webular), next to the local index.
 export const docsStore = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem
-  const home = yield* Config.String('HOME').pipe(Config.withDefault('.'), Effect.orDie)
+  const home = yield* Config.String('HOME').pipe(
+    Config.orElse(() => Config.String('USERPROFILE')),
+    Config.withDefault('.'),
+    Effect.orDie,
+  )
   const dir = yield* Config.String('WEBULAR_CACHE_DIR')
     .pipe(Config.withDefault(`${home}/.cache/webular`))
     .pipe(Effect.orDie)

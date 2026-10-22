@@ -10,10 +10,7 @@ import { CliError, commandName } from './effect.ts'
 import { logErr, parseFields } from './output.ts'
 
 type FlagValue = string | boolean | string[] | undefined
-interface ParsedArgs {
-  values: Record<string, FlagValue>
-  positionals: string[]
-}
+type ParsedArgs = { values: Record<string, FlagValue>; positionals: string[] }
 
 type OptionSpec = {
   type: 'string' | 'boolean'
@@ -49,28 +46,49 @@ function warnRemoved(values: Record<string, FlagValue>): Effect.Effect<void> {
   })
 }
 
-type Near = { name: string; d: number }
-
 // The declared flag at most 2 edits away from a mistyped one, if any.
 const didYouMean = (unknown: string, known: string[]): string => {
-  const near = known.reduce<Near | undefined>((best, name) => {
-    const d = distance(unknown, name)
-    const fits = d <= 2 && d < name.length
-    return fits && (best === undefined || d < best.d) ? { name, d } : best
-  }, undefined)
+  const near = known
+    .map((name) => ({ name, d: distance(unknown, name) }))
+    .filter(({ name, d }) => d <= 2 && d < name.length)
+    .sort((x, y) => x.d - y.d)[0]
   return near === undefined ? '' : ` Did you mean '--${near.name}'?`
 }
 
-const usageFor = (cmd: string, own: string[]): string => {
+// A list flag: repeat it (--urls a --urls b) or join with commas. A comma
+// splits only when a new URL (scheme://) follows, so https://x.com/a,b stays whole.
+export const listFlag = (raw: unknown): string[] | undefined =>
+  typeof raw === 'string' || Array.isArray(raw)
+    ? [raw]
+        .flat()
+        .flatMap((item) => String(item).split(/,(?=\s*[a-z][a-z0-9+.-]*:\/\/)/i))
+        .map((u) => u.trim())
+        .filter(Boolean)
+    : undefined
+
+type Described = { description?: string; def?: { type?: string }; unwrap?: () => Described }
+
+// One OPTIONS line per flag, described from the zod schema the MCP tool uses,
+// so the CLI help and the MCP schema cannot drift.
+const optionLine = (shape: Record<string, Described>, name: string): string => {
+  const key = name.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase())
+  const field = shape[key] ?? shape[name]
+  const inner = field?.def?.type === 'optional' ? field.unwrap?.() : field
+  const takes = inner?.def?.type === 'boolean' ? '' : ' <value>'
+  const desc = field?.description ?? inner?.description ?? ''
+  const head = `  --${name}${takes}`
+  return desc ? `${head.padEnd(19)} ${desc}` : head
+}
+
+const usageFor = (cmd: string, own: string[], shape: Record<string, Described>): string => {
   const desc = (COMMANDS as Record<string, string>)[cmd] ?? ''
   const main = (ARGUMENTS as Record<string, string>)[cmd]
   const usage = `  webular ${cmd}${main ? ` ${main}` : ''} [options]`
   const head = [`webular ${cmd} — ${desc}`, '', 'USAGE', usage, '']
   const example = (EXAMPLES as Record<string, string>)[cmd]
   const tail = example ? ['', 'EXAMPLE', `  ${example}`] : []
-  return [...head, 'OPTIONS', ...own.map((name) => `  --${name}`), ...GLOBAL_OPTIONS, ...tail].join(
-    '\n',
-  )
+  const options = own.map((name) => optionLine(shape, name))
+  return [...head, 'OPTIONS', ...options, ...GLOBAL_OPTIONS, ...tail].join('\n')
 }
 
 // --help prints usage on stdout and ends with exit 0 (an empty CliError
@@ -82,7 +100,16 @@ function checkFlags(
 ): Effect.Effect<void, CliError> {
   const cmd = commandName()
   if (values['help'] === true) {
-    return Effect.sync(() => process.stdout.write(`${usageFor(cmd, own)}\n`)).pipe(
+    // Loaded only for --help, so zod never slows a normal run.
+    return Effect.promise(() => import('../../plugins/webular/src/schemas.ts')).pipe(
+      Effect.map(
+        ({ schemas }) =>
+          ((schemas as Record<string, { shape: Record<string, Described> }>)[cmd]?.shape ??
+            {}) as Record<string, Described>,
+      ),
+      Effect.flatMap((shape) =>
+        Effect.sync(() => process.stdout.write(`${usageFor(cmd, own, shape)}\n`)),
+      ),
       Effect.andThen(Effect.fail(new CliError({ message: '', exitCode: 0 }))),
     )
   }
@@ -108,15 +135,10 @@ export function parseFlags(
   })
 }
 
-interface IntRange {
-  min: number
-  max: number
-}
-
+type IntRange = { min: number; max: number }
 function toInt(raw: FlagValue): number | null {
   const text = String(raw ?? '').trim()
-  if (text === '') return null
-  const n = Number(text)
+  const n = text === '' ? Number.NaN : Number(text)
   return Number.isInteger(n) ? n : null
 }
 

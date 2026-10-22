@@ -2,6 +2,7 @@
 // robots.txt, adaptive per-host delay, SimHash near-duplicate skip, and
 // SQLite resume tokens that survive across processes.
 import { Effect } from 'effect'
+import { retryAfterMs } from '../core/retry-after.ts'
 import {
   attempt,
   type CrawlError,
@@ -9,6 +10,7 @@ import {
   flush,
   makeFrontier,
   pop,
+  recordVisit,
   release,
 } from './crawl-frontier.ts'
 import { loadRun, newRun, openDb, restore } from './crawl-resume.ts'
@@ -26,6 +28,7 @@ import {
   titleOf,
 } from './crawl-types.ts'
 import { isNearDuplicate, remember } from './fingerprints.ts'
+import { robotsTags } from './robots-tags.ts'
 import { isAllowed, type Robots, robotsFromResponse } from './robots-txt.ts'
 import { halves, simhash64 } from './simhash.ts'
 
@@ -40,7 +43,6 @@ export {
   MAX_DELAY_MS,
   MIN_DELAY_MS,
   nextDelay,
-  textOf,
 } from './crawl-types.ts'
 
 const robotsFor = (r: Run, origin: string) => {
@@ -84,6 +86,14 @@ const follow = (r: Run, url: string, body: string) => {
 const keepPage = (r: Run, url: string, res: FetchResponse | null) => {
   if (!res) return void r.result.skipped.push({ url, reason: 'fetch-error' })
   const ok = res.status >= 200 && res.status < 300
+  const tags = ok
+    ? robotsTags(res.headers, res.body, (r.o.userAgent ?? 'webular').toLowerCase())
+    : { noindex: false, nofollow: false }
+  // noindex: out of the results, links still followed unless nofollow.
+  if (tags.noindex) {
+    r.result.skipped.push({ url, reason: 'noindex' })
+    return !tags.nofollow
+  }
   if (ok) {
     const [lo, hi] = halves(simhash64(textOf(res.body)))
     if (isNearDuplicate(r.fingerprints, lo, hi))
@@ -94,7 +104,7 @@ const keepPage = (r: Run, url: string, res: FetchResponse | null) => {
       .run(r.token, lo, hi)
   }
   r.result.pages.push({ url, status: res.status, body: res.body })
-  return ok
+  return ok && !tags.nofollow
 }
 
 const settle = (
@@ -104,9 +114,16 @@ const settle = (
   fetchMs: number,
   rules: Robots,
 ) => {
+  const h = res?.headers
+  const retryAfter = h instanceof Headers ? h.get('retry-after') : h?.['retry-after']
   const delay = nextDelay(
     r.delays.get(host) ?? floorOf(r),
-    { status: res?.status ?? 0, fetchMs, crawlDelayMs: rules.crawlDelayMs },
+    {
+      status: res?.status ?? 0,
+      fetchMs,
+      crawlDelayMs: rules.crawlDelayMs,
+      retryAfterMs: retryAfterMs(retryAfter ?? null, r.now()),
+    },
     floorOf(r),
   )
   r.delays.set(host, delay)
@@ -130,7 +147,9 @@ const visit = (r: Run, url: string, host: string) => {
       Effect.flatMap((res) =>
         attempt(() => {
           settle(r, host, res, r.now() - start, rules)
-          return keepPage(r, url, res)
+          const keep = keepPage(r, url, res)
+          recordVisit(r.frontier, url, keep === true)
+          return keep
         }).pipe(Effect.flatMap((keep) => (keep && res ? follow(r, url, res.body) : Effect.void))),
       ),
     )

@@ -2,7 +2,8 @@
 // validates its input, runs, and its result is rendered (src/cli/run.ts).
 // Discovery commands keep partial failures in the payload: exit 0 with a
 // stderr note, and exit 1 only when the payload is empty and errors exist
-// (payloadExit).
+// (payloadExit). For answer and research a page with no main text still
+// counts: its body text fills in (src/lib/html.ts), so it is not empty.
 // Final states carry an `exit-<code>` tag from src/cli/exit-codes.ts.
 import { setup } from 'xstate'
 import { EXIT, exitTag } from '../cli/exit-codes.ts'

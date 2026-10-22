@@ -1,7 +1,8 @@
 {
   "name": "webular",
   "version": "0.2.0",
-  "description": "Universal web research CLI — scrape, crawl, map, extract, search, summarize and gather context by composing free & open-source libraries into Mastra workflows/tools, orchestrated through a deterministic mise task graph.",
+  "mcpName": "io.github.srinitude/webular",
+  "description": "Jev, TypeSafe's decision model, makes the judgment calls in this web research CLI. It searches, scrapes, crawls, maps, extracts, summarizes, and answers on your machine. Its plugin adds four skills: research, interview, plain language, and Markdown. Jev's key is the only key.",
   "type": "module",
   "license": "Apache-2.0",
   "author": "Kiren Srinivasan <kiren@fantasymetals.com>",
@@ -27,7 +28,12 @@
     "context",
     "cli",
     "mastra",
-    "bun"
+    "bun",
+    "jev",
+    "typesafe",
+    "mastra-workflows",
+    "effect",
+    "xstate"
   ],
   "bin": {
     "webular": "./dist/webular.js"
@@ -59,7 +65,6 @@
     "access": "public"
   },
   "dependencies": {
-    "@ai-sdk/anthropic": "0.0.56",
     "@effect/platform-bun": "4.0.5",
     "@firecrawl/anydoc": "^0.2.4",
     "@mastra/core": "^1.78.0",
@@ -67,14 +72,11 @@
     "@modelcontextprotocol/sdk": "^1.32.1",
     "@mozilla/readability": "^0.6.0",
     "@statelyai/agent": "1.1.6",
-    "@xstate/react": "6.1.0",
-    "agent-browser": "^0.39.1",
+    "agent-browser": "0.39.1",
     "diff": "^9.0.0",
     "effect": "4.0.5",
     "linkedom": "^0.18.13",
     "mammoth": "^1.13.0",
-    "react": "19.3.1",
-    "react-dom": "19.3.1",
     "turndown": "^7.2.4",
     "unpdf": "^1.9.1",
     "xstate": "5.33.3",
@@ -86,13 +88,17 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
     "@effect/language-service": "0.87.5",
+    "@modelcontextprotocol/client": "2.2.0",
+    "@modelcontextprotocol/node": "2.0.0",
+    "@modelcontextprotocol/server": "2.2.0",
     "@types/bun": "^1.4.3",
-    "@types/react": "19.3.0",
-    "@types/react-dom": "19.3.0",
     "@types/turndown": "^5.0.6",
+    "@typescript/typescript6": "6.0.2",
+    "ai": "3.4.33",
     "deepsec": "^2.3.10",
+    "knip": "6.40.0",
     "portless": "0.15.8",
-    "typescript": "6.0.3"
+    "typescript": "7.0.2"
   },
   "trustedDependencies": [
     "agent-browser",

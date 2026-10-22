@@ -2,12 +2,17 @@
 // deterministic); `mise run bench:peers:live` calls providers, records every
 // response keyed by request, and writes a dated results file and report.
 // Flags: --live, --runs N (3), --peers a,b (live peers; default firecrawl,exa),
-// --max-calls N (20 per peer). BENCH_PLAN points at an extra plan file.
+// --max-calls N (20 per peer), --seed N (arm and task order; random if absent),
+// --cold (WEBULAR_NO_CACHE=1), --judge (blinded LLM judge, used only once
+// calibrated), --jobs a,b (run only those jobs). BENCH_PLAN points at an extra plan file.
 import { fileURLToPath } from 'node:url'
 import { BunRuntime, BunServices } from '@effect/platform-bun'
 import { Clock, Config, Console, Effect, FileSystem, Layer, Ref, Schema } from 'effect'
 import { FetchHttpClient } from 'effect/http'
+import { defaultJudge } from '../judge.ts'
+import { flagCached, roundCacheDir, useRunCache, withRoundCache } from './cache.ts'
 import { markCase } from './cases.ts'
+import { type JudgeSetup, judgedAccuracy } from './grade.ts'
 import {
   builtinMetrics,
   type MetricDef,
@@ -16,18 +21,25 @@ import {
   type RunRecord,
   type Task,
 } from './model.ts'
+import { resolveSeed, schedule } from './order.ts'
 import { Peers, PeersLive } from './providers.ts'
-import { recordMetrics, renderTable, sharedTasks, summarize } from './score.ts'
+import { livePath, replayPath } from './recording-paths.ts'
+import { report } from './report.ts'
+import { recordMetrics } from './score.ts'
+import { skipReason } from './skip.ts'
 import { builtinTasks, loadPlan, startPages } from './tasks.ts'
+import { CALL_TIMEOUT_MS } from './timeout.ts'
 
 const flag = (name: string) => {
   const i = Bun.argv.indexOf(`--${name}`)
   return i > 0 ? Bun.argv[i + 1] : undefined
 }
 const live = Bun.argv.includes('--live')
+const cold = Bun.argv.includes('--cold')
 const runs = Number(flag('runs') ?? 3)
 const livePeers = new Set(['webular', ...(flag('peers') ?? 'firecrawl,exa').split(',')])
 const maxCalls = Number(flag('max-calls') ?? 20)
+const jobs = flag('jobs')?.split(',')
 const root = fileURLToPath(new URL('../../../bench/', import.meta.url))
 
 const Recording = Schema.Union([
@@ -43,6 +55,7 @@ interface Ctx {
   calls: Ref.Ref<Record<string, number>>
   origin: string
   planMetrics: readonly MetricDef[]
+  judge: JudgeSetup
 }
 
 const callLive = (p: Provider, task: Task, origin: string) =>
@@ -54,6 +67,7 @@ const callLive = (p: Provider, task: Task, origin: string) =>
     const t0 = yield* Clock.currentTimeMillis
     const once = Ref.update(attempts, (n) => n + 1).pipe(
       Effect.andThen(job({ ...task.input, ...(url === undefined ? {} : { url }) })),
+      Effect.timeout(CALL_TIMEOUT_MS),
     )
     const result = yield* once.pipe(Effect.retry({ times: 1 }), Effect.result)
     const latencyMs = (yield* Clock.currentTimeMillis) - t0
@@ -64,30 +78,23 @@ const callLive = (p: Provider, task: Task, origin: string) =>
   })
 
 // Fresh call (local fixture, or a live peer within budget) or a replay.
+// Live recordings go under bench/results, never over checked-in bench/recordings.
 const obtain = (p: Provider, task: Task, run: number, ctx: Ctx) =>
   Effect.gen(function* () {
     const key = { p: p.id, job: task.job, task: task.id, input: task.input, run }
-    const file = `${root}recordings/${sha(key)}.json`
+    const file = replayPath(root, sha(key))
     if (task.localOnly || (live && livePeers.has(p.id))) {
       const used = yield* Ref.getAndUpdate(ctx.calls, (m) => ({ ...m, [p.id]: (m[p.id] ?? 0) + 1 }))
       if (!p.local && (used[p.id] ?? 0) >= maxCalls) return 'budget' as const
       const rec = yield* callLive(p, task, ctx.origin)
-      if (!task.localOnly) yield* ctx.fs.writeFileString(file, JSON.stringify(rec))
+      if (!task.localOnly)
+        yield* ctx.fs.writeFileString(livePath(root, sha(key)), JSON.stringify(rec))
       return rec
     }
     if (!(yield* ctx.fs.exists(file))) return undefined
     const text = yield* ctx.fs.readFileString(file)
     return yield* Schema.decodeUnknownEffect(Schema.fromJsonString(Recording))(text)
   })
-
-const skipReason = (p: Provider, task: Task) =>
-  p.skip
-    ? (['skipped', p.skip] as const)
-    : !p.jobs[task.job]
-      ? (['unsupported', `no ${task.job} API`] as const)
-      : task.localOnly && !p.local
-        ? (['unsupported', 'local fixture unreachable from a hosted API'] as const)
-        : undefined
 
 const runOne = (p: Provider, task: Task, run: number, ctx: Ctx) =>
   Effect.gen(function* () {
@@ -113,42 +120,23 @@ const runOne = (p: Provider, task: Task, run: number, ctx: Ctx) =>
       } satisfies RunRecord
     const outputHash = sha([rec.output.text, rec.output.urls])
     const metrics = recordMetrics(task, rec.output, ctx.planMetrics)
+    metrics['answerAccuracy'] = yield* judgedAccuracy(ctx.judge, task, rec.output)
     return { ...base, status: 'ok', outputHash, metrics } satisfies RunRecord
   })
 
-const statusLines = (providers: readonly Provider[], records: readonly RunRecord[]) =>
-  providers.map((p) => {
-    const counts: Record<string, number> = {}
-    for (const r of records) if (r.provider === p.id) counts[r.status] = (counts[r.status] ?? 0) + 1
-    return `  ${p.id}: ${JSON.stringify(counts)}${p.skip ? ` (${p.skip})` : ''}`
+// One round: seeded ABBA order, one run at a time, each run with its own cache dir.
+const runRound = (tasks: readonly Task[], providers: readonly Provider[], ctx: Ctx) =>
+  Effect.gen(function* () {
+    const seed = yield* resolveSeed(flag('seed'))
+    const cacheDir = roundCacheDir(root, `${yield* Clock.currentTimeMillis}-${seed}`)
+    const steps = yield* schedule(seed, tasks, providers, runs)
+    const step = (s: (typeof steps)[number]) =>
+      useRunCache(cacheDir, s.run, cold).pipe(
+        Effect.andThen(runOne(s.provider, s.task, s.run, ctx)),
+      )
+    const ran = yield* withRoundCache(cacheDir, Effect.forEach(steps, step, { concurrency: 1 }))
+    return { seed, records: flagCached(ran).map((r) => ({ ...r, seed })) }
   })
-
-const report = (
-  providers: readonly Provider[],
-  records: readonly RunRecord[],
-  defs: readonly MetricDef[],
-  note: string,
-) => {
-  const [web] = providers.filter((p) => p.id === 'webular')
-  if (!web) return 'no webular provider'
-  const ran = (p: Provider) =>
-    records.some((r) => r.provider === p.id && (r.status === 'ok' || r.status === 'error'))
-  const mode = live ? 'live' : 'offline replay'
-  const parts = [`peer benchmark (${mode}, ${runs} runs; ${note})`, 'status per provider:']
-  parts.push(...statusLines(providers, records))
-  parts.push(renderTable('webular, every task', summarize(records, [web], defs), defs))
-  for (const p of providers.filter((x) => x.id !== 'webular' && ran(x))) {
-    const shared = sharedTasks(records, ['webular', p.id])
-    const title = `webular vs ${p.id} on ${shared.size} shared tasks`
-    parts.push(renderTable(title, summarize(records, [web, p], defs, shared), defs))
-  }
-  const misses = records.filter(
-    (r) => r.provider === 'webular' && r.run === 1 && r.metrics['accuracy'] === 0,
-  )
-  parts.push('webular misses (run 1):')
-  parts.push(...misses.map((r) => `  ${r.task}: ${r.status} ${(r.note ?? '').slice(0, 160)}`))
-  return parts.join('\n\n')
-}
 
 const main = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem
@@ -157,26 +145,26 @@ const main = Effect.gen(function* () {
     Config.withDefault(`${root}benchmark-plan.json`),
   )
   const plan = yield* loadPlan(planPath)
-  const tasks = [...builtinTasks, ...plan.tasks]
   const defs = [...builtinMetrics, ...plan.metrics]
   yield* fs.makeDirectory(`${root}recordings`, { recursive: true })
+  yield* fs.makeDirectory(`${root}results/recordings`, { recursive: true })
   const pages = yield* startPages()
   const calls = yield* Ref.make<Record<string, number>>({})
-  const ctx: Ctx = { fs, calls, origin: pages.origin, planMetrics: plan.metrics }
-  const work = Array.from({ length: runs }, (_, i) => tasks.map((t) => [t, i + 1] as const)).flat()
-  const perProvider = yield* Effect.forEach(
-    providers,
-    (p) => Effect.forEach(work, ([t, run]) => runOne(p, t, run, ctx), { concurrency: 1 }),
-    { concurrency: providers.length },
-  )
-  const records = perProvider.flat()
-  const text = report(providers, records, defs, plan.note)
+  const names = providers.map((p) => p.id)
+  const judgeOn = Bun.argv.includes('--judge')
+  const judge = { judge: judgeOn ? defaultJudge : undefined, calibration: undefined, names }
+  const ctx: Ctx = { fs, calls, origin: pages.origin, planMetrics: plan.metrics, judge }
+  const tasks = [...builtinTasks, ...plan.tasks].filter((t) => !jobs || jobs.includes(t.job))
+  const { seed, records } = yield* runRound(tasks, providers, ctx)
+  const mode = `${live ? 'live' : 'offline replay'}, ${runs} runs`
+  const header = `peer benchmark (${mode}; ${plan.note}; seed ${seed}${cold ? ', cold' : ''})`
+  const text = report(providers, records, defs, header)
   yield* Console.log(text)
   if (!live) return
   const stamp = new Date(yield* Clock.currentTimeMillis).toISOString().replace(/[:.]/g, '-')
-  yield* fs.makeDirectory(`${root}results`, { recursive: true })
-  yield* fs.writeFileString(`${root}results/peers-${stamp}.json`, JSON.stringify({ runs, records }))
-  yield* fs.writeFileString(`${root}results/peers-${stamp}.txt`, `${text}\n`)
+  const out = `${root}results/peers-${stamp}`
+  yield* fs.writeFileString(`${out}.json`, JSON.stringify({ runs, seed, records }))
+  yield* fs.writeFileString(`${out}.txt`, `${text}\n`)
 })
 
 const layer = PeersLive.pipe(

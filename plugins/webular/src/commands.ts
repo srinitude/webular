@@ -5,10 +5,9 @@
 // Self-contained: nothing here reaches outside the plugin folder, so a host
 // that copies only this folder still runs it.
 import { constants } from 'node:os'
-import { Config, Data, Effect, Stream } from 'effect'
+import { Config, Data, Effect, Schema, Stream } from 'effect'
 import { ChildProcess, ChildProcessSpawner } from 'effect/process'
 import { z } from 'zod'
-import { uiMeta } from './apps.ts'
 import { cap } from './budget.ts'
 import descriptions from './descriptions.json' with { type: 'json' }
 import { outputs, schemas } from './schemas.ts'
@@ -53,12 +52,16 @@ export class CommandFailed extends Data.TaggedError('CommandFailed')<{
 const decode = (bytes: Stream.Stream<Uint8Array, unknown>) =>
   bytes.pipe(Stream.decodeText(), Stream.mkString)
 
-// true becomes a bare --flag, false and undefined drop out, arrays join with commas.
-const toFlags = (input: Record<string, unknown>) =>
-  Object.entries(input).flatMap(([k, v]) => {
+// camelCase keys become kebab-case flags, true becomes a bare --flag, false and
+// undefined drop out, arrays repeat the flag once per item (so a comma inside
+// a URL survives).
+export const toFlags = (input: Record<string, unknown>) =>
+  Object.entries(input).flatMap(([key, v]) => {
+    const k = key.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)
     if (v === undefined || v === false) return []
+    if (v === true) return [`--${k}`]
     // One --key=value token, so a value that starts with '-' is never read as a flag.
-    return v === true ? [`--${k}`] : [`--${k}=${String(v)}`]
+    return (Array.isArray(v) ? v : [v]).map((item) => `--${k}=${String(item)}`)
   })
 
 // Picks the next step by exit code: 2 is bad input, anything else is the site or the network.
@@ -82,6 +85,10 @@ const notJson = (command: string) =>
     message: `webular ${command} returned output that is not JSON. This is a webular bug. Do not retry. Tell the user, and include the tool name.`,
   })
 
+const decodeResult = Schema.decodeUnknownEffect(
+  Schema.fromJsonString(Schema.Record(Schema.String, Schema.Unknown)),
+)
+
 // Runs `webular <command> --json` with the tool input as flags; stdout is the
 // result, cut to one page that starts at `from`.
 export const runCommand = (
@@ -101,10 +108,10 @@ export const runCommand = (
       )
       // Exit 3 is the CLI's partial result: stdout holds every item, failed ones named.
       if (code !== 0 && code !== 3) return yield* failure(command, code, err)
-      return yield* Effect.try({
-        try: () => JSON.parse(out) as Record<string, unknown>,
-        catch: () => notJson(command),
-      }).pipe(Effect.map((result) => cap(result, command, from)))
+      return yield* decodeResult(out).pipe(
+        Effect.mapError(() => notJson(command)),
+        Effect.map((result) => cap(result, command, from)),
+      )
     }),
   ).pipe(Effect.mapError((e) => (e instanceof CommandFailed ? e : startFailed(command, e))))
 
@@ -129,7 +136,6 @@ export const commandTools = (Object.keys(schemas) as Command[]).sort().map((id) 
   description: descriptions.tools[id],
   inputSchema: z.strictObject({ ...schemas[id].shape, cursor }),
   outputSchema: outputs[id] ?? outputSchema,
-  ...uiMeta(id),
   annotations: {
     title: descriptions.titles[id],
     readOnlyHint: !writesFiles.has(id),

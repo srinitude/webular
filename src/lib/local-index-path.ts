@@ -1,6 +1,6 @@
 // Where the local index lives, plus the error type shared by every local-index file.
 import { BunServices } from '@effect/platform-bun'
-import { Config, ConfigProvider, Data, Effect, FileSystem, Path } from 'effect'
+import { Config, ConfigProvider, Context, Data, Effect, FileSystem, Path } from 'effect'
 
 export class LocalIndexError extends Data.TaggedError('LocalIndexError')<{
   readonly cause: unknown
@@ -11,7 +11,10 @@ export const localIndexPath = Effect.gen(function* () {
   const off = yield* Config.String('WEBULAR_NO_CACHE').pipe(Config.withDefault(''))
   if (off === '1') return ':memory:'
   const path = yield* Path.Path
-  const home = yield* Config.String('HOME').pipe(Config.withDefault('.'))
+  const home = yield* Config.String('HOME').pipe(
+    Config.orElse(() => Config.String('USERPROFILE')),
+    Config.withDefault('.'),
+  )
   const dir = yield* Config.String('WEBULAR_CACHE_DIR').pipe(
     Config.withDefault(path.join(home, '.cache', 'webular')),
   )
@@ -19,10 +22,15 @@ export const localIndexPath = Effect.gen(function* () {
   yield* fs.makeDirectory(dir, { recursive: true })
   return path.join(dir, 'local-index.sqlite')
 }).pipe(
-  // A fresh env snapshot per call: the runtime's default provider copies process.env once.
+  // A caller-supplied provider wins. Otherwise take a fresh env snapshot per call:
+  // the default provider (the Reference's cached value) copies process.env once.
   Effect.provideServiceEffect(
     ConfigProvider.ConfigProvider,
-    Effect.sync(() => ConfigProvider.fromEnv()),
+    Effect.gen(function* () {
+      const p = yield* ConfigProvider.ConfigProvider
+      const fallback = Context.getUnsafe(Context.empty(), ConfigProvider.ConfigProvider)
+      return p === fallback ? ConfigProvider.fromEnv() : p
+    }),
   ),
   Effect.provide(BunServices.layer),
   Effect.mapError((cause) => new LocalIndexError({ cause })),

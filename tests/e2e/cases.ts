@@ -19,7 +19,13 @@ export interface CliCase {
   err?: string
   maxChars: number
   maxMs: number
+  env?: Record<string, string>
 }
+
+// The fixture's search results link to its own 127.0.0.1 pages, and the address
+// guard blocks private links found in search results in every mode. These cases
+// opt in on purpose; the guard itself stays on for every other case.
+const PRIVATE_FIXTURE = { WEBULAR_ALLOW_PRIVATE: '1' }
 
 const ok = (name: string, cmd: CommandName, args: string[], maxChars = 6000, maxMs = 8000) => ({
   name,
@@ -51,6 +57,7 @@ export const CLI_CASES: CliCase[] = [
     '--variant',
   ),
   ok('scrape a page', 'scrape', ['--url', '{origin}/a', '--archive']),
+  ok('scrape past robots.txt', 'scrape', ['--url', '{origin}/a', '--ignore-robots']),
   usage('scrape needs a url', 'scrape', [], 'url'),
   usage('scrape bad renderer', 'scrape', ['{origin}/a', '--render', 'x'], '--render'),
   ok('crawl a site', 'crawl', [
@@ -79,22 +86,28 @@ export const CLI_CASES: CliCase[] = [
     '2',
   ]),
   ok('summarize a url', 'summarize', ['--url', '{origin}/a']),
-  ok(
-    'answer a question',
-    'answer',
-    ['--query', 'alpha', '--sources', '2', '--sentences', '2'],
-    8000,
-    8000,
-  ),
+  {
+    ...ok(
+      'answer a question',
+      'answer',
+      ['--query', 'alpha', '--sources', '2', '--sentences', '2'],
+      8000,
+      8000,
+    ),
+    env: PRIVATE_FIXTURE,
+  },
   ok('answer from given urls', 'answer', ['--query', 'alpha', '--urls', '{origin}/a'], 8000, 8000),
-  ok(
-    'research a topic',
-    'research',
-    ['--topic', 'alpha', '--depth', '1', '--sentences', '2'],
-    8000,
-    8000,
-  ),
-  ok('research short flag', 'research', ['-t', 'beta'], 8000, 8000),
+  {
+    ...ok(
+      'research a topic',
+      'research',
+      ['--topic', 'alpha', '--depth', '1', '--sentences', '2'],
+      8000,
+      8000,
+    ),
+    env: PRIVATE_FIXTURE,
+  },
+  { ...ok('research short flag', 'research', ['-t', 'beta'], 8000, 8000), env: PRIVATE_FIXTURE },
   ok('parse a file', 'parse', ['--file', '{tmp}/note.md']),
   ok('media download', 'media', [
     '--url',

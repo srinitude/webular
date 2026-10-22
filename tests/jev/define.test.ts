@@ -6,6 +6,9 @@ import { expect, test } from 'bun:test'
 import { BunServices } from '@effect/platform-bun'
 import { Effect, FileSystem, Schema } from 'effect'
 import { JEV_MODEL_DEFAULT } from '../../src/lib/jev/client.ts'
+import { decideCropBox } from '../../src/lib/jev/decisions/crop-box.ts'
+import { imageKindDecision } from '../../src/lib/jev/decisions/image-kind.ts'
+import { routeDecision } from '../../src/lib/jev/decisions/image-router.ts'
 import { decisions } from '../../src/lib/jev/decisions.ts'
 import { type DecisionDef, defineDecision } from '../../src/lib/jev/define.ts'
 import { committedSnapshot, violations } from '../../src/lib/jev/docs-guard.ts'
@@ -55,6 +58,9 @@ const DECLARED: ReadonlyArray<Declared> = [
   fetchBlockDecision,
   fetchBrowserDecision,
   nextEvent,
+  routeDecision,
+  decideCropBox,
+  imageKindDecision,
 ]
 const defs = DECLARED.map((d) => d.def)
 const run = <A>(e: Effect.Effect<A, unknown, FileSystem.FileSystem>) =>

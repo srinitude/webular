@@ -45,7 +45,12 @@ const batch = (n: number) =>
   Effect.gen(function* () {
     const fx = yield* startFixture(defaultRoutes)
     const urls = ['/a', '/b', '/c', '/d', '/e'].slice(0, n)
-    return yield* fetchSources(urls.map((p) => ({ title: p, url: `${fx.origin}${p}` })))
+    return yield* fetchSources(
+      urls.map((p) => ({ title: p, url: `${fx.origin}${p}` })),
+      15_000,
+      Number.POSITIVE_INFINITY,
+      true,
+    )
   })
 
 // Runs first, so no earlier parse in this file has warmed a worker.
@@ -99,7 +104,10 @@ describe('parseArticleText — worker pool', () => {
     eff(
       Effect.gen(function* () {
         const pages = Array.from({ length: 9 }, (_, i) => page(i))
-        const texts = yield* Effect.forEach(pages, parseArticleText, { concurrency: 'unbounded' })
+        const parsed = yield* Effect.forEach(pages, (html) => parseArticleText(html), {
+          concurrency: 'unbounded',
+        })
+        const texts = parsed.map((p) => p.text)
         expect(texts).toEqual(pages.map((html) => htmlToArticle(html).text))
         expect(texts[3]).toContain('Deterministic pool body 3')
       }),

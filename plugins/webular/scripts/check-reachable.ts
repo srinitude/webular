@@ -1,15 +1,6 @@
 // Reachable: every file under a skill folder is linked from its SKILL.md, directly or through a linked file.
 import { Effect } from 'effect'
-import { files, isExternal, links, pluginDir, read, rel, run } from './lib.ts'
-
-const resolve = (from: string, target: string) => {
-  const parts = from.split('/').slice(0, -1)
-  for (const seg of target.split('/')) {
-    if (seg === '..') parts.pop()
-    else if (seg !== '.' && seg !== '') parts.push(seg)
-  }
-  return parts.join('/')
-}
+import { files, isExternal, links, pluginDir, read, rel, resolve, run } from './lib.ts'
 
 const reachable = (skillDir: string, all: ReadonlySet<string>) =>
   Effect.gen(function* () {
@@ -41,7 +32,9 @@ if (import.meta.main)
       const out: string[] = []
       for (const dir of dirs) {
         const seen = yield* reachable(dir, set)
-        for (const f of all.filter((f) => f.startsWith(`${dir}/`) && !seen.has(f))) {
+        const stray = (f: string) =>
+          f.startsWith(`${dir}/`) && !seen.has(f) && !/\/(AGENTS|CLAUDE)\.md$/.test(f)
+        for (const f of all.filter(stray)) {
           out.push(`${rel(f)}:1: not linked from ${rel(dir)}/SKILL.md`)
         }
       }

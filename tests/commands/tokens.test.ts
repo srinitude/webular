@@ -8,7 +8,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { Effect, Schema } from 'effect'
 import { estimateTokens, PAGE_MAX_CHARS } from '../../src/core/output.ts'
 import { registerAll } from '../../src/tools/web.ts'
-import { runCli } from '../_support/cli.ts'
+import { runCli, runInProcess } from '../_support/cli.ts'
 import { eff } from '../_support/run.ts'
 
 // toolsList: the four web.* tools fit in 520 tokens. The 18 command tools from
@@ -17,7 +17,8 @@ import { eff } from '../_support/run.ts'
 // machine enum, events array, paging fields) measures 152 tokens by itself, so
 // the list measures about 4,537. The act tool's Cua goal input and description
 // bring it to a measured 4,709; the jev tool and answer urls add about 300, and
-// trimmed tool descriptions bring the list to a measured 4,841 under 4,850.
+// trimmed tool descriptions plus the search `errors` and monitor `archivedFrom`
+// output fields bring the list to a measured 4,848 under 4,850.
 const BUDGET = { toolsList: 4850, page: estimateTokens('x'.repeat(PAGE_MAX_CHARS)), error: 80 }
 const parseJson = Schema.decodeUnknownSync(Schema.fromJsonString(Schema.Unknown))
 const parseRec = (text: string): Record<string, unknown> =>
@@ -120,6 +121,8 @@ describe('MCP — compact, paged, deterministic results', () => {
 })
 
 const cli = (args: string[]) => runCli('/bin/webular.ts', args)
+// The diagram command in this process; the piped --json case above is the real-process smoke run.
+const diagram = (args: string[]) => runInProcess('src/commands/diagram.ts', args)
 
 describe('CLI — piped output is compact, sorted, colorless, repeatable', () => {
   test(
@@ -144,9 +147,9 @@ describe('CLI — piped output is compact, sorted, colorless, repeatable', () =>
     '--select and --ndjson',
     eff(
       Effect.gen(function* () {
-        const fields = yield* cli(['diagram', '--select', 'count'])
+        const fields = yield* diagram(['--select', 'count'])
         expect(Object.keys(parseRec(fields.out))).toEqual(['count'])
-        const nd = yield* cli(['diagram', '--ndjson'])
+        const nd = yield* diagram(['--ndjson'])
         const lines = nd.out.trim().split('\n')
         expect(lines.length).toBeGreaterThan(1)
         for (const line of lines) expect(typeof parseJson(line)).toBe('string')

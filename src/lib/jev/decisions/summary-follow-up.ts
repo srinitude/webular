@@ -1,14 +1,15 @@
-// summary follow-up: after summarize.lead, one summarize.core call per sentence swaps
-// sure filler picks for sure core sentences.
+// summary follow-up: after summarize.lead, one summarize.core call per pool sentence
+// swaps sure filler picks for sure core sentences.
 import { Effect } from 'effect'
 import { JEV_CONCURRENCY } from '../client.ts'
 import {
   allSentences,
   coreDecision,
-  MAX_ITEMS,
   type SummaryInput,
+  type SummaryPick,
   type Verdict,
 } from './summarize.ts'
+import { candidatePool } from './summarize-pool.ts'
 
 // Picks Jev surely calls filler give way to unpicked sentences it surely calls core;
 // the picks stay when there are too few replacements.
@@ -19,12 +20,22 @@ export const followUp = (picks: ReadonlyArray<number>, verdicts: ReadonlyArray<V
   return out.length === picks.length ? out : picks
 }
 
-export const summaryFollowUp = (input: SummaryInput, picks: ReadonlyArray<number>) => {
+// Only pool sentences are asked; every other sentence stays 'unsure'. The lead stays
+// only while it is still picked.
+export const summaryFollowUp = (input: SummaryInput, { picks, lead }: SummaryPick) => {
   const n = allSentences(input.text).length
-  if (n > MAX_ITEMS || picks.length >= n) return Effect.succeed(picks)
-  return Effect.forEach(
-    Array.from({ length: n }, (_, i) => i),
-    (i) => coreDecision({ text: input.text, i }),
-    { concurrency: JEV_CONCURRENCY },
-  ).pipe(Effect.map((verdicts) => followUp(picks, verdicts)))
+  if (picks.length >= n) return Effect.succeed<SummaryPick>({ picks, lead })
+  const pool = candidatePool(input.text, input.topN, undefined, picks)
+  return Effect.forEach(pool, (i) => coreDecision({ text: input.text, i, topN: input.topN }), {
+    concurrency: JEV_CONCURRENCY,
+  }).pipe(
+    Effect.map((got) => {
+      const at = new Map(pool.map((i, k) => [i, got[k] ?? 'unsure']))
+      const out = followUp(
+        picks,
+        Array.from({ length: n }, (_, i) => at.get(i) ?? 'unsure'),
+      )
+      return { picks: out, lead: lead !== undefined && out.includes(lead) ? lead : undefined }
+    }),
+  )
 }

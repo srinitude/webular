@@ -1,24 +1,22 @@
 // Bounded disk cache for text GETs: ETag / Last-Modified revalidation,
-// atomic temp-then-rename writes, oldest-last-use-first eviction under an
-// entry and a byte bound. Cache I/O failures never fail the fetch: they only
-// skip the cache.
+// max-age / Expires freshness (a fresh entry makes no request), atomic
+// temp-then-rename writes, oldest-last-use-first eviction under an entry and a
+// byte bound, and removal of stale temp files. Cache I/O failures never fail
+// the fetch: they only skip the cache.
+
 import { Clock, Config, Effect, FileSystem, Option, Path, Random, Schema } from 'effect'
+import { Entry, freshen, toEntry } from './cache-entry.ts'
 
 export interface CacheOptions {
   cache?: boolean
 }
 
-const Entry = Schema.Struct({
-  body: Schema.String,
-  etag: Schema.NullOr(Schema.String),
-  lastModified: Schema.NullOr(Schema.String),
-  contentType: Schema.NullOr(Schema.String),
-})
-type Entry = typeof Entry.Type
 const decodeEntry = Schema.decodeUnknownEffect(Schema.fromJsonString(Entry))
 
 const DEFAULT_MAX_BYTES = 64 * 1024 * 1024
 const DEFAULT_MAX_ENTRIES = 4096
+// A live write holds its temp file for milliseconds; an older one is a dead writer's.
+const STALE_TMP_MS = 10 * 60 * 1000
 
 interface Limits {
   bytes: number
@@ -83,16 +81,38 @@ const entryInfo = (file: string) =>
     return { file, size: Number(info.size), mtime }
   })
 
+// Temp files from a dead writer never reach `.json`; sweep the old ones. A stat
+// or remove that fails (a live writer renamed it first) is not an error.
+const sweepTmp = (dir: string, names: string[], now: number) =>
+  Effect.gen(function* () {
+    const fs = yield* FileSystem.FileSystem
+    const path = yield* Path.Path
+    yield* Effect.forEach(
+      names.filter((n) => n.endsWith('.tmp')),
+      (n) =>
+        entryInfo(path.join(dir, n)).pipe(
+          Effect.flatMap((f) =>
+            now - f.mtime > STALE_TMP_MS ? fs.remove(f.file, { force: true }) : Effect.void,
+          ),
+          Effect.ignore,
+        ),
+      { concurrency: 8, discard: true },
+    )
+  })
+
 // mtime is the last use: a write or a 304 hit sets it, so the oldest goes first.
 const evict = (dir: string, max: Limits) =>
   Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem
     const path = yield* Path.Path
-    const names = (yield* fs.readDirectory(dir)).filter((n) => n.endsWith('.json'))
+    const all = yield* fs.readDirectory(dir)
+    yield* sweepTmp(dir, all, yield* Clock.currentTimeMillis)
+    const names = all.filter((n) => n.endsWith('.json'))
     const files = yield* Effect.forEach(names, (n) => entryInfo(path.join(dir, n)), {
       concurrency: 8,
     })
-    files.sort((a, b) => a.mtime - b.mtime)
+    // Ties leave in name order, not the file system's directory order.
+    files.sort((a, b) => a.mtime - b.mtime || (a.file < b.file ? -1 : a.file > b.file ? 1 : 0))
     let total = files.reduce((sum, f) => sum + f.size, 0)
     let count = files.length
     for (const f of files) {
@@ -122,13 +142,6 @@ const touch = (file: string) =>
     yield* fs.utimes(file, now, now)
   }).pipe(Effect.ignore)
 
-const toEntry = (body: string, h: Headers): Entry => ({
-  body,
-  etag: h.get('etag'),
-  lastModified: h.get('last-modified'),
-  contentType: h.get('content-type'),
-})
-
 // GET text through the disk cache. `get` performs the request with the extra
 // validator headers; `read` turns a response into text (and rejects bad ones).
 export const cachedGetText = Effect.fn('cachedGetText')(function* <E>(
@@ -141,14 +154,19 @@ export const cachedGetText = Effect.fn('cachedGetText')(function* <E>(
   const bypass = off || opts.cache === false
   const file = (yield* Path.Path).join(dir, `${keyOf(url)}.json`)
   const entry = bypass ? Option.none<Entry>() : yield* load(file)
+  const now = yield* Clock.currentTimeMillis
+  if (Option.isSome(entry) && (entry.value.freshUntil ?? 0) > now) {
+    yield* touch(file)
+    return entry.value.body
+  }
   const res = yield* get(validators(entry))
   const stream = res.body
   if (res.status === 304 && Option.isSome(entry)) {
     if (stream) yield* Effect.ignore(Effect.tryPromise(() => stream.cancel()))
-    yield* touch(file)
+    yield* store(dir, file, freshen(entry.value, res.headers, now), limits)
     return entry.value.body
   }
   const body = yield* read(res)
-  if (!bypass && storable(res)) yield* store(dir, file, toEntry(body, res.headers), limits)
+  if (!bypass && storable(res)) yield* store(dir, file, toEntry(body, res.headers, now), limits)
   return body
 })

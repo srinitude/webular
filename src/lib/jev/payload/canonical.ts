@@ -52,10 +52,18 @@ export const purpose = (
   return Object.freeze(p)
 }
 
+// At most `n` chars, never ending inside a surrogate pair, and well-formed:
+// a lone surrogate (often a raw upstream .slice) becomes U+FFFD, as Jev takes only UTF-8.
+const cut = (s: string, n: number): string => {
+  const t = s.length > n ? s.slice(0, n) : s
+  const last = t.charCodeAt(t.length - 1)
+  return (last >= 0xd800 && last <= 0xdbff ? t.slice(0, -1) : t).toWellFormed()
+}
+
 // One JSON string, cut to `max` chars and to what is left of the byte budget.
 const str = (s: string, max: number, b: Budget): string => {
-  let j = JSON.stringify(s.length > max ? s.slice(0, max) : s)
-  if (j.length > b.bytes) j = JSON.stringify(s.slice(0, Math.max(0, Math.floor((b.bytes - 2) / 6))))
+  let j = JSON.stringify(cut(s, max))
+  if (j.length > b.bytes) j = JSON.stringify(cut(s, Math.max(0, Math.floor((b.bytes - 2) / 6))))
   b.bytes -= j.length
   return j
 }
@@ -74,7 +82,7 @@ const firstKeys = (o: object, max: number): string[] => {
   return keys
 }
 
-const write = (v: unknown, depth: number, b: Budget, out: string[]): void => {
+const write = (v: unknown, depth: number, b: Budget, out: string[], keep = false): void => {
   const pre = typeof v === 'object' && v !== null ? (v as Interned)[INTERNED] : undefined
   if (pre !== undefined) return void out.push(pre)
   if (--b.nodes < 0 || depth > CAPS.depth || b.bytes <= 2) return void out.push('null')
@@ -91,18 +99,21 @@ const write = (v: unknown, depth: number, b: Budget, out: string[]): void => {
     }
     return void out.push(']')
   }
-  // Keys sort, so equal data built in another order gives equal bytes.
-  const keys = firstKeys(v, b.fields).sort()
+  // Keys sort, so equal data built in another order gives equal bytes. A Choice's
+  // `criteria` keeps its order: that is the option order Jev reads, and the
+  // both-orders position check (menu.ts bothOrders) depends on it.
+  const keys = keep ? firstKeys(v, b.fields) : firstKeys(v, b.fields).sort()
+  const choice = (v as { type?: unknown }).type === 'choice'
   out.push('{')
   keys.forEach((k, i) => {
     if (i) out.push(',')
     out.push(str(k, CAPS.keyChars, b), ':')
-    write((v as Record<string, unknown>)[k], depth + 1, b, out)
+    write((v as Record<string, unknown>)[k], depth + 1, b, out, choice && k === 'criteria')
   })
   out.push('}')
 }
 
-// Canonical bytes of one value: sorted keys, finite numbers, capped lists and
+// Canonical bytes of one value: sorted keys (but a Choice's option order), finite numbers, capped lists and
 // strings. The cache key is the hash of these bytes, and they are what is posted.
 export const canonical = (
   v: unknown,
@@ -114,7 +125,7 @@ export const canonical = (
 }
 
 interface JevQuestionShape {
-  readonly type: 'noul' | 'choice' | 'score'
+  readonly type: 'noul' | 'choice' | 'score' | 'box'
   readonly instructions: unknown
   readonly criteria?: unknown
 }
@@ -126,11 +137,14 @@ export const requestBytes = (
   model: string,
   state: unknown,
   questions: Record<string, JevQuestionShape>,
+  assets?: object,
 ): string => {
   const b = { bytes: CAPS.bytes, nodes: CAPS.nodes, fields: CAPS.fields }
   const s = canonical(state, b)
   const q = canonical(questions, { ...b, fields: CAPS.options })
-  return `{"model":${JSON.stringify(model)},"state":${s},"questions":${q}}`
+  // Assets go in raw: base64 is far past the string cap, and it never counts against the byte budget.
+  const a = assets ? `,"assets":${JSON.stringify(assets)}` : ''
+  return `{"model":${JSON.stringify(model)},"state":${s},"questions":${q}${a}}`
 }
 
 // 64-bit wyhash of the canonical bytes: the cache key.

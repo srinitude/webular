@@ -3,10 +3,10 @@
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
-import { fetchText } from '../core/http.ts'
 import { htmlToArticle } from '../lib/html.ts'
 import { decisions } from '../lib/jev/decisions.ts'
 import { decisionStep } from '../lib/jev/steps.ts'
+import { fetchTextObeyingRobots } from '../lib/robots-gate.ts'
 import { compareAndStore } from '../lib/snapshot.ts'
 import { freeSourceFallback } from '../lib/sources/registry.ts'
 import { stepRuntime } from './runtime.ts'
@@ -24,6 +24,8 @@ const monitorOutput = z.object({
   changeStatus: z.enum(['new', 'same', 'changed']),
   diff: z.string().optional(),
   matters: z.boolean().optional(),
+  // Set when the live page failed and an archived copy was read instead.
+  archivedFrom: z.string().optional(),
 })
 
 const compared = monitorOutput.omit({ matters: true }).extend({ watchFor: z.string() })
@@ -31,14 +33,22 @@ const compared = monitorOutput.omit({ matters: true }).extend({ watchFor: z.stri
 const MAX_SNAPSHOTS = 3
 
 // The page itself; when it fails to load, the closest archived snapshots the
-// free sources list for the url, in rank order. With none, the page's own
-// error stands.
+// free sources list for the url, in rank order, and `archivedFrom` names the
+// copy read. With none, the page's own error stands.
 const pageHtml = (url: string, timeoutMs: number | undefined) =>
-  fetchText(url, { timeoutMs }).pipe(
+  fetchTextObeyingRobots(url, { timeoutMs }).pipe(
+    Effect.map((html) => ({ html, archivedFrom: undefined as string | undefined })),
     Effect.catch((err) =>
       freeSourceFallback('monitor', url, MAX_SNAPSHOTS).pipe(
         Effect.flatMap(({ results }) =>
-          Effect.firstSuccessOf(results.map((hit) => fetchText(hit.url, { timeoutMs }))),
+          Effect.firstSuccessOf(
+            results.map((hit) =>
+              Effect.map(fetchTextObeyingRobots(hit.url, { timeoutMs }), (html) => ({
+                html,
+                archivedFrom: hit.url as string | undefined,
+              })),
+            ),
+          ),
         ),
         Effect.mapError(() => err),
       ),
@@ -49,14 +59,20 @@ const fetchStep = createStep({
   id: 'fetch',
   inputSchema: monitorInput,
   outputSchema: compared,
-  execute: ({ inputData }) =>
+  execute: ({ inputData, abortSignal }) =>
     stepRuntime.runPromise(
       pageHtml(inputData.url, inputData.timeoutMs).pipe(
-        Effect.flatMap((html) =>
-          compareAndStore(inputData.dbPath, inputData.url, htmlToArticle(html).text),
+        Effect.flatMap(({ html, archivedFrom }) =>
+          compareAndStore(inputData.dbPath, inputData.url, htmlToArticle(html).text).pipe(
+            Effect.map((r) => ({
+              ...r,
+              ...(archivedFrom && { archivedFrom }),
+              watchFor: inputData.watchFor ?? '',
+            })),
+          ),
         ),
-        Effect.map((r) => ({ ...r, watchFor: inputData.watchFor ?? '' })),
       ),
+      { signal: abortSignal },
     ),
 })
 
@@ -77,6 +93,7 @@ export const monitorWorkflow = createWorkflow({
   id: 'monitor',
   inputSchema: monitorInput,
   outputSchema: monitorOutput,
+  options: { shouldPersistSnapshot: () => false },
 })
   .then(fetchStep)
   .then(snapshotStep)

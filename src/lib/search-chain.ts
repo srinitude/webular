@@ -1,14 +1,15 @@
-// Search across keyless sources. Web asks its free APIs at once, each under
-// SOURCE_TIMEOUT_MS, and fuses their lists (plus variants and a local index list)
-// by RRF + the official-domain signal. DuckDuckGo HTML runs only when no free API
-// had hits, then the free sources answer. Crossref and OpenAlex: scholarly.ts.
+// Search across keyless sources. Web asks its free APIs at once, each under SOURCE_TIMEOUT_MS,
+// and fuses their lists (plus variants and a local index list) by class-weighted RRF + the
+// official-domain signal. DuckDuckGo HTML runs only when no free API had hits, then the
+// free sources answer. Crossref and OpenAlex: scholarly.ts.
 import { Clock, Config, Deferred, Effect } from 'effect'
 import { logErr } from '../core/output.ts'
 import { crossref, npm, openalex } from './scholarly.ts'
-import { scoreHits, WEAK_SCORE, webSearch } from './search.ts'
+import { lexicalRerank, scoreHits, WEAK_SCORE, webSearch } from './search.ts'
 import { secondHop } from './search-hop.ts'
 import { pickSources, pickSourcesJudged } from './search-intent.ts'
-import { MAX_VARIANTS } from './search-source-names.ts'
+import { type Constraints, constraintsOf, matchesConstraints } from './search-query.ts'
+import { entityVariant, queriesFor } from './search-source-names.ts'
 import {
   type Hit,
   querySource,
@@ -17,24 +18,29 @@ import {
   type SourceStatus,
   traceLine,
 } from './search-source-run.ts'
+import { listWeights } from './search-source-score.ts'
+import { isNavigational, withOfficial } from './sources/official-sites.ts'
 import { type FreeSource, freeSourceFallback } from './sources/registry.ts'
+import { githubSearch, marginalia } from './sources/web.ts'
 import { type SearchSource, SOURCE_TIMEOUT_MS, sourceSearch } from './sources-search.ts'
 
-// One DuckDuckGo request returns its whole page whatever the limit; fusion
-// ranks the full page and the caller's slice keeps the best hits.
+// One DuckDuckGo request returns a whole page; fusion ranks it and the caller slices.
 const WEB_PAGE = 30
+// Navigational queries: the official sites of this many top Wikipedia articles.
+const OFFICIAL_ARTICLES = 5
 
 const one: SourceRunner = (source, query, limit) => {
   if (source === 'crossref') return crossref(query, limit)
   if (source === 'openalex') return openalex(query, limit)
   if (source === 'npm') return npm(query, limit)
+  if (source === 'marginalia') return marginalia(query, limit)
+  if (source === 'github-search') return githubSearch(query, limit)
   if (source === 'web') return webSearch(query, WEB_PAGE)
   return sourceSearch(source, query, limit)
 }
 
-// Whole-search budget: the free-API round and the scraped fallback each stop
-// at SOURCE_TIMEOUT_MS, so this only trips if something ignores its timeout.
-// A caller can pass a shorter deadlineMs (answer mode does).
+// Whole-search budget: each round stops at SOURCE_TIMEOUT_MS, so this trips only when
+// something ignores its timeout. A caller may pass a shorter deadlineMs (answer mode does).
 const SEARCH_DEADLINE_MS = 3 * SOURCE_TIMEOUT_MS
 
 interface SearchMeta {
@@ -56,30 +62,41 @@ export interface SearchOptions {
   judge?: ((query: string) => Effect.Effect<SearchSource[]>) | undefined
 }
 
+// WEBULAR_DETERMINISTIC=1: no settle cutoff, so source timing never changes the hits.
+const deterministic = Config.String('WEBULAR_DETERMINISTIC').pipe(
+  Config.withDefault(''),
+  Effect.map((v) => v === '1'),
+  Effect.orDie,
+)
+const graceAfter = (hit: Deferred.Deferred<void>) =>
+  Effect.andThen(Deferred.await(hit), Effect.sleep(SETTLE_GRACE_MS))
+
 const timedOut = () =>
   Effect.succeed({
     results: [] as Hit[],
     meta: { sources: {}, degraded: true, weak: true } as SearchMeta,
   })
 
-// web: the keyword pick starts at once; the judge's pick adds the sources it
-// names when it lands, or is dropped at the settle cutoff. DuckDuckGo runs only
-// if no source had hits. npm the keyword pick chose is never cut by the grace
-// (official homepages); sources the judge adds late take the settle cutoff.
+// web: the keyword pick starts at once; the judge's pick joins when it lands or is
+// dropped at the settle cutoff; DuckDuckGo runs only if no source had hits. Keyword
+// npm and navigational Wikipedia (it waits on Wikidata) stop only at their own cap.
+const outlastsGrace = (s: SearchSource, query: string, keyword: ReadonlyArray<SearchSource>) =>
+  (s === 'npm' && keyword.includes(s)) || (s === 'wikipedia' && isNavigational(query))
 const fanOut = Effect.fn('fanOut')(function* (
   source: SearchSource,
   query: string,
   limit: number,
   opts: SearchOptions,
 ) {
-  const queries = [query, ...(opts.variants ?? []).slice(0, MAX_VARIANTS)]
-  const runSource = opts.runSource ?? one
+  const queries = queriesFor(query, opts.variants)
+  const runSource =
+    opts.runSource ?? (isNavigational(query) ? withOfficial(query, one, OFFICIAL_ARTICLES) : one)
   const hit = yield* Deferred.make<void>()
-  const settle = { hit, cutoff: Effect.andThen(Deferred.await(hit), Effect.sleep(SETTLE_GRACE_MS)) }
   const uncut = { hit, cutoff: Effect.never }
+  const settle = (yield* deterministic) ? uncut : { hit, cutoff: graceAfter(hit) }
   const keyword = source === 'web' ? pickSources(query) : [source]
   const query1 = (s: SearchSource) =>
-    querySource(s, queries, limit, runSource, s === 'npm' && keyword.includes(s) ? uncut : settle)
+    querySource(s, queries, limit, runSource, outlastsGrace(s, query, keyword) ? uncut : settle)
   const run = (list: ReadonlyArray<SearchSource>) =>
     Effect.forEach(list, query1, { concurrency: Math.max(1, list.length) })
   const judge =
@@ -100,7 +117,7 @@ const searchOnce = Effect.fn('searchOnce')(function* (
   source: SearchSource,
   query: string,
   limit: number,
-  opts: SearchOptions = {},
+  opts: SearchOptions & { c: Constraints },
 ) {
   const start = yield* Clock.currentTimeMillis
   const traced = yield* Config.String('WEBULAR_TRACE').pipe(Config.withDefault(''), Effect.orDie)
@@ -109,14 +126,19 @@ const searchOnce = Effect.fn('searchOnce')(function* (
   const scored = scoreHits(
     [...ran.flatMap((r) => r.lists), ...(opts.local ? [opts.local] : [])],
     query,
-  )
+    ran.flatMap(listWeights),
+  ).filter((e) => matchesConstraints(e.hit, opts.c))
   const ok = ran.filter((r) => r.status === 'ok').length
   const meta: SearchMeta = {
     sources: Object.fromEntries(ran.map((r) => [r.source, { status: r.status, ms: r.ms }])),
     degraded: ok * 2 < ran.length,
     weak: (scored[0]?.score ?? 0) < WEAK_SCORE,
   }
-  return { results: scored.slice(0, limit).map((e) => e.hit), meta }
+  const hits = scored.map((e) => e.hit)
+  // Web only (other sources keep their own order), never under the answer hop: BM25 over
+  // a multi-hop question lifts pages sharing its bridge words over the hop's fused order.
+  const rerank = source === 'web' && !opts.hop
+  return { results: (rerank ? lexicalRerank(hits, query) : hits).slice(0, limit), meta }
 })
 
 interface Found {
@@ -125,16 +147,17 @@ interface Found {
 }
 type Searched = Found & { source?: FreeSource }
 
+const hitFields = ({ title, url, description }: Hit) => ({ title, url, description })
 // Nothing found, DuckDuckGo included: the free sources answer and `source`
 // names the one that did. If they all fail, the empty round stands.
-const withFreeSources = (query: string, limit: number, found: Found): Effect.Effect<Searched> =>
+const withFreeSources = (query: string, limit: number, found: Found, c: Constraints) =>
   found.results.length > 0
     ? Effect.succeed(found)
     : freeSourceFallback('search', query, limit).pipe(
         Effect.map(({ source, results }) => ({
           ...found,
           source,
-          results: results.map(({ title, url, description }) => ({ title, url, description })),
+          results: results.filter((h) => matchesConstraints(h, c)).map(hitFields),
         })),
         Effect.catch(() => Effect.succeed(found)),
       )
@@ -150,20 +173,27 @@ export const searchEffect = Effect.fn('search')(function* (
 ) {
   const deadline = opts.deadlineMs ?? SEARCH_DEADLINE_MS
   const start = yield* Clock.currentTimeMillis
-  const first = yield* searchOnce(source, query, limit, opts).pipe(
-    Effect.timeoutOrElse({ duration: deadline, orElse: timedOut }),
-  )
+  const c = yield* constraintsOf([query, ...(opts.variants ?? [])])
+  const once = { ...opts, c }
+  // Deterministic mode: no wall-clock cut; each source still stops at its own cap.
+  const det = yield* deterministic
+  const cut =
+    <A>(duration: number, orElse: () => Effect.Effect<A>) =>
+    (self: Effect.Effect<A>) =>
+      det ? self : Effect.timeoutOrElse(self, { duration, orElse })
+  const first = yield* searchOnce(source, query, limit, once).pipe(cut(deadline, timedOut))
   const free = (found: Found): Effect.Effect<Searched> =>
     source === 'web' && !opts.runSource
-      ? withFreeSources(query, limit, found)
+      ? withFreeSources(query, limit, found, c)
       : Effect.succeed(found)
   if (!opts.hop || source !== 'web') return yield* free(first)
   const left = deadline - ((yield* Clock.currentTimeMillis) - start)
-  const round = (q: string, n: number) => searchOnce('web', q, n, { runSource: opts.runSource })
+  const round = (q: string, n: number) =>
+    searchOnce('web', q, n, { runSource: opts.runSource, c, hop: true })
   return yield* secondHop(query, limit, first, round).pipe(
-    Effect.timeoutOrElse({ duration: Math.max(0, left), orElse: () => Effect.succeed(first) }),
+    cut(Math.max(0, left), () => Effect.succeed(first)),
     Effect.flatMap(free),
   )
 })
 
-export { pickSources, SETTLE_GRACE_MS, type SourceRunner }
+export { entityVariant, pickSources, SETTLE_GRACE_MS, type SourceRunner }

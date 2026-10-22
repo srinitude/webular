@@ -1,0 +1,32 @@
+{
+  "key": {
+    "provider": "beta",
+    "taskId": "t3",
+    "run": 0,
+    "commit": "2b4d7eb",
+    "settingsHash": "d1",
+    "date": "2026-10-21"
+  },
+  "family": "search.known-item",
+  "round": "2026-10-21-r0",
+  "settings": "default",
+  "phase": "warm",
+  "query": "what is t3",
+  "requestBody": "{\"query\":\"what is t3\",\"limit\":3,\"mode\":\"default\"}",
+  "output": "https://example.com/t3\nhttps://example.org/t3",
+  "status": "ok",
+  "latencyMs": 180,
+  "cached": false,
+  "loadAvg": 1.5,
+  "cpuMs": 12,
+  "calls": [
+    {
+      "host": "api.example.com",
+      "kind": "search",
+      "bytes": 2048,
+      "usd": 0.001,
+      "priceSource": "https://example.com/pricing",
+      "priceDate": "2026-10-21"
+    }
+  ]
+}

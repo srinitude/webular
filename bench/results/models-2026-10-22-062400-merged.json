@@ -1,0 +1,2535 @@
+{
+  "date": "2026-10-22",
+  "seed": "arm-order",
+  "rates": "https://platform.claude.com/docs/en/about-claude/pricing (read 2026-10-21)",
+  "rescoredFrom": [
+    "models-2026-10-22-haiku-chunk01.json",
+    "models-2026-10-22-haiku-chunk02.json",
+    "models-2026-10-22-sonnet-chunk1.json",
+    "models-2026-10-22-sonnet-chunk2.json",
+    "models-opus-chunkA-2026-10-22.json"
+  ],
+  "runs": [
+    {
+      "model": "claude-haiku-5-5",
+      "surface": "peer",
+      "provider": "exa",
+      "task": "peers.factual.vesta-discoverer",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "c6a44522d15caea2",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__exa__web_search_exa",
+          "input": {
+            "query": "astronomer who discovered the asteroid 4 Vesta in 1807",
+            "numResults": 5
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 152,
+      "cacheReadTokens": 7741,
+      "cacheWriteTokens": 8113,
+      "wallMs": 27840,
+      "costUsd": 0.001168,
+      "raw": "bench/results/raw/models-2026-10-22-053726-17370/claude-haiku-5-5-peer-exa-peers.factual.vesta-discoverer.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-haiku-5-5",
+      "surface": "peer",
+      "provider": "tavily",
+      "task": "peers.factual.vesta-discoverer",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "c6a44522d15caea2",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__tavily__tavily_search",
+          "input": {
+            "query": "Who discovered the asteroid 4 Vesta in 1807?",
+            "max_results": 5
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 149,
+      "cacheReadTokens": 12059,
+      "cacheWriteTokens": 7364,
+      "wallMs": 20386,
+      "costUsd": 0.001116,
+      "raw": "bench/results/raw/models-2026-10-22-053726-17370/claude-haiku-5-5-peer-tavily-peers.factual.vesta-discoverer.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-haiku-5-5",
+      "surface": "mcp",
+      "provider": "webular-jev-off",
+      "task": "peers.factual.vesta-discoverer",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "c6a44522d15caea2",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__webular__answer",
+          "input": {
+            "query": "Which astronomer discovered the asteroid 4 Vesta in 1807?"
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 213,
+      "cacheReadTokens": 20216,
+      "cacheWriteTokens": 5092,
+      "wallMs": 52016,
+      "costUsd": 0.000946,
+      "raw": "bench/results/raw/models-2026-10-22-053726-17370/claude-haiku-5-5-mcp-webular-jev-off-peers.factual.vesta-discoverer.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-haiku-5-5",
+      "surface": "mcp",
+      "provider": "webular-jev-on",
+      "task": "peers.factual.vesta-discoverer",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "c6a44522d15caea2",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__webular__answer",
+          "input": {
+            "query": "Which astronomer discovered the asteroid 4 Vesta in 1807?",
+            "sources": 2
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 245,
+      "cacheReadTokens": 24046,
+      "cacheWriteTokens": 1228,
+      "wallMs": 24573,
+      "costUsd": 0.000517,
+      "raw": "bench/results/raw/models-2026-10-22-053726-17370/claude-haiku-5-5-mcp-webular-jev-on-peers.factual.vesta-discoverer.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-haiku-5-5",
+      "surface": "peer",
+      "provider": "perplexity",
+      "task": "peers.factual.vesta-discoverer",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "c6a44522d15caea2",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__perplexity__perplexity_ask",
+          "input": {
+            "messages": [
+              {
+                "role": "user",
+                "content": "Which astronomer discovered the asteroid 4 Vesta in 1807? Answer in one line."
+              }
+            ]
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 160,
+      "cacheReadTokens": 11361,
+      "cacheWriteTokens": 5242,
+      "wallMs": 18925,
+      "costUsd": 0.000849,
+      "raw": "bench/results/raw/models-2026-10-22-053726-17370/claude-haiku-5-5-peer-perplexity-peers.factual.vesta-discoverer.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-haiku-5-5",
+      "surface": "peer",
+      "provider": "firecrawl",
+      "task": "peers.factual.vesta-discoverer",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "c6a44522d15caea2",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__firecrawl__firecrawl_search",
+          "input": {
+            "query": "4 Vesta asteroid discovered 1807 astronomer",
+            "limit": 3
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 158,
+      "cacheReadTokens": 56222,
+      "cacheWriteTokens": 4546,
+      "wallMs": 24701,
+      "costUsd": 0.00121,
+      "raw": "bench/results/raw/models-2026-10-22-053726-17370/claude-haiku-5-5-peer-firecrawl-peers.factual.vesta-discoverer.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-haiku-5-5",
+      "surface": "peer",
+      "provider": "perplexity",
+      "task": "peers.multi-hop.master-margarita-author-birth-country",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "1cb0e1048ab9c29c",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__perplexity__perplexity_ask",
+          "input": {
+            "messages": [
+              {
+                "role": "user",
+                "content": "The author of the novel The Master and Margarita was born in a city that is today the capital of which country? Reply in one line with the answer."
+              }
+            ]
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 232,
+      "cacheReadTokens": 13668,
+      "cacheWriteTokens": 2978,
+      "wallMs": 20782,
+      "costUsd": 0.000625,
+      "raw": "bench/results/raw/models-2026-10-22-053726-17370/claude-haiku-5-5-peer-perplexity-peers.multi-hop.master-margarita-author-birth-country.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-haiku-5-5",
+      "surface": "peer",
+      "provider": "tavily",
+      "task": "peers.multi-hop.master-margarita-author-birth-country",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "1cb0e1048ab9c29c",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__tavily__tavily_search",
+          "input": {
+            "query": "Mikhail Bulgakov birthplace city born Master and Margarita author",
+            "max_results": 5
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 241,
+      "cacheReadTokens": 14366,
+      "cacheWriteTokens": 5544,
+      "wallMs": 19705,
+      "costUsd": 0.000958,
+      "raw": "bench/results/raw/models-2026-10-22-053726-17370/claude-haiku-5-5-peer-tavily-peers.multi-hop.master-margarita-author-birth-country.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-haiku-5-5",
+      "surface": "peer",
+      "provider": "exa",
+      "task": "peers.multi-hop.master-margarita-author-birth-country",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "1cb0e1048ab9c29c",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__exa__web_search_exa",
+          "input": {
+            "query": "Mikhail Bulgakov author of The Master and Margarita birthplace city",
+            "numResults": 3
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 257,
+      "cacheReadTokens": 10057,
+      "cacheWriteTokens": 4885,
+      "wallMs": 27181,
+      "costUsd": 0.00084,
+      "raw": "bench/results/raw/models-2026-10-22-053726-17370/claude-haiku-5-5-peer-exa-peers.multi-hop.master-margarita-author-birth-country.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-haiku-5-5",
+      "surface": "mcp",
+      "provider": "webular-jev-off",
+      "task": "peers.multi-hop.master-margarita-author-birth-country",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "1cb0e1048ab9c29c",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__webular__answer",
+          "input": {
+            "query": "Where was Mikhail Bulgakov, author of The Master and Margarita, born, and what country's capital is that city today?",
+            "sources": 3
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 430,
+      "cacheReadTokens": 22523,
+      "cacheWriteTokens": 2882,
+      "wallMs": 81679,
+      "costUsd": 0.000801,
+      "raw": "bench/results/raw/models-2026-10-22-053726-17370/claude-haiku-5-5-mcp-webular-jev-off-peers.multi-hop.master-margarita-author-birth-country.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-haiku-5-5",
+      "surface": "peer",
+      "provider": "firecrawl",
+      "task": "peers.multi-hop.master-margarita-author-birth-country",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "1cb0e1048ab9c29c",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__firecrawl__firecrawl_search",
+          "input": {
+            "query": "Mikhail Bulgakov birthplace The Master and Margarita author born Kyiv",
+            "limit": 3
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 286,
+      "cacheReadTokens": 56225,
+      "cacheWriteTokens": 4834,
+      "wallMs": 38147,
+      "costUsd": 0.00131,
+      "raw": "bench/results/raw/models-2026-10-22-053726-17370/claude-haiku-5-5-peer-firecrawl-peers.multi-hop.master-margarita-author-birth-country.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-haiku-5-5",
+      "surface": "mcp",
+      "provider": "webular-jev-on",
+      "task": "peers.multi-hop.master-margarita-author-birth-country",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "1cb0e1048ab9c29c",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__webular__answer",
+          "input": {
+            "query": "Mikhail Bulgakov author of The Master and Margarita birthplace city capital of which country today",
+            "sentences": 3,
+            "sources": 2
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 299,
+      "cacheReadTokens": 24054,
+      "cacheWriteTokens": 1289,
+      "wallMs": 65475,
+      "costUsd": 0.000552,
+      "raw": "bench/results/raw/models-2026-10-22-053726-17370/claude-haiku-5-5-mcp-webular-jev-on-peers.multi-hop.master-margarita-author-birth-country.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-haiku-5-5",
+      "surface": "peer",
+      "provider": "firecrawl",
+      "task": "peers.fresh.world-cup-2026-final-winning-goal",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "2785592830e8f120",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__firecrawl__firecrawl_search",
+          "input": {
+            "query": "2026 FIFA World Cup final MetLife Stadium July 19 2026 only goal scorer",
+            "limit": 5
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 225,
+      "cacheReadTokens": 53927,
+      "cacheWriteTokens": 7336,
+      "wallMs": 29754,
+      "costUsd": 0.001569,
+      "raw": "bench/results/raw/models-2026-10-22-053726-17371/claude-haiku-5-5-peer-firecrawl-peers.fresh.world-cup-2026-final-winning-goal.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-haiku-5-5",
+      "surface": "peer",
+      "provider": "tavily",
+      "task": "peers.fresh.world-cup-2026-final-winning-goal",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "2785592830e8f120",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__tavily__tavily_search",
+          "input": {
+            "query": "2026 FIFA World Cup final MetLife Stadium July 19 only goal scorer",
+            "search_depth": "advanced"
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 230,
+      "cacheReadTokens": 14383,
+      "cacheWriteTokens": 11802,
+      "wallMs": 29720,
+      "costUsd": 0.001734,
+      "raw": "bench/results/raw/models-2026-10-22-053726-17371/claude-haiku-5-5-peer-tavily-peers.fresh.world-cup-2026-final-winning-goal.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-haiku-5-5",
+      "surface": "peer",
+      "provider": "exa",
+      "task": "peers.fresh.world-cup-2026-final-winning-goal",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "2785592830e8f120",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__exa__web_search_exa",
+          "input": {
+            "query": "2026 FIFA World Cup final MetLife Stadium July 19 2026 match report goal scorer",
+            "numResults": 8
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 211,
+      "cacheReadTokens": 10074,
+      "cacheWriteTokens": 10720,
+      "wallMs": 56826,
+      "costUsd": 0.001547,
+      "raw": "bench/results/raw/models-2026-10-22-053726-17371/claude-haiku-5-5-peer-exa-peers.fresh.world-cup-2026-final-winning-goal.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-haiku-5-5",
+      "surface": "mcp",
+      "provider": "webular-jev-off",
+      "task": "peers.fresh.world-cup-2026-final-winning-goal",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "2785592830e8f120",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__webular__search",
+          "input": {
+            "query": "2026 FIFA World Cup final MetLife Stadium July 19 only goal scorer"
+          }
+        },
+        {
+          "name": "mcp__webular__scrape",
+          "input": {
+            "url": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup"
+          }
+        },
+        {
+          "name": "mcp__webular__scrape",
+          "input": {
+            "url": "https://en.wikipedia.org/wiki/Argentina_at_the_FIFA_World_Cup"
+          }
+        },
+        {
+          "name": "mcp__webular__scrape",
+          "input": {
+            "url": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_final"
+          }
+        },
+        {
+          "name": "mcp__webular__answer",
+          "input": {
+            "query": "Who scored the only goal in the 2026 FIFA World Cup final at MetLife Stadium on July 19, 2026?",
+            "urls": [
+              "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_final"
+            ]
+          }
+        }
+      ],
+      "turns": 6,
+      "inputTokens": 10,
+      "outputTokens": 796,
+      "cacheReadTokens": 93881,
+      "cacheWriteTokens": 22464,
+      "wallMs": 63938,
+      "costUsd": 0.004146,
+      "raw": "bench/results/raw/models-2026-10-22-053726-17371/claude-haiku-5-5-mcp-webular-jev-off-peers.fresh.world-cup-2026-final-winning-goal.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-haiku-5-5",
+      "surface": "mcp",
+      "provider": "webular-jev-on",
+      "task": "peers.fresh.world-cup-2026-final-winning-goal",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "2785592830e8f120",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__webular__search",
+          "input": {
+            "query": "2026 FIFA World Cup final MetLife Stadium July 19 2026 only goal scorer",
+            "limit": 8
+          }
+        },
+        {
+          "name": "mcp__webular__scrape",
+          "input": {
+            "url": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_final"
+          }
+        },
+        {
+          "name": "mcp__webular__answer",
+          "input": {
+            "query": "Who scored the only goal in the 2026 FIFA World Cup final at MetLife Stadium on July 19, 2026?",
+            "urls": [
+              "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_final",
+              "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup"
+            ],
+            "sentences": 5
+          }
+        },
+        {
+          "name": "mcp__webular__scrape",
+          "input": {
+            "url": "https://en.wikipedia.org/wiki/2026_FIFA_World_Cup_final",
+            "cursor": 8000
+          }
+        },
+        {
+          "name": "mcp__webular__search",
+          "input": {
+            "query": "Spain Argentina World Cup final 2026 1-0 goal scorer Torres Merino stoppage time",
+            "limit": 8
+          }
+        }
+      ],
+      "turns": 6,
+      "inputTokens": 12,
+      "outputTokens": 1245,
+      "cacheReadTokens": 104411,
+      "cacheWriteTokens": 15030,
+      "wallMs": 128583,
+      "costUsd": 0.003547,
+      "raw": "bench/results/raw/models-2026-10-22-053726-17371/claude-haiku-5-5-mcp-webular-jev-on-peers.fresh.world-cup-2026-final-winning-goal.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-haiku-5-5",
+      "surface": "peer",
+      "provider": "perplexity",
+      "task": "peers.fresh.world-cup-2026-final-winning-goal",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "2785592830e8f120",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__perplexity__perplexity_ask",
+          "input": {
+            "messages": [
+              {
+                "role": "user",
+                "content": "In the 2026 FIFA World Cup final at MetLife Stadium on July 19, 2026, which player scored the only goal of the match? Reply in one line with the player's name and team."
+              }
+            ]
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 171,
+      "cacheReadTokens": 13684,
+      "cacheWriteTokens": 3140,
+      "wallMs": 31726,
+      "costUsd": 0.000615,
+      "raw": "bench/results/raw/models-2026-10-22-053726-17371/claude-haiku-5-5-peer-perplexity-peers.fresh.world-cup-2026-final-winning-goal.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-haiku-5-5",
+      "surface": "mcp",
+      "provider": "webular-jev-off",
+      "task": "peers.official-site.sqlite-max-string-length",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "0167c1c6e81a862f",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": false,
+      "problems": [
+        "never called answer on the mcp surface"
+      ],
+      "skipped": false,
+      "toolCalls": [],
+      "turns": 1,
+      "inputTokens": 2,
+      "outputTokens": 426,
+      "cacheReadTokens": 649,
+      "cacheWriteTokens": 4405,
+      "wallMs": 50366,
+      "costUsd": 0.00077,
+      "raw": "bench/results/raw/models-2026-10-22-053726-17371/claude-haiku-5-5-mcp-webular-jev-off-peers.official-site.sqlite-max-string-length.jsonl",
+      "miss": "never-called"
+    },
+    {
+      "model": "claude-haiku-5-5",
+      "surface": "peer",
+      "provider": "firecrawl",
+      "task": "peers.official-site.sqlite-max-string-length",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "0167c1c6e81a862f",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__firecrawl__firecrawl_scrape",
+          "input": {
+            "url": "https://www.sqlite.org/limits.html",
+            "formats": [
+              "markdown"
+            ]
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 223,
+      "cacheReadTokens": 56255,
+      "cacheWriteTokens": 11417,
+      "wallMs": 71085,
+      "costUsd": 0.002102,
+      "raw": "bench/results/raw/models-2026-10-22-053726-17371/claude-haiku-5-5-peer-firecrawl-peers.official-site.sqlite-max-string-length.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-haiku-5-5",
+      "surface": "peer",
+      "provider": "exa",
+      "task": "peers.official-site.sqlite-max-string-length",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "0167c1c6e81a862f",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__exa__web_search_exa",
+          "input": {
+            "query": "SQLite official implementation limits page SQLITE_MAX_LENGTH default value bytes string or BLOB"
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 146,
+      "cacheReadTokens": 10142,
+      "cacheWriteTokens": 12012,
+      "wallMs": 79364,
+      "costUsd": 0.001676,
+      "raw": "bench/results/raw/models-2026-10-22-053726-17371/claude-haiku-5-5-peer-exa-peers.official-site.sqlite-max-string-length.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-haiku-5-5",
+      "surface": "peer",
+      "provider": "perplexity",
+      "task": "peers.official-site.sqlite-max-string-length",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "0167c1c6e81a862f",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__perplexity__perplexity_ask",
+          "input": {
+            "messages": [
+              {
+                "role": "user",
+                "content": "According to SQLite's official implementation limits page (sqlite.org/limits.html), what is the default value of the SQLITE_MAX_LENGTH macro, which caps the number of bytes in a string or BLOB? Answer in one line."
+              }
+            ],
+            "search_domain_filter": [
+              "sqlite.org"
+            ]
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 251,
+      "cacheReadTokens": 13821,
+      "cacheWriteTokens": 3109,
+      "wallMs": 48155,
+      "costUsd": 0.000653,
+      "raw": "bench/results/raw/models-2026-10-22-053726-17371/claude-haiku-5-5-peer-perplexity-peers.official-site.sqlite-max-string-length.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-haiku-5-5",
+      "surface": "mcp",
+      "provider": "webular-jev-on",
+      "task": "peers.official-site.sqlite-max-string-length",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "0167c1c6e81a862f",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__webular__scrape",
+          "input": {
+            "url": "https://www.sqlite.org/limits.html"
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 196,
+      "cacheReadTokens": 22552,
+      "cacheWriteTokens": 5677,
+      "wallMs": 79198,
+      "costUsd": 0.001034,
+      "raw": "bench/results/raw/models-2026-10-22-053726-17371/claude-haiku-5-5-mcp-webular-jev-on-peers.official-site.sqlite-max-string-length.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-haiku-5-5",
+      "surface": "peer",
+      "provider": "tavily",
+      "task": "peers.official-site.sqlite-max-string-length",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "0167c1c6e81a862f",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": false,
+      "problems": [
+        "never called a tavily tool on the peer surface"
+      ],
+      "skipped": false,
+      "toolCalls": [],
+      "turns": 1,
+      "inputTokens": 2,
+      "outputTokens": 373,
+      "cacheReadTokens": 2953,
+      "cacheWriteTokens": 2102,
+      "wallMs": 99747,
+      "costUsd": 0.000479,
+      "raw": "bench/results/raw/models-2026-10-22-053726-17371/claude-haiku-5-5-peer-tavily-peers.official-site.sqlite-max-string-length.jsonl",
+      "miss": "never-called"
+    },
+    {
+      "model": "claude-sonnet-5-5",
+      "surface": "peer",
+      "provider": "tavily",
+      "task": "peers.factual.vesta-discoverer",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "c6a44522d15caea2",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__tavily__tavily_search",
+          "input": {
+            "query": "Which astronomer discovered the asteroid 4 Vesta in 1807?"
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 130,
+      "cacheReadTokens": 11277,
+      "cacheWriteTokens": 6653,
+      "wallMs": 37447,
+      "costUsd": 0.019068,
+      "raw": "bench/results/raw/models-2026-10-22-053713-15280/claude-sonnet-5-5-peer-tavily-peers.factual.vesta-discoverer.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-sonnet-5-5",
+      "surface": "peer",
+      "provider": "perplexity",
+      "task": "peers.factual.vesta-discoverer",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "c6a44522d15caea2",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__perplexity__perplexity_ask",
+          "input": {
+            "messages": [
+              {
+                "role": "user",
+                "content": "Which astronomer discovered the asteroid 4 Vesta in 1807?"
+              }
+            ],
+            "search_context_size": "low"
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 169,
+      "cacheReadTokens": 10587,
+      "cacheWriteTokens": 4528,
+      "wallMs": 17278,
+      "costUsd": 0.014077,
+      "raw": "bench/results/raw/models-2026-10-22-053713-15280/claude-sonnet-5-5-peer-perplexity-peers.factual.vesta-discoverer.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-sonnet-5-5",
+      "surface": "mcp",
+      "provider": "webular-jev-on",
+      "task": "peers.factual.vesta-discoverer",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "c6a44522d15caea2",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__webular__answer",
+          "input": {
+            "query": "Which astronomer discovered the asteroid 4 Vesta in 1807?",
+            "sentences": 2
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 209,
+      "cacheReadTokens": 20968,
+      "cacheWriteTokens": 2650,
+      "wallMs": 40484,
+      "costUsd": 0.01082,
+      "raw": "bench/results/raw/models-2026-10-22-053713-15280/claude-sonnet-5-5-mcp-webular-jev-on-peers.factual.vesta-discoverer.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-sonnet-5-5",
+      "surface": "peer",
+      "provider": "firecrawl",
+      "task": "peers.factual.vesta-discoverer",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "c6a44522d15caea2",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__firecrawl__firecrawl_search",
+          "input": {
+            "query": "who discovered asteroid 4 Vesta 1807",
+            "limit": 3
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 144,
+      "cacheReadTokens": 53145,
+      "cacheWriteTokens": 6206,
+      "wallMs": 39117,
+      "costUsd": 0.022278,
+      "raw": "bench/results/raw/models-2026-10-22-053713-15280/claude-sonnet-5-5-peer-firecrawl-peers.factual.vesta-discoverer.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-sonnet-5-5",
+      "surface": "peer",
+      "provider": "exa",
+      "task": "peers.factual.vesta-discoverer",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "c6a44522d15caea2",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__exa__web_search_exa",
+          "input": {
+            "query": "astronomer who discovered asteroid 4 Vesta in 1807",
+            "numResults": 3
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 166,
+      "cacheReadTokens": 8503,
+      "cacheWriteTokens": 2966,
+      "wallMs": 19427,
+      "costUsd": 0.009933,
+      "raw": "bench/results/raw/models-2026-10-22-053713-15280/claude-sonnet-5-5-peer-exa-peers.factual.vesta-discoverer.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-sonnet-5-5",
+      "surface": "mcp",
+      "provider": "webular-jev-off",
+      "task": "peers.factual.vesta-discoverer",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "c6a44522d15caea2",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__webular__answer",
+          "input": {
+            "query": "Which astronomer discovered the asteroid 4 Vesta in 1807?",
+            "sentences": 2
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 141,
+      "cacheReadTokens": 22500,
+      "cacheWriteTokens": 1187,
+      "wallMs": 24740,
+      "costUsd": 0.006636,
+      "raw": "bench/results/raw/models-2026-10-22-053713-15280/claude-sonnet-5-5-mcp-webular-jev-off-peers.factual.vesta-discoverer.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-sonnet-5-5",
+      "surface": "mcp",
+      "provider": "webular-jev-on",
+      "task": "peers.multi-hop.master-margarita-author-birth-country",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "1cb0e1048ab9c29c",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__webular__answer",
+          "input": {
+            "query": "Where was Mikhail Bulgakov, author of The Master and Margarita, born?",
+            "sentences": 2
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 182,
+      "cacheReadTokens": 20970,
+      "cacheWriteTokens": 2644,
+      "wallMs": 31480,
+      "costUsd": 0.010535,
+      "raw": "bench/results/raw/models-2026-10-22-053713-15280/claude-sonnet-5-5-mcp-webular-jev-on-peers.multi-hop.master-margarita-author-birth-country.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-sonnet-5-5",
+      "surface": "peer",
+      "provider": "perplexity",
+      "task": "peers.multi-hop.master-margarita-author-birth-country",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "1cb0e1048ab9c29c",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__perplexity__perplexity_ask",
+          "input": {
+            "messages": [
+              {
+                "role": "user",
+                "content": "Where was Mikhail Bulgakov, author of The Master and Margarita, born, and what country is that city the capital of today?"
+              }
+            ],
+            "search_context_size": "low"
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 179,
+      "cacheReadTokens": 12116,
+      "cacheWriteTokens": 2988,
+      "wallMs": 26810,
+      "costUsd": 0.01048,
+      "raw": "bench/results/raw/models-2026-10-22-053713-15280/claude-sonnet-5-5-peer-perplexity-peers.multi-hop.master-margarita-author-birth-country.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-sonnet-5-5",
+      "surface": "peer",
+      "provider": "tavily",
+      "task": "peers.multi-hop.master-margarita-author-birth-country",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "1cb0e1048ab9c29c",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": false,
+      "problems": [
+        "never called a tavily tool on the peer surface"
+      ],
+      "skipped": false,
+      "toolCalls": [],
+      "turns": 1,
+      "inputTokens": 2,
+      "outputTokens": 190,
+      "cacheReadTokens": 649,
+      "cacheWriteTokens": 3604,
+      "wallMs": 44922,
+      "costUsd": 0.010979,
+      "raw": "bench/results/raw/models-2026-10-22-053713-15280/claude-sonnet-5-5-peer-tavily-peers.multi-hop.master-margarita-author-birth-country.jsonl",
+      "miss": "never-called"
+    },
+    {
+      "model": "claude-sonnet-5-5",
+      "surface": "peer",
+      "provider": "exa",
+      "task": "peers.multi-hop.master-margarita-author-birth-country",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "1cb0e1048ab9c29c",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__exa__web_search_exa",
+          "input": {
+            "query": "Mikhail Bulgakov birthplace Kyiv",
+            "numResults": 3
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 136,
+      "cacheReadTokens": 8506,
+      "cacheWriteTokens": 3314,
+      "wallMs": 42956,
+      "costUsd": 0.010504,
+      "raw": "bench/results/raw/models-2026-10-22-053713-15280/claude-sonnet-5-5-peer-exa-peers.multi-hop.master-margarita-author-birth-country.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-sonnet-5-5",
+      "surface": "mcp",
+      "provider": "webular-jev-off",
+      "task": "peers.multi-hop.master-margarita-author-birth-country",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "1cb0e1048ab9c29c",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__webular__answer",
+          "input": {
+            "query": "Where was Mikhail Bulgakov, author of The Master and Margarita, born?",
+            "sentences": 2
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 227,
+      "cacheReadTokens": 22506,
+      "cacheWriteTokens": 1298,
+      "wallMs": 47094,
+      "costUsd": 0.007774,
+      "raw": "bench/results/raw/models-2026-10-22-053713-15280/claude-sonnet-5-5-mcp-webular-jev-off-peers.multi-hop.master-margarita-author-birth-country.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-sonnet-5-5",
+      "surface": "peer",
+      "provider": "firecrawl",
+      "task": "peers.multi-hop.master-margarita-author-birth-country",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "1cb0e1048ab9c29c",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__firecrawl__firecrawl_search",
+          "input": {
+            "query": "Mikhail Bulgakov author of The Master and Margarita birthplace",
+            "limit": 3
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 223,
+      "cacheReadTokens": 54673,
+      "cacheWriteTokens": 4411,
+      "wallMs": 41635,
+      "costUsd": 0.018733,
+      "raw": "bench/results/raw/models-2026-10-22-053713-15280/claude-sonnet-5-5-peer-firecrawl-peers.multi-hop.master-margarita-author-birth-country.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-sonnet-5-5",
+      "surface": "peer",
+      "provider": "exa",
+      "task": "peers.factual.coimbra-charter-year",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "4412c74816522ab4",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__exa__web_search_exa",
+          "input": {
+            "query": "University of Coimbra oldest university in Portugal chartered by King Denis year",
+            "numResults": 3
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 164,
+      "cacheReadTokens": 6969,
+      "cacheWriteTokens": 4868,
+      "wallMs": 38419,
+      "costUsd": 0.014515,
+      "raw": "bench/results/raw/models-2026-10-22-053713-15279/claude-sonnet-5-5-peer-exa-peers.factual.coimbra-charter-year.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-sonnet-5-5",
+      "surface": "mcp",
+      "provider": "webular-jev-off",
+      "task": "peers.factual.coimbra-charter-year",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "4412c74816522ab4",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__webular__answer",
+          "input": {
+            "query": "Year University of Coimbra / Estudo Geral chartered by King Denis (Dinis) oldest university in Portugal",
+            "sentences": 3
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 185,
+      "cacheReadTokens": 19443,
+      "cacheWriteTokens": 4377,
+      "wallMs": 32596,
+      "costUsd": 0.014745,
+      "raw": "bench/results/raw/models-2026-10-22-053713-15279/claude-sonnet-5-5-mcp-webular-jev-off-peers.factual.coimbra-charter-year.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-sonnet-5-5",
+      "surface": "mcp",
+      "provider": "webular-jev-on",
+      "task": "peers.factual.coimbra-charter-year",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "4412c74816522ab4",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__webular__answer",
+          "input": {
+            "query": "In what year was the University of Coimbra (oldest university in Portugal) officially chartered by King Denis?"
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 126,
+      "cacheReadTokens": 22497,
+      "cacheWriteTokens": 1135,
+      "wallMs": 55381,
+      "costUsd": 0.006355,
+      "raw": "bench/results/raw/models-2026-10-22-053713-15279/claude-sonnet-5-5-mcp-webular-jev-on-peers.factual.coimbra-charter-year.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-sonnet-5-5",
+      "surface": "peer",
+      "provider": "firecrawl",
+      "task": "peers.factual.coimbra-charter-year",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "4412c74816522ab4",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__firecrawl__firecrawl_search",
+          "input": {
+            "query": "oldest university in Portugal chartered by King Denis year University of Coimbra",
+            "limit": 3
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 178,
+      "cacheReadTokens": 54668,
+      "cacheWriteTokens": 5181,
+      "wallMs": 26596,
+      "costUsd": 0.020207,
+      "raw": "bench/results/raw/models-2026-10-22-053713-15279/claude-sonnet-5-5-peer-firecrawl-peers.factual.coimbra-charter-year.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-sonnet-5-5",
+      "surface": "peer",
+      "provider": "perplexity",
+      "task": "peers.factual.coimbra-charter-year",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "4412c74816522ab4",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__perplexity__perplexity_ask",
+          "input": {
+            "messages": [
+              {
+                "role": "user",
+                "content": "In what year was the oldest university in Portugal (University of Coimbra) officially chartered by King Denis (Dinis)?"
+              }
+            ],
+            "search_context_size": "low"
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 175,
+      "cacheReadTokens": 12112,
+      "cacheWriteTokens": 2921,
+      "wallMs": 22034,
+      "costUsd": 0.010272,
+      "raw": "bench/results/raw/models-2026-10-22-053713-15279/claude-sonnet-5-5-peer-perplexity-peers.factual.coimbra-charter-year.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-sonnet-5-5",
+      "surface": "peer",
+      "provider": "tavily",
+      "task": "peers.factual.coimbra-charter-year",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "4412c74816522ab4",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__tavily__tavily_search",
+          "input": {
+            "query": "University of Coimbra oldest university Portugal chartered King Denis year",
+            "max_results": 5
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 147,
+      "cacheReadTokens": 12810,
+      "cacheWriteTokens": 5110,
+      "wallMs": 22043,
+      "costUsd": 0.015534,
+      "raw": "bench/results/raw/models-2026-10-22-053713-15279/claude-sonnet-5-5-peer-tavily-peers.factual.coimbra-charter-year.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-sonnet-5-5",
+      "surface": "peer",
+      "provider": "tavily",
+      "task": "peers.multi-hop.tesla-unit-namesake-birth-country",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "d4960a0cdda84631",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__tavily__tavily_search",
+          "input": {
+            "query": "Nikola Tesla birthplace Smiljan present-day country",
+            "max_results": 5
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 216,
+      "cacheReadTokens": 12823,
+      "cacheWriteTokens": 4551,
+      "wallMs": 26130,
+      "costUsd": 0.014828,
+      "raw": "bench/results/raw/models-2026-10-22-053713-15279/claude-sonnet-5-5-peer-tavily-peers.multi-hop.tesla-unit-namesake-birth-country.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-sonnet-5-5",
+      "surface": "mcp",
+      "provider": "webular-jev-off",
+      "task": "peers.multi-hop.tesla-unit-namesake-birth-country",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "d4960a0cdda84631",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__webular__answer",
+          "input": {
+            "query": "Where was Nikola Tesla born (present-day country)?",
+            "sentences": 2
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 253,
+      "cacheReadTokens": 20979,
+      "cacheWriteTokens": 2867,
+      "wallMs": 50742,
+      "costUsd": 0.011803,
+      "raw": "bench/results/raw/models-2026-10-22-053713-15279/claude-sonnet-5-5-mcp-webular-jev-off-peers.multi-hop.tesla-unit-namesake-birth-country.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-sonnet-5-5",
+      "surface": "peer",
+      "provider": "firecrawl",
+      "task": "peers.multi-hop.tesla-unit-namesake-birth-country",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "d4960a0cdda84631",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": false,
+      "problems": [
+        "never called a firecrawl tool on the peer surface"
+      ],
+      "skipped": false,
+      "toolCalls": [],
+      "turns": 1,
+      "inputTokens": 2,
+      "outputTokens": 244,
+      "cacheReadTokens": 2173,
+      "cacheWriteTokens": 2091,
+      "wallMs": 44790,
+      "costUsd": 0.007889,
+      "raw": "bench/results/raw/models-2026-10-22-053713-15279/claude-sonnet-5-5-peer-firecrawl-peers.multi-hop.tesla-unit-namesake-birth-country.jsonl",
+      "miss": "never-called"
+    },
+    {
+      "model": "claude-sonnet-5-5",
+      "surface": "peer",
+      "provider": "exa",
+      "task": "peers.multi-hop.tesla-unit-namesake-birth-country",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "d4960a0cdda84631",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__exa__web_search_exa",
+          "input": {
+            "query": "Nikola Tesla birthplace Smiljan present-day country",
+            "numResults": 3
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 233,
+      "cacheReadTokens": 8513,
+      "cacheWriteTokens": 3275,
+      "wallMs": 33371,
+      "costUsd": 0.011377,
+      "raw": "bench/results/raw/models-2026-10-22-053713-15279/claude-sonnet-5-5-peer-exa-peers.multi-hop.tesla-unit-namesake-birth-country.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-sonnet-5-5",
+      "surface": "peer",
+      "provider": "perplexity",
+      "task": "peers.multi-hop.tesla-unit-namesake-birth-country",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "d4960a0cdda84631",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__perplexity__perplexity_ask",
+          "input": {
+            "messages": [
+              {
+                "role": "user",
+                "content": "The SI unit of magnetic flux density (tesla) is named after Nikola Tesla. In which present-day country was he born?"
+              }
+            ],
+            "search_context_size": "low"
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 242,
+      "cacheReadTokens": 12125,
+      "cacheWriteTokens": 3068,
+      "wallMs": 55390,
+      "costUsd": 0.011311,
+      "raw": "bench/results/raw/models-2026-10-22-053713-15279/claude-sonnet-5-5-peer-perplexity-peers.multi-hop.tesla-unit-namesake-birth-country.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-sonnet-5-5",
+      "surface": "mcp",
+      "provider": "webular-jev-on",
+      "task": "peers.multi-hop.tesla-unit-namesake-birth-country",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "d4960a0cdda84631",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": false,
+      "problems": [
+        "never called answer on the mcp surface"
+      ],
+      "skipped": false,
+      "toolCalls": [],
+      "turns": 1,
+      "inputTokens": 2,
+      "outputTokens": 235,
+      "cacheReadTokens": 2173,
+      "cacheWriteTokens": 2144,
+      "wallMs": 73682,
+      "costUsd": 0.007931,
+      "raw": "bench/results/raw/models-2026-10-22-053713-15279/claude-sonnet-5-5-mcp-webular-jev-on-peers.multi-hop.tesla-unit-namesake-birth-country.jsonl",
+      "miss": "never-called"
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "mcp",
+      "provider": "webular-jev-off",
+      "task": "peers.factual.vesta-discoverer",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "c6a44522d15caea2",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__webular__answer",
+          "input": {
+            "query": "Which astronomer discovered the asteroid 4 Vesta in 1807?"
+          }
+        },
+        {
+          "name": "mcp__webular__answer",
+          "input": {
+            "query": "Vesta discovered by Heinrich Wilhelm Olbers on 29 March 1807",
+            "urls": [
+              "https://en.wikipedia.org/wiki/4_Vesta"
+            ]
+          }
+        }
+      ],
+      "turns": 3,
+      "inputTokens": 6,
+      "outputTokens": 378,
+      "cacheReadTokens": 31459,
+      "cacheWriteTokens": 4857,
+      "wallMs": 39277,
+      "costUsd": 0.038161,
+      "raw": "bench/results/raw/models-2026-10-22-053729-18026/claude-opus-5-5-mcp-webular-jev-off-peers.factual.vesta-discoverer.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "peer",
+      "provider": "firecrawl",
+      "task": "peers.factual.vesta-discoverer",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "c6a44522d15caea2",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__firecrawl__firecrawl_search",
+          "input": {
+            "query": "4 Vesta asteroid discovered 1807 by astronomer",
+            "limit": 3
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 171,
+      "cacheReadTokens": 53127,
+      "cacheWriteTokens": 5960,
+      "wallMs": 51562,
+      "costUsd": 0.043861,
+      "raw": "bench/results/raw/models-2026-10-22-053729-18026/claude-opus-5-5-peer-firecrawl-peers.factual.vesta-discoverer.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "peer",
+      "provider": "tavily",
+      "task": "peers.factual.vesta-discoverer",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "c6a44522d15caea2",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__tavily__tavily_search",
+          "input": {
+            "query": "who discovered asteroid 4 Vesta 1807"
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 274,
+      "cacheReadTokens": 11270,
+      "cacheWriteTokens": 7683,
+      "wallMs": 30065,
+      "costUsd": 0.046165,
+      "raw": "bench/results/raw/models-2026-10-22-053729-18026/claude-opus-5-5-peer-tavily-peers.factual.vesta-discoverer.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "peer",
+      "provider": "exa",
+      "task": "peers.factual.vesta-discoverer",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "c6a44522d15caea2",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__exa__web_search_exa",
+          "input": {
+            "query": "who discovered asteroid 4 Vesta in 1807",
+            "numResults": 3
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 173,
+      "cacheReadTokens": 8484,
+      "cacheWriteTokens": 2990,
+      "wallMs": 23839,
+      "costUsd": 0.020123,
+      "raw": "bench/results/raw/models-2026-10-22-053729-18026/claude-opus-5-5-peer-exa-peers.factual.vesta-discoverer.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "mcp",
+      "provider": "webular-jev-on",
+      "task": "peers.factual.vesta-discoverer",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "c6a44522d15caea2",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__webular__answer",
+          "input": {
+            "query": "Which astronomer discovered the asteroid 4 Vesta in 1807?"
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 165,
+      "cacheReadTokens": 20948,
+      "cacheWriteTokens": 2713,
+      "wallMs": 27641,
+      "costUsd": 0.021071,
+      "raw": "bench/results/raw/models-2026-10-22-053729-18026/claude-opus-5-5-mcp-webular-jev-on-peers.factual.vesta-discoverer.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "peer",
+      "provider": "perplexity",
+      "task": "peers.factual.vesta-discoverer",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "c6a44522d15caea2",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__perplexity__perplexity_ask",
+          "input": {
+            "messages": [
+              {
+                "role": "user",
+                "content": "Which astronomer discovered the asteroid 4 Vesta in 1807?"
+              }
+            ],
+            "search_context_size": "low"
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 283,
+      "cacheReadTokens": 12094,
+      "cacheWriteTokens": 3056,
+      "wallMs": 24579,
+      "costUsd": 0.023375,
+      "raw": "bench/results/raw/models-2026-10-22-053729-18026/claude-opus-5-5-peer-perplexity-peers.factual.vesta-discoverer.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "peer",
+      "provider": "exa",
+      "task": "peers.multi-hop.tesla-unit-namesake-birth-country",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "d4960a0cdda84631",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__exa__web_search_exa",
+          "input": {
+            "query": "Nikola Tesla birthplace Smiljan present-day country, tesla SI unit magnetic flux density",
+            "numResults": 3
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 211,
+      "cacheReadTokens": 8495,
+      "cacheWriteTokens": 4312,
+      "wallMs": 24420,
+      "costUsd": 0.027495,
+      "raw": "bench/results/raw/models-2026-10-22-053729-18026/claude-opus-5-5-peer-exa-peers.multi-hop.tesla-unit-namesake-birth-country.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "mcp",
+      "provider": "webular-jev-off",
+      "task": "peers.multi-hop.tesla-unit-namesake-birth-country",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "d4960a0cdda84631",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__webular__answer",
+          "input": {
+            "query": "Nikola Tesla birthplace Smiljan present-day country",
+            "urls": [
+              "https://en.wikipedia.org/wiki/Nikola_Tesla"
+            ]
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 258,
+      "cacheReadTokens": 20960,
+      "cacheWriteTokens": 2865,
+      "wallMs": 49101,
+      "costUsd": 0.023693,
+      "raw": "bench/results/raw/models-2026-10-22-053729-18026/claude-opus-5-5-mcp-webular-jev-off-peers.multi-hop.tesla-unit-namesake-birth-country.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "peer",
+      "provider": "tavily",
+      "task": "peers.multi-hop.tesla-unit-namesake-birth-country",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "d4960a0cdda84631",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__tavily__tavily_search",
+          "input": {
+            "query": "Nikola Tesla birthplace Smiljan present-day country tesla unit magnetic flux density"
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 269,
+      "cacheReadTokens": 12805,
+      "cacheWriteTokens": 6636,
+      "wallMs": 53455,
+      "costUsd": 0.041137,
+      "raw": "bench/results/raw/models-2026-10-22-053729-18026/claude-opus-5-5-peer-tavily-peers.multi-hop.tesla-unit-namesake-birth-country.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "peer",
+      "provider": "perplexity",
+      "task": "peers.multi-hop.tesla-unit-namesake-birth-country",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "d4960a0cdda84631",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__perplexity__perplexity_ask",
+          "input": {
+            "messages": [
+              {
+                "role": "user",
+                "content": "The tesla is the SI unit of magnetic flux density. Where was Nikola Tesla born, and what present-day country is that in?"
+              }
+            ],
+            "search_context_size": "low"
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 335,
+      "cacheReadTokens": 12105,
+      "cacheWriteTokens": 3111,
+      "wallMs": 46116,
+      "costUsd": 0.024692,
+      "raw": "bench/results/raw/models-2026-10-22-053729-18026/claude-opus-5-5-peer-perplexity-peers.multi-hop.tesla-unit-namesake-birth-country.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "mcp",
+      "provider": "webular-jev-on",
+      "task": "peers.multi-hop.tesla-unit-namesake-birth-country",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "d4960a0cdda84631",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__webular__answer",
+          "input": {
+            "query": "Where was Nikola Tesla born, tesla unit magnetic flux density named after",
+            "urls": [
+              "https://en.wikipedia.org/wiki/Nikola_Tesla"
+            ]
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 247,
+      "cacheReadTokens": 22495,
+      "cacheWriteTokens": 1397,
+      "wallMs": 42043,
+      "costUsd": 0.01644,
+      "raw": "bench/results/raw/models-2026-10-22-053729-18026/claude-opus-5-5-mcp-webular-jev-on-peers.multi-hop.tesla-unit-namesake-birth-country.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "peer",
+      "provider": "firecrawl",
+      "task": "peers.multi-hop.tesla-unit-namesake-birth-country",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "d4960a0cdda84631",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__firecrawl__firecrawl_search",
+          "input": {
+            "query": "Nikola Tesla birthplace Smiljan present-day country tesla unit magnetic flux density",
+            "limit": 3
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 202,
+      "cacheReadTokens": 54663,
+      "cacheWriteTokens": 6337,
+      "wallMs": 91522,
+      "costUsd": 0.046674,
+      "raw": "bench/results/raw/models-2026-10-22-053729-18026/claude-opus-5-5-peer-firecrawl-peers.multi-hop.tesla-unit-namesake-birth-country.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "mcp",
+      "provider": "webular-jev-off",
+      "task": "peers.fresh.python-3-15-0-release-date",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "460666da57dc8239",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__webular__scrape",
+          "input": {
+            "url": "https://www.python.org/downloads/release/python-3150/"
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 169,
+      "cacheReadTokens": 20942,
+      "cacheWriteTokens": 6309,
+      "wallMs": 54091,
+      "costUsd": 0.039129,
+      "raw": "bench/results/raw/models-2026-10-22-053729-18026/claude-opus-5-5-mcp-webular-jev-off-peers.fresh.python-3-15-0-release-date.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "peer",
+      "provider": "perplexity",
+      "task": "peers.fresh.python-3-15-0-release-date",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "460666da57dc8239",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__perplexity__perplexity_search",
+          "input": {
+            "query": "Python 3.15.0 release date python.org",
+            "search_domain_filter": [
+              "python.org"
+            ]
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 206,
+      "cacheReadTokens": 12086,
+      "cacheWriteTokens": 5138,
+      "wallMs": 50762,
+      "costUsd": 0.032243,
+      "raw": "bench/results/raw/models-2026-10-22-053729-18026/claude-opus-5-5-peer-perplexity-peers.fresh.python-3-15-0-release-date.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "peer",
+      "provider": "tavily",
+      "task": "peers.fresh.python-3-15-0-release-date",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "460666da57dc8239",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": false,
+      "problems": [
+        "never called a tavily tool on the peer surface",
+        "reply does not match /October 9, 2026|Oct\\. 9, 2026|Oct 9, 2026|9 October 2026|9 Oct 2026|2026-10-09|October 9th, 2026|October 9 2026|Oct\\. 9 2026|10/09/2026|10/9/2026/"
+      ],
+      "skipped": false,
+      "toolCalls": [],
+      "turns": 1,
+      "inputTokens": 2,
+      "outputTokens": 426,
+      "cacheReadTokens": 2173,
+      "cacheWriteTokens": 2052,
+      "wallMs": 55184,
+      "costUsd": 0.019223,
+      "raw": "bench/results/raw/models-2026-10-22-053729-18026/claude-opus-5-5-peer-tavily-peers.fresh.python-3-15-0-release-date.jsonl",
+      "miss": "never-called"
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "peer",
+      "provider": "exa",
+      "task": "peers.fresh.python-3-15-0-release-date",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "460666da57dc8239",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": false,
+      "problems": [
+        "never called a exa tool on the peer surface",
+        "reply does not match /October 9, 2026|Oct\\. 9, 2026|Oct 9, 2026|9 October 2026|9 Oct 2026|2026-10-09|October 9th, 2026|October 9 2026|Oct\\. 9 2026|10/09/2026|10/9/2026/"
+      ],
+      "skipped": false,
+      "toolCalls": [],
+      "turns": 1,
+      "inputTokens": 2,
+      "outputTokens": 364,
+      "cacheReadTokens": 2173,
+      "cacheWriteTokens": 2050,
+      "wallMs": 84670,
+      "costUsd": 0.017973,
+      "raw": "bench/results/raw/models-2026-10-22-053729-18026/claude-opus-5-5-peer-exa-peers.fresh.python-3-15-0-release-date.jsonl",
+      "miss": "never-called"
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "mcp",
+      "provider": "webular-jev-on",
+      "task": "peers.fresh.python-3-15-0-release-date",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "460666da57dc8239",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__webular__scrape",
+          "input": {
+            "url": "https://www.python.org/downloads/release/python-3150/"
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 173,
+      "cacheReadTokens": 22459,
+      "cacheWriteTokens": 4800,
+      "wallMs": 118304,
+      "costUsd": 0.031968,
+      "raw": "bench/results/raw/models-2026-10-22-053729-18026/claude-opus-5-5-mcp-webular-jev-on-peers.fresh.python-3-15-0-release-date.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "peer",
+      "provider": "firecrawl",
+      "task": "peers.fresh.python-3-15-0-release-date",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "460666da57dc8239",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": false,
+      "problems": [
+        "never called a firecrawl tool on the peer surface",
+        "reply does not match /October 9, 2026|Oct\\. 9, 2026|Oct 9, 2026|9 October 2026|9 Oct 2026|2026-10-09|October 9th, 2026|October 9 2026|Oct\\. 9 2026|10/09/2026|10/9/2026/"
+      ],
+      "skipped": false,
+      "toolCalls": [],
+      "turns": 1,
+      "inputTokens": 2,
+      "outputTokens": 333,
+      "cacheReadTokens": 2173,
+      "cacheWriteTokens": 2054,
+      "wallMs": 96112,
+      "costUsd": 0.017373,
+      "raw": "bench/results/raw/models-2026-10-22-053729-18026/claude-opus-5-5-peer-firecrawl-peers.fresh.python-3-15-0-release-date.jsonl",
+      "miss": "never-called"
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "mcp",
+      "provider": "webular-jev-off",
+      "task": "peers.official-site.pep8-max-line-length",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "3a5c7185a5ccc0d8",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": false,
+      "problems": [
+        "timed out",
+        "never called answer on the mcp surface",
+        "reply does not match /79 characters|79-character|79 chars/"
+      ],
+      "skipped": false,
+      "toolCalls": [],
+      "turns": null,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "cacheReadTokens": 0,
+      "cacheWriteTokens": 0,
+      "wallMs": 424505,
+      "costUsd": 0,
+      "raw": "bench/results/raw/models-2026-10-22-053729-18026/claude-opus-5-5-mcp-webular-jev-off-peers.official-site.pep8-max-line-length.jsonl",
+      "miss": "timeout"
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "mcp",
+      "provider": "webular-jev-on",
+      "task": "peers.official-site.pep8-max-line-length",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "3a5c7185a5ccc0d8",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__webular__answer",
+          "input": {
+            "query": "PEP 8 maximum line length limit all lines",
+            "urls": [
+              "https://peps.python.org/pep-0008/"
+            ]
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 150,
+      "cacheReadTokens": 20957,
+      "cacheWriteTokens": 2530,
+      "wallMs": 27220,
+      "costUsd": 0.019857,
+      "raw": "bench/results/raw/models-2026-10-22-053729-18026/claude-opus-5-5-mcp-webular-jev-on-peers.official-site.pep8-max-line-length.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "peer",
+      "provider": "firecrawl",
+      "task": "peers.official-site.pep8-max-line-length",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "3a5c7185a5ccc0d8",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__firecrawl__firecrawl_scrape",
+          "input": {
+            "url": "https://peps.python.org/pep-0008/",
+            "formats": [
+              "query"
+            ],
+            "queryOptions": {
+              "prompt": "What maximum line length does PEP 8 say to limit all lines to? Quote the sentence.",
+              "mode": "directQuote"
+            }
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 238,
+      "cacheReadTokens": 54660,
+      "cacheWriteTokens": 4167,
+      "wallMs": 45292,
+      "costUsd": 0.036543,
+      "raw": "bench/results/raw/models-2026-10-22-053729-18026/claude-opus-5-5-peer-firecrawl-peers.official-site.pep8-max-line-length.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "peer",
+      "provider": "tavily",
+      "task": "peers.official-site.pep8-max-line-length",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "3a5c7185a5ccc0d8",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": false,
+      "problems": [
+        "never called a tavily tool on the peer surface"
+      ],
+      "skipped": false,
+      "toolCalls": [],
+      "turns": 1,
+      "inputTokens": 2,
+      "outputTokens": 301,
+      "cacheReadTokens": 2173,
+      "cacheWriteTokens": 2068,
+      "wallMs": 39633,
+      "costUsd": 0.016803,
+      "raw": "bench/results/raw/models-2026-10-22-053729-18026/claude-opus-5-5-peer-tavily-peers.official-site.pep8-max-line-length.jsonl",
+      "miss": "never-called"
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "peer",
+      "provider": "perplexity",
+      "task": "peers.official-site.pep8-max-line-length",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "3a5c7185a5ccc0d8",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__perplexity__perplexity_ask",
+          "input": {
+            "messages": [
+              {
+                "role": "user",
+                "content": "What maximum line length in characters does PEP 8 tell you to limit all lines to?"
+              }
+            ],
+            "search_context_size": "low"
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 301,
+      "cacheReadTokens": 12103,
+      "cacheWriteTokens": 3042,
+      "wallMs": 34326,
+      "costUsd": 0.023667,
+      "raw": "bench/results/raw/models-2026-10-22-053729-18026/claude-opus-5-5-peer-perplexity-peers.official-site.pep8-max-line-length.jsonl",
+      "miss": null
+    },
+    {
+      "model": "claude-opus-5-5",
+      "surface": "peer",
+      "provider": "exa",
+      "task": "peers.official-site.pep8-max-line-length",
+      "run": 1,
+      "family": "answer",
+      "promptSha": "3a5c7185a5ccc0d8",
+      "maxTurns": 10,
+      "timeoutSec": 300,
+      "grader": "code",
+      "seed": "arm-order",
+      "pass": true,
+      "problems": [],
+      "skipped": false,
+      "toolCalls": [
+        {
+          "name": "mcp__exa__web_fetch_exa",
+          "input": {
+            "urls": [
+              "https://peps.python.org/pep-0008/"
+            ],
+            "maxCharacters": 12000
+          }
+        }
+      ],
+      "turns": 2,
+      "inputTokens": 4,
+      "outputTokens": 262,
+      "cacheReadTokens": 8492,
+      "cacheWriteTokens": 6390,
+      "wallMs": 41265,
+      "costUsd": 0.038904,
+      "raw": "bench/results/raw/models-2026-10-22-053729-18026/claude-opus-5-5-peer-exa-peers.official-site.pep8-max-line-length.jsonl",
+      "miss": null
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "head": {
+    "vars": ["site", "name"]
+  },
+  "results": {
+    "bindings": [
+      {
+        "name": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "Vue.js"
+        },
+        "site": {
+          "type": "uri",
+          "value": "https://vuejs.org/"
+        }
+      },
+      {
+        "name": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "Vite"
+        },
+        "site": {
+          "type": "uri",
+          "value": "https://vite.dev/"
+        }
+      },
+      {
+        "name": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "Vite"
+        },
+        "site": {
+          "type": "uri",
+          "value": "https://vite.dev/"
+        }
+      }
+    ]
+  }
+}

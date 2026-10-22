@@ -51,9 +51,11 @@ export const agreedPick = (
   answers: Record<string, unknown>,
   key: string,
   bar: number,
+  // Set only by readers that act on an agreed `none` (an empty field, no command, no click).
+  keepNone = false,
 ): string | undefined => {
-  const a = picked(answers[key], bar, '')
-  return a !== '' && a === picked(answers[`${key}${SWAPPED}`], bar, '') ? a : undefined
+  const a = picked(answers[key], bar, '', keepNone)
+  return a !== '' && a === picked(answers[`${key}${SWAPPED}`], bar, '', keepNone) ? a : undefined
 }
 
 // Every key fact must be read by a question: each path two levels down in

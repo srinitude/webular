@@ -5,7 +5,10 @@ when a page is dead or a site will not answer.
 
 ## Retries
 
-- Every fetch retries 408, 429, 502, 503, and 504 on a fixed backoff. Or it waits for the server's `Retry-After` (capped at 10 s).
+- Every fetch retries 408, 429, 502, 503, and 504 on a fixed backoff.
+- When the server sends `Retry-After`, the fetch waits that long instead, up to 10 s.
+- If the server asks for more than 10 s, the fetch fails at once. The error names the wait, for example `asked to wait 120 s (Retry-After), over the 10 s limit`.
+- If the wait would run past the request's timeout, the fetch returns the server's status (such as 429) at once.
 
 ## Archive and index fallbacks
 

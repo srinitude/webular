@@ -2,9 +2,35 @@
 // Promise, so every step runs its Effect program through this one shared
 // runtime, which carries the Bun platform services (FileSystem, Path,
 // ChildProcessSpawner) that step programs yield, and the one Readability
-// worker pool the source fan-out parses on.
+// worker pool the source fan-out parses on, and the per-origin robots.txt cache.
 import * as BunServices from '@effect/platform-bun/BunServices'
-import { Layer, ManagedRuntime } from 'effect'
+import { ConfigProvider, Effect, Layer, ManagedRuntime } from 'effect'
+import { HostBudget } from '../core/budget.ts'
+import { requestLog } from '../lib/request-log.ts'
+import { RobotsGate } from '../lib/robots-gate.ts'
 import { ParsePool } from '../lib/sources.ts'
 
-export const stepRuntime = ManagedRuntime.make(Layer.mergeAll(BunServices.layer, ParsePool.layer))
+export { requestLog }
+
+// Steps read process.env live: Effect's default provider copies it once, at the
+// process's first Config read, so a later env change (a test, the MCP server)
+// would never reach a step.
+// ponytail: rebuilds the env trie per lookup; cache by process.env identity if lookups get hot.
+const liveEnv = Layer.succeed(
+  ConfigProvider.ConfigProvider,
+  ConfigProvider.make((path) => Effect.suspend(() => ConfigProvider.fromEnv().load(path))),
+)
+
+export const stepRuntime = ManagedRuntime.make(
+  Layer.mergeAll(BunServices.layer, ParsePool.layer, RobotsGate.layer, liveEnv).pipe(
+    Layer.provideMerge(requestLog),
+    Layer.provideMerge(HostBudget.layer.pipe(Layer.provide(BunServices.layer))),
+  ),
+)
+
+// Stops the parse pool's idle workers once a command ends. It never disposes
+// the runtime: a disposed ManagedRuntime dies on every later run, and one
+// process runs many workflows (the MCP server, a test run).
+export const drainParsePool = Effect.tryPromise(() =>
+  stepRuntime.runPromise(ParsePool.use((pool) => pool.drain)),
+)

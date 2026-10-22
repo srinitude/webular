@@ -21,13 +21,14 @@ const checksStep = createStep({
   id: 'checks',
   inputSchema: doctorInput,
   outputSchema: doctorOutput,
-  execute: () => stepRuntime.runPromise(runChecks()),
+  execute: ({ abortSignal }) => stepRuntime.runPromise(runChecks(), { signal: abortSignal }),
 })
 
 export const doctorWorkflow = createWorkflow({
   id: 'doctor',
   inputSchema: doctorInput,
   outputSchema: doctorOutput,
+  options: { shouldPersistSnapshot: () => false },
 })
   .then(checksStep)
   .commit()

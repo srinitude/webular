@@ -16,26 +16,38 @@ import * as FetchHttpClient from 'effect/http/FetchHttpClient'
 import * as HttpClient from 'effect/http/HttpClient'
 import * as ChildProcess from 'effect/process/ChildProcess'
 import { ChildProcessSpawner } from 'effect/process/ChildProcessSpawner'
+import { requestLog } from '../request-log.ts'
 import { docsStore } from './docs-cache.ts'
 import { committedSnapshot } from './docs-guard.ts'
 import type { JevError } from './errors.ts'
 import { withRecorder } from './learn/recorder.ts'
+import { isReleasedModel, JEV_LATEST_RELEASED } from './model.ts'
 import type { Instructions, OptionSpec } from './payload/answers.ts'
-import { postOnce, type Result, withFallback } from './post.ts'
+import { postOnce, type Result, withRetry } from './post.ts'
+import { type JevRoute, resolveRoute } from './route.ts'
 import { flagDrift, logCalibration, makeAsk, makeLru, replayStore } from './store.ts'
 
-// A pinned Jev release, so tuned thresholds and recorded replays hold
-// (docs.typesafe.ai/models). WEBULAR_JEV_MODEL overrides it in one place. If the
-// call fails, the pinned fallback release answers instead.
-export const JEV_MODEL_DEFAULT = 'jev-1.13.0'
+// Every call goes to the highest released Jev model (./model.ts). For tests only,
+// WEBULAR_JEV_MODEL may name another released id; an alias or preview name there
+// is ignored, so a call never goes to a moving target.
+export const JEV_MODEL_DEFAULT = JEV_LATEST_RELEASED
 // Every call runs the docs-guard check (./docs-guard.ts) first, inside postOnce.
-const ENDPOINT = 'https://api.typesafe.ai/v1/systemone'
+// The endpoint is the active route's base (./route.ts) plus the System One path.
+export const systemOne = (r: JevRoute) => `${r.base}/v1/systemone`
 const CACHE_CAPACITY = 1_024 // LRU entries; each holds only answers, keyed by a 64-bit hash
+// Live calls one process may send; WEBULAR_JEV_MAX_CALLS overrides. Past it every decision falls back.
+const MAX_LIVE_CALLS = 500
 export const JEV_CONCURRENCY = 8 // under the per-org request rate
 
 type Text = string | Instructions
 export type JevQuestion =
-  | { readonly type: 'noul'; readonly instructions: Text }
+  | {
+      readonly type: 'noul'
+      readonly instructions: Text
+      // What a yes and a no each cover and where each stops (docs: Noul criteria).
+      readonly criteria?: { readonly true: OptionSpec; readonly false: OptionSpec }
+    }
+  | { readonly type: 'box'; readonly instructions: Text } // needs the Jev 1.14 release and assets
   | {
       readonly type: 'choice'
       readonly instructions: Text
@@ -47,7 +59,15 @@ export type JevQuestion =
       readonly criteria: ReadonlyArray<string | OptionSpec>
     }
 
+// One image the request carries (docs.typesafe.ai/images): named in state by its key.
+export interface JevImage {
+  readonly type: 'image'
+  readonly format: 'jpg' | 'png'
+  readonly data_base64: string
+}
+
 export interface JevRequest {
+  readonly assets?: Record<string, JevImage>
   readonly state: Record<string, unknown>
   readonly questions: Record<string, JevQuestion>
 }
@@ -59,36 +79,68 @@ const optional = <A, E, R>(eff: Effect.Effect<Option.Option<A>, E, R>) =>
   eff.pipe(Effect.orElseSucceed(() => Option.none<A>()))
 const setting = (name: string) => optional(Config.option(Config.String(name)))
 
-// Key order: TYPESAFE_API_KEY, then the macOS Keychain item typesafe-ai-api-key.
-// WEBULAR_JEV=off turns Jev off, so every decision uses its baseline.
-const resolveKey = Effect.gen(function* () {
+// Key order: TYPESAFE_API_KEY, then the macOS Keychain item typesafe-ai-api-key
+// (on macOS only; other systems spawn nothing). WEBULAR_JEV=off turns Jev off,
+// so every decision uses its baseline. CI has no Keychain item and `security`
+// can block there on a locked keychain, so CI never spawns it and any other
+// lookup gets 3 seconds before it counts as no key.
+export const resolveKey = Effect.gen(function* () {
   if (Option.contains(yield* setting('WEBULAR_JEV'), 'off'))
     return Option.none<Redacted.Redacted<string>>()
   const env = yield* optional(Config.option(Config.Redacted('TYPESAFE_API_KEY')))
-  if (Option.isSome(env)) return env
+  if (Option.isSome(env) || process.platform !== 'darwin') return env
+  if (Option.isSome(yield* setting('CI'))) return env
   const spawner = yield* ChildProcessSpawner
   const out = yield* optional(
     spawner
-      .string(ChildProcess.make`security find-generic-password -s typesafe-ai-api-key -w`)
-      .pipe(Effect.map((s) => Option.liftPredicate(s.trim(), (k) => k.length > 0))),
+      .string(
+        ChildProcess.make(
+          'security',
+          ['find-generic-password', '-s', 'typesafe-ai-api-key', '-w'],
+          {
+            stdin: 'ignore',
+          },
+        ),
+      )
+      .pipe(
+        Effect.map((s) => Option.liftPredicate(s.trim(), (k) => k.length > 0)),
+        Effect.timeout('3 seconds'),
+      ),
   )
   return Option.map(out, (k) => Redacted.make(k))
 })
 
+// WEBULAR_JEV=off also turns replay off, so every decision uses its baseline.
+const replayFrom = (fs: FileSystem.FileSystem) =>
+  Effect.gen(function* () {
+    const record = Option.contains(yield* setting('WEBULAR_JEV_RECORD'), '1')
+    const off = Option.contains(yield* setting('WEBULAR_JEV'), 'off')
+    return Option.map(off ? Option.none<string>() : yield* setting('WEBULAR_JEV_REPLAY'), (d) =>
+      replayStore(fs, d, record),
+    )
+  })
+
 const make = Effect.gen(function* () {
-  const key = yield* resolveKey
+  const route = yield* resolveRoute(resolveKey)
+  const key = Option.map(route, (r) => r.key)
   const http = yield* HttpClient.HttpClient
   const fs = yield* FileSystem.FileSystem
-  const model = Option.getOrElse(yield* setting('WEBULAR_JEV_MODEL'), () => JEV_MODEL_DEFAULT)
-  const record = Option.contains(yield* setting('WEBULAR_JEV_RECORD'), '1')
-  const replay = Option.map(yield* setting('WEBULAR_JEV_REPLAY'), (d) => replayStore(fs, d, record))
+  const model = (yield* setting('WEBULAR_JEV_MODEL')).pipe(
+    Option.filter(isReleasedModel),
+    Option.getOrElse(() => JEV_LATEST_RELEASED),
+  )
+  const endpoint = Option.match(route, { onNone: () => '', onSome: systemOne })
+  const replay = yield* replayFrom(fs)
   const ask = makeAsk({
     model,
     replay,
-    live: withFallback(
-      postOnce(ENDPOINT, http, key, { snapshot: committedSnapshot, store: yield* docsStore }),
-      model,
+    live: withRetry(
+      postOnce(endpoint, http, key, { snapshot: committedSnapshot, store: yield* docsStore }),
     ),
+    maxLiveCalls: Option.match(yield* setting('WEBULAR_JEV_MAX_CALLS'), {
+      onNone: () => MAX_LIVE_CALLS,
+      onSome: (v) => (Number.isInteger(+v) && +v >= 0 ? +v : MAX_LIVE_CALLS),
+    }),
     lru: yield* Effect.sync(() => makeLru(CACHE_CAPACITY)),
     log: logCalibration(fs, yield* setting('WEBULAR_JEV_LOG')),
     drift: flagDrift(fs, yield* setting('WEBULAR_JEV_DRIFT_FILE')),
@@ -109,9 +161,18 @@ export class Jev extends Context.Service<
   static readonly layer = Layer.effect(Jev, make)
 
   static readonly live = Jev.layer.pipe(
-    Layer.provide(Layer.mergeAll(FetchHttpClient.layer, BunServices.layer)),
+    Layer.provide(
+      Layer.mergeAll(
+        FetchHttpClient.layer.pipe(Layer.provide(Layer.orDie(requestLog))),
+        BunServices.layer,
+      ),
+    ),
   )
 }
 
 // One runtime for the Promise-based Mastra steps; it builds the Jev layer on first use.
 export const jevRuntime = ManagedRuntime.make(Jev.live)
+
+// Runs an ask on jevRuntime's one Jev, so it shares the key lookup and the decision cache.
+export const withSharedJev = <A, E>(effect: Effect.Effect<A, E, Jev>) =>
+  Effect.flatMap(jevRuntime.contextEffect, (ctx) => Effect.provide(effect, ctx))

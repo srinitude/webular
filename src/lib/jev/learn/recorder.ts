@@ -46,9 +46,10 @@ const num = (o: Option.Option<string>, d: number) =>
 // $XDG_STATE_HOME/webular, else ~/.local/state/webular (the XDG default on
 // macOS and Linux alike, so one path works in every shell).
 export const recorderConfig = Effect.gen(function* () {
-  // No state folder known (no HOME, XDG_STATE_HOME, or WEBULAR_STATE_DIR):
+  // No state folder known (no HOME, USERPROFILE, XDG_STATE_HOME, or WEBULAR_STATE_DIR):
   // record nothing, so a test or sandbox never writes into its working folder.
-  const home = yield* opt('HOME')
+  const profile = yield* opt('USERPROFILE') // Windows has no HOME
+  const home = Option.orElse(yield* opt('HOME'), () => profile)
   const xdg = yield* opt('XDG_STATE_HOME')
   const own = yield* opt('WEBULAR_STATE_DIR')
   const known = Option.isSome(home) || Option.isSome(xdg) || Option.isSome(own)

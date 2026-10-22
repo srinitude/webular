@@ -2,7 +2,10 @@
   "mcpServers": {
     "webular": {
       "command": "bun",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/dist/server.js"]
+      "args": ["${CLAUDE_PLUGIN_ROOT}/dist/server.js"],
+      "env": {
+        "WEBULAR_AGENT_MODE": "1"
+      }
     }
   }
 }

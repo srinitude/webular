@@ -6,6 +6,8 @@ import { fileURLToPath } from 'node:url'
 import { BunServices } from '@effect/platform-bun'
 import { MCPClient } from '@mastra/mcp'
 import { Effect, Random, Schedule } from 'effect'
+import * as FetchHttpClient from 'effect/http/FetchHttpClient'
+import * as HttpClient from 'effect/http/HttpClient'
 import { ChildProcess, ChildProcessSpawner } from 'effect/process'
 
 const serverPath = fileURLToPath(new URL('../src/server.ts', import.meta.url))
@@ -51,6 +53,38 @@ test(
           toolNamesAt(`http://127.0.0.1:${port}/mcp`),
         )
         expect(names).toContain('webular_scrape')
+      }),
+    ),
+  30_000,
+)
+
+const statusWith = (url: string, headers: Record<string, string>) =>
+  HttpClient.HttpClient.pipe(
+    Effect.flatMap((http) => http.post(url, { headers })),
+    Effect.map((res) => res.status),
+    Effect.provide(FetchHttpClient.layer),
+  )
+
+// DNS rebinding guard: the MCP spec says a bad Origin MUST get 403.
+test(
+  'HTTP mode answers 403 to a foreign Origin or Host',
+  () =>
+    Effect.runPromise(
+      Effect.gen(function* () {
+        const port = yield* Random.nextIntBetween(40_000, 49_000)
+        const url = `http://127.0.0.1:${port}/mcp`
+        const statuses = yield* whileRunning(
+          ChildProcess.make('bun', [serverPath, '--http'], {
+            env: { PORT: String(port) },
+            extendEnv: true,
+          }),
+          Effect.all([
+            statusWith(url, { origin: 'https://evil.example' }),
+            statusWith(url, { host: 'evil.example' }),
+            statusWith(url, { origin: 'null' }),
+          ]),
+        )
+        expect(statuses).toEqual([403, 403, 403])
       }),
     ),
   30_000,

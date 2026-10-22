@@ -34,6 +34,17 @@ export const cliDispatchMachine = setup({
     printedVersion: { type: 'final', tags: [exitTag(EXIT.ok)] },
     rejected: { type: 'final', tags: [exitTag(EXIT.usage)] },
     taskSucceeded: { type: 'final', tags: [exitTag(EXIT.ok)] },
-    taskFailed: { type: 'final', tags: [exitTag(EXIT.failure)] },
+    // A failed task passes its own exit through: the first tag (1) is the
+    // usual one; the rest are the other exits a command or its start can end with.
+    taskFailed: {
+      type: 'final',
+      tags: [
+        exitTag(EXIT.failure),
+        exitTag(EXIT.usage),
+        exitTag(EXIT.partial),
+        exitTag(EXIT.toolchainMissing),
+        exitTag(EXIT.interrupted),
+      ],
+    },
   },
 })

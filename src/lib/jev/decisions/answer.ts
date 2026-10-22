@@ -16,7 +16,7 @@ import {
 } from '../payload/index.ts'
 import { topIndexes } from './summarize.ts'
 
-const DOCS = '88a6a003018eaea50167565a766a0d4a91d039cf93cc7dc2965d3ceba3a72caf'
+const DOCS = 'b0b26ab933a61b5d43ccccae5fbd009f445bfdcfd2808cac9e410a84f0fd8ca4'
 const MAX_ITEMS = 20 // one call carries at most 20 questions
 const MAX_SENTENCES = 18 // 18 options + `none`, asked twice
 const MAX_QUESTION = 300

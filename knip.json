@@ -1,0 +1,31 @@
+{
+  "$schema": "https://unpkg.com/knip@6.40.0/schema.json",
+  "entry": [
+    "bin/webular.ts",
+    "src/commands/*.ts",
+    "src/lib/parse-worker.ts",
+    "src/release/*.ts",
+    "scripts/**/*.ts",
+    "bench/**/*.ts",
+    "tests/**/*.test.ts",
+    "tests/**/*.eval.ts",
+    "tests/models/run.ts",
+    "tests/engine/cua-open-once.ts",
+    "tests/engine/cua-fake-driver.ts",
+    "tests/engine/cua-fake-browser.ts",
+    "plugins/webular/src/server.ts",
+    "plugins/webular/scripts/*.ts",
+    "plugins/webular/**/*.test.ts"
+  ],
+  "project": [
+    "bin/**/*.ts",
+    "src/**/*.ts",
+    "scripts/**/*.ts",
+    "bench/**/*.ts",
+    "tests/**/*.ts",
+    "plugins/webular/**/*.ts"
+  ],
+  "ignoreBinaries": ["mise"],
+  "ignoreDependencies": ["agent-browser", "deepsec", "portless"],
+  "ignoreExportsUsedInFile": true
+}

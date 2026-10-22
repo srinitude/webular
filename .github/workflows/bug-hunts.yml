@@ -1,0 +1,34 @@
+# webular bug hunts: every bugs:<class> task from docs/bug-classes.md, weekly
+# and on demand, on Linux, macOS and Windows. Read-only: no write permissions,
+# no persisted credentials, actions pinned by SHA.
+name: Bug hunts
+
+on:
+  schedule:
+    - cron: "41 6 * * 2" # weekly, Tuesday 06:41 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bug-hunts-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  hunts:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@fc42bcc7ddbf51124c30f95a877a0c5168a3bfde # v5.2.1
+        with:
+          experimental: true
+      - name: Run every bug hunt
+        run: mise run bugs:check

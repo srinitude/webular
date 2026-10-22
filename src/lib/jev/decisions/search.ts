@@ -5,7 +5,7 @@ import type { JevAnswer } from '../client.ts'
 import { defineDecision } from '../define.ts'
 import { CONFIDENCE_BAR, type OptionSpec, purpose, score, scored } from '../payload/index.ts'
 
-const DOCS = '88a6a003018eaea50167565a766a0d4a91d039cf93cc7dc2965d3ceba3a72caf'
+const DOCS = 'b0b26ab933a61b5d43ccccae5fbd009f445bfdcfd2808cac9e410a84f0fd8ca4'
 const MAX_ITEMS = 20 // one call carries at most 20 hit questions
 const MAX_QUERY = 300
 const MAX_TEXT = 400

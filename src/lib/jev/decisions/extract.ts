@@ -96,7 +96,7 @@ const payload = <I extends FieldInput>(full: I, ruleOf: (i: I) => string, select
 
 // The agreed element's full text; an agreed `none` means the field is empty.
 const read = (a: Record<string, JevAnswer>, t: number, input: FieldInput) => {
-  const pick = agreedPick(a, 'field', t)
+  const pick = agreedPick(a, 'field', t, true)
   if (pick === undefined) return undefined
   if (pick === 'none') return ''
   return input.candidates[Number(pick.slice(1))]?.text
@@ -113,7 +113,7 @@ const SUBTASKS = [
     payload: { question: 'field' },
   },
 ] as const
-const DOCS = '88a6a003018eaea50167565a766a0d4a91d039cf93cc7dc2965d3ceba3a72caf'
+const DOCS = 'b0b26ab933a61b5d43ccccae5fbd009f445bfdcfd2808cac9e410a84f0fd8ca4'
 const SAMPLE: ReadonlyArray<Candidate> = [
   { tag: 'a', hint: 'nav', text: 'Pricing' },
   { tag: 'span', hint: 'product-price', text: '$19.99' },

@@ -1,6 +1,7 @@
 // Jev HTTP failures: status to webular error kind and next action
 // (docs.typesafe.ai/api/errors), plus retry-after parsing.
 import { Data } from 'effect'
+import { delayHeaderMs } from '../../core/retry-after.ts'
 
 type JevErrorKind =
   | 'bad_request'
@@ -12,7 +13,9 @@ type JevErrorKind =
   | 'server'
   | 'timeout'
   | 'network'
+  | 'bad_reply'
   | 'no_key'
+  | 'budget'
 
 const KINDS: Record<JevErrorKind, { readonly next: string; readonly retry: boolean }> = {
   bad_request: { next: 'fix the payload: caps, UTF-8, or context length', retry: false },
@@ -24,7 +27,13 @@ const KINDS: Record<JevErrorKind, { readonly next: string; readonly retry: boole
   server: { next: 'retry once with jitter; else use the code rule', retry: true },
   timeout: { next: 'retry once with jitter; else use the code rule', retry: true },
   network: { next: 'retry once with jitter; else use the code rule', retry: true },
+  // A 200 is billed; its reply would not decode the second time either.
+  bad_reply: {
+    next: 'check the reply shape against the docs; the code rule decides',
+    retry: false,
+  },
   no_key: { next: 'set a TypeSafe key; the code rule decides meanwhile', retry: false },
+  budget: { next: 'raise WEBULAR_JEV_MAX_CALLS; the code rule decides meanwhile', retry: false },
 }
 
 const BY_STATUS: Readonly<Record<number, JevErrorKind>> = {
@@ -32,6 +41,7 @@ const BY_STATUS: Readonly<Record<number, JevErrorKind>> = {
   401: 'auth',
   403: 'forbidden',
   404: 'not_found',
+  408: 'timeout',
   422: 'invalid',
   429: 'rate_limited',
 }
@@ -45,14 +55,9 @@ export const retryAfterMs = (
   headers: Readonly<Record<string, string | undefined>>,
   now: number,
 ) => {
-  const ms = Number(headers['retry-after-ms'])
-  if (Number.isFinite(ms) && ms >= 0) return ms
-  const raw = headers['retry-after']
-  if (raw === undefined) return undefined
-  const secs = Number(raw)
-  if (Number.isFinite(secs) && secs >= 0) return secs * 1_000
-  const at = Date.parse(raw)
-  return Number.isNaN(at) ? undefined : Math.max(0, at - now)
+  const ms = headers['retry-after-ms']?.trim()
+  if (ms && /^\d+(\.\d+)?$/.test(ms)) return Number(ms)
+  return delayHeaderMs(headers['retry-after'], now)
 }
 
 export class JevError extends Data.TaggedError('JevError')<{

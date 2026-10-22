@@ -1,0 +1,73 @@
+{
+  "security": {
+    "globs": [
+      "tests/security/**/*.test.ts",
+      "tests/**/*.security.test.ts",
+      "tests/core/{private-hosts,robots-txt,polite-crawler,fetch-layer-user-agent,fetch-layer-path}*.test.ts",
+      "tests/engine/{sanitize-injection,robots-gate}*.test.ts",
+      "tests/ci/checkout-credentials.test.ts"
+    ],
+    "unguarded": []
+  },
+  "effect": {
+    "globs": [
+      "tests/effect/**/*.test.ts",
+      "tests/**/*.effect.test.ts",
+      "tests/core/{no-nested-run,proc,proc-child-cap,fault-injection}.test.ts",
+      "tests/cli/run-dispose.test.ts"
+    ],
+    "unguarded": ["unbounded Effect.all and forEach over dynamic lists"]
+  },
+  "mcp-cli": {
+    "globs": [
+      "tests/mcp/**/*.test.ts",
+      "tests/**/*.mcp-cli.test.ts",
+      "tests/contract/**/*.test.ts",
+      "tests/commands/mcp*.test.ts",
+      "tests/cli/exit-codes.test.ts"
+    ],
+    "unguarded": ["MCP cancellation", "EPIPE on a closed stdout", "NDJSON flush on exit"]
+  },
+  "parsing": {
+    "globs": [
+      "tests/parsing/**/*.test.ts",
+      "tests/**/*.parsing.test.ts",
+      "tests/engine/{url,canonical-url,decode,map-gzip,parse-pdf-caps}*.test.ts",
+      "tests/core/fetch-body-cap.test.ts",
+      "tests/lib/search-hitkey.test.ts"
+    ],
+    "unguarded": ["JSON.parse casts in the known list of scripts/bugs-check.ts"]
+  },
+  "tests-build": {
+    "globs": [
+      "tests/quality/{bugs-check,rule-greps,practices-config,sandbox,installed-deps,limits,exports,markdown-links}.test.ts",
+      "tests/ci/**/*.test.ts"
+    ],
+    "unguarded": []
+  },
+  "jev": {
+    "globs": [
+      "tests/jev/{definition-lint,machine-replay}*.test.ts",
+      "tests/jev/route.test.ts",
+      "tests/machines/**/*.test.ts"
+    ],
+    "unguarded": ["Jev fallback logging", "Mastra resume-schema drift"]
+  },
+  "os": {
+    "globs": [
+      "tests/os/**/*.test.ts",
+      "tests/core/{platform,platform-parity,file-url-paths}.test.ts",
+      "tests/lib/home-fallback.test.ts",
+      "tests/jev/key-platform.test.ts"
+    ],
+    "unguarded": []
+  },
+  "cross-branch": {
+    "globs": [
+      "tests/cross-branch/**/*.test.ts",
+      "tests/commands/mcp.test.ts",
+      "tests/quality/search-determinism.test.ts"
+    ],
+    "unguarded": ["two branches that rewrite one pinned string"]
+  }
+}

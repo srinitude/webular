@@ -14,8 +14,7 @@ import { toNodeHandler } from '@modelcontextprotocol/node'
 import { createMcpHandler, type Server } from '@modelcontextprotocol/server'
 import { serveStdio } from '@modelcontextprotocol/server/stdio'
 import { Config, Effect } from 'effect'
-import manifest from '../.claude-plugin/plugin.json' with { type: 'json' }
-import { appResources } from './apps.ts'
+import manifest from '../plugin.json' with { type: 'json' }
 import { type CommandFailed, commandTools, runCommand } from './commands.ts'
 import descriptions from './descriptions.json' with { type: 'json' }
 import { runtime } from './runtime.ts'
@@ -48,8 +47,9 @@ export const server = new MCPServer({
   name: 'webular',
   version: manifest.version,
   description: descriptions.server,
+  // Shown to the model at initialize: when to call webular, one example, and the CLI names.
+  instructions: descriptions.instructions,
   tools: Object.fromEntries(commandTools.map((t) => [t.id, tool(t)])),
-  appResources,
 })
 
 // MCPServer.startStdio and startHTTP hardcode legacy: 'reject', so a client
@@ -69,9 +69,22 @@ const handleHttp = toNodeHandler(createMcpHandler(instance, { legacy: 'stateless
   onerror,
 })
 
+// DNS rebinding guard: only loopback Host and Origin values reach /mcp; any other
+// gets 403, as the MCP spec asks of a local HTTP server.
+// portless names (*.localhost) resolve to loopback too (RFC 6761), so they pass.
+const loopback = (url: string) =>
+  URL.canParse(url) &&
+  /^(localhost|127\.0\.0\.1|\[::1\]|.+\.localhost)$/.test(new URL(url).hostname)
+const trusted = ({ host, origin }: { host?: string | undefined; origin?: string | undefined }) =>
+  loopback(`http://${host}`) && (origin === undefined || loopback(origin))
+
 const listen = (port: number) =>
   Effect.callback<ReturnType<typeof createServer>>((resume) => {
     const http = createServer((req, res) => {
+      if (!trusted(req.headers)) {
+        res.writeHead(403).end()
+        return
+      }
       if (new URL(req.url ?? '/', 'http://localhost').pathname !== '/mcp') {
         res.writeHead(404).end()
         return

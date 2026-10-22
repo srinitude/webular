@@ -1,7 +1,8 @@
 // One spawn helper for every command test — stdout/stderr drain CONCURRENTLY
 // (sequential drains deadlock once a pipe passes 64KB; see src/core/proc.ts).
-import { Effect, Stream } from 'effect'
+import { Config, Effect, FileSystem, Option, Stream } from 'effect'
 import { ChildProcess, ChildProcessSpawner } from 'effect/process'
+import { exitCodeOf, IN_PROCESS } from '../../src/core/effect.ts'
 import { ROOT } from './root.ts'
 
 export interface CliResult {
@@ -16,6 +17,29 @@ export interface CliOptions {
   exec?: string
 }
 
+// A cold `bun src/commands/<name>.ts` transpiles the whole module graph on every
+// spawn (4-9 s each on a loaded host, against about 1 s for the bundle), which
+// is what pushed command tests past the 30 s budget. So a spawn runs the built
+// dist/commands/<name>.js while it is at least as new as every file under src/;
+// a stale or missing build falls back to the source, so a test never runs old code.
+const mtimeMs = (info: { readonly mtime: Option.Option<Date> }) =>
+  Option.match(info.mtime, { onNone: () => 0, onSome: (d) => d.getTime() })
+
+export const builtEntry = Effect.fnUntraced(function* (entry: string, root: string = ROOT) {
+  const name = /^src\/commands\/([\w-]+)\.ts$/.exec(entry)?.[1]
+  if (!name) return entry
+  const fs = yield* FileSystem.FileSystem
+  const built = yield* Effect.option(fs.stat(`${root}dist/commands/${name}.js`))
+  if (Option.isNone(built)) return entry
+  const files = yield* fs.readDirectory(`${root}src`, { recursive: true })
+  const times = yield* Effect.forEach(
+    files,
+    (f) => Effect.map(fs.stat(`${root}src/${f}`), (i) => (i.type === 'File' ? mtimeMs(i) : 0)),
+    { concurrency: 16 },
+  )
+  return mtimeMs(built.value) >= Math.max(...times) ? `dist/commands/${name}.js` : entry
+})
+
 const text = <E>(s: Stream.Stream<Uint8Array, E>) => Stream.mkString(Stream.decodeText(s))
 
 // An explicit env replaces the parent's; no env inherits it. A child skips the
@@ -23,18 +47,37 @@ const text = <E>(s: Stream.Stream<Uint8Array, E>) => Stream.mkString(Stream.deco
 // writes .cache/webular (into HOME, or into the repo when HOME is unset).
 // A child runs with Jev off unless the caller's env sets WEBULAR_JEV, so no
 // command test reads the Keychain key or waits on a live docs guard and Jev call.
+// An explicit env with no PATH key (any case) keeps the parent's PATH, read under
+// either spelling: Windows names it "Path", so a bare Config.String('PATH') fails there.
+const parentPath = Config.String('PATH').pipe(
+  Config.orElse(() => Config.String('Path')),
+  Config.withDefault(''),
+)
+const childEnv = (env: CliOptions['env']) =>
+  Effect.gen(function* () {
+    if (env === undefined) return { WEBULAR_JEV: 'off' }
+    const ownPath = Object.keys(env).some((k) => k.toUpperCase() === 'PATH')
+    const PATH = ownPath ? '' : yield* parentPath
+    return { WEBULAR_JEV: 'off', WEBULAR_NO_CACHE: '1', ...(PATH && { PATH }), ...env }
+  })
+
 export const runCli = (
   entry: string,
   args: string[],
   opts: CliOptions = {},
-): Effect.Effect<CliResult, Error, ChildProcessSpawner.ChildProcessSpawner> =>
+): Effect.Effect<
+  CliResult,
+  Error,
+  ChildProcessSpawner.ChildProcessSpawner | FileSystem.FileSystem
+> =>
   Effect.scoped(
     Effect.gen(function* () {
       const spawner = yield* ChildProcessSpawner.ChildProcessSpawner
+      const run = yield* builtEntry(entry)
       const handle = yield* spawner.spawn(
-        ChildProcess.make(opts.exec ?? 'bun', [`${ROOT}${entry}`, ...args], {
+        ChildProcess.make(opts.exec ?? 'bun', [`${ROOT}${run}`, ...args], {
           cwd: opts.cwd ?? ROOT,
-          env: { WEBULAR_JEV: 'off', ...(opts.env && { WEBULAR_NO_CACHE: '1', ...opts.env }) },
+          env: yield* childEnv(opts.env),
           extendEnv: opts.env === undefined,
           detached: false,
         }),
@@ -46,3 +89,93 @@ export const runCli = (
       return { code: Number(code), out, err }
     }),
   ).pipe(Effect.mapError((e) => new Error(e.message)))
+
+// The same command run in this process: the entry's runMain hands its program
+// to the IN_PROCESS seam, which runs it with runCli's argv, env, and cwd while
+// stdout and stderr are captured. Calls run one at a time (globals are swapped).
+// Keep one runCli spawn per surface as the real-process smoke test.
+type Write = typeof process.stdout.write
+let loads = 0
+
+const capture =
+  (sink: string[]): Write =>
+  (chunk: string | Uint8Array, ...rest: unknown[]) => {
+    sink.push(typeof chunk === 'string' ? chunk : new TextDecoder().decode(chunk))
+    const done = rest.find((r) => typeof r === 'function') as (() => void) | undefined
+    done?.()
+    return true
+  }
+
+// The process state a run swaps, so restore puts every piece back.
+const snapshot = () => ({
+  argv: [...process.argv],
+  env: { ...process.env },
+  cwd: process.cwd(),
+  out: process.stdout.write,
+  err: process.stderr.write,
+  outTTY: process.stdout.isTTY,
+  errTTY: process.stderr.isTTY,
+})
+
+const restoreFrom = (saved: ReturnType<typeof snapshot>) =>
+  Effect.sync(() => {
+    process.argv.splice(0, process.argv.length, ...saved.argv)
+    for (const key of Object.keys(process.env)) delete process.env[key]
+    Object.assign(process.env, saved.env)
+    process.chdir(saved.cwd)
+    process.stdout.write = saved.out
+    process.stderr.write = saved.err
+    process.stdout.isTTY = saved.outTTY
+    process.stderr.isTTY = saved.errTTY
+  })
+
+const swapGlobals = (entry: string, args: string[], opts: CliOptions) =>
+  Effect.sync(() => {
+    const out: string[] = []
+    const err: string[] = []
+    const saved = snapshot()
+    const env = opts.env
+      ? { WEBULAR_JEV: 'off', WEBULAR_NO_CACHE: '1', ...opts.env }
+      : { ...process.env, WEBULAR_JEV: 'off' }
+    process.argv.splice(0, process.argv.length, process.execPath, `${ROOT}${entry}`, ...args)
+    for (const key of Object.keys(process.env)) delete process.env[key]
+    for (const [key, value] of Object.entries(env))
+      if (value !== undefined) process.env[key] = value
+    process.chdir(opts.cwd ?? ROOT)
+    process.stdout.write = capture(out)
+    process.stderr.write = capture(err)
+    process.stdout.isTTY = false
+    process.stderr.isTTY = false
+    return { out, err, restore: restoreFrom(saved) }
+  })
+
+const loadProgram = (entry: string) =>
+  Effect.gen(function* () {
+    const seen: { program?: Parameters<typeof exitCodeOf>[0] } = {}
+    const slot = globalThis as { [IN_PROCESS]?: (p: Parameters<typeof exitCodeOf>[0]) => void }
+    slot[IN_PROCESS] = (program) => {
+      seen.program = program
+    }
+    yield* Effect.tryPromise({
+      try: () => import(`${ROOT}${entry}?in-process=${++loads}`),
+      catch: (e) => new Error(`${entry}: import failed: ${String(e)}`),
+    }).pipe(Effect.ensuring(Effect.sync(() => delete slot[IN_PROCESS])))
+    if (!seen.program) return yield* Effect.fail(new Error(`${entry} never called runMain`))
+    return seen.program
+  })
+
+export const runInProcess = (
+  entry: string,
+  args: string[],
+  opts: Omit<CliOptions, 'exec'> = {},
+): Effect.Effect<CliResult, Error> =>
+  Effect.acquireUseRelease(
+    swapGlobals(entry, args, opts),
+    ({ out, err }) =>
+      Effect.map(Effect.flatMap(loadProgram(entry), exitCodeOf), (code) => ({
+        code,
+        out: out.join(''),
+        err: err.join(''),
+      })),
+    ({ restore }) => restore,
+  )

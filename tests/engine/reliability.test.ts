@@ -6,8 +6,9 @@ import { describe, expect, test } from 'bun:test'
 import type * as BunServices from '@effect/platform-bun/BunServices'
 import { Effect } from 'effect'
 import { fetchTextOrArchive, rawCapture } from '../../src/core/archive.ts'
-import { fetchText, retryAfterMs } from '../../src/core/http.ts'
+import { fetchText } from '../../src/core/http.ts'
 import { HttpStatusError } from '../../src/core/http-body.ts'
+import { retryAfterMs } from '../../src/core/retry-after.ts'
 import { type Routes, useFixture } from '../_support/fixture.ts'
 import { eff } from '../_support/run.ts'
 
@@ -56,10 +57,10 @@ const run = <A, E>(body: () => Generator<Effect.Effect<unknown, E, BunServices.B
 
 describe('retryAfterMs — RFC 9110 delay-seconds or HTTP-date', () => {
   const now = Date.parse('2026-10-20T00:00:00Z')
-  test('reads seconds, caps huge values, rejects junk', () => {
+  test('reads seconds uncapped, rejects junk', () => {
     expect(retryAfterMs('2', now)).toBe(2000)
     expect(retryAfterMs('0', now)).toBe(0)
-    expect(retryAfterMs('999', now)).toBe(10_000)
+    expect(retryAfterMs('999', now)).toBe(999_000)
     expect(retryAfterMs('-1', now)).toBeUndefined()
     expect(retryAfterMs('soon', now)).toBeUndefined()
     expect(retryAfterMs(null, now)).toBeUndefined()

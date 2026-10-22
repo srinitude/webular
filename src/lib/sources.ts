@@ -4,13 +4,13 @@
 // completion-ordered. Readability runs on at most maxHtml characters when the
 // caller caps it (answer mode: it costs 1-3 s of CPU per ~1 MB page).
 import { availableParallelism } from 'node:os'
-import { Context, Effect, Exit, Layer, Ref, Semaphore } from 'effect'
+import { Cause, Config, Context, Effect, Exit, Layer, Option, Ref, Semaphore } from 'effect'
 import { z } from 'zod'
 import { hostConcurrency } from '../core/budget.ts'
-import { fetchText } from '../core/http.ts'
-import { errMsg } from '../core/output.ts'
-import { htmlToArticle } from './html.ts'
-import { withArchiveCopy } from './sources/archive-copy.ts'
+import { dedupeKey } from '../core/url.ts'
+import { textAndImages } from './html.ts'
+import type { PageImage } from './html-images.ts'
+import { fetchOne } from './sources/fetch-one.ts'
 
 // The one zod mirror of the {url, reason} partial-failure shape — composed
 // into every fan-out workflow's output schema so they cannot drift.
@@ -23,11 +23,15 @@ export const fetchErrorsSchema = z.array(z.object({ url: z.string(), reason: z.s
 // kills its worker; raise PARSE_POOL_CAP or transfer bytes if parse CPU or
 // copy cost still dominates.
 const PARSE_POOL_CAP = 4
+// A worker that never replies times out instead of holding its permit forever.
+// A ~1 MB page parses in 1-3 s; WEBULAR_PARSE_TIMEOUT_MS overrides the 30 s.
+const parseTimeoutMs = Config.Int('WEBULAR_PARSE_TIMEOUT_MS').pipe(Config.withDefault(30_000))
 // Bun's Worker carries ref/unref; the DOM lib type in scope does not.
 type BunWorker = Worker & { ref(): void; unref(): void }
 interface PoolState {
   readonly idle: Ref.Ref<readonly BunWorker[]>
   readonly broken: Ref.Ref<boolean>
+  readonly timeoutMs: number
 }
 
 // From src this module sits in src/lib beside parse-worker.ts; built, it
@@ -37,7 +41,14 @@ const workerUrl = new URL(
   import.meta.url,
 ).href
 
-const parseInThread = (html: string) => Effect.try(() => htmlToArticle(html).text)
+type Parsed = {
+  readonly text: string
+  readonly images: PageImage[]
+  readonly rows?: string[]
+  readonly published?: string
+}
+const parseInThread = (html: string, base: string) =>
+  Effect.try((): Parsed => textAndImages(html, base))
 
 const takeWorker = ({ idle }: PoolState) =>
   Ref.modify(idle, (workers) => [workers.at(-1), workers.slice(0, -1)] as const).pipe(
@@ -49,13 +60,15 @@ const takeWorker = ({ idle }: PoolState) =>
   )
 
 // A healthy reply (text or a parse error) returns the worker to the pool; a
-// crash (`undefined`) or an interrupt terminates it, and a crash also turns
-// the pool off for the rest of the pool's life.
+// crash (`undefined`), a timeout, or an interrupt terminates it (the next parse
+// starts a fresh one), and a crash also turns the pool off for its life.
 const releaseWorker =
   ({ idle, broken }: PoolState) =>
-  (worker: BunWorker, exit: Exit.Exit<string | undefined, unknown>) => {
+  (worker: BunWorker, exit: Exit.Exit<Parsed | undefined, unknown>) => {
     const crashed = Exit.isSuccess(exit) && exit.value === undefined
-    if (crashed || Exit.hasInterrupts(exit)) {
+    const timedOut =
+      Exit.isFailure(exit) && Option.exists(Cause.findErrorOption(exit.cause), Cause.isTimeoutError)
+    if (crashed || timedOut || Exit.hasInterrupts(exit)) {
       return Effect.sync(() => worker.terminate()).pipe(
         Effect.andThen(crashed ? Ref.set(broken, true) : Effect.void),
       )
@@ -66,31 +79,37 @@ const releaseWorker =
     )
   }
 
-const askWorker = (worker: BunWorker, html: string) =>
-  Effect.callback<string | undefined, unknown>((resume) => {
-    worker.onmessage = (event: MessageEvent<{ text?: string; error?: string }>) => {
-      const { text, error } = event.data
-      resume(error === undefined ? Effect.succeed(text ?? '') : Effect.fail(new Error(error)))
+const askWorker = (worker: BunWorker, html: string, base: string) =>
+  Effect.callback<Parsed | undefined, unknown>((resume) => {
+    worker.onmessage = (event: MessageEvent<{ parsed?: Parsed; error?: string }>) => {
+      const { parsed, error } = event.data
+      resume(
+        error === undefined
+          ? Effect.succeed(parsed ?? { text: '', images: [] })
+          : Effect.fail(new Error(error)),
+      )
     }
     worker.onerror = () => resume(Effect.succeed(undefined))
-    worker.postMessage(html)
+    worker.postMessage({ html, base })
   })
 
-const parseInWorker = (state: PoolState, html: string) =>
+const parseInWorker = (state: PoolState, html: string, base: string) =>
   Effect.acquireUseRelease(
     takeWorker(state),
-    (worker) => askWorker(worker, html),
+    (worker) => Effect.timeout(askWorker(worker, html, base), state.timeoutMs),
     releaseWorker(state),
-  ).pipe(
-    Effect.flatMap((text) => (text === undefined ? parseInThread(html) : Effect.succeed(text))),
-  )
+  ).pipe(Effect.flatMap((p) => (p === undefined ? parseInThread(html, base) : Effect.succeed(p))))
 
 // The pool's permits and idle workers live as long as the runtime that builds
-// this layer. Building it starts no worker; closing it terminates the idle ones
-// (a busy one is terminated by its interrupted parse).
+// this layer. Building it starts no worker; closing it, or `drain`, terminates
+// the idle ones (a busy one is terminated by its interrupted parse). A drained
+// pool stays usable: the next parse starts a fresh worker.
 const terminateIdle = (idle: PoolState['idle']) =>
-  Effect.flatMap(Ref.get(idle), (workers) =>
-    Effect.forEach(workers, (worker) => Effect.sync(() => worker.terminate()), { discard: true }),
+  Effect.flatMap(Ref.getAndSet(idle, []), (workers) =>
+    Effect.forEach(workers, (worker) => Effect.sync(() => worker.terminate()), {
+      concurrency: 1,
+      discard: true,
+    }),
   )
 
 const makePool = Effect.gen(function* () {
@@ -98,42 +117,52 @@ const makePool = Effect.gen(function* () {
   const state: PoolState = {
     idle: yield* Effect.acquireRelease(Ref.make<readonly BunWorker[]>([]), terminateIdle),
     broken: yield* Ref.make(typeof Worker === 'undefined'),
+    timeoutMs: yield* Effect.orDie(parseTimeoutMs),
   }
-  const parse = (html: string) =>
+  const parse = (html: string, base: string) =>
     Effect.flatMap(Ref.get(state.broken), (broken) =>
-      broken ? parseInThread(html) : permits.withPermit(parseInWorker(state, html)),
+      broken ? parseInThread(html, base) : permits.withPermit(parseInWorker(state, html, base)),
     )
-  return { parse }
+  return { parse, drain: terminateIdle(state.idle) }
 })
 
 export class ParsePool extends Context.Service<
   ParsePool,
-  { readonly parse: (html: string) => Effect.Effect<string, unknown> }
+  {
+    readonly parse: (html: string, base: string) => Effect.Effect<Parsed, unknown>
+    readonly drain: Effect.Effect<void>
+  }
 >()('webular/lib/ParsePool') {
   static readonly layer = Layer.effect(ParsePool, makePool)
 }
 
-// Article text for one page, off the main thread when Workers run; an
-// in-thread parse when they are missing or fail.
-export const parseArticleText = (html: string) => ParsePool.use((pool) => pool.parse(html))
+// Article text and images for one page, off the main thread when Workers run;
+// an in-thread parse when they are missing or fail.
+export const parseArticleText = (html: string, base = '') =>
+  ParsePool.use((pool) => pool.parse(html, base))
 
-interface SourceRef {
-  title: string
-  url: string
-}
+type SourceRef = { title: string; url: string }
 
 export interface SourceEntry {
   title: string
   url: string
   text: string
+  images?: PageImage[] | undefined
+  // ISO time from the page's JSON-LD datePublished, when it states one.
+  published?: string | undefined
+  // Table rows as plain lines; Readability drops link-dense tables.
+  rows?: string[] | undefined
 }
+
+// Table rows join the text for answers: a list page's "79 Au Gold." row
+// answers a number question that Readability's article text cannot.
+export const withRows = ({ rows, ...e }: SourceEntry): SourceEntry =>
+  rows?.length ? { ...e, text: `${e.text}\n\n${rows.join('\n')}` } : e
 
 interface FetchedSources {
   entries: SourceEntry[]
   errors: { url: string; reason: string }[]
 }
-
-type Outcome = { ok: true; entry: SourceEntry } | { ok: false; url: string; reason: string }
 
 // Small batches parse in-thread: in a fresh CLI process a worker's startup
 // (it loads Readability again) costs more than the overlap saves. Measured
@@ -141,35 +170,25 @@ type Outcome = { ok: true; entry: SourceEntry } | { ok: false; url: string; reas
 // 6 pages 6284 vs 2825.
 // ponytail: fixed cut from one machine's medians; re-measure if parse cost moves.
 const POOL_MIN_PAGES = 4
-// A dead page (404, 410, 5xx, network failure, timeout) reads from the Internet
-// Archive's closest capture, so one dead source does not drop out of an answer.
-const fetchOne = (src: SourceRef, timeoutMs: number, maxHtml: number, pooled: boolean) =>
-  withArchiveCopy(src.url, fetchText(src.url, { timeoutMs }), (capture) =>
-    fetchText(capture, { timeoutMs }),
-  ).pipe(
-    Effect.flatMap(({ value: html }) =>
-      (pooled ? parseArticleText : parseInThread)(html.slice(0, maxHtml)),
-    ),
-    Effect.match({
-      onSuccess: (text): Outcome => ({
-        ok: true,
-        entry: { title: src.title, url: src.url, text },
-      }),
-      onFailure: (err): Outcome => ({ ok: false, url: src.url, reason: errMsg(err) }),
-    }),
-  )
 
 export const fetchSources = Effect.fn('fetchSources')(function* (
   sources: SourceRef[],
   timeoutMs = 15_000,
   maxHtml = Number.POSITIVE_INFINITY,
+  typed = false,
 ) {
+  // One page under several spellings (#fragment, tracking params) is fetched and cited once.
+  const seen = new Set<string>()
+  const unique = sources.filter((s) => {
+    const key = dedupeKey(s.url) ?? s.url
+    return !seen.has(key) && Boolean(seen.add(key))
+  })
+  const pooled = unique.length >= POOL_MIN_PAGES
   const outcomes = yield* Effect.forEach(
-    sources,
-    (src) => fetchOne(src, timeoutMs, maxHtml, sources.length >= POOL_MIN_PAGES),
-    {
-      concurrency: yield* hostConcurrency,
-    },
+    unique,
+    (src) =>
+      fetchOne(src, { timeoutMs, maxHtml, typed }, pooled ? parseArticleText : parseInThread),
+    { concurrency: yield* hostConcurrency },
   )
   const out: FetchedSources = { entries: [], errors: [] }
   for (const outcome of outcomes) {

@@ -3,7 +3,7 @@
 // Crossref, OpenAlex, and npm live in scholarly.ts.
 // All public, documented, no account. WEBULAR_SOURCE_ORIGIN swaps each
 // endpoint's origin (path kept) so tests run against the local fixture.
-import { Config, Effect } from 'effect'
+import { Config, Effect, Schema } from 'effect'
 import { DOMParser } from 'linkedom'
 import { FetchError } from '../core/decode.ts'
 import { fetchText } from '../core/http.ts'
@@ -46,14 +46,18 @@ export function plain(html: string): string {
     .trim()
 }
 
+const decodeJson = Schema.decodeUnknownEffect(
+  Schema.fromJsonString(Schema.Record(Schema.String, Schema.Unknown)),
+)
+
 function getJson(
   url: string,
 ): Effect.Effect<Record<string, unknown>, FetchError | HttpStatusError> {
   return Effect.flatMap(fetchText(url, { timeoutMs: SOURCE_TIMEOUT_MS }), (body) =>
-    Effect.try({
-      try: () => JSON.parse(body) as Record<string, unknown>,
-      catch: () => new FetchError({ message: `fetch ${url}: response is not JSON` }),
-    }),
+    Effect.mapError(
+      decodeJson(body),
+      () => new FetchError({ message: `fetch ${url}: response is not JSON` }),
+    ),
   )
 }
 

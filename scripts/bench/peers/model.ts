@@ -4,7 +4,21 @@
 // registry entry, never new plumbing.
 import { Data, type Effect, Schema } from 'effect'
 
-export const Job = Schema.Literals(['search', 'scrape', 'crawl', 'extract', 'answer'])
+export const Job = Schema.Literals([
+  'search',
+  'scrape',
+  'crawl',
+  'map',
+  'extract',
+  'answer',
+  'research',
+  'summarize',
+  'media',
+  'parse',
+  'batch',
+  'act',
+  'monitor',
+])
 export type Job = typeof Job.Type
 
 // A check is data, so plan files can add tasks and metrics without code.
@@ -47,7 +61,7 @@ export const Plan = Schema.Struct({
 })
 export type Plan = typeof Plan.Type
 
-export interface Citation {
+interface Citation {
   url: string
   text: string
 }
@@ -102,6 +116,7 @@ export interface RunRecord {
 
 export const builtinMetrics: readonly MetricDef[] = [
   { name: 'accuracy', dimension: 'quality', better: 'higher', unit: 'share' },
+  { name: 'answerAccuracy', dimension: 'quality', better: 'higher', unit: 'share' },
   { name: 'citationPrecision', dimension: 'quality', better: 'higher', unit: 'share' },
   { name: 'latencyP50Ms', dimension: 'speed', better: 'lower', unit: 'ms' },
   { name: 'latencyP95Ms', dimension: 'speed', better: 'lower', unit: 'ms' },

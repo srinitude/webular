@@ -1,0 +1,651 @@
+{
+  "decision": "image.kind",
+  "baseline-wins": [
+    {
+      "id": "pilot-images-infographic-01",
+      "input": {
+        "url": "https://www.cdc.gov/healthy-schools/web-graphics/index.html",
+        "title": "cdc.gov",
+        "question": "In the Sleepy Kids infographic, how many high schoolers out of 10 don't get enough sleep?",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["infographic"]
+    },
+    {
+      "id": "pilot-images-infographic-02",
+      "input": {
+        "url": "https://www.nhlbi.nih.gov/resources/copd-portraits-lung-health-any-age-infographic",
+        "title": "nhlbi.nih.gov",
+        "question": "In the COPD: Portraits of Lung Health at Any Age infographic, what is the first way listed for people in their 20s or 30s to look after their lungs?",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["infographic"]
+    },
+    {
+      "id": "pilot-images-infographic-03",
+      "input": {
+        "url": "https://www.census.gov/library/visualizations/2026/comm/median-household-income.html",
+        "title": "census.gov",
+        "question": "What 2025 median household income does the Census Bureau infographic show?",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["infographic"]
+    },
+    {
+      "id": "pilot-images-infographic-04",
+      "input": {
+        "url": "https://www.ready.gov/publications",
+        "title": "ready.gov",
+        "question": "In the 12 Ways to Prepare graphic, what is the third way shown in the top row?",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["infographic"]
+    }
+  ],
+  "baseline-loses": [
+    {
+      "id": "pilot-images-chart-01",
+      "input": {
+        "url": "https://ourworldindata.org/grapher/life-expectancy?tab=chart&country=JPN",
+        "title": "ourworldindata.org",
+        "question": "In the life expectancy line chart for Japan, what is the first year labeled on the x-axis, at the left end of Japan's line?",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["chart"]
+    },
+    {
+      "id": "pilot-images-chart-02",
+      "input": {
+        "url": "https://ourworldindata.org/grapher/unemployment-rate?tab=chart&country=USA~OWID_WRL",
+        "title": "ourworldindata.org",
+        "question": "In the unemployment rate chart for the United States and the World, in which year does the United States line reach its highest point?",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["chart"]
+    },
+    {
+      "id": "pilot-images-chart-03",
+      "input": {
+        "url": "https://ourworldindata.org/grapher/temperature-anomaly?tab=chart",
+        "title": "ourworldindata.org",
+        "question": "In the chart of world temperature change relative to the pre-industrial period, in which year does the Average line reach its highest point?",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["chart"]
+    },
+    {
+      "id": "pilot-images-chart-04",
+      "input": {
+        "url": "https://www.eia.gov/energyexplained/us-energy-facts/",
+        "title": "eia.gov",
+        "question": "In the U.S. energy consumption by source and sector diagram, what quadrillion Btu value is labeled inside the nuclear bar?",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["chart"]
+    },
+    {
+      "id": "pilot-images-chart-05",
+      "input": {
+        "url": "https://www.cdc.gov/nchs/products/databriefs/db492.htm",
+        "title": "cdc.gov",
+        "question": "In Figure 1 of the data brief, what is the labeled life expectancy at age 65 for both sexes in 2021, in years?",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["chart"]
+    },
+    {
+      "id": "pilot-images-chart-06",
+      "input": {
+        "url": "https://en.wikipedia.org/wiki/Keeling_Curve",
+        "title": "wikipedia.org",
+        "question": "In the main Keeling Curve chart of monthly mean CO2 concentration at Mauna Loa, what unit is shown in the y-axis label?",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["chart"]
+    },
+    {
+      "id": "pilot-images-table-01",
+      "input": {
+        "url": "https://commons.wikimedia.org/wiki/File:Mendelejevs_periodiska_system_1871.png",
+        "title": "wikimedia.org",
+        "question": "In the 1871 periodic table shown in the image, what number is printed after the equals sign for Ca (calcium), in row 4 under Gruppo II?",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["table"]
+    },
+    {
+      "id": "pilot-images-table-02",
+      "input": {
+        "url": "https://pubs.usgs.gov/wri/wri004198/",
+        "title": "pubs.usgs.gov",
+        "question": "In Table 3 (Spearman rank correlation coefficients between fecal coliform and water-quality field measurements), what is the pH coefficient for site no. 9?",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["table"]
+    },
+    {
+      "id": "pilot-images-table-03",
+      "input": {
+        "url": "https://ntrs.nasa.gov/api/citations/19930091395/downloads/19930091395.pdf",
+        "title": "ntrs.nasa.gov",
+        "question": "In Table V (Tail Surface Force and Hull Bending Moment Coefficients) of NACA Report No. 325, what bending moment M (m lb.) is listed for run maneuver 5C (turn), rudder position 7.85 R?",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["table"]
+    },
+    {
+      "id": "pilot-images-table-04",
+      "input": {
+        "url": "https://pubs.usgs.gov/wri/wri004198/",
+        "title": "pubs.usgs.gov",
+        "question": "In Table 2 (Summary statistics for fecal coliform concentrations for sampling sites on Wyoming streams), what is the Maximum fecal coliform concentration, in colonies per 100 milliliters, for site no. 14?",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["table"]
+    },
+    {
+      "id": "pilot-images-table-05",
+      "input": {
+        "url": "https://www.census.gov/library/visualizations/2025/demo/top-5-largest-population-increases-2023-2024.html",
+        "title": "census.gov",
+        "question": "In the Census Bureau graphic on population increases from July 2023 to July 2024, what numeric increase is shown for New York, NY, in the Top 5 Cities With the Largest Numeric Increase panel?",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["table"]
+    },
+    {
+      "id": "pilot-images-scan-01",
+      "input": {
+        "url": "https://archive.org/details/originofspecies00darwuoft",
+        "title": "archive.org",
+        "question": "On the page image with printed page number 23, under the running head INTRODUCTION, which words are printed in italics?",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["text_image"]
+    },
+    {
+      "id": "pilot-images-scan-02",
+      "input": {
+        "url": "https://patents.google.com/patent/US223898A",
+        "title": "patents.google.com",
+        "question": "On the scanned first page of the specification, headed UNITED STATES PATENT OFFICE, what Case No. is printed in parentheses in the opening paragraph?",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["text_image"]
+    },
+    {
+      "id": "pilot-images-scan-03",
+      "input": {
+        "url": "https://www.loc.gov/resource/sn83030214/1912-04-16/ed-1/?sp=1",
+        "title": "loc.gov",
+        "question": "On page 1 of the New-York Tribune of April 16, 1912, what number begins the full-width banner headline at the top of the page, below the masthead?",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["text_image"]
+    },
+    {
+      "id": "pilot-images-scan-04",
+      "input": {
+        "url": "https://ntrs.nasa.gov/citations/19650003011",
+        "title": "ntrs.nasa.gov",
+        "question": "On the scanned cover of this NASA Technical Note (TN D-2535), who is named as the author under the title?",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["text_image"]
+    },
+    {
+      "id": "pilot-images-scan-05",
+      "input": {
+        "url": "https://commons.wikimedia.org/wiki/File:The_biology_of_the_frog_(Page_273,_Fig._75)_BHL7720636.jpg",
+        "title": "wikimedia.org",
+        "question": "On this scanned book page, the caption of Fig. 75 names what the figure shows. Give the caption's first sentence, without the label-letter key.",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["text_image"]
+    },
+    {
+      "id": "pilot-images-diagram-01",
+      "input": {
+        "url": "https://commons.wikimedia.org/wiki/File:Schematic_diagram_of_the_human_eye_en.svg",
+        "title": "wikimedia.org",
+        "question": "In this labeled eye diagram, a line from a label in the lower right ends at the small spot at the back of the eye where the optic nerve meets the retina. What is the exact text of that label?",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["diagram"]
+    },
+    {
+      "id": "pilot-images-diagram-02",
+      "input": {
+        "url": "https://patents.google.com/patent/US174465A",
+        "title": "patents.google.com",
+        "question": "On the second drawing sheet, Fig. 6 shows three boxes of instruments in a series circuit. Which single letter labels the instrument in the left-hand box that is wired directly to the battery?",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["diagram"]
+    },
+    {
+      "id": "pilot-images-diagram-03",
+      "input": {
+        "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Overview",
+        "title": "developer.mozilla.org",
+        "question": "In the diagram of an HTTP request passing from the client to the server, how many boxes labeled Proxy are drawn between the Client box and the Server box?",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["diagram"]
+    },
+    {
+      "id": "pilot-images-diagram-04",
+      "input": {
+        "url": "https://www.nasa.gov/missions/artemis/artemis-ii-map/",
+        "title": "nasa.gov",
+        "question": "On the Artemis II mission map, what is the mean lunar far side flyby altitude in miles?",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["diagram"]
+    },
+    {
+      "id": "pilot-images-product-01",
+      "input": {
+        "url": "https://world.openfoodfacts.org/product/3017620422003",
+        "title": "openfoodfacts.org",
+        "question": "On the front package photo of this jar, what color is the rectangular tag that holds the weight figure at the lower right of the label?",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["product_photo"]
+    },
+    {
+      "id": "pilot-images-product-02",
+      "input": {
+        "url": "https://world.openfoodfacts.org/product/5449000000996",
+        "title": "openfoodfacts.org",
+        "question": "In the nutrition photo of this can, the footnote starting with an asterisk gives the reference intake of an average adult. What two energy values are printed in brackets?",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["product_photo"]
+    },
+    {
+      "id": "pilot-images-product-03",
+      "input": {
+        "url": "https://commons.wikimedia.org/wiki/File:Products_Products_Products_(3523437544).jpg",
+        "title": "wikimedia.org",
+        "question": "In this photo of picnic food and drinks, what brand name is printed on the leopard-print canned drink at the lower left?",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["product_photo"]
+    },
+    {
+      "id": "pilot-images-product-04",
+      "input": {
+        "url": "https://www.fda.gov/safety/recalls-market-withdrawals-safety-alerts/j-m-smucker-co-issues-voluntary-recall-select-jifr-products-sold-us-potential-salmonella",
+        "title": "fda.gov",
+        "question": "In the second product photo, the back label of a 28 oz creamy jar, what date is printed under BEST IF USED BY?",
+        "images": [
+          {
+            "ref": "00000000-0000-4000-8000-000000000000",
+            "type": "image",
+            "format": "png",
+            "data_base64": "iVBORw0KGgo=",
+            "alt": null,
+            "caption": null,
+            "width": 1280,
+            "height": 800,
+            "region": "main_content",
+            "repeats": 1
+          }
+        ]
+      },
+      "label": ["product_photo"]
+    }
+  ]
+}

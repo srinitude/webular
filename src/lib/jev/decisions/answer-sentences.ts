@@ -7,7 +7,7 @@ import { defineDecision } from '../define.ts'
 import { CONFIDENCE_BAR, noul, purpose, sureYes } from '../payload/index.ts'
 import { answerSentences } from './answer.ts'
 
-const DOCS = '88a6a003018eaea50167565a766a0d4a91d039cf93cc7dc2965d3ceba3a72caf'
+const DOCS = 'b0b26ab933a61b5d43ccccae5fbd009f445bfdcfd2808cac9e410a84f0fd8ca4'
 const MAX_SENTENCES = 18 // 18 candidate nouls + `any` per call
 const MAX_QUESTION = 300
 const MAX_SENTENCE = 600

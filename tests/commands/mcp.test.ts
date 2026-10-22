@@ -3,6 +3,7 @@
 import { describe, expect, test } from 'bun:test'
 
 import { Effect } from 'effect'
+import descriptions from '../../plugins/webular/src/descriptions.json' with { type: 'json' }
 import { runProc } from '../../src/core/proc.ts'
 import { runCli } from '../_support/cli.ts'
 import { ROOT } from '../_support/root.ts'
@@ -28,7 +29,7 @@ describe('webular mcp — MCP server tool listing', () => {
   )
 
   // A stdio MCP server lives as long as its stdin: it answers what arrives,
-  // then exits 0 once stdin closes.
+  // then exits 0 once stdin closes. No network; the 40 s limit is for load (a start takes ~10 s on a busy host).
   test(
     'serves until stdin closes, then exits 0',
     eff(
@@ -45,18 +46,19 @@ describe('webular mcp — MCP server tool listing', () => {
         }
         const { code, stdout } = yield* runProc(['bun', `${ROOT}src/commands/mcp.ts`], {
           cwd: ROOT,
-          timeoutMs: 12_000,
+          timeoutMs: 40_000,
           stdin: `${JSON.stringify(init)}\n`,
         })
         expect(code).toBe(0)
         expect(stdout).toContain('"serverInfo"')
-        // The client shows these instructions to the model: steer many URLs to batch.
-        expect(JSON.parse(stdout.split('\n')[0] ?? '').result.instructions).toBe(
-          'When you have two or more URLs, call batch once instead of calling scrape for each.',
-        )
+        // The client shows these instructions to the model: one text, shared with the plugin server.
+        const { instructions } = JSON.parse(stdout.split('\n')[0] ?? '').result
+        expect(instructions).toBe(descriptions.instructions)
+        expect(instructions).toContain('Call answer or research before replying')
+        expect(instructions).toContain('call batch once')
       }),
     ),
-    15_000,
+    45_000,
   )
 
   test(

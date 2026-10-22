@@ -31,9 +31,6 @@ const run = <A>(
     }).pipe(Effect.provide(BunServices.layer)),
   )
 
-const flagsOf = (s: Scenario) =>
-  s.reference.flatMap((step) => (Array.isArray(step) ? step.filter((a) => a.startsWith('--')) : []))
-
 test('every scenario states intent, outcome and a code eval that rejects a wrong reply', () =>
   run(() =>
     Effect.map(loadScenarios, (file) => {
@@ -62,14 +59,12 @@ test('each scenario names a real command, MCP tool and flags (contract first)', 
       )
       const shared = yield* fs.readFileString(`${ROOT}src/core/args.ts`)
       for (const s of file.scenarios.filter((x) => x.tool !== 'ReadMcpResourceTool')) {
-        const src = shared + (yield* fs.readFileString(`${ROOT}src/commands/${s.tool}.ts`))
         expect([s.id, s.tool in tools.tools]).toEqual([s.id, true])
-        for (const flag of flagsOf(s))
-          expect([s.id, flag, src.includes(`${flag.slice(2)}:`)]).toEqual([
-            s.id,
-            flag,
-            !(s.contractGaps ?? []).includes(flag),
-          ])
+        for (const step of s.reference.filter(Array.isArray)) {
+          const src = shared + (yield* fs.readFileString(`${ROOT}src/commands/${step[0]}.ts`))
+          for (const flag of step.filter((a) => a.startsWith('--')))
+            expect([s.id, flag, src.includes(`${flag.slice(2)}:`)]).toEqual([s.id, flag, true])
+        }
       }
     }),
   ))

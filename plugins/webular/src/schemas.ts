@@ -28,6 +28,7 @@ export const schemas = {
       .enum(['agent-browser', 'cua', 'off'])
       .optional()
       .describe('Render the page in a browser first: agent-browser, cua, or off'),
+    ignoreRobots: flag('Fetch even when robots.txt disallows the page; single URL only'),
   }),
   map: z.strictObject({ url, limit: count(10_000, 'Most URLs to return') }),
   summarize: z.strictObject({
@@ -61,7 +62,7 @@ export const schemas = {
       .min(1)
       .max(10)
       .optional()
-      .describe('Read only these pages, with no web search, and cite them'),
+      .describe('Read only these pages, with no web search, and cite them (repeat --urls)'),
   }),
   research: z.strictObject({
     topic: words('The topic to research'),
@@ -79,7 +80,7 @@ export const schemas = {
   }),
   monitor: z.strictObject({ url }),
   batch: z.strictObject({
-    urls: z.array(url).min(1).max(1000).optional().describe('The URLs to scrape'),
+    urls: z.array(url).min(1).max(1000).optional().describe('The URLs to scrape (repeat --urls)'),
     input: words('Path to a file with one URL per line').optional(),
     concurrency: count(32, 'Pages to fetch at once (default 4)'),
   }),
@@ -119,5 +120,24 @@ export const outputs: Partial<Record<keyof typeof schemas, z.ZodObject>> = {
   }),
   search: z.looseObject({
     source: z.enum(searchSources).optional().describe('The source that answered'),
+    errors: z
+      .array(z.looseObject({ url: z.string(), reason: z.string() }))
+      .optional()
+      .describe('Sent only when every source failed'),
+  }),
+  monitor: z.looseObject({ archivedFrom }),
+  summarize: z.looseObject({
+    picks: z
+      .array(
+        z.looseObject({
+          index: z.number().int(),
+          start: z.number().int(),
+          end: z.number().int(),
+          text: z.string(),
+        }),
+      )
+      .describe('Verbatim sentences; start and end are offsets into the cleaned page text'),
+    source_url: z.string().nullable().describe('The page read, which differs after a fallback'),
+    reason: z.string().optional().describe('Why the result is empty'),
   }),
 }

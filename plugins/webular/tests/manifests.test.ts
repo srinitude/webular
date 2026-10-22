@@ -88,6 +88,17 @@ test('the Claude Code manifest and marketplace entry match the plugin and the pa
     ),
   ))
 
+test('the Cursor marketplace matches the Claude Code marketplace', () =>
+  Effect.runPromise(
+    Effect.all(
+      [
+        readJson(`${repo}.claude-plugin/marketplace.json`, Schema.Unknown),
+        readJson(`${repo}.cursor-plugin/marketplace.json`, Schema.Unknown),
+      ],
+      { concurrency: 2 },
+    ).pipe(verify(([claude, cursor]) => expect(cursor).toEqual(claude))),
+  ))
+
 test('plugin code never reaches outside the plugin folder', () =>
   Effect.runPromise(
     noneContain(

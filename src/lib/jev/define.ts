@@ -5,6 +5,7 @@
 import { Effect } from 'effect'
 import { JEV_MODEL_DEFAULT, Jev, type JevAnswer, type JevRequest } from './client.ts'
 import { JevPayloadTooLarge } from './errors.ts'
+import type { JEV_LATEST_RELEASED } from './model.ts'
 import { type CONFIDENCE_BAR, JEV_TOKEN_CAP, payloadTokens, requestBytes } from './payload/index.ts'
 
 // Runs `jevPart` when Jev is available; any error uses `fallback`. The
@@ -35,8 +36,8 @@ interface Subtask {
   readonly payload: { readonly question: string }
 }
 
-// A pinned Jev model: a versioned id or jev-preview, never `jev`, `jev-latest`, or a `~alias`.
-type PinnedModel = `jev-${number}.${number}.${number}` | 'jev-preview'
+// The one pinned Jev model: the released constant, never `jev`, `jev-latest`, `jev-preview`, or a `~alias`.
+type PinnedModel = typeof JEV_LATEST_RELEASED
 
 export interface DecisionDef<I, A> {
   readonly name: string
@@ -111,7 +112,9 @@ export const defineDecision = <I, A>(def: DecisionDef<I, A>) =>
         def.name,
         () => def.fallback(input),
         (jev) =>
-          guardPayload(def.name, def.payload(input), def.maxTokens, def.model).pipe(
+          // A payload builder that throws fails here, so the fallback answers.
+          Effect.try(() => def.payload(input)).pipe(
+            Effect.flatMap((built) => guardPayload(def.name, built, def.maxTokens, def.model)),
             Effect.flatMap((req) => askJev(jev, def.name, req)),
             Effect.map((r) => {
               const picked = def.read(r.answers, def.bar, input)

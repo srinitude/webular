@@ -15,7 +15,10 @@ const stderrOf = (trace: string | undefined) =>
     Effect.sync(() => {
       const written: string[] = []
       const real = process.stderr.write
-      process.stderr.write = ((s: string) => (written.push(s), true)) as typeof real
+      process.stderr.write = ((s: string) => {
+        written.push(s)
+        return true
+      }) as typeof real
       return { written, real }
     }),
     ({ written }) =>

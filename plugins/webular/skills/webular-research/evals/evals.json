@@ -3,8 +3,9 @@
   "evals": [
     {
       "id": "answer-with-sources",
-      "prompt": "What does the Bun 1.3 release add? Give sources.",
-      "expected_behavior": [
+      "prompt": "What does the Bun release add? Give sources.",
+      "expected_output": "Calls search with a plain query, then scrape on two or three result URLs. Every fact in the answer sits next to a URL that a tool returned. Invents no URL.",
+      "assertions": [
         "Calls search with a plain query, then scrape on two or three result URLs",
         "Every fact in the answer sits next to a URL that a tool returned",
         "Invents no URL"
@@ -13,7 +14,8 @@
     {
       "id": "map-before-scrape",
       "prompt": "List the guide pages on https://bun.com/docs and summarize the install guide.",
-      "expected_behavior": [
+      "expected_output": "Calls map on the site before any scrape. Scrapes or summarizes only the install guide page. Keeps limit small unless asked for more.",
+      "assertions": [
         "Calls map on the site before any scrape",
         "Scrapes or summarizes only the install guide page",
         "Keeps limit small unless asked for more"
@@ -22,7 +24,8 @@
     {
       "id": "recover-from-bad-url",
       "prompt": "Read the page at bun.com/blog",
-      "expected_behavior": [
+      "expected_output": "Passes the full https:// URL, or retries once with it after an Invalid URL error. Does not guess the page content when a call fails.",
+      "assertions": [
         "Passes the full https:// URL, or retries once with it after an Invalid URL error",
         "Does not guess the page content when a call fails"
       ]
@@ -30,7 +33,8 @@
     {
       "id": "feed-from-page-url",
       "prompt": "What are the newest posts on https://bun.com/blog?",
-      "expected_behavior": [
+      "expected_output": "Calls feed with the plain page URL, without guessing a feed path first. Names the feedUrl the tool returned. Lists only items the tool returned.",
+      "assertions": [
         "Calls feed with the plain page URL, without guessing a feed path first",
         "Names the feedUrl the tool returned",
         "Lists only items the tool returned"
@@ -38,8 +42,9 @@
     },
     {
       "id": "archive-for-dead-page",
-      "prompt": "The page https://example.com/old-post is gone now. What did it say?",
-      "expected_behavior": [
+      "prompt": "The page https://example.com/old-post is gone. What did it say?",
+      "expected_output": "Calls scrape with archive set to true. Says the text came from the Wayback Machine copy that archivedFrom names. Does not guess the text when no archived copy comes back.",
+      "assertions": [
         "Calls scrape with archive set to true",
         "Says the text came from the Wayback Machine copy that archivedFrom names",
         "Does not guess the text when no archived copy comes back"
@@ -48,7 +53,8 @@
     {
       "id": "tools-still-connecting",
       "prompt": "Read the page https://bun.com/blog and tell me the newest post title, right as the session starts.",
-      "expected_behavior": [
+      "expected_output": "When no webular tool is listed yet, lists the webular server's MCP resources once instead of giving up. Then calls scrape on the page. Says the server did not connect only if the tools are still missing after that.",
+      "assertions": [
         "When no webular tool is listed yet, lists the webular server's MCP resources once instead of giving up",
         "Then calls scrape on the page",
         "Says the server did not connect only if the tools are still missing after that"
@@ -57,7 +63,8 @@
     {
       "id": "search-falls-back",
       "prompt": "Find three papers on retrieval-augmented generation, with links.",
-      "expected_behavior": [
+      "expected_output": "Calls search once, with the default source or with crossref or openalex. Names the source the result says answered. Makes no extra search call just to try another source after one succeeded.",
+      "assertions": [
         "Calls search once, with the default source or with crossref or openalex",
         "Names the source the result says answered",
         "Makes no extra search call just to try another source after one succeeded"
@@ -66,7 +73,7 @@
   ],
   "trigger_queries": {
     "should_trigger": [
-      "search the web for the latest Mastra release notes",
+      "search the web for the Mastra release notes",
       "scrape https://example.com and give me the text",
       "what pages are on docs.example.com?",
       "summarize this article for me: https://example.com/post",
@@ -75,7 +82,7 @@
       "map the site at https://bun.com",
       "research what people use for MCP servers on Bun",
       "find the RSS feed for https://example.com/blog",
-      "this page is dead now, can you get the archived copy?"
+      "this page is dead, can you get the archived copy?"
     ],
     "should_not_trigger": [
       "rename this variable in my code",

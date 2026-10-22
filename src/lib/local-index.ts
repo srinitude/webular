@@ -3,14 +3,15 @@
 // fusion so the search step can merge local hits with web hits in one call.
 // Pages are ranked whole (page-level BM25); each returned hit is split at its
 // headings to give its best section.
-import { Database } from 'bun:sqlite'
-import { Effect, type Scope } from 'effect'
+import type { Database } from 'bun:sqlite'
+import { Config, Effect, type Scope } from 'effect'
 import { emptyFingerprints, type Fingerprints, isNearDuplicate, remember } from './fingerprints.ts'
 import { bestChunk, queryTerms } from './local-chunks.ts'
 import { LocalIndexError, localIndexPath } from './local-index-path.ts'
 import { halves, simhash64 } from './simhash.ts'
+import { closeSqlite, openSqlite } from './sqlite-open.ts'
 
-export interface IndexedPage {
+interface IndexedPage {
   readonly url: string
   readonly title: string
   readonly text: string
@@ -33,15 +34,13 @@ const attempt = <A>(run: () => A) =>
   Effect.try({ try: run, catch: (cause) => new LocalIndexError({ cause }) })
 
 const SCHEMA = [
-  'PRAGMA journal_mode = WAL',
-  'PRAGMA synchronous = NORMAL',
   `CREATE VIRTUAL TABLE IF NOT EXISTS pages USING fts5(
      url UNINDEXED, title, body, tokenize = 'porter unicode61')`,
   'CREATE TABLE IF NOT EXISTS signatures (url TEXT PRIMARY KEY, simhash TEXT NOT NULL)',
 ]
 
 const load = (path: string): LocalIndex => {
-  const db = new Database(path, { create: true })
+  const db = openSqlite(path, true)
   for (const sql of SCHEMA) db.run(sql)
   const rows = db.query('SELECT simhash FROM signatures').all() as { simhash: string }[]
   const index: LocalIndex = { db, ...emptyFingerprints() }
@@ -55,7 +54,7 @@ export const openLocalIndex = (
 ): Effect.Effect<LocalIndex, LocalIndexError, Scope.Scope> =>
   Effect.acquireRelease(
     attempt(() => load(path)),
-    (index) => Effect.sync(() => index.db.close()),
+    (index) => Effect.sync(() => closeSqlite(index.db)),
   )
 
 interface AddResult {
@@ -146,6 +145,32 @@ export const fuseRanked = <T extends { readonly url: string }>(
   }
   return [...merged.values()].sort((a, b) => b.score - a.score).map((e) => e.item)
 }
+
+const PRIVATE_HOST =
+  /^(localhost|\[::1\]|.*\.local|127(\.\d+){3}|10(\.\d+){3}|192\.168(\.\d+){2}|169\.254(\.\d+){2}|172\.(1[6-9]|2\d|3[01])(\.\d+){2})$/
+
+const originOf = (url: string) => (URL.canParse(url) ? new URL(url).origin : '')
+
+/**
+ * Drops hits on loopback or private hosts (bench fixtures must not answer web
+ * queries) unless the query names that host or the hit is on the configured
+ * local source origin, WEBULAR_SOURCE_ORIGIN, that exact origin only.
+ */
+export const dropPrivateHosts = <T extends { readonly url: string }>(query: string, hits: T[]) =>
+  Config.String('WEBULAR_SOURCE_ORIGIN').pipe(
+    Config.withDefault(''),
+    Effect.orDie,
+    Effect.map((source) => {
+      const allowed = originOf(source)
+      const q = query.toLowerCase()
+      return hits.filter(({ url }) => {
+        const host = URL.canParse(url) ? new URL(url).hostname : ''
+        if (!PRIVATE_HOST.test(host)) return true
+        if (allowed !== '' && originOf(url) === allowed) return true
+        return q.includes(host.replace(/^\[|\]$/g, ''))
+      })
+    }),
+  )
 
 /** The search step's local list for fuseRanked: {title, url, description}; empty on any index error. */
 export const searchLocalIndex = (query: string, limit: number) =>

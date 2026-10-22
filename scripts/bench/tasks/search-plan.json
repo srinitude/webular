@@ -1,0 +1,16 @@
+{
+  "domains": [
+    { "domain": "science", "cls": "Q31855" },
+    { "domain": "health", "cls": "Q16917" },
+    { "domain": "law", "cls": "Q613142" },
+    { "domain": "finance", "cls": "Q22687" },
+    { "domain": "software", "cls": "Q341" },
+    { "domain": "sports", "cls": "Q476028" },
+    { "domain": "culture", "cls": "Q33506" },
+    { "domain": "local-government", "cls": "Q515" }
+  ],
+  "languages": ["zh", "ko", "ja", "de", "fr", "es", "ru", "ar"],
+  "perDomain": { "knownItem": 13, "navigational": 3, "longTail": 5 },
+  "reasoningTotal": 60,
+  "perLanguage": { "knownItem": 2, "multilingual": 5 }
+}

@@ -34,6 +34,7 @@ coverage/
 .DS_Store
 
 research/
+!docs/research/
 
 # Internal artifacts — not part of the distributable npm package
 docs/security/
@@ -49,3 +50,13 @@ docs/usecase-results.md
 # Per-platform npm packages written by mise run package:platforms
 npm/
 .cache/
+
+# Landing scratch (patches, bench results)
+.land/
+/bench/results/recordings/
+
+# Screenshot test scratch folders (tests/lib/driver-screenshot.test.ts) live under the repo root while it runs.
+.shot-test-*/
+
+# Test scratch never lives in the checkout; tests use tmpDir.
+.tmp-run/

@@ -6,6 +6,7 @@ import { describe, expect, test } from 'bun:test'
 import type * as BunServices from '@effect/platform-bun/BunServices'
 import { ConfigProvider, Effect } from 'effect'
 import { resolveFeed } from '../../src/core/feed-source.ts'
+import type { RobotsGate } from '../../src/lib/robots-gate.ts'
 import { type Routes, useFixture } from '../_support/fixture.ts'
 import { eff } from '../_support/run.ts'
 
@@ -54,8 +55,9 @@ const free = useFixture(
     '/found.xml': res(RSS, 'application/rss+xml'),
   }),
 )
-const run = <A, E>(body: () => Generator<Effect.Effect<unknown, E, BunServices.BunServices>, A>) =>
-  eff(Effect.gen(body))()
+const run = <A, E>(
+  body: () => Generator<Effect.Effect<unknown, E, BunServices.BunServices | RobotsGate>, A>,
+) => eff(Effect.gen(body))()
 // The fixture origin goes through the ConfigProvider, never process.env: the
 // default env provider fixes its key set when first built, and an env write
 // would leak into every later test file in the same process.

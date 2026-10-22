@@ -17,9 +17,7 @@ function page(links: string[]): Response {
   const anchors = links.map((href) => `<a href="${href}">${href}</a>`).join('')
   return new Response(
     `<!doctype html><html><head><title>t</title></head><body>${anchors}</body></html>`,
-    {
-      headers: { 'content-type': 'text/html' },
-    },
+    { headers: { 'content-type': 'text/html' } },
   )
 }
 
@@ -56,6 +54,26 @@ describe('map — sitemap discovery', () => {
         expect(links).toEqual([`${fx.origin}/a`, `${fx.origin}/b`])
         expect(errors).toEqual([])
         expect(fx.hits('/sitemap.xml')).toBe(1)
+      }),
+    ),
+    15_000,
+  )
+
+  test(
+    'lists pages from a sitemap whose locs are relative paths',
+    eff(
+      Effect.gen(function* () {
+        const fx = yield* startFixture(
+          (): Routes => ({
+            '/sitemap.xml': () => xml(urlset(['index.html', 'a/p1.html', '/b/p2.html'])),
+          }),
+        )
+        const { links } = yield* runMap(`${fx.origin}/`)
+        expect(links).toEqual([
+          `${fx.origin}/index.html`,
+          `${fx.origin}/a/p1.html`,
+          `${fx.origin}/b/p2.html`,
+        ])
       }),
     ),
     15_000,
@@ -106,6 +124,26 @@ describe('map — sitemap discovery', () => {
 const text = (body: string): Response =>
   new Response(body, { headers: { 'content-type': 'text/plain' } })
 
+describe('map — relative robots.txt Sitemap: line', () => {
+  test(
+    'follows a relative robots.txt Sitemap: line and its relative locs',
+    eff(
+      Effect.gen(function* () {
+        const fx = yield* startFixture(
+          (): Routes => ({
+            '/robots.txt': () => text('Sitemap: /maps/site.xml\n'),
+            '/maps/site.xml': () => xml(urlset(['r1', '/r2'])),
+            '/': () => page(['/crawled']),
+          }),
+        )
+        const { links } = yield* runMap(fx.origin)
+        expect(links).toEqual([`${fx.origin}/maps/r1`, `${fx.origin}/r2`])
+      }),
+    ),
+    15_000,
+  )
+})
+
 describe('map — robots.txt Sitemap: fallback', () => {
   test(
     'uses robots.txt Sitemap: entries when /sitemap.xml is missing',
@@ -153,7 +191,7 @@ describe('map — robots.txt Sitemap: fallback', () => {
         const fx = yield* startFixture((): Routes => ({ '/': () => page(['/only']) }))
         const { links } = yield* runMap(fx.origin)
         expect(links).toEqual([`${fx.origin}/only`])
-        expect(fx.hits('/robots.txt')).toBe(1)
+        expect(fx.hits('/robots.txt')).toBe(2) // robots gate read + Sitemap: lookup
       }),
     ),
     15_000,

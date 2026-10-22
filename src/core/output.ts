@@ -24,8 +24,21 @@ export function errMsg(err: unknown): string {
 export const ERROR_MAX_CHARS = 300
 export function shortError(err: unknown): string {
   const line = errMsg(err).split('\n', 1)[0] ?? ''
-  return line.length > ERROR_MAX_CHARS ? `${line.slice(0, ERROR_MAX_CHARS - 1)}…` : line
+  return line.length > ERROR_MAX_CHARS
+    ? `${line.slice(0, ERROR_MAX_CHARS - 1).toWellFormed()}…`
+    : line
 }
+
+// Plain text as one Markdown heading line: NFC, no zero-width marks, whitespace
+// and newlines collapsed, and inline syntax (links, emphasis, code, tables, #) escaped.
+export const ZERO_WIDTH = /[\u200B-\u200D\u2060\uFEFF]/g
+export const mdHeading = (text: string): string =>
+  text
+    .normalize('NFC')
+    .replace(ZERO_WIDTH, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/[\\`*_[\]()<>#|]/g, '\\$&')
 
 type Rec = Record<string, unknown>
 const isRec = (v: unknown): v is Rec => typeof v === 'object' && v !== null && !Array.isArray(v)
@@ -51,15 +64,28 @@ export function selectFields(data: unknown, fields: readonly string[] | undefine
   return Object.fromEntries(fields.filter((f) => f in data).map((f) => [f, data[f]]))
 }
 
+// A --select name the output does not hold, with the names it does: the stderr
+// note that keeps a typo from passing silently as `{}`.
+export function unknownFieldsNote(data: unknown, fields: readonly string[] | undefined) {
+  if (!fields?.length || !isRec(data)) return undefined
+  const unknown = fields.filter((f) => !(f in data))
+  if (!unknown.length) return undefined
+  return `select: no field ${unknown.map((f) => `"${f}"`).join(', ')} in this output; fields: ${Object.keys(data).sort().join(', ')}`
+}
+
 export const parseFields = (raw: string | undefined): string[] | undefined =>
   raw
     ?.split(',')
     .map((f) => f.trim())
     .filter(Boolean)
 
-// One compact JSON line per item of the first array field (or the value itself).
+// List fields commands emit, in preference order; any other output uses its first array.
+const LIST_KEYS = ['results', 'links', 'pages', 'sources']
+
+// One compact JSON line per item of the list field (or the value itself).
 export function toNdjson(data: unknown): string {
-  const list = isRec(data) ? Object.values(data).find(Array.isArray) : undefined
+  const named = isRec(data) ? LIST_KEYS.map((k) => data[k]).find(Array.isArray) : undefined
+  const list = named ?? (isRec(data) ? Object.values(data).find(Array.isArray) : undefined)
   return (list ?? [data]).map((item) => stableJson(item)).join('\n')
 }
 
@@ -122,8 +148,11 @@ export function emit(
   opts: EmitOptions,
 ): Effect.Effect<void, OutputError | SandboxError, FileSystem.FileSystem | Path.Path> {
   const text = formatOutput(data, opts)
-  if (opts.output) return Effect.flatMap(outPath(opts.output), (path) => writeFile(path, text))
-  return Effect.sync(() => {
-    process.stdout.write(`${text}\n`)
-  })
+  const note = unknownFieldsNote(data, opts.fields)
+  const write = opts.output
+    ? Effect.flatMap(outPath(opts.output), (path) => writeFile(path, text))
+    : Effect.sync(() => {
+        process.stdout.write(`${text}\n`)
+      })
+  return Effect.andThen(write, note ? logErr(note) : Effect.void)
 }

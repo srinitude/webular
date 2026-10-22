@@ -3,7 +3,20 @@
 import { describe, expect, test } from 'bun:test'
 import { hasCycle, loadGraph, parentsOf } from '../_support/graph.ts'
 
-const SPINE = ['setup', 'lint', 'typecheck', 'build', 'test', 'validate', 'ci']
+const SPINE = [
+  'setup',
+  'lint',
+  'docs:links',
+  'docs:tasks:check',
+  'prune:check',
+  'bugs:static',
+  'typecheck',
+  'build',
+  'test',
+  'bugs:check',
+  'validate',
+  'ci',
+]
 const COMMANDS = [
   'search',
   'scrape',
@@ -53,6 +66,14 @@ describe('mise task graph — the contract every CLI invocation routes through',
 
   test('every capability command depends on exactly one predecessor: setup', () => {
     for (const cmd of COMMANDS) expect(parentsOf(graph, `run:${cmd}`)).toEqual(['setup'])
+  })
+
+  test('every bug-hunt class depends on exactly one predecessor: setup', () => {
+    const hunts = Object.keys(graph).filter(
+      (t) => /^bugs:/.test(t) && !['bugs:static', 'bugs:check'].includes(t),
+    )
+    expect(hunts.length).toBe(8)
+    for (const t of hunts) expect(parentsOf(graph, t)).toEqual(['setup'])
   })
 
   test('the universal task graph is acyclic', () => {

@@ -11,6 +11,7 @@ import { errMsg } from '../core/output.ts'
 interface DownloadOptions {
   maxBytes?: number | undefined
   idleMs?: number
+  timeoutMs?: number // whole download, headers and body
 }
 
 type Reader = ReadableStreamDefaultReader<Uint8Array>
@@ -20,6 +21,7 @@ class DownloadError extends Data.TaggedError('DownloadError')<{ readonly message
 const DEFAULT_MAX_BYTES = 100 * 1024 * 1024
 const CONNECT_TIMEOUT_MS = 30_000
 const DEFAULT_IDLE_MS = 30_000
+const DEFAULT_TIMEOUT_MS = 30 * 60_000 // 100 MB at about 60 KB/s
 
 const failWith = (message: string) => Effect.fail(new DownloadError({ message }))
 const attempt = <A>(run: () => PromiseLike<A> | A) =>
@@ -78,17 +80,22 @@ const pump = Effect.fnUntraced(function* (
 
 // Windows: a rename onto a dest that another rename is replacing (or a reader
 // holds open) fails EPERM/EBUSY/EACCES for a moment, so retry briefly. POSIX
-// renames are atomic and never hit this path. FileSystem reports those codes
-// as the Busy and PermissionDenied system-error tags.
-const RENAME_BUSY = new Set(['Busy', 'PermissionDenied'])
-const RENAME_TRIES = 10
+// renames are atomic and never hit this path. FileSystem tags only EBUSY and
+// EACCES (EPERM arrives as 'Unknown'), so match the errno code on the cause.
+const RENAME_BUSY_CODES = new Set(['EPERM', 'EBUSY', 'EACCES'])
+const RENAME_TRIES = 20
+
+const isRenameBusy = (err: { readonly reason: { readonly cause?: unknown } }) => {
+  const code = (err.reason.cause as { readonly code?: string } | undefined)?.code
+  return code !== undefined && RENAME_BUSY_CODES.has(code)
+}
 
 const renameOver = (fs: FileSystem.FileSystem, from: string, to: string) =>
   fs.rename(from, to).pipe(
     Effect.retry({
-      while: (err) => RENAME_BUSY.has(err.reason._tag),
+      while: isRenameBusy,
       times: RENAME_TRIES - 1,
-      schedule: Schedule.spaced(20),
+      schedule: Schedule.spaced(25),
     }),
   )
 
@@ -122,7 +129,7 @@ export const downloadToFile = Effect.fn('downloadToFile')(function* (
   opts: DownloadOptions = {},
 ) {
   const maxBytes = opts.maxBytes ?? DEFAULT_MAX_BYTES
-  const res = yield* httpGet(url).pipe(
+  const res = yield* httpGet(url, { timeoutMs: opts.timeoutMs ?? DEFAULT_TIMEOUT_MS }).pipe(
     Effect.timeoutOrElse({
       duration: CONNECT_TIMEOUT_MS,
       orElse: () => failWith(`download ${url} timed out connecting`),

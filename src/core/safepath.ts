@@ -1,5 +1,6 @@
-// Opt-in path confinement for untrusted-automation embedders. Enabled with
-// WEBULAR_SANDBOX=1; otherwise paths pass through unchanged (default CLI UX).
+// Output-path confinement. On by default in agent mode (WEBULAR_AGENT_MODE=1, set by
+// `webular mcp`), where page content can steer the agent; off for a person at the CLI.
+// WEBULAR_SANDBOX=1 turns it on and WEBULAR_SANDBOX=0 turns it off in either mode.
 // Confines to WEBULAR_OUTPUT_DIR (cwd by default) using realpath canonicalization
 // so a symlinked parent directory cannot escape the sandbox.
 import { Data, Effect, FileSystem, Path } from 'effect'
@@ -7,7 +8,10 @@ import { Data, Effect, FileSystem, Path } from 'effect'
 export class SandboxError extends Data.TaggedError('SandboxError')<{ readonly message: string }> {}
 
 export function sandboxEnabled(): Effect.Effect<boolean> {
-  return Effect.sync(() => process.env['WEBULAR_SANDBOX'] === '1')
+  return Effect.sync(() => {
+    const set = process.env['WEBULAR_SANDBOX']
+    return set === '1' || (set !== '0' && process.env['WEBULAR_AGENT_MODE'] === '1')
+  })
 }
 
 // The directory the user invoked webular from — the gateway pins the command
@@ -16,17 +20,27 @@ function invokeDir(): string {
   return process.env['WEBULAR_INVOKE_DIR'] ?? process.cwd()
 }
 
+const deny = (message: string) => Effect.fail(new SandboxError({ message }))
+
 // Canonical realpath of the deepest existing ancestor (the target may not exist
 // yet) — resolves symlinks in every parent component, defeating symlink escapes.
+// A dangling symlink "does not exist" to fs.exists, so each component is tried
+// with readLink first and a link is followed to where it points (bounded hops).
+const MAX_LINK_HOPS = 40
 const realAncestor = Effect.fn('safepath.realAncestor')(function* (full: string) {
   const fs = yield* FileSystem.FileSystem
   const path = yield* Path.Path
   let dir = full
-  while (!(yield* fs.exists(dir))) dir = path.resolve(dir, '..')
-  return yield* fs.realPath(dir)
+  for (let hops = 0; hops <= MAX_LINK_HOPS; ) {
+    const link = yield* fs.readLink(dir).pipe(Effect.option)
+    if (link._tag === 'Some') {
+      dir = path.resolve(path.dirname(dir), link.value)
+      hops++
+    } else if (yield* fs.exists(dir)) return yield* fs.realPath(dir)
+    else dir = path.resolve(dir, '..')
+  }
+  return yield* deny(`sandbox: too many symlink hops (${full})`)
 })
-
-const deny = (message: string) => Effect.fail(new SandboxError({ message }))
 
 const confine = Effect.fn('safepath.confine')(function* (p: string) {
   const fs = yield* FileSystem.FileSystem
@@ -35,7 +49,8 @@ const confine = Effect.fn('safepath.confine')(function* (p: string) {
   const resolved = yield* Effect.gen(function* () {
     const base = yield* fs.realPath(path.resolve(process.env['WEBULAR_OUTPUT_DIR'] ?? invokeDir()))
     const full = path.resolve(base, p)
-    return { base, full, escapes: path.relative(base, yield* realAncestor(full)).startsWith('..') }
+    const rel = path.relative(base, yield* realAncestor(full))
+    return { base, full, escapes: path.isAbsolute(rel) || rel.split(path.sep)[0] === '..' }
   }).pipe(Effect.mapError((err) => new SandboxError({ message: `sandbox: ${err.message}` })))
   if (resolved.escapes) return yield* deny(`sandbox: path escapes ${resolved.base} (${p})`)
   return resolved.full

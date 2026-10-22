@@ -3,7 +3,7 @@
 // derive the fetch fan-out from them. Pure derive + injectable reader keeps
 // it testable with simulated limits; WEBULAR_CONCURRENCY overrides the result.
 import { availableParallelism, freemem, platform, totalmem } from 'node:os'
-import { Config, Effect, FileSystem } from 'effect'
+import { Config, Context, Data, Effect, FileSystem, Layer, Option, Schema } from 'effect'
 
 interface HostLimits {
   cpus: number
@@ -80,20 +80,44 @@ export function deriveBudget(host: HostLimits, override = 0): Budget {
   return { ...host, concurrency: clamp(Math.min(byCpu, byMemory), FLOOR, CEILING) }
 }
 
-const override = Effect.gen(function* () {
-  return yield* Config.Int('WEBULAR_CONCURRENCY')
-}).pipe(Effect.orElseSucceed(() => 0))
+class BudgetConfigError extends Data.TaggedError('BudgetConfigError')<{ message: string }> {}
 
-// Memoized: the host reads run once per process, on first use, so commands
-// that never fan out never pay for them.
-const cachedBudget = Effect.runSync(
-  Effect.cached(Effect.zipWith(readHost(), override, (host, n) => deriveBudget(host, n))),
+const PositiveInt = Schema.NumberFromString.pipe(
+  Schema.decodeTo(Schema.Int.check(Schema.isGreaterThan(0))),
 )
 
-export const hostBudget = (): Effect.Effect<Budget, never, FileSystem.FileSystem> => cachedBudget
+// Unset means "derive from the host" (0); anything else must be a positive integer.
+const override = Effect.gen(function* () {
+  const raw = yield* Config.option(Config.String('WEBULAR_CONCURRENCY'))
+  if (Option.isNone(raw)) return 0
+  return yield* Schema.decodeUnknownEffect(PositiveInt)(raw.value).pipe(
+    Effect.mapError(
+      () =>
+        new BudgetConfigError({
+          message: `WEBULAR_CONCURRENCY must be a positive integer, got "${raw.value}"`,
+        }),
+    ),
+  )
+})
+
+// The override is checked when the layer is built; the host reads are memoized
+// and run on first use, so commands that never fan out never pay for them.
+export class HostBudget extends Context.Service<
+  HostBudget,
+  { readonly budget: Effect.Effect<Budget> }
+>()('webular/core/HostBudget') {
+  static readonly layer = Layer.effect(
+    HostBudget,
+    Effect.gen(function* () {
+      const n = yield* override
+      const fs = yield* FileSystem.FileSystem
+      const host = readHost().pipe(Effect.provideService(FileSystem.FileSystem, fs))
+      return { budget: yield* Effect.cached(Effect.map(host, (h) => deriveBudget(h, n))) }
+    }),
+  )
+}
+
+export const hostBudget = () => HostBudget.use((b) => b.budget)
 
 // The fan-out bound for Effect callers: the same memoized host read.
-export const hostConcurrency: Effect.Effect<number, never, FileSystem.FileSystem> = Effect.map(
-  cachedBudget,
-  (b) => b.concurrency,
-)
+export const hostConcurrency = Effect.map(hostBudget(), (b) => b.concurrency)

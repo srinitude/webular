@@ -3,10 +3,10 @@
 // allows from that state can ever be taken.
 // With no model set up, the agent takes the event the code observed whenever
 // the machine allows it, so every command replays its machine exactly.
-// With a model set up (./agent-model.ts), agent.decide() proposes an event; a
-// proposal outside the allowed set, a failure, or a timeout falls back to the
-// observed event. The package and the AI SDK load lazily, only on that path,
-// so plain commands never pay their import cost.
+// With Jev set up (./agent-model.ts) or a planner given, agent.decide() proposes
+// an event; a proposal outside the allowed set, a failure, or a timeout falls
+// back to the observed event. The package loads lazily, only on that path, so
+// plain commands never pay its import cost.
 import { Context, Effect, Option } from 'effect'
 import {
   type AnyMachineSnapshot,
@@ -15,7 +15,7 @@ import {
   type EventObject,
 } from 'xstate'
 import type { JevAsk } from './agent-jev.ts'
-import { load, loadModel, type ModelRef, modelRef } from './agent-model.ts'
+import { load, modelRef } from './agent-model.ts'
 
 // The event types the machine accepts from this snapshot. The one place that
 // reads XState's private `_nodes`: an XState upgrade that moves it breaks here only.
@@ -48,8 +48,8 @@ const DECIDE_LIMITS = {
   cached: 256,
 } as const
 
-// Answers keyed by the stable prompt (machine, goal, state, context, allowed events).
-// ponytail: whole-cache reset at DECIDE_LIMITS.cached; an LRU only if hit rates call for it.
+// Answers keyed by the stable prompt (machine, goal, state, context, allowed events),
+// in least-used-first order: a hit moves its key to the back, a full cache drops the front.
 export const AgentAnswers = Context.Reference<Map<string, string>>('webular/AgentAnswers', {
   defaultValue: () => new Map(),
 })
@@ -61,44 +61,22 @@ interface Ask {
   goal: string
   planner: Planner | undefined
   jev: JevAsk | undefined
-  model: ModelRef | undefined
 }
 
-interface Usage {
-  promptTokens?: number
-  completionTokens?: number
-}
-
-// The agent, zod, and the provider load only on the model path.
+// The agent and zod load only on the planner path; the planner stands in for a model.
 const buildAgent = (ask: Ask) =>
   Effect.map(
-    Effect.all(
-      [load(() => import('@statelyai/agent')), load(() => import('zod')), loadModel(ask.model)],
-      { concurrency: 3 },
-    ),
-    ([{ createAgent }, { z }, model]) =>
+    Effect.all([load(() => import('@statelyai/agent')), load(() => import('zod'))], {
+      concurrency: 2,
+    }),
+    ([{ createAgent }, { z }]) =>
       createAgent({
         name: 'webular',
         events: Object.fromEntries(ask.allowed.map((type) => [type, z.object({})])),
-        model: model as never,
+        model: undefined as never,
         maxTokens: DECIDE_LIMITS.maxTokens,
         maxRetries: DECIDE_LIMITS.maxRetries,
       }),
-  )
-
-// Logs the token usage the provider reports for each model reply.
-const logUsage = (ask: Ask, usage: Usage[]) =>
-  Effect.forEach(
-    usage,
-    (u) =>
-      Effect.logInfo('agent.decide usage').pipe(
-        Effect.annotateLogs({
-          model: `${ask.model?.provider}:${ask.model?.id}`,
-          promptTokens: u.promptTokens,
-          completionTokens: u.completionTokens,
-        }),
-      ),
-    { concurrency: 1, discard: true },
   )
 
 // Jev picks first; the agent then takes that pick through its planner option.
@@ -114,11 +92,6 @@ const proposeEvent = (ask: Ask) =>
     const planner = ask.jev ? yield* jevPlanner(ask, ask.jev) : ask.planner
     if (ask.jev && !planner) return undefined
     const agent = yield* buildAgent(ask)
-    const usage: Usage[] = []
-    agent.onMessage((message) => {
-      const reported = (message as { result?: { usage?: Usage } }).result?.usage
-      if (reported) usage.push(reported)
-    })
     const plan = yield* Effect.tryPromise({
       try: (signal) =>
         agent.decide({
@@ -130,7 +103,6 @@ const proposeEvent = (ask: Ask) =>
         }),
       catch: (cause) => cause,
     })
-    yield* logUsage(ask, usage)
     return plan?.nextEvent?.type
   }).pipe(
     Effect.timeoutOrElse({
@@ -142,18 +114,17 @@ const proposeEvent = (ask: Ask) =>
 const askModel = (ask: Ask, fallback: Decision) =>
   Effect.gen(function* () {
     const answers = yield* AgentAnswers
-    const key = JSON.stringify([
-      ask.machine.id,
-      ask.goal,
-      ask.snapshot.value,
-      ask.snapshot.context,
-      ask.allowed,
-    ])
+    const { machine, goal, snapshot, allowed } = ask
+    const key = JSON.stringify([machine.id, goal, snapshot.value, snapshot.context, allowed])
     const cached = answers.get(key)
-    if (cached) return { event: cached, source: 'cache' } satisfies Decision
+    if (cached) {
+      answers.delete(key)
+      answers.set(key, cached)
+      return { event: cached, source: 'cache' } satisfies Decision
+    }
     const type = yield* proposeEvent(ask)
-    if (!type || !ask.allowed.includes(type)) return fallback
-    if (answers.size >= DECIDE_LIMITS.cached) answers.clear()
+    if (!type || !allowed.includes(type)) return fallback
+    if (answers.size >= DECIDE_LIMITS.cached) answers.delete(answers.keys().next().value ?? key)
     answers.set(key, type)
     return { event: type, source: 'model' } satisfies Decision
   }).pipe(Effect.orElseSucceed(() => fallback))
@@ -174,10 +145,9 @@ export const decideAt = (
     const fallback: Decision = { event, source: 'machine' }
     if (allowed.length < 2 && !planner && !options.jev) return fallback
     const ref = Option.getOrUndefined(yield* modelRef)
-    const jev = options.jev ?? (ref?.provider === 'jev' ? yield* liveJev(ref.id) : undefined)
-    const model = ref?.provider === 'jev' ? undefined : ref
-    if (!planner && !jev && !model) return fallback
-    return yield* askModel({ machine, snapshot, allowed, goal, planner, jev, model }, fallback)
+    const jev = options.jev ?? (ref ? yield* liveJev(ref.id) : undefined)
+    if (!planner && !jev) return fallback
+    return yield* askModel({ machine, snapshot, allowed, goal, planner, jev }, fallback)
   })
 
 // WEBULAR_AGENT_MODEL=jev:<model> asks the live Jev API; the client loads only then.

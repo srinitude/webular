@@ -1,0 +1,72 @@
+[
+  {
+    "prop": "P6",
+    "qualifier": "P580",
+    "current": true,
+    "quota": 12,
+    "domain": "politics",
+    "en": "As of {date}, who is the head of government of {subject}?",
+    "zh": "截至{date}，{subject}的政府首脑是谁？",
+    "ko": "{date} 기준 {subject}의 정부 수반은 누구입니까?"
+  },
+  {
+    "prop": "P35",
+    "qualifier": "P580",
+    "current": true,
+    "quota": 10,
+    "domain": "politics",
+    "en": "As of {date}, who is the head of state of {subject}?",
+    "zh": "截至{date}，{subject}的国家元首是谁？",
+    "ko": "{date} 기준 {subject}의 국가 원수는 누구입니까?"
+  },
+  {
+    "prop": "P169",
+    "qualifier": "P580",
+    "current": true,
+    "quota": 14,
+    "domain": "business",
+    "en": "As of {date}, who is the chief executive officer of {subject}?",
+    "zh": "截至{date}，{subject}的首席执行官是谁？",
+    "ko": "{date} 기준 {subject}의 최고경영자는 누구입니까?"
+  },
+  {
+    "prop": "P286",
+    "qualifier": "P580",
+    "current": true,
+    "quota": 16,
+    "domain": "sports",
+    "en": "As of {date}, who is the head coach of {subject}?",
+    "zh": "截至{date}，{subject}的主教练是谁？",
+    "ko": "{date} 기준 {subject}의 감독은 누구입니까?"
+  },
+  {
+    "prop": "P348",
+    "qualifier": "P577",
+    "current": false,
+    "quota": 14,
+    "domain": "software",
+    "en": "Which version of {subject} was released on {when}?",
+    "zh": "{subject}在{when}发布的是哪个版本？",
+    "ko": "{when}에 출시된 {subject}의 버전은 무엇입니까?"
+  },
+  {
+    "prop": "P1037",
+    "qualifier": "P580",
+    "current": true,
+    "quota": 12,
+    "domain": "culture",
+    "en": "As of {date}, who is the director of {subject}?",
+    "zh": "截至{date}，{subject}的负责人是谁？",
+    "ko": "{date} 기준 {subject}의 관장은 누구입니까?"
+  },
+  {
+    "prop": "P488",
+    "qualifier": "P580",
+    "current": true,
+    "quota": 12,
+    "domain": "business",
+    "en": "As of {date}, who is the chairperson of {subject}?",
+    "zh": "截至{date}，{subject}的主席是谁？",
+    "ko": "{date} 기준 {subject}의 의장은 누구입니까?"
+  }
+]

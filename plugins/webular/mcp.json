@@ -1,6 +1,8 @@
 {
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
   "mcpServers": {
     "webular": {
+      "type": "stdio",
       "command": "bun",
       "args": ["./dist/server.js"]
     }

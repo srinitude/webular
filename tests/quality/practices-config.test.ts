@@ -37,10 +37,11 @@ describe('best practices: CI workflow', () => {
     }),
   )
   check(
-    'dependabot keeps action and npm pins current',
+    'dependabot opens no version-update PRs for actions, bun, or docker',
     Effect.map(read('.github/dependabot.yml'), (yml) => {
       expect(yml).toContain('package-ecosystem: github-actions')
       expect(yml).toContain('package-ecosystem: bun')
+      expect(yml.match(/open-pull-requests-limit: 0$/gm)).toHaveLength(3)
     }),
   )
 })
@@ -58,7 +59,22 @@ describe('best practices: package engines and files', () => {
     Effect.gen(function* () {
       const { files } = yield* packageJson
       expect(files).toContain('CHANGELOG.md')
-      for (const path of files) expect(yield* exists(path)).toBe(true)
+      // dist/ is build output: the build task must write each dist entry, and
+      // once dist/ is built (`mise run test` builds first) each entry must exist.
+      const build =
+        (yield* read('mise.toml')).match(/^\[tasks\.build\]$[\s\S]*?(?=^\[)/m)?.[0] ?? ''
+      const built = yield* exists('dist')
+      const unwritten = files.filter(
+        (path) =>
+          path.startsWith('dist/') &&
+          [`/${path}"`, `"${path}/`, `--chunk-naming=${path.slice(5)}/`].every(
+            (s) => !build.includes(s),
+          ),
+      )
+      const checked = files.filter((path) => built || !path.startsWith('dist/'))
+      const found = yield* Effect.forEach(checked, exists, { concurrency: 8 })
+      const missing = checked.filter((_, index) => !found[index])
+      expect({ unwritten, missing }).toEqual({ unwritten: [], missing: [] })
     }),
   )
 })

@@ -76,7 +76,7 @@ const search = (
 
 describe('webular search — free APIs at once for the default web source', () => {
   test(
-    'asks wikipedia, hackernews, openalex together; openalex hits, so DuckDuckGo is skipped',
+    'asks wikipedia, hackernews, openalex, github-search together; openalex hits, so DuckDuckGo is skipped',
     () =>
       search(['--limit', '2'], true, (data, webHits) => {
         expect(webHits).toBe(0)
@@ -85,6 +85,8 @@ describe('webular search — free APIs at once for the default web source', () =
           wikipedia: expect.objectContaining({ status: 'no-results' }),
           hackernews: expect.objectContaining({ status: 'blocked:500' }),
           openalex: expect.objectContaining({ status: 'ok' }),
+          // No route, so it fails; a failed source never adds results.
+          'github-search': expect.objectContaining({ status: 'blocked:404' }),
         })
       }),
     30_000,
@@ -113,6 +115,7 @@ describe('webular search — free-source fallback', () => {
 })
 
 describe('webular search --source crossref|openalex', () => {
+  // Local fixture, no network. The 45 s limit is for load: a CLI start takes ~9 s when the host runs hundreds of processes.
   test(
     'crossref: first title, DOI URL, tag-free abstract; no source field',
     () =>
@@ -123,7 +126,7 @@ describe('webular search --source crossref|openalex', () => {
         expect(first?.description).toStartWith('Abstract: This paper explores')
         expect(first?.description).not.toContain('<')
       }),
-    15_000,
+    45_000,
   )
 
   test(
@@ -135,6 +138,6 @@ describe('webular search --source crossref|openalex', () => {
         expect(first?.description).toStartWith('Práce se zabývá podrobným srovnáním')
         expect(second?.url).toBe('https://doi.org/10.5281/zenodo.7945165')
       }),
-    15_000,
+    45_000,
   )
 })

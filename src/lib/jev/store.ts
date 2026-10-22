@@ -2,14 +2,17 @@
 // calibration log, and the drift file. client.ts wires these into `ask`.
 import { DateTime, Effect, type FileSystem, Option, Schema } from 'effect'
 import type { JevRequest, JevResult } from './client.ts'
-import type { JevError } from './errors.ts'
+import { JevError } from './errors.ts'
+import { JEV_LATEST_RELEASED } from './model.ts'
 import { cacheKey, isSure, requestBytes } from './payload/index.ts'
 import { Result } from './post.ts'
 
 // The versioned id the calibration evals (tests/jev/decisions.eval.test.ts)
-// were recorded with. Any other answering id is drift: the log row says so,
-// WEBULAR_JEV_DRIFT_FILE gets a line, and `mise run jev:check` reruns the evals live.
-export const JEV_CALIBRATED_MODEL = 'jev-1.13.0'
+// were recorded with: the model every call sends. Each log row names the model
+// that answered, so rows from different models never mix. Any other answering id
+// is drift: the log row says so, WEBULAR_JEV_DRIFT_FILE gets a line, and
+// `mise run jev:check` reruns the evals live.
+export const JEV_CALIBRATED_MODEL = JEV_LATEST_RELEASED
 export const modelDrift = (model: string | undefined, calibrated: string = JEV_CALIBRATED_MODEL) =>
   model !== undefined && model !== calibrated
 
@@ -90,28 +93,50 @@ export const makeLru = (capacity: number) => {
 interface AskDeps {
   readonly model: string
   readonly replay: Option.Option<ReturnType<typeof replayStore>>
-  readonly live: (body: string, req: JevRequest) => Effect.Effect<JevResult, JevError>
+  readonly live: (body: string) => Effect.Effect<JevResult, JevError>
+  // Live calls this client may send; replay and cache hits cost none.
+  readonly maxLiveCalls: number
   readonly lru: ReturnType<typeof makeLru>
   readonly log: ReturnType<typeof logCalibration>
   readonly drift: ReturnType<typeof flagDrift>
 }
 
-// Cache, then replay, then the live call; every answer is remembered, logged, and drift-checked.
-export const makeAsk = (d: AskDeps) => (decision: string, req: JevRequest) =>
-  Effect.suspend(() => {
-    const body = requestBytes(d.model, req.state, req.questions)
-    const k = cacheKey(body)
-    const hit = d.lru.get(k)
-    const fromReplay = (r: ReturnType<typeof replayStore>) => {
-      const onNone = () => r.miss(k, d.live(body, req))
-      return r.get(k).pipe(Effect.flatMap(Option.match({ onNone, onSome: Effect.succeed })))
-    }
-    const res: Effect.Effect<JevResult, JevError> = hit
-      ? Effect.succeed({ ...hit, source: 'cache' as const })
-      : Option.match(d.replay, { onNone: () => d.live(body, req), onSome: fromReplay })
-    return res.pipe(
-      Effect.tap((r) => d.lru.remember(k, r)),
-      Effect.tap((r) => d.log(decision, k, r)),
-      Effect.tap((r) => d.drift(decision, r)),
+// The live call, counted: past maxLiveCalls it fails with a typed budget error,
+// so the decision's fallback answers and nothing is sent.
+const budgeted = (d: AskDeps) => {
+  let sent = 0
+  return (body: string) =>
+    Effect.suspend(() =>
+      sent++ < d.maxLiveCalls
+        ? d.live(body)
+        : Effect.fail(
+            new JevError({
+              reason: `run budget of ${d.maxLiveCalls} live calls spent`,
+              kind: 'budget',
+            }),
+          ),
     )
-  })
+}
+
+// Cache, then replay, then the live call; every answer is remembered, logged, and drift-checked.
+export const makeAsk = (d: AskDeps) => {
+  const live = budgeted(d)
+  return (decision: string, req: JevRequest) =>
+    Effect.suspend(() => {
+      const body = requestBytes(d.model, req.state, req.questions, req.assets)
+      const k = cacheKey(body)
+      const hit = d.lru.get(k)
+      const fromReplay = (r: ReturnType<typeof replayStore>) => {
+        const onNone = () => r.miss(k, live(body))
+        return r.get(k).pipe(Effect.flatMap(Option.match({ onNone, onSome: Effect.succeed })))
+      }
+      const res: Effect.Effect<JevResult, JevError> = hit
+        ? Effect.succeed({ ...hit, source: 'cache' as const })
+        : Option.match(d.replay, { onNone: () => live(body), onSome: fromReplay })
+      return res.pipe(
+        Effect.tap((r) => d.lru.remember(k, r)),
+        Effect.tap((r) => d.log(decision, k, r)),
+        Effect.tap((r) => d.drift(decision, r)),
+      )
+    })
+}

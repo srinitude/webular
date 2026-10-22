@@ -1,0 +1,32 @@
+{
+  "key": {
+    "provider": "alpha",
+    "taskId": "t2",
+    "run": 0,
+    "commit": "2b4d7eb",
+    "settingsHash": "b1",
+    "date": "2026-10-21"
+  },
+  "family": "search.known-item",
+  "round": "2026-10-21-r0",
+  "settings": "best",
+  "phase": "cold",
+  "query": "what is t2 bust=r1-t2",
+  "requestBody": "{\"query\":\"what is t2 bust=r1-t2\",\"limit\":3,\"mode\":\"best\"}",
+  "output": "https://example.com/t2\nhttps://example.org/t2",
+  "status": "ok",
+  "latencyMs": 420,
+  "cached": false,
+  "loadAvg": 1.5,
+  "cpuMs": 12,
+  "calls": [
+    {
+      "host": "api.example.com",
+      "kind": "search",
+      "bytes": 2048,
+      "usd": 0.001,
+      "priceSource": "https://example.com/pricing",
+      "priceDate": "2026-10-21"
+    }
+  ]
+}

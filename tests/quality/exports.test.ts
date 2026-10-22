@@ -20,5 +20,8 @@ describe('dead exports — every src export has an importer', () => {
         expect(dead).toEqual([])
       }),
     ),
+    // One parse per file across src, bin, tests, scripts: bounded and linear,
+    // but past bun's 5 s default on a loaded runner.
+    30_000,
   )
 })

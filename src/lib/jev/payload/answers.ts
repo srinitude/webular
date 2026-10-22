@@ -36,8 +36,15 @@ const option = (v: string | null | OptionSpec, key: string): OptionSpec =>
 // The plain text of an instruction, for checks that read every instruction as one string.
 export const instructionText = (i: string | Instructions) =>
   typeof i === 'string' ? i : [i.task, i.answer_wanted, ...(i.rules ?? [])].join(' ')
-export const noul = (instructions: string | Instructions) =>
-  ({ type: 'noul', instructions: structured('noul', instructions) }) as const
+export const noul = (
+  instructions: string | Instructions,
+  criteria?: { readonly true: OptionSpec; readonly false: OptionSpec },
+) =>
+  ({
+    type: 'noul',
+    instructions: structured('noul', instructions),
+    ...(criteria === undefined ? {} : { criteria }),
+  }) as const
 export const choice = (
   instructions: string | Instructions,
   criteria: Record<string, string | null | OptionSpec>,
@@ -75,11 +82,12 @@ export const sureYes = (a: unknown, bar: number = CONFIDENCE_BAR): boolean | und
     onNone: () => undefined,
     onSome: (x) => (x.noul >= bar ? true : x.noul <= 1 - bar ? false : undefined),
   })
-// The chosen option at or above `bar`, else `fallback`; `none` never wins.
-export const picked = (a: unknown, bar: number, fallback: string): string =>
+// The chosen option at or above `bar`, else `fallback`; `none` wins only with `keepNone`.
+export const picked = (a: unknown, bar: number, fallback: string, keepNone = false): string =>
   Option.match(asChoice(a), {
     onNone: () => fallback,
-    onSome: (x) => (x.choice !== NONE_OPTION && (x.confidence ?? 0) >= bar ? x.choice : fallback),
+    onSome: (x) =>
+      (keepNone || x.choice !== NONE_OPTION) && (x.confidence ?? 0) >= bar ? x.choice : fallback,
   })
 export const scored = (a: unknown, bar: number, fallback: number): number =>
   Option.match(asScore(a), {

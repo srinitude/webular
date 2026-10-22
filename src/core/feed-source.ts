@@ -4,9 +4,10 @@
 // the free feed search lists for the url.
 import { Data, Effect } from 'effect'
 import { DOMParser } from 'linkedom'
+import { fetchTextObeyingRobots, robotsHopGate } from '../lib/robots-gate.ts'
 import { freeSourceFallback } from '../lib/sources/registry.ts'
 import { fetchTextOrArchive } from './archive.ts'
-import { type FetchOptions, fetchText } from './http.ts'
+import type { FetchOptions } from './http.ts'
 
 interface SourceOptions extends FetchOptions {
   archive?: boolean | undefined
@@ -29,13 +30,19 @@ const isFeed = (xml: string): boolean => {
   return FEED_ROOTS.has(root?.tagName.toLowerCase() ?? '')
 }
 
-function alternates(html: string, base: string): string[] {
+// Links resolve against the page's <base href> when it parses; one that does
+// not parse is skipped, so a bad href never takes a slot or throws.
+function alternates(html: string, page: string): string[] {
   const doc = new DOMParser().parseFromString(html, 'text/html')
   const links = [...doc.querySelectorAll('link[rel~="alternate"][href]')] as Element[]
+  const baseHref = doc.querySelector('base[href]')?.getAttribute('href') ?? ''
+  const base = URL.canParse(baseHref, page) ? new URL(baseHref, page).toString() : page
   return links
     .filter((l) => FEED_TYPE.test(l.getAttribute('type') ?? ''))
+    .map((l) => l.getAttribute('href') ?? '')
+    .filter((href) => URL.canParse(href, base))
     .slice(0, MAX_ALTERNATES)
-    .map((l) => new URL(l.getAttribute('href') ?? '', base).toString())
+    .map((href) => new URL(href, base).toString())
 }
 
 const guesses = (url: string): string[] =>
@@ -51,13 +58,15 @@ const asFeed = (found: Found) =>
   isFeed(found.xml) ? Effect.succeed(found) : Effect.fail(new NotAFeed({ url: found.feedUrl }))
 
 const tryFeed = (feedUrl: string, opts: FetchOptions) =>
-  Effect.flatMap(fetchText(feedUrl, opts), (xml) => asFeed({ xml, feedUrl }))
+  Effect.flatMap(fetchTextObeyingRobots(feedUrl, opts), (xml) => asFeed({ xml, feedUrl }))
 
 // ponytail: the Wayback step re-fetches the dead url once; reuse the first
 // failure when archive.ts exposes its archive-only path.
 const fromWayback = (url: string, opts: SourceOptions) =>
-  Effect.flatMap(fetchTextOrArchive(url, opts), ({ html, archivedFrom }) =>
-    asFeed({ xml: html, feedUrl: url, archivedFrom }),
+  Effect.flatMap(robotsHopGate, (allow) =>
+    Effect.andThen(allow(url), fetchTextOrArchive(url, { ...opts, hopGate: allow })),
+  ).pipe(
+    Effect.flatMap(({ html, archivedFrom }) => asFeed({ xml: html, feedUrl: url, archivedFrom })),
   )
 
 // The feeds the free search lists for the url, tried in rank order. When it
@@ -71,7 +80,7 @@ const fromFreeSources = <E>(url: string, opts: FetchOptions, chainError: E) =>
   )
 
 const resolveChain = (url: string, opts: SourceOptions) =>
-  fetchText(url, opts).pipe(
+  fetchTextObeyingRobots(url, opts).pipe(
     Effect.matchEffect({
       onSuccess: (body) =>
         isFeed(body)

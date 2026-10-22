@@ -3,7 +3,9 @@
 // survives reopen, and RRF merges ranked lists deterministically.
 import { expect, test } from 'bun:test'
 import { tmpdir } from 'node:os'
-import { Effect } from 'effect'
+import { join } from 'node:path'
+import { BunServices } from '@effect/platform-bun'
+import { ConfigProvider, Effect } from 'effect'
 import { headingText } from '../../src/lib/crawl-types.ts'
 import {
   addPages,
@@ -15,6 +17,7 @@ import {
 } from '../../src/lib/local-index.ts'
 import { localIndexPath } from '../../src/lib/local-index-path.ts'
 import { hamming, simhash64 } from '../../src/lib/simhash.ts'
+import { tmpDir } from '../_support/run.ts'
 
 const tides = {
   url: 'https://a.test/tides',
@@ -96,34 +99,32 @@ test('fuseRanked sums 1/(k+rank) by URL and keeps first-seen items', () => {
   expect(fuseRanked([])).toEqual([])
 })
 
-// The cache env vars are set for the test and put back on every exit path.
-const cacheEnv = Effect.acquireRelease(
-  Effect.sync(() => {
-    const saved = { off: process.env['WEBULAR_NO_CACHE'], dir: process.env['WEBULAR_CACHE_DIR'] }
-    process.env['WEBULAR_NO_CACHE'] = '0'
-    process.env['WEBULAR_CACHE_DIR'] = `${tmpdir()}/search-local-${process.pid}`
-    return saved
-  }),
-  (saved) =>
-    Effect.sync(() => {
-      process.env['WEBULAR_NO_CACHE'] = saved.off ?? '1'
-      if (saved.dir === undefined) delete process.env['WEBULAR_CACHE_DIR']
-      else process.env['WEBULAR_CACHE_DIR'] = saved.dir
-    }),
-)
+// Each test hands the index its own config and temp dir; process.env stays untouched.
+const cacheIn = (dir: string) =>
+  ConfigProvider.layer(
+    ConfigProvider.fromEnvRecord({ WEBULAR_NO_CACHE: '0', WEBULAR_CACHE_DIR: dir }),
+  )
+
+test('a caller-supplied config decides where the local index lives', () =>
+  Effect.runPromise(
+    Effect.gen(function* () {
+      const dir = yield* tmpDir('local-index-path-')
+      const path = yield* localIndexPath.pipe(Effect.provide(cacheIn(dir)))
+      expect(path).toBe(join(dir, 'local-index.sqlite'))
+    }).pipe(Effect.scoped, Effect.provide(BunServices.layer)),
+  ))
 
 test('searchLocalIndex: the search step reads the shared index and fuses it after web hits', () =>
   Effect.runPromise(
     Effect.gen(function* () {
-      yield* cacheEnv
-      yield* Effect.scoped(
+      const dir = yield* tmpDir('search-local-')
+      const local = yield* Effect.scoped(
         Effect.flatMap(Effect.flatMap(localIndexPath, openLocalIndex), (i) => addPages(i, [tides])),
-      )
-      const local = yield* searchLocalIndex('Fundy tides', 5)
+      ).pipe(Effect.andThen(searchLocalIndex('Fundy tides', 5)), Effect.provide(cacheIn(dir)))
       expect(local.map((h) => h.url)).toEqual([tides.url])
       const web = [{ url: 'https://w.test/1', title: 'w', description: '' }]
       expect(fuseRanked([web, local]).map((h) => h.url)).toEqual(['https://w.test/1', tides.url])
-    }).pipe(Effect.scoped),
+    }).pipe(Effect.scoped, Effect.provide(BunServices.layer)),
   ))
 
 const guide = {
@@ -164,6 +165,22 @@ test('crawled HTML keeps its h1-h6 headings as chunk heading paths', () =>
         yield* addPages(index, [{ url: guide.url, title: guide.title, text: headingText(html) }])
         const [hit] = yield* searchLocal(index, 'abrasion', 5)
         expect(hit?.section).toBe('Setup > Cabling')
+      }),
+    ),
+  ))
+
+test('a stub section hands its snippet the section text that follows it', () =>
+  Effect.runPromise(
+    withIndex(':memory:', (index) =>
+      Effect.gen(function* () {
+        const text =
+          '# Pricing\nSee the plans.\n## Plans\nThe Pro plan costs ten dollars each month.'
+        yield* addPages(index, [{ url: guide.url, title: 'Pricing', text }])
+        const [hit] = yield* searchLocal(index, 'pricing', 5)
+        expect([hit?.section, hit?.description]).toEqual([
+          'Pricing > Plans',
+          'See the plans.\nThe Pro plan costs ten dollars each month.',
+        ])
       }),
     ),
   ))

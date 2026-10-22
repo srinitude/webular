@@ -1,0 +1,43 @@
+# Repository settings as code: fails when the GitHub description, homepage, or
+# topics drift from .github/repo-settings.json. Read-only; applying the file is
+# `mise run repo:settings`, run by hand.
+name: Repo settings
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 7 * * 1" # weekly, Monday 07:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: repo-settings-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      MISE_LOCKED: 1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@fc42bcc7ddbf51124c30f95a877a0c5168a3bfde # v5.2.1
+        with:
+          experimental: true
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/bun-install-cache
+          key: bun-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('mise.toml', 'bun.lock') }}
+      - name: Trust the repo's mise.toml
+        run: mise trust
+      - name: Check the repository settings
+        env:
+          BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
+          GH_TOKEN: ${{ github.token }}
+        run: mise run repo:settings:check

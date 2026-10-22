@@ -1,13 +1,15 @@
 // FOSS document parsing: detect format by extension, extract markdown/text.
 // pdf/docx parsers load their heavy deps lazily (they never tax a text parse);
 // binary formats we cannot parse fail loudly instead of decoding to garbage.
-import { Data, Effect } from 'effect'
-import { errMsg, logErr } from '../core/output.ts'
-import { htmlToMarkdown, sanitizeHtml } from './html.ts'
+import { Context, Effect, Option } from 'effect'
+import { logErr } from '../core/output.ts'
+import { htmlToMarkdown } from './html.ts'
+import { attempt, fail, ParseError, setting } from './parse-core.ts'
+import { pdfText } from './parse-pdf.ts'
+
+export { pdfText }
 
 type DocFormat = 'pdf' | 'docx' | 'html' | 'md' | 'txt' | 'csv' | 'json'
-
-class ParseError extends Data.TaggedError('ParseError')<{ readonly message: string }> {}
 
 const SUPPORTED = 'pdf, docx, html, md, txt, csv, json'
 
@@ -42,13 +44,6 @@ const EXT_FORMATS: Record<string, DocFormat> = {
   json: 'json',
 }
 
-const fail = (message: string) => Effect.fail(new ParseError({ message }))
-const attempt = <A>(run: () => PromiseLike<A>) =>
-  Effect.tryPromise({
-    try: () => Promise.resolve(run()),
-    catch: (e) => new ParseError({ message: errMsg(e) }),
-  })
-
 function detectFormat(file: string): Effect.Effect<DocFormat, ParseError> {
   const ext = file.split('.').pop()?.toLowerCase() ?? ''
   if (BINARY_EXTS.has(ext))
@@ -56,40 +51,46 @@ function detectFormat(file: string): Effect.Effect<DocFormat, ParseError> {
   return Effect.succeed(EXT_FORMATS[ext] ?? 'txt')
 }
 
-// PDF bytes to text; scrape reads a fetched PDF through this same reader.
-export const pdfText = Effect.fnUntraced(function* (bytes: Uint8Array) {
-  const { extractText, getDocumentProxy } = yield* attempt(() => import('unpdf'))
-  // The pdf.js proxy holds a worker and page buffers: free it on success and failure.
-  return yield* Effect.acquireRelease(
-    attempt(() => getDocumentProxy(bytes.slice())), // pdf.js detaches its input: pass a copy
-    (pdf) =>
-      Effect.ignore(attempt(() => (pdf as unknown as { destroy(): Promise<void> }).destroy())),
-  ).pipe(
-    Effect.flatMap((pdf) => attempt(() => extractText(pdf, { mergePages: true }))),
-    Effect.map(({ text }) => (typeof text === 'string' ? text : (text as string[]).join('\n'))),
-    Effect.scoped,
-  )
-})
-
 const parsePdf = Effect.fnUntraced(function* (file: string) {
   const buf = yield* attempt(() => Bun.file(file).arrayBuffer())
   return yield* pdfText(new Uint8Array(buf))
 })
 
+type Docx = { value: string; messages: { type: string; message: string }[] }
+// The converter is a service so a test supplies a fake without mock.module.
+export const DocxConverter = Context.Reference<(buffer: Buffer) => Effect.Effect<Docx, ParseError>>(
+  'webular/lib/DocxConverter',
+  {
+    defaultValue: () => (buffer) =>
+      attempt(() => import('mammoth')).pipe(
+        Effect.flatMap(({ default: mammoth }) => attempt(() => mammoth.convertToHtml({ buffer }))),
+      ),
+  },
+)
+
+// WEBULAR_DOCX_TIMEOUT_MS bounds one conversion, as WEBULAR_PDF_TIMEOUT_MS bounds a PDF.
+// ponytail: mammoth has no abort, so a timed-out conversion runs on unseen; a worker would stop it.
 const parseDocx = Effect.fnUntraced(function* (file: string) {
-  const { default: mammoth } = yield* attempt(() => import('mammoth'))
+  const timeoutMs = yield* setting('WEBULAR_DOCX_TIMEOUT_MS', 60_000)
   const buf = yield* attempt(() => Bun.file(file).arrayBuffer())
-  const { value: html, messages } = yield* attempt(() =>
-    mammoth.convertToHtml({ buffer: Buffer.from(buf) }),
+  const convert = yield* DocxConverter
+  const done = yield* convert(Buffer.from(buf)).pipe(
+    Effect.mapError(
+      (e) => new ParseError({ message: `parse: ${file}: docx unreadable: ${e.message}` }),
+    ),
+    Effect.timeoutOption(timeoutMs),
   )
+  if (Option.isNone(done))
+    return yield* fail(
+      `parse: ${file}: docx conversion stopped (WEBULAR_DOCX_TIMEOUT_MS: over ${timeoutMs} ms)`,
+    )
+  const { value: html, messages } = done.value
   for (const m of messages) yield* logErr(`parse: ${file}: mammoth ${m.type}: ${m.message}`)
-  return htmlToMarkdown(sanitizeHtml(html))
+  return htmlToMarkdown(html)
 })
 
 const parseHtml = (file: string) =>
-  attempt(() => Bun.file(file).text()).pipe(
-    Effect.map((html) => htmlToMarkdown(sanitizeHtml(html))),
-  )
+  attempt(() => Bun.file(file).text()).pipe(Effect.map((html) => htmlToMarkdown(html)))
 
 // Extension checks can be fooled; NUL bytes in the head cannot.
 const parseText = Effect.fnUntraced(function* (file: string) {
@@ -120,7 +121,17 @@ function contentOf(file: string, format: DocFormat): Effect.Effect<string, Parse
   }
 }
 
+// Every parser reads the whole file into memory: stat it against a budget first.
+const MAX_PARSE_BYTES = 64 * 1024 * 1024
+
+const checkSize = Effect.fnUntraced(function* (file: string) {
+  const { size } = yield* attempt(() => Bun.file(file).stat())
+  if (size > MAX_PARSE_BYTES)
+    return yield* fail(`parse: ${file} is too large (${size} bytes; limit ${MAX_PARSE_BYTES})`)
+})
+
 export const parseDocument = Effect.fn('parseDocument')(function* (file: string) {
   const format = yield* detectFormat(file)
+  yield* checkSize(file)
   return { file, format, markdown: yield* contentOf(file, format) }
 })

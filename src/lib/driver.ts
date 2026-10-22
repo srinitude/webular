@@ -8,6 +8,7 @@
 import * as BunServices from '@effect/platform-bun/BunServices'
 import { Context, Effect, Layer, Schema, type Stream, SubscriptionRef } from 'effect'
 import { runBatch } from './agentbrowser.ts'
+import { maybeScreenshot } from './driver-screenshot.ts'
 
 export const Backend = Schema.Literals(['agent-browser', 'cua'])
 export type Backend = typeof Backend.Type
@@ -27,6 +28,7 @@ class DriverError extends Schema.TaggedError<DriverError>()('DriverError', {
 interface Rendered {
   url: string
   html: string
+  screenshot?: Uint8Array // only when WEBULAR_SCREENSHOT is on and the capture succeeded
 }
 
 export class Driver extends Context.Service<
@@ -43,6 +45,8 @@ export interface Steps {
   open(url: string): Effect.Effect<unknown, DriverError>
   read(url: string, opened: unknown): Effect.Effect<string, DriverError>
   close(opened: unknown): Effect.Effect<void>
+  // Optional picture of the page just read; undefined when off or it failed.
+  shot?(): Effect.Effect<Uint8Array | undefined>
 }
 
 export const makeDriver = Effect.fnUntraced(function* (backend: Backend, steps: Steps) {
@@ -58,7 +62,9 @@ export const makeDriver = Effect.fnUntraced(function* (backend: Backend, steps: 
       Effect.gen(function* () {
         const opened = yield* session(url)
         yield* mark('reading', url)
-        return { url, html: yield* steps.read(url, opened) }
+        const html = yield* steps.read(url, opened)
+        const screenshot = steps.shot ? yield* steps.shot() : undefined
+        return screenshot ? { url, html, screenshot } : { url, html }
       }),
     )
   return Driver.of({ backend, render, state: SubscriptionRef.changes(ref) })
@@ -71,6 +77,8 @@ const decodeQuoted = Schema.decodeUnknownEffect(Schema.fromJsonString(Schema.Str
 
 // agent-browser prints the page raw or as a JSON string; keep only the markup.
 // Markup with no text (a blank render) yields '' so readHtml fails it.
+// `get html html` can print the root's inner markup (`<head>…<body>…`), which
+// linkedom parses into an empty body, so it gets its `<html>` root back.
 export const htmlFromAgentBrowser = (stdout: string) =>
   Effect.map(
     Effect.orElseSucceed(decodeQuoted(stdout.trim()), () => stdout),
@@ -78,7 +86,8 @@ export const htmlFromAgentBrowser = (stdout: string) =>
       const start = text.indexOf('<')
       const end = text.lastIndexOf('>')
       const html = start >= 0 && end > start ? text.slice(start, end + 1) : ''
-      return html.replace(/<[^>]*>/g, '').trim() ? html : ''
+      if (!html.replace(/<[^>]*>/g, '').trim()) return ''
+      return /^<(!doctype|html)/i.test(html) ? html : `<html>${html}</html>`
     },
   )
 
@@ -105,7 +114,13 @@ const batch = (commands: string[][]) =>
 // One process opens (open returns after the load event, so inline scripts have
 // run) and reads, so get html never races a separate open. An extra
 // `wait --load load` after open stalls about 25 s, so there is none. A cold
-// daemon can refuse the second command ("Failed to connect"): retry once.
+// daemon can refuse the second command ("Failed to connect"): retry once, but
+// only what a retry can fix: a dropped connection, a timeout (a killed run
+// prints no stderr, so its message is "exit 143"), 429 or a 5xx. A 404, an
+// unknown command, or a bad selector fails at once.
+const TRANSIENT =
+  /ECONN(?:RESET|REFUSED)|EPIPE|Failed to connect|time(?:d )?out|exit 143|\b(?:429|5\d\d)\b/i
+
 const readHtml = (url: string) =>
   Effect.flatMap(
     Effect.flatMap(
@@ -114,7 +129,7 @@ const readHtml = (url: string) =>
           ['open', url],
           ['get', 'html', 'html'],
         ]),
-        { times: 1 },
+        { times: 1, while: (err) => TRANSIENT.test(err.message) },
       ),
       htmlFromAgentBrowser,
     ),
@@ -125,6 +140,7 @@ const readHtml = (url: string) =>
 const agentBrowserSteps: Steps = {
   open: () => Effect.void,
   read: readHtml,
+  shot: () => maybeScreenshot(SESSION),
   close: () => Effect.void,
 }
 

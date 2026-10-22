@@ -4,18 +4,50 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and 
 
 ## [Unreleased]
 
-### Changed
-
-- Toolchain and packages move to their stable releases.
-- CI checkout does not persist the token, and each job has a 30-minute timeout.
-- `@types/diff` is dropped, since `diff` ships its own types.
-
 ### Added
 
+- Jev is the only key (`TYPESAFE_API_KEY`). Requests go to the direct TypeSafe endpoint, then the Pydantic AI Gateway, and `webular doctor` shows the route. Each request uses the pinned release `jev-1.14.0`.
+- A robots.txt gate on `scrape`, `map`, `batch`, and `crawl`, checked on every redirect hop. `scrape --ignore-robots` opts out.
+- Search levers, official-site lookup through Wikidata, and `WEBULAR_DETERMINISTIC=1` for a repeatable search.
+- `answer` grounds each answer on a run date and routes images. `research` routes images too.
+- Canonical URLs, gzip sitemaps, and JSON-LD facts in `map` and `scrape`.
+- A plugin with four skills: research, interview, plain language, and Markdown.
+- Windows, macOS, and Linux support, including musl, with per-shell key setup.
+- A peer benchmark harness, with [the results](docs/benchmarks.md) and numbers generated from the committed run.
+- [`docs/best-practices.md`](docs/best-practices.md), a checklist of the practices this repo follows. [`tests/quality/practices-config.test.ts`](tests/quality/practices-config.test.ts) and [`tests/quality/practices-source.test.ts`](tests/quality/practices-source.test.ts) check it.
 - `effect` as a dependency.
-- `docs/best-practices.md`, a checklist of the practices this repo follows. `tests/quality/practices-config.test.ts` and `tests/quality/practices-source.test.ts` check it.
 - Dependabot for GitHub Actions and npm.
-- `SECURITY.md` and this changelog.
+- [`SECURITY.md`](SECURITY.md) and this changelog.
+
+### Changed
+
+- `search` lists the failed sources and exits 1 when every source fails.
+- `monitor` obeys robots.txt and reports `archivedFrom` with a warning.
+- A `Retry-After` over the 10 s cap fails inside the deadline.
+- An unreachable host fails with the network error.
+- Agent mode confines output paths by default.
+- `--select` names the missing fields, and an image-only PDF fails with an OCR hint.
+- `--urls` is repeatable, and batch URLs must be http or https.
+- MCP tool descriptions fit the token budget, and unknown tool input keys or a bad cursor return `isError`.
+- Dates parse as UTC, and answers drop reference lines and lead with sentences that hold the asked answer.
+- CI and the release use pinned actions, a 30-minute job timeout, a checkout that does not persist the token, and trusted publishing.
+- Toolchain and packages move to their stable releases.
+
+### Fixed
+
+- Private and loopback hits no longer appear unless the query names the host.
+- Hidden and invisible text no longer reaches page text, and a page with no main text falls back to its body text.
+- Private addresses are guarded on every redirect, and auth headers do not cross hosts.
+- Crawls check robots.txt before the root page.
+- The PDF load deadline and caps fire, and a cap stops early with a note.
+- Sitemap relative locs resolve, and Wayback picks the capture nearest in time.
+- Workflow steps read the live environment, and an aborted step cancels.
+
+### Removed
+
+- MCP App views from the plugin and server.
+- The direct Anthropic and OpenAI providers.
+- `@types/diff`, since `diff` ships its own types.
 
 ## [0.2.0] - 2026-07-02
 

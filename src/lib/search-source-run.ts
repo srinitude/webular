@@ -1,8 +1,9 @@
 // One search source under the settle contract: every query variant at once,
 // each under SOURCE_TIMEOUT_MS, cut at the shared settle cutoff.
-import { Cause, Clock, Deferred, Effect, Ref } from 'effect'
+import { Cause, Clock, Deferred, Effect, Option, Ref } from 'effect'
 import { HttpStatusError } from '../core/http-body.ts'
 import { MAX_VARIANTS } from './search-source-names.ts'
+import { SourceStats } from './search-source-score.ts'
 import { type SearchSource, SOURCE_TIMEOUT_MS } from './sources-search.ts'
 
 export interface Hit {
@@ -56,6 +57,13 @@ const bestStatus = (outcomes: ReadonlyArray<Outcome>) =>
     outcomes[0]?.status ?? 'no-results',
   )
 
+// Trailing navigational filler ("Bun runtime documentation homepage"): the
+// free full-text APIs need every word, so it hides the project. Questions and
+// a query that is only filler stay as they are.
+const TRAILING_NAV =
+  /(?:\s+(?:official|site|website|homepage|home page|docs?|documentation|library|github))+\s*$/i
+export const navCore = (q: string) => (q.trim().endsWith('?') ? q : q.replace(TRAILING_NAV, ''))
+
 // One source, every query variant at once; the best variant status wins.
 // `hit` fires on the first variant with hits; `cutoff` ends the stragglers.
 export const querySource = Effect.fn('querySource')(function* (
@@ -74,13 +82,16 @@ export const querySource = Effect.fn('querySource')(function* (
   const cut = Effect.as(settle.cutoff, { status: 'timeout', hits: [] } as Outcome)
   const outcomes = yield* Effect.forEach(
     queries,
-    (q) => runVariant(runSource(source, q, limit), onHit, cut),
+    (q) => runVariant(runSource(source, navCore(q), limit), onHit, cut),
     { concurrency: MAX_VARIANTS + 1 },
   )
   const endedAt = yield* Clock.currentTimeMillis
   const ms = endedAt - start
   const status = bestStatus(outcomes)
   const firstHitAt = yield* Ref.get(firstHit)
+  // Feeds the observed ranking when a SourceStats layer is provided.
+  const stats = yield* Effect.serviceOption(SourceStats)
+  if (Option.isSome(stats)) yield* stats.value.record(source, status, ms)
   return { source, status, ms, firstHitAt, endedAt, lists: outcomes.map((o) => o.hits) }
 })
 

@@ -2,7 +2,8 @@
 // scorer agrees with its labeled cases when a TypeSafe key is present.
 import { expect, test } from 'bun:test'
 import { ConfigProvider, Effect, Option, Redacted } from 'effect'
-import { decisions, plainText, scorers, typesafeKey } from '../evals/jev.ts'
+import { decisions, scorers, typesafeKey } from '../evals/jev.ts'
+import { plainText } from '../skills/human-language/scripts/plain.ts'
 
 test('plainText swaps filler and collapses space but never touches code spans', () => {
   expect(plainText('  Utilize   the `in order to` key\n prior to   sending. ')).toBe(

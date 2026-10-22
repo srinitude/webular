@@ -3,7 +3,17 @@
 // (BENCH_PLAN, default bench/benchmark-plan.json) adds tasks and metrics.
 import { Effect, Schema } from 'effect'
 import { startFixture } from '../../../tests/_support/fixture.ts'
+import { actPage, actTasks } from './act-tasks.ts'
+import { batchTasks } from './batch-tasks.ts'
+import { crawlRoutes, crawlTasks } from './crawl-tasks.ts'
+import { extractTasks } from './extract-tasks.ts'
+import { mapTasks } from './map-tasks.ts'
+import { mediaTasks } from './media-tasks.ts'
 import { type MetricDef, Plan, type Task } from './model.ts'
+import { monitorRoute, monitorTasks } from './monitor-tasks.ts'
+import { parseTasks } from './parse-tasks.ts'
+import { researchTasks } from './research-tasks.ts'
+import { summarizeTasks } from './summarize-tasks.ts'
 
 const html = (body: string) =>
   new Response(
@@ -37,6 +47,9 @@ export const startPages = () =>
     '/article': () => html(article),
     '/table': () => html(table),
     '/js': () => html(jsPage),
+    ...crawlRoutes,
+    '/act': () => html(actPage),
+    '/monitor': monitorRoute(),
   }))
 
 const noChrome = {
@@ -147,6 +160,25 @@ export const builtinTasks: readonly Task[] = [
     'What is the height of Mount Everest in meters according to the 2020 survey?',
     ['8,848', '8848'],
   ),
+  // Spot misses: trailing navigational filler, and a title split at "in the".
+  {
+    id: 'search-bun-docs-homepage',
+    job: 'search',
+    suite: 'search',
+    input: { query: 'Bun runtime documentation homepage' },
+    checks: [{ kind: 'urlMatches', values: ['^https://bun\\.(sh|com)'] }],
+  },
+  qa('qa-cholera-author', 'Who wrote the novel Love in the Time of Cholera?', ['Garcia Marquez']),
+  ...mapTasks,
+  ...extractTasks,
+  ...researchTasks,
+  ...summarizeTasks,
+  ...mediaTasks,
+  ...parseTasks,
+  ...crawlTasks,
+  ...batchTasks,
+  ...actTasks,
+  ...monitorTasks,
 ]
 
 export const loadPlan = (path: string) =>

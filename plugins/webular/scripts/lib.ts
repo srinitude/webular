@@ -2,6 +2,7 @@
 import { fileURLToPath } from 'node:url'
 import { BunRuntime, BunServices } from '@effect/platform-bun'
 import { Console, Data, Effect, FileSystem } from 'effect'
+import { ChildProcess, ChildProcessSpawner } from 'effect/process'
 
 const slash = (p: string) => p.replaceAll('\\', '/')
 export const repoRoot = slash(fileURLToPath(new URL('../../../', import.meta.url)))
@@ -23,6 +24,15 @@ export const files = (dir: string) =>
       { concurrency: 16 },
     )
     return found.filter(Boolean).sort()
+  })
+
+// Repo-relative paths git tracks (plus untracked, unignored ones), matching the pathspecs.
+export const tracked = (...pathspecs: string[]) =>
+  Effect.gen(function* () {
+    const spawner = yield* ChildProcessSpawner.ChildProcessSpawner
+    const args = ['ls-files', '--cached', '--others', '--exclude-standard', '--', ...pathspecs]
+    const found = yield* spawner.lines(ChildProcess.make('git', args, { cwd: repoRoot }))
+    return found.filter(Boolean)
   })
 
 export const read = (path: string) =>
@@ -58,9 +68,23 @@ export const links = (text: string) =>
 
 export const isExternal = (target: string) => /^[a-z][a-z0-9+.-]*:/i.test(target)
 
+// Resolves a relative link target against the file that holds it.
+export const resolve = (from: string, target: string) => {
+  const parts = from.split('/').slice(0, -1)
+  for (const seg of target.split('/')) {
+    if (seg === '..') parts.pop()
+    else if (seg !== '.' && seg !== '') parts.push(seg)
+  }
+  return parts.join('/')
+}
+
 // Runs a check. The program returns one "file:line: message" string per violation.
 export const run = (
-  program: Effect.Effect<ReadonlyArray<string>, unknown, FileSystem.FileSystem>,
+  program: Effect.Effect<
+    ReadonlyArray<string>,
+    unknown,
+    FileSystem.FileSystem | ChildProcessSpawner.ChildProcessSpawner
+  >,
 ) =>
   program.pipe(
     Effect.flatMap((found) =>

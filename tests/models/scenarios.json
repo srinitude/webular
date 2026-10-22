@@ -6,7 +6,33 @@
   "models": ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"],
   "surfaces": ["cli", "mcp", "plugin"],
   "smoke": "scrape-reads-article",
-  "evalRules": "Every eval is a code check over the final reply: answerContains strings must all appear, answerMatches must match, and the run must call the scenario tool on its surface unless the scenario sets requireTool to false, which grades the reply alone. No scenario needs a judgment call, so none uses a Jev judge.",
+  "agentSample": ["scrape-reads-article", "search-finds-pages", "answer-cites-source"],
+  "providers": [
+    {
+      "id": "exa",
+      "command": "npx",
+      "args": ["-y", "exa-mcp-server@3.4.2"],
+      "keys": [{ "env": "EXA_API_KEY", "item": "exa-api-key" }]
+    },
+    {
+      "id": "firecrawl",
+      "command": "npx",
+      "args": ["-y", "firecrawl-mcp@3.33.4"],
+      "keys": [{ "env": "FIRECRAWL_API_KEY", "item": "firecrawl" }]
+    },
+    {
+      "id": "tavily",
+      "command": "npx",
+      "args": ["-y", "tavily-mcp@0.2.22"],
+      "keys": [{ "env": "TAVILY_API_KEY", "item": "tavily-api-key" }]
+    },
+    {
+      "id": "perplexity",
+      "command": "npx",
+      "args": ["-y", "@perplexity-ai/mcp-server@1.3.0"],
+      "keys": [{ "env": "PERPLEXITY_API_KEY", "item": "perplexity-api-key" }]
+    }
+  ],
   "routes": {
     "/article": [
       "<!doctype html><html><head><title>Tide Tables</title></head><body><nav>Home | Shop | Login</nav><article><h1>Tide Tables</h1><p>High tide at the north pier is at 06:12.</p><p>Low tide follows at 12:31 on the same day.</p></article><footer>Copyright Example Harbor</footer></body></html>"
@@ -264,21 +290,117 @@
       }
     },
     {
-      "id": "mcp-app-map-view",
-      "intent": "An agent host wants the site-map MCP App view, so it can show the user a map of a site instead of a wall of URLs.",
-      "outcome": "The reply gives the view's title, webular site map.",
+      "id": "media-saves-page-file",
+      "intent": "An agent wants a page saved to a file on disk, so it can keep or hand on the original page.",
+      "outcome": "The reply gives the saved file path.",
       "eval": {
         "kind": "code",
-        "answerContains": ["webular site map"]
+        "answerContains": ["{tmp}/tides.html"]
       },
-      "tool": "ReadMcpResourceTool",
-      "prompt": "Read the MCP resource ui://webular/map from the webular MCP server. Reply with the exact text inside its <title> tag.",
+      "tool": "media",
+      "prompt": "Save the page {origin}/article as a file at {tmp}/tides.html. Reply with the path it was saved to.",
       "reference": [
-        {
-          "file": "plugins/webular/src/ui/map.html"
-        }
+        ["media", "--url", "{origin}/article", "--download", "-o", "{tmp}/tides.html", "--json"]
       ],
-      "surfaces": ["plugin"],
+      "baseline": {
+        "pass": true,
+        "problems": []
+      }
+    },
+    {
+      "id": "parse-reads-local-file",
+      "intent": "An agent wants a file on disk turned into clean text, so it can read what the file says.",
+      "outcome": "The reply gives the low tide time, 12:31.",
+      "eval": {
+        "kind": "code",
+        "answerContains": ["12:31"]
+      },
+      "tool": "parse",
+      "prompt": "Save the page {origin}/article as a file at {tmp}/tides.html, then turn that file into text. Reply with the low tide time.",
+      "reference": [
+        ["media", "--url", "{origin}/article", "--download", "-o", "{tmp}/tides.html", "--json"],
+        ["parse", "--file", "{tmp}/tides.html", "--json"]
+      ],
+      "baseline": {
+        "pass": true,
+        "problems": []
+      }
+    },
+    {
+      "id": "tasks-lists-build-tasks",
+      "intent": "An agent wants to know which tasks build, check, and run webular, so it picks the right one.",
+      "outcome": "The reply names the run:scrape task.",
+      "eval": {
+        "kind": "code",
+        "answerContains": ["run:scrape"]
+      },
+      "tool": "tasks",
+      "prompt": "List the mise tasks for webular. Reply with the task that runs the scrape command.",
+      "reference": [["tasks", "--json"]],
+      "baseline": {
+        "pass": true,
+        "problems": []
+      }
+    },
+    {
+      "id": "diagram-lists-machines",
+      "intent": "An agent wants to know which state machines model how webular commands run, so it reads the right one.",
+      "outcome": "The reply names the command-lifecycle machine.",
+      "eval": {
+        "kind": "code",
+        "answerContains": ["command-lifecycle"]
+      },
+      "tool": "diagram",
+      "prompt": "List the state machines that model how webular commands run. Reply with the machine for a command's lifecycle.",
+      "reference": [["diagram", "--json"]],
+      "baseline": {
+        "pass": true,
+        "problems": []
+      }
+    },
+    {
+      "id": "doctor-checks-environment",
+      "intent": "An agent wants to know whether webular can run here when a tool fails for no clear reason.",
+      "outcome": "The reply names the bun check.",
+      "eval": {
+        "kind": "code",
+        "answerContains": ["bun"]
+      },
+      "tool": "doctor",
+      "prompt": "Check that webular can run on this machine. Reply with the name of the first check.",
+      "reference": [["doctor", "--json"]],
+      "baseline": {
+        "pass": true,
+        "problems": []
+      }
+    },
+    {
+      "id": "audit-shows-scan-plan",
+      "intent": "An agent wants the security scan plan with no API key, so it knows the command to run.",
+      "outcome": "The reply names deepsec.",
+      "eval": {
+        "kind": "code",
+        "answerContains": ["deepsec"]
+      },
+      "tool": "audit",
+      "prompt": "Show the security scan plan for webular. Reply with the tool it uses.",
+      "reference": [["audit", "--json"]],
+      "baseline": {
+        "pass": true,
+        "problems": []
+      }
+    },
+    {
+      "id": "jev-lists-actions",
+      "intent": "An agent wants to know what webular's Jev command can do, so it picks the right action.",
+      "outcome": "The reply names the learn and correct actions.",
+      "eval": {
+        "kind": "code",
+        "answerContains": ["learn", "correct"]
+      },
+      "tool": "jev",
+      "prompt": "Ask webular's jev command what it can do. Reply with the actions it offers.",
+      "reference": [["jev"]],
       "baseline": {
         "pass": true,
         "problems": []

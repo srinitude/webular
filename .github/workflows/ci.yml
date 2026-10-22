@@ -2,7 +2,8 @@
 # pulls setup -> lint -> typecheck -> build -> test -> validate -> ci.
 # Identical to local CI (`mise run ci`); mise owns the toolchain + graph, so
 # tool versions come from mise.toml, never from this file.
-# Runs on Linux, macOS and Windows: the CLI ships to all three.
+# Runs on every OS the CLI ships to: Linux, macOS and Windows on x64 and arm64,
+# plus Alpine (musl) in a container.
 name: CI
 
 on:
@@ -50,17 +51,32 @@ jobs:
         # (1147 tests in 206 files): Windows 7.1 min, Ubuntu about 6.3 min,
         # macOS about 6.7 min. Measured in run 39657398809; Ubuntu and macOS
         # are projected from 180 and 174 files done in 4 and 5 min.
+        # locked: mise.lock lists linux-x64, macos-arm64, windows-x64 and
+        # linux-x64-musl only, so a locked install fails on the other platforms
+        # until `mise lock --platform macos-x64,linux-arm64,windows-arm64` runs.
         include:
           - os: ubuntu-latest
             timeout: 10
-          - os: macos-latest
+            locked: 1
+          - os: ubuntu-24.04-arm
+            timeout: 12
+            locked: 0
+          - os: macos-latest # arm64
             timeout: 11
+            locked: 1
+          - os: macos-15-intel # x64; macos-13 is retired
+            timeout: 14
+            locked: 0
           - os: windows-latest
             timeout: 11
+            locked: 1
+          - os: windows-11-arm
+            timeout: 15
+            locked: 0
     runs-on: ${{ matrix.os }}
     timeout-minutes: ${{ matrix.timeout }}
     env:
-      MISE_LOCKED: 1
+      MISE_LOCKED: ${{ matrix.locked }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -100,6 +116,31 @@ jobs:
         env:
           BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
         run: mise run e2e
+
+  # musl: the same suite on Alpine, where the linux-*-musl executables run.
+  # A docker run on the host (not a job container), because the JavaScript
+  # actions need glibc node and checkout stays on the host. The image ships no
+  # bash, curl, or npm, and its `node` is a bun symlink that fails
+  # `node --version`; the doctor, completion, PKGBUILD, installer, and
+  # platform package tests need the real tools, as on every other runner.
+  alpine:
+    needs: push-covered-by-pr
+    if: ${{ !cancelled() && needs.push-covered-by-pr.outputs.covered != 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Run mise run ci and mise run e2e on Alpine
+        run: |
+          docker run --rm -v "$PWD:/w" -w /w -e MISE_LOCKED=1 oven/bun:1.4.3-alpine sh -ec '
+            apk add --no-cache git fish mandoc libgcc libstdc++ bash curl nodejs npm procps
+            apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community mise
+            git config --global --add safe.directory /w
+            mise trust
+            MISE_EXPERIMENTAL=1 mise run ci
+            MISE_EXPERIMENTAL=1 mise run e2e'
 
   # Standalone executable: each runner builds its native target (mise run
   # build) and smoke-tests it. Same 3-OS matrix and gate as ci; its timeouts fit

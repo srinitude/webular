@@ -3,6 +3,7 @@
 // a timeout. A content-type refusal never does, and when the archive has no
 // capture the original error stands.
 import { Config, Effect, Schema } from 'effect'
+import { asOfStamp } from '../lib/as-of.ts'
 import { withJev } from '../lib/jev/budget.ts'
 import { classifyHttpError } from '../lib/jev/fetch.ts'
 import type { FetchError } from './decode.ts'
@@ -21,7 +22,7 @@ type FetchFailure = HttpStatusError | FetchError
 const isDeadPage = (err: FetchFailure): boolean =>
   err instanceof HttpStatusError
     ? err.status === 404 || err.status === 410 || err.status >= 500
-    : !/unsupported content-type/.test(err.message)
+    : !/unsupported content-type|robots\.txt disallows/.test(err.message)
 
 // The raw capture (no Wayback toolbar): `id_` after the timestamp, https for
 // the real archive host.
@@ -55,9 +56,13 @@ const archiveOrigin = (opts: ArchiveOptions) =>
 
 const closestCapture = (url: string, opts: ArchiveOptions = {}) =>
   archiveOrigin(opts).pipe(
-    Effect.flatMap((origin) =>
-      fetchText(`${origin}/wayback/available?url=${encodeURIComponent(url)}`, opts),
+    Effect.zipWith(asOfStamp, (origin, stamp) =>
+      fetchText(
+        `${origin}/wayback/available?url=${encodeURIComponent(url)}${stamp ? `&timestamp=${stamp}` : ''}`,
+        opts,
+      ),
     ),
+    Effect.flatten,
     Effect.flatMap(Schema.decodeUnknownEffect(Availability)),
     Effect.map(({ archived_snapshots: { closest } }) =>
       closest?.available && /^2\d\d$/.test(closest.status)

@@ -116,7 +116,7 @@ const namedTools = Effect.gen(function* () {
   const texts = yield* Effect.forEach(files, (p) => read(`${PLUGIN}/skills/${p}`), {
     concurrency: 8,
   })
-  const rows = [...(yield* skillDoc).matchAll(/^\| [^|]+ \| `([a-z]+)`( \([^|]*\))? \|$/gm)]
+  const rows = [...(yield* skillDoc).matchAll(/^\| [^|]+ \| `webular:([a-z]+)`( \([^|]*\))? \|$/gm)]
   return {
     table: rows.map((m) => m[1] ?? ''),
     sections: [...(yield* toolsDoc).matchAll(/^## (.+)$/gm)]
@@ -168,7 +168,7 @@ test('every input field a skill names for a tool is in the live inputSchema', ()
           return spans(line.replace(/\([^)]*\)/g, '')).map((f) => [sec.split('\n')[0] ?? '', f])
         })
       const fromTable = [
-        ...(yield* skillDoc).matchAll(/^\| [^|]+ \| `([a-z]+)` \(([^|]*)\) \|$/gm),
+        ...(yield* skillDoc).matchAll(/^\| [^|]+ \| `webular:([a-z]+)` \(([^|]*)\) \|$/gm),
       ].flatMap((m) => spans(m[2] ?? '').map((f) => [m[1] ?? '', f]))
       const bad = [...fromReference, ...fromTable]
         .filter(

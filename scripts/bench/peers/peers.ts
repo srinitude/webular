@@ -4,6 +4,7 @@
 import { Effect, Schema } from 'effect'
 import { type HttpClient, HttpClientRequest, HttpClientResponse } from 'effect/http'
 import { BenchError, type Output, type Provider } from './model.ts'
+import { CALL_TIMEOUT_MS } from './timeout.ts'
 
 export const PRICING_SOURCES: Record<string, string> = {
   firecrawl:
@@ -11,7 +12,8 @@ export const PRICING_SOURCES: Record<string, string> = {
   exa: 'https://exa.ai/pricing (search $5 / 1k, contents $1 / 1k pages, answer $5 / 1k)',
   tavily: 'https://www.tavily.com/pricing (pay as you go $0.008 / credit; basic search 1 credit)',
   perplexity: 'https://docs.perplexity.ai/guides/pricing (sonar $5 / 1k requests + $1 / M tokens)',
-  parallel: 'https://parallel.ai/pricing',
+  parallel:
+    'https://docs.parallel.ai/getting-started/pricing (search fast $1 / 1k, responses low $10 / 1k)',
 }
 const FIRECRAWL_CREDIT_USD = 83 / 100_000
 
@@ -19,7 +21,7 @@ export const fail = (e: unknown) =>
   new BenchError({ message: e instanceof Error ? e.message : String(e) })
 export const bytes = (s: string) => new TextEncoder().encode(s).length
 type Jobs = Provider['jobs']
-type Post = <A>(
+export type Post = <A>(
   url: string,
   headers: Record<string, string>,
   body: object,
@@ -36,12 +38,12 @@ export const poster =
       Effect.flatMap(HttpClientResponse.filterStatusOk),
       Effect.flatMap((res) => res.json),
       Effect.flatMap(Schema.decodeUnknownEffect(schema)),
-      Effect.timeout('90 seconds'),
+      Effect.timeout(CALL_TIMEOUT_MS),
       Effect.map((r) => ({ r, sentBytes: bytes(JSON.stringify(body)) })),
       Effect.mapError(fail),
     )
 
-const out = (text: string, urls: string[], costUsd: number, sentBytes: number): Output => ({
+export const out = (text: string, urls: string[], costUsd: number, sentBytes: number): Output => ({
   text,
   urls,
   citations: [],

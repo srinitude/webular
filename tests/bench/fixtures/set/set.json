@@ -1,0 +1,218 @@
+{
+  "version": "fixture-set-1",
+  "frozen": true,
+  "canary": "FIXTURE-CANARY 6f1c2e8a-3b7d-4c55-9e0a-1d2f3a4b5c6d",
+  "tasks": [
+    {
+      "id": "known-item",
+      "family": "search.known-item",
+      "split": "dev",
+      "input": "Who maintains the Rust compiler?",
+      "source": "https://example.org/a",
+      "asOf": "2026-09-01",
+      "buildDate": "2026-09-15",
+      "author": "kiren",
+      "questionType": "entity",
+      "aliases": ["Rust project"],
+      "tags": {
+        "domain": "science",
+        "language": "en",
+        "fresh": false,
+        "longTail": true,
+        "navigational": false,
+        "premise": "none"
+      },
+      "checks": [{ "kind": "contains", "value": "Rust" }]
+    },
+    {
+      "id": "fresh-zh",
+      "family": "search.fresh",
+      "split": "dev",
+      "input": "fixture zh question",
+      "source": "https://example.org/b",
+      "asOf": "2026-09-01",
+      "buildDate": "2026-09-15",
+      "author": "kiren",
+      "questionType": "fact",
+      "aliases": ["b"],
+      "tags": {
+        "domain": "health",
+        "language": "zh",
+        "fresh": true,
+        "longTail": false,
+        "navigational": false,
+        "premise": "true"
+      },
+      "checks": [{ "kind": "contains", "value": "b" }]
+    },
+    {
+      "id": "long-tail-ko",
+      "family": "search.long-tail",
+      "split": "dev",
+      "input": "fixture ko question",
+      "source": "https://example.org/c",
+      "asOf": "2026-09-01",
+      "buildDate": "2026-09-15",
+      "author": "kiren",
+      "questionType": "fact",
+      "aliases": ["c"],
+      "tags": {
+        "domain": "law",
+        "language": "ko",
+        "fresh": false,
+        "longTail": true,
+        "navigational": false,
+        "premise": "true"
+      },
+      "checks": [{ "kind": "contains", "value": "c" }]
+    },
+    {
+      "id": "answer-short",
+      "family": "answer.short",
+      "split": "dev",
+      "input": "fixture finance question",
+      "source": "https://example.org/d",
+      "asOf": "2026-09-01",
+      "buildDate": "2026-09-15",
+      "author": "kiren",
+      "questionType": "number",
+      "aliases": ["42"],
+      "tags": {
+        "domain": "finance",
+        "language": "en",
+        "fresh": true,
+        "longTail": false,
+        "navigational": false,
+        "premise": "true"
+      },
+      "checks": [{ "kind": "numeric", "value": 42, "tolerance": 0 }]
+    },
+    {
+      "id": "false-premise-de",
+      "family": "answer.false-premise",
+      "split": "dev",
+      "input": "fixture de question",
+      "source": "https://example.org/e",
+      "asOf": "2026-09-01",
+      "buildDate": "2026-09-15",
+      "author": "kiren",
+      "questionType": "premise",
+      "aliases": ["nein"],
+      "tags": {
+        "domain": "software",
+        "language": "de",
+        "fresh": false,
+        "longTail": true,
+        "navigational": false,
+        "premise": "false"
+      },
+      "checks": [],
+      "rubric": "Says the premise is false."
+    },
+    {
+      "id": "citation",
+      "family": "answer.citation",
+      "split": "dev",
+      "input": "fixture sports question",
+      "source": "https://example.org/f",
+      "asOf": "2026-09-01T00:00:00.000Z",
+      "buildDate": "2026-09-15",
+      "author": "kiren",
+      "questionType": "fact",
+      "aliases": ["f"],
+      "tags": {
+        "domain": "sports",
+        "language": "en",
+        "fresh": false,
+        "longTail": false,
+        "navigational": false,
+        "premise": "true"
+      },
+      "checks": [{ "kind": "urlMatches", "value": "example.org" }]
+    },
+    {
+      "id": "no-answer-fr",
+      "family": "answer.no-answer",
+      "split": "dev",
+      "input": "fixture fr question",
+      "source": "https://example.org/g",
+      "asOf": "2026-09-01",
+      "buildDate": "2026-09-15",
+      "author": "kiren",
+      "questionType": "none",
+      "aliases": ["aucune"],
+      "tags": {
+        "domain": "culture",
+        "language": "fr",
+        "fresh": true,
+        "longTail": false,
+        "navigational": false,
+        "premise": "none"
+      },
+      "checks": [{ "kind": "excludes", "value": "1999" }]
+    },
+    {
+      "id": "multihop",
+      "family": "research.multihop",
+      "split": "dev",
+      "input": "fixture local question",
+      "source": "https://example.org/h",
+      "asOf": "2026-09-01",
+      "buildDate": "2026-09-15",
+      "author": "kiren",
+      "questionType": "fact",
+      "aliases": ["h"],
+      "tags": {
+        "domain": "local",
+        "language": "en",
+        "fresh": true,
+        "longTail": false,
+        "navigational": false,
+        "premise": "true"
+      },
+      "checks": [{ "kind": "regex", "value": "h+" }]
+    },
+    {
+      "id": "wide-es",
+      "family": "research.wide",
+      "split": "sealed",
+      "input": "fixture sealed question about Spanish ministries",
+      "source": "https://example.org/i",
+      "asOf": "2026-09-01",
+      "buildDate": "2026-09-15",
+      "author": "kiren",
+      "questionType": "list",
+      "aliases": ["i"],
+      "tags": {
+        "domain": "government",
+        "language": "es",
+        "fresh": false,
+        "longTail": false,
+        "navigational": false,
+        "premise": "true"
+      },
+      "checks": [{ "kind": "contains", "value": "i" }]
+    },
+    {
+      "id": "scrape",
+      "family": "scrape.page",
+      "split": "dev",
+      "input": "https://example.org/j",
+      "source": "https://example.org/j",
+      "asOf": "2026-09-01",
+      "buildDate": "2026-09-15",
+      "author": "kiren",
+      "questionType": "page",
+      "aliases": ["j"],
+      "tags": {
+        "domain": "travel",
+        "language": "en",
+        "fresh": false,
+        "longTail": false,
+        "navigational": false,
+        "premise": "none"
+      },
+      "checks": [{ "kind": "contains", "value": "j" }]
+    }
+  ]
+}

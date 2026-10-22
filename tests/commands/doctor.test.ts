@@ -9,8 +9,14 @@ import { eff } from '../_support/run.ts'
 
 const fx = useFixture(defaultRoutes)
 
-const runDoctor = (args: string[], env: Record<string, string | undefined> = { ...process.env }) =>
-  runCli('src/commands/doctor.ts', args, { env })
+// The default env points the network probe at the fixture so no default run leaves the host.
+const runDoctor = (
+  args: string[],
+  env: Record<string, string | undefined> = {
+    ...process.env,
+    WEBULAR_DOCTOR_URL: `${fx.origin}/c`,
+  },
+) => runCli('src/commands/doctor.ts', args, { env })
 
 interface Check {
   name: string

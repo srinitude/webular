@@ -25,6 +25,12 @@
       "grader": "bun test: schema decode and equality"
     },
     {
+      "assertion": "the Cursor marketplace matches the Claude Code marketplace",
+      "source": "tests/manifests.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: schema decode and equality"
+    },
+    {
       "assertion": "plugin code never reaches outside the plugin folder",
       "source": "tests/manifests.test.ts",
       "kind": "deterministic",
@@ -283,72 +289,6 @@
       "grader": "bun test: tool result text over a local site and feed"
     },
     {
-      "assertion": "the bridge reads a tool result the way the view needs it",
-      "source": "tests/session-view.test.ts",
-      "kind": "deterministic",
-      "grader": "bun test: equality on error, structured, and empty results"
-    },
-    {
-      "assertion": "every path through the lifecycle shows a label and only moves the machine allows",
-      "source": "tests/session-view.test.ts",
-      "kind": "deterministic",
-      "grader": "bun test: model-based simple paths of the lifecycle machine"
-    },
-    {
-      "assertion": "a tool result drives the machine to the same end the CLI exit rule picks",
-      "source": "tests/session-view.test.ts",
-      "kind": "deterministic",
-      "grader": "bun test: final state per result shape"
-    },
-    {
-      "assertion": "a URL list folds into a site tree with a count on each folder and failures kept",
-      "source": "tests/views.test.ts",
-      "kind": "deterministic",
-      "grader": "bun test: buildTree counts and outcomes"
-    },
-    {
-      "assertion": "a unified diff splits into side by side rows that pair removed and added lines",
-      "source": "tests/views.test.ts",
-      "kind": "deterministic",
-      "grader": "bun test: splitDiff rows"
-    },
-    {
-      "assertion": "citation markers point at 1-based sources and say when the source failed",
-      "source": "tests/views.test.ts",
-      "kind": "deterministic",
-      "grader": "bun test: citations parts"
-    },
-    {
-      "assertion": "crawl pages and a monitor check drive the machine to its end, and the text copy names it",
-      "source": "tests/views.test.ts",
-      "kind": "deterministic",
-      "grader": "bun test: lifecycle end state and asText header"
-    },
-    {
-      "assertion": "each tool links to the view the design gives it, and every other tool stays text",
-      "source": "tests/views.test.ts",
-      "kind": "deterministic",
-      "grader": "bun test: tool _meta.ui.resourceUri map"
-    },
-    {
-      "assertion": "a real MCP client reads every view as one self-contained MCP App page",
-      "source": "tests/views.test.ts",
-      "kind": "deterministic",
-      "grader": "bun test: resources/read mimeType per view"
-    },
-    {
-      "assertion": "the view says when a result came back and how long the run took",
-      "source": "tests/views.test.ts",
-      "kind": "deterministic",
-      "grader": "bun test: when() words for check time and elapsed time"
-    },
-    {
-      "assertion": "a host that never reads ui:// still gets the linked map result as data",
-      "source": "tests/session-view.test.ts",
-      "kind": "deterministic",
-      "grader": "bun test: tool result text over a local site"
-    },
-    {
       "assertion": "${name} source rules match the pinned hash",
       "source": "tests/readability-drift.test.ts",
       "kind": "deterministic",
@@ -527,6 +467,72 @@
       "source": "tests/plugin.test.ts",
       "kind": "deterministic",
       "grader": "bun test: skill text match"
+    },
+    {
+      "assertion": "HTTP mode answers 403 to a foreign Origin or Host",
+      "source": "tests/http.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: HTTP status equality"
+    },
+    {
+      "assertion": "all four skills are covered",
+      "source": "tests/skill-spec.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: skill folder count"
+    },
+    {
+      "assertion": "the marketplace entry names the real number of skills",
+      "source": "tests/skill-spec.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: manifest text match"
+    },
+    {
+      "assertion": "the plugin README names the file the manifest runs",
+      "source": "tests/skill-spec.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: README text match"
+    },
+    {
+      "assertion": "the commands page says an unreachable robots.txt blocks the crawl",
+      "source": "tests/skill-spec.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: docs text match"
+    },
+    {
+      "assertion": "the research skill writes tool names with the webular: prefix",
+      "source": "tests/skill-spec.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: skill text match"
+    },
+    {
+      "assertion": "skills and evals hold no time-tied wording",
+      "source": "tests/skill-spec.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: forbidden-word scan"
+    },
+    {
+      "assertion": "every webular:<tool> in the research skill is a registered tool",
+      "source": "tests/skill-tools-sync.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: skill tool names against schemas"
+    },
+    {
+      "assertion": "the research skill names every registered tool",
+      "source": "tests/skill-tools-sync.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: registered tools against skill text"
+    },
+    {
+      "assertion": "each tools.md section lists exactly the input fields of its schema",
+      "source": "tests/skill-tools-sync.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: tools.md fields against schemas"
+    },
+    {
+      "assertion": "tools.md lists every machine that machine.next accepts",
+      "source": "tests/skill-tools-sync.test.ts",
+      "kind": "deterministic",
+      "grader": "bun test: tools.md machines against machine schema"
     },
     {
       "assertion": "each Jev scorer agrees with its calibration labels",

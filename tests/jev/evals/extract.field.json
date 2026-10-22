@@ -10,6 +10,16 @@
         ]
       },
       "label": "$19.99"
+    },
+    {
+      "input": {
+        "name": "price",
+        "candidates": [
+          { "tag": "a", "hint": "nav", "text": "Pricing" },
+          { "tag": "h1", "hint": "product-title", "text": "Trail Running Shoe" }
+        ]
+      },
+      "label": ""
     }
   ],
   "baseline-loses": [
@@ -22,6 +32,26 @@
         ]
       },
       "label": "$19.99"
+    },
+    {
+      "input": {
+        "name": "price",
+        "candidates": [
+          { "tag": "span", "hint": "price-label", "text": "Price:" },
+          { "tag": "a", "hint": "nav", "text": "Pricing" }
+        ]
+      },
+      "label": ""
+    },
+    {
+      "input": {
+        "name": "title",
+        "candidates": [
+          { "tag": "a", "hint": "title-link", "text": "Home" },
+          { "tag": "span", "hint": "promo", "text": "Free shipping on orders over $50" }
+        ]
+      },
+      "label": ""
     }
   ]
 }

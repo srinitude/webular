@@ -62,6 +62,15 @@ describe('agent-browser blank page', () => {
         expect(yield* htmlFromAgentBrowser('"<head></head><body></body>"')).toBe('')
       }),
     ))
+
+  // Without its root, linkedom reads an empty body and the render's text is lost.
+  test('a render printed without its html root gets the root back', () =>
+    Effect.runPromise(
+      Effect.gen(function* () {
+        const inner = '<head><title>T</title></head><body><p>AURORA-7</p></body>'
+        expect(yield* htmlFromAgentBrowser(JSON.stringify(inner))).toBe(`<html>${inner}</html>`)
+      }),
+    ))
 })
 
 const fakeSteps = (closed: string[], readFails: boolean): Steps => ({
@@ -126,6 +135,14 @@ describe('render fallback trigger', () => {
     expect(needsJs(page)).toBe(false)
   })
 
+  // An app shell whose only text is a full "enable JavaScript" sentence is still a shell.
+  test('a script page whose only text asks for JavaScript needs a render', () => {
+    const page =
+      '<html><head><script src=/app.js></script></head><body><div id="root"></div>' +
+      '<p>You need to enable JavaScript in your browser to run this app.</p></body></html>'
+    expect(needsJs(page)).toBe(true)
+  })
+
   test('render off keeps the fetched page and starts no browser', () =>
     Effect.runPromise(
       Effect.gen(function* () {
@@ -134,6 +151,14 @@ describe('render fallback trigger', () => {
         expect(page).toEqual({ html })
       }),
     ))
+})
+
+// The title and byline run into "Loading..."; the ellipsis ends no sentence.
+test('a titled shell that says Loading... still gets a render', () => {
+  const page =
+    '<html><body><main><h1>Live board 811 (heavy)</h1><p>By Mara Ellison, 2026-02-02</p>' +
+    '<div id="app">Loading...</div></main><script>render()</script></body></html>'
+  expect(needsJs(page)).toBe(true)
 })
 
 const pdfServer = Effect.acquireRelease(

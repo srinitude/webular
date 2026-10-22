@@ -4,7 +4,7 @@
 import { Effect } from 'effect'
 import { EXIT } from '../cli/exit-codes.ts'
 import { discoveryExit, runWorkflow } from '../cli/run.ts'
-import { emitOpts, intFlag, parseFlags, timeoutFlag } from '../core/args.ts'
+import { emitOpts, intFlag, listFlag, parseFlags, timeoutFlag } from '../core/args.ts'
 import { CliError, runMain } from '../core/effect.ts'
 
 type Values = Parameters<typeof emitOpts>[0]
@@ -16,10 +16,7 @@ const answerInput = (values: Values, query: string) =>
       sources: yield* intFlag('answer', values, 'sources', { def: 3, min: 1, max: 10 }),
       sentences: yield* intFlag('answer', values, 'sentences', { def: 3, min: 1, max: 25 }),
       timeoutMs: yield* timeoutFlag('answer', values),
-      urls: (values['urls'] as string | undefined)
-        ?.split(',')
-        .map((u) => u.trim())
-        .filter(Boolean),
+      urls: listFlag(values['urls']),
     }
   })
 
@@ -28,7 +25,7 @@ const main = Effect.gen(function* () {
     query: { type: 'string' },
     sources: { type: 'string' },
     sentences: { type: 'string' },
-    urls: { type: 'string' },
+    urls: { type: 'string', multiple: true },
   })
   const query = (values['query'] as string) ?? positionals[0]
   if (!query) {

@@ -24,3 +24,7 @@ export const cliFlags = (command: string) =>
       ),
     ),
   )
+
+// The flag a tool input becomes: runCommand's toFlags turns camelCase keys into
+// kebab-case, so `ignoreRobots` is `--ignore-robots`.
+export const flagOf = (input: string) => input.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)

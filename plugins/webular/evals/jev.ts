@@ -7,6 +7,10 @@ import { ChildProcess, ChildProcessSpawner } from 'effect/process'
 import { plainText } from '../skills/human-language/scripts/plain.ts'
 import decisionsFile from './decisions.json' with { type: 'json' }
 
+// The plugin imports nothing from the repo src/, so it mirrors JEV_LATEST_RELEASED
+// from src/lib/jev/model.ts; tests/jev/latest-model.test.ts fails if they differ.
+const JEV_LATEST_RELEASED = 'jev-1.14.0'
+
 const Label = Schema.Literals(['yes', 'no'])
 const Case = Schema.Struct({ input: Schema.Unknown, expected: Label })
 const Decision = Schema.Struct({
@@ -25,10 +29,17 @@ const decodeAnswer = Schema.decodeUnknownEffect(Answer)
 export const decisions = Schema.decodeUnknownSync(DecisionsFile)(decisionsFile).decisions
 
 // The macOS Keychain item that holds the TypeSafe key; None when it is absent.
+// CI machines have no Keychain item, and `security` can block there waiting on a
+// locked keychain, so CI never spawns it and any other lookup gets 3 seconds.
 const fromKeychain = Effect.gen(function* () {
+  const ci = yield* Config.option(Config.String('CI'))
+  if (process.platform !== 'darwin' || Option.isSome(ci))
+    return Option.none<Redacted.Redacted<string>>()
   const spawner = yield* ChildProcessSpawner.ChildProcessSpawner
   const proc = yield* spawner.spawn(
-    ChildProcess.make('security', ['find-generic-password', '-s', 'typesafe-ai-api-key', '-w']),
+    ChildProcess.make('security', ['find-generic-password', '-s', 'typesafe-ai-api-key', '-w'], {
+      stdin: 'ignore',
+    }),
   )
   const [out, code] = yield* Effect.all(
     [proc.stdout.pipe(Stream.decodeText(), Stream.mkString), proc.exitCode],
@@ -38,6 +49,7 @@ const fromKeychain = Effect.gen(function* () {
   return code === 0 && key ? Option.some(Redacted.make(key)) : Option.none()
 }).pipe(
   Effect.scoped,
+  Effect.timeout('3 seconds'),
   Effect.provide(BunServices.layer),
   Effect.orElseSucceed(() => Option.none<Redacted.Redacted<string>>()),
 )
@@ -50,10 +62,8 @@ export const typesafeKey = Config.option(Config.Redacted('TYPESAFE_API_KEY')).pi
 
 // Build-time plain-language pass on payload free text, from the built-in
 // human-language skill's word list (one source of truth).
-export { plainText }
-
 const body = (decision: Decision, input: unknown) => ({
-  model: 'jev-1.13.0',
+  model: JEV_LATEST_RELEASED,
   state: { input },
   questions: {
     label: {

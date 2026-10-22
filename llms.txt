@@ -1,0 +1,30 @@
+# webular
+
+> A web research CLI on Bun. Its judgment calls go to Jev, TypeSafe's System One decision model. It scrapes, crawls, maps, extracts, searches, and summarizes with free and open-source parts, as Mastra workflows built on Effect and XState and run from a fixed mise task graph.
+
+Jev's key (`TYPESAFE_API_KEY`) is the only API key. Without it, each decision falls back to a rule-based baseline, and `WEBULAR_JEV=off` turns Jev off. Start at the README, then the docs and benchmark pages below.
+
+## Docs
+
+- [README](https://github.com/srinitude/webular/blob/main/README.md): what webular is, install, usage, and exit codes.
+- [docs/README.md](https://github.com/srinitude/webular/blob/main/docs/README.md): Docs index
+- [docs/how-it-works.md](https://github.com/srinitude/webular/blob/main/docs/how-it-works.md): How webular works
+- [docs/why-webular.md](https://github.com/srinitude/webular/blob/main/docs/why-webular.md): Why webular
+- [docs/commands.md](https://github.com/srinitude/webular/blob/main/docs/commands.md): Command reference
+- [docs/install.md](https://github.com/srinitude/webular/blob/main/docs/install.md): Install channels
+- [docs/build-and-run.md](https://github.com/srinitude/webular/blob/main/docs/build-and-run.md): Build and run
+- [docs/reliability.md](https://github.com/srinitude/webular/blob/main/docs/reliability.md): Reliability
+- [docs/cua-browser-mode.md](https://github.com/srinitude/webular/blob/main/docs/cua-browser-mode.md): Browser mode (Cua)
+- [docs/agent-contract.md](https://github.com/srinitude/webular/blob/main/docs/agent-contract.md): Agent contract
+- [docs/architecture.md](https://github.com/srinitude/webular/blob/main/docs/architecture.md): Architecture
+- [docs/development.md](https://github.com/srinitude/webular/blob/main/docs/development.md): Development
+- [docs/best-practices.md](https://github.com/srinitude/webular/blob/main/docs/best-practices.md): Best practices checklist
+
+## Benchmarks
+
+- [Benchmark results](https://github.com/srinitude/webular/blob/main/docs/benchmarks.md): measured scores against peer products.
+- [bench/spec/benchmark-spec.md](https://github.com/srinitude/webular/blob/main/bench/spec/benchmark-spec.md): Webular web-research benchmark spec
+- [bench/spec/sources.md](https://github.com/srinitude/webular/blob/main/bench/spec/sources.md): Sources
+- [bench/spec/spec-grading-and-stats.md](https://github.com/srinitude/webular/blob/main/bench/spec/spec-grading-and-stats.md): Graders, statistics, latency, and cost
+- [bench/spec/spec-integrity-and-report.md](https://github.com/srinitude/webular/blob/main/bench/spec/spec-integrity-and-report.md): Fairness, anti-cheating, guard tests, and the report
+- [bench/spec/spec-audit-fixes.md](https://github.com/srinitude/webular/blob/main/bench/spec/spec-audit-fixes.md): Fixes for the bias audit of the current bench

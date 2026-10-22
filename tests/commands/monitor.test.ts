@@ -129,4 +129,29 @@ describe('webular monitor — change tracking across snapshots (real fetch)', ()
     ),
     25_000,
   )
+  test(
+    'agent mode still honors an absolute WEBULAR_DB (operator setting, not a tool argument)',
+    eff(
+      Effect.gen(function* () {
+        const dir = yield* tmpDir('webular-')
+        const env: Record<string, string | undefined> = {
+          ...process.env,
+          WEBULAR_AGENT_MODE: '1',
+          WEBULAR_ALLOW_PRIVATE: '1',
+          WEBULAR_DB: join(dir, 'agent.db'),
+        }
+        delete env['WEBULAR_SANDBOX']
+        const { code, err } = yield* runCli(
+          'src/commands/monitor.ts',
+          ['--url', `${fx.origin}/c`, '--json'],
+          { env },
+        )
+        expect(err).toBe('')
+        expect(code).toBe(0)
+        const fs = yield* FileSystem.FileSystem
+        expect(yield* fs.exists(join(dir, 'agent.db'))).toBe(true)
+      }),
+    ),
+    25_000,
+  )
 })

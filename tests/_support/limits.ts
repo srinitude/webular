@@ -2,9 +2,10 @@
 // <=200 lines/file, <=30 lines/construct, control-flow nesting depth <=3.
 // Nesting counts only control-flow (not function/callback bodies), so test
 // nesting is naturally measured relative to the test() declaration.
+
+import ts from '@typescript/typescript6'
 import { Glob } from 'bun'
 import { Effect, FileSystem } from 'effect'
-import ts from 'typescript'
 
 export interface Violation {
   file: string

@@ -36,7 +36,8 @@ const bySource =
     calls.push(`${source}:${query}`)
     return Effect.succeed(lists[source] ?? recorded)
   }
-const onlyWiki = (wikipedia: Hit[]) => ({ wikipedia, hackernews: [], openalex: [] })
+const quiet = { hackernews: [], openalex: [], marginalia: [], 'github-search': [] }
+const onlyWiki = (wikipedia: Hit[]) => ({ wikipedia, ...quiet })
 function* concurrentNotSummed() {
   const sources = pickSources('bun runtime')
   const slow: SourceRunner = () => Effect.as(Effect.sleep(300), recorded)

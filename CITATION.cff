@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: If you use webular, please cite it with this metadata.
+type: software
+title: webular
+abstract: "Jev, TypeSafe's decision model, makes the judgment calls in this web research CLI. It searches, scrapes, crawls, maps, extracts, summarizes, and answers on your machine. Its plugin adds four skills: research, interview, plain language, and Markdown. Jev's key is the only key."
+authors:
+  - family-names: Srinivasan
+    given-names: Kiren
+repository-code: https://github.com/srinitude/webular
+repository-artifact: https://www.npmjs.com/package/webular
+url: https://github.com/srinitude/webular
+version: 0.2.0
+license: Apache-2.0
+keywords:
+  - web
+  - scraping
+  - scrape
+  - crawler
+  - crawl
+  - map
+  - extract
+  - search
+  - research
+  - summarize
+  - context
+  - cli
+  - mastra
+  - bun
+  - jev
+  - typesafe
+  - mastra-workflows
+  - effect
+  - xstate

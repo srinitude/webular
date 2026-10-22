@@ -11,6 +11,7 @@ import {
   shortError,
   stableJson,
   toNdjson,
+  unknownFieldsNote,
 } from '../../src/core/output.ts'
 
 describe('stableJson', () => {
@@ -32,6 +33,14 @@ describe('selectFields / toNdjson', () => {
     expect(selectFields({ a: 1 }, undefined)).toEqual({ a: 1 })
   })
 
+  test('a --select name the output lacks gets a stderr note listing the fields', () => {
+    expect(unknownFieldsNote({ b: 1, a: 2 }, ['a', 'nope'])).toBe(
+      'select: no field "nope" in this output; fields: a, b',
+    )
+    expect(unknownFieldsNote({ a: 1 }, ['a'])).toBeUndefined()
+    expect(unknownFieldsNote([1], ['a'])).toBeUndefined()
+  })
+
   test('one sorted-key line per item of the first array field', () => {
     expect(
       toNdjson({
@@ -43,6 +52,12 @@ describe('selectFields / toNdjson', () => {
       }),
     ).toBe('{"t":"x","u":1}\n{"t":"y","u":2}')
     expect(toNdjson({ only: 'object' })).toBe('{"only":"object"}')
+  })
+
+  test('a known list field wins over an earlier array field; unknown arrays fall back to the first', () => {
+    expect(toNdjson({ tags: ['x'], results: [1, 2] })).toBe('1\n2')
+    expect(toNdjson({ links: ['a'], sources: ['b'] })).toBe('"a"')
+    expect(toNdjson({ other: [3], more: [4] })).toBe('3')
   })
 })
 

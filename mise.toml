@@ -5,7 +5,9 @@
 # code. Tests are authored BEFORE code (R1).
 #
 # Graph shape (zero cycles — it is a tree rooted at `setup`):
-#   setup -> lint -> typecheck -> build -> test -> validate -> ci
+#   setup -> lint -> docs:links -> docs:tasks:check -> prune:check -> bugs:static
+#     -> typecheck -> build -> test -> bugs:check -> validate -> ci
+#   setup -> bugs:<class>             (one read-only bug hunt each)
 #   setup -> format                   (mutating dev task, OFF the check-only spine)
 #   setup -> run:<command>            (one logical predecessor each)
 # The CI/CD spine (setup..ci) is the SINGLE default dependency path and is
@@ -53,13 +55,87 @@ description = "Lint + format-verify with Biome (check-only CI gate)"
 depends = ["setup"]
 run = "bunx biome check ."
 
+[tasks."docs:links"]
+description = "Docs: every tracked Markdown file links each repo path it names, and every relative link, heading anchor, and line anchor resolves (--fix links bare paths)"
+depends = ["lint"]
+run = 'bun "{{config_root}}/plugins/webular/scripts/check-links.ts" --repo'
+
+[tasks."docs:tasks:check"]
+description = "Docs: docs/tasks.md matches `mise tasks --json` (check-only; `mise run docs:tasks` rewrites it)"
+depends = ["docs:links"]
+run = 'bun "{{config_root}}/scripts/tasks-doc.ts" --check'
+
+[tasks."docs:tasks"]
+description = "Docs: rewrite docs/tasks.md from `mise tasks --json` (writes files; off the CI spine)"
+depends = ["setup"]
+run = 'bun "{{config_root}}/scripts/tasks-doc.ts"'
+
+[tasks."prune:check"]
+description = "Prune: knip finds unused files, exports, types, and dependencies from the entry points in knip.json (check-only; fails on any finding)"
+depends = ["docs:tasks:check"]
+run = "bunx knip --no-progress"
+
+[tasks."prune:fix"]
+description = "Prune: apply knip's safe fixes (unused exports, types, dependencies; never files), keep them only if typecheck and the quality tests pass, else undo them. Needs a clean tree; --dry lists what it would remove (off the CI spine)"
+depends = ["setup"]
+usage = 'flag "--dry" help="List what would be removed; change nothing"'
+run = """
+set -e
+if [ "${usage_dry:-false}" = "true" ]; then
+  bunx knip --no-progress --no-exit-code --include exports,types,dependencies,devDependencies --reporter compact
+  exit 0
+fi
+[ -z "$(git status --porcelain)" ] || { echo 'prune:fix: commit or set aside your changes first' >&2; exit 1; }
+bunx knip --no-progress --no-exit-code --fix --fix-type exports,types,dependencies
+bun install 1>&2
+bunx biome check --write . >/dev/null || true
+if bun node_modules/typescript/bin/tsc --noEmit && bun node_modules/typescript/bin/tsc --noEmit -p plugins/webular && bun test --timeout 60000 ./tests/quality; then
+  git status --short
+else
+  echo 'prune:fix: checks failed after the fixes; undoing them' >&2
+  git diff --binary | git apply -R
+  exit 1
+fi
+"""
+
+[tasks."sync:check"]
+description = "Drift: every generated or mirrored file matches its source (dispatch table, bench docs, practices and rule files, skills and plugin tools, docs/tasks.md). A focused subset of `mise run test`"
+depends = ["build", "plugin:bundle"]
+run = [
+  'bun "{{config_root}}/scripts/tasks-doc.ts" --check',
+  "bun test --timeout 60000 tests/cli/dispatch.test.ts tests/bench/bench-docs.test.ts tests/quality/practices-config.test.ts tests/quality/rule-files.test.ts tests/contract/skills.test.ts tests/contract/plugin-tools.test.ts",
+]
+
+[tasks."docs:chain:check"]
+description = "Docs: the readability-chain ledger rows, AGENTS.md rules, Markdown links, and the plugin's timeless wording all hold. A focused subset of `mise run test`"
+depends = ["setup"]
+run = [
+  "bun test --timeout 60000 tests/quality/agents-md.test.ts tests/quality/markdown-links.test.ts tests/quality/markdown-chain-ledger.test.ts",
+  'bun "{{config_root}}/plugins/webular/scripts/check-timeless.ts"',
+]
+
+[tasks."docs:facts"]
+description = "Docs: the facts in README.md and docs/install.md, and the repo and plugin descriptions, match the code. A focused subset of `mise run test`"
+depends = ["setup"]
+run = "bun test --timeout 60000 tests/quality/readme-facts.test.ts tests/release/description-sync.test.ts"
+
+[tasks."os:check"]
+description = "Every OS, locally: shell completions parse, the e2e parity list, the CLI gateway, and the Jev key lookup on each platform. Linux, macOS, and Windows each run the full suite only in CI (.github/workflows/ci.yml)"
+depends = ["setup"]
+run = "bun test --timeout 60000 tests/release/completions.test.ts tests/quality/e2e-parity.test.ts tests/cli/gateway.test.ts tests/jev/key-platform.test.ts"
+
+[tasks."bugs:static"]
+description = "Bugs: static guards from docs/bug-classes.md (no MCP stdout writes, no `as any`, no JSON.parse casts, no shell strings, no raw fetch); read-only"
+depends = ["prune:check"]
+run = 'bun "{{config_root}}/scripts/bugs-check.ts"'
+
 [tasks.typecheck]
 description = "Compilation: strict TypeScript typecheck of the CLI and of plugins/webular (its own tsconfig, outside the root include)"
-depends = ["lint"]
-run = ["bunx tsc --noEmit", "bunx tsc --noEmit -p plugins/webular"]
+depends = ["bugs:static"]
+run = ["bun node_modules/typescript/bin/tsc --noEmit", "bun node_modules/typescript/bin/tsc --noEmit -p plugins/webular"]
 
 [tasks.build]
-description = "Build: bundle every command into dist/commands (shared chunks in dist/chunks), compile the native webular executable into dist/bin, and bundle the plugin's MCP App views (plugin:ui), which the plugin's MCP server reads at startup"
+description = "Build: bundle every command into dist/commands (shared chunks in dist/chunks), and compile the native webular executable into dist/bin"
 depends = ["typecheck"]
 run = [
   'bun scripts/gen-dispatch.ts',
@@ -67,10 +143,18 @@ run = [
   'bun build {{vars.entries}} --target=bun --minify --splitting --root="{{config_root}}/src" --outdir="{{config_root}}/dist" --chunk-naming=chunks/[name]-[hash].[ext]',
   'bun build "{{config_root}}/bin/webular.ts" --compile --minify --sourcemap --bytecode --format=esm --outfile="{{config_root}}/dist/bin/webular"',
   'bun build "{{config_root}}/src/release/node-launcher.ts" --target=node --format=esm --minify --outfile="{{config_root}}/dist/webular.js"',
-  { task = "plugin:ui" },
 ]
 sources = ["src/**/*.ts", "bin/**/*.ts", "scripts/**/*.ts", "mise.toml", "package.json", "tsconfig.json"]
 outputs = ["dist/commands/search.js", "dist/bin/webular", "dist/webular.js"]
+
+[tasks.clean]
+description = "Delete build output (dist/) on every OS; never touches bench results, recordings, or caches"
+run = 'bun "{{config_root}}/scripts/clean.ts"'
+
+[tasks."release:dry"]
+description = "Release dry run: build, then list what `bun pm pack` would publish without writing a tarball (off the CI spine)"
+depends = ["build"]
+run = "bun pm pack --dry-run"
 
 [tasks."compile:all"]
 description = "Cross-compile the webular executable for every Bun target into dist/bin (release path, off the check-only spine)"
@@ -129,33 +213,92 @@ depends = ["build"]
 # processes), so files run side by side. Each file still gets a fresh global.
 run = "bun test --timeout 30000 --parallel"
 
+[tasks."test:shuffled"]
+description = "Run the bun test suite in random order; a failure prints its seed so the order-dependent test reproduces (off the CI spine)"
+depends = ["build"]
+run = "bun test --timeout 30000 --parallel --randomize"
+
 [tasks."jev:check"]
-description = "Jev framework checks (off the linear spine; the test task runs them too): payload caps and flat cost, canonical bytes, the 0.95 bar, machine-only moves, record and replay, the raw-call lint, and the evals"
+description = "Jev framework checks (off the linear spine; the test task runs them too): payload caps and flat cost, canonical bytes, the 0.95 bar, machine-only moves, record and replay, the raw-call lint, the doctor Jev route row, and the evals"
 depends = ["setup"]
 # A drifted answering model (lines in this file) makes the evals a required live rerun.
 env = { WEBULAR_JEV_DRIFT_FILE = "{{ get_env(name='WEBULAR_JEV_DRIFT_FILE', default=config_root ~ '/.cache/jev-drift.jsonl') }}" }
 run = "bun test ./tests/jev --timeout 30000"
+
+[tasks."repo:settings"]
+description = "Apply .github/repo-settings.json (description, homepage, topics) to the GitHub repository; writes to GitHub, so run it on purpose. Off the linear spine"
+depends = ["setup"]
+run = "bun scripts/repo-settings.ts apply"
+
+[tasks."repo:settings:check"]
+description = "Read-only: fails naming each GitHub repository setting that drifted from .github/repo-settings.json. No other task depends on it"
+depends = ["setup"]
+run = "bun scripts/repo-settings.ts check"
 
 [tasks."jev:docs"]
 description = "Refresh and verify the Jev docs snapshot: conditional GET of docs.typesafe.ai/llms-full.txt (a 304 when unchanged), proof (sha256, line count, chunk boundaries) written to src/lib/jev/docs-snapshot.json; pass --replay to re-prove the committed recording offline"
 depends = ["setup"]
 run = "bun scripts/jev-docs.ts"
 
+[tasks."jev:latest-check"]
+description = "Fails when docs.typesafe.ai lists a Jev release above JEV_LATEST_RELEASED in src/lib/jev/model.ts. No other task depends on it"
+depends = ["setup"]
+run = "bun scripts/jev-latest-check.ts"
+
+[tasks."bugs:security"]
+description = "Bug hunt: run the security class guards (SSRF, robots order, injection, CI credentials) from docs/bug-classes.md; prints every missing guard; read-only"
+depends = ["setup"]
+run = 'bun "{{config_root}}/scripts/bugs-hunt.ts" security'
+
+[tasks."bugs:effect"]
+description = "Bug hunt: run the effect class guards (defects, interruption, scopes, child processes) from docs/bug-classes.md; prints every missing guard; read-only"
+depends = ["setup"]
+run = 'bun "{{config_root}}/scripts/bugs-hunt.ts" effect'
+
+[tasks."bugs:mcp-cli"]
+description = "Bug hunt: run the mcp-cli class guards (MCP stdout and tools, exit codes, CLI contract) from docs/bug-classes.md; prints every missing guard; read-only"
+depends = ["setup"]
+run = 'bun "{{config_root}}/scripts/bugs-hunt.ts" mcp-cli'
+
+[tasks."bugs:parsing"]
+description = "Bug hunt: run the parsing class guards (URLs, charset, gzip and body caps, canonical keys) from docs/bug-classes.md; prints every missing guard; read-only"
+depends = ["setup"]
+run = 'bun "{{config_root}}/scripts/bugs-hunt.ts" parsing'
+
+[tasks."bugs:tests-build"]
+description = "Bug hunt: run the tests-build class guards (quality gates, CI graph, release) from docs/bug-classes.md; prints every missing guard; read-only"
+depends = ["setup"]
+run = 'bun "{{config_root}}/scripts/bugs-hunt.ts" tests-build'
+
+[tasks."bugs:jev"]
+description = "Bug hunt: run the jev class guards (Jev definitions, replays, XState machines) from docs/bug-classes.md; prints every missing guard; read-only"
+depends = ["setup"]
+run = 'bun "{{config_root}}/scripts/bugs-hunt.ts" jev'
+
+[tasks."bugs:os"]
+description = "Bug hunt: run the os class guards (platform parity and paths) from docs/bug-classes.md; prints every missing guard; read-only"
+depends = ["setup"]
+run = 'bun "{{config_root}}/scripts/bugs-hunt.ts" os'
+
+[tasks."bugs:cross-branch"]
+description = "Bug hunt: run the cross-branch class guards (pinned literals to rerun after a combined land) from docs/bug-classes.md; prints every missing guard; read-only"
+depends = ["setup"]
+run = 'bun "{{config_root}}/scripts/bugs-hunt.ts" cross-branch'
+
+[tasks."bugs:check"]
+description = "Bugs: the static guards, then every bug-hunt class (bugs:security through bugs:cross-branch) in one read-only CI node"
+depends = ["test"]
+run = ['bun "{{config_root}}/scripts/bugs-check.ts"', 'bun "{{config_root}}/scripts/bugs-hunt.ts" all']
+
 [tasks.validate]
 description = "Validate gate — aggregates the full quality spine"
-depends = ["test"]
+depends = ["bugs:check"]
 run = "echo webular: validate OK"
 
 [tasks.ci]
 description = "CI entry — single default dependency path (local + remote)"
 depends = ["validate"]
 run = "echo webular: ci complete"
-
-[tasks.clean]
-description = "Remove build artifacts"
-# Portable delete: `rm -rf` does not exist in the Windows task shell.
-depends = ["setup"]
-run = "bun scripts/clean.ts"
 
 # ───────────────────────── Capability commands ─────────────────────────
 # Each is a Mastra workflow entrypoint. One logical predecessor (`setup`),
@@ -272,7 +415,7 @@ run = "bunx biome check plugins/webular"
 [tasks."plugin:typecheck"]
 description = "Plugin: strict TypeScript typecheck of plugins/webular"
 depends = ["plugin:lint"]
-run = "bunx tsc --noEmit -p plugins/webular"
+run = "bun node_modules/typescript/bin/tsc --noEmit -p plugins/webular"
 
 [tasks."plugin:check-test-first"]
 description = "Plugin: each src file has a test that names or imports it"
@@ -304,12 +447,6 @@ description = "Plugin: no time-anchored wording in Markdown"
 depends = ["plugin:check-reachable"]
 run = 'bun "{{config_root}}/plugins/webular/scripts/check-timeless.ts"'
 
-[tasks."plugin:ui"]
-description = "Plugin: bundle each MCP App view into one self-contained HTML file in plugins/webular/dist/ui"
-depends = ["setup"]
-env = { NODE_ENV = "production" }
-run = 'bun build --compile --target=browser --minify "{{config_root}}/plugins/webular/src/ui/session.html" "{{config_root}}/plugins/webular/src/ui/map.html" "{{config_root}}/plugins/webular/src/ui/monitor.html" --outdir="{{config_root}}/plugins/webular/dist/ui"'
-
 [tasks."plugin:bundle"]
 description = "Plugin: bundle the MCP server into plugins/webular/dist/server.js, the file mcp.json starts, so a host starts it without transpiling hundreds of modules"
 depends = ["setup"]
@@ -317,7 +454,7 @@ run = 'bun build --target=bun --minify "{{config_root}}/plugins/webular/src/serv
 
 [tasks."plugin:test"]
 description = "Plugin: run the webular agent plugin's outcome evals and tests"
-depends = ["plugin:check-timeless", "plugin:ui", "plugin:bundle"]
+depends = ["plugin:check-timeless", "plugin:bundle"]
 run = "bun test --timeout 30000 plugins/webular"
 
 [tasks."plugin:ci"]
@@ -348,6 +485,11 @@ run = "echo webular: default complete"
 description = "Run the agent scenarios through headless Claude Code on the subscription models, per surface, into bench/results (off the CI spine; pass --smoke for one run per model)"
 depends = ["build"]
 run = 'bun "{{config_root}}/tests/models/run.ts"'
+
+[tasks."bench:matrix"]
+description = "Agent benchmark matrix: `test:models --agent` runs the Jev-off, Jev-on, and rival arms on the three subscription models into bench/results (paid and live; off the CI spine)"
+depends = ["build"]
+run = 'bun "{{config_root}}/tests/models/run.ts" --agent'
 
 [tasks.bench]
 description = "Benchmark cold start (wall + CPU) of the CLI and its network-free commands with hyperfine, then the summarizer scaling run at 10, 1,000 and 100,000 sentences (off the CI spine)"
@@ -383,4 +525,25 @@ run = "bun scripts/bench/peers/run.ts"
 [tasks."bench:peers:live"]
 description = "Peer benchmark live: calls each keyed provider (at most 20 calls per peer), records responses, writes bench/results (off the CI spine)"
 depends = ["setup"]
-run = "bun scripts/bench/peers/run.ts --live"
+# A new results file always refreshes the docs that quote it.
+run = ["bun scripts/bench/peers/run.ts --live", "bun scripts/bench/peers/docs.ts"]
+
+[tasks."bench:scoreboard"]
+description = "Rewrite bench/scoreboard.json and the scoreboard table in docs/scoreboard.md: every metric for every command, its value, eval, and set"
+depends = ["setup"]
+run = "bun scripts/bench/scoreboard.ts"
+
+[tasks."bench:docs"]
+description = "Rewrite the generated benchmark blocks in README.md, docs/benchmarks.md, and docs/benchmarks-peers.md from the committed peer run with the highest timestamp in bench/results"
+depends = ["setup"]
+run = "bun scripts/bench/peers/docs.ts"
+
+[tasks."bench:data"]
+description = "Download the pinned public bench datasets (WebMainBench subset, Firecrawl scrape set) into .cache/bench-data and check each sha256 against bench/datasets (off the CI spine; a cached file makes no network call)"
+depends = ["setup"]
+run = "bun scripts/bench/dataset-fetch.ts"
+
+[tasks."bench:data:pin"]
+description = "Rewrite bench/datasets/*.json from the cached files after a revision bump (off the CI spine)"
+depends = ["setup"]
+run = "bun scripts/bench/dataset-pin.ts"

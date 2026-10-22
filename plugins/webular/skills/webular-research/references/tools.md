@@ -16,7 +16,7 @@
 - For stdio, run `bun ./src/server.ts` from the plugin folder.
 - For HTTP, run `mise run plugin:dev` from the repo root. Portless then serves it at `https://webular-mcp.localhost/mcp`.
 - Without portless, run `bun ./src/server.ts --http`. It listens on `http://127.0.0.1:$PORT/mcp`, and the port is 3939 when `PORT` is not set.
-- Run `mise run build` once. Each tool call then starts a prebuilt command file. It starts much faster than the source files. Set `WEBULAR_DEV=1` to run the source files instead.
+- Run `mise run build` once. Each tool call then starts a prebuilt command file. That starts much faster than the source files. Set `WEBULAR_DEV=1` to run the source files instead.
 
 ## search
 
@@ -27,9 +27,10 @@
 
 ## scrape
 
-- Input: `url` (a full http or https URL, required), `archive` (true or false), and `render` (`agent-browser`, `cua`, or `off`; renders the page in a browser first).
+- Input: `url` (a full http or https URL, required), `archive` (true or false), `render` (`agent-browser`, `cua`, or `off`; renders the page in a browser first), and `ignoreRobots` (true or false).
 - Output: the page title and its main content as Markdown, with no menus or ads.
 - With `archive: true`, a page that fails live is read from its closest Wayback Machine copy, and `archivedFrom` names that copy.
+- By default, a page that robots.txt disallows returns status `blocked` with reason `robots`. With `ignoreRobots: true`, it is fetched anyway, and the output carries `robots: "disallowed"`. This works for a single URL only. Crawl, map, and batch always honor robots.txt.
 
 ## map
 
@@ -52,7 +53,7 @@
 ## machine.next
 
 - `webular mcp` serves it, next to the `web.*` tools.
-- Input: `machine` (`cliDispatch`, `commandLifecycle`, `fetch`, `mcpServe`, or `scrapeFallback`, required) and `events` (the events already sent, up to 64).
+- Input: `machine` (`cliDispatch`, `commandLifecycle`, `fetch`, `jevCommand`, `mcpServe`, or `scrapeFallback`, required) and `events` (the events already sent, up to 64).
 - Output: `state`, `next` (the only events allowed at this step), `done`, and `tags`. When the machine is done, an `exit-<code>` tag names its exit code.
 - Call it before you send a webular command an event, when you aren't sure the step is legal. Pass the machine and the events already sent.
 - Choose only from `next`. If `done` is true, stop and read the exit code from `tags`.

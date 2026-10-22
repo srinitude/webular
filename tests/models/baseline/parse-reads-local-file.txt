@@ -1,0 +1,3 @@
+{"action":"download","bytes":286,"savedTo":"{tmp}/tides.html","url":"{origin}/article"}
+
+{"file":"{tmp}/tides.html","format":"html","markdown":"Tide Tables\n\nHome | Shop | Login\n\n# Tide Tables\n\nHigh tide at the north pier is at 06:12.\n\nLow tide follows at 12:31 on the same day.\n\nCopyright Example Harbor"}

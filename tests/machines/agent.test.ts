@@ -150,15 +150,16 @@ const failureChoices = Effect.gen(function* () {
 }).pipe(Effect.provideService(AgentAnswers, new Map()))
 
 describe('stately agent model setup', () => {
-  test('WEBULAR_AGENT_MODEL parses only provider:model for a known provider', () => {
-    expect(parseModel('anthropic:claude-haiku-5-5')).toEqual(
-      Option.some({ provider: 'anthropic', id: 'claude-haiku-5-5' }),
-    )
-    expect(parseModel('openai:gpt-4o-mini')).toEqual(
-      Option.some({ provider: 'openai', id: 'gpt-4o-mini' }),
-    )
-    expect(parseModel('jev:jev-latest')).toEqual(Option.some({ provider: 'jev', id: 'jev-latest' }))
-    for (const bad of ['gpt-4o-mini', 'anthropic:', ':x', 'mistral:large', 'toString:x'])
+  test('WEBULAR_AGENT_MODEL parses only jev:<model>', () => {
+    expect(parseModel('jev:jev-1.14.0')).toEqual(Option.some({ provider: 'jev', id: 'jev-1.14.0' }))
+    for (const bad of [
+      'gpt-4o-mini',
+      'jev:',
+      ':x',
+      'anthropic:claude-haiku-5-5',
+      'openai:gpt-4o-mini',
+      'toString:x',
+    ])
       expect(parseModel(bad)).toEqual(Option.none())
   })
 

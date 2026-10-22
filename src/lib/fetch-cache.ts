@@ -1,6 +1,8 @@
 // Bounded bun:sqlite validator cache for conditional GETs.
-import { Database } from 'bun:sqlite'
+
+import { safeUrl } from '../core/fetch-policy.ts'
 import type { Reply } from './fetch-types.ts'
+import { openSqlite } from './sqlite-open.ts'
 
 export interface Validator {
   readonly etag: string | null
@@ -11,8 +13,6 @@ export interface Validator {
 // url is the primary key, so lookup is O(log n) on the B-tree; `used` is
 // indexed, so eviction is O(log n + evicted). Rows stay at most `rows`.
 const SCHEMA = [
-  'PRAGMA journal_mode = WAL',
-  'PRAGMA synchronous = NORMAL',
   `CREATE TABLE IF NOT EXISTS validators (url TEXT PRIMARY KEY, etag TEXT, last_modified TEXT,
      body TEXT NOT NULL, used INTEGER NOT NULL)`,
   'CREATE INDEX IF NOT EXISTS validators_used ON validators (used)',
@@ -22,7 +22,7 @@ const EVICT_SQL =
   'DELETE FROM validators WHERE used <= (SELECT used FROM validators ORDER BY used DESC LIMIT 1 OFFSET ?)'
 
 export const openCache = (path: string, rows: number) => {
-  const db = new Database(path, { create: true })
+  const db = openSqlite(path, true)
   for (const sql of SCHEMA) db.run(sql)
   let tick = (db.query('SELECT COALESCE(MAX(used), 0) AS m FROM validators').get() as { m: number })
     .m
@@ -30,14 +30,23 @@ export const openCache = (path: string, rows: number) => {
   const touch = db.query('UPDATE validators SET used = ? WHERE url = ?')
   const put = db.query('INSERT OR REPLACE INTO validators VALUES (?, ?, ?, ?, ?)')
   const evict = db.query(EVICT_SQL)
+  // The key is the URL with secret params redacted, so a key never lands on disk.
   const lookup = (url: string) => {
-    const row = get.get(url) as Validator | null
-    if (row) touch.run(++tick, url)
+    const key = safeUrl(url)
+    const row = get.get(key) as Validator | null
+    if (row) touch.run(++tick, key)
     return row
   }
-  const store = (url: string, r: Reply) => {
-    put.run(url, r.headers['etag'] ?? null, r.headers['last-modified'] ?? null, r.body, ++tick)
+  // One transaction: one commit (one fsync) per store, and a failed evict undoes the put.
+  const store = db.transaction((url: string, r: Reply) => {
+    put.run(
+      safeUrl(url),
+      r.headers['etag'] ?? null,
+      r.headers['last-modified'] ?? null,
+      r.body,
+      ++tick,
+    )
     evict.run(rows)
-  }
+  })
   return { db, lookup, store }
 }
