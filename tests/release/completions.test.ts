@@ -10,7 +10,7 @@ import { writeCompletions } from '../../src/release/completions.ts'
 import { ROOT } from '../_support/root.ts'
 import { eff } from '../_support/run.ts'
 
-const DIR = join(ROOT, 'dist', 'completions-test')
+const DIR = join(ROOT, 'out', 'completions-test')
 const PWSH = '/opt/homebrew/bin/pwsh'
 const file = (name: string) => join(DIR, name)
 
