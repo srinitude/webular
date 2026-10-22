@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- <url><loc>ORIGIN/commented</loc></url> -->
+  <url><loc>ORIGIN/p?a=1&amp;b=2</loc></url>
+  <url><loc><![CDATA[ORIGIN/cdata?x=1&y=2]]></loc></url>
+  <url><LOC>
+      ORIGIN/spaced
+  </LOC></url>
+  <url><loc>ORIGIN/q?s=&quot;a b&quot;&#38;t=&#x31;</loc></url>
+</urlset>

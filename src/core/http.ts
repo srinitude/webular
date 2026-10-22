@@ -14,6 +14,7 @@ import { FetchError } from './decode.ts'
 import { FETCH_ERROR, RETRY_BACKOFF_MS, RETRY_STATUS, retryPause } from './fetch-policy.ts'
 import { dropBody, type HttpStatusError, okText } from './http-body.ts'
 import { errMsg } from './output.ts'
+import { delayHeaderMs } from './retry-after.ts'
 import { sameHost } from './url.ts'
 
 export const USER_AGENT = `webular/${pkg.version} (+https://github.com/srinitude/webular)`
@@ -33,11 +34,10 @@ export interface FetchOptions extends CacheOptions {
 
 // Retry-After (RFC 9110 section 10.2.3): delay-seconds or an HTTP-date.
 export function retryAfterMs(header: string | null, now: number): number | undefined {
-  if (!header?.trim()) return undefined
-  const secs = Number(header)
-  const ms = Number.isFinite(secs) ? secs * 1000 : Date.parse(header) - now
-  if (!Number.isFinite(ms) || ms < 0) return undefined
-  return Math.min(ms, MAX_RETRY_AFTER_MS)
+  const ms = delayHeaderMs(header, now)
+  // A past HTTP-date is ignored, while delay-seconds of 0 is a real "retry now".
+  const past = ms === 0 && !/^\s*[\d.]+\s*$/.test(header ?? '')
+  return ms === undefined || past ? undefined : Math.min(ms, MAX_RETRY_AFTER_MS)
 }
 
 type FetchSnapshot = SnapshotFrom<typeof fetchMachine>

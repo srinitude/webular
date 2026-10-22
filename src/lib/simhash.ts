@@ -1,7 +1,16 @@
 // 64-bit Charikar SimHash for near-duplicate detection (Manku, Jain, Das
 // Sarma, WWW 2007: k <= 3 differing bits on 64-bit fingerprints).
 
-export const words = (text: string) => text.toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? []
+import { ZERO_WIDTH } from '../core/output.ts'
+
+// NFC and no zero-width marks first, so NFD text and "hel\u200Blo" hash as typed;
+// \p{M} keeps combining marks inside their word.
+export const words = (text: string) =>
+  text
+    .normalize('NFC')
+    .replace(ZERO_WIDTH, '')
+    .toLowerCase()
+    .match(/[\p{L}\p{M}\p{N}]+/gu) ?? []
 
 const FNV_BASIS = 0x811c9dc5
 const FNV_PRIME = 0x01000193

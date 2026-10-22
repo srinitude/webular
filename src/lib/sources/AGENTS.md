@@ -23,6 +23,8 @@ Rules for the free source adapters, under [src/lib/AGENTS.md](../AGENTS.md).
 
 ## Checks
 
+- `Retry-After` date parsing in [polite](polite.ts) has guards in `mise run bugs:parsing`.
+
 ```bash
 mise run test:file tests/lib/sources tests/commands/search-sources.test.ts
 ```

@@ -1,5 +1,6 @@
 // Fetch layer types, typed errors, backoff math, and reply classification.
 import { Clock, Data, Effect } from 'effect'
+import { delayHeaderMs } from '../core/retry-after.ts'
 
 type FetchErrorKind = 'timeout' | 'network' | 'http' | 'blocked' | 'too-large' | 'invalid-url'
 type NextAction = 'retry' | 'escalate' | 'give-up' | 'slow-down'
@@ -54,13 +55,7 @@ export const fullJitterDelay = (attempt: number, baseMs: number, capMs: number, 
   u * Math.min(capMs, baseMs * 2 ** attempt)
 
 /** `Retry-After` as delta-seconds or HTTP-date (RFC 9110), in ms; undefined when absent or bad. */
-const parseRetryAfter = (value: string | undefined, now: number): number | undefined => {
-  if (!value) return undefined
-  const seconds = Number(value)
-  if (Number.isFinite(seconds)) return Math.max(0, seconds * 1000)
-  const at = Date.parse(value)
-  return Number.isNaN(at) ? undefined : Math.max(0, at - now)
-}
+const parseRetryAfter = delayHeaderMs
 
 const CHALLENGE = /cf-chl|captcha|enable javascript|checking your browser/i
 

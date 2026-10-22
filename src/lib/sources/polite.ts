@@ -8,6 +8,7 @@ import { Clock, Config, Context, Effect, Schema, Semaphore } from 'effect'
 import pkg from '../../../package.json' with { type: 'json' }
 import { type FetchOptions, fetchText } from '../../core/http.ts'
 import { HttpStatusError } from '../../core/http-body.ts'
+import { delayHeaderMs } from '../../core/retry-after.ts'
 import { endpoint } from '../sources-search.ts'
 
 export interface Hit {
@@ -80,10 +81,7 @@ export const rateLimit = (name: string): Limit =>
 // When the pool is spent: retry-after on a 403/429, else x-ratelimit-reset once
 // x-ratelimit-remaining is 0, else a minute on a bare 429 (GitHub's own advice).
 const spentUntil = (res: Response, now: number) => {
-  const header = res.headers.get('retry-after')
-  const after = Number(header)
-  const dated = Date.parse(header ?? '') // an HTTP-date; seconds parse to NaN here
-  const wait = after > 0 ? after * 1000 : dated - now
+  const wait = delayHeaderMs(res.headers.get('retry-after'), now) ?? 0
   if ((res.status === 403 || res.status === 429) && wait > 0) return now + wait
   if (res.headers.get('x-ratelimit-remaining') === '0')
     return Number(res.headers.get('x-ratelimit-reset')) * 1000

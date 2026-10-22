@@ -25,6 +25,7 @@ Rules for the Jev client and decision framework, under [src/lib/AGENTS.md](../AG
 
 ## Checks
 
+- `Retry-After` date parsing in [errors](errors.ts) has guards in `mise run bugs:parsing`.
 - Only [`src/machines/agent.ts`](../../machines/agent.ts) may read XState's private `_nodes`.
 - Only the process edges call `runPromise`. In this folder, that is [`steps.ts`](steps.ts).
 

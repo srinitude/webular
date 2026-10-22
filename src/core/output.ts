@@ -24,8 +24,21 @@ export function errMsg(err: unknown): string {
 export const ERROR_MAX_CHARS = 300
 export function shortError(err: unknown): string {
   const line = errMsg(err).split('\n', 1)[0] ?? ''
-  return line.length > ERROR_MAX_CHARS ? `${line.slice(0, ERROR_MAX_CHARS - 1)}…` : line
+  return line.length > ERROR_MAX_CHARS
+    ? `${line.slice(0, ERROR_MAX_CHARS - 1).toWellFormed()}…`
+    : line
 }
+
+// Plain text as one Markdown heading line: NFC, no zero-width marks, whitespace
+// and newlines collapsed, and inline syntax (links, emphasis, code, tables, #) escaped.
+export const ZERO_WIDTH = /[\u200B-\u200D\u2060\uFEFF]/g
+export const mdHeading = (text: string): string =>
+  text
+    .normalize('NFC')
+    .replace(ZERO_WIDTH, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .replace(/[\\`*_[\]()<>#|]/g, '\\$&')
 
 type Rec = Record<string, unknown>
 const isRec = (v: unknown): v is Rec => typeof v === 'object' && v !== null && !Array.isArray(v)

@@ -75,6 +75,16 @@ const retryAfterDate = Effect.gen(function* () {
   expect(out.seen.calls).toBe(1)
 })
 
+// The asctime form has no zone and still means GMT, whatever zone the machine is in.
+const retryAfterAsctime = Effect.gen(function* () {
+  const now = yield* Clock.currentTimeMillis
+  const [, day, mon, year, time] = new Date(now + 90_000).toUTCString().split(/,? /)
+  const wd = new Date(now + 90_000).toUTCString().slice(0, 3)
+  const out = yield* twice(403, { 'retry-after': `${wd} ${mon} ${day} ${time} ${year}` })
+  skippedWith429(out.second)
+  expect(out.seen.calls).toBe(1)
+})
+
 const remainingLeft = Effect.gen(function* () {
   const reset = yield* resetIn60
   const out = yield* twice(200, { 'x-ratelimit-remaining': '9', 'x-ratelimit-reset': reset })
@@ -119,6 +129,7 @@ describe('github search rate limit', () => {
   test('remaining 0 skips GitHub until x-ratelimit-reset', () => run(remainingZero))
   test('403 with retry-after skips GitHub for that long', () => run(retryAfter))
   test('403 with an HTTP-date retry-after skips GitHub until then', () => run(retryAfterDate))
+  test('403 with a zoneless asctime retry-after reads it as GMT', () => run(retryAfterAsctime))
   test('remaining above 0 keeps asking GitHub', () => run(remainingLeft))
   test('GitHub search stays keyless with GITHUB_TOKEN or GH_TOKEN set', () => run(fresh(tokens)))
   test('search fallback answers from other sources while GitHub is spent', () => run(fallbackSpent))

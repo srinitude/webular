@@ -7,6 +7,7 @@ import { Effect } from 'effect'
 import { z } from 'zod'
 import { fetchTextOrArchive } from '../core/archive.ts'
 import { fetchText } from '../core/http.ts'
+import { mdHeading } from '../core/output.ts'
 import { htmlToMarkdown, pageBodyHtml, parsePage } from '../lib/html.ts'
 import { decisions } from '../lib/jev/decisions.ts'
 import { decisionStep } from '../lib/jev/steps.ts'
@@ -140,7 +141,7 @@ function toScrapeResult(p: Prepared, picks: Picks | undefined): z.infer<typeof s
   return {
     url,
     title,
-    markdown: title ? `# ${title}\n\n${body}` : body,
+    markdown: title ? `# ${mdHeading(title)}\n\n${body}` : body,
     text: p.page.article.text,
     links: p.page.links,
     ...(p.page.metadata ? { metadata: p.page.metadata } : {}),

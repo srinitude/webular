@@ -30,6 +30,7 @@
   "parsing": {
     "globs": [
       "tests/parsing/**/*.test.ts",
+      "tests/**/*.parsing.test.ts",
       "tests/engine/{url,canonical-url,decode,map-gzip,parse-pdf-caps}*.test.ts",
       "tests/core/fetch-body-cap.test.ts",
       "tests/lib/search-hitkey.test.ts"

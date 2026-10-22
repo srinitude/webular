@@ -3,7 +3,7 @@
 import { isProbablyReaderable, Readability } from '@mozilla/readability'
 import { parseHTML } from 'linkedom'
 import TurndownService from 'turndown'
-import { normalizeUrl } from '../core/url.ts'
+import { documentBase, normalizeUrl } from '../core/url.ts'
 import { imagesFrom, inlineAlts, ogImageOf, type PageImage, textOf } from './html-images.ts'
 import { dropHidden, dropInvisible, sanitizeHtml } from './html-sanitize.ts'
 import { addTableRule } from './html-table.ts'
@@ -28,12 +28,15 @@ interface PageDoc {
 
 type DomDocument = ReturnType<typeof parseHTML>['document']
 
+// Only web links count: javascript:, mailto:, tel:, and data: hrefs are not pages.
 function addLink(out: Set<string>, href: string | null, base: string): void {
   const url = href && normalizeUrl(href, base)
-  if (url) out.add(url)
+  if (url && /^https?:/.test(url)) out.add(url)
 }
 
-function linksFrom(document: DomDocument, base: string): string[] {
+// Relative hrefs resolve against <base href> when the page sets one.
+function linksFrom(document: DomDocument, pageUrl: string): string[] {
+  const base = documentBase(document.querySelector('base[href]')?.getAttribute('href'), pageUrl)
   const out = new Set<string>()
   for (const anchor of document.querySelectorAll('a[href]')) {
     addLink(out, anchor.getAttribute('href'), base)
@@ -155,6 +158,16 @@ export function extractLinks(html: string, base: string): string[] {
 
 const turndown = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' })
 addTableRule(turndown)
+// Turndown fences only <pre><code>; a bare <pre> would lose its line breaks
+// and get Markdown-escaped. The fence outgrows any backtick run inside.
+turndown.addRule('bare-pre', {
+  filter: (node) => node.nodeName === 'PRE' && node.firstChild?.nodeName !== 'CODE',
+  replacement: (_content, node) => {
+    const code = (node.textContent ?? '').replace(/\n$/, '')
+    const fence = '`'.repeat(Math.max(3, ...(code.match(/`+/g) ?? []).map((r) => r.length + 1)))
+    return `\n\n${fence}\n${code}\n${fence}\n\n`
+  },
+})
 
 // Every Markdown path sanitizes here, so no caller can hand Turndown hidden
 // text, script, or style from raw HTML.

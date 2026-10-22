@@ -26,14 +26,37 @@ export type PageMetadata = z.infer<typeof metadataSchema>
 
 const parseJson = Schema.decodeUnknownOption(Schema.fromJsonString(Schema.Unknown))
 
+// Pages wrap blocks in an HTML comment or a CDATA section (with or without a
+// JS comment prefix), start with a BOM, or leave a trailing comma; none of that is data.
+const OPEN_WRAP = /^(?:<!--|(?:\/\/|\/\*)?\s*<!\[CDATA\[(?:\*\/)?)/
+const CLOSE_WRAP = /(?:-->|(?:\/\/|\/\*)?\s*\]\]>(?:\*\/)?)$/
+const unwrap = (text: string): string =>
+  text
+    .replace(/^\uFEFF/, '')
+    .trim()
+    .replace(OPEN_WRAP, '')
+    .replace(CLOSE_WRAP, '')
+    .trim()
+// Strings are matched first so a comma inside one is never touched.
+const dropTrailingCommas = (text: string): string =>
+  text.replace(/"(?:[^"\\]|\\.)*"|,(\s*[}\]])/g, (m, tail?: string) => tail ?? m)
+const parseBlock = (text: string) => {
+  const clean = unwrap(text)
+  return Option.orElse(parseJson(clean), () => parseJson(dropTrailingCommas(clean)))
+}
+
 type Node = Record<string, unknown>
 const isNode = (v: unknown): v is Node => typeof v === 'object' && v !== null && !Array.isArray(v)
 
+// Real pages nest a few levels; deeper input is hostile and would overflow the stack.
+const MAX_NESTING = 16
+
 // Every object in a block: the block itself, array members, and @graph members.
-function nodesOf(value: unknown): Node[] {
-  if (Array.isArray(value)) return value.flatMap(nodesOf)
+function nodesOf(value: unknown, depth = 0): Node[] {
+  if (depth > MAX_NESTING) return []
+  if (Array.isArray(value)) return value.flatMap((v) => nodesOf(v, depth + 1))
   if (!isNode(value)) return []
-  return [value, ...nodesOf(value['@graph'])]
+  return [value, ...nodesOf(value['@graph'], depth + 1)]
 }
 
 const asStrings = (v: unknown): string[] =>
@@ -64,7 +87,10 @@ export function pageMetadata(document: DomDocument): PageMetadata | undefined {
   for (const script of document.querySelectorAll('script[type="application/ld+json" i]')) {
     const text = script.textContent ?? ''
     if (text.length > JSON_LD_MAX_BLOCK_CHARS) continue
-    for (const node of Option.getOrElse(Option.map(parseJson(text), nodesOf), () => [])) {
+    for (const node of Option.getOrElse(
+      Option.map(parseBlock(text), (v) => nodesOf(v)),
+      () => [],
+    )) {
       const fact = factOf(node)
       if (Object.keys(fact).length) facts.push(fact)
     }

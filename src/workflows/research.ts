@@ -3,6 +3,7 @@
 import { createStep, createWorkflow } from '@mastra/core/workflows'
 import { Effect } from 'effect'
 import { z } from 'zod'
+import { mdHeading } from '../core/output.ts'
 import { pageImageSchema } from '../lib/answer-figure.ts'
 import { searchRounds } from '../lib/jev/decisions/research.ts'
 import { researchSentences } from '../lib/jev/decisions/research-sentences.ts'
@@ -115,7 +116,7 @@ function buildSection(
   const sentences = [...new Set([...lead, ...top])].slice(0, topN)
   const body = sentences.length > 0 ? sentences.join(' ') : 'No extractable content.'
   const figs = figures.length > 0 ? `\n\n${figures.join('\n')}` : ''
-  return `## ${entry.title || `Source ${idx + 1}`}\n\n${body}${figs}\n\n> Source [${idx + 1}]: ${entry.url}`
+  return `## ${mdHeading(entry.title) || `Source ${idx + 1}`}\n\n${body}${figs}\n\n> Source [${idx + 1}]: ${entry.url}`
 }
 
 // image.router per source: figures only where the answer sits in a picture.

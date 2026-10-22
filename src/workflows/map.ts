@@ -37,11 +37,25 @@ type ChildResult =
   | { loc: string; ok: true; locs: string[] }
   | { loc: string; ok: false; reason: string }
 
-// Each loc resolves against the sitemap's own URL, so relative locs count.
-function locsOf(xml: string, base: string): string[] {
-  return [...xml.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/g)].flatMap(
-    (m) => normalizeUrl(m[1] ?? '', base) ?? [],
+const XML_ENTITIES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" }
+// Named XML entities and numeric references; anything else is left as written.
+const decodeXml = (text: string): string =>
+  text.replace(
+    /&(?:#(\d+)|#x([\da-f]+)|(\w+));/gi,
+    (m, dec?: string, hex?: string, name?: string) => {
+      const code = dec ? Number(dec) : hex ? Number.parseInt(hex, 16) : undefined
+      if (code === undefined) return XML_ENTITIES[name ?? ''] ?? m
+      return code <= 0x10ffff ? String.fromCodePoint(code) : m
+    },
   )
+const withoutComments = (xml: string): string => xml.replace(/<!--[\s\S]*?-->/g, '')
+
+// Each loc resolves against the sitemap's own URL, so relative locs count. Comments
+// are ignored, tags are case-insensitive, and a loc may be CDATA or hold entities.
+function locsOf(xml: string, base: string): string[] {
+  return [
+    ...withoutComments(xml).matchAll(/<loc>\s*(?:<!\[CDATA\[([\s\S]*?)\]\]>|([^<]*?))\s*<\/loc>/gi),
+  ].flatMap((m) => normalizeUrl(m[1] ?? decodeXml(m[2] ?? '').trim(), base) ?? [])
 }
 
 const fetchChild = (loc: string, host: string, timeoutMs: number): Effect.Effect<ChildResult> =>
@@ -82,7 +96,8 @@ const sitemapAt = Effect.fn('map.sitemapAt')(function* (
 ) {
   const xml = yield* fetchTextWithinHost(sitemapUrl, host, { timeoutMs: budget, gunzip: true })
   const sameHostLocs = locsOf(xml, sitemapUrl).filter((u) => sameHost(host, u))
-  if (/<sitemapindex[\s>]/i.test(xml)) return yield* childLinks(sameHostLocs, host, budget)
+  if (/<sitemapindex[\s>]/i.test(withoutComments(xml)))
+    return yield* childLinks(sameHostLocs, host, budget)
   return { links: sameHostLocs, errors: [] } satisfies Discovery
 })
 

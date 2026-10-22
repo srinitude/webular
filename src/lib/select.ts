@@ -3,6 +3,7 @@
 // selector, go to a Jev pick (decisions/extract.ts) with the code rule as fallback.
 import { Data, Effect } from 'effect'
 import { parseHTML } from 'linkedom'
+import { dropHidden } from './html-sanitize.ts'
 import { JEV_CONCURRENCY } from './jev/client.ts'
 import { type Candidate, fieldDecision, recoverDecision } from './jev/decisions/extract.ts'
 import { onJevRuntime } from './jev/run.ts'
@@ -43,6 +44,14 @@ export function parseFieldSpecs(raw: string): Effect.Effect<FieldSpec[], Invalid
   )
 }
 
+// Script, style, and hidden text never reach a field: a matched element's
+// textContent would otherwise carry them.
+const parseVisible = (html: string) => {
+  const { document } = parseHTML(html)
+  if (document.documentElement) dropHidden(document.documentElement)
+  return document
+}
+
 const MAX_CANDIDATES = 60 // ponytail: first 60 text elements; rank by hint if pages run longer
 const SKIP = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEMPLATE', 'TITLE'])
 const textOf = (el: Element) => el.textContent?.trim() ?? ''
@@ -74,7 +83,7 @@ const pickField = (
 }
 
 export const selectFields = (html: string, fields: ReadonlyArray<FieldSpec>) => {
-  const { document } = parseHTML(html)
+  const document = parseVisible(html)
   return Effect.forEach(fields, (f) => pickField(document, f), {
     concurrency: JEV_CONCURRENCY,
   }).pipe(
@@ -83,8 +92,7 @@ export const selectFields = (html: string, fields: ReadonlyArray<FieldSpec>) => 
 }
 
 export function selectMatches(html: string, selector: string): string[] {
-  const { document } = parseHTML(html)
-  return Array.from(document.querySelectorAll(selector))
+  return Array.from(parseVisible(html).querySelectorAll(selector))
     .map((el) => el.textContent?.trim() ?? '')
     .filter(Boolean)
 }

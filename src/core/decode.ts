@@ -29,19 +29,29 @@ function headerCharset(contentType: string | null): string | null {
   return m?.[1] ?? null
 }
 
-function metaCharset(prefix: Uint8Array): string | null {
-  const head = new TextDecoder('latin1').decode(prefix)
-  const m = /<meta\s[^>]*charset\s*=\s*["']?\s*([\w.:-]+)/i.exec(head)
-  return m?.[1] ?? null
-}
-
-export function pickCharset(contentType: string | null, prefix: Uint8Array): string {
-  return bomCharset(prefix) ?? headerCharset(contentType) ?? metaCharset(prefix) ?? 'utf-8'
-}
-
 // Labels Bun's TextDecoder does not support fall back to utf-8 — deterministic
 // under the pinned runtime.
 const decoderFor = Option.liftThrowable((label: string) => new TextDecoder(label))
+
+// The canonical encoding name for a label, or null when it is unknown, so an
+// unknown label falls through to the next source (WHATWG).
+const known = (label: string | null): string | null =>
+  label === null ? null : Option.getOrNull(Option.map(decoderFor(label), (d) => d.encoding))
+
+// Only the first 1024 bytes are prescanned; a meta utf-16 label means utf-8
+// and x-user-defined means windows-1252 (WHATWG prescan rules).
+function metaCharset(prefix: Uint8Array): string | null {
+  const head = new TextDecoder('latin1').decode(prefix.subarray(0, PRESCAN_BYTES))
+  const m = /<meta\s[^>]*charset\s*=\s*["']?\s*([\w.:-]+)/i.exec(head)
+  const enc = known(m?.[1] ?? null)
+  if (enc?.startsWith('utf-16')) return 'utf-8'
+  return enc === 'x-user-defined' ? 'windows-1252' : enc
+}
+
+export function pickCharset(contentType: string | null, prefix: Uint8Array): string {
+  return bomCharset(prefix) ?? known(headerCharset(contentType)) ?? metaCharset(prefix) ?? 'utf-8'
+}
+
 const makeDecoder = (label: string): TextDecoder =>
   Option.getOrElse(decoderFor(label), () => new TextDecoder())
 
