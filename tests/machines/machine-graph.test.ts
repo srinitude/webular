@@ -3,6 +3,7 @@
 // way out. A dead end or an orphaned state fails here before any code runs.
 import { expect, test } from 'bun:test'
 import type { AnyStateMachine, AnyStateNode } from 'xstate'
+import { getShortestPaths } from 'xstate/graph'
 import { cliDispatchMachine } from '../../src/machines/cli-dispatch.ts'
 import { commandLifecycleMachine } from '../../src/machines/command-lifecycle.ts'
 import { fetchMachine } from '../../src/machines/fetch.ts'
@@ -44,6 +45,12 @@ const reachable = (machine: AnyStateMachine) => {
       for (const target of t.target ?? []) enter(target).forEach(visit)
   }
   enter(machine.root).forEach(visit)
+  // A transition function picks its target when it runs, so it has no static
+  // target. Machines with one also run under xstate/graph: every state a
+  // shortest path reaches counts, and the static walk continues from it.
+  if (leaves(machine.root).some((n) => outgoing(n).some((t) => t.to)))
+    for (const path of getShortestPaths(machine))
+      path.state.nodes.filter((n) => children(n).length === 0).forEach(visit)
   return seen
 }
 
