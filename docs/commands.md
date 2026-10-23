@@ -48,6 +48,19 @@ Webular guards against requests to your own network (SSRF). A private address is
 
 `WEBULAR_ALLOW_PRIVATE=1` lifts every private-address block.
 
+## Update notice
+
+When npm has a higher webular version than the one installed, a command ends with one line on stderr. The line names the command that upgrades this install. Webular asks npm at most once a day and keeps the answer in `WEBULAR_CACHE_DIR`. The check never makes a command wait on the network.
+
+The notice stays off in each of these cases:
+
+- `WEBULAR_NO_UPDATE_NOTIFIER=1` is set.
+- `CI` is set.
+- stderr is not a terminal.
+- The command uses `--json` or `--ndjson`.
+- Webular runs in agent mode.
+- The installed version is a prerelease.
+
 ## Output paths
 
 Webular can write files: `-o`, `media` downloads, `act` screenshots, and the `monitor` database. [`src/core/safepath.ts`](../src/core/safepath.ts) decides where those files may go:
