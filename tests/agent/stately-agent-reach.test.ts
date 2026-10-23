@@ -104,7 +104,12 @@ const checkModelPath = (machine: AnyStateMachine, snap: AnyMachineSnapshot) =>
     expect(plan.event?.type).toBe(offered[0]?.[0])
     const forbidden = machine.events.find((type) => !allowed.includes(type))
     if (forbidden === undefined) return
-    const bad = yield* Effect.result(decideWith(snap, recordedExecutor([], () => forbidden)))
+    const bad = yield* Effect.result(
+      decideWith(
+        snap,
+        recordedExecutor([], () => forbidden),
+      ),
+    )
     expect(bad._tag === 'Failure' || bad.success.event === null).toBe(true)
   })
 
