@@ -67,12 +67,20 @@ export const claudeArgs = (
   'WebSearch,WebFetch',
 ]
 
-// The child's env: no plugin but the one under test, and no claude.ai connectors.
+// A headless run waits only 2 s for a plugin's MCP server (30 s with
+// --mcp-config), and connects with a 30 s limit; a busy machine misses both,
+// so the model starts with no webular tools. Both waits get this long.
+const MCP_WAIT_MS = '120000'
+
+// The child's env: no plugin but the one under test, no claude.ai connectors,
+// and the webular server connected before the first turn.
 export const claudeEnv = (env: Record<string, string>, path: string) => ({
   ...env,
   PATH: path,
   CLAUDE_CODE_PLUGIN_DIRS: '',
   ENABLE_CLAUDEAI_MCP_SERVERS: 'false',
+  CLAUDE_CODE_MCP_STARTUP_WAIT_MS: MCP_WAIT_MS,
+  MCP_TIMEOUT: MCP_WAIT_MS,
 })
 
 const mcpServers = ({ surface, peer }: Job, env: Record<string, string>) =>

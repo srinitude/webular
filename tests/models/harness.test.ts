@@ -122,6 +122,8 @@ test('the plugin surface loads the plugin and no claude.ai connectors', () =>
         PATH: '/bin',
         CLAUDE_CODE_PLUGIN_DIRS: '',
         ENABLE_CLAUDEAI_MCP_SERVERS: 'false',
+        CLAUDE_CODE_MCP_STARTUP_WAIT_MS: '120000',
+        MCP_TIMEOUT: '120000',
       })
     }),
   ))
