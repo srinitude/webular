@@ -106,8 +106,7 @@ test('each surface allows only the tools it needs, with a turn cap and no bypass
     }),
   ))
 
-// A strict MCP config hides plugin servers, so the plugin run drops claude.ai
-// connectors through its env instead.
+// A strict MCP config hides plugin servers, so the plugin run drops claude.ai connectors via env.
 test('the plugin surface loads the plugin and no claude.ai connectors', () =>
   run(() =>
     Effect.map(loadScenarios, (file) => {

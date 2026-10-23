@@ -1,8 +1,7 @@
-// `mise run test:models`: run each scenario through headless Claude Code on
-// the logged-in subscription, for each model and surface, and write the
-// model x surface x scenario matrix to bench/results/models-<date>.json plus a
-// Markdown summary. Every run keeps its raw stream-json output under
-// bench/results/raw/. Runs go one at a time to respect usage limits. Never CI.
+// `mise run test:models`: run each scenario through headless Claude Code on the logged-in
+// subscription, for each model and surface, and write the model x surface x scenario matrix to
+// bench/results/models-<date>.json plus a Markdown summary. Every run keeps its raw stream-json
+// output under bench/results/raw/. Runs go one at a time to respect usage limits. Never CI.
 //   --smoke                 the smoke scenario, CLI surface, every model
 //   --models a,b --surfaces cli,mcp --scenarios id,id   narrow the grid
 import { parseArgs } from 'node:util'
@@ -67,9 +66,8 @@ export const claudeArgs = (
   'WebSearch,WebFetch',
 ]
 
-// A headless run waits only 2 s for a plugin's MCP server (30 s with
-// --mcp-config), and connects with a 30 s limit; a busy machine misses both,
-// so the model starts with no webular tools. Both waits get this long.
+// A headless run waits only 2 s for a plugin's MCP server (30 s with --mcp-config) and connects
+// within 30 s; a busy machine misses both, so the model gets no webular tools. Both get this long.
 const MCP_WAIT_MS = '120000'
 
 // The child's env: no plugin but the one under test, no claude.ai connectors,
@@ -102,11 +100,8 @@ const spawnClaude = (job: Job, ctx: Ctx, env: Record<string, string>, keys: Keys
     const binDir = yield* Config.String('WEBULAR_BIN_DIR').pipe(
       Config.withDefault(`${ROOT}dist/bin`),
     )
-    yield* fs.writeFileString(
-      `${ctx.tmp}/mcp.json`,
-      JSON.stringify({ mcpServers: mcpServers(job, env) }),
-    )
     const mcp = `${ctx.tmp}/mcp.json`
+    yield* fs.writeFileString(mcp, JSON.stringify({ mcpServers: mcpServers(job, env) }))
     const args = claudeArgs(s, model, surface, ctx, mcp, file.defaults.maxTurns, provider)
     // Keys live only in the child env; the config refers to them by name.
     const childEnv = claudeEnv({ ...env, ...keys }, `${binDir}:${path}`)
