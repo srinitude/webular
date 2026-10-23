@@ -355,3 +355,5 @@
 {"path": "tests/agent/AGENTS.md", "sha": "cd0c57e793b50ef611fee04bc7d3e8afe45a7718f21100efd3fa1d95014ffc8b", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/machines/AGENTS.md", "sha": "1e21079abcc11ca87969d91195a4b5367ec71132b0828af355493699a2cdb5c7", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": ".github/workflows/AGENTS.md", "sha": "173f0a759f6ab1ca666e2d94ec0be305c28df8f14c67130973c3dcdb2d4ecd29", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/reliability.md", "sha": "5906632615ceb4cc3fe8a6f2304f1053a94d12cac7a36061f6b2ec525b206666", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "src/core/AGENTS.md", "sha": "d21bac1bb589afbbaa39c7d5ec218fdc8b1f2df5350c95232d84d360851bdcb5", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}

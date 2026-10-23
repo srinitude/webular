@@ -6,6 +6,9 @@ when a page is dead or a site will not answer.
 ## Retries
 
 - Every fetch retries 408, 429, 502, 503, and 504 on a fixed backoff.
+- All fetches to one host share a retry budget: 10 retries plus 20% of that host's requests.
+- After 5 failed attempts in a row, a host gets no retries until it answers again. First attempts still go out.
+- When no retry is left, the fetch returns its last status or error.
 - When the server sends `Retry-After`, the fetch waits that long instead, up to 10 s.
 - If the server asks for more than 10 s, the fetch fails at once. The error names the wait, for example `asked to wait 120 s (Retry-After), over the 10 s limit`.
 - If the wait would run past the request's timeout, the fetch returns the server's status (such as 429) at once.
