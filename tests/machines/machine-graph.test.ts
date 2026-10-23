@@ -50,7 +50,7 @@ const reachable = (machine: AnyStateMachine) => {
   // shortest path reaches counts, and the static walk continues from it.
   if (leaves(machine.root).some((n) => outgoing(n).some((t) => t.to)))
     for (const path of getShortestPaths(machine))
-      path.state.nodes.filter((n) => children(n).length === 0).forEach(visit)
+      path.state.nodes.filter((n: AnyStateNode) => children(n).length === 0).forEach(visit)
   return seen
 }
 
