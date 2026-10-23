@@ -51,7 +51,7 @@ const clientFiles = { Cursor: '~/.cursor/mcp.json', 'VS Code': '.vscode/mcp.json
 const samples = Object.entries({ Search: search, Scrape: scrape, Summarize: summarize })
 const keychain = `security add-generic-password -a "$USER" -s typesafe-ai-api-key -w`
 const readKey = 'read -rs TYPESAFE_API_KEY && export TYPESAFE_API_KEY'
-const pin = `curl --proto '=https' --tlsv1.2 -fsSL https://webular.dev/v${release}/install.sh | sh`
+const pin = `curl --proto '=https' --tlsv1.2 -fsSL https://webular.dev/install.sh | sh`
 const rivals = [
   ['webular', 'None (Jev is optional)', 'Your machine', 'Scored'],
   ['Exa', 'Yes', 'Hosted API with its own search index', 'Scored'],
@@ -169,7 +169,7 @@ cd webular
 bun install --frozen-lockfile
 bun bin/webular.ts --help</code></pre>
     <p>Prebuilt for macOS (arm64, x64), Linux (x64 and arm64, glibc or musl), and Windows (x64, arm64). Anything else: run from source.</p>
-    <p>Pin a release:</p>
+    <p>Install the latest release:</p>
     <pre tabindex="0"><code>{pin}</code></pre>
     <p><a href="/install">Every channel, upgrade, and uninstall →</a></p>
   </section>
