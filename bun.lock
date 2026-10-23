@@ -52,9 +52,9 @@
       "undici": "^8.10.2",
     },
     "@hono/node-server": "^1.19.15",
-    "@modelcontextprotocol/client": "^2.3.1",
+    "@modelcontextprotocol/client": "2.3.1",
     "@modelcontextprotocol/core": "^2.3.1",
-    "@modelcontextprotocol/server": "^2.3.1",
+    "@modelcontextprotocol/server": "2.3.1",
     "@vercel/sandbox": {
       "undici": "^7.29.1",
     },
