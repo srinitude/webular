@@ -65,8 +65,9 @@ jobs:
             timeout: 11
             locked: 1
           # The x64 Mac is the slowest runner, so its tests run in two shards
-          # on two runners: shard 1/2 runs the whole `mise run ci` spine and
-          # e2e, shard 2/2 runs setup, build, and the other half of the files.
+          # on two runners: shard 1/2 runs the whole `mise run ci` spine, and
+          # shard 2/2 runs setup, build, the other half of the files, and e2e,
+          # so the two shards take about the same time.
           # `bun test --shard` splits the file list, so each test file runs
           # exactly once on this OS (tests/ci/workflow-matrix.test.ts checks
           # that the shards are 1..n of n).
@@ -126,13 +127,15 @@ jobs:
         run: mise run ci
       # Every command, flag, MCP tool, and the executable, from the user's
       # side, against a local fixture server (no network).
+      # Sharded runners run it in shard 2/2, after that shard's build.
       - name: Run the end-to-end surface check
-        if: matrix.shard != '2/2'
+        if: ${{ !matrix.shard }}
         env:
           BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
         run: mise run e2e
-      # Shard 2/2: the build the tests read, then this shard's test files.
-      # Lint, typecheck, and the bug checks run once, in shard 1/2.
+      # Shard 2/2: the build the tests read, this shard's test files, then
+      # e2e on that build. Lint, typecheck, and the bug checks run once, in
+      # shard 1/2.
       - name: Run the second test shard
         if: matrix.shard == '2/2'
         env:
@@ -142,6 +145,7 @@ jobs:
           mise run setup
           mise run build
           mise run test
+          mise run e2e
 
   # musl: the same suite on Alpine, where the linux-*-musl executables run.
   # A docker run on the host (not a job container), because the JavaScript
