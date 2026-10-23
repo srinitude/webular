@@ -79,12 +79,24 @@ jobs:
             timeout: 14
             locked: 0
             shard: 2/2
+          # Both Windows runners were the slowest jobs (about 7 min each, in
+          # run 39947552969), so they split the same way as the x64 Mac.
           - os: windows-latest
             timeout: 11
             locked: 1
+            shard: 1/2
+          - os: windows-latest
+            timeout: 11
+            locked: 1
+            shard: 2/2
           - os: windows-11-arm
             timeout: 15
             locked: 0
+            shard: 1/2
+          - os: windows-11-arm
+            timeout: 15
+            locked: 0
+            shard: 2/2
     runs-on: ${{ matrix.os }}
     timeout-minutes: ${{ matrix.timeout }}
     env:
@@ -135,17 +147,14 @@ jobs:
         run: mise run e2e
       # Shard 2/2: the build the tests read, this shard's test files, then
       # e2e on that build. Lint, typecheck, and the bug checks run once, in
-      # shard 1/2.
+      # shard 1/2. One `&&` chain, so the first failure fails the step in both
+      # bash and the Windows PowerShell default shell.
       - name: Run the second test shard
         if: matrix.shard == '2/2'
         env:
           BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/bun-install-cache
           MISE_TASK_SKIP_DEPENDS: "1"
-        run: |
-          mise run setup
-          mise run build
-          mise run test
-          mise run e2e
+        run: mise run setup && mise run build && mise run test && mise run e2e
 
   # musl: the same suite on Alpine, where the linux-*-musl executables run.
   # A docker run on the host (not a job container), because the JavaScript
