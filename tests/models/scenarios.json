@@ -399,6 +399,7 @@
         "answerContains": ["learn", "correct"]
       },
       "tool": "jev",
+      "requireTool": false,
       "prompt": "Ask webular's jev command what it can do. Reply with the actions it offers.",
       "reference": [["jev"]],
       "baseline": {
