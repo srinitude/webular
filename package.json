@@ -71,7 +71,7 @@
     "@mastra/mcp": "^2.4.1",
     "@modelcontextprotocol/sdk": "^1.32.1",
     "@mozilla/readability": "^0.6.0",
-    "@statelyai/agent": "1.1.6",
+    "@statelyai/agent": "2.0.0-alpha.30",
     "agent-browser": "0.39.1",
     "diff": "^9.0.0",
     "effect": "4.0.5",
@@ -79,7 +79,7 @@
     "mammoth": "^1.13.0",
     "turndown": "^7.2.4",
     "unpdf": "^1.9.1",
-    "xstate": "5.33.3",
+    "xstate": "6.0.0-alpha.69",
     "zod": "^4.6.7"
   },
   "optionalDependencies": {
@@ -94,7 +94,7 @@
     "@types/bun": "^1.4.3",
     "@types/turndown": "^5.0.6",
     "@typescript/typescript6": "6.0.2",
-    "ai": "3.4.33",
+    "ai": "^7.0.0",
     "deepsec": "^2.3.10",
     "fast-check": "4.10.2",
     "knip": "6.40.0",
