@@ -25,7 +25,7 @@ const researchArg = (s: Parameters<typeof decisions.research>[0]) =>
 const machine = createMachine({
   id: 'scrape',
   initial: 'idle',
-  states: { idle: { on: { FETCH: 'busy', SKIP: 'done' } }, busy: {}, done: {} },
+  states: { idle: { on: { FETCH: { target: 'busy' }, SKIP: { target: 'done' } } }, busy: {}, done: {} },
 })
 
 test('every key fact in a payload is read by a question', () => {

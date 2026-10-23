@@ -4,7 +4,7 @@
 // else leaves the observed event in place.
 // The live ask goes through the shared Jev client (src/lib/jev/answers.ts), so it
 // runs the docs guard and the client's key lookup.
-import type { AgentPlanner, AnyAgent } from '@statelyai/agent'
+import type { AgentDecisionExecutor } from '@statelyai/agent'
 import { Effect } from 'effect'
 import type { AnyMachineSnapshot } from 'xstate'
 import { askAnswers } from '../lib/jev/answers.ts'
@@ -70,21 +70,12 @@ export const jevChoose = (
     Effect.orElseSucceed(() => undefined),
   )
 
-// The planner hands the agent the pick Jev already made. Its contract is
+// The executor hands decideNext the pick Jev already made. Its contract is
 // Promise-shaped, so it runs through the one shared runtime.
 export const pickedPlanner =
-  (type: string): AgentPlanner<AnyAgent> =>
-  (_agent, input) =>
-    stepRuntime.runPromise(
-      Effect.succeed({
-        goal: input.goal,
-        state: input.state,
-        nextEvent: { type } as never,
-        execute: () => stepRuntime.runPromise(Effect.void),
-        sessionId: 'jev',
-        timestamp: 0,
-      }),
-    )
+  (type: string): AgentDecisionExecutor =>
+  () =>
+    stepRuntime.runPromise(Effect.succeed({ event: { type } }))
 
 // The live call: one ask through the shared client, bounded by TIMEOUT_MS. The
 // client sends its own pinned model (WEBULAR_JEV_MODEL or its default), so
