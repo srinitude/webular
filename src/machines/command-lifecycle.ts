@@ -5,38 +5,39 @@
 // (payloadExit). For answer and research a page with no main text still
 // counts: its body text fills in (src/lib/html.ts), so it is not empty.
 // Final states carry an `exit-<code>` tag from src/cli/exit-codes.ts.
-import { setup } from 'xstate'
+import { setup, types } from 'xstate'
 import { EXIT, exitTag } from '../cli/exit-codes.ts'
 
 export const commandLifecycleMachine = setup({
-  types: {
-    events: {} as
-      | { type: 'INPUT_INVALID' }
-      | { type: 'INPUT_VALID' }
-      | { type: 'WORKFLOW_FAILED' }
-      | { type: 'WORKFLOW_SUCCEEDED' }
-      | { type: 'NO_ERRORS' }
-      | { type: 'SOME_ERRORS' }
-      | { type: 'EMPTY_WITH_ERRORS' }
-      | { type: 'PARTIAL' },
+  schemas: {
+    events: {
+      INPUT_INVALID: types<void>(),
+      INPUT_VALID: types<void>(),
+      WORKFLOW_FAILED: types<void>(),
+      WORKFLOW_SUCCEEDED: types<void>(),
+      NO_ERRORS: types<void>(),
+      SOME_ERRORS: types<void>(),
+      EMPTY_WITH_ERRORS: types<void>(),
+      PARTIAL: types<void>(),
+    },
   },
 }).createMachine({
   id: 'commandLifecycle',
   initial: 'validatingInput',
   states: {
     validatingInput: {
-      on: { INPUT_INVALID: 'rejected', INPUT_VALID: 'runningWorkflow' },
+      on: { INPUT_INVALID: { target: 'rejected' }, INPUT_VALID: { target: 'runningWorkflow' } },
     },
     runningWorkflow: {
-      on: { WORKFLOW_FAILED: 'failed', WORKFLOW_SUCCEEDED: 'rendering' },
+      on: { WORKFLOW_FAILED: { target: 'failed' }, WORKFLOW_SUCCEEDED: { target: 'rendering' } },
     },
     rendering: {
       on: {
-        NO_ERRORS: 'completed',
-        SOME_ERRORS: 'completedWithPartialFailures',
-        EMPTY_WITH_ERRORS: 'emptyWithErrors',
+        NO_ERRORS: { target: 'completed' },
+        SOME_ERRORS: { target: 'completedWithPartialFailures' },
+        EMPTY_WITH_ERRORS: { target: 'emptyWithErrors' },
         // Explicit-target commands (batch): some named targets failed.
-        PARTIAL: 'partial',
+        PARTIAL: { target: 'partial' },
       },
     },
     partial: { type: 'final', tags: [exitTag(EXIT.partial)] },
