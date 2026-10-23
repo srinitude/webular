@@ -352,3 +352,5 @@
 {"path": "site/src/content/AGENTS.md", "sha": "2e9f4230be93a661c74df5db34d75d1c340896eda47ac01e9c5fad3398d52a92", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "site/src/content/for-agents.md", "sha": "0d3859552217e2ac486a5b8faca149903c85557b94d93af2c7f9689f3c563f81", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "AGENTS.md", "sha": "c1af42e0dfd7268a9e9326489c926b55fff516c7b713f9120f7f2c7e8135905c", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "tests/agent/AGENTS.md", "sha": "cd0c57e793b50ef611fee04bc7d3e8afe45a7718f21100efd3fa1d95014ffc8b", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "tests/machines/AGENTS.md", "sha": "1e21079abcc11ca87969d91195a4b5367ec71132b0828af355493699a2cdb5c7", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
