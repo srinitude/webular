@@ -32,6 +32,12 @@
 # a trusted publisher on npmjs.com for webular and for every webular-<key>
 # package, with these form values: user srinitude, repo webular, workflow
 # release.yml, environment release, and "npm publish" allowed (ticked).
+# Each webular-<platform> package must exist on npm before OIDC can publish it,
+# because OIDC cannot create a package that was never published. Create it once
+# with `npm stage publish` from a 2FA npm session, which makes a `0.0.0-stage`
+# placeholder. Then add the trusted publisher with `npm trust github <pkg>
+# --file release.yml --repo srinitude/webular --allow-publish --env release
+# --yes`, and tag within 48 hours.
 name: Release
 
 on:
@@ -362,8 +368,9 @@ jobs:
     needs: [assets, smoke]
     runs-on: ubuntu-latest
     environment: release
-    # The build (typecheck chain) runs here, plus nine npm publishes and up to
-    # 5 minutes of parallel registry waits: 20 minutes keeps about 2x headroom.
+    # The build (typecheck chain) runs here, plus thirteen npm publishes (12
+    # platform packages and the root) and up to 5 minutes of parallel registry
+    # waits: 20 minutes keeps about 2x headroom.
     timeout-minutes: 20
     outputs:
       dist-tag: ${{ steps.tag.outputs.dist-tag }}
