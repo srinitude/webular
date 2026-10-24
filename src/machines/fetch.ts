@@ -8,31 +8,24 @@
 // siblings: each failed final state would gain a "try next source" transition
 // back to `requesting` with the next source in context.
 import { Effect } from 'effect'
-import { assign, type EventFromLogic, type SnapshotFrom, setup } from 'xstate'
+import { type EventFromLogic, type SnapshotFrom, setup, types } from 'xstate'
 import { MAX_RETRIES, REDIRECT_LIMIT, RETRY_ON_TIMEOUT } from '../core/fetch-policy.ts'
 import { decideAt } from './agent.ts'
 
+const canRetry = (attempt: number) => attempt < MAX_RETRIES
+
 export const fetchMachine = setup({
-  types: {
-    context: {} as { attempt: number; hops: number },
-    events: {} as
-      | { type: 'OK' }
-      | { type: 'HTTP_ERROR' }
-      | { type: 'RETRYABLE_STATUS' }
-      | { type: 'NETWORK_ERROR' }
-      | { type: 'TIMEOUT' }
-      | { type: 'REDIRECT_SAME_HOST' }
-      | { type: 'REDIRECT_OFF_HOST' },
-  },
-  guards: {
-    retryStatus: ({ context }) => context.attempt < MAX_RETRIES,
-    retryNetwork: ({ context }) => context.attempt < MAX_RETRIES,
-    retryTimeout: ({ context }) => RETRY_ON_TIMEOUT && context.attempt < MAX_RETRIES,
-    canFollow: ({ context }) => context.hops < REDIRECT_LIMIT - 1,
-  },
-  actions: {
-    countRetry: assign({ attempt: ({ context }) => context.attempt + 1 }),
-    followRedirect: assign({ hops: ({ context }) => context.hops + 1, attempt: 0 }),
+  schemas: {
+    context: types<{ attempt: number; hops: number }>(),
+    events: {
+      OK: types<void>(),
+      HTTP_ERROR: types<void>(),
+      RETRYABLE_STATUS: types<void>(),
+      NETWORK_ERROR: types<void>(),
+      TIMEOUT: types<void>(),
+      REDIRECT_SAME_HOST: types<void>(),
+      REDIRECT_OFF_HOST: types<void>(),
+    },
   },
 }).createMachine({
   id: 'fetch',
@@ -41,25 +34,41 @@ export const fetchMachine = setup({
   states: {
     requesting: {
       on: {
-        OK: 'succeeded',
-        HTTP_ERROR: 'httpFailed',
-        RETRYABLE_STATUS: [
-          { guard: 'retryStatus', target: 'requesting', reenter: true, actions: 'countRetry' },
-          { target: 'httpFailed' },
-        ],
-        NETWORK_ERROR: [
-          { guard: 'retryNetwork', target: 'requesting', reenter: true, actions: 'countRetry' },
-          { target: 'networkFailed' },
-        ],
-        TIMEOUT: [
-          { guard: 'retryTimeout', target: 'requesting', reenter: true, actions: 'countRetry' },
-          { target: 'timedOut' },
-        ],
-        REDIRECT_SAME_HOST: [
-          { guard: 'canFollow', target: 'requesting', reenter: true, actions: 'followRedirect' },
-          { target: 'tooManyRedirects' },
-        ],
-        REDIRECT_OFF_HOST: 'offHostBlocked',
+        OK: { target: 'succeeded' },
+        HTTP_ERROR: { target: 'httpFailed' },
+        RETRYABLE_STATUS: ({ context }) =>
+          canRetry(context.attempt)
+            ? {
+                target: 'requesting',
+                reenter: true,
+                context: { ...context, attempt: context.attempt + 1 },
+              }
+            : { target: 'httpFailed' },
+        NETWORK_ERROR: ({ context }) =>
+          canRetry(context.attempt)
+            ? {
+                target: 'requesting',
+                reenter: true,
+                context: { ...context, attempt: context.attempt + 1 },
+              }
+            : { target: 'networkFailed' },
+        TIMEOUT: ({ context }) =>
+          RETRY_ON_TIMEOUT && canRetry(context.attempt)
+            ? {
+                target: 'requesting',
+                reenter: true,
+                context: { ...context, attempt: context.attempt + 1 },
+              }
+            : { target: 'timedOut' },
+        REDIRECT_SAME_HOST: ({ context }) =>
+          context.hops < REDIRECT_LIMIT - 1
+            ? {
+                target: 'requesting',
+                reenter: true,
+                context: { hops: context.hops + 1, attempt: 0 },
+              }
+            : { target: 'tooManyRedirects' },
+        REDIRECT_OFF_HOST: { target: 'offHostBlocked' },
       },
     },
     succeeded: { type: 'final' },

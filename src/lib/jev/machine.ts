@@ -6,7 +6,7 @@ import {
   type AnyStateMachine,
   createMachine,
   type EventObject,
-  getInitialSnapshot,
+  initialTransition,
 } from 'xstate'
 import { allowedEvents as agentAllowedEvents } from '../../machines/agent.ts'
 import type { JevRequest } from './client.ts'
@@ -89,9 +89,9 @@ const SAMPLE_MACHINE = () => {
   const machine = createMachine({
     id: 'sample',
     initial: 'idle',
-    states: { idle: { on: { GO: 'done', STOP: 'done' } }, done: {} },
+    states: { idle: { on: { GO: { target: 'done' }, STOP: { target: 'done' } } }, done: {} },
   })
-  return { machine, snapshot: getInitialSnapshot(machine) }
+  return { machine, snapshot: initialTransition(machine)[0] }
 }
 export const nextEvent = defineDecision<Allowed, string | undefined>({
   name: 'machine.next',

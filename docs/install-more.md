@@ -44,6 +44,19 @@ gh release download --repo srinitude/webular --pattern 'webular-linux-x64'
 gh release verify-asset webular-linux-x64 --repo srinitude/webular
 ```
 
+### Release file names
+
+Every release attaches the same set of files. `<build>` is a name from the [Platforms table](install.md#platforms).
+
+- `webular-<build>`, or `webular-<build>.exe` on Windows: one standalone binary per build. It needs no Node or Bun.
+- `webular-completions.tar.gz`: the bash, zsh, fish, and PowerShell completions, plus the `webular(1)` man page.
+- `SHA256SUMS`: the SHA-256 of every `webular-*` file above.
+- `install.sh` and `install.ps1`: the install scripts, with that release's version and checksums baked in.
+- `webular.rb` and `webular.json`: the Homebrew formula and the Scoop manifest.
+- `webular.1`: the man page on its own.
+- `webular.spdx.json`: the software bill of materials (SBOM).
+- `webular.sigstore.json` and `webular.intoto.jsonl`: the signed build provenance, as a Sigstore bundle and as its in-toto envelope.
+
 ## Shell completions
 
 Run `webular completions <shell>` for bash, zsh, fish, or PowerShell, as the install script section shows. Each release also has `webular-completions.tar.gz`, with the same completions plus the `webular(1)` man page. Unpack it and copy each file to the folder your shell reads.

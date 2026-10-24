@@ -81,17 +81,21 @@ If the app says it cannot find `webular`, put the full path in `command`: your h
 
 ## Platforms
 
-webular ships eight native builds. Every install channel picks the one that fits your machine.
+webular ships twelve native builds. Every install channel picks the one that fits your machine. Each x64 build has a `-baseline` sibling for x64 CPUs without AVX2.
 
 | System | CPU | libc | Build |
 |---|---|---|---|
 | macOS | arm64 | n/a | `darwin-arm64` |
 | macOS | x64 | n/a | `darwin-x64` |
+| macOS | x64, no AVX2 | n/a | `darwin-x64-baseline` |
 | Linux | x64 | glibc | `linux-x64` |
+| Linux | x64, no AVX2 | glibc | `linux-x64-baseline` |
 | Linux | arm64 | glibc | `linux-arm64` |
 | Linux | x64 | musl | `linux-x64-musl` |
+| Linux | x64, no AVX2 | musl | `linux-x64-musl-baseline` |
 | Linux | arm64 | musl | `linux-arm64-musl` |
 | Windows | x64 | n/a | `windows-x64` |
+| Windows | x64, no AVX2 | n/a | `windows-x64-baseline` |
 | Windows | arm64 | n/a | `windows-arm64` |
 
 - **WSL** is Linux. Use the Linux commands inside it. WSL has no macOS Keychain, so set the key with an environment variable.

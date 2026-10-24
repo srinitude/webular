@@ -8,6 +8,7 @@ Tests for the CLI edge. The parent rules are in [tests/AGENTS.md](../AGENTS.md).
 - Errors and exit codes: [`exit-codes.test.ts`](exit-codes.test.ts) (each tagged error maps to the documented code), [`experience-gaps.test.ts`](experience-gaps.test.ts) (errors name the next step; `--help` ends with an example).
 - Output: [`render.test.ts`](render.test.ts) (human text against `--json`, `-o`, batch exit codes), [`human-output.test.ts`](human-output.test.ts) (color rule, width wrap, "did you mean").
 - Runtime: [`run-dispose.test.ts`](run-dispose.test.ts) (the runtime is disposed after a run), [`run-interrupt.effect.test.ts`](run-interrupt.effect.test.ts) (an interrupt stops the run cleanly).
+- Upgrade and notice: [`upgrade-completions.test.ts`](upgrade-completions.test.ts) (`upgrade` names its channel and runs nothing without `--yes`; `completions` prints a script its shell parses), [`update-notice.test.ts`](update-notice.test.ts) (the notice shows only for a higher cached version and hides for every off switch).
 
 ## Rules
 

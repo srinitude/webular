@@ -13,6 +13,7 @@ import { runCommand } from './dispatch.ts'
 import { EXIT, settledExit } from './exit-codes.ts'
 import { printHelp, printVersion } from './help.ts'
 import { errorLabel, safeText } from './style.ts'
+import { withUpdateNotice } from './update-notice.ts'
 
 function isCommand(value: string): value is CommandName {
   return (COMMAND_NAMES as string[]).includes(value)
@@ -39,7 +40,7 @@ export function route(argv: string[]) {
   if (command === '--version' || command === '-V')
     return Effect.as(printVersion(), settledExit(cliDispatchMachine, [{ type: 'VERSION' }]))
   if (!isCommand(command)) return unknownCommand(command)
-  return Effect.map(runCommand(command, rest), (code) =>
+  return Effect.map(withUpdateNotice(argv, runCommand(command, rest)), (code) =>
     settledExit(cliDispatchMachine, [
       { type: 'KNOWN_COMMAND' },
       { type: code === EXIT.ok ? 'TASK_SUCCEEDED' : 'TASK_FAILED' },

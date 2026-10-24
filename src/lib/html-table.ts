@@ -61,9 +61,12 @@ const headerPaths = (heads: Element[], width: number): string[] => {
 const line = (cells: string[], width: number): string =>
   `| ${[...cells, ...Array<string>(width - cells.length).fill('')].join(' | ')} |`
 
+// Only this table's own rows: a nested table's rows belong to its cell.
+const ownRows = (table: Element): Element[] =>
+  Array.from(table.querySelectorAll('tr')).filter((tr) => tr.closest('table') === table)
+
 function tableToGfm(node: Element): string {
-  // Only this table's own rows: a nested table's rows belong to its cell.
-  const trs = Array.from(node.querySelectorAll('tr')).filter((tr) => tr.closest('table') === node)
+  const trs = ownRows(node)
   const rows = grid(trs)
   const stacked = trs.findIndex((tr) => !allHeader(tr))
   const width = Math.max(...rows.map((r) => r.length))
@@ -84,16 +87,43 @@ export function addTableRule(service: TurndownService): void {
   })
 }
 
+type Body = Parameters<typeof dropHidden>[0]
+
+// A data row under stacked header rows as "Header: value" pairs ("Item: Tea;
+// Price / 2024: 1"), keyed by its <tr>: its bare cells lose which header path
+// each value sits under. One header row stays a bare row, since that row reads
+// right above it, and a second copy of each value halves its rarity weight in
+// answer ranking.
+// ponytail: cell text keeps grid's GFM pipe escapes ("a\|b").
+const headerPairs = (body: Body): Map<Element, string> => {
+  const pairs = new Map<Element, string>()
+  for (const table of Array.from(body.querySelectorAll('table'))) {
+    const trs = ownRows(table)
+    const stacked = trs.findIndex((tr) => !allHeader(tr))
+    if (stacked < 2) continue
+    const rows = grid(trs)
+    const heads = headerPaths(trs.slice(0, stacked), Math.max(...rows.map((r) => r.length)))
+    rows.slice(stacked).forEach((cells, i) => {
+      const pair = cells.flatMap((v, c) => (v && heads[c] ? [`${heads[c]}: ${v}`] : [])).join('; ')
+      const tr = trs[stacked + i]
+      if (pair && tr) pairs.set(tr, pair)
+    })
+  }
+  return pairs
+}
+
 // Table rows as plain lines ("79 Au Gold."), read before Readability, which
 // drops link-dense tables such as a list page's element table. Hidden rows go
 // first; each row ends in a period so the answer path keeps it as a sentence.
-export const tableRows = (body: Parameters<typeof dropHidden>[0]): string[] => {
+// A data row under stacked header rows reads as its "Header: value" pairs.
+export const tableRows = (body: Body): string[] => {
   dropHidden(body)
-  return Array.from(body.querySelectorAll('tr'), (tr) =>
-    dropInvisible(Array.from(tr.children, (c) => c.textContent ?? '').join(' '))
-      .replace(/\s+/g, ' ')
-      .trim(),
+  const pairs = headerPairs(body)
+  return Array.from(
+    body.querySelectorAll('tr'),
+    (tr) => pairs.get(tr) ?? Array.from(tr.children, (c) => c.textContent ?? '').join(' '),
   )
+    .map((row) => dropInvisible(row).replace(/\s+/g, ' ').trim())
     .filter((row) => row.includes(' '))
     .map((row) => (/[.!?]$/.test(row) ? row : `${row}.`))
 }

@@ -57,7 +57,7 @@ Windows (PowerShell):
 irm https://webular.dev/install.ps1 | iex
 ```
 
-The script picks the build for your OS, CPU, and libc, and the no-AVX2 build on older x64 CPUs. It checks the SHA-256 baked into it before it installs, and installs nothing on a mismatch. With `gh` on your PATH, it also checks the build's attestation. [The install script guide](docs/install-script.md) shows how to read it first, pin a release with `--version`, and uninstall. [Install channels](docs/install.md) covers npm, running from source with [Bun](https://bun.sh), [GitHub Packages](docs/install.md#from-github-packages), release binaries with `SHA256SUMS` and provenance, upgrade, and shell completions.
+The script picks the build for your OS, CPU, and libc, and the no-AVX2 build on older x64 CPUs. It checks the SHA-256 baked into it before it installs, and installs nothing on a mismatch. With `gh` on your PATH, it also checks the build's attestation. [The install script guide](docs/install-script.md) shows how to read it first, pin a release with `--version`, and uninstall. With Node, `npm i -g webular` installs it, and `npx webular doctor` runs it once without installing. [Install channels](docs/install.md) covers npm, `npx`, `bunx`, `pnpm dlx`, Homebrew, Scoop, running from source with [Bun](https://bun.sh), [GitHub Packages](docs/install.md#from-github-packages), release binaries with `SHA256SUMS` and provenance, upgrade, and shell completions.
 
 ## Quickstart
 

@@ -8,23 +8,24 @@
 // PDF_FAILED. Final states: the page as fetched (`fetchedPage`, `keptFetched`),
 // the rendered page, the PDF text, a robots block, or a failure.
 // tests/machines/machine-sync.test.ts ties each event to its branch in the code.
-import { setup } from 'xstate'
+import { setup, types } from 'xstate'
 
 export const scrapeFallbackMachine = setup({
-  types: {
-    events: {} as
-      | { type: 'ROBOTS_BLOCKED' }
-      | { type: 'FETCHED' }
-      | { type: 'ARCHIVED' }
-      | { type: 'PDF_REFUSED' }
-      | { type: 'FETCH_FAILED' }
-      | { type: 'STATIC_PAGE' }
-      | { type: 'SHELL_RENDER_OFF' }
-      | { type: 'SHELL_RENDER_ON' }
-      | { type: 'RENDER_OK' }
-      | { type: 'RENDER_FAILED' }
-      | { type: 'PDF_OK' }
-      | { type: 'PDF_FAILED' },
+  schemas: {
+    events: {
+      ROBOTS_BLOCKED: types<void>(),
+      FETCHED: types<void>(),
+      ARCHIVED: types<void>(),
+      PDF_REFUSED: types<void>(),
+      FETCH_FAILED: types<void>(),
+      STATIC_PAGE: types<void>(),
+      SHELL_RENDER_OFF: types<void>(),
+      SHELL_RENDER_ON: types<void>(),
+      RENDER_OK: types<void>(),
+      RENDER_FAILED: types<void>(),
+      PDF_OK: types<void>(),
+      PDF_FAILED: types<void>(),
+    },
   },
 }).createMachine({
   id: 'scrapeFallback',
@@ -32,22 +33,24 @@ export const scrapeFallbackMachine = setup({
   states: {
     fetching: {
       on: {
-        ROBOTS_BLOCKED: 'robotsBlocked',
-        FETCHED: 'checkingShell',
-        ARCHIVED: 'checkingShell',
-        PDF_REFUSED: 'readingPdf',
-        FETCH_FAILED: 'failed',
+        ROBOTS_BLOCKED: { target: 'robotsBlocked' },
+        FETCHED: { target: 'checkingShell' },
+        ARCHIVED: { target: 'checkingShell' },
+        PDF_REFUSED: { target: 'readingPdf' },
+        FETCH_FAILED: { target: 'failed' },
       },
     },
     checkingShell: {
       on: {
-        STATIC_PAGE: 'fetchedPage',
-        SHELL_RENDER_OFF: 'fetchedPage',
-        SHELL_RENDER_ON: 'rendering',
+        STATIC_PAGE: { target: 'fetchedPage' },
+        SHELL_RENDER_OFF: { target: 'fetchedPage' },
+        SHELL_RENDER_ON: { target: 'rendering' },
       },
     },
-    rendering: { on: { RENDER_OK: 'rendered', RENDER_FAILED: 'keptFetched' } },
-    readingPdf: { on: { PDF_OK: 'pdfRead', PDF_FAILED: 'failed' } },
+    rendering: {
+      on: { RENDER_OK: { target: 'rendered' }, RENDER_FAILED: { target: 'keptFetched' } },
+    },
+    readingPdf: { on: { PDF_OK: { target: 'pdfRead' }, PDF_FAILED: { target: 'failed' } } },
     fetchedPage: { type: 'final' },
     keptFetched: { type: 'final' },
     rendered: { type: 'final' },

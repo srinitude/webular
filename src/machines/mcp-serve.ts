@@ -3,24 +3,25 @@
 // the tool's schema, or that names no tool, gets an error result; after each
 // the server keeps serving. Stdin closing stops the server (final `stopped`).
 // Each serving state names the last outcome, so a path walk covers every order.
-import { setup } from 'xstate'
+import { setup, types } from 'xstate'
 
 const SERVING = {
   on: {
-    TOOL_OK: 'answered',
-    TOOL_INVALID_ARGS: 'rejectedArgs',
-    TOOL_UNKNOWN: 'rejectedUnknown',
-    STOP: 'stopped',
+    TOOL_OK: { target: 'answered' },
+    TOOL_INVALID_ARGS: { target: 'rejectedArgs' },
+    TOOL_UNKNOWN: { target: 'rejectedUnknown' },
+    STOP: { target: 'stopped' },
   },
 } as const
 
 export const mcpServeMachine = setup({
-  types: {
-    events: {} as
-      | { type: 'TOOL_OK' }
-      | { type: 'TOOL_INVALID_ARGS' }
-      | { type: 'TOOL_UNKNOWN' }
-      | { type: 'STOP' },
+  schemas: {
+    events: {
+      TOOL_OK: types<void>(),
+      TOOL_INVALID_ARGS: types<void>(),
+      TOOL_UNKNOWN: types<void>(),
+      STOP: types<void>(),
+    },
   },
 }).createMachine({
   id: 'mcpServe',

@@ -46,6 +46,17 @@ describe('best practices: CI workflow', () => {
   )
 })
 
+// A files entry starting with "!" is an npm exclusion glob, not a path; dist/ entries
+// are checked only once dist/ is built.
+const missingPaths = (files: readonly string[], built: boolean) =>
+  Effect.gen(function* () {
+    const checked = files.filter(
+      (path) => !path.startsWith('!') && (built || !path.startsWith('dist/')),
+    )
+    const found = yield* Effect.forEach(checked, exists, { concurrency: 8 })
+    return checked.filter((_, index) => !found[index])
+  })
+
 describe('best practices: package engines and files', () => {
   check(
     'engines.bun matches the mise bun pin',
@@ -71,11 +82,15 @@ describe('best practices: package engines and files', () => {
             (s) => !build.includes(s),
           ),
       )
-      const checked = files.filter((path) => built || !path.startsWith('dist/'))
-      const found = yield* Effect.forEach(checked, exists, { concurrency: 8 })
-      const missing = checked.filter((_, index) => !found[index])
+      const missing = yield* missingPaths(files, built)
       expect({ unwritten, missing }).toEqual({ unwritten: [], missing: [] })
     }),
+  )
+  check(
+    'a negation entry in files is not a path, a missing plain path still fails',
+    Effect.map(missingPaths(['README.md', '!**/AGENTS.md', 'no-such-path'], false), (missing) =>
+      expect(missing).toEqual(['no-such-path']),
+    ),
   )
 })
 

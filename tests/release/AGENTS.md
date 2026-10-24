@@ -9,6 +9,7 @@ Tests for packaging and release. The parent rules are in [tests/AGENTS.md](../AG
 - Distribution files: [`distribution.test.ts`](distribution.test.ts), [`distros.test.ts`](distros.test.ts), [`manifests.test.ts`](manifests.test.ts), [`winget.test.ts`](winget.test.ts), [`completions.test.ts`](completions.test.ts), [`manpage.test.ts`](manpage.test.ts), [`description-sync.test.ts`](description-sync.test.ts) (every description surface copies the [`package.json`](../../package.json) description; the marketplace plugin entry copies [`plugins/webular/plugin.json`](../../plugins/webular/plugin.json)).
 - Plugin and pack files: [`mcp-manifests.test.ts`](mcp-manifests.test.ts), [`pack-list.test.ts`](pack-list.test.ts).
 - Release workflow: [`gates.test.ts`](gates.test.ts) (the Node launcher, build before pack, tag gate), [`assets-job.test.ts`](assets-job.test.ts), [`github-packages.test.ts`](github-packages.test.ts) (the GitHub Packages job and the rename).
+- Release file names: [`release-file-names.test.ts`](release-file-names.test.ts) (the list in [`docs/install-more.md`](../../docs/install-more.md) matches every file the release workflow attaches).
 
 ## Rules
 

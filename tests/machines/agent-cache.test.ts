@@ -1,26 +1,17 @@
 // The answer cache stays at its limit by dropping its oldest-used entry (LRU).
 import { expect, test } from 'bun:test'
-import type { AgentPlanner, AnyAgent } from '@statelyai/agent'
+import type { AgentDecisionExecutor } from '@statelyai/agent'
 import { Effect } from 'effect'
 import { initialTransition } from 'xstate'
 import { AgentAnswers, decideAt } from '../../src/machines/agent.ts'
 import { fetchMachine } from '../../src/machines/fetch.ts'
 import { eff } from '../_support/run.ts'
 
-// The planner contract is Promise-shaped; the recorded answer is an Effect run once.
+// The executor contract is Promise-shaped; the recorded answer is an Effect run once.
 const recorded =
-  (type: string): AgentPlanner<AnyAgent> =>
-  (_agent, input) =>
-    Effect.runPromise(
-      Effect.succeed({
-        goal: input.goal,
-        state: input.state,
-        nextEvent: { type } as never,
-        execute: () => Effect.runPromise(Effect.succeed(undefined)),
-        sessionId: 'recorded',
-        timestamp: 0,
-      }),
-    )
+  (type: string): AgentDecisionExecutor =>
+  () =>
+    Effect.runPromise(Effect.succeed({ event: { type } }))
 
 const LIMIT = 256
 const [start] = initialTransition(fetchMachine)
