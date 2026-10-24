@@ -53,7 +53,9 @@
     "bun.lock",
     "README.md",
     "CHANGELOG.md",
-    "LICENSE"
+    "LICENSE",
+    "!**/AGENTS.md",
+    "!**/CLAUDE.md"
   ],
   "scripts": {
     "prepack": "mise run build"
