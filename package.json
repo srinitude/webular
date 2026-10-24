@@ -109,7 +109,7 @@
     "@modelcontextprotocol/core": "^2.3.1",
     "@modelcontextprotocol/server": "2.3.1",
     "@xmldom/xmldom": "^0.8.15",
-    "body-parser": "^2.3.0",
+    "body-parser": "^2.4.0",
     "brace-expansion": "^5.0.12",
     "fast-uri": "^3.1.8",
     "hono": "^4.13.13",
@@ -123,7 +123,8 @@
       "undici": "^8.10.2"
     },
     "@vercel/sandbox": {
-      "undici": "^7.29.1"
+      "undici": "^7.29.1",
+      "zod": "^4.6.7"
     }
   },
   "trustedDependencies": [
