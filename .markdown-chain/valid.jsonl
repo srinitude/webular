@@ -361,3 +361,4 @@
 {"path": "docs/install.md", "sha": "0e08b92d61083e51790a8e9ccf8a9728266b032c85144035776e52ed709df359", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/install-more.md", "sha": "da395049e75adc74dc88bfd745ff849e5fca41488f45d44463577a65fe803c92", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/release/AGENTS.md", "sha": "2e798ac13062367eff3dd1302c23a61851294ce287fb1cf75062f605f134cdad", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/content/install.md", "sha": "4cb48835917f3e4a58ce82d8c78e830a33bc8a0f4ad6f59deebbdf42e9864554", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
