@@ -3,7 +3,7 @@
 // move whenever the machine allows it.
 import { expect, test } from 'bun:test'
 import { Effect } from 'effect'
-import { type AnyMachineSnapshot, createMachine, getInitialSnapshot } from 'xstate'
+import { type AnyMachineSnapshot, createMachine, initialTransition } from 'xstate'
 import { allowedEvents } from '../../src/lib/jev/machine.ts'
 import { CAPS } from '../../src/lib/jev/payload/index.ts'
 import { eff } from '../_support/run.ts'
@@ -12,9 +12,9 @@ const TYPES = Array.from({ length: CAPS.fields + 1 }, (_, n) => `E${String(n).pa
 const wide = createMachine({
   id: 'wide',
   initial: 'idle',
-  states: { idle: { on: Object.fromEntries(TYPES.map((t) => [t, 'done'])) }, done: {} },
+  states: { idle: { on: Object.fromEntries(TYPES.map((t) => [t, { target: 'done' }])) }, done: {} },
 })
-const start = getInitialSnapshot(wide) as AnyMachineSnapshot
+const start = initialTransition(wide)[0] as AnyMachineSnapshot
 const last = TYPES[TYPES.length - 1] ?? ''
 
 test(

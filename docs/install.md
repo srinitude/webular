@@ -65,6 +65,37 @@ bun add -g webular
 
 Bun needs Node on your PATH too, because the launcher starts with a Node shebang.
 
+### Run once without installing
+
+Each of these fetches webular, runs one command, and leaves nothing on your PATH:
+
+```bash
+npx webular doctor
+bunx webular doctor
+pnpm dlx webular doctor
+```
+
+Pin a release with `webular@<x.y.z>` in place of `webular`. The first run downloads the native package, so later runs start faster from the cache.
+
+## Homebrew and Scoop
+
+The Homebrew tap and the Scoop bucket go live with the first tagged release. Each release writes `webular.rb` and `webular.json` from `SHA256SUMS`, so both point at the same checked binaries as the install script.
+
+macOS and glibc Linux:
+
+```bash
+brew install srinitude/webular/webular
+```
+
+Windows:
+
+```powershell
+scoop bucket add webular https://github.com/srinitude/scoop-webular
+scoop install webular
+```
+
+Upgrade with `brew upgrade webular` or `scoop update webular`. `webular upgrade` prints the right one for your install.
+
 ### From GitHub Packages
 
 Each release also goes to the GitHub Packages npm registry as `@srinitude/webular`. GitHub asks for a token to install from it, even for public packages: a personal access token (classic) with the `read:packages` scope. Add `@srinitude:registry=https://npm.pkg.github.com` and `//npm.pkg.github.com/:_authToken=TOKEN` to `~/.npmrc`, with your token in place of `TOKEN`. Then run `npm i -g @srinitude/webular`.

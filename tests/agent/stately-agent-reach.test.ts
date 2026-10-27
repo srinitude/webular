@@ -3,12 +3,10 @@
 // Every model answer is recorded: a planner or a mock language model. No live call.
 import { describe, expect, test } from 'bun:test'
 import { fileURLToPath } from 'node:url'
-import { createAgent } from '@statelyai/agent'
-import { MockLanguageModelV1 } from 'ai/test'
+import { type AgentDecisionExecutor, decideNext } from '@statelyai/agent'
 import { Effect, FileSystem } from 'effect'
 import { type AnyMachineSnapshot, type AnyStateMachine, StateMachine } from 'xstate'
 import { getShortestPaths } from 'xstate/graph'
-import { z } from 'zod'
 import { AgentAnswers, allowedEvents, decideAt, replay } from '../../src/machines/agent.ts'
 import { type JevAsk, type JevRequest, pickedPlanner } from '../../src/machines/agent-jev.ts'
 import { machineSchema, machineState } from '../../src/tools/web-machine.ts'
@@ -69,37 +67,27 @@ const sweep = (machine: AnyStateMachine) =>
     { concurrency: 8, discard: true },
   )
 
-// A mock model that records the tools it was offered and calls `reply`.
-const recordedModel = (offered: string[][], reply: (tools: string[]) => string) =>
-  new MockLanguageModelV1({
-    doGenerate: (options) =>
-      Effect.runPromise(
-        Effect.sync(() => {
-          const tools = options.mode.type === 'regular' ? (options.mode.tools ?? []) : []
-          const names = tools.map((t) => t.name)
-          offered.push(names)
-          const call = { toolCallType: 'function' as const, toolCallId: 'recorded', args: '{}' }
-          return {
-            rawCall: { rawPrompt: null, rawSettings: {} },
-            finishReason: 'tool-calls' as const,
-            usage: { promptTokens: 1, completionTokens: 1 },
-            toolCalls: [{ ...call, toolName: reply(names) }],
-          }
-        }),
-      ),
-  })
+// A recording executor: it notes the options it was offered and answers with `reply`.
+const recordedExecutor =
+  (offered: string[][], reply: (types: string[]) => string): AgentDecisionExecutor =>
+  (request) =>
+    Effect.runPromise(
+      Effect.sync(() => {
+        const types = (request.options ?? []).map((option) => option.event.type)
+        offered.push(types)
+        return { event: { type: reply(types) } }
+      }),
+    )
 
-// The package's own planner, set up as webular sets it up: only allowed events.
-const decideWith = (machine: AnyStateMachine, snap: AnyMachineSnapshot, model: unknown) =>
+// The package's own decideNext, set up as webular sets it up: only allowed events.
+const decideWith = (snap: AnyMachineSnapshot, decide: AgentDecisionExecutor) =>
   Effect.tryPromise(() =>
-    createAgent({
-      name: 'webular',
-      events: Object.fromEntries(allowedEvents(snap).map((type) => [type, z.object({})])),
-      model: model as never,
-    }).decide({
-      goal: 'finish',
-      machine,
-      state: { value: snap.value, context: snap.context },
+    decideNext(snap, {
+      decide,
+      model: 'webular',
+      allowedEvents: allowedEvents(snap),
+      prompt: 'finish',
+      maxRetries: 0,
     }),
   )
 
@@ -109,22 +97,20 @@ const checkModelPath = (machine: AnyStateMachine, snap: AnyMachineSnapshot) =>
     const allowed = allowedEvents(snap)
     const offered: string[][] = []
     const plan = yield* decideWith(
-      machine,
       snap,
-      recordedModel(offered, ([first]) => `${first}`),
+      recordedExecutor(offered, ([first]) => `${first}`),
     )
-    expect(offered.map((names) => names.toSorted())).toEqual([allowed.toSorted()])
-    expect(plan?.nextEvent?.type).toBe(offered[0]?.[0])
+    expect(offered.map((types) => types.toSorted())).toEqual([allowed.toSorted()])
+    expect(plan.event?.type).toBe(offered[0]?.[0])
     const forbidden = machine.events.find((type) => !allowed.includes(type))
     if (forbidden === undefined) return
     const bad = yield* Effect.result(
       decideWith(
-        machine,
         snap,
-        recordedModel([], () => forbidden),
+        recordedExecutor([], () => forbidden),
       ),
     )
-    expect(bad._tag === 'Failure' || bad.success?.nextEvent === undefined).toBe(true)
+    expect(bad._tag === 'Failure' || bad.success.event === null).toBe(true)
   })
 
 const modelSweep = (machine: AnyStateMachine) =>

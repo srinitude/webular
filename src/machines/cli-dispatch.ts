@@ -2,18 +2,19 @@
 // unknown command) or routes to `mise run run:<command>` and passes the task's
 // exit code through. The CLI never runs capability code itself (bin/webular.ts,
 // src/cli/route.ts). Final states carry an `exit-<code>` tag from src/cli/exit-codes.ts.
-import { setup } from 'xstate'
+import { setup, types } from 'xstate'
 import { EXIT, exitTag } from '../cli/exit-codes.ts'
 
 export const cliDispatchMachine = setup({
-  types: {
-    events: {} as
-      | { type: 'HELP' }
-      | { type: 'VERSION' }
-      | { type: 'UNKNOWN_COMMAND' }
-      | { type: 'KNOWN_COMMAND' }
-      | { type: 'TASK_SUCCEEDED' }
-      | { type: 'TASK_FAILED' },
+  schemas: {
+    events: {
+      HELP: types<void>(),
+      VERSION: types<void>(),
+      UNKNOWN_COMMAND: types<void>(),
+      KNOWN_COMMAND: types<void>(),
+      TASK_SUCCEEDED: types<void>(),
+      TASK_FAILED: types<void>(),
+    },
   },
 }).createMachine({
   id: 'cliDispatch',
@@ -21,14 +22,14 @@ export const cliDispatchMachine = setup({
   states: {
     parsingArgv: {
       on: {
-        HELP: 'printedHelp',
-        VERSION: 'printedVersion',
-        UNKNOWN_COMMAND: 'rejected',
-        KNOWN_COMMAND: 'runningMiseTask',
+        HELP: { target: 'printedHelp' },
+        VERSION: { target: 'printedVersion' },
+        UNKNOWN_COMMAND: { target: 'rejected' },
+        KNOWN_COMMAND: { target: 'runningMiseTask' },
       },
     },
     runningMiseTask: {
-      on: { TASK_SUCCEEDED: 'taskSucceeded', TASK_FAILED: 'taskFailed' },
+      on: { TASK_SUCCEEDED: { target: 'taskSucceeded' }, TASK_FAILED: { target: 'taskFailed' } },
     },
     printedHelp: { type: 'final', tags: [exitTag(EXIT.ok)] },
     printedVersion: { type: 'final', tags: [exitTag(EXIT.ok)] },

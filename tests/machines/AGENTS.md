@@ -17,7 +17,7 @@ Model-based tests for the XState machines in [src/machines/](../../src/machines/
 - `path.steps[0]` is the init step; slice it off to get the events.
 - `limit` has no default bound. Set `limit` or `stopWhen` when context can grow.
 - `getPathsFromEvents` throws on an event with no transition. Do not swallow the error.
-- Never call a model. Planner answers are recorded. When a test needs a model object, use `MockLanguageModelV1` from `ai/test`.
+- Never call a model. Planner answers are recorded. When a test needs a model, give `decideNext` a recorded `AgentDecisionExecutor`.
 - These tests are the flow docs, so a machine change needs a test change here.
 
 ## Checks

@@ -2,22 +2,23 @@
 // the command lifecycle: its argv picks help, `learn`, `correct`, or a usage
 // error, and each of the two actions then succeeds or fails.
 // Final states carry an `exit-<code>` tag from src/cli/exit-codes.ts.
-import { setup } from 'xstate'
+import { setup, types } from 'xstate'
 import { EXIT, exitTag } from '../cli/exit-codes.ts'
 
 const RESULT = (done: string, failed: string) => ({
-  on: { SUCCEEDED: done, FAILED: failed },
+  on: { SUCCEEDED: { target: done }, FAILED: { target: failed } },
 })
 
 export const jevCommandMachine = setup({
-  types: {
-    events: {} as
-      | { type: 'HELP' }
-      | { type: 'LEARN' }
-      | { type: 'CORRECT' }
-      | { type: 'USAGE_ERROR' }
-      | { type: 'SUCCEEDED' }
-      | { type: 'FAILED' },
+  schemas: {
+    events: {
+      HELP: types<void>(),
+      LEARN: types<void>(),
+      CORRECT: types<void>(),
+      USAGE_ERROR: types<void>(),
+      SUCCEEDED: types<void>(),
+      FAILED: types<void>(),
+    },
   },
 }).createMachine({
   id: 'jevCommand',
@@ -25,10 +26,10 @@ export const jevCommandMachine = setup({
   states: {
     parsingArgv: {
       on: {
-        HELP: 'printedHelp',
-        LEARN: 'learning',
-        CORRECT: 'correcting',
-        USAGE_ERROR: 'rejected',
+        HELP: { target: 'printedHelp' },
+        LEARN: { target: 'learning' },
+        CORRECT: { target: 'correcting' },
+        USAGE_ERROR: { target: 'rejected' },
       },
     },
     learning: RESULT('learned', 'learnFailed'),

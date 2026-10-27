@@ -3,7 +3,7 @@
 // allows from that state can ever be taken.
 // With no model set up, the agent takes the event the code observed whenever
 // the machine allows it, so every command replays its machine exactly.
-// With Jev set up (./agent-model.ts) or a planner given, agent.decide() proposes
+// With Jev set up (./agent-model.ts) or a planner given, decideNext() proposes
 // an event; a proposal outside the allowed set, a failure, or a timeout falls
 // back to the observed event. The package loads lazily, only on that path, so
 // plain commands never pay its import cost.
@@ -17,10 +17,9 @@ import {
 import type { JevAsk } from './agent-jev.ts'
 import { load, modelRef } from './agent-model.ts'
 
-// The event types the machine accepts from this snapshot. The one place that
-// reads XState's private `_nodes`: an XState upgrade that moves it breaks here only.
+// The event types the machine accepts from this snapshot, read from its active nodes.
 export const allowedEvents = (snapshot: AnyMachineSnapshot): string[] =>
-  [...new Set(snapshot._nodes.flatMap((node) => node.ownEvents))].filter((type) =>
+  [...new Set(snapshot.nodes.flatMap((node) => node.ownEvents.map(String)))].filter((type) =>
     snapshot.can({ type }),
   )
 
@@ -39,10 +38,9 @@ export interface Decision {
 }
 
 // A planner stands in for the model: tests pass recorded answers through it.
-type Planner = NonNullable<import('@statelyai/agent').AgentDecideOptions['planner']>
+type Planner = import('@statelyai/agent').AgentDecisionExecutor
 
 const DECIDE_LIMITS = {
-  maxTokens: 64,
   maxRetries: 1,
   timeoutMs: 5_000,
   cached: 256,
@@ -63,22 +61,6 @@ interface Ask {
   jev: JevAsk | undefined
 }
 
-// The agent and zod load only on the planner path; the planner stands in for a model.
-const buildAgent = (ask: Ask) =>
-  Effect.map(
-    Effect.all([load(() => import('@statelyai/agent')), load(() => import('zod'))], {
-      concurrency: 2,
-    }),
-    ([{ createAgent }, { z }]) =>
-      createAgent({
-        name: 'webular',
-        events: Object.fromEntries(ask.allowed.map((type) => [type, z.object({})])),
-        model: undefined as never,
-        maxTokens: DECIDE_LIMITS.maxTokens,
-        maxRetries: DECIDE_LIMITS.maxRetries,
-      }),
-  )
-
 // Jev picks first; the agent then takes that pick through its planner option.
 const jevPlanner = (ask: Ask, jev: JevAsk) =>
   Effect.gen(function* () {
@@ -90,20 +72,21 @@ const jevPlanner = (ask: Ask, jev: JevAsk) =>
 const proposeEvent = (ask: Ask) =>
   Effect.gen(function* () {
     const planner = ask.jev ? yield* jevPlanner(ask, ask.jev) : ask.planner
-    if (ask.jev && !planner) return undefined
-    const agent = yield* buildAgent(ask)
+    if (!planner) return undefined
+    const { decideNext } = yield* load(() => import('@statelyai/agent'))
     const plan = yield* Effect.tryPromise({
       try: (signal) =>
-        agent.decide({
-          goal: ask.goal,
-          machine: ask.machine,
-          state: { value: ask.snapshot.value, context: ask.snapshot.context },
-          abortSignal: signal,
-          ...(planner ? { planner } : {}),
+        decideNext(ask.snapshot, {
+          decide: planner,
+          model: 'webular',
+          allowedEvents: ask.allowed,
+          prompt: ask.goal,
+          maxRetries: DECIDE_LIMITS.maxRetries,
+          signal,
         }),
       catch: (cause) => cause,
     })
-    return plan?.nextEvent?.type
+    return plan.event?.type
   }).pipe(
     Effect.timeoutOrElse({
       duration: DECIDE_LIMITS.timeoutMs,

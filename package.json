@@ -53,7 +53,9 @@
     "bun.lock",
     "README.md",
     "CHANGELOG.md",
-    "LICENSE"
+    "LICENSE",
+    "!**/AGENTS.md",
+    "!**/CLAUDE.md"
   ],
   "scripts": {
     "prepack": "mise run build"
@@ -71,7 +73,7 @@
     "@mastra/mcp": "^2.4.1",
     "@modelcontextprotocol/sdk": "^1.32.1",
     "@mozilla/readability": "^0.6.0",
-    "@statelyai/agent": "1.1.6",
+    "@statelyai/agent": "2.0.0-alpha.30",
     "agent-browser": "0.39.1",
     "diff": "^9.0.0",
     "effect": "4.0.5",
@@ -79,7 +81,7 @@
     "mammoth": "^1.13.0",
     "turndown": "^7.2.4",
     "unpdf": "^1.9.1",
-    "xstate": "5.33.3",
+    "xstate": "6.0.0-alpha.69",
     "zod": "^4.6.7"
   },
   "optionalDependencies": {
@@ -94,7 +96,7 @@
     "@types/bun": "^1.4.3",
     "@types/turndown": "^5.0.6",
     "@typescript/typescript6": "6.0.2",
-    "ai": "3.4.33",
+    "ai": "^7.0.0",
     "deepsec": "^2.3.10",
     "fast-check": "4.10.2",
     "knip": "6.40.0",
@@ -103,11 +105,11 @@
   },
   "overrides": {
     "@hono/node-server": "^1.19.15",
-    "@modelcontextprotocol/client": "^2.3.1",
+    "@modelcontextprotocol/client": "2.3.1",
     "@modelcontextprotocol/core": "^2.3.1",
-    "@modelcontextprotocol/server": "^2.3.1",
+    "@modelcontextprotocol/server": "2.3.1",
     "@xmldom/xmldom": "^0.8.15",
-    "body-parser": "^2.3.0",
+    "body-parser": "^2.4.0",
     "brace-expansion": "^5.0.12",
     "fast-uri": "^3.1.8",
     "hono": "^4.13.13",
@@ -121,7 +123,8 @@
       "undici": "^8.10.2"
     },
     "@vercel/sandbox": {
-      "undici": "^7.29.1"
+      "undici": "^7.29.1",
+      "zod": "^4.6.7"
     }
   },
   "trustedDependencies": [

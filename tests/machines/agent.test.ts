@@ -1,8 +1,8 @@
 // The Stately agent never takes an event its machine forbids. Recorded model
 // answers (a planner that proposes every event type at every step of every
-// path) go through the real agent.decide(); no model is ever called.
+// path) go through the real decideNext(); no model is ever called.
 import { describe, expect, test } from 'bun:test'
-import type { AgentPlanner, AnyAgent } from '@statelyai/agent'
+import type { AgentDecisionExecutor } from '@statelyai/agent'
 import { Effect, Option } from 'effect'
 import { type AnyStateMachine, type EventObject, initialTransition } from 'xstate'
 import {
@@ -21,20 +21,11 @@ import { webTools } from '../../src/tools/web.ts'
 import { finalPaths } from '../_support/paths.ts'
 import { eff } from '../_support/run.ts'
 
-// The planner contract is Promise-shaped; the recorded answer is an Effect run once.
+// The executor contract is Promise-shaped; the recorded answer is an Effect run once.
 const recorded =
-  (type: string): AgentPlanner<AnyAgent> =>
-  (_agent, input) =>
-    Effect.runPromise(
-      Effect.succeed({
-        goal: input.goal,
-        state: input.state,
-        nextEvent: { type } as never,
-        execute: () => Effect.runPromise(Effect.succeed(undefined)),
-        sessionId: 'recorded',
-        timestamp: 0,
-      }),
-    )
+  (type: string): AgentDecisionExecutor =>
+  () =>
+    Effect.runPromise(Effect.succeed({ event: { type } }))
 
 const MACHINES: [string, AnyStateMachine, string[]][] = [
   [

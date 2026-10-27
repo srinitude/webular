@@ -7,15 +7,25 @@ import { batches, CAPS, JEV_TOKEN_CAP, payloadTokens, requestBytes } from '../pa
 
 const MAX_SENTENCE = 600
 
+// fitPool re-ranks one text for every pool size it tries, so summarizer runs are
+// memoized for the last text only: the cache holds one text and is cleared on the next.
+const memo = { text: undefined as string | undefined, runs: new Map<number, string[]>() }
+const ranked = (text: string, topN: number): ReadonlyArray<string> => {
+  if (memo.text !== text) memo.runs.clear()
+  memo.text = text
+  const sentences = memo.runs.get(topN) ?? summarizeText(text, topN).sentences
+  memo.runs.set(topN, sentences)
+  return sentences
+}
+
 // Every sentence of `text` in text order, split the way summarizeText splits it.
-export const allSentences = (text: string) =>
-  summarizeText(text, Number.POSITIVE_INFINITY).sentences
+export const allSentences = (text: string) => ranked(text, Number.POSITIVE_INFINITY)
 
 // Indexes of the summarizer's top `topN` sentences, in text order.
 export const topIndexes = (text: string, topN: number): ReadonlyArray<number> => {
   const all = allSentences(text)
   const used = new Set<number>()
-  for (const s of summarizeText(text, topN).sentences) {
+  for (const s of ranked(text, topN)) {
     const i = all.findIndex((t, j) => t === s && !used.has(j))
     if (i >= 0) used.add(i)
   }
