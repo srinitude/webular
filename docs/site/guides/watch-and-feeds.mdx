@@ -1,0 +1,72 @@
+---
+title: Watch pages and read feeds
+description: Track a page over time with monitor, and read RSS or Atom feeds with feed.
+---
+
+```bash
+webular feed https://hnrss.org/frontpage --limit 5
+```
+
+`feed` reads an RSS 2.0 or Atom 1.0 feed and lists its items. Each item shows its date, title, and link.
+
+```text
+Sat, 24 Oct 2026 23:11:54 +0000	America Has Lost 200k of Jobs in Media, Film and the Arts. How Much Is AI?
+  https://www.apricitas.io/p/ai-and-the-fall-of-the-creative-class
+Sat, 24 Oct 2026 21:54:16 +0000	Argus – a free, open-source agentic security operations platform – MIT
+  https://thomasunise.com/argus
+Sat, 24 Oct 2026 21:47:31 +0000	We should be more ambitious with the software we build
+  https://danluu.com/ambitious/
+```
+
+This list is cut to three items. The feed gains new items over time, so your list will differ.
+
+## Read a feed
+
+- `--limit` sets the most items to return. The default is 20.
+- You can give `feed` a page URL instead of a feed URL, and webular finds the page's feed.
+- `--archive` reads the closest Wayback Machine copy when the live feed fails.
+
+Add `--json` for the full items. Each item has a `title`, a `url`, a `published` date, and a `summary`:
+
+```bash
+webular feed https://hnrss.org/frontpage --limit 1 --json
+```
+
+```json
+{"count":1,"feedUrl":"https://hnrss.org/frontpage","items":[{"published":"Sat, 24 Oct 2026 23:11:54 +0000","summary":"<p>Article URL: <a href=\"https://www.apricitas.io/p/ai-and-the-fall-of-the-creative-class\">https://www.apricitas.io/p/ai-and-the-fall-of-the-creative-class</a></p> <p>Comments URL: <a href=\"https://news.ycombinator.com/item?id=50226419\">https://news.ycombinator.com/item?id=50226419</a></p> <p>Points: 9</p> <p># Comments: 5</p>","title":"America Has Lost 200k of Jobs in Media, Film and the Arts. How Much Is AI?","url":"https://www.apricitas.io/p/ai-and-the-fall-of-the-creative-class"}],"title":"Hacker News: Front Page","url":"https://hnrss.org/frontpage"}
+```
+
+## Watch a page
+
+`monitor` remembers a page and shows what changed since the last time you ran it. It keeps its record in a bun:sqlite database, and it obeys robots.txt.
+
+```bash
+webular monitor https://example.com
+```
+
+The first run reports `new`. A run on an unchanged page reports `same`:
+
+```json
+{"changeStatus":"new","url":"http://127.0.0.1:8123/product.html"}
+{"changeStatus":"same","url":"http://127.0.0.1:8123/product.html"}
+```
+
+When the page differs from the saved copy, the result reports `changed` and adds a `diff` of the text:
+
+```json
+{"changeStatus":"changed","diff":"Index: http://127.0.0.1:8123/product.html\n===================================================================\n--- http://127.0.0.1:8123/product.html\tprevious\n+++ http://127.0.0.1:8123/product.html\tcurrent\n@@ -1,4 +1,4 @@\n Trail Mug\n-$18.00\n+$16.00\n In stock\n A steel mug that keeps coffee hot on the trail.\n\\ No newline at end of file\n","matters":true,"url":"http://127.0.0.1:8123/product.html"}
+```
+
+These three results came from a page on a local test server. Its price line read $18.00 on the first two runs and $16.00 on the third.
+
+- `--db` picks the database file. The `WEBULAR_DB` setting does the same.
+- `--watch-for` takes a plain-words note about the kind of change you care about.
+
+## When the page does not load
+
+If the page does not load, `monitor` reads the closest archived copy instead. The JSON names that copy in `archivedFrom`, stderr warns, and the exit code stays `0`. Check `archivedFrom` before you trust a result: it tells you the text came from an archive, not from the live page. [Reliability](/reference/reliability) explains where the archive copies come from.
+
+## Next
+
+- Read a changed page in full: [Read pages and whole sites](/guides/read-pages).
+- Every flag: [monitor](/reference/commands/monitor) and [feed](/reference/commands/feed).

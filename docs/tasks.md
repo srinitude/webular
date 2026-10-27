@@ -28,9 +28,12 @@ ci: CI entry — single default dependency path (local + remote) [after validate
 clean: Delete build output (dist/) on every OS; never touches bench results, recordings, or caches
 compile:all: Cross-compile the webular executable for every Bun target into dist/bin (release path, off the check-only spine) [after build]
 default: Default path: a bare `mise run` runs the repo CI spine, the plugin chain, then the end-to-end run [after ci, plugin:ci, e2e]
+docs:build: Docs: build the Fumadocs site for webular.dev/docs into site-docs/out: pages from docs/*.md, then a static Next export with its search index [after setup]
 docs:chain:check: Docs: the readability-chain ledger rows, AGENTS.md rules, Markdown links, and the plugin's timeless wording all hold. A focused subset of `mise run test` [after setup]
+docs:dev: Docs: serve the Fumadocs site at localhost:3000/docs with live reload (pages from docs/*.md) [after setup]
 docs:facts: Docs: the facts in README.md and docs/install.md, and the repo and plugin descriptions, match the code. A focused subset of `mise run test` [after setup]
 docs:links: Docs: every tracked Markdown file links each repo path it names, and every relative link, heading anchor, and line anchor resolves (--fix links bare paths) [after lint]
+docs:outputs: Docs: record the real text and --json output of each URL command against the contract fixture site, for the command pages [after setup]
 docs:tasks: Docs: rewrite docs/tasks.md from `mise tasks --json` (writes files; off the CI spine) [after setup]
 docs:tasks:check: Docs: docs/tasks.md matches `mise tasks --json` (check-only; `mise run docs:tasks` rewrites it) [after docs:links]
 e2e: End-to-end: every command, flag, MCP tool, plugin tool, skill, and the executable, from the user's side, on a local fixture server [after build]

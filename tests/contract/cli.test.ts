@@ -5,11 +5,11 @@
 // against a local fixture server.
 
 import { describe, expect, test } from 'bun:test'
-import { join } from 'node:path'
 import type { AnyWorkflow } from '@mastra/core/workflows'
 import { Effect, Schema } from 'effect'
 import { COMMAND_NAMES } from '../../src/cli/commands.ts'
 import { runCli, runInProcess } from '../_support/cli.ts'
+import { CONTRACT_ROUTES, JSON_RUNS } from '../_support/contract-runs.ts'
 import { useFixture } from '../_support/fixture.ts'
 import { eff, io, tmpDir } from '../_support/run.ts'
 
@@ -18,18 +18,7 @@ const SMOKE = 'scrape'
 const cli = (cmd: string, args: string[]) => runInProcess(`src/commands/${cmd}.ts`, args)
 const spawned = (cmd: string, args: string[]) => runCli(`src/commands/${cmd}.ts`, args)
 
-const PAGE =
-  '<html><head><title>Fixture</title></head><body><h1>Hello</h1><p>Plain text here.</p></body></html>'
-const RSS = `<?xml version="1.0"?><rss version="2.0"><channel><title>Fixture RSS</title>
-<item><title>One</title><link>https://example.com/1</link><description>First</description></item>
-</channel></rss>`
-const typed = (body: BodyInit, type: string) => () =>
-  new Response(body, { headers: { 'content-type': type } })
-const fx = useFixture(() => ({
-  '/': typed(PAGE, 'text/html'),
-  '/rss.xml': typed(RSS, 'application/rss+xml'),
-  '/img.png': typed(new Uint8Array(64), 'image/png'),
-}))
+const fx = useFixture(() => CONTRACT_ROUTES)
 
 // Commands with no required input run real work with no flags, so only the
 // unknown-flag half of the usage check applies to them.
@@ -57,22 +46,6 @@ describe('every command honors --help and usage errors', () => {
     )
   }
 })
-
-// Network-only or host-tool commands skip the JSON check: search and research
-// call live search providers, act drives a real browser, audit and doctor
-// inspect host tools, mcp serves stdio. parse reads local files, not URLs.
-const JSON_RUNS: Record<string, (origin: string, dir: string) => string[]> = {
-  scrape: (o) => ['--url', `${o}/`],
-  map: (o) => ['--url', `${o}/`],
-  crawl: (o) => ['--url', `${o}/`, '--limit', '1'],
-  extract: (o) => ['--url', `${o}/`, '--selector', 'h1'],
-  summarize: (o) => ['--url', `${o}/`],
-  batch: (o) => ['--urls', `${o}/`],
-  monitor: (o) => ['--url', `${o}/`],
-  answer: (o) => ['--query', 'hello', '--urls', `${o}/`],
-  feed: (o) => ['--url', `${o}/rss.xml`],
-  media: (o, dir) => ['--url', `${o}/img.png`, '-o', join(dir, 'media.bin')],
-}
 
 // Each command's contract is its workflow's outputSchema: src/workflows/<cmd>.ts
 // exports <cmd>Workflow, built from a Standard Schema (zod) that this wraps as

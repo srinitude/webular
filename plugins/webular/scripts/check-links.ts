@@ -72,9 +72,10 @@ export const checkText = (file: string, text: string, cache = new Map<string, st
     return out
   })
 
-// Skipped: vendored, generated, and benchmark output folders.
+// Skipped: vendored, generated, and benchmark output folders, and docs/site pages, whose
+// links are /docs site routes that scripts/docs-links.ts checks on the built export.
 const SKIP =
-  /(^|\/)(node_modules|dist|vendor)\/|^bench\/(results|recordings)\/|^site\/src\/content\//
+  /(^|\/)(node_modules|dist|vendor)\/|^bench\/(results|recordings)\/|^site\/src\/content\/|^docs\/site\//
 
 const checkFile = (
   file: string,

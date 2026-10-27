@@ -1,0 +1,21 @@
+---
+title: Docs for agents
+description: Read the webular docs as plain Markdown, one page at a time or all at once.
+---
+
+```bash
+curl https://webular.dev/docs/llms.txt
+```
+
+That file lists every docs page. An agent can fetch it first, then read only the pages it needs.
+
+## What you get
+
+- Every page has a `.md` twin. Add `.md` to the address of a docs page to get it as plain Markdown.
+- `llms-full.txt` holds every page in one file.
+- The repo `llms.txt` stays the source for the package index.
+
+## Related
+
+- [Use webular from an agent](/agents)
+- [Agent contract](/agents/contract)

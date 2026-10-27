@@ -48,6 +48,10 @@
           "correctness": { "noUnusedVariables": "off", "noUnusedImports": "off" }
         }
       }
+    },
+    {
+      "includes": ["site-docs/**/*.css"],
+      "css": { "parser": { "tailwindDirectives": true } }
     }
   ]
 }

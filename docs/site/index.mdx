@@ -1,0 +1,59 @@
+---
+title: webular docs
+description: Search, scrape, crawl, and answer with sources, from your own machine.
+---
+
+Search, scrape, crawl, and answer with sources, from your own machine. A CLI and MCP server with one optional key: Jev.
+
+```bash
+webular search "bun javascript runtime" --limit 2
+```
+
+```console
+1. Bun: Fast JavaScript runtime, bundler, transpiler and package manager
+   https://github.com/Jarred-Sumner/bun
+   https://news.ycombinator.com/item?id=31993622
+2. Bun: Fast JavaScript runtime, transpiler, and NPM client written in Zig
+   https://bun.sh/?launch
+   https://news.ycombinator.com/item?id=31993429
+```
+
+That search ran with no key.
+
+## Pick your first page
+
+- [Install](/install): get webular on macOS, Linux, or Windows, and check that it works.
+- [Use from an agent](/agents): add the MCP server, the plugin, or the skills to your AI client.
+- [See the benchmarks](/benchmarks): every score against Exa, Tavily, Firecrawl, and Perplexity, losses included.
+
+## Every command
+
+| Command | What it does |
+|---|---|
+| [`search`](/reference/commands/search) | Searches the web with no key, or one keyless source |
+| [`scrape`](/reference/commands/scrape) | Reads one URL as clean markdown or JSON |
+| [`crawl`](/reference/commands/crawl) | Reads a site page by page on the same host |
+| [`map`](/reference/commands/map) | Finds all URLs for a domain |
+| [`extract`](/reference/commands/extract) | Pulls fields with CSS selectors or a schema |
+| [`summarize`](/reference/commands/summarize) | Picks the key sentences (no model) |
+| [`answer`](/reference/commands/answer) | Answers from sources |
+| [`research`](/reference/commands/research) | Runs a multi-step research loop and writes a cited markdown report |
+| [`parse`](/reference/commands/parse) | Turns local docs into markdown |
+| [`media`](/reference/commands/media) | Downloads media; takes a screenshot or PDF in a real browser |
+| [`monitor`](/reference/commands/monitor) | Tracks changes to a URL over time |
+| [`batch`](/reference/commands/batch) | Scrapes many URLs at once |
+| [`doctor`](/reference/commands/doctor) | Checks your setup and toolchain |
+| [`tasks`](/reference/commands/tasks) | Lists the mise task graph that defines the commands |
+| [`mcp`](/reference/commands/mcp) | Serves webular's features as an MCP server |
+| [`diagram`](/reference/commands/diagram) | Lists the XState machines that model the CLI flows |
+| [`audit`](/reference/commands/audit) | Reports whether `deepsec` is there, plus a scan plan |
+| [`act`](/reference/commands/act) | Drives a real browser |
+| [`feed`](/reference/commands/feed) | Reads an RSS 2.0 or Atom 1.0 feed and lists its items |
+| [`upgrade`](/reference/commands/upgrade) | Prints the upgrade command for your install; `--yes` runs it |
+| [`completions`](/reference/commands/completions) | Prints a shell completion script |
+| [`jev`](/reference/commands/jev) | Learns from recorded Jev calls, or labels one as an eval case |
+
+## What needs a key
+
+- **No key:** every command runs. Each Jev decision uses its built-in baseline.
+- **Jev key:** sharper judgment calls. [The Jev key](/jev) shows how to set it.

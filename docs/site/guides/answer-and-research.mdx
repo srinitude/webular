@@ -1,0 +1,94 @@
+---
+title: Answer questions with sources
+description: Use answer for a short cited reply and research for a longer cited report.
+---
+
+```bash
+webular research "web scraping in 2026" --depth 3 -o report.md
+```
+
+`research` runs a multi-step loop and writes a cited Markdown report to `report.md`. The report starts like this (trimmed):
+
+```markdown
+# Research: web scraping
+
+## Web scraping
+
+Web scraping, web harvesting, or web data extraction is data scraping used for extracting data from websites.[1] Web scraping software may directly access the World Wide Web using the Hypertext Transfer Protocol or a web browser.
+
+> Source [1]: https://en.wikipedia.org/wiki/Web_scraping
+
+## Gaps
+```
+
+Each claim points to a numbered source. A `Gaps` section names the pages that failed to load, so you can see what the report did not read.
+
+## Answer from a web search
+
+`answer` runs three steps: it searches the web, fetches the pages it finds, then writes a short answer from them.
+
+```bash
+webular answer "what is bun?"
+```
+
+- `--sources` sets how many web sources to read. The default is 3.
+- `--sentences` sets how many sentences the answer has. The default is 3.
+
+The answer lists its sources at the end.
+
+## Answer from pages you choose
+
+`--urls` skips the web search. webular reads only the pages you name and cites them. Repeat the flag once for each URL, so a comma inside a URL stays whole.
+
+```bash
+webular answer "How much is the Trail Mug?" --urls http://127.0.0.1:8123/product.html
+```
+
+```text
+18.00. $18.00 A steel mug that keeps coffee hot on the trail.
+
+Sources:
+- http://127.0.0.1:8123/product.html  http://127.0.0.1:8123/product.html
+```
+
+This output came from a local test server. A URL you pass with `--urls` counts as one you typed yourself. [Safety](/reference/safety) explains how that treats private addresses.
+
+To read two pages, repeat the flag:
+
+```bash
+webular answer "What changed?" --urls https://example.com/a --urls https://example.com/b
+```
+
+With `--json`, the result holds `answer`, `asOf`, `errors`, `query`, and `sources`.
+
+## Control a research run
+
+`research` takes these flags:
+
+- `--depth` sets how many sources to dig into. The default is 3.
+- `--sentences` sets the sentences from each source. The default is 2.
+- `-o` writes the report to a file. Without it, the report prints.
+
+## Pages with no main text
+
+Both commands keep a page when Readability, the tool that finds a page's main text, finds none on it. They read the page's body text instead. A run whose pages load exits `0`, even when another fetch fails.
+
+## Pin the date
+
+Each answer cites the run date. `WEBULAR_AS_OF` pins that date, in `YYYY-MM-DD` form:
+
+```bash
+WEBULAR_AS_OF=2026-01-15 webular answer "How much is the Trail Mug?" --urls http://127.0.0.1:8123/product.html --json --select asOf
+```
+
+```json
+{"asOf":"2026-01-15"}
+```
+
+Pages are cached in `~/.cache/webular`. Pin the date and use the cache to repeat a run. Live pages still change, so the same input can give a different result later. [Reliability](/reference/reliability) and [Environment](/reference/environment) cover the settings.
+
+## Next
+
+- See how well these commands score: [Benchmarks](/benchmarks).
+- Use these commands from an agent: [Use webular from an agent](/agents).
+- Every flag: [answer](/reference/commands/answer) and [research](/reference/commands/research).

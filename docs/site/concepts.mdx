@@ -1,0 +1,48 @@
+---
+title: How webular works
+description: The parts that shape every command, in plain words.
+---
+
+```bash
+webular diagram
+```
+
+`webular diagram` lists the XState machines that model the CLI flows. This page explains them and the other parts.
+
+## Runs on your machine
+
+Every feature runs on open-source parts, on your machine, with no webular server in the middle. webular is open source under Apache-2.0.
+
+## Jev and the baseline
+
+Jev is TypeSafe's System One decision model. It makes the judgment calls inside each command. A System One model gives a fast, typed answer to one narrow question.
+
+Jev is optional. Without the Jev key, each decision falls back to its rule-based **baseline**, and every command still runs. [The Jev key](/jev) shows how to set it.
+
+## The building blocks
+
+- **Mastra** workflows run each command as a series of steps.
+- **Effect** is the base of all the code, so errors and config are typed values the code must handle.
+- **XState** machines model each CLI flow, so it can be tested and replayed.
+
+Bun runs it. Readability, linkedom, Turndown, unpdf, mammoth, and anydoc read pages. agent-browser and Cua drive real browsers.
+
+## One JSON contract for every command
+
+With `--json`, every command prints JSON with sorted keys and a stable shape. See the [CLI overview](/reference/cli) for every output option.
+
+## Cache and repeat runs
+
+- Pages are cached in `~/.cache/webular`. `WEBULAR_CACHE_DIR` moves the cache, and `--no-cache` skips it.
+- `WEBULAR_DETERMINISTIC=1` makes search wait for every source.
+- `WEBULAR_AS_OF` pins the run date that answers cite.
+
+A date-pinned replay with recorded Jev answers can give the same output again, but live pages still change.
+
+## robots.txt by default
+
+webular follows robots.txt by default. `scrape` returns status `blocked` for a page that robots.txt disallows. `scrape --ignore-robots` fetches one URL anyway and marks it `disallowed`. `crawl`, `map`, and `batch` always follow robots.txt.
+
+## Guards for agents
+
+In agent mode, webular blocks private network addresses and keeps file writes inside one folder. [Network and file safety](/reference/safety) has every rule.

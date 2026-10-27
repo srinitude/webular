@@ -1,0 +1,123 @@
+/* The docs theme: the webular hero's paper, oxblood, and rose, read from the
+ * hero tokens in webular-tokens.css. Every Fumadocs color, font, and radius
+ * maps to a semantic token, so one token change restyles the docs. */
+@import "tailwindcss";
+@import "./webular-tokens.css";
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
+
+/* The hero type: Georgia for text, the system mono for code. Both are system
+ * fonts, so the docs load no font files. */
+@theme {
+  --font-sans: var(--primitive-font-family-serif);
+  --font-serif: var(--primitive-font-family-serif);
+  --font-mono: var(--primitive-font-family-mono);
+  --radius-sm: var(--primitive-radius-hair);
+  --radius-md: var(--primitive-radius-hair);
+  --radius-lg: var(--primitive-radius-hair);
+  --radius-xl: var(--primitive-radius-hair);
+  --radius-2xl: var(--primitive-radius-hair);
+}
+
+/* webular-tokens.css switches light and dark on data-theme and
+ * prefers-color-scheme, so one mapping covers both modes. It also replaces the
+ * stock Fumadocs dark palette, which sits on .dark and .dark #nd-sidebar. */
+:root,
+.dark,
+.dark #nd-sidebar {
+  --color-fd-background: var(--semantic-color-surface-page);
+  --color-fd-foreground: var(--semantic-color-text-primary);
+  --color-fd-muted: var(--semantic-color-surface-sunken);
+  --color-fd-muted-foreground: var(--semantic-color-text-secondary);
+  --color-fd-popover: var(--semantic-color-surface-page);
+  --color-fd-popover-foreground: var(--semantic-color-text-primary);
+  --color-fd-card: var(--semantic-color-surface-page);
+  --color-fd-card-foreground: var(--semantic-color-text-primary);
+  --color-fd-border: var(--semantic-color-plot-ink-strong);
+  --color-fd-primary: var(--semantic-color-text-accent);
+  --color-fd-primary-foreground: var(--semantic-color-surface-page);
+  /* Fumadocs draws secondary and accent at 50% alpha under muted or accent
+   * text (search field, sidebar hover), so both stay a light tint of the text
+   * color on the page, which keeps that text above 4.5:1. */
+  --color-fd-secondary: color-mix(
+    in srgb,
+    var(--semantic-color-text-primary) 6%,
+    var(--semantic-color-surface-page)
+  );
+  --color-fd-secondary-foreground: var(--semantic-color-text-primary);
+  --color-fd-accent: color-mix(
+    in srgb,
+    var(--semantic-color-text-primary) 8%,
+    var(--semantic-color-surface-page)
+  );
+  --color-fd-accent-foreground: var(--semantic-color-text-primary);
+  --color-fd-ring: var(--semantic-color-focus-ring);
+  --color-fd-overlay: color-mix(in srgb, var(--semantic-color-surface-brand) 60%, transparent);
+}
+
+html,
+body {
+  background: var(--semantic-color-surface-page);
+  color: var(--semantic-color-text-primary);
+}
+body {
+  font-family: var(--primitive-font-family-serif);
+  line-height: var(--primitive-font-line-height-body);
+}
+code,
+pre,
+kbd {
+  font-family: var(--primitive-font-family-mono);
+}
+:focus-visible {
+  outline: 2px solid var(--semantic-color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* Headings: the hero headline's heavy serif at a tight line height. */
+#nd-page h1 {
+  font-weight: var(--primitive-font-weight-heavy);
+  line-height: var(--primitive-font-line-height-tight);
+}
+.prose :where(h2, h3) {
+  font-weight: var(--primitive-font-weight-heavy);
+}
+.prose :where(a) {
+  color: var(--semantic-color-text-accent);
+  text-decoration-color: var(--semantic-color-text-accent);
+}
+
+/* Sidebar group labels read like plot labels: mono caps. */
+#nd-sidebar p {
+  font-family: var(--primitive-font-family-mono);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* The active page and code blocks sit on the brand oxblood, as the hero's
+ * brand section does. */
+#nd-sidebar a[data-active="true"] {
+  background: var(--semantic-color-surface-brand);
+  color: var(--semantic-color-text-on-brand);
+}
+.prose :where(pre) {
+  background: var(--semantic-color-surface-brand);
+  color: var(--semantic-color-text-on-brand);
+  border-color: var(--semantic-color-plot-ink-strong);
+}
+.prose :where(:not(pre) > code) {
+  background: var(--semantic-color-surface-sunken);
+  border: 1px solid var(--semantic-color-plot-ink-strong);
+}
+a,
+button {
+  transition-duration: var(--semantic-motion-quick);
+  transition-timing-function: var(--semantic-motion-ease);
+}
+
+/* Line length: prose text stops at 38em, at most 76 characters a line at
+ * half-em glyphs (under the 80 limit). Code blocks, tables, and cards keep
+ * the full column. */
+.prose :where(p, ul, ol, blockquote, dl) {
+  max-width: 38em;
+}

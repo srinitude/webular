@@ -1,0 +1,95 @@
+---
+title: Recipes
+description: Short copy-paste pipelines that chain webular commands with jq and plain files.
+---
+
+```bash
+webular search "bun runtime" --source wikipedia --limit 3 --json | jq -r '.results[0].url' | xargs webular scrape
+```
+
+That is the first recipe below: search, take the top link, and read it. Every recipe uses only real flags. The ones that use `jq` need [jq](https://jqlang.org) on your PATH.
+
+These recipes rely on two facts. `--json` prints the same shape for every command. A command that fails exits with a code that a script can check. See [Exit codes](/reference/exit-codes).
+
+## Search, then read the top result
+
+```bash
+webular search "bun runtime" --source wikipedia --limit 3 --json \
+  | jq -r '.results[0].url' \
+  | xargs webular scrape
+```
+
+`jq` takes the `url` of the first item in `results`. `xargs` hands it to `scrape`, which prints the page as Markdown. To list every result title instead, use `--select results` and read `.results[].title`:
+
+```bash
+webular search "bun runtime" --source wikipedia --limit 3 --json --select results \
+  | jq -r '.results[].title'
+```
+
+```text
+Bun (software)
+Bun (disambiguation)
+V8 (JavaScript engine)
+```
+
+## Map a site, then read every page
+
+`map` lists the URLs. `batch --input` reads a file with one URL on each line.
+
+```bash
+webular map https://bun.sh --limit 5 --json | jq -r '.links[]' > urls.txt
+webular batch --input urls.txt --ndjson -o pages.ndjson
+```
+
+Each line of `pages.ndjson` is one JSON object with `ok`, `url`, and either a `title` or an `error`:
+
+```json
+{"ok":true,"title":"Bun — A fast all-in-one JavaScript runtime","url":"https://bun.sh/"}
+{"ok":true,"title":"Welcome to Bun | Bun Docs","url":"https://bun.sh/docs"}
+{"ok":true,"title":"Bun is joining Anthropic","url":"https://bun.sh/blog/bun-joins-anthropic"}
+{"ok":true,"title":"Guides | Bun Guides","url":"https://bun.sh/guides"}
+{"ok":true,"title":"API Reference | Bun","url":"https://bun.sh/reference"}
+```
+
+Exit code `3` means some URLs failed. The ones that worked are still in the file. A site with no sitemap and no links can give an empty `urls.txt`.
+
+## Find the URLs that failed
+
+Print only the failed lines from a `batch` run:
+
+```bash
+webular batch --input urls.txt --ndjson | jq -r 'select(.ok == false) | .url'
+```
+
+## Save a whole run to a file
+
+`--ndjson` prints one JSON line for each result item, and `-o` writes the output to a file instead of the screen.
+
+```bash
+webular batch --urls https://example.com --urls https://example.org --ndjson -o pages.ndjson
+```
+
+## List the pages of a crawl
+
+```bash
+webular crawl https://example.com --limit 10 --json | jq -r '.pages[].url'
+```
+
+## Research a topic into a report
+
+```bash
+webular research "web scraping in 2026" --depth 3 -o report.md
+```
+
+`report.md` is a cited Markdown report. Raise `--depth` to read more sources. See [Answer questions with sources](/guides/answer-and-research).
+
+## Answer from pages you pick
+
+```bash
+webular answer "What does this page say about pricing?" --urls https://example.com/pricing --json --select answer,sources
+```
+
+## Next
+
+- The commands behind these recipes: [Read pages and whole sites](/guides/read-pages) and [Search the web](/guides/search-the-web).
+- Every command: [CLI reference](/reference/cli).

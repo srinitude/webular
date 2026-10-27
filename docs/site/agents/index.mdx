@@ -1,0 +1,136 @@
+---
+title: Use webular from an agent
+description: Add webular to an AI agent as an MCP server or a plugin, and learn what the agent gets.
+---
+
+```bash
+claude mcp add webular -- webular mcp
+```
+
+That one line gives Claude Code every webular command as a tool. Install webular first, so `webular` is on your PATH. See [Install](/install).
+
+## Pick your client
+
+Most clients read the same `mcpServers` block. VS Code, Codex CLI, and Zed use their own shape.
+
+<Tabs items={['Claude Code', 'Codex CLI', 'VS Code', 'Claude Desktop', 'Cursor', 'Windsurf', 'Cline', 'Gemini CLI', 'Zed']}>
+<Tab value="Claude Code">
+
+```bash
+claude mcp add webular -- webular mcp
+```
+
+</Tab>
+<Tab value="Codex CLI">
+
+```bash
+codex mcp add webular -- webular mcp
+```
+
+To edit the file instead, put this in `~/.codex/config.toml`, or in `.codex/config.toml` for a trusted project.
+
+```toml
+[mcp_servers.webular]
+command = "webular"
+args = ["mcp"]
+```
+
+</Tab>
+<Tab value="VS Code">
+
+Put this in `.vscode/mcp.json`. VS Code uses the `servers` key. This also covers GitHub Copilot.
+
+```json
+{ "servers": { "webular": { "type": "stdio", "command": "webular", "args": ["mcp"] } } }
+```
+
+</Tab>
+<Tab value="Claude Desktop">
+
+Put this block in the app's MCP config file.
+
+```json
+{ "mcpServers": { "webular": { "command": "webular", "args": ["mcp"] } } }
+```
+
+</Tab>
+<Tab value="Cursor">
+
+Put this block in the app's MCP config file.
+
+```json
+{ "mcpServers": { "webular": { "command": "webular", "args": ["mcp"] } } }
+```
+
+</Tab>
+<Tab value="Windsurf">
+
+Put this block in the app's MCP config file.
+
+```json
+{ "mcpServers": { "webular": { "command": "webular", "args": ["mcp"] } } }
+```
+
+</Tab>
+<Tab value="Cline">
+
+Put this block in the app's MCP config file.
+
+```json
+{ "mcpServers": { "webular": { "command": "webular", "args": ["mcp"] } } }
+```
+
+</Tab>
+<Tab value="Gemini CLI">
+
+Put this block in the app's MCP config file.
+
+```json
+{ "mcpServers": { "webular": { "command": "webular", "args": ["mcp"] } } }
+```
+
+</Tab>
+<Tab value="Zed">
+
+Zed uses the `context_servers` key in its settings file. You can also add the server in the UI: open Settings, then AI, then MCP Servers, then Add Server, then Add Local Server.
+
+```json
+{ "context_servers": { "webular": { "command": "webular", "args": ["mcp"] } } }
+```
+
+</Tab>
+</Tabs>
+
+## The plugin
+
+The plugin bundles the MCP server and four skills: research, interview, plain language, and Markdown. In Claude Code, run this:
+
+```text
+/plugin install webular --marketplace srinitude/webular
+```
+
+You can also copy a folder from `plugins/webular/skills` into your agent's skills folder. The skills are `webular-research`, `webular-interview`, `human-language`, and `rich-and-native-markdown`.
+
+## What the agent gets
+
+- The plugin has 19 command tools: every command but `mcp`.
+- `webular mcp` has 24 tools. These are the 19, plus `machine.next`, `web.fetch`, `web.links`, `web.markdown`, and `web.readability`.
+- Each result holds at most 8,000 characters. A longer result comes with a `cursor` for the next part.
+- An error comes back with `isError: true` and the same text the command prints. See [Exit codes](/reference/exit-codes).
+
+Read [Agent contract](/agents/contract) for what each surface promises.
+
+## Safety in agent mode
+
+`webular mcp` and the plugin run in agent mode. Page text can steer an agent, so two guards turn on:
+
+- Private addresses, such as `localhost` or `192.168.x.x`, are blocked. Set `WEBULAR_ALLOW_PRIVATE=1` in the server's `env` to allow them.
+- Files are written only inside the folder the server starts in, or `WEBULAR_OUTPUT_DIR`. Set `WEBULAR_SANDBOX=0` to allow any path.
+
+At the command line, neither guard is on. See [Network and file safety](/reference/safety) and [Settings](/reference/environment).
+
+## Next
+
+- [Agent contract](/agents/contract)
+- [Docs for agents](/agents/llms-txt)
+- [Install](/install)

@@ -1,0 +1,6 @@
+# Written by mise run docs:build: content from docs/*.md, then the Next build.
+content/
+.next/
+.source/
+out/
+next-env.d.ts

@@ -503,6 +503,31 @@ run = [
   'bun "{{config_root}}/site/scripts/machine-files.ts"',
 ]
 
+[tasks."docs:build"]
+description = "Docs: build the Fumadocs site for webular.dev/docs into site-docs/out: pages from docs/*.md, then a static Next export with its search index"
+depends = ["setup"]
+dir = "{{config_root}}/site-docs"
+run = [
+  "bun install --frozen-lockfile 1>&2",
+  'bun "{{config_root}}/scripts/docs-content.ts"',
+  'bun --bun "{{config_root}}/site-docs/node_modules/next/dist/bin/next" build 1>&2',
+]
+
+[tasks."docs:outputs"]
+description = "Docs: record the real text and --json output of each URL command against the contract fixture site, for the command pages"
+depends = ["setup"]
+run = 'bun "{{config_root}}/scripts/docs-outputs.ts"'
+
+[tasks."docs:dev"]
+description = "Docs: serve the Fumadocs site at localhost:3000/docs with live reload (pages from docs/*.md)"
+depends = ["setup"]
+dir = "{{config_root}}/site-docs"
+run = [
+  "bun install --frozen-lockfile 1>&2",
+  'bun "{{config_root}}/scripts/docs-content.ts"',
+  'bun --bun "{{config_root}}/site-docs/node_modules/next/dist/bin/next" dev',
+]
+
 [tasks."site:test"]
 description = "Site: on site/dist, no sideways scroll at 320 to 2560 px with the hero command on screen, zero serious or critical axe issues, and a home page under 100 KB gzip with no third-party script"
 depends = ["site:build"]

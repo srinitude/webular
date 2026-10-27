@@ -1,0 +1,66 @@
+---
+title: Glossary
+description: Plain meanings of the terms used across the webular docs, from agent mode to System One model.
+---
+
+This page has no command to run, because it is a list of definitions.
+
+## Agent mode
+
+webular running under `webular mcp` or the agent plugin, where extra guards are on. Private addresses are blocked, and file writes stay in a sandbox. See [Network and file safety](/reference/safety).
+
+## Baseline
+
+The rule-based fallback. When no Jev key is set, each decision uses its baseline instead of a Jev call. See [The Jev key](/jev).
+
+## Cell
+
+One tool used by one AI agent model. The agent matrix scores cells.
+
+## Endpoint
+
+A rival's feature: the web address a program calls to use it. See [Command parity](/compare#command-parity).
+
+## Fingerprint
+
+The sha256 of a results file. It shows which run a set of benchmark numbers came from. See [Benchmark results](/benchmarks).
+
+## Gold
+
+The known right answer for a benchmark task.
+
+## Jev
+
+TypeSafe's System One decision model. It makes the judgment calls inside each webular command.
+
+## Jev key
+
+The one optional key, set as `TYPESAFE_API_KEY`. webular works without it. See [The Jev key](/jev).
+
+## MCP
+
+Model Context Protocol. It lets an AI agent call tools in a program. `webular mcp` serves webular's features this way. See [Use webular from an agent](/agents).
+
+## Noise bar
+
+The smallest gap that counts as real rather than luck.
+
+## p50 latency
+
+The median wait. Half of the runs finish faster, and half finish slower.
+
+## Peer run
+
+One benchmark run that gives webular and its rivals the same tasks. See [By peer](/benchmarks/peers).
+
+## Recall
+
+The share of the right pages or facts that were found.
+
+## robots.txt
+
+A file where a site says which pages tools may read. webular follows it by default. See [Network and file safety](/reference/safety).
+
+## System One model
+
+A model that gives a fast, typed answer to one narrow question.

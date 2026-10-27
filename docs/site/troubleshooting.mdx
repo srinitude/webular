@@ -1,0 +1,83 @@
+---
+title: Troubleshooting and FAQ
+description: Fix the common webular problems fast, from a missing helper tool to a blocked page.
+---
+
+```bash
+webular doctor --json
+```
+
+## Run doctor first
+
+`doctor` checks your setup and names each missing tool. Run it before anything else. It exits `1` when a required check fails. See [`doctor`](/reference/commands/doctor).
+
+## Exit code 127
+
+Exit code `127` means a command could not start, usually because a helper tool is missing. Install the tool that `doctor` names, then run the command again. See [Exit codes and errors](/reference/exit-codes).
+
+## A page is blocked by robots.txt
+
+`scrape` returns status `blocked` for a page that robots.txt disallows. To fetch one URL anyway, add `--ignore-robots`. webular then marks the result `disallowed`.
+
+```bash
+webular scrape https://example.com --ignore-robots
+```
+
+`crawl`, `map`, and `batch` always honor robots.txt, and they have no opt-out. See [Network and file safety](/reference/safety).
+
+## A site will not answer
+
+For a dead page or a site that will not answer, ask for the archive copy.
+
+```bash
+webular scrape https://example.com/old-page --archive
+```
+
+`scrape --archive` uses the Wayback Machine's capture when the page is dead, and reports it as `archivedFrom`. `batch --archive` does the same for each URL. `answer`, `research`, `extract`, and `media` read a dead page from its archive copy without a flag. See [Retries and dead pages](/reference/reliability).
+
+## A scanned PDF will not parse
+
+`parse` and `scrape` exit `1` on a PDF with no text layer, such as a scanned or image-only PDF. webular has no OCR, so run the PDF through an OCR tool such as `ocrmypdf` first.
+
+```bash
+ocrmypdf scanned.pdf readable.pdf
+webular parse readable.pdf
+```
+
+## A private address is blocked in agent mode
+
+A private address is on your own network, such as `localhost` or `192.168.x.x`. If you type a private URL at the command line, webular fetches it. Under `webular mcp` and the agent plugin, every private target is blocked, because page text can steer the agent.
+
+To allow them, set `WEBULAR_ALLOW_PRIVATE=1` in the server's `env`.
+
+```json
+{
+  "mcpServers": {
+    "webular": {
+      "command": "webular",
+      "args": ["mcp"],
+      "env": { "WEBULAR_ALLOW_PRIVATE": "1" }
+    }
+  }
+}
+```
+
+See [Network and file safety](/reference/safety) and [Use webular from an agent](/agents).
+
+## FAQ
+
+### Do I need a key?
+
+No. Every command runs with no key. The only key is the Jev key (`TYPESAFE_API_KEY`). With it, the judgment calls get sharper. Without it, each decision uses its rule-based baseline. See [The Jev key](/jev).
+
+### Does it send data anywhere?
+
+webular runs on your machine, with no webular server in the middle. It calls the sites you ask for, public search sources, and Jev when a key is set. See [Security and privacy](/security).
+
+### Why did search exit 1?
+
+When every source fails and nothing is found, `search` lists each failed source in `errors` in its JSON, says so on stderr, and exits `1`. A source may be rate-limited. To see source notes on stderr, set `WEBULAR_TRACE=1`. You can also try one keyless source.
+
+```bash
+WEBULAR_TRACE=1 webular search "bun runtime" --source wikipedia
+```

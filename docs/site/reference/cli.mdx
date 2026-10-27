@@ -1,0 +1,63 @@
+---
+title: CLI overview
+description: Every webular command, the options all commands share, and which commands work offline.
+---
+
+```bash
+webular --help
+```
+
+The help text lists every command and the options below. Run `webular <command> --help` for the flags of one command.
+
+## Global options
+
+These work on every command.
+
+| Option | What it does |
+|---|---|
+| `--json` | Print JSON with sorted keys. It is one line unless output is a terminal. |
+| `--ndjson` | Print one JSON line per result item. |
+| `--select <a,b>` | Keep only the named top-level JSON fields, comma-separated, such as `title,url`. |
+| `-o, --output <file>` | Write the output to a file. |
+| `--timeout <ms>` | Time limit for each network try. The default is 30000. |
+| `--no-cache` | Fetch every page fresh. Skip the local page cache. |
+| `-h, --help` | Show help. |
+| `-V, --version` | Show the version. |
+
+If `--select` names a field the output lacks, the command still prints the fields it has and exits 0. A note on stderr names each missing field and lists the fields there are.
+
+## Commands
+
+| Command | What it does |
+|---|---|
+| [`search`](/reference/commands/search) | Search the web, news, images, video, and other sources |
+| [`scrape`](/reference/commands/scrape) | Fetch one URL and return clean Markdown or JSON |
+| [`crawl`](/reference/commands/crawl) | Follow links on a site and collect its pages |
+| [`map`](/reference/commands/map) | Find all the URLs on a domain |
+| [`extract`](/reference/commands/extract) | Pull named fields out of pages using a schema |
+| [`summarize`](/reference/commands/summarize) | Summarize a page or text (key sentences, no model) |
+| [`answer`](/reference/commands/answer) | Answer a question using fresh web results |
+| [`research`](/reference/commands/research) | Research a topic in several steps and write a report |
+| [`parse`](/reference/commands/parse) | Turn local files into Markdown |
+| [`media`](/reference/commands/media) | Save screenshots and PDFs, or download media |
+| [`monitor`](/reference/commands/monitor) | Watch a URL and show what changed |
+| [`batch`](/reference/commands/batch) | Read two or more URLs in one call |
+| [`doctor`](/reference/commands/doctor) | Check your setup and tools |
+| [`tasks`](/reference/commands/tasks) | List the mise tasks this CLI runs |
+| [`mcp`](/reference/commands/mcp) | Run webular as an MCP server |
+| [`diagram`](/reference/commands/diagram) | List the XState machines that model the CLI flows |
+| [`audit`](/reference/commands/audit) | Show whether deepsec is installed and the scan plan |
+| [`act`](/reference/commands/act) | Control a real browser: open, snapshot, screenshot, interact |
+| [`feed`](/reference/commands/feed) | Read an RSS or Atom feed and list its items |
+| [`jev`](/reference/commands/jev) | Learn from recorded Jev calls, or label one as an eval case |
+| [`upgrade`](/reference/commands/upgrade) | Print the command that upgrades this install |
+| [`completions`](/reference/commands/completions) | Print the shell completion script |
+
+## Work offline
+
+These need no network: `summarize --text`, `parse`, `tasks`, `diagram`, and `--help`.
+
+## Related
+
+- [Exit codes and errors](/reference/exit-codes)
+- [Settings](/reference/environment)

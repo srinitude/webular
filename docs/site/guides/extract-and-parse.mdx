@@ -1,0 +1,106 @@
+---
+title: Extract fields and parse files
+description: Pull named fields from a web page with CSS selectors, and turn local files into Markdown.
+---
+
+```bash
+webular extract https://example.com --fields title:h1,note:p
+```
+
+Each field is a name and a CSS selector, joined by a colon. Here `title` reads the `h1` and `note` reads the first `p`. The command prints one line for each field:
+
+```text
+title: Example Domain
+note: This domain is for use in documentation examples without needing permission. This is not a service; avoid relying on it for testing and monitoring purposes.
+```
+
+Add `--json` to get the same fields as JSON:
+
+```bash
+webular extract https://example.com --fields title:h1,note:p --json
+```
+
+```json
+{"data":{"note":"This domain is for use in documentation examples without needing permission. This is not a service; avoid relying on it for testing and monitoring purposes.","title":"Example Domain"},"url":"https://example.com"}
+```
+
+The fields sit under `data`, and the page address sits in `url`.
+
+## Extract with selectors
+
+`extract` needs a URL and either `--fields` or `--selector`. Without one of them it exits with a usage error.
+
+- `--fields` takes `name:selector` pairs split by commas, such as `title:h1,price:.price`.
+- `--selector` takes one CSS selector, such as `h1`. It prints just that text.
+
+```bash
+webular extract https://example.com --selector h1
+```
+
+```text
+Example Domain
+```
+
+To pull a price and a stock note from a product page, give each field its own selector:
+
+```bash
+webular extract https://shop.example.com/mug --fields title:h1,price:.price,stock:.stock
+```
+
+If a page is dead, `extract` reads its archive copy without a flag. See [Read pages and whole sites](/guides/read-pages).
+
+## Parse local files
+
+`parse` turns a local file into Markdown. It reads PDF, DOCX, HTML, Markdown, CSV, JSON, and TXT. It needs no network.
+
+First make a small CSV file:
+
+```bash
+printf 'region,units\nNorth,120\nSouth,95\n' > sales.csv
+```
+
+Then parse it:
+
+```bash
+webular parse sales.csv
+```
+
+````text
+```csv
+region,units
+North,120
+South,95
+```
+````
+
+With `--json`, the result names the `file` by its full path, its `format`, and the `markdown`. The path depends on the folder you run the command in:
+
+```bash
+webular parse sales.csv --json
+```
+
+```json
+{"file":"/home/you/sales.csv","format":"csv","markdown":"```csv\nregion,units\nNorth,120\nSouth,95\n```"}
+```
+
+Use `-o` to write the Markdown to a file:
+
+```bash
+webular parse report.pdf -o report.md
+```
+
+A path that does not exist exits `1`.
+
+## PDFs with no text
+
+A scanned or image-only PDF has no text layer. webular has no OCR (text recognition), so `parse` and `scrape` exit `1` on such a PDF. The error tells you to run the PDF through an OCR tool first. For example, with `ocrmypdf`:
+
+```bash
+ocrmypdf scan.pdf scan-text.pdf
+webular parse scan-text.pdf
+```
+
+## Next
+
+- Read whole sites before you extract: [Read pages and whole sites](/guides/read-pages).
+- Every flag: [extract](/reference/commands/extract) and [parse](/reference/commands/parse).

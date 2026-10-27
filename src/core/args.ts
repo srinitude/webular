@@ -2,7 +2,7 @@
 // bounds-checked flag accessors shared by every command.
 import { parseArgs } from 'node:util'
 import { Effect } from 'effect'
-import { ARGUMENTS, COMMANDS, EXAMPLES } from '../cli/commands.ts'
+import { ARGUMENTS, CLI_ONLY_HELP, COMMANDS, EXAMPLES } from '../cli/commands.ts'
 import { EXIT } from '../cli/exit-codes.ts'
 import { GLOBAL_OPTIONS } from '../cli/help.ts'
 import { distance } from '../cli/style.ts'
@@ -70,12 +70,13 @@ type Described = { description?: string; def?: { type?: string }; unwrap?: () =>
 
 // One OPTIONS line per flag, described from the zod schema the MCP tool uses,
 // so the CLI help and the MCP schema cannot drift.
-const optionLine = (shape: Record<string, Described>, name: string): string => {
+const optionLine = (cmd: string, shape: Record<string, Described>, name: string): string => {
   const key = name.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase())
   const field = shape[key] ?? shape[name]
   const inner = field?.def?.type === 'optional' ? field.unwrap?.() : field
   const takes = inner?.def?.type === 'boolean' ? '' : ' <value>'
-  const desc = field?.description ?? inner?.description ?? ''
+  const extra = (CLI_ONLY_HELP as Record<string, Record<string, string>>)[cmd]?.[name]
+  const desc = field?.description ?? inner?.description ?? extra ?? ''
   const head = `  --${name}${takes}`
   return desc ? `${head.padEnd(19)} ${desc}` : head
 }
@@ -87,7 +88,7 @@ const usageFor = (cmd: string, own: string[], shape: Record<string, Described>):
   const head = [`webular ${cmd} — ${desc}`, '', 'USAGE', usage, '']
   const example = (EXAMPLES as Record<string, string>)[cmd]
   const tail = example ? ['', 'EXAMPLE', `  ${example}`] : []
-  const options = own.map((name) => optionLine(shape, name))
+  const options = own.map((name) => optionLine(cmd, shape, name))
   return [...head, 'OPTIONS', ...options, ...GLOBAL_OPTIONS, ...tail].join('\n')
 }
 

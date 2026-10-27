@@ -1,0 +1,105 @@
+---
+title: Read pages and whole sites
+description: Scrape one page, crawl a site, map a domain, read many URLs at once, and fall back to an archive copy.
+---
+
+```bash
+webular scrape https://example.com --json
+```
+
+`scrape` reads one URL and returns clean Markdown and the page text.
+
+```json
+{"links":[],"markdown":"# Example Domain\n\nThis domain is for use in documentation examples without needing permission. This is not a service; avoid relying on it for testing and monitoring purposes.","text":"This domain is for use in documentation examples without needing permission. This is not a service; avoid relying on it for testing and monitoring purposes.","title":"Example Domain","url":"https://example.com"}
+```
+
+Leave out `--json` to print just the Markdown. Add `--select title,url` to keep only those fields.
+
+## Scrape one URL
+
+```bash
+webular scrape https://example.com
+```
+
+```text
+# Example Domain
+
+This domain is for use in documentation examples without needing permission. This is not a service; avoid relying on it for testing and monitoring purposes.
+```
+
+If a page needs a browser to draw its content, `--render` takes `agent-browser`, `cua`, or `off`. See [Drive a real browser](/guides/browser-mode).
+
+## robots.txt and --ignore-robots
+
+webular follows robots.txt. When robots.txt disallows a page, `scrape` returns the status `blocked` with the reason `robots`. This output came from a local test server whose robots.txt disallows `/private.html`:
+
+```json
+{"links":[],"markdown":"","reason":"robots","rule":"/private.html","status":"blocked","text":"","title":"","url":"http://127.0.0.1:8123/private.html","userAgent":"webular"}
+```
+
+`--ignore-robots` fetches the page anyway. It works for one URL only, and the result carries `robots: "disallowed"`:
+
+```bash
+webular scrape https://example.com/private --ignore-robots
+```
+
+`crawl`, `map`, and `batch` always honor robots.txt. A host that cannot be reached fails with the network error, not `blocked`. [Safety](/reference/safety) lists every guard.
+
+## Crawl a site
+
+`crawl` reads a site page by page on the same host, breadth first. It obeys robots.txt and paces its requests for each host.
+
+```bash
+webular crawl https://example.com --limit 10
+```
+
+- `--limit` sets the most pages to visit. The default is 5.
+- `--depth` sets the link hops from the start page. The default is 2.
+- `--concurrency` sets how many pages to fetch at once. The default is 4.
+
+The JSON lists `pages`, each with a `title` and a `url`, plus `count`, `errors`, and `limitReached`.
+
+## Map a domain
+
+`map` finds URLs for a domain. It uses the sitemap and a link search.
+
+```bash
+webular map https://example.com --limit 50 --json
+```
+
+The JSON holds `count`, `errors`, `links`, and `url`.
+
+When a site's root will not answer, `map` asks the Wayback CDX and Common Crawl's index for URLs instead.
+
+## Read many URLs at once
+
+`batch` scrapes many URLs in one call. Give it URLs after the command, repeat `--urls`, or point `--input` at a file with one URL on each line.
+
+```bash
+webular batch --urls https://example.com --urls https://example.org --ndjson
+```
+
+With `--ndjson`, each URL prints one JSON line. A line holds `ok`, `url`, and either a `title` or an `error`. This output came from a local test server, with one page that exists and one that does not:
+
+```json
+{"ok":true,"title":"Trail Mug","url":"http://127.0.0.1:8123/product.html"}
+{"error":"fetch http://127.0.0.1:8123/nope.html failed: 404 File not found","ok":false,"url":"http://127.0.0.1:8123/nope.html"}
+```
+
+Exit code `3` means some items failed. The ones that worked still print. `--concurrency` sets how many pages to fetch at once. The default is 4. See [Exit codes](/reference/exit-codes) for every code.
+
+## Dead pages with --archive
+
+When a page is dead, `--archive` reads its closest Wayback Machine copy. A page counts as dead on a 404, a 410, a 5xx, a network error, or a timeout. The result reports the copy as `archivedFrom`.
+
+```bash
+webular scrape https://example.com/old-page --archive
+```
+
+`batch --archive` does the same for each URL. `answer`, `research`, `extract`, and `media` (download) read a dead page from its archive copy without a flag. [Reliability](/reference/reliability) covers retries too.
+
+## Next
+
+- Pull named fields from a page: [Extract fields and parse files](/guides/extract-and-parse).
+- Chain these commands: [Recipes](/guides/recipes).
+- Every flag: [scrape](/reference/commands/scrape).

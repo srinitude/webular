@@ -1,0 +1,37 @@
+---
+title: Settings
+description: Every environment variable webular reads, with its default and what it does.
+---
+
+```bash
+WEBULAR_JEV=off webular doctor
+```
+
+The `jev` row of the output reads `jev off (WEBULAR_JEV=off)`. All settings are optional.
+
+## Environment variables
+
+| Name | Default | Effect | Source |
+|---|---|---|---|
+| `TYPESAFE_API_KEY` | Unset | Your Jev key, the only key webular uses. When it is unset on macOS, webular reads the Keychain item `typesafe-ai-api-key`. | README.md, docs/jev.md |
+| `WEBULAR_JEV` | Unset | Set to `off` to turn Jev off. Webular skips the key lookup and uses each decision's baseline rule. | README.md, docs/jev.md |
+| `WEBULAR_CACHE_DIR` | `~/.cache/webular` | Folder for the local page cache. | README.md, src/core/cache.ts |
+| `WEBULAR_NO_CACHE` | Unset | Set to `1` to fetch every page fresh. Same as `--no-cache`. | README.md, src/core/cache.ts |
+| `WEBULAR_DETERMINISTIC` | Unset | Set to `1` to make search wait for every source, so source timing never changes the hits. | README.md, src/lib/search-chain.ts |
+| `WEBULAR_AS_OF` | Unset | A date in `YYYY-MM-DD` form. It pins the run date that answers cite. | README.md, src/lib/as-of.ts |
+| `WEBULAR_MAILTO` | Unset | An email address for the polite pool of scholarly sources. | README.md, src/lib/sources/polite.ts |
+| `WEBULAR_TRACE` | Unset | Set to `1` to print source notes on stderr, such as a spent rate limit. | README.md, src/lib/search-chain.ts |
+| `WEBULAR_BIN` | Unset | The binary the plugin's MCP server calls. | README.md |
+| `WEBULAR_ALLOW_PRIVATE` | Unset | Set to `1` to allow requests to private addresses in agent mode. | docs/commands.md, src/core/address-guard.ts |
+| `WEBULAR_OUTPUT_DIR` | The folder webular starts in | In agent mode, files may be written only inside this folder. | docs/commands.md, src/core/safepath.ts |
+| `WEBULAR_SANDBOX` | On in agent mode, off at the command line | Set to `1` to turn the write sandbox on at the command line. Set to `0` to turn it off in agent mode. | docs/commands.md, src/core/safepath.ts |
+| `WEBULAR_DB` | Unset | Path of the `monitor` database. It is your own setting, so the sandbox leaves it alone. | docs/commands.md, src/commands/monitor.ts |
+| `WEBULAR_LATEST_URL` | `https://webular.dev/latest` | The address `upgrade` checks to find the release to install. | docs/commands.md, src/commands/upgrade.ts |
+| `WEBULAR_AGENT_MODE` | Off; `webular mcp` sets it to `1` | Turns on agent mode and its guards. | docs/install.md, src/commands/mcp.ts |
+| `WEBULAR_BASELINE` | Unset | Set to `1` to force the no-AVX2 build on x64 CPUs. | docs/install.md, src/core/platform.ts |
+
+## Related
+
+- [The Jev key](/jev)
+- [Network and file safety](/reference/safety)
+- [CLI overview](/reference/cli)

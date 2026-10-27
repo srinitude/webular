@@ -1,0 +1,106 @@
+---
+title: webular and the alternatives
+description: See how webular differs from Exa, Firecrawl, Tavily, and Perplexity, and where those tools are ahead.
+---
+
+This page has no command to run, because it is a comparison. To try webular, start at [Install](/install).
+
+webular does what search and scrape services do, but it runs on your machine. This page says where it differs from Exa, Firecrawl, Perplexity, and Tavily, and where they do better. For scores, see [Benchmark results](/benchmarks).
+
+## At a glance
+
+| Tool | Key needed | Where it runs | In the committed peer run |
+|---|---|---|---|
+| webular | None (Jev is optional) | Your machine | Scored |
+| Exa | Yes | Hosted API with its own search index | Scored |
+| Firecrawl | Yes | Hosted API | Scored |
+| Tavily | Yes | Hosted API | No scored calls |
+| Perplexity | Yes | Hosted API | No scored calls |
+
+A peer run gives webular and its rivals the same tasks. "No scored calls" means the run has no scored result for that tool. [By peer](/benchmarks/peers) has each rival's row, and [How to read the numbers](/benchmarks/guide) explains every metric.
+
+## What sets webular apart
+
+### It runs on your machine
+
+webular is a Bun CLI plus an MCP server on your computer. No webular server sits in the middle.
+
+It still uses the network. It calls the sites you ask for, Jev (only when a key is set), and public search sources such as DuckDuckGo, Wayback, Reddit, Hacker News, Crossref, and OpenAlex. Your queries reach those hosts.
+
+Exa, Perplexity, and Tavily are hosted APIs. Firecrawl is a hosted API that you can also host yourself.
+
+### One optional key
+
+Every core job runs with no key. The only key is the Jev key (`TYPESAFE_API_KEY`). Without it, each decision uses its rule-based baseline. See [The Jev key](/jev).
+
+Each hosted rival needs its own key.
+
+### One tool for every job
+
+webular puts scrape, crawl, map, extract, search, summarize, answer, and research in one command set with one JSON contract.
+
+- Exa lists no map, crawl, or summarize endpoint.
+- Firecrawl has no standalone answer or summarize.
+
+### All of it is open source
+
+webular is Apache-2.0, so you can read and change every line. Firecrawl is AGPL-3.0.
+
+### robots.txt is respected by default
+
+webular checks robots.txt before it fetches a page. A blocked page comes back with status `blocked` and reason `robots`, so you can see it. You can opt out for one URL with `scrape --ignore-robots`. See [Network and file safety](/reference/safety).
+
+### Date-pinned replay
+
+webular can replay a run pinned to a date, with recorded Jev answers. `WEBULAR_AS_OF=YYYY-MM-DD` fixes the date. `WEBULAR_JEV_RECORD=1` records Jev answers, and `WEBULAR_JEV_REPLAY` plays them back. Only replay mode runs offline. Live pages still change, so a live run can still differ.
+
+### MCP server, plugin, and skills, all local
+
+webular ships an MCP server, an agent plugin, and skills. MCP itself is not new: Exa and Brave also publish MCP servers. The difference is that those front hosted APIs, and this one runs on your machine. See [Use webular from an agent](/agents).
+
+## Where others are ahead
+
+- **Own indexes.** Exa, Brave, and Google run their own search indexes. webular relies on free public sources, which can rate-limit.
+- **Citation precision.** Exa reports citation precision. webular does not measure it in the peer run.
+- **Answers.** Exa scores higher than webular on `answer`. See [Benchmark results](/benchmarks).
+- **Speed.** webular was slower than the scored rivals. See [Benchmark results](/benchmarks).
+- **Hard sites.** Firecrawl and other browser services are built to get past bot defenses. webular was not tested on those sites.
+- **SOC 2.** Exa, Firecrawl, and Brave cite SOC 2 Type II.
+- **Remote MCP.** Exa runs a remote MCP server that needs no install. webular needs an install.
+
+## Command parity
+
+A fair test compares a webular command only with a rival feature that does the same job. A rival's feature is called an endpoint: the web address a program calls to use it.
+
+webular is on par for a command when its accuracy, the share of answers right, is at least the rival's. Its p50 latency, the median wait, must also be within the noise bar, or behind only for a written, proven reason. The noise bar is the smallest gap that counts as real rather than luck.
+
+In the table, "Scored against" names the benchmark job and, in brackets, the rivals it scores there. "Gold" means the known right answer for a task. "Recall" means the share of the right pages or facts that were found. "Page chrome" is menus, ads, and footers.
+
+| Command | Rival endpoints | Scored against | How an answer counts as right |
+|---|---|---|---|
+| [`search`](/reference/commands/search) | Firecrawl `POST /v2/search`, Exa `POST /search`, Tavily `POST /search`, Perplexity `POST /search` | `search` (Firecrawl, Exa, Tavily) | Gold URL in the hits |
+| [`scrape`](/reference/commands/scrape) | Firecrawl `POST /v2/scrape`, Exa `POST /contents`, Tavily `POST /extract` | `scrape` (Firecrawl, Exa) | Gold text present, page chrome absent |
+| [`answer`](/reference/commands/answer) | Exa `POST /answer`, Perplexity Sonar or Agent API, Tavily `POST /search` with `include_answer` | `answer` (Exa, Tavily, Perplexity) | Answer accuracy against accepted spellings |
+| [`map`](/reference/commands/map) | Firecrawl `POST /v2/map`, Tavily `POST /map` | `map` (Firecrawl, Tavily) | Page recall: every gold page listed |
+| [`extract`](/reference/commands/extract) | Firecrawl `POST /v2/scrape` with a `json` format and schema, or `POST /v2/extract`; Exa `POST /search` with `outputSchema` | `extract` (Firecrawl) | Field accuracy against gold values |
+| [`crawl`](/reference/commands/crawl) | Firecrawl `POST /v2/crawl`, Tavily `POST /crawl` | `crawl` (Firecrawl, Tavily) | Page recall plus gold text per page |
+| [`batch`](/reference/commands/batch) | Firecrawl batch scrape, Exa `POST /contents` with many URLs, Tavily `POST /extract` with many URLs | `batch` (Firecrawl, Exa, Tavily) | Scrape accuracy per URL |
+| [`research`](/reference/commands/research) | Exa Agent (deep research), Perplexity Agent API, Tavily research | `research` (Exa, Perplexity) | Answer accuracy and citation precision |
+| [`summarize`](/reference/commands/summarize) | Exa `POST /contents` with `summary` | `summarize` (Exa) | Key-fact recall |
+| [`monitor`](/reference/commands/monitor) | Firecrawl scrape with the `changeTracking` format | `monitor` (Firecrawl) | Change found after a known edit |
+| [`parse`](/reference/commands/parse) | Firecrawl document parsing | `parse` (Firecrawl) | Gold text present |
+| [`media`](/reference/commands/media) | Firecrawl scrape with the `screenshot` format | `media` (Firecrawl) | Image returned for the page |
+| [`act`](/reference/commands/act) | Firecrawl scrape `actions` and interact | `act` (Firecrawl) | Goal state reached |
+
+### Commands with no rival
+
+These commands have no match in the four rivals, so parity does not apply: [`feed`](/reference/commands/feed), [`doctor`](/reference/commands/doctor), [`tasks`](/reference/commands/tasks), [`mcp`](/reference/commands/mcp), [`diagram`](/reference/commands/diagram), [`audit`](/reference/commands/audit), and [`jev`](/reference/commands/jev).
+
+Exa `POST /findSimilar` has no webular command.
+
+### Rival documentation
+
+- Firecrawl: [map endpoint](https://docs.firecrawl.dev/api-reference/endpoint/map) and [billing](https://docs.firecrawl.dev/billing)
+- Tavily: [map endpoint](https://docs.tavily.com/documentation/api-reference/endpoint/map) and [API credits](https://docs.tavily.com/documentation/api-credits)
+- Exa: [pricing](https://exa.ai/docs/admin/pricing)
+- Perplexity: [pricing](https://docs.perplexity.ai/docs/getting-started/pricing)

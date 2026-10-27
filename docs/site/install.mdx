@@ -1,0 +1,103 @@
+---
+title: Install
+description: Install webular on any supported system and check that it works.
+---
+
+<Tabs items={['macOS and Linux', 'Windows', 'npm, Bun, pnpm', 'mise', 'From source']}>
+<Tab value="macOS and Linux">
+
+```bash
+curl --proto '=https' --tlsv1.2 -fsSL https://webular.dev/install.sh | sh
+```
+
+</Tab>
+<Tab value="Windows">
+
+```powershell
+irm https://webular.dev/install.ps1 | iex
+```
+
+</Tab>
+<Tab value="npm, Bun, pnpm">
+
+```bash
+npm i -g webular
+pnpm add -g webular
+bun add -g webular
+```
+
+Bun needs Node on your PATH too, because the launcher starts with a Node shebang.
+
+</Tab>
+<Tab value="mise">
+
+```bash
+mise use -g github:srinitude/webular
+```
+
+Use the `github:` backend. Do not use `ubi:`.
+
+</Tab>
+<Tab value="From source">
+
+Run from source with [Bun](https://bun.sh), as [Build and run](https://github.com/srinitude/webular/blob/main/docs/build-and-run.md) shows. `mise run build` makes the bundles and a native `dist/bin/webular`.
+
+</Tab>
+</Tabs>
+
+Copy the install command only from this page, the README, or webular.dev. Fake install pages swap the host name.
+
+## What the script checks
+
+- The script picks the build for your OS, CPU, and libc.
+- It checks the SHA-256 baked into it before it installs. On a mismatch, it installs nothing.
+- With `gh` on your PATH, it also checks the build's attestation with `gh attestation verify`. `WEBULAR_VERIFY_ATTESTATION=1` makes `gh` required, and `WEBULAR_VERIFY_ATTESTATION=0` skips the check.
+- It runs `webular --version` on the new file before it replaces anything.
+
+## Pin a release
+
+Pass `--version <x.y.z>` to install that exact release:
+
+```bash
+curl --proto '=https' --tlsv1.2 -fsSL https://webular.dev/install.sh | sh -s -- --version <x.y.z> --no-modify-path
+```
+
+## Platforms
+
+Prebuilt binaries cover `darwin-arm64`, `darwin-x64`, `linux-x64`, `linux-arm64`, `linux-x64-musl`, `linux-arm64-musl`, `windows-x64`, and `windows-arm64`.
+
+Each x64 build has a `-baseline` sibling for CPUs without AVX2: `darwin-x64-baseline`, `linux-x64-baseline`, `linux-x64-musl-baseline`, and `windows-x64-baseline`. The installers pick it for you. On any other platform, run from source with Bun.
+
+## Check it
+
+```bash
+webular doctor
+```
+
+`doctor` names each missing tool. See [Quickstart](/quickstart) for its output.
+
+## Upgrade
+
+`webular upgrade` prints the upgrade command for your install. `--yes` runs it. It finds your channel from where the program lives. `WEBULAR_LATEST_URL` changes the address it checks (default `https://webular.dev/latest`).
+
+```bash
+webular upgrade
+```
+
+For the package channels:
+
+```bash
+npm i -g webular@latest     # or: bun add -g webular@latest, pnpm add -g webular@latest
+```
+
+## Uninstall
+
+Remove a copy from the install script with `sh install.sh --uninstall`. Remove a package with `npm rm -g webular`, `bun rm -g webular`, or `pnpm rm -g webular`. The page cache is in `~/.cache/webular` unless `WEBULAR_CACHE_DIR` moves it.
+
+## Shell completions
+
+```bash
+webular completions zsh
+```
+
+`webular completions` takes `bash`, `zsh`, `fish`, or `powershell`. Each release also has `webular-completions.tar.gz`, with the same completions plus the `webular(1)` man page.

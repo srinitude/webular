@@ -1,0 +1,45 @@
+---
+title: Security and privacy
+description: How webular treats hostile input, what leaves your machine, how to report a flaw, and how releases are checked.
+---
+
+This page has no command to run, because it states policy. To check your own setup, run `webular doctor` (see [Troubleshooting](/troubleshooting)).
+
+## Hostile input
+
+webular fetches web pages and documents it does not control. So it treats every page, file, and URL as hostile input.
+
+Two guards back this up. The private-address guard blocks requests to your own network in agent mode. The output sandbox keeps agent writes inside one folder. Both are in [Network and file safety](/reference/safety).
+
+## What leaves your machine
+
+webular runs on your machine, with no webular server in the middle. It still uses the network, so some requests leave your computer:
+
+- Page requests to the sites you name.
+- Requests to public search sources such as DuckDuckGo, Wayback, Reddit, Hacker News, Crossref, and OpenAlex. Your queries reach those hosts.
+- Calls to Jev, only when a Jev key is set. See [The Jev key](/jev).
+
+The install scripts send no telemetry. Their only network calls download the build and its checksums. See the [install script reference](https://github.com/srinitude/webular/blob/main/docs/install-script.md#no-telemetry).
+
+## Supported versions
+
+Security fixes go only into the most recent release published on npm.
+
+## Report a vulnerability
+
+Report it privately with the **Report a vulnerability** button on the repository's Security tab. Here is the direct link: [report a vulnerability](https://github.com/srinitude/webular/security/advisories/new).
+
+- Do not open a public issue for a vulnerability.
+- Include the command, the input that triggers the problem, and what you expected to happen.
+
+The full policy is in [SECURITY.md](https://github.com/srinitude/webular/blob/main/SECURITY.md).
+
+## Supply chain
+
+- The install script checks the SHA-256 baked into it before it installs, and installs nothing on a mismatch. With `gh` on your PATH, it also checks the build's attestation. See [Install](/install).
+- Release binaries come with `SHA256SUMS` and provenance.
+- CodeQL scans the code. OpenSSF Scorecard and OpenSSF Best Practices track the project's habits.
+
+[![CodeQL](https://github.com/srinitude/webular/actions/workflows/codeql.yml/badge.svg)](https://github.com/srinitude/webular/actions/workflows/codeql.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/srinitude/webular/badge)](https://scorecard.dev/viewer/?uri=github.com/srinitude/webular)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15797/badge)](https://www.bestpractices.dev/projects/15797)

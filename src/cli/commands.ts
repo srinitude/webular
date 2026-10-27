@@ -28,6 +28,19 @@ export const COMMANDS = {
 
 export type CommandName = keyof typeof COMMANDS
 
+// Help text for flags the MCP tools leave out (their schemas describe every other flag).
+export const CLI_ONLY_HELP: Partial<Record<CommandName, Record<string, string>>> = {
+  batch: { archive: 'When the live page fails, read its closest Wayback Machine copy instead' },
+  mcp: { list: 'Print the tool names as JSON and exit, instead of starting the server' },
+  monitor: {
+    db: 'The database file that keeps page history (WEBULAR_DB does the same)',
+    'watch-for': 'A plain-words note about the kind of change you care about',
+  },
+  upgrade: { yes: 'Run the upgrade command now instead of only printing it' },
+  completions: { shell: 'The shell to print for: bash, zsh, fish, or powershell' },
+  search: { variant: 'Another wording of the query to search too (repeat; at most 2)' },
+}
+
 // The main argument each command takes, shown on its usage line.
 export const ARGUMENTS: Partial<Record<CommandName, string>> = {
   search: '<query>',

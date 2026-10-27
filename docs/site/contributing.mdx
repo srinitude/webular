@@ -1,0 +1,72 @@
+---
+title: Contributing
+description: Set up mise, run the checks, and send a focused pull request to webular.
+---
+
+```bash
+mise trust ./mise.toml && mise run setup
+```
+
+Install [mise](https://mise.jdx.dev) first. It pins Bun and every other tool in `mise.toml`. Run the command from your clone of the repository. `mise trust` is needed once per clone, and `mise run setup` does a frozen-lockfile install.
+
+People start at [CONTRIBUTING.md](https://github.com/srinitude/webular/blob/main/CONTRIBUTING.md). Agents start at [AGENTS.md](https://github.com/srinitude/webular/blob/main/AGENTS.md). By taking part, you agree to the [Code of Conduct](https://github.com/srinitude/webular/blob/main/CODE_OF_CONDUCT.md).
+
+## Try your clone
+
+```bash
+bun bin/webular.ts scrape https://example.com --json
+```
+
+## Run one test folder
+
+Run every check through `mise`. Do not call `bun test` or `bunx biome` by hand when a task exists.
+
+```bash
+mise run test:file tests/contract
+```
+
+The full `mise run test` is slow, so run only the folder you touched. Two more checks:
+
+```bash
+mise run lint      # Biome check
+mise run format    # Biome fixes (writes files)
+```
+
+## Run the whole CI chain
+
+```bash
+mise run
+```
+
+`mise run ci` runs setup, lint, typecheck, build, test, and validate. Run it before you commit.
+
+## Rules that tests enforce
+
+- Tests use real code and a local `Bun.serve` fixture. No mocks or stubs.
+- A behavior change comes with a test or eval that fails without the change and passes with it.
+- Files stay at or under 200 lines, functions and classes at or under 30, and nesting at depth 3.
+- Write TypeScript only, with Effect. No export without an importer.
+- Measure a change that affects speed or size before and after with `mise run bench`. Keep it only if the numbers and the tests both hold.
+- Use American English, and names that say what a thing is.
+
+[AGENTS.md](https://github.com/srinitude/webular/blob/main/AGENTS.md) holds the full list. It also names what to ask first: dependencies, tool pins, workflows, exit codes, `--json` shapes, and MCP tool names.
+
+## Docs rules
+
+Every public page about webular must match the code. Checks catch the drift, so a stale page fails the build. Change the code and the text that describes it in the same commit.
+
+- **README and docs.** Tests compare the commands, flags, MCP tools, env vars, platforms, and install commands in the README and the install and command docs with the code. `mise run test` runs them.
+- **Package and plugin text.** The `description` in `package.json` is the one short description. A test fails when `CITATION.cff`, the plugin manifest, or the marketplace text says something else.
+- **Benchmark numbers.** Numbers live only in the generated blocks of `README.md` and `docs/benchmarks.md`. Run `mise run bench:docs` to rewrite those blocks from the committed peer run with the highest timestamp in `bench/results`. Never type a number by hand.
+- **API keys.** Jev is the only API key webular uses. The guard test `tests/quality/only-jev-key.test.ts` fails when code reads any other key.
+
+## Send a pull request
+
+1. Fork the repo and branch from `main`.
+2. Make one focused change, and update the doc that describes it in the same commit.
+3. Write commit subjects as [Conventional Commits](https://www.conventionalcommits.org/) with a scope, such as `fix(search): drop loopback hits`.
+4. Open a pull request against `main`, and describe what changed and why. Never force-push to `main`.
+
+For a large change, open an issue first so the design is agreed before you write code. Report a vulnerability through [Security and privacy](/security), never in a public issue.
+
+Contributions are licensed under Apache-2.0. See [Support and license](/support).

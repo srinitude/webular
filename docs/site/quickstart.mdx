@@ -1,0 +1,57 @@
+---
+title: Quickstart
+description: Four commands with real output, and no key needed.
+---
+
+You need webular on your PATH. If you do not have it yet, start with [Install](/install).
+
+## Step 1: check your setup
+
+```bash
+webular doctor
+```
+
+`doctor` names each missing tool. Here is its output, trimmed:
+
+```console
+ok   network HTTP 200
+ok   upgrade https://github.com/srinitude/webular/releases/latest
+ok   jev off (WEBULAR_JEV=off)
+```
+
+## Step 2: read a page as clean markdown
+
+```bash
+webular scrape https://example.com
+```
+
+```console
+# Example Domain
+
+This domain is for use in documentation examples without needing permission. This is not a service; avoid relying on it for testing and monitoring purposes.
+```
+
+## Step 3: summarize text with no network and no model
+
+```bash
+webular summarize --text "Bun is a fast runtime. It runs TypeScript." --sentences 1 --json
+```
+
+```console
+{"figures":[],"picks":[{"end":22,"index":0,"source_url":null,"start":0,"text":"Bun is a fast runtime."}],"sentences":["Bun is a fast runtime."],"source_url":null,"summary":"Bun is a fast runtime."}
+```
+
+## Step 4: search and keep only the fields you need
+
+```bash
+webular search "bun runtime" --json --select title,url
+```
+
+`--select` keeps only the fields you name. If a field is missing, the command still exits 0, and stderr names the field.
+
+## Next steps
+
+- [Search the web](/guides/search-the-web) and [read pages and whole sites](/guides/read-pages).
+- [Answer questions with sources](/guides/answer-and-research).
+- [Set the Jev key](/jev) for sharper judgment calls.
+- Look up any flag in the [CLI overview](/reference/cli).

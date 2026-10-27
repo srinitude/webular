@@ -1,0 +1,109 @@
+---
+title: The Jev key
+description: Set, check, or turn off the one optional key.
+---
+
+```bash
+webular doctor
+```
+
+`doctor` has a `jev` row. It names the active route, its base URL, and the model, and shows the HTTP status. It never prints the key. With no key, or with Jev off, the row says so and still passes, for example `ok   jev off (WEBULAR_JEV=off)`.
+
+## What Jev changes
+
+Jev makes sharper judgment calls inside each command. Without a key, every command still runs, and each decision uses its rule-based **baseline**. When a call fails, times out, or has no key, that decision falls back to its baseline. A failed call never stops a command.
+
+## Get a key
+
+Get a key from TypeSafe or another provider of Jev. webular reads `TYPESAFE_API_KEY`. It is the only key webular uses.
+
+## Store the key
+
+Keep the key in an environment variable or in the macOS Keychain. Never put it in a file in your project.
+
+<Tabs items={['macOS Keychain', 'bash and zsh', 'fish', 'PowerShell', 'cmd']}>
+<Tab value="macOS Keychain">
+
+This command asks for the key, so the key never lands in your shell history:
+
+```bash
+security add-generic-password -a "$USER" -s typesafe-ai-api-key -w
+```
+
+The Keychain item works on macOS only.
+
+</Tab>
+<Tab value="bash and zsh">
+
+For this shell session only, read the key without showing it:
+
+```bash
+read -rs TYPESAFE_API_KEY && export TYPESAFE_API_KEY
+```
+
+</Tab>
+<Tab value="fish">
+
+This keeps the key for every new fish session:
+
+```fish
+set -Ux TYPESAFE_API_KEY <your-key>
+```
+
+</Tab>
+<Tab value="PowerShell">
+
+For this session only:
+
+```powershell
+$env:TYPESAFE_API_KEY = '<your-key>'
+```
+
+To keep it for your Windows user account:
+
+```powershell
+[Environment]::SetEnvironmentVariable('TYPESAFE_API_KEY', '<your-key>', 'User')
+```
+
+</Tab>
+<Tab value="cmd">
+
+This keeps the key for new windows. Open a new window after you run it:
+
+```bat
+setx TYPESAFE_API_KEY "<your-key>"
+```
+
+</Tab>
+</Tabs>
+
+## Check it
+
+```bash
+webular doctor
+```
+
+To check the key by hand, list the models it can use. You get JSON with the model names, or an error such as `401` for a bad key:
+
+```bash
+curl -fsS https://api.typesafe.ai/v1/models -H "Authorization: Bearer $TYPESAFE_API_KEY"
+```
+
+## Turn it off
+
+Set `WEBULAR_JEV=off`. webular then skips the key lookup, makes no Jev calls, and uses each decision's baseline. Unset the variable to turn Jev back on.
+
+## Routes and the pinned model
+
+- webular sends each question to TypeSafe's own API, `https://api.typesafe.ai/v1/systemone`, with the key as a Bearer token.
+- With no TypeSafe key, it can use the Pydantic AI Gateway instead (`PYDANTIC_AI_GATEWAY_API_KEY`).
+- It pins one model: `jev-1.14.0`. It never sends the `jev-latest` or `jev-preview` aliases.
+- It runs at most 8 Jev calls at once.
+
+[Jev in webular](https://github.com/srinitude/webular/blob/main/docs/jev.md) lists every route, including the ones webular does not support.
+
+## Cost and limits
+
+- Input costs $0.042 per million tokens. Output is free. See [Models](https://docs.typesafe.ai/models).
+- Each organization has its own rate limits, shown in the [TypeSafe console](https://console.typesafe.ai/rate-limits). A call over the limit gets `429`.
+- A request body can be at most 32 MiB.

@@ -1,0 +1,87 @@
+---
+title: Search the web
+description: Search with no key, pick one source, and repeat a search with the same results.
+---
+
+```bash
+webular search "bun runtime" --source wikipedia
+```
+
+You need no key and no account. The command prints a numbered list of results, each with a title, a link, and a short note.
+
+```text
+1. Bun (software)
+   https://en.wikipedia.org/wiki/Bun_(software)
+   open-source software portal Bun is a JavaScript runtime, package manager and test runner designed as a drop-in replacement for Node.js. Bun uses Safari's JavaScriptCore
+2. Bun (disambiguation)
+   https://en.wikipedia.org/wiki/Bun_(disambiguation)
+   medical test Bun (software), a JavaScript runtime Occipital bun, a bulge at the back of the skull Buttocks (slang: buns), of a human body Bún, a village
+```
+
+## Search with the default source
+
+Leave out `--source` and webular searches DuckDuckGo's no-JS page.
+
+```bash
+webular search "bun javascript runtime" --limit 2
+```
+
+`--limit` sets the most results to return. The default is 10. If the default source fails, webular tries the other sources in order.
+
+## Pick one source
+
+`--source` searches one keyless source instead of the default. It takes `wikipedia`, `hackernews`, or `arxiv`.
+
+<Tabs items={['Wikipedia', 'Hacker News', 'arXiv']}>
+  <Tab value="Wikipedia">
+    ```bash
+    webular search "bun runtime" --source wikipedia
+    ```
+  </Tab>
+  <Tab value="Hacker News">
+    ```bash
+    webular search "bun runtime" --source hackernews
+    ```
+  </Tab>
+  <Tab value="arXiv">
+    ```bash
+    webular search "retrieval augmented generation" --source arxiv
+    ```
+  </Tab>
+</Tabs>
+
+## Get JSON
+
+Add `--json` and every command prints the same JSON shape, with sorted keys. Add `--select` to keep only the fields you name.
+
+```bash
+webular search "bun runtime" --source wikipedia --limit 2 --json
+```
+
+The result holds `count`, `meta`, `query`, and `results`. Each item in `results` has a `title`, a `url`, and a `description`. The `meta` field says which sources answered and how long each took.
+
+## Repeat a search
+
+Search can finish before every source has answered, so source timing may change which results you get. Set `WEBULAR_DETERMINISTIC=1` and search waits for every source. Timing then has no effect on the hits.
+
+```bash
+WEBULAR_DETERMINISTIC=1 webular search "bun runtime"
+```
+
+`WEBULAR_TRACE=1` prints source notes on stderr (the error stream), such as a spent rate limit.
+
+## When every source fails
+
+If every source fails and nothing is found, three things happen:
+
+- The JSON lists each failed source in `errors`.
+- stderr says so.
+- The command exits `1`.
+
+Run `webular doctor` to check your setup. [Reliability](/reference/reliability) explains retries and what webular does when a site will not answer.
+
+## Next
+
+- Read a result page: [Read pages and whole sites](/guides/read-pages).
+- Get an answer with sources: [Answer questions with sources](/guides/answer-and-research).
+- Every flag: [search](/reference/commands/search).

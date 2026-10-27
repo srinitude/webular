@@ -1,0 +1,92 @@
+---
+title: Drive a real browser
+description: Take screenshots and PDFs, open pages and read their structure, and drive a throwaway Cua window.
+---
+
+```bash
+webular act --help
+```
+
+`act` and `media` drive a real browser through agent-browser. `act --goal` and `scrape --render cua` drive a Cua window instead. Try [scrape](/guides/read-pages) first, since it does not need a browser.
+
+## Screenshots and PDFs with media
+
+`media` takes a screenshot or prints a page as a PDF in a real browser. `--screenshot` and `--pdf` pick the kind, and `-o` sets the file to write.
+
+<Tabs items={['Screenshot', 'PDF']}>
+  <Tab value="Screenshot">
+    ```bash
+    webular media --url https://example.com --screenshot -o shot.png
+    ```
+
+    ```text
+    screenshot https://example.com -> shot.png (66410 bytes)
+    ```
+  </Tab>
+  <Tab value="PDF">
+    ```bash
+    webular media --url https://example.com --pdf -o page.pdf
+    ```
+
+    ```text
+    pdf https://example.com -> page.pdf (114510 bytes)
+    ```
+  </Tab>
+</Tabs>
+
+`media` with no kind flag, or with `--download`, downloads the file at the URL. `--max-bytes` sets the largest file to save, in bytes.
+
+## Open a page with act
+
+`act` opens a page in a real browser and prints a snapshot of its structure. The first lines show the page title and address, then each element in order.
+
+```bash
+webular act https://example.com
+```
+
+```text
+✓ Example Domain
+  https://example.com/
+
+- paragraph
+  - StaticText "This domain is for use in documentation examples without needing permission. This is not a service; avoid relying on it for testing and monitoring purposes."
+```
+
+The snapshot is cut here. Elements you can click show a reference such as `[ref=e1]`.
+
+To save a screenshot too, pass a file path:
+
+```bash
+webular act https://example.com --screenshot act.png
+```
+
+## Drive a Cua window with a goal
+
+`act --goal` takes a plain goal and drives a Cua window to reach it. It needs no URL. `scrape --render cua` reads a page through the same kind of window.
+
+Cua browser mode keeps your own browser safe. webular drives only a throwaway window, never your everyday browser. Set it up in three steps:
+
+1. Let cua-driver start the window itself, with `browser_prepare {allow_launch:true, profile:{mode:"isolated_new"}}`. A Chrome you start yourself with `--user-data-dir` is refused with `browser_consent_required`.
+2. Name that window in `WEBULAR_CUA_WINDOW` as `<pid>:<window_id>`.
+3. Run `webular scrape <url> --render cua`, or `webular act --goal "<plain goal>"`.
+
+```bash
+export WEBULAR_CUA_WINDOW=12345:678
+webular act --goal 'click "Press me" until it says "Done"'
+```
+
+The two numbers in `WEBULAR_CUA_WINDOW` are an example. Use the `<pid>:<window_id>` of the window that cua-driver started.
+
+### What webular refuses
+
+webular refuses any window whose profile is not a throwaway one, for both `--render cua` and `act --goal`. Your default browser profile is never driven.
+
+## Safety notes
+
+- Page text can steer an agent. In agent mode, webular blocks private addresses unless `WEBULAR_ALLOW_PRIVATE=1`, and it keeps writes inside the folder it started in. [Safety](/reference/safety) explains both.
+- Only point `WEBULAR_CUA_WINDOW` at a throwaway window.
+
+## Next
+
+- Run these from an agent: [Use webular from an agent](/agents).
+- Every flag: [act](/reference/commands/act) and [media](/reference/commands/media).

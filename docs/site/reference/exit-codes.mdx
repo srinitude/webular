@@ -1,0 +1,42 @@
+---
+title: Exit codes and errors
+description: What each webular exit code means, and the next step for common errors.
+---
+
+```bash
+webular scrape https://example.com; echo "exit code: $?"
+```
+
+A successful run prints the page, then `exit code: 0`. Any other number is in the table below.
+
+## Exit codes
+
+| Code | Meaning |
+|---|---|
+| `0` | Success |
+| `1` | Failure |
+| `2` | Usage error: the command or its flags were wrong |
+| `3` | Some `batch` items failed |
+| `127` | A command could not start, because a helper tool is missing |
+| `128 + n` | The run was stopped by signal `n` |
+
+Two signals come up most. `130` means SIGINT, such as Ctrl-C. `143` means SIGTERM.
+
+Exit codes stay fixed, so a script or an agent can rely on them.
+
+## Common errors
+
+- **A helper tool is missing (exit 127).** Run `webular doctor`. It names each missing tool.
+- **A server asks you to wait too long.** A fetch retries when a server sends `Retry-After`, but only up to 10 s. A longer wait fails at once, and the error names it, for example `asked to wait 120 s (Retry-After), over the 10 s limit`. Try again later. See [Retries and dead pages](/reference/reliability).
+- **A `--select` field is missing.** The command still exits 0. A note on stderr reads `select: no field "titel" in this output; fields: ...`, followed by the fields there are. Fix the field name and run the command again.
+- **A PDF has no text layer (exit 1).** `parse` and `scrape` fail on a scanned or image-only PDF, because webular has no OCR. The error says to run the PDF through an OCR tool, such as `ocrmypdf`, first.
+- **Every search source failed (exit 1).** The JSON lists each failed source in `errors`, and stderr says so. Run `webular doctor --json` to check your setup.
+
+## In MCP
+
+An MCP tool returns an error result with `isError: true` and the same text the command prints. See [Use webular from an agent](/agents).
+
+## Related
+
+- [CLI overview](/reference/cli)
+- [Troubleshooting](/troubleshooting)

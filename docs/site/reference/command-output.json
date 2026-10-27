@@ -1,0 +1,52 @@
+{
+  "scrape": {
+    "args": "--url https://example.com/",
+    "text": "# Fixture\n\n# Hello\n\nPlain text here.",
+    "json": "{\"links\":[],\"markdown\":\"# Fixture\\n\\n# Hello\\n\\nPlain text here.\",\"text\":\"Hello\\nPlain text here.\",\"title\":\"Fixture\",\"url\":\"https://example.com/\"}"
+  },
+  "map": {
+    "args": "--url https://example.com/",
+    "text": "",
+    "json": "{\"count\":0,\"errors\":[],\"links\":[],\"url\":\"https://example.com/\"}"
+  },
+  "crawl": {
+    "args": "--url https://example.com/ --limit 1",
+    "text": "https://example.com/\tFixture",
+    "json": "{\"count\":1,\"errors\":[],\"limitReached\":true,\"pages\":[{\"title\":\"Fixture\",\"url\":\"https://example.com/\"}],\"root\":\"https://example.com/\"}"
+  },
+  "extract": {
+    "args": "--url https://example.com/ --selector h1",
+    "text": "Hello",
+    "json": "{\"matches\":[\"Hello\"],\"url\":\"https://example.com/\"}"
+  },
+  "summarize": {
+    "args": "--url https://example.com/",
+    "text": "Hello Plain text here.",
+    "json": "{\"figures\":[],\"picks\":[{\"end\":5,\"index\":0,\"source_url\":\"https://example.com/\",\"start\":0,\"text\":\"Hello\"},{\"end\":22,\"index\":1,\"source_url\":\"https://example.com/\",\"start\":6,\"text\":\"Plain text here.\"}],\"sentences\":[\"Hello\",\"Plain text here.\"],\"source_url\":\"https://example.com/\",\"summary\":\"Hello Plain text here.\"}"
+  },
+  "batch": {
+    "args": "--urls https://example.com/",
+    "text": "ok   https://example.com/  Fixture\nok 1/1",
+    "json": "{\"count\":1,\"results\":[{\"ok\":true,\"title\":\"Fixture\",\"url\":\"https://example.com/\"}]}"
+  },
+  "monitor": {
+    "args": "--url https://example.com/",
+    "text": "new https://example.com/",
+    "json": "{\"changeStatus\":\"new\",\"url\":\"https://example.com/\"}"
+  },
+  "answer": {
+    "args": "--query hello --urls https://example.com/",
+    "text": "Plain text here.\n\nSources:\n- https://example.com/  https://example.com/",
+    "json": "{\"answer\":\"Plain text here.\",\"asOf\":\"2026-01-01\",\"errors\":[],\"query\":\"hello\",\"readability\":{\"markdown\":[],\"plain\":[]},\"sources\":[{\"title\":\"https://example.com/\",\"url\":\"https://example.com/\"}]}"
+  },
+  "feed": {
+    "args": "--url https://example.com/rss.xml",
+    "text": "One\n  https://example.com/1",
+    "json": "{\"count\":1,\"feedUrl\":\"https://example.com/rss.xml\",\"items\":[{\"published\":\"\",\"summary\":\"First\",\"title\":\"One\",\"url\":\"https://example.com/1\"}],\"title\":\"Fixture RSS\",\"url\":\"https://example.com/rss.xml\"}"
+  },
+  "media": {
+    "args": "--url https://example.com/img.png -o media.bin",
+    "text": "download https://example.com/img.png -> media.bin (64 bytes)",
+    "json": "{\"action\":\"download\",\"bytes\":64,\"savedTo\":\"media.bin\",\"url\":\"https://example.com/img.png\"}"
+  }
+}
