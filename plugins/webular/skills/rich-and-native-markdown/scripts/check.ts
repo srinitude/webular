@@ -34,7 +34,8 @@ const headingSlug = (raw: string) => {
   if (title === undefined) return undefined
   // Split on `<` and drop each piece's text up to its first `>`: no `<` survives to rebuild a tag.
   const text = title.replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/[`*]/g, '')
-  return slug(text.split('<').map((p, i) => (i ? p.slice(p.indexOf('>') + 1) : p)).join(''))
+  const parts = text.split('<').map((p, i) => (i ? p.slice(p.indexOf('>') + 1) : p))
+  return slug(parts.join(''))
 }
 
 // ponytail: line regexes, not an AST; nested parens in URLs and indented code blocks are missed.
