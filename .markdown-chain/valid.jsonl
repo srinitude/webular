@@ -386,7 +386,7 @@
 {"path": "docs/site/support.mdx", "sha": "05ee8847ffc3833ad19f983f173c206108b3a65b6fcb01b7f14a0b9f6a47ff40", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/site/troubleshooting.mdx", "sha": "e6134197ebf52cade22a37997ed88d7e4a913730943499cbb20743a1fc22121a", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "site-docs/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
-{"path": "site-docs/app/AGENTS.md", "sha": "0b4648fc4240a23cf8006d8a81edc2178271092044df1227598deec810677d91", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site-docs/app/AGENTS.md", "sha": "db33b491d88e2a3b138d00eb318b973f716e942c4668db5ea46f80f25155dc69", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "site-docs/app/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "site-docs/app/[[...slug]]/AGENTS.md", "sha": "90ee99d034c92b6ce7c025db4735fe10917aedfe1962c28c9c4b1af0e0a82ecd", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "site-docs/app/[[...slug]]/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
