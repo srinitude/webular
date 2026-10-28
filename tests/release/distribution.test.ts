@@ -118,7 +118,7 @@ test('a checksum line reads the same in text and binary mode, with LF or CRLF', 
   ])
 })
 
-test('release attests, drafts, publishes npm, then un-drafts', () => {
+test('release attests, drafts, un-drafts on GitHub, then publishes npm last', () => {
   const text = JSON.stringify(release)
   const order = [
     'mise run compile:all',
@@ -126,9 +126,9 @@ test('release attests, drafts, publishes npm, then un-drafts', () => {
     'mise run package:manifests',
     'actions/attest@',
     '--draft',
+    '--draft=false',
     'npm/webular-*',
     'publish .',
-    '--draft=false',
   ].map((needle) => text.indexOf(needle))
   expect(order.every((at) => at >= 0)).toBe(true)
   expect([...order].sort((a, b) => a - b)).toEqual(order)

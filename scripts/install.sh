@@ -144,7 +144,7 @@ install_binary() {
   fetch "$base/$asset" "$tmp/$asset" || rc=$?
   case "$rc" in
     0) ;;
-    22 | 8) fail "Release v${version:-latest} not found, or it has no $asset ($base/$asset)" ;;
+    22 | 56 | 8) fail "Release v${version:-latest} not found, or it has no $asset ($base/$asset)" ;;
     *) fail "download failed: $base/$asset; check your network and run this again" ;;
   esac
   verify_download "$tmp/$asset"
