@@ -28,6 +28,7 @@ const COMMON: Record<string, OptionSpec> = {
   timeout: { type: 'string' },
   // Read by dispatch.ts (it sets WEBULAR_NO_CACHE); parsed here so no command rejects it.
   'no-cache': { type: 'boolean' },
+  why: { type: 'boolean', default: false },
 }
 
 // Retired flags the CLI ignores — still PARSED so a legacy `--format json`
@@ -113,6 +114,8 @@ function checkFlags(
       Effect.andThen(Effect.fail(new CliError({ message: '', exitCode: 0 }))),
     )
   }
+  if (typeof values['why'] === 'string')
+    return Effect.fail(new CliError({ message: `${cmd}: --why takes no value.`, exitCode: 2 }))
   const unknown = Object.keys(values).find((name) => !(name in known))
   if (unknown === undefined) return Effect.void
   const hint = didYouMean(unknown, Object.keys(known))
@@ -184,16 +187,13 @@ export function timeoutFlag(
   return optIntFlag(cmd, values, 'timeout', { min: 1, max: 600_000 })
 }
 
-export function emitOpts(values: Record<string, FlagValue>): {
-  json: boolean
-  ndjson: boolean
-  fields?: string[] | undefined
-  output?: string | undefined
-} {
-  return {
-    json: Boolean(values['json']),
-    ndjson: Boolean(values['ndjson']),
-    fields: parseFields(strFlag(values, 'select')),
-    output: strFlag(values, 'output'),
-  }
-}
+type Picks = { fields?: string[] | undefined; output?: string | undefined; why?: true }
+export const emitOpts = (
+  values: Record<string, FlagValue>,
+): { json: boolean; ndjson: boolean } & Picks => ({
+  ...(values['why'] === true && { why: true as const }),
+  json: Boolean(values['json']),
+  ndjson: Boolean(values['ndjson']),
+  fields: parseFields(strFlag(values, 'select')),
+  output: strFlag(values, 'output'),
+})

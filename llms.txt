@@ -2,7 +2,7 @@
 
 > A web research CLI on Bun. Its judgment calls go to Jev, TypeSafe's System One decision model. It scrapes, crawls, maps, extracts, searches, and summarizes with free and open-source parts, as Mastra workflows built on Effect and XState and run from a fixed mise task graph.
 
-Jev's key (`TYPESAFE_API_KEY`) is the only API key. Without it, each decision falls back to a rule-based baseline, and `WEBULAR_JEV=off` turns Jev off. Start at the README, then the docs and benchmark pages below.
+Jev's key (`TYPESAFE_API_KEY`) is the only API key. Without it, each decision falls back to a rule-based baseline, and `WEBULAR_JEV=off` turns Jev off. `webular --why`: How webular works. `--why`: Show how results were picked. `--why` adds no network calls. Start at the README, then the docs and benchmark pages below.
 
 ## Docs
 

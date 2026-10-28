@@ -115,6 +115,7 @@ interface EmitOptions {
   fields?: string[] | undefined
   output?: string | undefined
   render?: ((data: unknown) => string) | undefined
+  why?: boolean | undefined
 }
 
 function defaultRender(data: unknown): string {
@@ -131,7 +132,11 @@ const jsonIndent = (toFile: boolean): number | undefined =>
 
 export function formatOutput(data: unknown, opts: EmitOptions): string {
   const picked = selectFields(data, opts.fields)
-  if (opts.ndjson) return toNdjson(picked)
+  // --why --ndjson: one last line, {"why":{...}}, after the result lines.
+  if (opts.ndjson)
+    return opts.why && isRec(data)
+      ? `${toNdjson(picked)}\n${stableJson({ why: data['why'] })}`
+      : toNdjson(picked)
   if (opts.json || opts.fields) return stableJson(picked, jsonIndent(Boolean(opts.output)))
   return (opts.render ?? defaultRender)(data)
 }

@@ -9,6 +9,7 @@ import { clearLead } from './search-diversify.ts'
 import { secondHop } from './search-hop.ts'
 import { pickSources, pickSourcesJudged } from './search-intent.ts'
 import { type Constraints, constraintsOf, matchesConstraints } from './search-query.ts'
+import { scoresOf } from './search-score-word.ts'
 import { entityVariant, queriesFor } from './search-source-names.ts'
 import {
   type Hit,
@@ -128,17 +129,16 @@ const searchOnce = Effect.fn('searchOnce')(function* (
     query,
     ran.flatMap(listWeights),
   ).filter((e) => matchesConstraints(e.hit, opts.c))
-  const ok = ran.filter((r) => r.status === 'ok').length
   const meta: SearchMeta = {
     sources: Object.fromEntries(ran.map((r) => [r.source, { status: r.status, ms: r.ms }])),
-    degraded: ok * 2 < ran.length,
+    degraded: ran.filter((r) => r.status === 'ok').length * 2 < ran.length,
     weak: (scored[0]?.score ?? 0) < WEAK_SCORE,
   }
   const hits = scored.map((e) => e.hit)
-  // Web only (other sources keep their own order), never under the answer hop: BM25 over
-  // a multi-hop question lifts pages sharing its bridge words over the hop's fused order.
+  // Web only, never under the answer hop: BM25 lifts a multi-hop question's bridge-word pages.
   const rerank = source === 'web' && !opts.hop && !clearLead(scored)
-  return { results: (rerank ? lexicalRerank(hits, query) : hits).slice(0, limit), meta }
+  const results = (rerank ? lexicalRerank(hits, query) : hits).slice(0, limit)
+  return { results, meta: { ...meta, scores: scoresOf(results, scored, ran) } }
 })
 
 interface Found {

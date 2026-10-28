@@ -24,6 +24,8 @@ Two signals come up most. `130` means SIGINT, such as Ctrl-C. `143` means SIGTER
 
 Exit codes stay fixed, so a script or an agent can rely on them.
 
+Bare `webular --why` exits 0. The per-command form never changes a command's exit code. Search with `--why` exits exactly as search without it.
+
 ## Common errors
 
 - **A helper tool is missing (exit 127).** Run `webular doctor`. It names each missing tool.

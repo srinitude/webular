@@ -13,6 +13,8 @@ export interface Scored<H extends Hit> {
   score: number
   lists: number[] // indexes of the input lists that returned the hit
   rank: number // 1-based final position
+  places?: Array<[list: number, rank: number]> // each list's 1-based rank for the hit
+  signal?: number // the domain-signal term: > 0 official site, < 0 aggregator
 }
 
 type Entry<H extends Hit> = Omit<Scored<H>, 'rank'>
@@ -48,9 +50,10 @@ function mergeCopies<H extends Hit>(entries: Entry<H>[]): Entry<H>[] {
   const kept: Entry<H>[] = []
   for (const e of [...entries].sort(byScore)) {
     const twin = kept.find((k) => isCopy(k.hit, e.hit))
-    if (!twin) kept.push({ ...e, lists: [...e.lists] })
+    if (!twin) kept.push({ ...e, lists: [...e.lists], places: [...(e.places ?? [])] })
     else {
       twin.score += e.score
+      twin.places = [...(twin.places ?? []), ...(e.places ?? [])]
       twin.lists = [...new Set([...twin.lists, ...e.lists])].sort((x, y) => x - y)
     }
   }

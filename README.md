@@ -155,7 +155,7 @@ Bun runs it. Readability, linkedom, Turndown, unpdf, mammoth, and anydoc read pa
 
 ## Output, exit codes, and behavior
 
-Global options: `--json`, `--ndjson`, `--select <a,b>`, `-o/--output <file>`, `--timeout <ms>` (per network try), `--no-cache`, `-h/--help`, and `-V/--version`. `--json` prints JSON with sorted keys and a stable shape. Exit codes: `0` success, `1` failure, `2` usage error, `3` some `batch` items failed, `127` a command could not start, and `128 + n` stopped by signal `n` (`130` for SIGINT, `143` for SIGTERM).
+Global options: `--json`, `--ndjson`, `--select <a,b>`, `-o/--output <file>`, `--timeout <ms>` (per network try), `--no-cache`, `--why`, `-h/--help`, and `-V/--version`. `--json` prints JSON with sorted keys and a stable shape. `--why`: Show how results were picked. Bare `webular --why` exits 0. `--why` adds no network calls. The per-command form never changes a command's exit code. Exit codes: `0` success, `1` failure, `2` usage error, `3` some `batch` items failed, `127` a command could not start, and `128 + n` stopped by signal `n` (`130` for SIGINT, `143` for SIGTERM).
 
 - **robots.txt.** `scrape` returns status `blocked` for a page that robots.txt disallows. `--ignore-robots` fetches one URL anyway and marks it `disallowed`. `crawl`, `map`, and `batch` always honor robots.txt.
 - **Same input, same result.** Pages are cached in `~/.cache/webular`. `WEBULAR_DETERMINISTIC=1` makes search wait for every source. `WEBULAR_AS_OF` pins the run date that answers cite.

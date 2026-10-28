@@ -105,12 +105,14 @@ export function scoreHits<H extends SearchHit>(
   query: string,
   weights: ReadonlyArray<number> = [],
 ): Scored<H>[] {
-  const seen = new Map<string, { hit: H; score: number; lists: number[] }>()
+  const seen = new Map<string, Omit<Scored<H>, 'rank'>>()
   lists.forEach((list, li) => {
     list.forEach((hit, i) => {
       const key = hitKey(hit.url)
-      const entry = seen.get(key) ?? { hit, score: domainSignal(hit.url, query), lists: [] }
+      const signal = domainSignal(hit.url, query)
+      const entry = seen.get(key) ?? { hit, score: signal, signal, lists: [], places: [] }
       entry.score += (weights[li] ?? 1) / (RRF_K + i + 1)
+      entry.places?.push([li, i + 1])
       if (!entry.lists.includes(li)) entry.lists.push(li)
       if (hit.description.length > entry.hit.description.length)
         entry.hit = { ...entry.hit, description: hit.description }

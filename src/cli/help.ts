@@ -22,6 +22,7 @@ export const GLOBAL_OPTIONS = [
   '  -o, --output <f>  Write the output to a file',
   '  --timeout <ms>    Time limit for each network try (default 30000)',
   '  --no-cache        Fetch every page fresh; skip the local page cache',
+  '  --why             Show how results were picked',
   '  -h, --help        Show help',
   '  -V, --version     Show version',
 ]
@@ -32,6 +33,7 @@ const HEAD = [
   '',
   'USAGE',
   '  webular <command> [options]',
+  '  webular --why   How webular works',
   '',
   'COMMANDS',
 ]

@@ -13,12 +13,14 @@ import { commandLifecycleMachine } from '../machines/command-lifecycle.ts'
 import { EXIT, payloadExit, settledExit } from './exit-codes.ts'
 import { renderFor } from './render.ts'
 import { safeText } from './style.ts'
+import { whyBlock, withWhy } from './why.ts'
 
 interface RunOpts {
   json?: boolean | undefined
   ndjson?: boolean | undefined
   fields?: string[] | undefined
   output?: string | undefined
+  why?: boolean | undefined
   exitCode?: (result: unknown) => number
 }
 
@@ -84,7 +86,8 @@ function report(
       { type: 'WORKFLOW_FAILED' },
     ])
   const failures = errorCount(outcome.result)
-  const { exitCode, ...emitOpts } = opts
+  const { exitCode, ...rest } = opts
+  const emitOpts = { ...rest, render: rest.why ? withWhyBlock(name) : renderFor(name) }
   const exit = settledExit(commandLifecycleMachine, [
     { type: 'INPUT_VALID' },
     { type: 'WORKFLOW_SUCCEEDED' },
@@ -98,9 +101,16 @@ function report(
       : Effect.void
   return note.pipe(
     Effect.andThen(archiveNote(name, outcome.result)),
-    Effect.andThen(emit(outcome.result, { ...emitOpts, render: renderFor(name) })),
+    Effect.andThen(emit(rest.why ? withWhy(name, outcome.result) : outcome.result, emitOpts)),
     Effect.as(exit),
   )
+}
+
+// Human --why output: the command's own text, then the WHY block. A reason
+// quotes web URLs, so it is escaped like any rendered text.
+const withWhyBlock = (name: string) => {
+  const base = renderFor(name)
+  return base && ((data: unknown) => `${base(data)}\n${safeText(whyBlock(data))}`)
 }
 
 // A url that is not a full http or https address is wrong usage (exit 2), so

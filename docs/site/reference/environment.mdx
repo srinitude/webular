@@ -20,7 +20,7 @@ The `jev` row of the output reads `jev off (WEBULAR_JEV=off)`. All settings are 
 | `WEBULAR_DETERMINISTIC` | Unset | Set to `1` to make search wait for every source, so source timing never changes the hits. | README.md, src/lib/search-chain.ts |
 | `WEBULAR_AS_OF` | Unset | A date in `YYYY-MM-DD` form. It pins the run date that answers cite. | README.md, src/lib/as-of.ts |
 | `WEBULAR_MAILTO` | Unset | An email address for the polite pool of scholarly sources. | README.md, src/lib/sources/polite.ts |
-| `WEBULAR_TRACE` | Unset | Set to `1` to print source notes on stderr, such as a spent rate limit. | README.md, src/lib/search-chain.ts |
+| `WEBULAR_TRACE` | Unset | Set to `1` to print source notes on stderr, such as a spent rate limit. `--why` gives the reasons on stdout, for users and agents. | README.md, src/lib/search-chain.ts |
 | `WEBULAR_BIN` | Unset | The binary the plugin's MCP server calls. | README.md |
 | `WEBULAR_ALLOW_PRIVATE` | Unset | Set to `1` to allow requests to private addresses in agent mode. | docs/commands.md, src/core/address-guard.ts |
 | `WEBULAR_OUTPUT_DIR` | The folder webular starts in | In agent mode, files may be written only inside this folder. | docs/commands.md, src/core/safepath.ts |

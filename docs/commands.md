@@ -35,6 +35,14 @@ This page describes what each `webular` command does. The README holds the usage
 - `parse` and `scrape` exit `1` on a PDF with no text layer, such as a scanned or image-only PDF. Webular has no OCR, so the error says to run the PDF through an OCR tool, such as `ocrmypdf`, first.
 - `answer` and `research` keep a page when Readability finds no main text on it, and read the page's body text instead. A run whose pages load exits `0`, even when another fetch fails.
 
+## --why
+
+| Flag | What it does |
+| --- | --- |
+| `--why` | Show how results were picked |
+
+Bare `webular --why` exits 0. `--why` adds no network calls. The per-command form never changes a command's exit code.
+
 ## Private addresses
 
 Webular guards against requests to your own network (SSRF). A private address is loopback, RFC 1918, link-local such as `169.254.169.254`, CGNAT, IPv6 `::1`, `fc00::/7`, or `fe80::/10`, or an IPv4-mapped IPv6 form of any of them. `localhost` counts too. [`src/core/address-guard.ts`](../src/core/address-guard.ts) applies these rules to every request:

@@ -40,6 +40,17 @@ const searchOutput = z.object({
     sources: z.record(z.string(), z.object({ status: z.string(), ms: z.number() })),
     degraded: z.boolean(),
     weak: z.boolean(),
+    // Raw fused score per returned hit, for --why (HitScore in search-chain.ts).
+    scores: z
+      .array(
+        z.object({
+          url: z.string(),
+          score: z.number(),
+          parts: z.array(z.string()),
+          word: z.enum(['clear lead', 'backed', 'weak']),
+        }),
+      )
+      .optional(),
   }),
   // Only when nothing was found because the sources failed: one {url, reason}
   // per failed source, and the command exits 1.

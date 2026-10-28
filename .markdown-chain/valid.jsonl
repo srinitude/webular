@@ -408,3 +408,16 @@
 {"path": "CHANGELOG.md", "sha": "8802566dc3844d776756e2f313ade2654203c245c5061f926ce86b1a557538c7", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "src/core/AGENTS.md", "sha": "5a39e1333523777e0eb6e001535559ca492c5a100a0cd62707c0df7c4af779e6", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/core/AGENTS.md", "sha": "c1ade83a332fd607cb1bafe652744dec50ae665a950b7f5ff81fb13619dbe1e4", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "README.md", "sha": "fe8fd0541cd5bb27bebc74abdfce3c520726e8c0bc536ca7dc86f22f46f887b5", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/commands.md", "sha": "12f9c570238e296c851da4c463f2a1249bb922ded0ebdb9e5b88aafa9798f235", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/install.md", "sha": "cf9a63b20d632c85f81bdfac4706942de1960435849555fb56cec30be4369753", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/site/reference/cli.mdx", "sha": "e451a8950e2adb47c0cd945631c4a7f395053a5db56e359a0b9f34a80d15b539", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "src/cli/AGENTS.md", "sha": "fb1eb9665582f41f9793a20a68109f8321ce563b736b5d85bf0e81fc0268fd44", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "tests/cli/AGENTS.md", "sha": "416b6df306c975513924a904384a5b0e9bbf832cce4298f45ca53f7035db38e9", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/site/reference/exit-codes.mdx", "sha": "e1006c02c1665f18b747ad4adba638bc47a42d6cc83102eecc4059ef2f14b101", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/site/reference/cli.mdx", "sha": "939adac8da13ea783c906499c89cd39ff7dd6f0c9230d1daae542cc526f78aec", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/commands.md", "sha": "ad995aecafa5813800a3bf063bdb102b2226cbd83584009843b08504790fc30e", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "README.md", "sha": "aeeedcd116852654c43d488d006b4d1afd5b88658aff7b7bebd309b6f25ff815", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/install.md", "sha": "88507ec95e69d4ea7722d0659129fb00118bf00d80a4021452045d984645e22e", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/site/reference/environment.mdx", "sha": "5dfdd0ccebb0575fc7eb733aff3223813e4a52b4ea309358a6aae35cd990e2e8", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/site/troubleshooting.mdx", "sha": "406d9dbf1246ade3582ba42b769ffd0d30540c5294a653efd45756d90cfd5a0e", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
