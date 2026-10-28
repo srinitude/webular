@@ -1,8 +1,8 @@
 /* The docs theme: the webular hero's paper, oxblood, and rose, read from the
- * hero tokens in webular-tokens.css. Every Fumadocs color, font, radius, and
+ * hero tokens in site/design/hero-tokens.css, the file home reads too. Every Fumadocs color, font, radius, and
  * spacing step maps to a token, so one token change restyles the docs. */
 @import "tailwindcss";
-@import "./webular-tokens.css";
+@import "../../site/design/hero-tokens.css";
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";
 
@@ -21,7 +21,7 @@
   --radius-2xl: var(--primitive-radius-hair);
 }
 
-/* webular-tokens.css switches light and dark on data-theme and
+/* hero-tokens.css switches light and dark on data-theme and
  * prefers-color-scheme, so one mapping covers both modes. It also replaces the
  * stock Fumadocs dark palette, which sits on .dark and .dark #nd-sidebar. */
 :root,

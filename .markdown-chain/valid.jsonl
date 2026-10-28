@@ -424,3 +424,6 @@
 {"path": "docs/commands.md", "sha": "52f78413664d91632ded00c3fff88a14e66202bf8343446ff7c8967bfc6a2c7d", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "src/lib/AGENTS.md", "sha": "55b39d6e5a980989e4fdc7cb8a67fc92cb172bb4fd1be3c5546f072609dde187", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/cli/AGENTS.md", "sha": "daa28a3b999903e12ff37156bee4282d6997cd0872ccfba49f4f8e3647eee863", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/design/AGENTS.md", "sha": "efefcb9eb72e101ea0126ec329138a006ff91d35e40a5d602f5a001b03577a62", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site-docs/AGENTS.md", "sha": "73a07489a9e77c7be98db7b44230f3f7356ed484fd907933689575c254a8a99e", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site-docs/app/AGENTS.md", "sha": "48d574b3fd8fc6768bffed036b68b52c4ed1471e7681370061b0212031061de2", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
