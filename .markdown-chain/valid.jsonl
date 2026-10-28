@@ -421,3 +421,4 @@
 {"path": "docs/install.md", "sha": "88507ec95e69d4ea7722d0659129fb00118bf00d80a4021452045d984645e22e", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/site/reference/environment.mdx", "sha": "5dfdd0ccebb0575fc7eb733aff3223813e4a52b4ea309358a6aae35cd990e2e8", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/site/troubleshooting.mdx", "sha": "406d9dbf1246ade3582ba42b769ffd0d30540c5294a653efd45756d90cfd5a0e", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/commands.md", "sha": "52f78413664d91632ded00c3fff88a14e66202bf8343446ff7c8967bfc6a2c7d", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}

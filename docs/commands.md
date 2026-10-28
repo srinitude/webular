@@ -43,6 +43,18 @@ This page describes what each `webular` command does. The README holds the usage
 
 Bare `webular --why` exits 0. `--why` adds no network calls. The per-command form never changes a command's exit code.
 
+### The `search --why` card
+
+`webular search "your query" --why` adds a card under the results. It reads only what the run already holds.
+
+- **Score.** Each result shows its fused score, such as `0.0412`, then the parts that made it. `brave#1` means the Brave list ranked the page first. `+official` means the site got a boost for being official. `-aggregator` means it lost points for being an aggregator.
+- **Label.** The card opens with `Scores compare results in this run only.` A score ranks pages inside one run. It does not say how relevant a page is on its own.
+- **Score words.** Each score ends with one word:
+  - `weak` means the score is under `0.0246`. One list put the page first and no other list agreed.
+  - `clear lead` goes only to the top result, when at least two lists agree on it and its score beats the next result by at least `1/61`.
+  - `backed` means every other score.
+- **Verdict.** The card ends with a verdict and one next command. `Verdict: weak.` means the top result scored under `0.0246`, and the next command is `webular research "your query"`. `Verdict: not weak.` means it scored `0.0246` or more, and the next command is `webular scrape` with the top page's URL.
+
 ## Private addresses
 
 Webular guards against requests to your own network (SSRF). A private address is loopback, RFC 1918, link-local such as `169.254.169.254`, CGNAT, IPv6 `::1`, `fc00::/7`, or `fe80::/10`, or an IPv4-mapped IPv6 form of any of them. `localhost` counts too. [`src/core/address-guard.ts`](../src/core/address-guard.ts) applies these rules to every request:
