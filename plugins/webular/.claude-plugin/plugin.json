@@ -1,6 +1,6 @@
 {
   "name": "webular",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Search, scrape, crawl, and answer with sources, from your own machine. A CLI and MCP server with one optional key: Jev.",
   "author": { "name": "Kiren Srinivasan", "email": "kiren@fantasymetals.com" },
   "homepage": "https://github.com/srinitude/webular",

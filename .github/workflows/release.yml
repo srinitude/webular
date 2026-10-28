@@ -129,7 +129,9 @@ jobs:
   # musl: the same suite on Alpine, where the linux-*-musl executables run
   # (docker run on the host: the JavaScript actions need glibc node). bash,
   # curl, nodejs, and npm: the image has none of them (its `node` is a bun
-  # symlink), and the suite runs each one.
+  # symlink), and the suite runs each one. --init makes docker's init PID 1:
+  # without it, sh execs its last command (mise) as PID 1, which never reaps an
+  # orphan, so a killed grandchild stays a zombie that kill(pid, 0) still finds.
   test-musl:
     runs-on: ubuntu-latest
     timeout-minutes: 12
@@ -139,7 +141,7 @@ jobs:
           persist-credentials: false
       - name: Run mise run test on Alpine
         run: |
-          docker run --rm -v "$PWD:/w" -w /w -e MISE_LOCKED=1 oven/bun:1.4.3-alpine@sha256:629e17411f1f129dbec3af78d5af9c9f2a937435c80349437206c6b0b7422373 sh -ec '
+          docker run --init --rm -v "$PWD:/w" -w /w -e MISE_LOCKED=1 oven/bun:1.4.3-alpine@sha256:629e17411f1f129dbec3af78d5af9c9f2a937435c80349437206c6b0b7422373 sh -ec '
             apk add --no-cache git fish mandoc libgcc libstdc++ bash curl nodejs npm procps
             apk add --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community mise
             git config --global --add safe.directory /w

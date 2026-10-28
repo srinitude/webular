@@ -4,6 +4,12 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and 
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-10-28
+
+### Fixed
+
+- The release tests on Alpine run Docker with `--init`. Without it, the container had no process that cleans up exited child processes, so the `runProc` tests found a killed grandchild still listed and failed.
+
 ## [0.3.0] - 2026-10-22
 
 ### Added
@@ -69,7 +75,8 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and 
 
 - A universal web research CLI, routed through mise into Mastra workflows built on free and open-source libraries.
 
-[Unreleased]: https://github.com/srinitude/webular/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/srinitude/webular/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/srinitude/webular/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/srinitude/webular/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/srinitude/webular/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/srinitude/webular/compare/v0.1.0...v0.1.1

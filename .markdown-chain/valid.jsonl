@@ -403,3 +403,5 @@
 {"path": "site-docs/AGENTS.md", "sha": "3e358bb105b2615e14af79e632517da9c00b703df4f62f3798861808f12a66d0", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/site/agents/index.mdx", "sha": "2c3664643a4cefb71d2eff291c027e6aa91d7e86faad87fd4ed7bb3ccb563ac2", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/site/guides/extract-and-parse.mdx", "sha": "d4b1bc41f29255d1d1b3014c283465045be6f7b80e78893e3567039e51341258", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "CHANGELOG.md", "sha": "31b98e6005fe07fce65090f2f3b449e51fd145b7d02905f83dbd11835a397387"}
+{"path": "CHANGELOG.md", "sha": "31b98e6005fe07fce65090f2f3b449e51fd145b7d02905f83dbd11835a397387", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
