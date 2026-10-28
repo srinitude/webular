@@ -61,7 +61,8 @@
     "prepack": "mise run build"
   },
   "engines": {
-    "bun": ">=1.4.3"
+    "bun": ">=1.4.3",
+    "node": ">=16.9.0"
   },
   "publishConfig": {
     "access": "public"

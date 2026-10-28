@@ -382,7 +382,7 @@
 {"path": "docs/site/guides/search-the-web.mdx", "sha": "61f7912cc5c357d89e82f0fc9c1a4dac7f4adc2c93dc673a46a7a1c4e59ea332", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/site/guides/watch-and-feeds.mdx", "sha": "ce8f06082cbd30a905059209f34fd870c51eed1f53aca7bf5fe9f30a2b0b57ad", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/site/index.mdx", "sha": "b556a6909f263d9163f2dfb168bd9f8eb51bf5083b0ea3aaabb8152b5c026f94", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
-{"path": "docs/site/install.mdx", "sha": "be37d2d76e4177e00515b0ea6a714b8b5f86b7c9dd50d6231f0a3ac923340816", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/site/install.mdx", "sha": "4232d8b8966d3a702c4c398c4e254c1776f956302365a86c9b9afb51f886c5b8", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/site/jev.mdx", "sha": "281834c33ec226769dea16d9e41c3f0c5bfb190468d2c23a8743c0c932739913", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/site/quickstart.mdx", "sha": "7af2fc020edd3d0fdd559e57857bbb31864cde2bf1ab9d4a69b656e0aad972da", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/site/reference/AGENTS.md", "sha": "b975faf9544bc9efe28eb210593d2be6113cb9b20e53b19fd962f16269b6e57a", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}

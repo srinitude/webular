@@ -66,6 +66,12 @@ describe('best practices: package engines and files', () => {
     }),
   )
   check(
+    'engines.node is the oldest Node the dist/webular.js launcher parses and runs on (Object.hasOwn, 16.9)',
+    Effect.gen(function* () {
+      expect((yield* packageJson).engines['node']).toBe('>=16.9.0')
+    }),
+  )
+  check(
     'every path in files exists and CHANGELOG.md ships',
     Effect.gen(function* () {
       const { files } = yield* packageJson
