@@ -4,6 +4,14 @@ This file follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and 
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-10-28
+
+### Security
+
+- `@modelcontextprotocol/node` is 2.1.2, which limits request body size and JSON-RPC batch length on the HTTP transport ([GHSA-f897-62hf-6gxq](https://github.com/advisories/GHSA-f897-62hf-6gxq)).
+- The site build uses wrangler 4.153.0, whose bundled undici 7.30.1 fixes eight undici advisories.
+- Tag and comment stripping repeats until nothing is left, so a tag split by another tag cannot rejoin. JSON-LD unwrapping also drops a `--!>` comment end.
+
 ## [0.3.1] - 2026-10-28
 
 ### Fixed

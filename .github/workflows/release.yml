@@ -446,7 +446,7 @@ jobs:
               npm publish --ignore-scripts --provenance --access public --tag "$DIST_TAG" "$1"
             fi
           }
-          for dir in npm/webular-*; do publish "$dir"; done
+          for dir in ./npm/webular-*; do publish "$dir"; done
           # npm's malware scan can hold a tarball back; the root package
           # resolves its optionalDependencies, so wait for each, all at once
           # (30 x 10 s max in total, not per package).
@@ -458,7 +458,7 @@ jobs:
             done
           }
           pids=
-          for dir in npm/webular-*; do
+          for dir in ./npm/webular-*; do
             spec="$(jq -r '.name + "@" + .version' "$dir/package.json")"
             wait_for "$spec" & pids="$pids $!"
           done
@@ -520,7 +520,11 @@ jobs:
       - name: Download the attested executables
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" -n release-files -D dist/bin
+        run: |
+          # The build already wrote its own dist/bin/webular and the artifact holds
+          # one too, so extract beside dist/bin and copy in only the checksummed files.
+          gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" -n release-files -D "$RUNNER_TEMP/release-files"
+          cp "$RUNNER_TEMP"/release-files/webular-* "$RUNNER_TEMP/release-files/SHA256SUMS" dist/bin/
       - name: Check the downloads against the release SHA256SUMS
         run: (cd dist/bin && sha256sum --check --strict SHA256SUMS)
       - name: Write the per-platform npm packages
@@ -546,7 +550,7 @@ jobs:
               npm publish --ignore-scripts --tag "$tag" "$1"
             fi
           }
-          for dir in npm/webular-*; do publish "$dir"; done
+          for dir in ./npm/webular-*; do publish "$dir"; done
           publish .
 
   # Copies webular.rb from the release into srinitude/homebrew-webular.

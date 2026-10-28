@@ -32,7 +32,7 @@ const parseJson = Schema.decodeUnknownOption(Schema.fromJsonString(Schema.Unknow
 // Pages wrap blocks in an HTML comment or a CDATA section (with or without a
 // JS comment prefix), start with a BOM, or leave a trailing comma; none of that is data.
 const OPEN_WRAP = /^(?:<!--|(?:\/\/|\/\*)?\s*<!\[CDATA\[(?:\*\/)?)/
-const CLOSE_WRAP = /(?:-->|(?:\/\/|\/\*)?\s*\]\]>(?:\*\/)?)$/
+const CLOSE_WRAP = /(?:--!?>|(?:\/\/|\/\*)?\s*\]\]>(?:\*\/)?)$/
 const unwrap = (text: string): string =>
   text
     .replace(/^\uFEFF/, '')

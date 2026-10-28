@@ -8,6 +8,7 @@ import { DOMParser } from 'linkedom'
 import { FetchError } from '../core/decode.ts'
 import { fetchText } from '../core/http.ts'
 import type { HttpStatusError } from '../core/http-body.ts'
+import { removeAll } from '../core/remove-all.ts'
 
 export { SEARCH_SOURCES, type SearchSource } from './search-source-names.ts'
 
@@ -36,8 +37,7 @@ export const endpoint = (base: string, params: Record<string, string>) =>
 // ponytail: tag strip + the five XML entities only; snippets are short and
 // display-only, so a full HTML parse is not worth it.
 export function plain(html: string): string {
-  return html
-    .replace(/<[^>]+>/g, '')
+  return removeAll(html, /<[^>]+>/g)
     .replace(/&quot;/g, '"')
     .replace(/&#0?39;/g, "'")
     .replace(/&lt;/g, '<')

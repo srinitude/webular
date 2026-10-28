@@ -405,3 +405,6 @@
 {"path": "docs/site/guides/extract-and-parse.mdx", "sha": "d4b1bc41f29255d1d1b3014c283465045be6f7b80e78893e3567039e51341258", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "CHANGELOG.md", "sha": "31b98e6005fe07fce65090f2f3b449e51fd145b7d02905f83dbd11835a397387"}
 {"path": "CHANGELOG.md", "sha": "31b98e6005fe07fce65090f2f3b449e51fd145b7d02905f83dbd11835a397387", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "CHANGELOG.md", "sha": "8802566dc3844d776756e2f313ade2654203c245c5061f926ce86b1a557538c7", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "src/core/AGENTS.md", "sha": "5a39e1333523777e0eb6e001535559ca492c5a100a0cd62707c0df7c4af779e6", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "tests/core/AGENTS.md", "sha": "c1ade83a332fd607cb1bafe652744dec50ae665a950b7f5ff81fb13619dbe1e4", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}

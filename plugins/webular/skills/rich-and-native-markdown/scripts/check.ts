@@ -32,7 +32,9 @@ const slug = (text: string) =>
 const headingSlug = (raw: string) => {
   const title = raw.match(/^ {0,3}#{1,6}\s+(.*?)(?:\s+#+)?\s*$/)?.[1]
   if (title === undefined) return undefined
-  return slug(title.replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1').replace(/[`*]|<[^>]+>/g, ''))
+  let text = title.replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1')
+  for (let prev = ''; prev !== text; ) [prev, text] = [text, text.replace(/[`*]|<[^>]+>/g, '')]
+  return slug(text)
 }
 
 // ponytail: line regexes, not an AST; nested parens in URLs and indented code blocks are missed.

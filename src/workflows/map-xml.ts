@@ -1,3 +1,4 @@
+import { removeAll } from '../core/remove-all.ts'
 import { normalizeUrl } from '../core/url.ts'
 
 const XML_ENTITIES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'" }
@@ -11,13 +12,13 @@ const decodeXml = (text: string): string =>
       return code <= 0x10ffff ? String.fromCodePoint(code) : m
     },
   )
-export const withoutComments = (xml: string): string => xml.replace(/<!--[\s\S]*?-->/g, '')
+export const withoutComments = (xml: string): string => removeAll(xml, /<!--[\s\S]*?-->/g)
 
 // The root element's namespace prefix (`sm:` in <sm:urlset>), or '' when unprefixed. Only
 // tags with that prefix count, so <image:loc> inside a <url> is not read as a page.
 export const rootPrefix = (xml: string): string => {
   const prefix = /<(?:([\w.-]+):)?(?:urlset|sitemapindex)[\s>]/i.exec(xml)?.[1]
-  return prefix ? `${prefix.replace(/\./g, '\\.')}:` : ''
+  return prefix ? `${prefix.replace(/[\\^$.*+?()[\]{}|-]/g, '\\$&')}:` : ''
 }
 
 // 2602.15921: at the limit cut, each first path segment gets at most an even share of the

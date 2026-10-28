@@ -1,6 +1,6 @@
 {
   "name": "webular-plugin",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "private": true,
   "type": "module",
   "description": "Runtime dependencies of the webular agent plugin, so the plugin folder runs on its own.",
@@ -9,7 +9,7 @@
     "@effect/platform-bun": "4.0.5",
     "@mastra/core": "^1.78.0",
     "@mastra/mcp": "^2.4.1",
-    "@modelcontextprotocol/node": "2.0.0",
+    "@modelcontextprotocol/node": "2.1.2",
     "@modelcontextprotocol/server": "2.3.1",
     "effect": "4.0.5",
     "zod": "^4.6.7"

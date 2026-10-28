@@ -1,5 +1,6 @@
 // HTML sanitizing: strips active content, hidden text, and invisible characters.
 import { parseHTML } from 'linkedom'
+import { removeAll } from '../core/remove-all.ts'
 
 type DomDocument = ReturnType<typeof parseHTML>['document']
 
@@ -87,5 +88,5 @@ export function sanitizeHtml(html: string): string {
       if (unsafeAttr(name, el.getAttribute(name) ?? '')) el.removeAttribute(name)
     }
   }
-  return dropInvisible(document.body.innerHTML.replace(COMMENT, ''))
+  return dropInvisible(removeAll(document.body.innerHTML, COMMENT))
 }
