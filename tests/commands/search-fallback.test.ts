@@ -141,3 +141,41 @@ describe('webular search --source crossref|openalex', () => {
     45_000,
   )
 })
+
+// --why reads the recorded payload only: the same fixture hits as a plain run,
+// a `why` record whose results follow the output order, and the same exit code.
+describe('webular search --why', () => {
+  test(
+    'why.results follow results in order; the results are unchanged',
+    () =>
+      eff(
+        Effect.gen(function* () {
+          const fx = yield* fixture(true, true)
+          const PATH = yield* Config.String('PATH').pipe(Config.orElse(() => Config.String('Path')))
+          const HOME = yield* Config.String('HOME').pipe(Config.withDefault('/tmp'))
+          const env = { PATH, HOME, WEBULAR_SOURCE_ORIGIN: fx.origin, WEBULAR_DETERMINISTIC: '1' }
+          const args = ['bun', '--limit', '2', '--json']
+          const plain = yield* runCli('src/commands/search.ts', args, { env })
+          const run = yield* runCli('src/commands/search.ts', [...args, '--why'], { env })
+          expect(run.code).toBe(plain.code)
+          const Url = Schema.Array(Schema.Struct({ url: Schema.String }))
+          const Why = Schema.fromJsonString(
+            Schema.Struct({
+              results: Url,
+              why: Schema.Struct({ fusion: Schema.Literal('weighted-rrf'), results: Url }),
+            }),
+          )
+          const Base = Schema.fromJsonString(
+            Schema.Struct({ results: Schema.Array(Schema.Unknown) }),
+          )
+          const data = yield* Schema.decodeUnknownEffect(Why)(run.out)
+          expect(data.why.results.map((r) => r.url)).toEqual(data.results.map((r) => r.url))
+          const withFlag = yield* Schema.decodeUnknownEffect(Base)(run.out)
+          const without = yield* Schema.decodeUnknownEffect(Base)(plain.out)
+          expect(withFlag.results).toEqual(without.results)
+          expect(fx.hits('/works')).toBeGreaterThan(0)
+        }),
+      )(),
+    45_000,
+  )
+})

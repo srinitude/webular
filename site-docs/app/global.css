@@ -1,14 +1,16 @@
 /* The docs theme: the webular hero's paper, oxblood, and rose, read from the
- * hero tokens in webular-tokens.css. Every Fumadocs color, font, and radius
- * maps to a semantic token, so one token change restyles the docs. */
+ * hero tokens in webular-tokens.css. Every Fumadocs color, font, radius, and
+ * spacing step maps to a token, so one token change restyles the docs. */
 @import "tailwindcss";
 @import "./webular-tokens.css";
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";
 
 /* The hero type: Georgia for text, the system mono for code. Both are system
- * fonts, so the docs load no font files. */
+ * fonts, so the docs load no font files. Spacing: every Tailwind step is a
+ * multiple of the hero's 4 px space step. */
 @theme {
+  --spacing: var(--semantic-space-1);
   --font-sans: var(--primitive-font-family-serif);
   --font-serif: var(--primitive-font-family-serif);
   --font-mono: var(--primitive-font-family-mono);

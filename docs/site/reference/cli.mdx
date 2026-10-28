@@ -21,8 +21,11 @@ These work on every command.
 | `-o, --output <file>` | Write the output to a file. |
 | `--timeout <ms>` | Time limit for each network try. The default is 30000. |
 | `--no-cache` | Fetch every page fresh. Skip the local page cache. |
+| `--why` | Show how results were picked |
 | `-h, --help` | Show help. |
 | `-V, --version` | Show the version. |
+
+Bare `webular --why` exits 0. `webular --why --ndjson` prints one line per step, then one `{"try":...}` line. Any other argument with the bare form, such as `webular --why search x`, exits 2 with: `--why goes after the command: webular search x --why`. The per-command form never changes a command's exit code. `--why` adds no network calls.
 
 If `--select` names a field the output lacks, the command still prints the fields it has and exits 0. A note on stderr names each missing field and lists the fields there are.
 

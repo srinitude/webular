@@ -10,6 +10,7 @@ Rules for the launcher and router, under [src/AGENTS.md](../AGENTS.md).
 - [`help.ts`](help.ts) and [`style.ts`](style.ts) shape terminal text: wrap, color, error labels, and "did you mean".
 - [`launch.ts`](launch.ts) picks what runs: the native build, else Bun on `dist`, else Bun on `src`.
 - [`exit-codes.ts`](exit-codes.ts) is the one source of exit codes.
+- [`why.ts`](why.ts) answers `--why`: bare, it prints how ranking works; on a command, it adds a reason to each result from the recorded payload, with no network call.
 - [`completion-script.ts`](completion-script.ts) builds the bash, zsh, fish, and PowerShell completion scripts for `webular completions`.
 - [`update-notice.ts`](update-notice.ts) prints one stderr line after a command when npm has a newer webular. It reads a daily cache and has off switches.
 
