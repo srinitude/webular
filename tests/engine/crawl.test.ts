@@ -23,7 +23,7 @@ const jittered =
     Effect.flatMap(Random.nextBetween(0, 12), Effect.sleep).pipe(Effect.as(html(title, links)))
 
 function siteRoutes(origin: string): Routes {
-  const upper = origin.toUpperCase().replace('HTTP://', 'HTTP://')
+  const upper = origin.toUpperCase()
   return {
     '/': jittered('Root', [
       '/a',

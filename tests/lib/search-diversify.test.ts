@@ -8,7 +8,7 @@ test('near copies on one host (same title) merge into one hit', () => {
   const a = hit('https://news.example.com/a', 'Bun 2 released', 'Bun 2 ships a faster runtime')
   const b = hit('https://news.example.com/print/a', 'Bun 2 Released!', 'Bun 2 ships a runtime')
   const out = scoreHits([[a, hit('https://other.org/x')], [b]], 'x')
-  expect(urls(out).filter((u) => u.includes('news.example.com'))).toHaveLength(1)
+  expect(urls(out).filter((u) => new URL(u).hostname === 'news.example.com')).toHaveLength(1)
   expect(out[0]?.hit.url).toBe('https://news.example.com/a')
 })
 

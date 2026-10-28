@@ -2,6 +2,7 @@
 // Crossref and OpenAlex live in search-chain.ts. Semantic Scholar is left out:
 // its keyless pool answered 429 on the first probe.
 import { Effect, Schema } from 'effect'
+import { removeAll } from '../../core/remove-all.ts'
 import { getJson, type Hit } from './polite.ts'
 
 const EuropePmc = Schema.fromJsonString(
@@ -28,7 +29,7 @@ const describe = (r: {
   pubYear?: string | undefined
 }) =>
   r.abstractText
-    ? r.abstractText.replace(/<[^>]+>/g, '')
+    ? removeAll(r.abstractText, /<[^>]+>/g)
     : [r.journalTitle, r.pubYear].filter(Boolean).join(', ')
 
 export const europePmc = (query: string, limit: number): Effect.Effect<Hit[], unknown> =>

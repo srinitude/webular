@@ -7,6 +7,7 @@
 // caller (a live view, a log) watch the session without polling.
 import * as BunServices from '@effect/platform-bun/BunServices'
 import { Context, Effect, Layer, Schema, type Stream, SubscriptionRef } from 'effect'
+import { removeAll } from '../core/remove-all.ts'
 import { runBatch } from './agentbrowser.ts'
 import { maybeScreenshot } from './driver-screenshot.ts'
 
@@ -86,7 +87,7 @@ export const htmlFromAgentBrowser = (stdout: string) =>
       const start = text.indexOf('<')
       const end = text.lastIndexOf('>')
       const html = start >= 0 && end > start ? text.slice(start, end + 1) : ''
-      if (!html.replace(/<[^>]*>/g, '').trim()) return ''
+      if (!removeAll(html, /<[^>]*>/g).trim()) return ''
       return /^<(!doctype|html)/i.test(html) ? html : `<html>${html}</html>`
     },
   )

@@ -13,7 +13,7 @@ test('seed adds at least 8 no-answer and 6 ambiguous tasks', () => {
 test('every seed task has a source, a quoted span, and aliases', () => {
   for (const t of tasks) {
     expect(t.source.url.startsWith('https://')).toBe(true)
-    expect(t.source.url.includes('wikidata.org')).toBe(false)
+    expect(new URL(t.source.url).hostname).not.toMatch(/(^|\.)wikidata\.org$/)
     expect(t.source.license.length).toBeGreaterThan(0)
     expect(t.aliases.length).toBeGreaterThan(0)
     const evidence = t.gold['evidence'] as ReadonlyArray<{ span: string }>
