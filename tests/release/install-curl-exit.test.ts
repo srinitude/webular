@@ -31,8 +31,11 @@ for (const code of [22, 56]) {
           WEBULAR_BASELINE: '0',
           WEBULAR_VERIFY_ATTESTATION: '0',
         }
-        const argv = ['sh', `${ROOT}scripts/install.sh`, '--version', '9.9.9']
-        const out = yield* runProc(argv, { env, extendEnv: true, timeoutMs: 30_000 })
+        const out = yield* runProc(['sh', `${ROOT}scripts/install.sh`, '--version', '9.9.9'], {
+          env,
+          extendEnv: true,
+          timeoutMs: 30_000,
+        })
         expect(out.code).not.toBe(0)
         expect(out.stderr).toContain('Release v9.9.9 not found')
         expect(yield* fs.exists(`${home}/.webular/bin/webular`)).toBe(false)
