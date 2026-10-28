@@ -4,7 +4,7 @@
 // site-wide CSP (script-src 'self') covers /docs as it is. Data scripts (JSON) stay inline.
 import { Effect, type FileSystem } from 'effect'
 
-const INLINE = /<script((?:(?!\bsrc=)[^>])*)>([\s\S]+?)<\/script>/g
+const INLINE = /<script((?:(?!\bsrc=)[^>])*)>([\s\S]+?)<\/script[^>]*>/gi
 const DATA = /\btype="(?!text\/javascript"|module")/
 
 export const externalize = (html: string) => {

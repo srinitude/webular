@@ -61,7 +61,7 @@ type Row = (typeof Scoreboard.Type)[number]
 const esc = (text: string): string =>
   text
     .split(/(`[^`]*`)/)
-    .map((part, i) => (i % 2 ? part : part.replace(/[<>{}]/g, '\\$&')))
+    .map((part, i) => (i % 2 ? part : part.replace(/[\\<>{}]/g, '\\$&')))
     .join('')
 
 const OPTION = /^ {2}((?:-\w, )?--[\w-]+)(?: (<[^>]+>))?\s*(.*)$/
