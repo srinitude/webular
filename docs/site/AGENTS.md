@@ -7,7 +7,7 @@ The source of the pages written for webular.dev/docs, under [docs/AGENTS.md](../
 - One `.mdx` file per page, at the path of its address: `index.mdx` is `/docs`.
 - First run: [index.mdx](index.mdx), [install.mdx](install.mdx), [quickstart.mdx](quickstart.mdx), [concepts.mdx](concepts.mdx), and [jev.mdx](jev.mdx).
 - Benchmarks and project: [compare.mdx](compare.mdx), [troubleshooting.mdx](troubleshooting.mdx), [security.mdx](security.mdx), [contributing.mdx](contributing.mdx), [support.mdx](support.mdx), and [glossary.mdx](glossary.mdx).
-- `mise run docs:build` copies each file into `site-docs/content/docs/` and adds its footer.
+- `mise run docs:build` copies each file into the docs site's content folder and adds its footer. Git ignores that folder.
 
 ## Rules
 

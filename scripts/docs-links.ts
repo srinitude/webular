@@ -2,11 +2,12 @@
 // site/dist/docs pages resolves to a built file. It exits 1 and lists each
 // broken link. Run it after mise run site:build.
 
+import { fileURLToPath } from 'node:url'
 import { BunRuntime } from '@effect/platform-bun'
 import * as BunServices from '@effect/platform-bun/BunServices'
 import { Effect, FileSystem } from 'effect'
 
-const DIST = new URL('../site/dist/', import.meta.url).pathname
+const DIST = fileURLToPath(new URL('../site/dist/', import.meta.url))
 
 // /docs/a/b/#x -> docs/a/b/index.html; /docs/llms.txt -> docs/llms.txt
 export const target = (href: string): string => {

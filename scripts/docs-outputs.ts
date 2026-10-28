@@ -8,8 +8,8 @@ import { Effect, FileSystem } from 'effect'
 import { ChildProcess, ChildProcessSpawner } from 'effect/process'
 import { CONTRACT_ROUTES, JSON_RUNS } from '../tests/_support/contract-runs.ts'
 import { startFixture } from '../tests/_support/fixture.ts'
+import { ROOT } from './docs-commands.ts'
 
-const ROOT = new URL('..', import.meta.url).pathname
 const OUT = `${ROOT}docs/site/reference/command-output.json`
 // A fixed date and ranking, so a rerun on the same code gives the same output.
 const ENV = { WEBULAR_AS_OF: '2026-01-01', WEBULAR_DETERMINISTIC: '1', WEBULAR_NO_CACHE: '1' }

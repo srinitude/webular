@@ -8,8 +8,15 @@ import { ROOT } from '../_support/root.ts'
 import { eff } from '../_support/run.ts'
 
 const SELF = 'tests/quality/no-mcp-apps.test.ts'
+// The Fumadocs docs site is a Next.js app, so its pages are .tsx; no other file may be.
+const isView = (f: string) => /\.(tsx|jsx)$/.test(f) && !f.startsWith('site-docs/')
 
 describe('no MCP App views come back', () => {
+  test('only the docs site may hold .tsx or .jsx files', () => {
+    const files = ['site-docs/app/layout.tsx', 'src/ui/view.tsx', 'site-docs-x/a.jsx', 'src/a.ts']
+    expect(files.filter(isView)).toEqual(['src/ui/view.tsx', 'site-docs-x/a.jsx'])
+  })
+
   test(
     'plugins/webular/src/ui does not exist',
     eff(
@@ -36,7 +43,7 @@ describe('no MCP App views come back', () => {
             cwd: ROOT,
           },
         )
-        expect(files.stdout.split('\n').filter((f) => /\.(tsx|jsx)$/.test(f))).toEqual([])
+        expect(files.stdout.split('\n').filter(isView)).toEqual([])
       }),
     ),
     30_000,

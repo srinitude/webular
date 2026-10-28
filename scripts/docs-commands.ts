@@ -3,6 +3,7 @@
 // text from COMMANDS, EXAMPLES, EXIT, docs/commands.md, the MCP tool list, and
 // bench/scoreboard.json. Only the related links are typed per command.
 // `bun scripts/docs-commands.ts <outdir>` writes <outdir>/<name>.mdx.
+import { fileURLToPath } from 'node:url'
 import { BunRuntime, BunServices } from '@effect/platform-bun'
 import { Effect, FileSystem, Schema } from 'effect'
 import { ChildProcess, ChildProcessSpawner } from 'effect/process'
@@ -11,7 +12,7 @@ import { COMMAND_NAMES, COMMANDS, type CommandName, EXAMPLES } from '../src/cli/
 import { DISPATCH } from '../src/cli/dispatch-table.ts'
 import { EXIT } from '../src/cli/exit-codes.ts'
 
-const ROOT = new URL('..', import.meta.url).pathname
+export const ROOT = fileURLToPath(new URL('..', import.meta.url))
 
 // A command not listed here points at doctor.
 const RELATED: Partial<Record<CommandName, readonly CommandName[]>> = {

@@ -39,6 +39,7 @@ const SITE_ADAPTERS: Readonly<Record<string, string>> = {
   'site/src/InstallBlock.astro': 'install block names each agent host',
   'site/src/content/install.md': 'one setup line per MCP client',
   'site/src/routes/index.astro': 'home page shows the Claude Code install line',
+  'docs/site/agents/index.mdx': 'one setup tab per MCP client',
 }
 
 const ADAPTERS: Readonly<Record<string, string>> = {

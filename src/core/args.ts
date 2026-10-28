@@ -68,8 +68,7 @@ export const listFlag = (raw: unknown): string[] | undefined =>
 
 type Described = { description?: string; def?: { type?: string }; unwrap?: () => Described }
 
-// One OPTIONS line per flag, described from the zod schema the MCP tool uses,
-// so the CLI help and the MCP schema cannot drift.
+// One OPTIONS line per flag from the MCP tool's zod schema, so CLI help and schema cannot drift.
 const optionLine = (cmd: string, shape: Record<string, Described>, name: string): string => {
   const key = name.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase())
   const field = shape[key] ?? shape[name]

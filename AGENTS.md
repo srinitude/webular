@@ -2,7 +2,7 @@
 
 Webular is a web research CLI on Bun. Its jobs run as [Mastra workflows](src/workflows/AGENTS.md) on Effect, with judgment calls sent to [Jev](src/lib/jev/AGENTS.md), TypeSafe's decision model, and flows in [XState](src/machines/AGENTS.md).
 
-This file is for coding agents on any host. People start at [README.md](README.md). Site: [site/](site/AGENTS.md).
+This file is for coding agents on any host. People start at [README.md](README.md). Sites: [site/](site/AGENTS.md), [site-docs/](site-docs/AGENTS.md).
 
 ## Commands and mise
 
@@ -109,7 +109,7 @@ Never:
 
 These rules hold for every AGENTS.md below the root. [agents-md.test.ts](tests/quality/agents-md.test.ts) checks each one.
 
-1. Coverage. Every folder git tracks has an AGENTS.md. Generated or recorded folders are exempt: [bench/recordings](bench/recordings/), [bench/results](bench/results/), [plugins/webular/dist](plugins/webular/dist/), and the Markdown chain ledger in [.markdown-chain](.markdown-chain/). Untracked folders (build output, installed packages) are out of scope. Check: coverage.
+1. Coverage. Every folder git tracks has an AGENTS.md. Generated or recorded folders are exempt: [bench/recordings](bench/recordings/), [bench/results](bench/results/), [plugins/webular/dist](plugins/webular/dist/), and the Markdown chain ledger in [.markdown-chain](.markdown-chain/). Untracked folders are out of scope. Check: coverage.
 2. Shape. Line 1 is `# <folder>/AGENTS.md`. A short purpose paragraph follows, linking the parent file. Then only these headings, in this order, each when it has content: `## What lives here`, `## Rules`, `## Checks`, `## Children`. Check: shape. Source: section names from [agents.md](https://agents.md).
 3. Precedence. The closest AGENTS.md to a file wins, and a direct user prompt beats all of them. A nested file adds or narrows rules, and never repeats a parent line. Check: no repeated line. Source: [agents.md](https://agents.md), [Codex](https://developers.openai.com/codex/guides/agents-md).
 4. Size. The root stays within 150 lines and 12 KiB, a nested file within 60 lines and 4 KiB. The chain from the root to any folder stays under 32 KiB, the Codex default. Check: size. Sources: [Codex](https://developers.openai.com/codex/guides/agents-md), [Devin](https://docs.devin.ai/onboard-devin/agents-md) (16 KiB per file), [HumanLayer](https://www.humanlayer.dev/blog/writing-a-good-claude-md).
@@ -119,4 +119,4 @@ These rules hold for every AGENTS.md below the root. [agents-md.test.ts](tests/q
 8. Wording. Every file states standing facts in plain words, with no time words or version talk outside code spans and citations. Each file goes through the readability chain (rich-and-native-markdown, then human-language). Check: timeless wording, with the patterns from [check-timeless.ts](plugins/webular/scripts/check-timeless.ts).
 9. Change rule. A commit that changes a folder's code, commands, or dependencies updates that folder's AGENTS.md in the same commit.
 10. Bridges. AGENTS.md is the neutral source; native readers need nothing more. Other hosts get thin adapters: a real CLAUDE.md beside each, never a symlink, holding only `@AGENTS.md`; [.gemini/settings.json](.gemini/settings.json); [.cursor-plugin/](.cursor-plugin/); [.aider.conf.yml](.aider.conf.yml). Check: [claude-md-bridges.test.ts](tests/quality/claude-md-bridges.test.ts). Sources: [Claude Code memory](https://code.claude.com/docs/en/memory), [Gemini CLI](https://geminicli.com/docs/cli/gemini-md/), [Aider](https://aider.chat/docs/usage/conventions.html).
-11. Links. Every mention of an existing repo path is a relative Markdown link from the file that names it. This holds for every file type and for folders. Fenced code blocks, commands such as `mise run build`, globs, and nonexistent example paths are exempt. A `#L` line anchor points at a line that exists. `mise run docs:links` checks it for every tracked Markdown file.
+11. Links. Every mention of an existing repo path is a relative Markdown link from the file that names it. This covers files and folders. Fenced code blocks, commands such as `mise run build`, globs, and nonexistent example paths are exempt. A `#L` line anchor points at a line that exists. `mise run docs:links` checks it for every tracked Markdown file.

@@ -5,10 +5,9 @@ import { BunRuntime } from '@effect/platform-bun'
 import * as BunServices from '@effect/platform-bun/BunServices'
 import { Effect, FileSystem, Option } from 'effect'
 import { ChildProcess, ChildProcessSpawner } from 'effect/process'
-import { commandPages } from './docs-commands.ts'
+import { commandPages, ROOT } from './docs-commands.ts'
 import { copyExport } from './docs-inline.ts'
 
-const ROOT = new URL('..', import.meta.url).pathname
 const SITE = `${ROOT}docs/site/`
 const OUT = `${ROOT}site-docs/content/docs/`
 const DIST = `${ROOT}site/dist/docs/`
