@@ -439,3 +439,10 @@
 {"path": "docs/tasks.md", "sha": "25bd2bd1ae331cfba4e386b47530a07e3c413c60f35d8884938d1c7d3e509ecc", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "src/release/AGENTS.md", "sha": "bb95f4d1f542c0c74283bdcc01b8d645d9969e9e62b7ddf1eb771cd48fdc165c", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/tasks.md", "sha": "b4525bd6a2a878bcea026ec666370d1c1812db6fb78f1ef6ac250482d048e526", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/design/AGENTS.md", "sha": "49b3f0cbb87e6d0b591b1792c0158ad7b280b69d34e1f9b3b473a5dd052d9782"}
+{"path": "site/src/AGENTS.md", "sha": "df06226e40d7aa8c73f72f26a4bf129881e1dcf45e34b0277c434781dc953740", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/AGENTS.md", "sha": "46014352a9fb260c3764772b71e04a58c2681523124207c42cf461834b5a8b44", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/scripts/AGENTS.md", "sha": "4cfb9c0259c2bf617e975656a7fe23f53c5be7e195345ab19dd0ad476816e953", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site-docs/AGENTS.md", "sha": "329e3945bf2eb4e82f623431bd22cae53113b8543d3c07d632ae716aa4f0e1ad", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site-docs/app/AGENTS.md", "sha": "afddb913532ec2d18d1b7c3fe44eca5b6d54f65035f1869c5aba66521c22a3a5", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/design/AGENTS.md", "sha": "3b688df2c40fd9bd37e4f824f644aa2aa7a58022ace9a40fec70b29022919575", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}

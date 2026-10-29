@@ -508,7 +508,7 @@ dir = "{{config_root}}/site"
 run = [
   "bun install --frozen-lockfile 1>&2",
   'bun "{{config_root}}/site/scripts/tokens-css.ts" 1>&2',
-  'bunx biome format --write "{{config_root}}/site/src/tokens.css" 1>&2',
+  'bunx biome format --write "{{config_root}}/site/src/grid.css" 1>&2',
   'bun "{{config_root}}/site/scripts/tools-json.ts"',
   'PUBLIC_BUILD_SHA="$(git rev-parse --short HEAD)" PUBLIC_BUILD_DATE="$(git log -1 --format=%cs)" bun --bun "{{config_root}}/site/node_modules/astro/bin/astro.mjs" build',
   'bun "{{config_root}}/site/scripts/machine-files.ts"',

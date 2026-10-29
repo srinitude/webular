@@ -43,8 +43,8 @@ main {
 .card,
 details.group {
   padding: var(--space-16);
-  background: var(--color-surface);
-  border: var(--border-width) solid var(--color-border);
+  background: var(--theme-surface);
+  border: var(--border-width) solid var(--theme-border);
   border-radius: var(--radius-box);
 }
 .card {
@@ -115,7 +115,7 @@ th,
 td {
   text-align: left;
   padding: var(--space-8) var(--space-12);
-  border: var(--border-width) solid var(--color-border);
+  border: var(--border-width) solid var(--theme-border);
   vertical-align: top;
 }
 .actions {
@@ -130,7 +130,7 @@ td {
   align-items: center;
   min-height: var(--size-tap-target);
   padding-inline: var(--space-16);
-  border: var(--border-width) solid var(--color-border);
+  border: var(--border-width) solid var(--theme-border);
   border-radius: var(--radius-control);
 }
 
@@ -167,8 +167,8 @@ td {
 }
 .cards-table tr {
   padding: var(--space-16);
-  background: var(--color-surface);
-  border: var(--border-width) solid var(--color-border);
+  background: var(--theme-surface);
+  border: var(--border-width) solid var(--theme-border);
   border-radius: var(--radius-box);
 }
 .cards-table th[scope="row"] {
@@ -183,7 +183,7 @@ td {
 
 /* Footer: 48 px top padding, 1 px top border. */
 .site-footer {
-  border-top: var(--border-width) solid var(--color-border);
+  border-top: var(--border-width) solid var(--theme-border);
   padding-block: var(--space-48) var(--space-32);
 }
 .site-footer ul {
@@ -196,6 +196,6 @@ td {
 .site-footer a {
   display: inline-block;
   padding-block: var(--space-4);
-  color: var(--color-text);
+  color: var(--theme-text);
   text-decoration: none;
 }
