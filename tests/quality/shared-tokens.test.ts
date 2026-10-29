@@ -65,14 +65,24 @@ const Semantic = Schema.fromJsonString(
 )
 type Semantic = typeof Semantic.Type
 
-// The declaration each semantic token should build to, with its palette alias resolved
+// A color, a palette alias, or a semantic alias in the same theme, followed to its hex.
+const hex = (tokens: Semantic, raw: string): string => {
+  const [, group, name = ''] =
+    /^\{(primitive\.palette|semantic\.(?:light|dark))\.(.+)\}$/.exec(raw) ?? []
+  if (group === undefined) return raw
+  const target =
+    group === 'primitive.palette'
+      ? tokens.primitive.palette[name]
+      : tokens.semantic[group === 'semantic.light' ? 'light' : 'dark'][name]
+  return target === undefined ? raw : hex(tokens, target.$value)
+}
+
+// The declaration each semantic token should build to, with its aliases resolved
 // and its hex in lowercase, as Biome writes it.
 const expected = (tokens: Semantic, mode: 'light' | 'dark') =>
-  Object.entries(tokens.semantic[mode]).map(([name, leaf]) => {
-    const alias = /^\{primitive\.palette\.(.+)\}$/.exec(leaf.$value)?.[1] ?? ''
-    const value = tokens.primitive.palette[alias]?.$value ?? leaf.$value
-    return `--semantic-${name}: ${value.toLowerCase()};`
-  })
+  Object.entries(tokens.semantic[mode]).map(
+    ([name, leaf]) => `--semantic-${name}: ${hex(tokens, leaf.$value).toLowerCase()};`,
+  )
 
 test(
   'home and docs get every semantic light and dark color from tokens.json',

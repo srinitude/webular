@@ -58,14 +58,26 @@ const Tokens = Schema.fromJsonString(
 )
 type Tokens = typeof Tokens.Type
 
-// A semantic value is a color or a {primitive.palette.<name>} alias, resolved to its color.
+// A color, a {primitive.palette.<name>} alias, or a {semantic.<mode>.<name>} alias, followed to its color.
+// ponytail: a semantic alias loop would recurse forever; the token-sources and shared-tokens tests catch one.
+const resolve = (tokens: Tokens, raw: string): string | undefined => {
+  const [, group, name] =
+    /^\{(primitive\.palette|semantic\.light|semantic\.dark)\.([\w-]+)\}$/.exec(raw) ?? []
+  if (group === undefined || name === undefined) return raw
+  const target =
+    group === 'primitive.palette'
+      ? tokens.primitive.palette[name]
+      : tokens.semantic[group === 'semantic.light' ? 'light' : 'dark'][name]
+  return target === undefined ? undefined : resolve(tokens, target.$value)
+}
+
 // Lowercase hex matches what Biome writes, so a rebuild leaves no diff.
 const semanticColors = (tokens: Tokens, mode: 'light' | 'dark') =>
-  Object.entries(tokens.semantic[mode]).map(([name, leaf]) => {
-    const alias = /^\{primitive\.palette\.([\w-]+)\}$/.exec(leaf.$value)?.[1]
-    const value = alias === undefined ? leaf.$value : tokens.primitive.palette[alias]?.$value
-    return { name, raw: leaf.$value, value: value?.toLowerCase() }
-  })
+  Object.entries(tokens.semantic[mode]).map(([name, leaf]) => ({
+    name,
+    raw: leaf.$value,
+    value: resolve(tokens, leaf.$value)?.toLowerCase(),
+  }))
 
 const block = (colors: ReturnType<typeof semanticColors>, indent: string) =>
   colors.map(({ name, value }) => `${indent}--semantic-${name}: ${value};`).join('\n')

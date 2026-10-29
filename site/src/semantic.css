@@ -5,6 +5,9 @@
   --semantic-card: #ffffff;
   --semantic-strand: #111111;
   --semantic-edge: #111111;
+  --semantic-page-edge: #ffd400;
+  --semantic-on-band: #ffd400;
+  --semantic-miss-card: #22242a;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -13,6 +16,8 @@
     --semantic-card: #22242a;
     --semantic-strand: #ffd400;
     --semantic-edge: #ffd400;
+    --semantic-on-band: #111111;
+    --semantic-miss-card: #22242a;
   }
 }
 :root[data-theme="dark"] {
@@ -21,4 +26,6 @@
   --semantic-card: #22242a;
   --semantic-strand: #ffd400;
   --semantic-edge: #ffd400;
+  --semantic-on-band: #111111;
+  --semantic-miss-card: #22242a;
 }

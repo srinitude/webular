@@ -1356,6 +1356,27 @@
     "support": "The edge of a control or its selected state. As #111111 it gives 13.19:1 against semantic.light.page and 18.88:1 against semantic.light.card, above the 3:1 that WCAG 2.2 SC 1.4.11 asks of the visual information that identifies a control and its state.",
     "basis": "standard"
   },
+  "semantic.light.page-edge": {
+    "value": "{semantic.light.page}",
+    "source": "design/webular-dev-2026-10-28/webular-dev-pages.pen at bce18603",
+    "date": "2026-10-29",
+    "support": "The design file binds the stroke of page-colored frame borders to the variable semantic-light-page-edge, and site/design/tokens.json on that design branch at bce18603 defines it as an alias of semantic.light.page (#FFD400). The site gets the same name and the same color.",
+    "basis": "design-row"
+  },
+  "semantic.light.on-band": {
+    "value": "{semantic.light.page}",
+    "source": "design/webular-dev-2026-10-28/webular-dev-pages.pen at bce18603",
+    "date": "2026-10-29",
+    "support": "The design file binds the fill of page-colored text on the ink band to the variable semantic-light-on-band, and site/design/tokens.json on that design branch at bce18603 defines it as an alias of semantic.light.page (#FFD400). The site gets the same name and the same color.",
+    "basis": "design-row"
+  },
+  "semantic.light.miss-card": {
+    "value": "{primitive.palette.char}",
+    "source": "design/webular-dev-2026-10-28/webular-dev-pages.pen at bce18603",
+    "date": "2026-10-29",
+    "support": "The design file binds the fill of the not-found result card to the variable semantic-light-miss-card, and site/design/tokens.json on that design branch at bce18603 defines it as an alias of primitive.palette.char (#22242A). The site gets the same name and the same color.",
+    "basis": "design-row"
+  },
   "semantic.dark.page": {
     "value": "{primitive.palette.ink}",
     "source": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190",
@@ -1394,6 +1415,20 @@
     "date": "2026-10-29",
     "support": "The edge of a control or its selected state. As #FFD400 it gives 13.19:1 against semantic.dark.page and 10.84:1 against semantic.dark.card, above the 3:1 that WCAG 2.2 SC 1.4.11 asks of the visual information that identifies a control and its state.",
     "basis": "standard"
+  },
+  "semantic.dark.on-band": {
+    "value": "{semantic.dark.page}",
+    "source": "design/webular-dev-2026-10-28/webular-dev-pages.pen at bce18603",
+    "date": "2026-10-29",
+    "support": "The design file binds the fill of page-colored text on the ink band to the variable semantic-dark-on-band, and site/design/tokens.json on that design branch at bce18603 defines it as an alias of semantic.dark.page (#111111). The site gets the same name and the same color.",
+    "basis": "design-row"
+  },
+  "semantic.dark.miss-card": {
+    "value": "{primitive.palette.char}",
+    "source": "design/webular-dev-2026-10-28/webular-dev-pages.pen at bce18603",
+    "date": "2026-10-29",
+    "support": "The design file binds the fill of the not-found result card to the variable semantic-dark-miss-card, and site/design/tokens.json on that design branch at bce18603 defines it as an alias of primitive.palette.char (#22242A). The site gets the same name and the same color.",
+    "basis": "design-row"
   },
   "$extensions.dev.webular.grid.360.gutter": {
     "value": {

@@ -221,7 +221,7 @@ td {
 .run-hero .code-row,
 .run-hero .code-row pre {
   background: var(--semantic-ink);
-  color: var(--semantic-page);
+  color: var(--semantic-on-band);
 }
 .run-hero .copy {
   background: var(--semantic-page);
@@ -289,7 +289,7 @@ td {
   display: inline-block;
   padding: var(--space-4) var(--space-12);
   background: var(--semantic-ink);
-  color: var(--semantic-page);
+  color: var(--semantic-on-band);
 }
 /* The 7-tile band: inverted, with the lead tile inverted again. */
 .tile-band {
@@ -311,7 +311,7 @@ td {
   font-family: var(--font-display);
   font-size: var(--h3-size);
   font-weight: var(--font-weight-bold);
-  color: var(--semantic-page);
+  color: var(--semantic-on-band);
   text-decoration: none;
   border: calc(var(--border-width) * 2) solid var(--semantic-page);
   border-radius: var(--space-4);
@@ -327,7 +327,7 @@ td {
 }
 .home-footer {
   background: var(--semantic-ink);
-  color: var(--semantic-page);
+  color: var(--semantic-on-band);
   border-top-color: var(--semantic-page);
   font-size: var(--code-size);
 }
@@ -344,7 +344,7 @@ td {
   margin: 0;
 }
 .home-footer .wrap a {
-  color: var(--semantic-page);
+  color: var(--semantic-on-band);
 }
 /* The domain labels caught in the home web art. */
 .web-label rect {
@@ -452,7 +452,7 @@ td {
   padding: var(--space-12) var(--space-16);
   font-family: var(--font-mono);
   font-size: var(--body-size);
-  color: var(--semantic-page);
+  color: var(--semantic-on-band);
   background: var(--semantic-ink);
   text-decoration: none;
 }
