@@ -242,6 +242,30 @@ td {
 .run-hero .run-line code {
   font-size: min(var(--h1-size), 6.5cqi);
 }
+/* copy_failed: a card above the run line that says to copy by hand. */
+.copy-failed {
+  display: grid;
+  gap: var(--space-8);
+  margin-bottom: var(--space-16);
+  padding: var(--space-16);
+  background: var(--semantic-card);
+  color: var(--semantic-ink);
+  border: var(--border-width) solid var(--semantic-edge);
+  border-radius: var(--radius-box);
+}
+.copy-failed[hidden] {
+  display: none;
+}
+.copy-failed strong {
+  font-size: var(--h3-size);
+}
+.copy-failed p {
+  margin: 0;
+}
+.run-line .copy-failed code {
+  font-size: var(--code-size);
+  font-weight: inherit;
+}
 .run-hero h1,
 .run-hero .next {
   font-size: var(--h3-size);

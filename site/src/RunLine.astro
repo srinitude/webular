@@ -16,6 +16,11 @@ const command = parts.join(' ')
 ---
 
 <div class="run-line" data-copy-region>
+  <div class="copy-failed" data-copy-failed hidden>
+    <strong>Copy did not work</strong>
+    <p>Select the line by hand and copy it:</p>
+    <code>$ {command}</code>
+  </div>
   <div class="code-row">
     <pre id={id} tabindex="0" aria-label={label}><code>$ {parts.map((part, i) => <span class={i ? 'run-part' : undefined}>{i ? '  ' : ''}{part}{i < parts.length - 1 ? ' \\' : ''}</span>)}</code></pre>
     <button type="button" class="copy" data-copy={command}>Copy</button>

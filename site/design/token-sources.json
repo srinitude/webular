@@ -128,11 +128,7 @@
     "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "font.sans": {
-    "value": [
-      "Public Sans",
-      "system-ui",
-      "sans-serif"
-    ],
+    "value": ["Public Sans", "system-ui", "sans-serif"],
     "source": "https://github.com/uswds/public-sans/blob/develop/LICENSE.md",
     "date": "2026-10-29",
     "support": "Font license page https://github.com/uswds/public-sans/blob/develop/LICENSE.md, read 2026-10-29, says GSA waives copyright in its Public Sans font software modifications through the CC0 1.0 Universal public domain dedication. No design-loop decision row picks this family; the Catch Of The Day direction names Archivo Black.",
@@ -140,11 +136,7 @@
     "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "font.mono": {
-    "value": [
-      "JetBrains Mono",
-      "ui-monospace",
-      "monospace"
-    ],
+    "value": ["JetBrains Mono", "ui-monospace", "monospace"],
     "source": "https://github.com/JetBrains/JetBrainsMono/blob/master/OFL.txt",
     "date": "2026-10-29",
     "support": "Font license page https://github.com/JetBrains/JetBrainsMono/blob/master/OFL.txt, read 2026-10-29, licenses JetBrains Mono under the SIL Open Font License 1.1. No design-loop decision row picks this family; the Catch Of The Day direction names Space Mono.",

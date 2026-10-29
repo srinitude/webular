@@ -169,9 +169,12 @@ const darkFooter = home || short
             said = 'Copy did not work'
             heard = `${said}. Select the line by hand and copy it.`
           }
+          // copy_failed also shows the design's visible panel above the run line.
+          const panel = button.closest('[data-copy-region]')?.querySelector<HTMLElement>('[data-copy-failed]')
           button.textContent = said
           if (status) status.textContent = heard
-          setTimeout(() => { button.textContent = 'Copy'; if (status) status.textContent = '' }, said === 'Copied' ? 2000 : 6000)
+          if (panel) panel.hidden = said === 'Copied'
+          setTimeout(() => { button.textContent = 'Copy'; if (status) status.textContent = ''; if (panel) panel.hidden = true }, said === 'Copied' ? 2000 : 6000)
         })
       }
       const toc = document.querySelector('[data-toc]')
