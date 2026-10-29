@@ -106,7 +106,7 @@ test('without the native package or Bun, the launcher names the missing package'
   ))
 
 test('the npm bin is the generated Node launcher and ships in the package', () => {
-  expect(pkg.bin.webular).toBe('./dist/webular.js')
+  expect(pkg.bin.webular).toBe('dist/webular.js')
   expect(pkg.files).toContain('dist/webular.js')
 })
 
