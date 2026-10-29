@@ -19,6 +19,22 @@
   --radius-lg: var(--primitive-radius-hair);
   --radius-xl: var(--primitive-radius-hair);
   --radius-2xl: var(--primitive-radius-hair);
+  /* Type sizes and weights: each step Fumadocs uses reads the hero scale.
+   * Tailwind's 2xl and 6xl land on the nearest hero steps, xl and 3xl. Georgia
+   * has one bold face, so semibold and bold both take the hero's heavy. */
+  --text-xs: var(--primitive-font-size-xs);
+  --text-sm: var(--primitive-font-size-sm);
+  --text-base: var(--primitive-font-size-md);
+  --text-lg: var(--primitive-font-size-lg);
+  --text-2xl: var(--primitive-font-size-xl);
+  --text-6xl: var(--primitive-font-size-3xl);
+  --font-weight-medium: var(--primitive-font-weight-medium);
+  --font-weight-semibold: var(--primitive-font-weight-heavy);
+  --font-weight-bold: var(--primitive-font-weight-heavy);
+  /* Motion: every transition utility takes the hero's quick step and plotter
+   * ease, which drop to 0ms under prefers-reduced-motion. */
+  --default-transition-duration: var(--semantic-motion-quick);
+  --default-transition-timing-function: var(--semantic-motion-ease);
 }
 
 /* hero-tokens.css switches light and dark on data-theme and
