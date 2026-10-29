@@ -396,7 +396,7 @@
 {"path": "site-docs/app/api/search/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/tasks.md", "sha": "9f6f582950fa3870df759e1fd5a054672a06af67172fdffe5118ca5e8b341f10", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "scripts/AGENTS.md", "sha": "5c5002e4b059d8afd46a85dd3ac589047991d725976ad1cd618de750e90da383", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
-{"path": "AGENTS.md", "sha": "90ab51adde5522ce7e205584630ae7c701302dca8fd0e6d251cb386bf0da276d", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "AGENTS.md", "sha": "e6da5c91c43a0005fbe0b8acc43c7615e55529ffdcbcae9ae3a191d395e9787b", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/AGENTS.md", "sha": "7ab2ddf3856743cdf75c0741b685c4457c3eeeb02ecbd362011a872831eae222", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/quality/AGENTS.md", "sha": "c3b28efcd24c194850fafabde2a1702f7e16030cb06269490376776497383edf", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/site/AGENTS.md", "sha": "65c8ca6b45e77ca4ad1dd38c465677fa38413836beded6f70dc0303e9968e624", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
