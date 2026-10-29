@@ -6,6 +6,7 @@ The webular.dev website: a static Astro build served by Cloudflare Workers stati
 
 - [astro.config.ts](astro.config.ts): the Astro config, which adds each route file.
 - [.gitignore](.gitignore): keeps build output and installed packages out of git.
+- [PROMOTE.md](PROMOTE.md): the steps that take a checked preview of webular.dev live.
 - The design folder holds [design/tokens.json](design/tokens.json), the source of the style tokens. The tokens-css.ts script in the scripts folder turns it into the token style sheet.
 
 ## Rules
