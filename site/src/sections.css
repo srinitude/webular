@@ -234,8 +234,13 @@ td {
 }
 /* In the hero column the run line steps down to the page-title size so each
    part fits one line; the headings step down further, so it stays the largest. */
-.run-hero .run-line :is(pre, code) {
-  font-size: var(--h1-size);
+.run-hero .run-line pre {
+  container-type: inline-size;
+}
+/* 6.5cqi keeps "$ npx webular@0.3.2 mcp" (23 monospace cells) on one line,
+   so both run lines share one size. */
+.run-hero .run-line code {
+  font-size: min(var(--h1-size), 6.5cqi);
 }
 .run-hero h1,
 .run-hero .next {
