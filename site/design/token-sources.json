@@ -2328,12 +2328,12 @@
   },
   "breakpoint.1440.lead": {
     "value": {
-      "value": 30,
+      "value": 32,
       "unit": "px"
     },
-    "source": "design/webular-dev-2026-10-28/webular-dev-pages.pen at ec2da355",
+    "source": "design/webular-dev-2026-10-28/webular-dev-pages.pen at 9077933d",
     "date": "2026-10-29",
-    "support": "The design file binds the lead line and the hero command on every 1440 page frame to the variable breakpoint-1440-lead, and site/design/tokens.json on that design branch at ec2da355 sets it to 30 px. The site gets the same name and the same size.",
+    "support": "The design file binds the lead line and the hero command on every 1440 page frame to the variable breakpoint-1440-lead, and site/design/tokens.json on that design branch at 9077933d sets it to 32 px. The site gets the same name and the same size.",
     "basis": "design-row"
   },
   "breakpoint.390.title": {
