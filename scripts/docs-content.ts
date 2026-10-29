@@ -6,7 +6,7 @@ import * as BunServices from '@effect/platform-bun/BunServices'
 import { Effect, FileSystem, Option } from 'effect'
 import { ChildProcess, ChildProcessSpawner } from 'effect/process'
 import { commandPages, ROOT } from './docs-commands.ts'
-import { copyExport } from './docs-inline.ts'
+import { copyExport, designedIndex } from './docs-inline.ts'
 
 const SITE = `${ROOT}docs/site/`
 const OUT = `${ROOT}site-docs/content/docs/`
@@ -162,8 +162,7 @@ const entry = (text: string, path: string) => {
 const publish = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem
   yield* copyExport(fs, `${ROOT}site-docs/out`, DIST)
-  // The export owns /docs: drop the Astro page, which would answer /docs ahead of docs/index.html.
-  yield* fs.remove(`${ROOT}site/dist/docs.html`, { force: true })
+  yield* designedIndex(fs, `${ROOT}site/dist/docs.html`, DIST)
   const index: string[] = []
   const full: string[] = []
   const urls: string[] = []

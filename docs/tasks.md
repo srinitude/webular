@@ -28,7 +28,7 @@ ci: CI entry — single default dependency path (local + remote) [after validate
 clean: Delete build output (dist/) on every OS; never touches bench results, recordings, or caches
 compile:all: Cross-compile the webular executable for every Bun target into dist/bin (release path, off the check-only spine) [after build]
 default: Default path: a bare `mise run` runs the repo CI spine, the plugin chain, then the end-to-end run [after ci, plugin:ci, e2e]
-docs:build: Docs: build webular.dev, then the Fumadocs docs (pages from docs/*.md, a static Next export with its search index) into site-docs/out, and publish them into site/dist/docs beside the site [after setup, site:build]
+docs:build: Docs: build webular.dev, then the Fumadocs docs (pages from docs/*.md, a static Next export with its search index) into site-docs/out, publish them into site/dist/docs beside the site, with the designed docs page as the /docs index, then check every internal link in site/dist [after setup, site:build]
 docs:chain:check: Docs: the readability-chain ledger rows, AGENTS.md rules, Markdown links, and the plugin's timeless wording all hold. A focused subset of `mise run test` [after setup]
 docs:dev: Docs: serve the Fumadocs site at localhost:3000/docs with live reload (pages from docs/*.md) [after setup]
 docs:facts: Docs: the facts in README.md and docs/install.md, and the repo and plugin descriptions, match the code. A focused subset of `mise run test` [after setup]

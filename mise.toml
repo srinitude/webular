@@ -515,7 +515,7 @@ run = [
 ]
 
 [tasks."docs:build"]
-description = "Docs: build webular.dev, then the Fumadocs docs (pages from docs/*.md, a static Next export with its search index) into site-docs/out, and publish them into site/dist/docs beside the site"
+description = "Docs: build webular.dev, then the Fumadocs docs (pages from docs/*.md, a static Next export with its search index) into site-docs/out, publish them into site/dist/docs beside the site, with the designed docs page as the /docs index, then check every internal link in site/dist"
 depends = ["setup", "site:build"]
 dir = "{{config_root}}/site-docs"
 run = [
@@ -523,6 +523,7 @@ run = [
   'bun "{{config_root}}/scripts/docs-content.ts"',
   'bun --bun "{{config_root}}/site-docs/node_modules/next/dist/bin/next" build 1>&2',
   'bun "{{config_root}}/scripts/docs-content.ts" --publish',
+  'bun "{{config_root}}/scripts/docs-links.ts"',
 ]
 
 [tasks."docs:outputs"]

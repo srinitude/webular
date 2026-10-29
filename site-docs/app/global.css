@@ -4,6 +4,7 @@
  * token, so one token change restyles the docs. */
 @import "tailwindcss";
 @import "../../site/src/tokens.css";
+@import "../../site/src/fonts.css";
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";
 

@@ -452,3 +452,12 @@
 {"path": "site/src/AGENTS.md", "sha": "fa848b94ffa553efc3034dcf7bc12ac1f5e32938de346f85e3d58bc10a6ba074", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "site/src/AGENTS.md", "sha": "aff075b0fa7ef704d071abdc9f21c981385a2af3bf757393a665898eec6578ac", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "site/scripts/AGENTS.md", "sha": "63275b97b318e760304a3d394dc35aa68fa5a0631db1c7fc229299b3d291ed72", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/AGENTS.md", "sha": "821106abfc0cbf8c961e0a1c9d96ecd931643593730f1a164f56f288852033ec", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/public/AGENTS.md", "sha": "30f2d5fd0a9e9282ed053af5f37b39779fcdc5a46a50621c3cfc3d3955655cb7", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site-docs/AGENTS.md", "sha": "4b661e7f874b54c12787eca526c3c817177c32a757fccc29490cf923a9122574", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "scripts/AGENTS.md", "sha": "87afcb9d944942a2daf0a3b42bca26c8883f98a04669deb45e388c543eef0de6", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/tasks.md", "sha": "87d2a490cdfc7c8d9e58738b863d50a50a1d8f7b0b02c7a12a933edc5e517f68", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/public/fonts/AGENTS.md", "sha": "620057677ed4861407035be46d6b3fdb88e6063e922624e6ae2eb1756d0f93ae"}
+{"path": "site/public/fonts/AGENTS.md", "sha": "620057677ed4861407035be46d6b3fdb88e6063e922624e6ae2eb1756d0f93ae", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/public/fonts/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/public/AGENTS.md", "sha": "08cb633d9ebba9f5afa2159316aa76647be49adb3c59cd676c6a09047d8baf40", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
