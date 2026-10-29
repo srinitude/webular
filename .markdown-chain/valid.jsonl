@@ -474,3 +474,5 @@
 {"path": "tests/quality/AGENTS.md", "sha": "8e4dfb06c6d126d3333ef5c665b263bf2d74dd74cb6fb2b409d02c6dccc6a171"}
 {"path": "tests/quality/AGENTS.md", "sha": "7e2f0fa4ce08300d2440c1d2b688af0b922780b472c40a637c3032cbf18c4b7a", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/ci/AGENTS.md", "sha": "27cae9323f45bcb3362ee3bf17273b31ff36053c61117cf7cfe2c9d5a8145306", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/AGENTS.md", "sha": "6d5b680315e98616be161fbab67ee02e8d925d84a845c5fcffdca0136c8737cf"}
+{"path": "site/AGENTS.md", "sha": "8db6f7a7256893107db17b0034964e7531d8eda9963e2047fc81467e2003cf14", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}

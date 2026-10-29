@@ -2,8 +2,8 @@
 // the same commit. GitHub makes no pull_request run for a pull request with
 // merge conflicts, so only a MERGEABLE one covers the push.
 import { expect, test } from 'bun:test'
-import { Effect, FileSystem, Stream } from 'effect'
-import { ChildProcess, ChildProcessSpawner } from 'effect/process'
+import { Effect, FileSystem } from 'effect'
+import { runProc } from '../../src/core/proc.ts'
 import { ROOT } from '../_support/root.ts'
 import { eff, tmpDir } from '../_support/run.ts'
 
@@ -20,24 +20,21 @@ const lookup = (name: string) =>
     ),
   )
 
-// The lookup script against a stand-in gh that prints `state`, or fails when
-// `state` is null; returns the `covered` line it writes.
+// The lookup script against a stand-in gh, a shell function that prints
+// `state`, or fails when `state` is null; returns the `covered` line it writes.
+// `sh` from PATH and a relative GITHUB_OUTPUT, so Windows (Git's sh) runs it too.
 const covered = (script: string, state: string | null) =>
   Effect.gen(function* () {
     const fs = yield* FileSystem.FileSystem
     const dir = yield* tmpDir('push-covered-')
-    yield* fs.writeFileString(
-      `${dir}/gh`,
-      `#!/bin/sh\n${state === null ? 'exit 1' : `echo ${state}`}\n`,
-    )
-    yield* fs.chmod(`${dir}/gh`, 0o755)
-    const spawner = yield* ChildProcessSpawner.ChildProcessSpawner
-    const command = ChildProcess.make('/bin/sh', ['-c', script], {
-      env: { PATH: `${dir}:/usr/bin:/bin`, GITHUB_OUTPUT: `${dir}/out` },
+    const gh = `gh() { ${state === null ? 'return 1' : `echo ${state}`}; }`
+    const { code, stderr } = yield* runProc(['sh', '-c', `${gh}\n${script}`], {
+      cwd: dir,
+      env: { GITHUB_OUTPUT: 'out' },
+      extendEnv: true,
+      timeoutMs: 20_000,
     })
-    const handle = yield* spawner.spawn(command)
-    yield* handle.all.pipe(Stream.runDrain)
-    yield* handle.exitCode
+    expect({ code, stderr }).toMatchObject({ code: 0 })
     return (yield* fs.readFileString(`${dir}/out`)).trim()
   }).pipe(Effect.scoped)
 

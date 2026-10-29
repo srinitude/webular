@@ -185,7 +185,11 @@ describe('command output contract (integration)', () => {
     'crawl exits 1 when nothing was crawled and errors exist',
     eff(
       Effect.gen(function* () {
-        const { code } = yield* runCmd('crawl', ['--url', `${fx.origin}/status?code=500`, '--json'])
+        // A failed root asks the archive indexes; the fixture stands in for them (it 404s
+        // their paths), so no live index can hand back a 127.0.0.1 capture and exit 0.
+        const env = { WEBULAR_SOURCE_ORIGIN: fx.origin, WEBULAR_SOURCE_GAP_MS: '0' }
+        const args = ['--url', `${fx.origin}/status?code=500`, '--json']
+        const { code } = yield* runCli('src/commands/crawl.ts', args, { env })
         expect(code).toBe(1)
       }),
     ),
