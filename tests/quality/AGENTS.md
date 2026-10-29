@@ -15,21 +15,21 @@ The code gates. The parent rules are in [tests/AGENTS.md](../AGENTS.md). These g
 - Docs site: [`docs-content.test.ts`](docs-content.test.ts) (paths, links, footers), [`docs-commands.test.ts`](docs-commands.test.ts) (command pages).
 - Host names: [`host-neutral.test.ts`](host-neutral.test.ts) (only adapter files name a host).
 - Step abort: [`step-abort-signal.effect.test.ts`](step-abort-signal.effect.test.ts).
-- Docs facts: [`readme-facts.test.ts`](readme-facts.test.ts) (the claims in [README.md](../../README.md) and [docs/install.md](../../docs/install.md) match the code).
-- Coverage and safety: [`e2e-parity.test.ts`](e2e-parity.test.ts), [`sandbox.test.ts`](sandbox.test.ts), [`sandbox-default.security.test.ts`](sandbox-default.security.test.ts) (agent mode confines output paths), [`only-jev-key.test.ts`](only-jev-key.test.ts) (the code reads only the Jev API key).
-- Bug classes from [docs/bug-classes.md](../../docs/bug-classes.md): [`bugs-check.test.ts`](bugs-check.test.ts) plants one bad line per guard in [scripts/bugs-check.ts](../../scripts/bugs-check.ts) and proves each one fails.
-- Install: [`installed-deps.test.ts`](installed-deps.test.ts) (declared packages are installed), [`shared-tokens.test.ts`](shared-tokens.test.ts) (home and docs share one token set).
+- Docs facts: [`readme-facts.test.ts`](readme-facts.test.ts) (claims in [README.md](../../README.md) and [docs/install.md](../../docs/install.md) match the code).
+- Coverage and safety: [`e2e-parity.test.ts`](e2e-parity.test.ts), [`sandbox.test.ts`](sandbox.test.ts), [`sandbox-default.security.test.ts`](sandbox-default.security.test.ts) (agent mode confines output paths), [`only-jev-key.test.ts`](only-jev-key.test.ts) (reads only the Jev API key).
+- Bug classes from [docs/bug-classes.md](../../docs/bug-classes.md): [`bugs-check.test.ts`](bugs-check.test.ts) plants one bad line per guard in [scripts/bugs-check.ts](../../scripts/bugs-check.ts) and proves each fails.
+- Install: [`installed-deps.test.ts`](installed-deps.test.ts) (declared packages are installed), [`shared-tokens.test.ts`](shared-tokens.test.ts) (home and docs share one token set), [`token-sources.test.ts`](token-sources.test.ts).
 - Search and answer scorers:
-  - [`date-recency-scorers.test.ts`](date-recency-scorers.test.ts): `asOf` is the pinned run date, and the top hit is recent.
+  - [`date-recency-scorers.test.ts`](date-recency-scorers.test.ts): `asOf` is the pinned run date; the top hit is recent.
   - [`answer-accuracy.eval.test.ts`](answer-accuracy.eval.test.ts): scores the offline dev set for faithfulness, sure-but-wrong, and no-answer rates.
   - [`search-determinism.test.ts`](search-determinism.test.ts): with `WEBULAR_DETERMINISTIC=1`, the same recorded sources give the same ranked hits.
 
 ## Rules
 
-- Add a gate when code can decide a rule. Name the file after the rule.
+- Add a gate, named after its rule, when code can decide the rule.
 - Share analyzers through [tests/_support/](../_support/), not between gate files.
-- A gate lists every fault at once, not only the first.
-- Fix the code a gate flags. Do not loosen the gate.
+- A gate lists every fault at once.
+- Fix the code a gate flags; never loosen the gate.
 
 ## Checks
 
