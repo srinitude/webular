@@ -2283,5 +2283,64 @@
     "support": "Material says all components align to an 8 dp square grid; 96 px is 12 steps of 8. No read source names 96 px as a section gap. This grid row repeats breakpoint.2560.section-gap.",
     "basis": "grid",
     "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
+  },
+  "semantic.light.strand-quiet": {
+    "value": "#F0C800",
+    "source": "design/webular-dev-2026-10-28/webular-dev-pages.pen at ec2da355",
+    "date": "2026-10-29",
+    "support": "The design file binds quiet web strands on the light page to the variable semantic-light-strand-quiet, and site/design/tokens.json on that design branch at ec2da355 defines it as #F0C800. The site gets the same name and the same color.",
+    "basis": "design-row"
+  },
+  "semantic.dark.strand-quiet": {
+    "value": "#857000",
+    "source": "design/webular-dev-2026-10-28/webular-dev-pages.pen at ec2da355",
+    "date": "2026-10-29",
+    "support": "The design file binds quiet web strands on the dark page to the variable semantic-dark-strand-quiet, and site/design/tokens.json on that design branch at ec2da355 defines it as #857000, which gives 3.88:1 on #111111 and 3.19:1 on #22242A. The site gets the same name and the same color.",
+    "basis": "design-row"
+  },
+  "semantic.dark.page-edge": {
+    "value": "{semantic.dark.page}",
+    "source": "design/webular-dev-2026-10-28/webular-dev-pages.pen at ec2da355",
+    "date": "2026-10-29",
+    "support": "The design file binds the stroke of page-colored frame borders in the dark theme to the variable semantic-dark-page-edge, and site/design/tokens.json on that design branch at ec2da355 defines it as an alias of semantic.dark.page (#111111). The site gets the same name and the same color.",
+    "basis": "design-row"
+  },
+  "semantic.light.page-panel": {
+    "value": "{semantic.light.page}",
+    "source": "design/webular-dev-2026-10-28/webular-dev-pages.pen at ec2da355",
+    "date": "2026-10-29",
+    "support": "The design file binds the fill of page-colored panels, the section cards and the footer, to the variable semantic-light-page-panel, and site/design/tokens.json on that design branch at ec2da355 defines it as an alias of semantic.light.page (#FFD400). The site gets the same name and the same color.",
+    "basis": "design-row"
+  },
+  "semantic.dark.page-panel": {
+    "value": "{semantic.dark.page}",
+    "source": "design/webular-dev-2026-10-28/webular-dev-pages.pen at ec2da355",
+    "date": "2026-10-29",
+    "support": "The design file binds the fill of page-colored panels, the section cards and the footer, to the variable semantic-dark-page-panel, and site/design/tokens.json on that design branch at ec2da355 defines it as an alias of semantic.dark.page (#111111). The site gets the same name and the same color.",
+    "basis": "design-row"
+  },
+  "radius.panel": {
+    "value": "{radius.control}",
+    "source": "design/webular-dev-2026-10-28/webular-dev-pages.pen at ec2da355",
+    "date": "2026-10-29",
+    "support": "The design file binds the corner radius of panels, which are section cards, run lines, command output blocks, and state banners, to the variable radius-panel, and site/design/tokens.json on that design branch at ec2da355 defines it as an alias of radius.control. The site gets the same name and the same radius.",
+    "basis": "design-row"
+  },
+  "breakpoint.1440.lead": {
+    "value": {
+      "value": 30,
+      "unit": "px"
+    },
+    "source": "design/webular-dev-2026-10-28/webular-dev-pages.pen at ec2da355",
+    "date": "2026-10-29",
+    "support": "The design file binds the lead line and the hero command on every 1440 page frame to the variable breakpoint-1440-lead, and site/design/tokens.json on that design branch at ec2da355 sets it to 30 px. The site gets the same name and the same size.",
+    "basis": "design-row"
+  },
+  "breakpoint.390.title": {
+    "value": "{breakpoint.390.body}",
+    "source": "design/webular-dev-2026-10-28/webular-dev-pages.pen at ec2da355",
+    "date": "2026-10-29",
+    "support": "The design file binds titles on the 390 phone layout, page and section headings, nearest-page links, and the wordmark, to the variable breakpoint-390-title, and site/design/tokens.json on that design branch at ec2da355 defines it as an alias of breakpoint.390.body (16 px). The site gets the same name and the same size.",
+    "basis": "design-row"
   }
 }

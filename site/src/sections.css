@@ -226,7 +226,7 @@ td {
 .run-hero .copy {
   background: var(--semantic-page);
   color: var(--semantic-ink);
-  border-color: var(--semantic-page);
+  border-color: var(--semantic-page-edge);
 }
 /* The designed break: the subcommand starts its own line. */
 .run-part {
@@ -313,7 +313,7 @@ td {
   font-weight: var(--font-weight-bold);
   color: var(--semantic-on-band);
   text-decoration: none;
-  border: calc(var(--border-width) * 2) solid var(--semantic-page);
+  border: calc(var(--border-width) * 2) solid var(--semantic-page-edge);
   border-radius: var(--space-4);
 }
 .tile-grid .tile-lead a {
@@ -328,7 +328,7 @@ td {
 .home-footer {
   background: var(--semantic-ink);
   color: var(--semantic-on-band);
-  border-top-color: var(--semantic-page);
+  border-top-color: var(--semantic-page-edge);
   font-size: var(--code-size);
 }
 .home-footer .wrap {
