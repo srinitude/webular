@@ -4,6 +4,7 @@
   --semantic-ink: #111111;
   --semantic-card: #ffffff;
   --semantic-strand: #111111;
+  --semantic-edge: #111111;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -11,6 +12,7 @@
     --semantic-ink: #ffd400;
     --semantic-card: #22242a;
     --semantic-strand: #ffd400;
+    --semantic-edge: #ffd400;
   }
 }
 :root[data-theme="dark"] {
@@ -18,4 +20,5 @@
   --semantic-ink: #ffd400;
   --semantic-card: #22242a;
   --semantic-strand: #ffd400;
+  --semantic-edge: #ffd400;
 }

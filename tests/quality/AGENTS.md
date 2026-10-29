@@ -18,7 +18,7 @@ The code gates. The parent rules are in [tests/AGENTS.md](../AGENTS.md). These g
 - Docs facts: [`readme-facts.test.ts`](readme-facts.test.ts) (claims in [README.md](../../README.md) and [docs/install.md](../../docs/install.md) match the code).
 - Coverage and safety: [`e2e-parity.test.ts`](e2e-parity.test.ts), [`sandbox.test.ts`](sandbox.test.ts), [`sandbox-default.security.test.ts`](sandbox-default.security.test.ts) (agent mode confines output paths), [`only-jev-key.test.ts`](only-jev-key.test.ts) (reads only the Jev API key).
 - Bug classes from [docs/bug-classes.md](../../docs/bug-classes.md): [`bugs-check.test.ts`](bugs-check.test.ts) plants one bad line per guard in [scripts/bugs-check.ts](../../scripts/bugs-check.ts) and proves each fails.
-- Install: [`installed-deps.test.ts`](installed-deps.test.ts) (declared packages are installed), [`shared-tokens.test.ts`](shared-tokens.test.ts) (home and docs share one token set), [`token-sources.test.ts`](token-sources.test.ts).
+- Install: [`installed-deps.test.ts`](installed-deps.test.ts) (declared packages are installed), [`shared-tokens.test.ts`](shared-tokens.test.ts) (home and docs share one token set), [`token-sources.test.ts`](token-sources.test.ts), [`control-edge-contrast.test.ts`](control-edge-contrast.test.ts) (every control edge keeps 3:1 in both themes).
 - Search and answer scorers:
   - [`date-recency-scorers.test.ts`](date-recency-scorers.test.ts): `asOf` is the pinned run date; the top hit is recent.
   - [`answer-accuracy.eval.test.ts`](answer-accuracy.eval.test.ts): scores the offline dev set for faithfulness, sure-but-wrong, and no-answer rates.

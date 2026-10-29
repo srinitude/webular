@@ -61,7 +61,7 @@
   --color-fd-secondary-foreground: var(--semantic-ink);
   --color-fd-accent: color-mix(in srgb, var(--semantic-ink) 8%, var(--semantic-page));
   --color-fd-accent-foreground: var(--semantic-ink);
-  --color-fd-ring: var(--semantic-ink);
+  --color-fd-ring: var(--semantic-edge);
   --color-fd-overlay: color-mix(in srgb, var(--semantic-ink) 60%, transparent);
 }
 
@@ -80,8 +80,16 @@ kbd {
   font-family: var(--font-mono);
 }
 :focus-visible {
-  outline: var(--focus-width) solid var(--semantic-ink);
+  outline: var(--focus-width) solid var(--semantic-edge);
   outline-offset: 2px;
+}
+
+/* The theme switch marks its selected item with a fill only. The stock 8% accent
+ * fill sits near 1:1 on the page, so the selected item takes the edge color, which
+ * keeps the 3:1 that WCAG `2.2` SC `1.4.11` asks of a state. */
+[data-theme-toggle] .bg-fd-accent {
+  background: var(--semantic-edge);
+  color: var(--semantic-page);
 }
 
 /* Headings: Archivo Black at the heading line height. */

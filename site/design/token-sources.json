@@ -161,8 +161,10 @@
   },
   "line-height.heading": {
     "value": 1.15,
-    "status": "unsourced",
-    "reason": "No read source names a heading line height: WCAG 2.2 SC 1.4.8 and 1.4.12 set floors for body text, and the Material and Apple pages read give no heading ratio.",
+    "source": "https://designsystem.digital.gov/design-tokens/typesetting/line-height/",
+    "date": "2026-10-29",
+    "support": "The USWDS line-height token 2 outputs 1.15, with the usage \"headings, introductory (lead or dek) text, no more than 1-2 sentences\".",
+    "basis": "guideline",
     "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "line-height.code": {
@@ -454,7 +456,7 @@
       "unit": "px"
     },
     "status": "unsourced",
-    "reason": "No read type scale has a 30 px h1 step (Material: Body 1 16, Body 2 14, H3 48, H4 34; Apple: Body 17, Subhead 15, Title 1 28, Large Title 34), and 30 is off the Material 4 dp type grid.",
+    "reason": "A search of type scales (USWDS, Tailwind CSS, Material, Apple) on 2026-10-29 found none that sets a 30 px h1 for a 360 px wide screen. No read type scale has a 30 px h1 step (Material: Body 1 16, Body 2 14, H3 48, H4 34; Apple: Body 17, Subhead 15, Title 1 28, Large Title 34), and 30 is off the Material 4 dp type grid.",
     "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.360.body": {
@@ -761,7 +763,7 @@
     },
     "source": "https://m3.material.io/foundations/layout/breakpoints/medium",
     "date": "2026-10-29",
-    "support": "Material 3 gives medium layouts (600 dp and up) 24 dp margins; this 600 px viewport gets 24 px.",
+    "support": "Material 3 gives medium layouts (600 to 839 dp) 24 dp margins; this 600 px viewport gets 24 px.",
     "basis": "guideline",
     "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
@@ -1255,7 +1257,7 @@
       "unit": "px"
     },
     "status": "unsourced",
-    "reason": "No read type scale has a 18 px body step (Material: Body 1 16, Body 2 14, H3 48, H4 34; Apple: Body 17, Subhead 15, Title 1 28, Large Title 34), and 18 is off the Material 4 dp type grid.",
+    "reason": "A search of type scales found none that pairs this size with this role at this width. Tailwind CSS lists text-lg at 1.125rem (18px) (https://tailwindcss.com/docs/font-size, read 2026-10-29), but as a utility step with no role or viewport, so it does not support the value. No read type scale has a 18 px body step (Material: Body 1 16, Body 2 14, H3 48, H4 34; Apple: Body 17, Subhead 15, Title 1 28, Large Title 34), and 18 is off the Material 4 dp type grid.",
     "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.2560.mono": {
@@ -1355,6 +1357,13 @@
     "basis": "design-row",
     "commit": "site/design/tokens.json at commit 37c98a85 (site: emit semantic light and dark tokens and theme the docs from them)"
   },
+  "semantic.light.edge": {
+    "value": "{primitive.palette.ink}",
+    "source": "https://www.w3.org/TR/WCAG22/#non-text-contrast",
+    "date": "2026-10-29",
+    "support": "The edge of a control or its selected state. As #111111 it gives 13.19:1 against semantic.light.page and 18.88:1 against semantic.light.card, above the 3:1 that WCAG 2.2 SC 1.4.11 asks of the visual information that identifies a control and its state.",
+    "basis": "standard"
+  },
   "semantic.dark.page": {
     "value": "{primitive.palette.ink}",
     "source": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190",
@@ -1387,6 +1396,13 @@
     "basis": "design-row",
     "commit": "site/design/tokens.json at commit 37c98a85 (site: emit semantic light and dark tokens and theme the docs from them)"
   },
+  "semantic.dark.edge": {
+    "value": "{primitive.palette.caution-yellow}",
+    "source": "https://www.w3.org/TR/WCAG22/#non-text-contrast",
+    "date": "2026-10-29",
+    "support": "The edge of a control or its selected state. As #FFD400 it gives 13.19:1 against semantic.dark.page and 10.84:1 against semantic.dark.card, above the 3:1 that WCAG 2.2 SC 1.4.11 asks of the visual information that identifies a control and its state.",
+    "basis": "standard"
+  },
   "$extensions.dev.webular.grid.360.gutter": {
     "value": {
       "value": 16,
@@ -1415,7 +1431,7 @@
       "unit": "px"
     },
     "status": "unsourced",
-    "reason": "No read type scale has a 30 px h1 step (Material: Body 1 16, Body 2 14, H3 48, H4 34; Apple: Body 17, Subhead 15, Title 1 28, Large Title 34), and 30 is off the Material 4 dp type grid. This grid row repeats breakpoint.360.h1.",
+    "reason": "A search of type scales (USWDS, Tailwind CSS, Material, Apple) on 2026-10-29 found none that sets a 30 px h1 for a 360 px wide screen. No read type scale has a 30 px h1 step (Material: Body 1 16, Body 2 14, H3 48, H4 34; Apple: Body 17, Subhead 15, Title 1 28, Large Title 34), and 30 is off the Material 4 dp type grid. This grid row repeats breakpoint.360.h1.",
     "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.360.body": {
@@ -1722,7 +1738,7 @@
     },
     "source": "https://m3.material.io/foundations/layout/breakpoints/medium",
     "date": "2026-10-29",
-    "support": "Material 3 gives medium layouts (600 dp and up) 24 dp margins; this 600 px viewport gets 24 px. This grid row repeats breakpoint.600.gutter.",
+    "support": "Material 3 gives medium layouts (600 to 839 dp) 24 dp margins; this 600 px viewport gets 24 px. This grid row repeats breakpoint.600.gutter.",
     "basis": "guideline",
     "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
@@ -2216,7 +2232,7 @@
       "unit": "px"
     },
     "status": "unsourced",
-    "reason": "No read type scale has a 18 px body step (Material: Body 1 16, Body 2 14, H3 48, H4 34; Apple: Body 17, Subhead 15, Title 1 28, Large Title 34), and 18 is off the Material 4 dp type grid. This grid row repeats breakpoint.2560.body.",
+    "reason": "A search of type scales found none that pairs this size with this role at this width. Tailwind CSS lists text-lg at 1.125rem (18px) (https://tailwindcss.com/docs/font-size, read 2026-10-29), but as a utility step with no role or viewport, so it does not support the value. No read type scale has a 18 px body step (Material: Body 1 16, Body 2 14, H3 48, H4 34; Apple: Body 17, Subhead 15, Title 1 28, Large Title 34), and 18 is off the Material 4 dp type grid. This grid row repeats breakpoint.2560.body.",
     "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.2560.mono": {

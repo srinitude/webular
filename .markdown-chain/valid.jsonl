@@ -470,3 +470,4 @@
 {"path": "tests/quality/AGENTS.md", "sha": "e7ff31121c2b9afe2b9bf8d411676a0a3316f3f0cb28259e5df575b6bd4cf6ff", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "site/design/AGENTS.md", "sha": "8e0e38923a3235a3f0c349b4951da3ee6a0e357b0fbbe2e033f9db80dbf5d8eb", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/quality/AGENTS.md", "sha": "f90562ce49b38604bd859b0ca16cc1ec4c0b565e73f8e829ffa110b749703678", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "tests/quality/AGENTS.md", "sha": "c6ed6022c82b5a5c983427ba175009f350fd620710c36494205980522268faba", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
