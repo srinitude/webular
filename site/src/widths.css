@@ -1,6 +1,46 @@
 /* Layout changes by width, per the layout spec. The grid values (gutter,
    content, type sizes, section gap) change in tokens.css; media queries
    cannot read custom properties, so widths here are literal. */
+/* Home hero, narrow first: Copy drops below the command, 2 of the 10 rows show. */
+.tagline {
+  margin: 0;
+  font-size: var(--code-size);
+}
+.run-hero .code-row {
+  flex-wrap: wrap;
+  padding-bottom: var(--space-8);
+}
+.run-hero .code-row pre {
+  flex-basis: 100%;
+}
+.search-rows li:nth-child(3),
+.result-tag .tag-wide {
+  display: none;
+}
+@media (min-width: 600px) {
+  .run-hero .code-row {
+    flex-wrap: nowrap;
+    padding-bottom: 0;
+  }
+  .run-hero .code-row pre {
+    flex-basis: auto;
+  }
+  .search-rows li:nth-child(3) {
+    display: list-item;
+  }
+  .result-tag .tag-wide {
+    display: inline-block;
+  }
+  .result-tag .tag-narrow {
+    display: none;
+  }
+  .tile-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .tile-grid .tile-lead {
+    grid-column: 1 / -1;
+  }
+}
 @media (orientation: landscape) and (max-height: 500px) {
   :root {
     --header-min: var(--size-header-landscape);

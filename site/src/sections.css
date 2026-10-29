@@ -212,25 +212,89 @@ td {
 .run-line pre,
 .run-line code {
   font-size: var(--run-line-size);
+  font-weight: var(--font-weight-bold);
   line-height: var(--line-height-heading);
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+/* Both home run lines: inverted block, the largest and heaviest text on the page. */
+.run-hero .code-row,
+.run-hero .code-row pre {
+  background: var(--theme-text);
+  color: var(--theme-bg);
+}
+.run-hero .copy {
+  background: var(--theme-bg);
+  color: var(--theme-text);
+  border-color: var(--theme-bg);
+}
+/* The designed break: the subcommand starts its own line. */
+.run-part {
+  display: block;
+}
+/* In the hero column the run line steps down to the page-title size so each
+   part fits one line; the headings step down further, so it stays the largest. */
+.run-hero .run-line :is(pre, code) {
+  font-size: var(--h1-size);
+}
+.run-hero h1,
+.run-hero .next {
+  font-size: var(--h3-size);
+}
 .run-hero .next {
   margin-top: var(--space-16);
 }
-/* The second run line sits one type step below the hero run line. */
-.run-hero .next + .run-line :is(pre, code) {
-  font-size: var(--h1-size);
+.search-rows {
+  margin: 0;
+  padding: var(--space-16) var(--space-16) var(--space-16) var(--space-48);
+  font-size: var(--code-size);
+  background: var(--theme-surface);
+  border: var(--border-width) solid var(--theme-border);
+  overflow-wrap: anywhere;
+}
+.result-tag,
+.json-note {
+  font-size: var(--code-size);
+}
+.result-tag span {
+  display: inline-block;
+  padding: var(--space-4) var(--space-12);
+  background: var(--theme-text);
+  color: var(--theme-bg);
+}
+/* The 7-tile band: inverted, with the lead tile inverted again. */
+.tile-band {
+  padding-block: var(--section-gap);
+  background: var(--theme-text);
+  box-shadow: 0 0 0 100vmax var(--theme-text);
+  clip-path: inset(0 -100vmax);
+}
+.tile-grid {
+  display: grid;
+  gap: var(--space-16);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tile-grid a {
+  display: block;
+  padding: var(--space-16);
+  font-family: var(--font-display);
+  font-size: var(--h3-size);
+  font-weight: var(--font-weight-bold);
+  color: var(--theme-bg);
+  text-decoration: none;
+  border: calc(var(--border-width) * 2) solid var(--theme-bg);
+  border-radius: var(--space-4);
+}
+.tile-grid .tile-lead a {
+  padding: var(--space-24);
+  background: var(--theme-bg);
+  color: var(--theme-text);
 }
 /* The docs index leads with its first step, "Start here", at the page title's size. */
 .docs-index .doc-body h2:first-of-type {
   font-size: var(--h1-size);
-}
-.doctor-output {
-  font-size: var(--code-size);
-  white-space: pre;
-  overflow-x: auto;
 }
 .web-art {
   display: block;
