@@ -38,6 +38,17 @@ const GATES: ReadonlyArray<Gate> = [
     'getComputedStyle|getBoundingClientRect|offsetWidth|offsetHeight',
     'src/*.ts',
   ],
+  // CI installs only the root packages, so the root typecheck and suite must
+  // not reach the site's own ones; site:test runs the one exempt file.
+  [
+    'the root code imports no site package',
+    "from '(\\.\\./)+site/|from '(astro|playwright|@axe-core|wrangler)",
+    'src/*.ts',
+    'tests/*.ts',
+    'bin/*.ts',
+    'scripts/*.ts',
+    ':!tests/quality/site-copy-failed.test.ts',
+  ],
   ['no untrusted workflow triggers', 'pull_request_target|workflow_run', '.github/*.yml'],
   [
     'no retired Effect names',

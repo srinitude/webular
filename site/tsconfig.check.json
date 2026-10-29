@@ -1,0 +1,5 @@
+{
+  "extends": "../tsconfig.json",
+  "include": ["scripts/site-browser.ts", "../tests/quality/site-copy-failed.test.ts"],
+  "exclude": []
+}

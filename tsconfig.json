@@ -24,5 +24,6 @@
     "forceConsistentCasingInFileNames": true,
     "plugins": [{ "name": "@effect/language-service" }]
   },
-  "include": ["src", "tests", "bin", "scripts"]
+  "include": ["src", "tests", "bin", "scripts"],
+  "exclude": ["tests/quality/site-copy-failed.test.ts"]
 }
