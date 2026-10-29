@@ -18,7 +18,7 @@
 # smoke-tested first. -> publish (npm, last): one npm package per target
 # (webular-<key>, with os/cpu/libc fields), then the root package that lists
 # them as optionalDependencies. An npm failure never holds back the GitHub
-# release. homebrew, scoop, and docker follow github-release, not npm.
+# release. homebrew and scoop follow github-release, not npm.
 # Versions already on npm are skipped, so a
 # rerun after a partial publish is safe. A prerelease tag (any tag with a "-")
 # publishes to the npm dist-tag `next` and marks the release as a prerelease;
@@ -32,7 +32,8 @@
 # release; each skips with a notice while the TAP_TOKEN secret is unset.
 # -> docker: build the Dockerfile from the attested musl executables for
 # linux/amd64 and linux/arm64 and push ghcr.io/srinitude/webular:<version>,
-# plus :latest for a `latest` release.
+# plus :latest for a `latest` release. docker also follows github-release, not
+# npm.
 # tests/core/platform-parity.test.ts keeps this file, mise.toml, and the
 # resolver table in step; tests/release/gates.test.ts checks the gates.
 # npm auth is trusted publishing (OIDC): no NPM_TOKEN. Before the first run, add

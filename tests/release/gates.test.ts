@@ -110,6 +110,12 @@ test('the npm bin is the generated Node launcher and ships in the package', () =
   expect(pkg.files).toContain('dist/webular.js')
 })
 
+test('docker follows github-release, not npm', () => {
+  const needs = [(jobs['docker'] as { needs?: string | string[] })?.needs ?? []].flat()
+  expect(needs).toContain('github-release')
+  for (const npm of ['publish', 'publish-github-packages']) expect(needs).not.toContain(npm)
+})
+
 test('publish builds before packing and runs no lifecycle scripts', () => {
   const build = at('publish', 'mise run build')
   expect(build).toBeGreaterThan(-1)
@@ -160,7 +166,7 @@ test('the tap and bucket jobs push only with TAP_TOKEN and only for latest', () 
 
 test('the GitHub release goes out before and apart from npm', () => {
   const needs = (job: string) => [(jobs[job] as { needs?: string | string[] })?.needs ?? []].flat()
-  for (const job of ['github-release', 'homebrew', 'scoop', 'docker'])
+  for (const job of ['github-release', 'homebrew', 'scoop'])
     for (const npm of ['publish', 'publish-github-packages']) expect(needs(job)).not.toContain(npm)
   expect(runs('github-release').join('\n')).toContain('--draft=false')
   expect(runs('publish').join('\n')).not.toContain('--draft=false')
