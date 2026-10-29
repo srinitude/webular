@@ -2349,5 +2349,172 @@
     "date": "2026-10-29",
     "support": "The design file binds the fill of the ink band, run lines, result badges, and the section index, to the variable semantic-dark-band, and site/design/tokens.json on that design branch at ec2da355 defines it as an alias of semantic.dark.ink (#FFD400). The site gets the same name and the same color.",
     "basis": "design-row"
+  },
+  "semantic.light.band": {
+    "value": "{semantic.light.ink}",
+    "source": "design/webular-dev-2026-10-28/webular-dev-pages.pen at 52439ae2",
+    "date": "2026-10-29",
+    "support": "site/design/tokens.json on the design branch at 52439ae2 defines semantic.light.band as an alias of semantic.light.ink (#111111), the same shape as semantic.dark.band. The site gets the same name and the same color.",
+    "basis": "design-row"
+  },
+  "font.display": {
+    "value": ["Archivo Black", "system-ui", "sans-serif"],
+    "status": "unsourced",
+    "reason": "Restored under its old name because sections.css and site.css read --font-display and fonts.css loads Archivo Black. The value is the one in site/design/tokens.json at 37c98a85^. No research source was read for it."
+  },
+  "font.weight-medium": {
+    "value": 400,
+    "status": "unsourced",
+    "reason": "Restored under its old name because the docs theme reads --font-weight-medium. The value is the one in site/design/tokens.json at 37c98a85^. No research source was read for it."
+  },
+  "font.weight-bold": {
+    "value": 700,
+    "status": "unsourced",
+    "reason": "Restored under its old name because sections.css and site.css read --font-weight-bold. The value is the one in site/design/tokens.json at 37c98a85^. No research source was read for it."
+  },
+  "gutter": {
+    "value": { "value": 16, "unit": "px" },
+    "status": "unsourced",
+    "reason": "Restored under its old name as the 320 px base because every page style reads --gutter and grid.css starts at 360 px. The value is the one in site/design/tokens.json at 37c98a85^. No research source was read for it."
+  },
+  "content-max": {
+    "value": { "value": 320, "unit": "px" },
+    "status": "unsourced",
+    "reason": "Restored under its old name as the 320 px base because every page style reads --content-max and grid.css starts at 360 px. It equals breakpoint.320.content plus two gutters. The value is the one in site/design/tokens.json at 37c98a85^. No research source was read for it."
+  },
+  "h1-size": {
+    "value": { "value": 28, "unit": "px" },
+    "status": "unsourced",
+    "reason": "Restored under its old name as the 320 px base because the page styles read --h1-size and grid.css starts at 360 px. It equals breakpoint.320.h1. The value is the one in site/design/tokens.json at 37c98a85^. No research source was read for it."
+  },
+  "run-line-size": {
+    "value": { "value": 35, "unit": "px" },
+    "status": "unsourced",
+    "reason": "Restored under its old name as the 320 px base because sections.css reads --run-line-size and grid.css starts at 360 px. It is 1.25 times h1-size. The value is the one in site/design/tokens.json at 37c98a85^. No research source was read for it."
+  },
+  "h2-size": {
+    "value": { "value": 20, "unit": "px" },
+    "status": "unsourced",
+    "reason": "Restored under its old name as the 320 px base because the page styles read --h2-size and grid.css starts at 360 px. It is 0.7 times h1-size, rounded. The value is the one in site/design/tokens.json at 37c98a85^. No research source was read for it."
+  },
+  "body-size": {
+    "value": { "value": 16, "unit": "px" },
+    "status": "unsourced",
+    "reason": "Restored under its old name as the 320 px base because the page styles read --body-size and grid.css starts at 360 px. It equals breakpoint.320.body. The value is the one in site/design/tokens.json at 37c98a85^. No research source was read for it."
+  },
+  "lead-size": {
+    "value": { "value": 18, "unit": "px" },
+    "status": "unsourced",
+    "reason": "Restored under its old name as the 320 px base because the page styles read --lead-size and grid.css starts at 360 px. It is body-size plus 2 px. The value is the one in site/design/tokens.json at 37c98a85^. No research source was read for it."
+  },
+  "h3-size": {
+    "value": "{lead-size}",
+    "status": "unsourced",
+    "reason": "Restored under its old name because the page styles read --h3-size. It aliases lead-size, as it did in site/design/tokens.json at 37c98a85^. No research source was read for it."
+  },
+  "code-size": {
+    "value": { "value": 14, "unit": "px" },
+    "status": "unsourced",
+    "reason": "Restored under its old name as the 320 px base because the page styles read --code-size and grid.css starts at 360 px. It equals breakpoint.320.mono. The value is the one in site/design/tokens.json at 37c98a85^. No research source was read for it."
+  },
+  "section-gap": {
+    "value": { "value": 64, "unit": "px" },
+    "status": "unsourced",
+    "reason": "Restored under its old name as the 320 px base because the page styles read --section-gap and grid.css starts at 360 px. It equals breakpoint.320.section-gap. The value is the one in site/design/tokens.json at 37c98a85^. No research source was read for it."
+  },
+  "text-xs": {
+    "value": { "value": 13, "unit": "px" },
+    "status": "unsourced",
+    "reason": "Restored under its old name because the docs theme reads --text-xs. The value is the one in site/design/tokens.json at 37c98a85^. No research source was read for it."
+  },
+  "text-sm": {
+    "value": { "value": 15, "unit": "px" },
+    "status": "unsourced",
+    "reason": "Restored under its old name because the docs theme reads --text-sm. The value is the one in site/design/tokens.json at 37c98a85^. No research source was read for it."
+  },
+  "text-md": {
+    "value": { "value": 17, "unit": "px" },
+    "status": "unsourced",
+    "reason": "Restored under its old name because the docs theme reads --text-md. The value is the one in site/design/tokens.json at 37c98a85^. No research source was read for it."
+  },
+  "text-lg": {
+    "value": { "value": 20, "unit": "px" },
+    "status": "unsourced",
+    "reason": "Restored under its old name because the docs theme reads --text-lg. The value is the one in site/design/tokens.json at 37c98a85^. No research source was read for it."
+  },
+  "text-xl": {
+    "value": { "value": 28, "unit": "px" },
+    "status": "unsourced",
+    "reason": "Restored under its old name because the docs theme reads --text-xl. The value is the one in site/design/tokens.json at 37c98a85^. No research source was read for it."
+  },
+  "text-3xl": {
+    "value": { "value": 52, "unit": "px" },
+    "status": "unsourced",
+    "reason": "Restored under its old name because sections.css and the docs theme read --text-3xl. The value is the one in site/design/tokens.json at 37c98a85^. No research source was read for it."
+  },
+  "border-width": {
+    "value": { "value": 1, "unit": "px" },
+    "status": "unsourced",
+    "reason": "Restored under its old name because sections.css and site.css read --border-width. The value is the one in site/design/tokens.json at 37c98a85^. No research source was read for it."
+  },
+  "focus-width": {
+    "value": { "value": 3, "unit": "px" },
+    "status": "unsourced",
+    "reason": "Restored under its old name because site.css reads --focus-width. The value is the one in site/design/tokens.json at 37c98a85^. No research source was read for it."
+  },
+  "measure": {
+    "value": { "value": 72, "unit": "ch" },
+    "status": "unsourced",
+    "reason": "Restored under its old name because sections.css reads --measure. The value is the one in site/design/tokens.json at 37c98a85^. No research source was read for it."
+  },
+  "theme.bg": {
+    "value": "{semantic.light.page}",
+    "status": "unsourced",
+    "reason": "Restored under its old name because the docs theme reads --theme-bg. It now aliases the semantic page color in both themes, as tests/quality/shared-tokens.test.ts expects. No research source was read for it."
+  },
+  "theme.surface": {
+    "value": "{semantic.light.card}",
+    "status": "unsourced",
+    "reason": "Restored under its old name because the docs theme reads --theme-surface. It now aliases the semantic card color in both themes, as tests/quality/shared-tokens.test.ts expects. No research source was read for it."
+  },
+  "theme.text": {
+    "value": "{semantic.light.ink}",
+    "status": "unsourced",
+    "reason": "Restored under its old name because the docs theme reads --theme-text. It now aliases the semantic ink color in both themes, as tests/quality/shared-tokens.test.ts expects. No research source was read for it."
+  },
+  "theme.muted": {
+    "value": "{semantic.light.ink}",
+    "status": "unsourced",
+    "reason": "Restored under its old name because the docs theme reads --theme-muted. It now aliases the semantic ink color in both themes, as tests/quality/shared-tokens.test.ts expects. No research source was read for it."
+  },
+  "theme.border": {
+    "value": "{semantic.light.strand}",
+    "status": "unsourced",
+    "reason": "Restored under its old name because the docs theme reads --theme-border. It now aliases the semantic strand color in both themes, as tests/quality/shared-tokens.test.ts expects. No research source was read for it."
+  },
+  "theme.accent": {
+    "value": "{semantic.light.ink}",
+    "status": "unsourced",
+    "reason": "Restored under its old name because the docs theme reads --theme-accent. It now aliases the semantic ink color in both themes, as tests/quality/shared-tokens.test.ts expects. No research source was read for it."
+  },
+  "theme.on-accent": {
+    "value": "{semantic.light.page}",
+    "status": "unsourced",
+    "reason": "Restored under its old name because the docs theme reads --theme-on-accent. It now aliases the semantic page color in both themes, as tests/quality/shared-tokens.test.ts expects. No research source was read for it."
+  },
+  "theme.focus": {
+    "value": "{semantic.light.ink}",
+    "status": "unsourced",
+    "reason": "Restored under its old name because the docs theme reads --theme-focus. It now aliases the semantic ink color in both themes, as tests/quality/shared-tokens.test.ts expects. No research source was read for it."
+  },
+  "theme.brand": {
+    "value": "{semantic.light.ink}",
+    "status": "unsourced",
+    "reason": "Restored under its old name because the docs theme reads --theme-brand. It now aliases the semantic ink color in both themes, as tests/quality/shared-tokens.test.ts expects. No research source was read for it."
+  },
+  "theme.on-brand": {
+    "value": "{semantic.light.page}",
+    "status": "unsourced",
+    "reason": "Restored under its old name because the docs theme reads --theme-on-brand. It now aliases the semantic page color in both themes, as tests/quality/shared-tokens.test.ts expects. No research source was read for it."
   }
 }
