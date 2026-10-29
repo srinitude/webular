@@ -20,8 +20,8 @@ The Fumadocs site served at [webular.dev/docs](https://webular.dev/docs/), under
 - Why Next.js: the Fumadocs setup guide documents it first ([Next.js setup](https://www.fumadocs.dev/docs/manual-installation/next)), and the export needs one config line for output and one for the base path.
 - Search is static: `staticGET` writes the index, and `staticClient` searches it in the browser ([Built-in Search](https://www.fumadocs.dev/docs/headless/search/orama)).
 - The loader's base URL is `/`, because Next adds `/docs` to every link. A link in content is `/<slug>`, never `/docs/<slug>`.
-- Styles read only the built tokens in [site/src/tokens.css](../site/src/tokens.css), which come from [site/design/tokens.json](../site/design/tokens.json). The home page imports the same file, so home and docs share one token source. Type names Space Mono and Archivo Black, each with a system fallback. The docs import [site/src/fonts.css](../site/src/fonts.css), the same self-hosted faces the home page loads.
-- The light and dark palettes follow `data-theme`, as on the home page.
+- Styles read only tokens built from [site/design/tokens.json](../site/design/tokens.json): colors from [semantic.css](../site/src/semantic.css), the rest from [tokens.css](../site/src/tokens.css). Home and docs import both, so they share one token set. Type names Space Mono and Archivo Black, each with a system fallback. The docs import [fonts.css](../site/src/fonts.css), the same self-hosted faces the home page loads.
+- Light and dark follow `data-theme` and the system color scheme.
 - The Next export hydrates with inline scripts. `--publish` moves each one, in place, to `/docs/_inline/<sha256>.js` ([scripts/docs-inline.ts](../scripts/docs-inline.ts)), so the site-wide content security policy covers `/docs` unchanged. Hashes in a `/docs` header do not fit: a long page has more than 40 inline scripts, past the 2,000-character line limit of `_headers` ([Cloudflare limits](https://developers.cloudflare.com/workers/static-assets/headers/)).
 
 ## Checks

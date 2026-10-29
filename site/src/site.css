@@ -4,7 +4,7 @@
 :root {
   --h3-size: var(--lead-size);
   --header-min: var(--size-header);
-  --fade: color-mix(in srgb, var(--theme-text) 22%, transparent);
+  --fade: color-mix(in srgb, var(--semantic-ink) 22%, transparent);
 }
 *,
 *::before,
@@ -16,21 +16,21 @@ html {
 }
 body {
   margin: 0;
-  background: var(--theme-bg);
-  color: var(--theme-text);
+  background: var(--semantic-page);
+  color: var(--semantic-ink);
   font: var(--body-size) / var(--line-height-body) var(--font-sans);
   overflow-wrap: break-word;
 }
 /* The accent marks actions and links only. */
 a {
-  color: var(--theme-accent);
+  color: var(--semantic-ink);
   text-underline-offset: 0.15em;
 }
 a:focus-visible,
 summary:focus-visible,
 pre:focus-visible,
 .scroll-row:focus-visible {
-  outline: var(--focus-width) solid var(--theme-focus);
+  outline: var(--focus-width) solid var(--semantic-ink);
   outline-offset: 2px;
 }
 h1,
@@ -65,7 +65,7 @@ pre {
   font-size: var(--code-size);
 }
 :not(pre) > code {
-  background: var(--theme-surface);
+  background: var(--semantic-card);
   padding: 0 var(--space-4);
   border-radius: var(--radius-control);
 }
@@ -79,16 +79,16 @@ pre,
   overflow-x: auto;
   white-space: pre;
   background:
-    linear-gradient(to left, transparent, var(--theme-surface) var(--space-24)) right /
+    linear-gradient(to left, transparent, var(--semantic-card) var(--space-24)) right /
     var(--space-32) 100% no-repeat local,
     linear-gradient(to left, var(--fade), transparent) right / var(--space-16) 100% no-repeat scroll,
-    var(--theme-surface);
+    var(--semantic-card);
 }
 pre {
   margin: 0;
   padding: var(--space-12) var(--space-16);
   line-height: var(--line-height-code);
-  border: var(--border-width) solid var(--theme-border);
+  border: var(--border-width) solid var(--semantic-strand);
   border-radius: var(--radius-box);
   tab-size: 2;
 }
@@ -105,19 +105,19 @@ pre {
   top: -10rem;
   z-index: 10;
   padding: var(--space-8) var(--space-16);
-  background: var(--theme-bg);
-  border: var(--border-width) solid var(--theme-border);
+  background: var(--semantic-page);
+  border: var(--border-width) solid var(--semantic-strand);
 }
 .skip-link:focus {
   top: var(--space-8);
 }
 .muted {
-  color: var(--theme-muted);
+  color: var(--semantic-ink);
 }
 
 /* Header: 56 px tall, 1 px bottom border. */
 .site-header {
-  border-bottom: var(--border-width) solid var(--theme-border);
+  border-bottom: var(--border-width) solid var(--semantic-strand);
 }
 .site-header .wrap {
   display: flex;
@@ -129,7 +129,7 @@ pre {
 .wordmark {
   font-weight: var(--font-weight-bold);
   font-size: var(--h3-size);
-  color: var(--theme-text);
+  color: var(--semantic-ink);
   text-decoration: none;
 }
 .header-end {
@@ -143,7 +143,7 @@ pre {
   align-items: center;
   min-height: var(--size-tap-target);
   padding-inline: var(--space-8);
-  color: var(--theme-text);
+  color: var(--semantic-ink);
   text-decoration: none;
   cursor: pointer;
 }

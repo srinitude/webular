@@ -1,20 +1,23 @@
-// Guard: the home page and the docs read one token source, site/src/tokens.css,
-// built from site/design/tokens.json, so a token change restyles both and the
-// two never drift apart.
+// Guard: the home page and the docs read the same built tokens, site/src/tokens.css
+// for type, space, and motion and site/src/semantic.css for light and dark colors,
+// both built from site/design/tokens.json, so a token change restyles both and
+// the two never drift apart.
 
 import { expect, test } from 'bun:test'
-import { Effect, Schema } from 'effect'
+import { Effect, FileSystem, Schema } from 'effect'
 import { read } from '../_support/repo-files.ts'
+import { ROOT } from '../_support/root.ts'
 import { eff } from '../_support/run.ts'
 
 test(
-  'home and docs import the same built token file',
+  'home and docs import the same built token files',
   eff(
     Effect.gen(function* () {
       const home = yield* read('site/src/Base.astro')
       const docs = yield* read('site-docs/app/global.css')
       const tokens = yield* read('site/src/tokens.css')
       expect(home).toContain("import './tokens.css'")
+      expect(home).toContain("import './semantic.css'")
       expect(docs).toContain('@import "../../site/src/tokens.css";')
       // The docs theme maps its colors, type, and spacing onto these names.
       for (const name of ['--theme-bg', '--theme-accent', '--font-sans', '--space-4'])
@@ -95,6 +98,49 @@ test(
       const fd = docs.match(/--color-fd-[\w-]+: [^;]+;/g) ?? []
       expect(fd.length).toBeGreaterThan(10)
       expect(fd.filter((line) => !line.includes('var(--semantic-'))).toEqual([])
+    }),
+  ),
+)
+
+// Each --theme-* color in tokens.css and the semantic token that holds its role.
+// Light values match one for one; in dark, text and muted take the ink (#ffd400)
+// and surface takes the card (#22242a), the same colors the docs use.
+const SEMANTIC_FOR_THEME: Readonly<Record<string, string>> = {
+  '--theme-bg': '--semantic-page',
+  '--theme-on-accent': '--semantic-page',
+  '--theme-on-brand': '--semantic-page',
+  '--theme-text': '--semantic-ink',
+  '--theme-accent': '--semantic-ink',
+  '--theme-brand': '--semantic-ink',
+  '--theme-focus': '--semantic-ink',
+  '--theme-muted': '--semantic-ink',
+  '--theme-border': '--semantic-strand',
+  '--theme-surface': '--semantic-card',
+}
+
+test(
+  'no site page reads a --theme-* color that has a semantic token',
+  eff(
+    Effect.gen(function* () {
+      const fs = yield* FileSystem.FileSystem
+      const tokens = yield* read('site/src/tokens.css')
+      const semantic = yield* read('site/src/semantic.css')
+      for (const [theme, token] of Object.entries(SEMANTIC_FOR_THEME)) {
+        expect(tokens).toContain(`${theme}:`)
+        expect(semantic).toContain(`${token}:`)
+      }
+      // tokens.css defines the --theme-* names; every other page file only reads colors.
+      const files = (yield* fs.readDirectory(`${ROOT}site/src`, { recursive: true }))
+        .map((file) => file.replaceAll('\\', '/'))
+        .filter((file) => /\.(css|astro)$/.test(file) && file !== 'tokens.css')
+      expect(files).toContain('site.css')
+      const hits: Array<string> = []
+      for (const file of files) {
+        const text = yield* read(`site/src/${file}`)
+        for (const [name] of text.matchAll(/--theme-[\w-]+/g))
+          if (name in SEMANTIC_FOR_THEME) hits.push(`${file}: ${name}`)
+      }
+      expect(hits).toEqual([])
     }),
   ),
 )

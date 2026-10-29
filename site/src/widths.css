@@ -139,10 +139,10 @@
   .cards-table th,
   .cards-table td {
     padding: var(--space-12) var(--space-16);
-    border: var(--border-width) solid var(--theme-border);
+    border: var(--border-width) solid var(--semantic-strand);
   }
   .cards-table thead th {
-    background: var(--theme-surface);
+    background: var(--semantic-card);
   }
   .cards-table td::before {
     content: none;
@@ -189,11 +189,11 @@
   }
   .sidebar a {
     padding: var(--space-4) 0;
-    color: var(--theme-text);
+    color: var(--semantic-ink);
   }
   /* The current page shows in the accent color. */
   .sidebar a[aria-current="page"] {
-    color: var(--theme-accent);
+    color: var(--semantic-ink);
     font-weight: var(--font-weight-bold);
   }
 }
