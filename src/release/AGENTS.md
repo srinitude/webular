@@ -19,6 +19,8 @@ Rules for the release steps, under [src/AGENTS.md](../AGENTS.md).
 - [`upgrade.ts`](upgrade.ts) is pure. Callers pass the paths and the environment, so each channel is provable without touching the machine.
 - [`node-launcher.ts`](node-launcher.ts) runs on plain Node, so it uses only Node built-ins.
 - Publishing to a package manager stays a manual step.
+- After each publish, run `mise run nix:refresh <version>`. It rewrites the repo-root [`webular.nix`](../../webular.nix) from that release's `SHA256SUMS`, using the generator in [`nix.ts`](nix.ts); with no version, it uses the release at `releases/latest`. The helper then commits [`webular.nix`](../../webular.nix) to the open PR branch, with no added token or repo setting: `gh` uses the login that is already set up. This is the one step that writes outside `dist/`. Script: [`nix-refresh.ts`](nix-refresh.ts).
+- `mise run nix:check` fails while [`webular.nix`](../../webular.nix) pins a version other than the tag at `releases/latest`. It reads the tag, not [`package.json`](../../package.json), because a version has no checksums until its release is built.
 
 ## Checks
 

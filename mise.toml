@@ -208,6 +208,17 @@ description = "Write the AUR PKGBUILD, .SRCINFO, and webular.nix into dist/packa
 depends = ["compile:all"]
 run = 'bun "{{config_root}}/src/release/distros.ts"'
 
+[tasks."nix:refresh"]
+description = "Rewrite the repo-root webular.nix from a published release's SHA256SUMS (default: the release at `releases/latest`); run after each publish, then commit it to the open PR branch. Off the linear spine"
+depends = ["setup"]
+usage = 'arg "[version]" help="Published version, like 0.3.2 or v0.3.2"'
+run = 'bun "{{config_root}}/src/release/nix-refresh.ts" refresh{% if usage.version %} "{{ usage.version }}"{% endif %}'
+
+[tasks."nix:check"]
+description = "Read-only: fails when webular.nix pins a version other than the tag of the release at `releases/latest`. Off the linear spine"
+depends = ["setup"]
+run = 'bun "{{config_root}}/src/release/nix-refresh.ts" check'
+
 [tasks."test:file"]
 description = "Run the named test files only (targeted check while editing)"
 depends = ["setup"]

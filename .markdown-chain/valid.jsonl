@@ -435,3 +435,6 @@
 {"path": "site/PROMOTE.md", "sha": "d5448b8a4cac1c05e4266f149af149ab3a8d7312dfefea2fadd9e919cd1a50a6", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/install-more.md", "sha": "a8abab32d0653050dc069371dfac1dfda4b774dbcde61cc866435dea2648a033", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/install.md", "sha": "6315855480b2b7460b92197dff0a1ab77736b5525644210e1b65d2f662d3e9eb", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "tests/release/AGENTS.md", "sha": "4db7e565a563f8477bb6c05a9f4631673a6c17f9d701b475e6f6891559de3f85", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/tasks.md", "sha": "25bd2bd1ae331cfba4e386b47530a07e3c413c60f35d8884938d1c7d3e509ecc", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "src/release/AGENTS.md", "sha": "bb95f4d1f542c0c74283bdcc01b8d645d9969e9e62b7ddf1eb771cd48fdc165c", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}

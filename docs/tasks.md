@@ -42,6 +42,8 @@ jev:check: Jev framework checks (off the linear spine; the test task runs them t
 jev:docs: Refresh and verify the Jev docs snapshot: conditional GET of docs.typesafe.ai/llms-full.txt (a 304 when unchanged), proof (sha256, line count, chunk boundaries) written to src/lib/jev/docs-snapshot.json; pass --replay to re-prove the committed recording offline [after setup]
 jev:latest-check: Fails when docs.typesafe.ai lists a Jev release above JEV_LATEST_RELEASED in src/lib/jev/model.ts. No other task depends on it [after setup]
 lint: Lint + format-verify with Biome (check-only CI gate) [after setup]
+nix:check: Read-only: fails when webular.nix pins a version other than the tag of the release at `releases/latest`. Off the linear spine [after setup]
+nix:refresh: Rewrite the repo-root webular.nix from a published release's SHA256SUMS (default: the release at `releases/latest`); run after each publish, then commit it to the open PR branch. Off the linear spine [after setup]
 os:check: Every OS, locally: shell completions parse, the e2e parity list, the CLI gateway, and the Jev key lookup on each platform. Linux, macOS, and Windows each run the full suite only in CI (.github/workflows/ci.yml) [after setup]
 package:completions: Write shell completions (bash, zsh, fish, PowerShell) into dist/completions from the command and flag tables (release path, after compile:all) [after compile:all]
 package:distros: Write the AUR PKGBUILD, .SRCINFO, and webular.nix into dist/packaging from dist/bin/SHA256SUMS (release path, after compile:all) [after compile:all]
