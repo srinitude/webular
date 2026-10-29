@@ -7,7 +7,8 @@ The Astro layout, components, and styles, under [site/AGENTS.md](../AGENTS.md).
 - [Base.astro](Base.astro): the page shell that every route wraps, with the one page script.
 - [DocMeta.astro](DocMeta.astro): the head tags and page links for a doc page.
 - [RunLine.astro](RunLine.astro): one command to run, its Copy button, and a polite live region that says "Copied".
-- [WebArt.astro](WebArt.astro): the web art, one inline SVG path drawn at build time; `torn` drops a wedge for the 404 page, and `labeled` adds the home page's domain labels.
+- [SearchRows.astro](SearchRows.astro): the real `search "sqlite wal"` rows and the Nice catch tag, shared by the home and docs heroes.
+- [WebArt.astro](WebArt.astro): the web art, one inline SVG path drawn at build time; `torn` drops a wedge for the 404 page, and `labeled` adds tags: `true` for the home page's domains, or a list of names.
 - [site.css](site.css): the page styles.
 - [sections.css](sections.css): page sections, cards, doc pages, and the comparison table.
 - [widths.css](widths.css): the layout changes at each width from the layout spec.

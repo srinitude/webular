@@ -15,8 +15,24 @@
 }
 .search-rows li:nth-child(3),
 .result-tag .tag-wide,
-.web-label:nth-of-type(n + 4) {
+.web-label:nth-of-type(n + 4),
+.doctor-sum,
+.art-wide {
   display: none;
+}
+/* Narrow nav: the brand on top, the links in a row under it. */
+.site-header .wrap {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-8);
+  padding-block: var(--space-8);
+}
+.header-end {
+  margin-left: calc(var(--space-8) * -1);
+}
+/* The install command stays on one line at 390 px: 26 cells at 6cqi. */
+.page-hero .run-line code {
+  font-size: min(var(--h1-size), 6cqi);
 }
 @media (min-width: 600px) {
   .web-label:nth-of-type(n + 4) {
@@ -35,8 +51,18 @@
   .result-tag .tag-wide {
     display: inline-block;
   }
-  .result-tag .tag-narrow {
+  .result-tag .tag-narrow,
+  .art-narrow {
     display: none;
+  }
+  .doctor-sum {
+    display: inline;
+  }
+  .art-wide {
+    display: block;
+  }
+  .install-cards {
+    grid-template-columns: repeat(2, 1fr);
   }
   .tile-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -74,8 +100,13 @@
   }
 }
 @media (min-width: 768px) {
-  .nav-768 {
-    display: inline-flex;
+  .site-header .wrap {
+    flex-direction: row;
+    align-items: center;
+    padding-block: 0;
+  }
+  .header-end {
+    margin-left: auto;
   }
   .site-footer ul {
     grid-template-columns: repeat(3, 1fr);

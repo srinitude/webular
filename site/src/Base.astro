@@ -11,8 +11,9 @@ interface Props {
   description: string
   home?: boolean
   doc?: boolean
+  short?: boolean
 }
-const { title, description, home = false, doc = false } = Astro.props
+const { title, description, home = false, doc = false, short = false } = Astro.props
 
 const sha = import.meta.env.PUBLIC_BUILD_SHA ?? 'dev'
 const date = import.meta.env.PUBLIC_BUILD_DATE ?? 'dev'
@@ -42,6 +43,14 @@ const footerLinks = [
 // The home page footer keeps only the two outside links; its tiles reach the rest.
 if (home)
   footerLinks.splice(0, footerLinks.length, ['GitHub', github], ['Releases', `${github}/releases`])
+// A short page (install, docs, 404) gets the home footer look with the three nav links.
+if (short)
+  footerLinks.splice(
+    0,
+    footerLinks.length,
+    ...pages.filter(([label]) => ['Install', 'Commands', 'Docs'].includes(label)),
+  )
+const darkFooter = home || short
 ---
 
 <!doctype html>
@@ -58,10 +67,10 @@ if (home)
     <a class="skip-link" href={home ? "#hero-command" : "#content"}>{home ? "Skip to install" : "Skip to content"}</a>
     <header class="site-header">
       <div class="wrap">
-        <div class="brand"><a class="wordmark" href="/">webular</a>{home && <p class="tagline">Search, scrape, crawl, and answer with sources. Your own web, spun on your own machine.</p>}</div>
+        <div class="brand"><a class="wordmark" href="/">webular</a><p class="tagline">Search, scrape, crawl, and answer with sources. Your own web, spun on your own machine.</p></div>
         <div class="header-end">
           <a class="nav-390" href="/install">Install</a>
-          <a class="nav-768" href="/commands">Commands</a>
+          <a class="nav-390" href="/commands">Commands</a>
           <a class="nav-390" href="/docs">Docs</a>
           <button type="button" class="theme-toggle" data-theme-toggle aria-label="Dark theme" aria-pressed="false">◐</button>
         </div>
@@ -91,14 +100,14 @@ if (home)
         )}
       </div>
     </main>
-    <footer class:list={["site-footer", { "home-footer": home }]}>
+    <footer class:list={["site-footer", { "home-footer": darkFooter }]}>
       <div class="wrap">
-        {home && <a class="footer-mark" href="/">webular</a>}
+        {darkFooter && <a class="footer-mark" href="/">webular</a>}
         <ul>
           {footerLinks.map(([label, href]) => <li><a href={href}>{label}</a></li>)}
         </ul>
-        {!home && <p>Open source under Apache-2.0. © Kiren Srinivasan. This site sets no cookies and runs no tracking.</p>}
-        {!home && <p class="muted">Built from commit <code>{sha}</code> on <code>{date}</code></p>}
+        {!darkFooter && <p>Open source under Apache-2.0. © Kiren Srinivasan. This site sets no cookies and runs no tracking.</p>}
+        {!darkFooter && <p class="muted">Built from commit <code>{sha}</code> on <code>{date}</code></p>}
       </div>
     </footer>
     <script>

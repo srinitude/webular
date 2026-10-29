@@ -159,7 +159,6 @@ pre {
   min-width: var(--size-tap-target);
 }
 .nav-390,
-.nav-768,
 .sidebar {
   display: none;
 }

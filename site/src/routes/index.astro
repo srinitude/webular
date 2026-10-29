@@ -1,6 +1,7 @@
 ---
 import Base from '../Base.astro'
 import RunLine from '../RunLine.astro'
+import SearchRows from '../SearchRows.astro'
 import WebArt from '../WebArt.astro'
 
 const release = import.meta.env.PUBLIC_RELEASE_VERSION ?? '0.3.0'
@@ -21,15 +22,6 @@ const jsonLd = JSON.stringify({
   author: { '@type': 'Person', name: 'Kiren Srinivasan' },
   sameAs: ['https://github.com/srinitude/webular', 'https://www.npmjs.com/package/webular'],
 })
-// The first 3 of the 10 rows a real keyless `search "sqlite wal"` printed.
-const rows = [
-  ['SQLite WAL-reset database corruption bug', 'https://sqlite.org/wal.html#walresetbug'],
-  ['SQLite', 'https://en.wikipedia.org/wiki/SQLite'],
-  [
-    'agentscope-ai-java/sqlite-wal-doctor',
-    'https://github.com/agentscope-ai-java/sqlite-wal-doctor',
-  ],
-]
 // The lead tile first, then the six in reading order.
 const tiles = [
   ['Add 24 MCP tools to your agent', '/install#agents'],
@@ -49,10 +41,7 @@ const tiles = [
     <div class="run-block">
       <h1 id="hero-title">webular does web research from your own machine with no paid API. Copy one line and watch it spin up.</h1>
       <RunLine lines={['npx webular@0.3.2', 'search "sqlite wal"']} id="hero-command" label="Run this first" />
-      <ol class="search-rows" tabindex="0" aria-label="What search prints">
-        {rows.map(([title, url]) => <li>{title}<br />{url}</li>)}
-      </ol>
-      <p class="result-tag"><span class="tag-wide">Nice catch: 10 results in one go, 3 shown. No key, no sign-up.</span><span class="tag-narrow">Nice catch: 10 results, 2 shown. No key, no sign-up.</span></p>
+      <SearchRows />
       <h2 class="next">Next: plug the whole web into your agent.</h2>
       <RunLine command="npx webular@0.3.2 mcp" label="Add to your agent" />
       <p class="json-note">Add --json to any command. Same tidy JSON, every time.</p>

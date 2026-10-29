@@ -1,10 +1,12 @@
 ---
 // The web art: one inline SVG path, a tilted orb web with 12 spokes and 6
 // sagging rings, drawn at build time. `torn` drops one wedge for the 404 page.
+// `labeled` catches tags in the web: true for the home search domains, or a list
+// of names for the fixed spots (the torn web has one spot, at its middle).
 // Decorative only: hidden from assistive tech, and it never sits over text.
 interface Props {
   torn?: boolean
-  labeled?: boolean
+  labeled?: boolean | ReadonlyArray<string>
 }
 const { torn = false, labeled = false } = Astro.props
 const c = 340
@@ -22,17 +24,23 @@ const rings = [1, 2, 3, 4, 5, 6].map((k) => {
   return `M${at(0, r)}${legs.join('')}`
 })
 const d = [...spokes, ...rings].join('')
-// The domains the hero search hit, caught in the web: [name, x, y, tilt in degrees].
-// Only the home page shows them; narrow widths keep the first three.
-const catches: ReadonlyArray<readonly [string, number, number, number]> = labeled
-  ? [
-      ['sqlite.org', 120, 150, 4],
-      ['en.wikipedia.org', 330, 243, -3],
-      ['github.com', 58, 431, 2],
-      ['doi.org', 250, 515, -3],
-      ['philipotoole.com', 12, 556, 3],
+// The domains the hero search hit; narrow widths keep the first three tags.
+const domains = ['sqlite.org', 'en.wikipedia.org', 'github.com', 'doi.org', 'philipotoole.com']
+// Each spot: [x, y, tilt in degrees].
+const spots: ReadonlyArray<readonly [number, number, number]> = torn
+  ? [[210, 265, 3]]
+  : [
+      [120, 150, 4],
+      [330, 243, -3],
+      [58, 431, 2],
+      [250, 515, -3],
+      [12, 556, 3],
     ]
-  : []
+const names = labeled === true ? domains : labeled || []
+const catches = names.flatMap((name, i) => {
+  const spot = spots[i]
+  return spot ? [[name, ...spot] as const] : []
+})
 ---
 
 <svg class:list={['web-art', { torn }]} viewBox="0 0 680 600" aria-hidden="true" focusable="false">

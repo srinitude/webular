@@ -333,10 +333,6 @@ td {
   font-family: var(--font-mono);
   font-size: var(--code-size);
 }
-/* The docs index leads with its first step, "Start here", at the page title's size. */
-.docs-index .doc-body h2:first-of-type {
-  font-size: var(--h1-size);
-}
 .web-art {
   display: block;
   width: 100%;
@@ -358,23 +354,81 @@ td {
     transform: rotate(1deg);
   }
 }
-/* Install: the h1 and lead first, then the run line, then the rest of the doc. */
-.run-first {
-  display: flex;
-  flex-direction: column;
+/* Install, docs index, and 404: the landing's run hero with the page title one
+   step up, then cards with a title and one summary line, then the doc. */
+.page-hero h1 {
+  font-size: var(--h2-size);
 }
-.run-first > .doc-body {
-  display: contents;
+.run-block .kicker {
+  margin-bottom: 0;
+  font-family: var(--font-display);
+  font-size: var(--h3-size);
+  font-weight: var(--font-weight-bold);
 }
-.run-first > .doc-body > *,
-.run-first > :not(.doc-body, .run-line) {
-  order: 2;
+.doctor-rows {
+  padding-left: var(--space-16);
+  line-height: var(--line-height-code);
+  white-space: pre;
+  overflow-x: auto;
 }
-.run-first > .doc-body > h1,
-.run-first > .doc-body > h1 + p {
-  order: 0;
+.page-cards {
+  display: grid;
+  gap: var(--space-24);
+  margin: var(--section-gap) 0 0;
+  padding: 0;
+  list-style: none;
 }
-.run-first > .run-line {
-  order: 1;
-  margin-block: var(--space-16);
+.page-cards li {
+  display: grid;
+  gap: var(--space-24);
+}
+.page-cards a {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-24);
+  font-size: var(--body-size);
+  color: var(--theme-text);
+  text-decoration: none;
+  background: var(--theme-surface);
+  border: calc(var(--border-width) * 2) solid var(--theme-border);
+  border-radius: var(--space-4);
+}
+.page-cards strong {
+  font-family: var(--font-display);
+  font-size: var(--h3-size);
+}
+.page-cards .card-lead strong {
+  font-size: var(--h2-size);
+}
+.page-cards .card-lead span {
+  font-weight: var(--font-weight-bold);
+}
+.page-doc {
+  margin-top: var(--section-gap);
+}
+/* The hero already carries the page title and lead. */
+.page-doc .doc-body > h1,
+.page-doc .doc-body > h1 + p {
+  display: none;
+}
+.missing-hero h1 {
+  font-size: var(--text-3xl);
+}
+.run-block .missing-lead {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--h2-size);
+  line-height: var(--line-height-heading);
+}
+.home-link {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--size-tap-target);
+  padding: var(--space-12) var(--space-16);
+  font-family: var(--font-mono);
+  font-size: var(--body-size);
+  color: var(--theme-bg);
+  background: var(--theme-text);
+  text-decoration: none;
 }
