@@ -515,13 +515,14 @@ run = [
 ]
 
 [tasks."docs:build"]
-description = "Docs: build the Fumadocs site for webular.dev/docs into site-docs/out: pages from docs/*.md, then a static Next export with its search index"
-depends = ["setup"]
+description = "Docs: build webular.dev, then the Fumadocs docs (pages from docs/*.md, a static Next export with its search index) into site-docs/out, and publish them into site/dist/docs beside the site"
+depends = ["setup", "site:build"]
 dir = "{{config_root}}/site-docs"
 run = [
   "bun install --frozen-lockfile 1>&2",
   'bun "{{config_root}}/scripts/docs-content.ts"',
   'bun --bun "{{config_root}}/site-docs/node_modules/next/dist/bin/next" build 1>&2',
+  'bun "{{config_root}}/scripts/docs-content.ts" --publish',
 ]
 
 [tasks."docs:outputs"]
@@ -562,7 +563,7 @@ run = [
 
 [tasks."site:deploy"]
 description = "Site: deploy site/dist to Cloudflare Workers static assets for webular.dev and www.webular.dev (needs a signed-in wrangler; never in CI)"
-depends = ["site:build"]
+depends = ["docs:build"]
 dir = "{{config_root}}/site"
 run = 'bun "{{config_root}}/site/node_modules/wrangler/bin/wrangler.js" deploy'
 

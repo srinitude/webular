@@ -438,3 +438,4 @@
 {"path": "tests/release/AGENTS.md", "sha": "4db7e565a563f8477bb6c05a9f4631673a6c17f9d701b475e6f6891559de3f85", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/tasks.md", "sha": "25bd2bd1ae331cfba4e386b47530a07e3c413c60f35d8884938d1c7d3e509ecc", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "src/release/AGENTS.md", "sha": "bb95f4d1f542c0c74283bdcc01b8d645d9969e9e62b7ddf1eb771cd48fdc165c", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/tasks.md", "sha": "b4525bd6a2a878bcea026ec666370d1c1812db6fb78f1ef6ac250482d048e526", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}

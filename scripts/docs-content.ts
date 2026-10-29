@@ -162,6 +162,8 @@ const entry = (text: string, path: string) => {
 const publish = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem
   yield* copyExport(fs, `${ROOT}site-docs/out`, DIST)
+  // The export owns /docs: drop the Astro page, which would answer /docs ahead of docs/index.html.
+  yield* fs.remove(`${ROOT}site/dist/docs.html`, { force: true })
   const index: string[] = []
   const full: string[] = []
   const urls: string[] = []

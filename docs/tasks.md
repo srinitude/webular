@@ -28,7 +28,7 @@ ci: CI entry — single default dependency path (local + remote) [after validate
 clean: Delete build output (dist/) on every OS; never touches bench results, recordings, or caches
 compile:all: Cross-compile the webular executable for every Bun target into dist/bin (release path, off the check-only spine) [after build]
 default: Default path: a bare `mise run` runs the repo CI spine, the plugin chain, then the end-to-end run [after ci, plugin:ci, e2e]
-docs:build: Docs: build the Fumadocs site for webular.dev/docs into site-docs/out: pages from docs/*.md, then a static Next export with its search index [after setup]
+docs:build: Docs: build webular.dev, then the Fumadocs docs (pages from docs/*.md, a static Next export with its search index) into site-docs/out, and publish them into site/dist/docs beside the site [after setup, site:build]
 docs:chain:check: Docs: the readability-chain ledger rows, AGENTS.md rules, Markdown links, and the plugin's timeless wording all hold. A focused subset of `mise run test` [after setup]
 docs:dev: Docs: serve the Fumadocs site at localhost:3000/docs with live reload (pages from docs/*.md) [after setup]
 docs:facts: Docs: the facts in README.md and docs/install.md, and the repo and plugin descriptions, match the code. A focused subset of `mise run test` [after setup]
@@ -93,7 +93,7 @@ run:tasks: TASKS — introspect the mise task graph this CLI routes through [aft
 run:upgrade: UPGRADE — print (or with --yes, run) the command that upgrades this install [after setup]
 setup: Install pinned dependencies (frozen lockfile) — root of the universal task graph
 site:build: Site: build webular.dev into site/dist: tools.json from the live `webular mcp` tools/list, the Astro pages, then every .md twin and machine file [after setup]
-site:deploy: Site: deploy site/dist to Cloudflare Workers static assets for webular.dev and www.webular.dev (needs a signed-in wrangler; never in CI) [after site:build]
+site:deploy: Site: deploy site/dist to Cloudflare Workers static assets for webular.dev and www.webular.dev (needs a signed-in wrangler; never in CI) [after docs:build]
 site:dev: Site: serve webular.dev from site/src with live reload (writes tools.json first) [after setup]
 site:test: Site: on site/dist, no sideways scroll at 320 to 2560 px with the hero command on screen, zero serious or critical axe issues, and a home page under 100 KB gzip with no third-party script [after site:build]
 sync:check: Drift: every generated or mirrored file matches its source (dispatch table, bench docs, practices and rule files, skills and plugin tools, docs/tasks.md). A focused subset of `mise run test` [after build, plugin:bundle]
