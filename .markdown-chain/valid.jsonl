@@ -477,3 +477,5 @@
 {"path": "site/AGENTS.md", "sha": "6d5b680315e98616be161fbab67ee02e8d925d84a845c5fcffdca0136c8737cf"}
 {"path": "site/AGENTS.md", "sha": "8db6f7a7256893107db17b0034964e7531d8eda9963e2047fc81467e2003cf14", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "site/scripts/AGENTS.md", "sha": "267c75219a41264d3aa77e5552945fbc02bec42d23cb88a957e856c49892b290", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/content/commands.md", "sha": "e706c529c5261e8bf84b599f9c87872274438b9106dc8a900003ffae52596114", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/content/install.md", "sha": "d3041f7d8c64d78551a771a3469f3c1e31c2c72e6680b0ba674571172a66b4c2", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}

@@ -7,13 +7,13 @@ import WebArt from '../WebArt.astro'
 
 // What a real `webular doctor` run printed (design provenance/doctor.txt).
 const checks = [
-  ['bun', '1.3.14'],
+  ['bun', '1.4.3'],
   ['mise', '2026.10.18 macos-arm64'],
   ['node', 'v26.10.0'],
   ['network', 'HTTP 200'],
 ]
 const rows = checks.map(([name, detail]) => `${name.padEnd(9)}ok   ${detail}`).join('\n')
-const tags = ['bun 1.3.14', 'node v26.10.0', 'mise 2026.10.18', 'network HTTP 200', 'ok: true']
+const tags = ['bun 1.4.3', 'node v26.10.0', 'mise 2026.10.18', 'network HTTP 200', 'ok: true']
 const cards = [
   [
     'One-line install',
@@ -29,7 +29,7 @@ const cards = [
   [
     'Supported platforms',
     'Runs where Bun runs. doctor checks bun, node, and mise for you.',
-    '#platforms',
+    '#supported-platforms',
   ],
 ]
 ---
