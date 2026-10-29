@@ -11,11 +11,15 @@
 # "release-files" (no rebuild, so the SHA256SUMS bytes hold), attest the SBOM,
 # attest every file (actions/attest, Sigstore build provenance), and attach
 # them all, plus scripts/install.sh and scripts/install.ps1, to a DRAFT GitHub
-# release; nothing is attested or released until every test passes -> publish: one
-# npm package per target (webular-<key>, with os/cpu/libc fields), then the
-# root package that lists them as optionalDependencies, then un-draft the
-# release. Immutable releases lock assets on publish, so the release goes
-# public only after npm succeeds. Versions already on npm are skipped, so a
+# release; nothing is attested or released until every test passes -> smoke
+# runs each executable -> github-release: un-draft the release, so the GitHub
+# downloads and the install.sh and install.ps1 curl paths work without npm.
+# Immutable releases lock assets on publish, and every asset is attested and
+# smoke-tested first. -> publish (npm, last): one npm package per target
+# (webular-<key>, with os/cpu/libc fields), then the root package that lists
+# them as optionalDependencies. An npm failure never holds back the GitHub
+# release. homebrew, scoop, and docker follow github-release, not npm.
+# Versions already on npm are skipped, so a
 # rerun after a partial publish is safe. A prerelease tag (any tag with a "-")
 # publishes to the npm dist-tag `next` and marks the release as a prerelease;
 # a stable version below npm's current `latest` publishes to `maintenance` and
@@ -372,8 +376,43 @@ jobs:
           chmod +x smoke/*
           docker run --rm -e KEY -v "$PWD/smoke:/s:ro" alpine:3.22@sha256:d406446bc05b82480756ce8f1287964d28768c23955fa9480d2a74a2eae7a654 sh -ec 'apk add --no-cache libgcc libstdc++ && /s/webular-$KEY --version && /s/webular-$KEY --help'
 
-  publish:
+  # Un-draft the release once every asset is attested and smoke-tested, before
+  # and apart from npm, so a registry outage never holds back the GitHub
+  # downloads or the curl installers. A stable version below the current latest
+  # GitHub release (a backport) stays off `latest`.
+  github-release:
     needs: [assets, smoke]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5 # checkout, bun, and one release edit
+    outputs:
+      dist-tag: ${{ steps.tag.outputs.dist-tag }}
+    permissions:
+      contents: write # un-draft the release
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - name: Pick the release channel
+        id: tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          latest=$(gh release view --repo "$GITHUB_REPOSITORY" --json tagName --jq .tagName 2>/dev/null || true)
+          echo "dist-tag=$(bun src/release/dist-tag.ts "${GITHUB_REF_NAME#v}" "${latest#v}")" >> "$GITHUB_OUTPUT"
+      - name: Publish the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DIST_TAG: ${{ steps.tag.outputs.dist-tag }}
+        run: |
+          latest=; [ "$DIST_TAG" = latest ] || latest=--latest=false
+          gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --draft=false $latest
+
+  # npm runs last: only after the GitHub release is out.
+  publish:
+    needs: [assets, smoke, github-release]
     runs-on: ubuntu-latest
     environment: release
     # The build (typecheck chain) runs here, plus thirteen npm publishes (12
@@ -383,7 +422,7 @@ jobs:
     outputs:
       dist-tag: ${{ steps.tag.outputs.dist-tag }}
     permissions:
-      contents: write # read the draft release, then un-draft it
+      contents: read # download the published release files
       id-token: write # npm trusted publishing (OIDC) + provenance
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -467,13 +506,6 @@ jobs:
           done
           for pid in $pids; do wait "$pid"; done
           publish .
-      - name: Publish the GitHub release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          DIST_TAG: ${{ steps.tag.outputs.dist-tag }}
-        run: |
-          latest=; [ "$DIST_TAG" = latest ] || latest=--latest=false
-          gh release edit "$GITHUB_REF_NAME" --draft=false $latest
 
   # GitHub Packages: the same root and per-platform packages as npmjs.com,
   # renamed @srinitude/<name> for npm.pkg.github.com by package:github
@@ -485,7 +517,7 @@ jobs:
   # release binaries carry their own attestations. Versions already there are
   # skipped, so a rerun is safe.
   publish-github-packages:
-    needs: [assets, smoke]
+    needs: [assets, smoke, github-release]
     runs-on: ubuntu-latest
     timeout-minutes: 15 # the build chain plus nine publishes; no registry waits
     permissions:
@@ -560,8 +592,8 @@ jobs:
   # TAP_TOKEN is a fine-grained token with Contents read and write on the tap
   # and bucket repos only.
   homebrew:
-    needs: publish
-    if: ${{ needs.publish.outputs.dist-tag == 'latest' }}
+    needs: github-release
+    if: ${{ needs.github-release.outputs.dist-tag == 'latest' }}
     runs-on: ubuntu-latest
     timeout-minutes: 3
     env:
@@ -585,8 +617,8 @@ jobs:
 
   # Copies webular.json from the release into srinitude/scoop-webular.
   scoop:
-    needs: publish
-    if: ${{ needs.publish.outputs.dist-tag == 'latest' }}
+    needs: github-release
+    if: ${{ needs.github-release.outputs.dist-tag == 'latest' }}
     runs-on: ubuntu-latest
     timeout-minutes: 3
     env:
@@ -613,7 +645,7 @@ jobs:
   # moves :latest. QEMU runs the arm64 `apk add` step; the docker-container
   # builder from setup-buildx makes the two-platform push possible.
   docker:
-    needs: publish
+    needs: github-release
     runs-on: ubuntu-latest
     timeout-minutes: 15 # two-platform build, the arm64 half under QEMU
     permissions:
@@ -638,7 +670,7 @@ jobs:
         run: printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
       - name: Build and push ghcr.io/srinitude/webular for linux/amd64 and linux/arm64
         env:
-          DIST_TAG: ${{ needs.publish.outputs.dist-tag }}
+          DIST_TAG: ${{ needs.github-release.outputs.dist-tag }}
         run: |
           image=ghcr.io/srinitude/webular
           set -- -t "$image:${GITHUB_REF_NAME#v}"

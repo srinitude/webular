@@ -149,11 +149,20 @@ test('the tap and bucket jobs push only with TAP_TOKEN and only for latest', () 
     ['homebrew', 'srinitude/homebrew-webular'],
     ['scoop', 'srinitude/scoop-webular'],
   ] as const) {
-    expect(jobs[job]?.if).toContain("needs.publish.outputs.dist-tag == 'latest'")
+    expect(jobs[job]?.if).toContain("needs.github-release.outputs.dist-tag == 'latest'")
     const steps = jobs[job]?.steps ?? []
     expect(
       steps.some((s) => s.if === "env.GH_TOKEN == ''" && s.run?.includes('TAP_TOKEN is not set')),
     ).toBe(true)
     expect(steps.some((s) => s.if === "env.GH_TOKEN != ''" && s.run?.includes(repo))).toBe(true)
   }
+})
+
+test('the GitHub release goes out before and apart from npm', () => {
+  const needs = (job: string) => [(jobs[job] as { needs?: string | string[] })?.needs ?? []].flat()
+  for (const job of ['github-release', 'homebrew', 'scoop', 'docker'])
+    for (const npm of ['publish', 'publish-github-packages']) expect(needs(job)).not.toContain(npm)
+  expect(runs('github-release').join('\n')).toContain('--draft=false')
+  expect(runs('publish').join('\n')).not.toContain('--draft=false')
+  expect(needs('publish')).toContain('github-release')
 })

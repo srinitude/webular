@@ -72,7 +72,7 @@ test(
         release.indexOf('\n  publish:'),
         release.indexOf('\n  publish-github-packages:'),
       )
-      expect(publish).toMatch(/permissions:\n\s+contents: write[^\n]*\n\s+id-token: write/)
+      expect(publish).toMatch(/permissions:\n\s+contents: read[^\n]*\n\s+id-token: write/)
       for (const line of publish.match(/npm publish --[^\n]*/g) ?? [])
         expect(line).toContain('--provenance')
     }),
