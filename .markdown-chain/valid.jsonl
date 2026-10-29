@@ -432,3 +432,4 @@
 {"path": "site/AGENTS.md", "sha": "5aabb87b9bd04574e2c317967fca6d2d10621a78335d0f5c482189f27442191b"}
 {"path": "site/AGENTS.md", "sha": "5aabb87b9bd04574e2c317967fca6d2d10621a78335d0f5c482189f27442191b", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/quality/AGENTS.md", "sha": "9930534440fcb04bc50dad28db700a6767cd160d8d8013a2895e9e9b220a76c0", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/PROMOTE.md", "sha": "75e8faf37977fa66a6362a8c3d17bca7ce1b1e2cf6c75353ec884a06ad8add3f"}

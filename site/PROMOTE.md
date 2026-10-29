@@ -27,11 +27,19 @@ The upload prints no `Version Preview URL`, because [wrangler.jsonc](wrangler.js
 node node_modules/wrangler/bin/wrangler.js dev --local --ip 127.0.0.1 --port 8798
 ```
 
-In a second shell, run the page check from [Check after the promote](#check-after-the-promote) with `http://127.0.0.1:8798` as the host.
+In a second shell, run the page check from [Check after the promote](#check-after-the-promote) with `http://127.0.0.1:8798` as the only host. To do that, change the `for host in` line to `for host in http://127.0.0.1:8798; do`. Run the 404 check with the same host.
 
 ## Promote
 
-Send all traffic on webular.dev and www.webular.dev to the previewed upload. Put its `Worker Version ID` in place of `VERSION_ID`:
+Send all traffic on webular.dev and www.webular.dev to the previewed upload. In each command below, put its `Worker Version ID` in place of `VERSION_ID`.
+
+First, rehearse the step. This form changes nothing and ends with `--dry-run: exiting`:
+
+```bash
+bun node_modules/wrangler/bin/wrangler.js versions deploy VERSION_ID@100% --message "webular.dev redesign" --yes --dry-run
+```
+
+Then run the same command without `--dry-run` to promote:
 
 ```bash
 bun node_modules/wrangler/bin/wrangler.js versions deploy VERSION_ID@100% --message "webular.dev redesign" --yes
