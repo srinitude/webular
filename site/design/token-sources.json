@@ -1,2033 +1,2244 @@
 {
   "color.dark.bg": {
     "value": "#0E0F0C",
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://www.w3.org/TR/WCAG22/#contrast-minimum",
+    "date": "2026-10-29",
+    "support": "As the page behind color.dark.text (#ECEBE4) it gives 16.09:1, above the 4.5:1 of WCAG 2.2 SC 1.4.3 and the 7:1 of SC 1.4.6.",
+    "basis": "standard",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "color.dark.surface": {
     "value": "#17181A",
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. Its contrast against color.dark.bg is 1.08:1. It is a fill or divider, not text, so the 4.5:1 text rule does not cover it; WCAG 2.2 SC 1.4.11 asks 3:1 only for a boundary that identifies a control.",
-    "basis": "commit-and-rule"
+    "source": "https://www.w3.org/TR/WCAG22/#non-text-contrast",
+    "date": "2026-10-29",
+    "support": "Its contrast against color.dark.bg is 1.08:1. It is a fill or divider, not text, so the 4.5:1 text rule does not cover it; WCAG 2.2 SC 1.4.11 asks 3:1 only for a boundary that identifies a control.",
+    "basis": "standard",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "color.dark.text": {
     "value": "#ECEBE4",
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. Its contrast against color.dark.bg is 16.09:1, and the brief's text-contrast rule (WCAG 2.2 SC 1.4.3, design/webular-dev-2026-10-28/brief.json at afdad190) asks 4.5:1.",
-    "basis": "commit-and-rule"
+    "source": "design/webular-dev-2026-10-28/brief.json at afdad190",
+    "date": "2026-10-29",
+    "support": "Its contrast against color.dark.bg is 16.09:1, and the brief's text-contrast rule (WCAG 2.2 SC 1.4.3, design/webular-dev-2026-10-28/brief.json at afdad190) asks 4.5:1.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "color.dark.muted": {
     "value": "#A3A296",
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. Its contrast against color.dark.bg is 7.48:1, and the brief's text-contrast rule (WCAG 2.2 SC 1.4.3, design/webular-dev-2026-10-28/brief.json at afdad190) asks 4.5:1.",
-    "basis": "commit-and-rule"
+    "source": "design/webular-dev-2026-10-28/brief.json at afdad190",
+    "date": "2026-10-29",
+    "support": "Its contrast against color.dark.bg is 7.48:1, and the brief's text-contrast rule (WCAG 2.2 SC 1.4.3, design/webular-dev-2026-10-28/brief.json at afdad190) asks 4.5:1.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "color.dark.border": {
     "value": "#2A2B26",
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. Its contrast against color.dark.bg is 1.35:1. It is a fill or divider, not text, so the 4.5:1 text rule does not cover it; WCAG 2.2 SC 1.4.11 asks 3:1 only for a boundary that identifies a control.",
-    "basis": "commit-and-rule"
+    "source": "https://www.w3.org/TR/WCAG22/#non-text-contrast",
+    "date": "2026-10-29",
+    "support": "Its contrast against color.dark.bg is 1.35:1. It is a fill or divider, not text, so the 4.5:1 text rule does not cover it; WCAG 2.2 SC 1.4.11 asks 3:1 only for a boundary that identifies a control.",
+    "basis": "standard",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "color.dark.accent": {
     "value": "#F2B544",
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. Its contrast against color.dark.bg is 10.5:1, and the brief's text-contrast rule (WCAG 2.2 SC 1.4.3, design/webular-dev-2026-10-28/brief.json at afdad190) asks 4.5:1.",
-    "basis": "commit-and-rule"
+    "source": "design/webular-dev-2026-10-28/brief.json at afdad190",
+    "date": "2026-10-29",
+    "support": "Its contrast against color.dark.bg is 10.5:1, and the brief's text-contrast rule (WCAG 2.2 SC 1.4.3, design/webular-dev-2026-10-28/brief.json at afdad190) asks 4.5:1.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "color.dark.on-accent": {
     "value": "#0E0F0C",
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. Its contrast against color.dark.accent is 10.5:1, and the brief's text-contrast rule (WCAG 2.2 SC 1.4.3, design/webular-dev-2026-10-28/brief.json at afdad190) asks 4.5:1.",
-    "basis": "commit-and-rule"
+    "source": "design/webular-dev-2026-10-28/brief.json at afdad190",
+    "date": "2026-10-29",
+    "support": "Its contrast against color.dark.accent is 10.5:1, and the brief's text-contrast rule (WCAG 2.2 SC 1.4.3, design/webular-dev-2026-10-28/brief.json at afdad190) asks 4.5:1.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "color.dark.focus": {
     "value": "#F2B544",
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. Its contrast against color.dark.bg is 10.5:1, and the brief's text-contrast rule (WCAG 2.2 SC 1.4.3, design/webular-dev-2026-10-28/brief.json at afdad190) asks 4.5:1; WCAG 2.2 SC 1.4.11 asks 3:1 for a focus ring.",
-    "basis": "commit-and-rule"
+    "source": "design/webular-dev-2026-10-28/brief.json at afdad190",
+    "date": "2026-10-29",
+    "support": "Its contrast against color.dark.bg is 10.5:1, and the brief's text-contrast rule (WCAG 2.2 SC 1.4.3, design/webular-dev-2026-10-28/brief.json at afdad190) asks 4.5:1; WCAG 2.2 SC 1.4.11 asks 3:1 for a focus ring.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "color.light.bg": {
     "value": "#FAF9F4",
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://www.w3.org/TR/WCAG22/#contrast-minimum",
+    "date": "2026-10-29",
+    "support": "As the page behind color.light.text (#16170F) it gives 17.12:1, above the 4.5:1 of WCAG 2.2 SC 1.4.3 and the 7:1 of SC 1.4.6.",
+    "basis": "standard",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "color.light.surface": {
     "value": "#F0EEE6",
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. Its contrast against color.light.bg is 1.1:1. It is a fill or divider, not text, so the 4.5:1 text rule does not cover it; WCAG 2.2 SC 1.4.11 asks 3:1 only for a boundary that identifies a control.",
-    "basis": "commit-and-rule"
+    "source": "https://www.w3.org/TR/WCAG22/#non-text-contrast",
+    "date": "2026-10-29",
+    "support": "Its contrast against color.light.bg is 1.1:1. It is a fill or divider, not text, so the 4.5:1 text rule does not cover it; WCAG 2.2 SC 1.4.11 asks 3:1 only for a boundary that identifies a control.",
+    "basis": "standard",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "color.light.text": {
     "value": "#16170F",
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. Its contrast against color.light.bg is 17.12:1, and the brief's text-contrast rule (WCAG 2.2 SC 1.4.3, design/webular-dev-2026-10-28/brief.json at afdad190) asks 4.5:1.",
-    "basis": "commit-and-rule"
+    "source": "design/webular-dev-2026-10-28/brief.json at afdad190",
+    "date": "2026-10-29",
+    "support": "Its contrast against color.light.bg is 17.12:1, and the brief's text-contrast rule (WCAG 2.2 SC 1.4.3, design/webular-dev-2026-10-28/brief.json at afdad190) asks 4.5:1.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "color.light.muted": {
     "value": "#55554B",
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. Its contrast against color.light.bg is 7.15:1, and the brief's text-contrast rule (WCAG 2.2 SC 1.4.3, design/webular-dev-2026-10-28/brief.json at afdad190) asks 4.5:1.",
-    "basis": "commit-and-rule"
+    "source": "design/webular-dev-2026-10-28/brief.json at afdad190",
+    "date": "2026-10-29",
+    "support": "Its contrast against color.light.bg is 7.15:1, and the brief's text-contrast rule (WCAG 2.2 SC 1.4.3, design/webular-dev-2026-10-28/brief.json at afdad190) asks 4.5:1.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "color.light.border": {
     "value": "#D9D7CC",
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. Its contrast against color.light.bg is 1.37:1. It is a fill or divider, not text, so the 4.5:1 text rule does not cover it; WCAG 2.2 SC 1.4.11 asks 3:1 only for a boundary that identifies a control.",
-    "basis": "commit-and-rule"
+    "source": "https://www.w3.org/TR/WCAG22/#non-text-contrast",
+    "date": "2026-10-29",
+    "support": "Its contrast against color.light.bg is 1.37:1. It is a fill or divider, not text, so the 4.5:1 text rule does not cover it; WCAG 2.2 SC 1.4.11 asks 3:1 only for a boundary that identifies a control.",
+    "basis": "standard",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "color.light.accent": {
     "value": "#8C5A00",
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. Its contrast against color.light.bg is 5.57:1, and the brief's text-contrast rule (WCAG 2.2 SC 1.4.3, design/webular-dev-2026-10-28/brief.json at afdad190) asks 4.5:1.",
-    "basis": "commit-and-rule"
+    "source": "design/webular-dev-2026-10-28/brief.json at afdad190",
+    "date": "2026-10-29",
+    "support": "Its contrast against color.light.bg is 5.57:1, and the brief's text-contrast rule (WCAG 2.2 SC 1.4.3, design/webular-dev-2026-10-28/brief.json at afdad190) asks 4.5:1.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "color.light.on-accent": {
     "value": "#FAF9F4",
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. Its contrast against color.light.accent is 5.57:1, and the brief's text-contrast rule (WCAG 2.2 SC 1.4.3, design/webular-dev-2026-10-28/brief.json at afdad190) asks 4.5:1.",
-    "basis": "commit-and-rule"
+    "source": "design/webular-dev-2026-10-28/brief.json at afdad190",
+    "date": "2026-10-29",
+    "support": "Its contrast against color.light.accent is 5.57:1, and the brief's text-contrast rule (WCAG 2.2 SC 1.4.3, design/webular-dev-2026-10-28/brief.json at afdad190) asks 4.5:1.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "color.light.focus": {
     "value": "#8C5A00",
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. Its contrast against color.light.bg is 5.57:1, and the brief's text-contrast rule (WCAG 2.2 SC 1.4.3, design/webular-dev-2026-10-28/brief.json at afdad190) asks 4.5:1; WCAG 2.2 SC 1.4.11 asks 3:1 for a focus ring.",
-    "basis": "commit-and-rule"
+    "source": "design/webular-dev-2026-10-28/brief.json at afdad190",
+    "date": "2026-10-29",
+    "support": "Its contrast against color.light.bg is 5.57:1, and the brief's text-contrast rule (WCAG 2.2 SC 1.4.3, design/webular-dev-2026-10-28/brief.json at afdad190) asks 4.5:1; WCAG 2.2 SC 1.4.11 asks 3:1 for a focus ring.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "font.sans": {
-    "value": ["Public Sans", "system-ui", "sans-serif"],
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. Font license page https://github.com/uswds/public-sans/blob/develop/LICENSE.md, read 2026-10-29, says GSA waives copyright in its Public Sans font software modifications through the CC0 1.0 Universal public domain dedication. No design-loop decision row picks this family; the Catch Of The Day direction names Archivo Black.",
-    "basis": "commit-and-rule"
+    "value": [
+      "Public Sans",
+      "system-ui",
+      "sans-serif"
+    ],
+    "source": "https://github.com/uswds/public-sans/blob/develop/LICENSE.md",
+    "date": "2026-10-29",
+    "support": "Font license page https://github.com/uswds/public-sans/blob/develop/LICENSE.md, read 2026-10-29, says GSA waives copyright in its Public Sans font software modifications through the CC0 1.0 Universal public domain dedication. No design-loop decision row picks this family; the Catch Of The Day direction names Archivo Black.",
+    "basis": "license",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "font.mono": {
-    "value": ["JetBrains Mono", "ui-monospace", "monospace"],
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. Font license page https://github.com/JetBrains/JetBrainsMono/blob/master/OFL.txt, read 2026-10-29, licenses JetBrains Mono under the SIL Open Font License 1.1. No design-loop decision row picks this family; the Catch Of The Day direction names Space Mono.",
-    "basis": "commit-and-rule"
+    "value": [
+      "JetBrains Mono",
+      "ui-monospace",
+      "monospace"
+    ],
+    "source": "https://github.com/JetBrains/JetBrainsMono/blob/master/OFL.txt",
+    "date": "2026-10-29",
+    "support": "Font license page https://github.com/JetBrains/JetBrainsMono/blob/master/OFL.txt, read 2026-10-29, licenses JetBrains Mono under the SIL Open Font License 1.1. No design-loop decision row picks this family; the Catch Of The Day direction names Space Mono.",
+    "basis": "license",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "line-height.body": {
     "value": 1.5,
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://www.w3.org/TR/WCAG22/#visual-presentation",
+    "date": "2026-10-29",
+    "support": "WCAG 2.2 SC 1.4.8 asks line spacing of at least space-and-a-half (1.5) within paragraphs; 1.5 meets it exactly.",
+    "basis": "standard",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "line-height.heading": {
     "value": 1.15,
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "status": "unsourced",
+    "reason": "No read source names a heading line height: WCAG 2.2 SC 1.4.8 and 1.4.12 set floors for body text, and the Material and Apple pages read give no heading ratio.",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "line-height.code": {
     "value": 1.6,
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://www.w3.org/TR/WCAG22/#visual-presentation",
+    "date": "2026-10-29",
+    "support": "WCAG 2.2 SC 1.4.8 asks line spacing of at least 1.5 within paragraphs; 1.6 clears it.",
+    "basis": "standard",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "space.4": {
     "value": {
       "value": 4,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 puts every Pen padding on this space scale and says no new step was needed.",
-    "basis": "commit-and-rule"
+    "source": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190",
+    "date": "2026-10-29",
+    "support": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 puts every Pen padding on this space scale and says no new step was needed.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "space.8": {
     "value": {
       "value": 8,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 puts every Pen padding on this space scale and says no new step was needed.",
-    "basis": "commit-and-rule"
+    "source": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190",
+    "date": "2026-10-29",
+    "support": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 puts every Pen padding on this space scale and says no new step was needed.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "space.12": {
     "value": {
       "value": 12,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 puts every Pen padding on this space scale and says no new step was needed.",
-    "basis": "commit-and-rule"
+    "source": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190",
+    "date": "2026-10-29",
+    "support": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 puts every Pen padding on this space scale and says no new step was needed.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "space.16": {
     "value": {
       "value": 16,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 puts every Pen padding on this space scale and says no new step was needed.",
-    "basis": "commit-and-rule"
+    "source": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190",
+    "date": "2026-10-29",
+    "support": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 puts every Pen padding on this space scale and says no new step was needed.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "space.24": {
     "value": {
       "value": 24,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 puts every Pen padding on this space scale and says no new step was needed.",
-    "basis": "commit-and-rule"
+    "source": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190",
+    "date": "2026-10-29",
+    "support": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 puts every Pen padding on this space scale and says no new step was needed.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "space.32": {
     "value": {
       "value": 32,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 puts every Pen padding on this space scale and says no new step was needed.",
-    "basis": "commit-and-rule"
+    "source": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190",
+    "date": "2026-10-29",
+    "support": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 puts every Pen padding on this space scale and says no new step was needed.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "space.48": {
     "value": {
       "value": 48,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 puts every Pen padding on this space scale and says no new step was needed.",
-    "basis": "commit-and-rule"
+    "source": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190",
+    "date": "2026-10-29",
+    "support": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 puts every Pen padding on this space scale and says no new step was needed.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "space.64": {
     "value": {
       "value": 64,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 puts every Pen padding on this space scale and says no new step was needed.",
-    "basis": "commit-and-rule"
+    "source": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190",
+    "date": "2026-10-29",
+    "support": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 puts every Pen padding on this space scale and says no new step was needed.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "space.96": {
     "value": {
       "value": 96,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 puts every Pen padding on this space scale and says no new step was needed.",
-    "basis": "commit-and-rule"
+    "source": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190",
+    "date": "2026-10-29",
+    "support": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 puts every Pen padding on this space scale and says no new step was needed.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "radius.control": {
     "value": {
       "value": 6,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 binds the Pen corner radii to radius-control and radius-box.",
-    "basis": "commit-and-rule"
+    "source": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190",
+    "date": "2026-10-29",
+    "support": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 binds the Pen corner radii to radius-control and radius-box.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "radius.box": {
     "value": {
       "value": 8,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 binds the Pen corner radii to radius-control and radius-box.",
-    "basis": "commit-and-rule"
+    "source": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190",
+    "date": "2026-10-29",
+    "support": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 binds the Pen corner radii to radius-control and radius-box.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "size.tap-target": {
     "value": {
       "value": 44,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. 44 px clears the 24 by 24 CSS px floor in the brief's copy-button rule (WCAG 2.2 SC 2.5.8, design/webular-dev-2026-10-28/brief.json at afdad190), and design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds size-tap-target at the same value.",
-    "basis": "commit-and-rule"
+    "source": "design/webular-dev-2026-10-28/brief.json at afdad190",
+    "date": "2026-10-29",
+    "support": "44 px clears the 24 by 24 CSS px floor in the brief's copy-button rule (WCAG 2.2 SC 2.5.8, design/webular-dev-2026-10-28/brief.json at afdad190), and design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds size-tap-target at the same value.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "size.header": {
     "value": {
       "value": 56,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 56 px is 7 steps of 8. No read source names 56 px as a header height.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "size.header-landscape": {
     "value": {
       "value": 48,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 48 px is 6 steps of 8. No read source names 48 px as a landscape header height.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "size.sidebar": {
     "value": {
       "value": 240,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 240 px is 30 steps of 8. No read source names 240 px as a sidebar width.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "size.on-this-page": {
     "value": {
       "value": 200,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 200 px is 25 steps of 8. No read source names 200 px as the on-this-page column width.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "size.copy-button": {
     "value": {
       "value": 64,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html",
+    "date": "2026-10-29",
+    "support": "WCAG 2.2 SC 2.5.8 asks a pointer target of at least 24 by 24 CSS px; 64 px clears it and is 8 steps of the Material 8 dp grid.",
+    "basis": "standard",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.320.gutter": {
     "value": {
       "value": 16,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m3.material.io/foundations/layout/breakpoints/compact",
+    "date": "2026-10-29",
+    "support": "Material 3 gives compact windows (under 600 dp) 16 dp margins; this 320 px viewport gets 16 px, and design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds gutter 16 px.",
+    "basis": "guideline",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.320.content": {
     "value": {
       "value": 288,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m3.material.io/foundations/layout/breakpoints/compact",
+    "date": "2026-10-29",
+    "support": "288 px is the 320 px viewport minus two 16 px gutters, and that gutter is the Material margin for this width.",
+    "basis": "derived",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.320.h1": {
     "value": {
       "value": 28,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Title 1 at 28 pt at the default Large size; design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds h1-size 28 px.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.320.body": {
     "value": {
       "value": 16,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/typography/the-type-system.html",
+    "date": "2026-10-29",
+    "support": "The Material type scale sets Body 1 at 16; design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds body-size 16 px.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.320.mono": {
     "value": {
       "value": 14,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/typography/the-type-system.html",
+    "date": "2026-10-29",
+    "support": "The Material type scale sets Body 2 at 14; design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds code-size 14 px.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.320.section-gap": {
     "value": {
       "value": 64,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 64 px is 8 steps of 8. No read source names 64 px as a section gap.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.360.gutter": {
     "value": {
       "value": 16,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m3.material.io/foundations/layout/breakpoints/compact",
+    "date": "2026-10-29",
+    "support": "Material 3 gives compact windows (under 600 dp) 16 dp margins; this 360 px viewport gets 16 px, and design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds gutter 16 px.",
+    "basis": "guideline",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.360.content": {
     "value": {
       "value": 328,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m3.material.io/foundations/layout/breakpoints/compact",
+    "date": "2026-10-29",
+    "support": "328 px is the 360 px viewport minus two 16 px gutters, and that gutter is the Material margin for this width.",
+    "basis": "derived",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.360.h1": {
     "value": {
       "value": 30,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "status": "unsourced",
+    "reason": "No read type scale has a 30 px h1 step (Material: Body 1 16, Body 2 14, H3 48, H4 34; Apple: Body 17, Subhead 15, Title 1 28, Large Title 34), and 30 is off the Material 4 dp type grid.",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.360.body": {
     "value": {
       "value": 16,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/typography/the-type-system.html",
+    "date": "2026-10-29",
+    "support": "The Material type scale sets Body 1 at 16; design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds body-size 16 px.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.360.mono": {
     "value": {
       "value": 14,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/typography/the-type-system.html",
+    "date": "2026-10-29",
+    "support": "The Material type scale sets Body 2 at 14; design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds code-size 14 px.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.360.section-gap": {
     "value": {
       "value": 64,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 64 px is 8 steps of 8. No read source names 64 px as a section gap.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.375.gutter": {
     "value": {
       "value": 16,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m3.material.io/foundations/layout/breakpoints/compact",
+    "date": "2026-10-29",
+    "support": "Material 3 gives compact windows (under 600 dp) 16 dp margins; this 375 px viewport gets 16 px, and design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds gutter 16 px.",
+    "basis": "guideline",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.375.content": {
     "value": {
       "value": 343,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m3.material.io/foundations/layout/breakpoints/compact",
+    "date": "2026-10-29",
+    "support": "343 px is the 375 px viewport minus two 16 px gutters, and that gutter is the Material margin for this width.",
+    "basis": "derived",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.375.h1": {
     "value": {
       "value": 32,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says type can align to a 4 dp grid; 32 px is 8 steps of 4. No read type scale names 32 as a step.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.375.body": {
     "value": {
       "value": 16,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/typography/the-type-system.html",
+    "date": "2026-10-29",
+    "support": "The Material type scale sets Body 1 at 16; design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds body-size 16 px.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.375.mono": {
     "value": {
       "value": 14,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/typography/the-type-system.html",
+    "date": "2026-10-29",
+    "support": "The Material type scale sets Body 2 at 14; design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds code-size 14 px.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.375.section-gap": {
     "value": {
       "value": 64,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 64 px is 8 steps of 8. No read source names 64 px as a section gap.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.390.gutter": {
     "value": {
       "value": 16,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m3.material.io/foundations/layout/breakpoints/compact",
+    "date": "2026-10-29",
+    "support": "Material 3 gives compact windows (under 600 dp) 16 dp margins; this 390 px viewport gets 16 px, and design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds gutter 16 px.",
+    "basis": "guideline",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.390.content": {
     "value": {
       "value": 358,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m3.material.io/foundations/layout/breakpoints/compact",
+    "date": "2026-10-29",
+    "support": "358 px is the 390 px viewport minus two 16 px gutters, and that gutter is the Material margin for this width.",
+    "basis": "derived",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.390.h1": {
     "value": {
       "value": 32,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says type can align to a 4 dp grid; 32 px is 8 steps of 4. No read type scale names 32 as a step.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.390.body": {
     "value": {
       "value": 16,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/typography/the-type-system.html",
+    "date": "2026-10-29",
+    "support": "The Material type scale sets Body 1 at 16; design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds body-size 16 px.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.390.mono": {
     "value": {
       "value": 14,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/typography/the-type-system.html",
+    "date": "2026-10-29",
+    "support": "The Material type scale sets Body 2 at 14; design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds code-size 14 px.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.390.section-gap": {
     "value": {
       "value": 64,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 64 px is 8 steps of 8. No read source names 64 px as a section gap.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.414.gutter": {
     "value": {
       "value": 16,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m3.material.io/foundations/layout/breakpoints/compact",
+    "date": "2026-10-29",
+    "support": "Material 3 gives compact windows (under 600 dp) 16 dp margins; this 414 px viewport gets 16 px, and design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds gutter 16 px.",
+    "basis": "guideline",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.414.content": {
     "value": {
       "value": 382,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m3.material.io/foundations/layout/breakpoints/compact",
+    "date": "2026-10-29",
+    "support": "382 px is the 414 px viewport minus two 16 px gutters, and that gutter is the Material margin for this width.",
+    "basis": "derived",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.414.h1": {
     "value": {
       "value": 34,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Large Title at 34 pt at the default Large size; the Material type scale sets Headline 4 at 34.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.414.body": {
     "value": {
       "value": 16,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/typography/the-type-system.html",
+    "date": "2026-10-29",
+    "support": "The Material type scale sets Body 1 at 16; design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds body-size 16 px.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.414.mono": {
     "value": {
       "value": 14,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/typography/the-type-system.html",
+    "date": "2026-10-29",
+    "support": "The Material type scale sets Body 2 at 14; design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds code-size 14 px.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.414.section-gap": {
     "value": {
       "value": 64,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 64 px is 8 steps of 8. No read source names 64 px as a section gap.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.430.gutter": {
     "value": {
       "value": 16,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m3.material.io/foundations/layout/breakpoints/compact",
+    "date": "2026-10-29",
+    "support": "Material 3 gives compact windows (under 600 dp) 16 dp margins; this 430 px viewport gets 16 px, and design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds gutter 16 px.",
+    "basis": "guideline",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.430.content": {
     "value": {
       "value": 398,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m3.material.io/foundations/layout/breakpoints/compact",
+    "date": "2026-10-29",
+    "support": "398 px is the 430 px viewport minus two 16 px gutters, and that gutter is the Material margin for this width.",
+    "basis": "derived",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.430.h1": {
     "value": {
       "value": 36,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says type can align to a 4 dp grid; 36 px is 9 steps of 4. No read type scale names 36 as a step.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.430.body": {
     "value": {
       "value": 16,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/typography/the-type-system.html",
+    "date": "2026-10-29",
+    "support": "The Material type scale sets Body 1 at 16; design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds body-size 16 px.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.430.mono": {
     "value": {
       "value": 14,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/typography/the-type-system.html",
+    "date": "2026-10-29",
+    "support": "The Material type scale sets Body 2 at 14; design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds code-size 14 px.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.430.section-gap": {
     "value": {
       "value": 64,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 64 px is 8 steps of 8. No read source names 64 px as a section gap.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.600.gutter": {
     "value": {
       "value": 24,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m3.material.io/foundations/layout/breakpoints/medium",
+    "date": "2026-10-29",
+    "support": "Material 3 gives medium layouts (600 dp and up) 24 dp margins; this 600 px viewport gets 24 px.",
+    "basis": "guideline",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.600.content": {
     "value": {
       "value": 552,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m3.material.io/foundations/layout/breakpoints/medium",
+    "date": "2026-10-29",
+    "support": "552 px is the 600 px viewport minus two 24 px gutters, and that gutter is the Material margin for this width.",
+    "basis": "derived",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.600.h1": {
     "value": {
       "value": 36,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says type can align to a 4 dp grid; 36 px is 9 steps of 4. No read type scale names 36 as a step.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.600.body": {
     "value": {
       "value": 16,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/typography/the-type-system.html",
+    "date": "2026-10-29",
+    "support": "The Material type scale sets Body 1 at 16; design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds body-size 16 px.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.600.mono": {
     "value": {
       "value": 15,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Subhead at 15 pt at the default Large size.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.600.section-gap": {
     "value": {
       "value": 64,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 64 px is 8 steps of 8. No read source names 64 px as a section gap.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.768.gutter": {
     "value": {
       "value": 32,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/responsive-layout-grid.html",
+    "date": "2026-10-29",
+    "support": "The Material 2 responsive layout grid gives 600 to 904 dp screens 32 dp margins; this 768 px viewport gets 32 px.",
+    "basis": "guideline",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.768.content": {
     "value": {
       "value": 704,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/responsive-layout-grid.html",
+    "date": "2026-10-29",
+    "support": "704 px is the 768 px viewport minus two 32 px gutters, and that gutter is the Material margin for this width.",
+    "basis": "derived",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.768.h1": {
     "value": {
       "value": 40,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says type can align to a 4 dp grid; 40 px is 10 steps of 4. No read type scale names 40 as a step.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.768.body": {
     "value": {
       "value": 17,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Body at 17 pt at the default Large size and calls 17 pt the default text size.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.768.mono": {
     "value": {
       "value": 15,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Subhead at 15 pt at the default Large size.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.768.section-gap": {
     "value": {
       "value": 64,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 64 px is 8 steps of 8. No read source names 64 px as a section gap.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.820.gutter": {
     "value": {
       "value": 32,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/responsive-layout-grid.html",
+    "date": "2026-10-29",
+    "support": "The Material 2 responsive layout grid gives 600 to 904 dp screens 32 dp margins; this 820 px viewport gets 32 px.",
+    "basis": "guideline",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.820.content": {
     "value": {
       "value": 756,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/responsive-layout-grid.html",
+    "date": "2026-10-29",
+    "support": "756 px is the 820 px viewport minus two 32 px gutters, and that gutter is the Material margin for this width.",
+    "basis": "derived",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.820.h1": {
     "value": {
       "value": 40,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says type can align to a 4 dp grid; 40 px is 10 steps of 4. No read type scale names 40 as a step.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.820.body": {
     "value": {
       "value": 17,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Body at 17 pt at the default Large size and calls 17 pt the default text size.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.820.mono": {
     "value": {
       "value": 15,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Subhead at 15 pt at the default Large size.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.820.section-gap": {
     "value": {
       "value": 64,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 64 px is 8 steps of 8. No read source names 64 px as a section gap.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.1024.gutter": {
     "value": {
       "value": 32,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 32 px is 4 steps of 8. No read source names 32 px as the gutter at 1024 px (the Material 2 grid lets margins scale above 904 dp).",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.1024.content": {
     "value": {
       "value": 960,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/responsive-layout-grid.html",
+    "date": "2026-10-29",
+    "support": "960 px is the 1024 px viewport minus two 32 px gutters, and that gutter is the Material margin for this width.",
+    "basis": "derived",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.1024.h1": {
     "value": {
       "value": 44,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says type can align to a 4 dp grid; 44 px is 11 steps of 4. No read type scale names 44 as a step.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.1024.body": {
     "value": {
       "value": 17,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Body at 17 pt at the default Large size and calls 17 pt the default text size.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.1024.mono": {
     "value": {
       "value": 15,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Subhead at 15 pt at the default Large size.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.1024.section-gap": {
     "value": {
       "value": 64,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 64 px is 8 steps of 8. No read source names 64 px as a section gap.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.1280.gutter": {
     "value": {
       "value": 32,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 32 px is 4 steps of 8. No read source names 32 px as the gutter at 1280 px (the Material 2 grid lets margins scale above 904 dp).",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.1280.content": {
     "value": {
       "value": 1120,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 1120 px is 140 steps of 8. No read source names 1120 px as the content cap at 1280 px.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.1280.h1": {
     "value": {
       "value": 44,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says type can align to a 4 dp grid; 44 px is 11 steps of 4. No read type scale names 44 as a step.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.1280.body": {
     "value": {
       "value": 17,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Body at 17 pt at the default Large size and calls 17 pt the default text size.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.1280.mono": {
     "value": {
       "value": 15,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Subhead at 15 pt at the default Large size.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.1280.section-gap": {
     "value": {
       "value": 64,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 64 px is 8 steps of 8. No read source names 64 px as a section gap.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.1440.gutter": {
     "value": {
       "value": 32,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 32 px is 4 steps of 8. No read source names 32 px as the gutter at 1440 px (the Material 2 grid lets margins scale above 904 dp).",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.1440.content": {
     "value": {
       "value": 1200,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 1200 px is 150 steps of 8. No read source names 1200 px as the content cap at 1440 px.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.1440.h1": {
     "value": {
       "value": 48,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/typography/the-type-system.html",
+    "date": "2026-10-29",
+    "support": "The Material type scale sets Headline 3 at 48.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.1440.body": {
     "value": {
       "value": 17,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Body at 17 pt at the default Large size and calls 17 pt the default text size.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.1440.mono": {
     "value": {
       "value": 15,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Subhead at 15 pt at the default Large size.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.1440.section-gap": {
     "value": {
       "value": 64,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 64 px is 8 steps of 8. No read source names 64 px as a section gap.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.1920.gutter": {
     "value": {
       "value": 32,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 32 px is 4 steps of 8. No read source names 32 px as the gutter at 1920 px (the Material 2 grid lets margins scale above 904 dp).",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.1920.content": {
     "value": {
       "value": 1200,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 1200 px is 150 steps of 8. No read source names 1200 px as the content cap at 1920 px.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.1920.h1": {
     "value": {
       "value": 48,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/typography/the-type-system.html",
+    "date": "2026-10-29",
+    "support": "The Material type scale sets Headline 3 at 48.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.1920.body": {
     "value": {
       "value": 17,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Body at 17 pt at the default Large size and calls 17 pt the default text size.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.1920.mono": {
     "value": {
       "value": 15,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Subhead at 15 pt at the default Large size.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.1920.section-gap": {
     "value": {
       "value": 96,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 96 px is 12 steps of 8. No read source names 96 px as a section gap.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.2560.gutter": {
     "value": {
       "value": 32,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 32 px is 4 steps of 8. No read source names 32 px as the gutter at 2560 px (the Material 2 grid lets margins scale above 904 dp).",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.2560.content": {
     "value": {
       "value": 1320,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 1320 px is 165 steps of 8. No read source names 1320 px as the content cap at 2560 px.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.2560.h1": {
     "value": {
       "value": 56,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says type can align to a 4 dp grid; 56 px is 14 steps of 4. No read type scale names 56 as a step.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.2560.body": {
     "value": {
       "value": 18,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "status": "unsourced",
+    "reason": "No read type scale has a 18 px body step (Material: Body 1 16, Body 2 14, H3 48, H4 34; Apple: Body 17, Subhead 15, Title 1 28, Large Title 34), and 18 is off the Material 4 dp type grid.",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.2560.mono": {
     "value": {
       "value": 15,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Subhead at 15 pt at the default Large size.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "breakpoint.2560.section-gap": {
     "value": {
       "value": 96,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)",
-    "date": "2026-10-22",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 96 px is 12 steps of 8. No read source names 96 px as a section gap.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 42dea1e2 (feat(site): apply the Pen design tokens and layout spec)"
   },
   "motion.quick": {
     "value": {
       "value": 120,
       "unit": "ms"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. No design-loop decision row, contrast rule, type-scale method, font license page, or grid rule names this value, so the commit is its only source.",
-    "basis": "commit-only"
+    "source": "https://www.nngroup.com/articles/animation-duration/",
+    "date": "2026-10-29",
+    "support": "NN/g says simple feedback animations should take about 100 ms and most animations 100 to 500 ms; 120 ms sits at the quick end of that range. No source names 120 ms.",
+    "basis": "guideline",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "primitive.palette.caution-yellow": {
     "value": "#FFD400",
-    "source": "site/design/tokens.json at commit 37c98a85 (site: emit semantic light and dark tokens and theme the docs from them)",
+    "source": "design/webular-dev-2026-10-28/rationale.md at afdad190",
     "date": "2026-10-29",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/rationale.md at afdad190 picks Concept 4, Catch Of The Day, in \"Caution yellow and black\", and design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds the same hex as color-palette-caution-yellow.",
-    "basis": "commit-and-rule"
+    "support": "design/webular-dev-2026-10-28/rationale.md at afdad190 picks Concept 4, Catch Of The Day, in \"Caution yellow and black\", and design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds the same hex as color-palette-caution-yellow.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 37c98a85 (site: emit semantic light and dark tokens and theme the docs from them)"
   },
   "primitive.palette.ink": {
     "value": "#111111",
-    "source": "site/design/tokens.json at commit 37c98a85 (site: emit semantic light and dark tokens and theme the docs from them)",
+    "source": "design/webular-dev-2026-10-28/rationale.md at afdad190",
     "date": "2026-10-29",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/rationale.md at afdad190 picks Concept 4, Catch Of The Day, in \"Caution yellow and black\", and design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds the same hex as color-palette-ink.",
-    "basis": "commit-and-rule"
+    "support": "design/webular-dev-2026-10-28/rationale.md at afdad190 picks Concept 4, Catch Of The Day, in \"Caution yellow and black\", and design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds the same hex as color-palette-ink.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 37c98a85 (site: emit semantic light and dark tokens and theme the docs from them)"
   },
   "primitive.palette.paper": {
     "value": "#FFFFFF",
-    "source": "site/design/tokens.json at commit 37c98a85 (site: emit semantic light and dark tokens and theme the docs from them)",
+    "source": "design/webular-dev-2026-10-28/rationale.md at afdad190",
     "date": "2026-10-29",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/rationale.md at afdad190 picks Concept 4, Catch Of The Day, in \"Caution yellow and black\", and design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds the same hex as color-palette-paper.",
-    "basis": "commit-and-rule"
+    "support": "design/webular-dev-2026-10-28/rationale.md at afdad190 picks Concept 4, Catch Of The Day, in \"Caution yellow and black\", and design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds the same hex as color-palette-paper.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 37c98a85 (site: emit semantic light and dark tokens and theme the docs from them)"
   },
   "primitive.palette.char": {
     "value": "#22242A",
-    "source": "site/design/tokens.json at commit 37c98a85 (site: emit semantic light and dark tokens and theme the docs from them)",
+    "source": "design/webular-dev-2026-10-28/rationale.md at afdad190",
     "date": "2026-10-29",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/rationale.md at afdad190 picks Concept 4, Catch Of The Day, in \"Caution yellow and black\", and design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds the same hex as color-palette-char.",
-    "basis": "commit-and-rule"
+    "support": "design/webular-dev-2026-10-28/rationale.md at afdad190 picks Concept 4, Catch Of The Day, in \"Caution yellow and black\", and design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds the same hex as color-palette-char.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 37c98a85 (site: emit semantic light and dark tokens and theme the docs from them)"
   },
   "semantic.light.page": {
     "value": "{primitive.palette.caution-yellow}",
-    "source": "site/design/tokens.json at commit 37c98a85 (site: emit semantic light and dark tokens and theme the docs from them)",
+    "source": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190",
     "date": "2026-10-29",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 records the mapping decision: semantic-light-page, -ink, -card, -strand and semantic-dark-page, -ink, -card, -strand replace fill-ffd400, fill-111111, fill-ffffff, fill-22242a, chosen by each frame's theme.",
-    "basis": "commit-and-rule"
+    "support": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 records the mapping decision: semantic-light-page, -ink, -card, -strand and semantic-dark-page, -ink, -card, -strand replace fill-ffd400, fill-111111, fill-ffffff, fill-22242a, chosen by each frame's theme.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 37c98a85 (site: emit semantic light and dark tokens and theme the docs from them)"
   },
   "semantic.light.ink": {
     "value": "{primitive.palette.ink}",
-    "source": "site/design/tokens.json at commit 37c98a85 (site: emit semantic light and dark tokens and theme the docs from them)",
+    "source": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190",
     "date": "2026-10-29",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 records the mapping decision: semantic-light-page, -ink, -card, -strand and semantic-dark-page, -ink, -card, -strand replace fill-ffd400, fill-111111, fill-ffffff, fill-22242a, chosen by each frame's theme.",
-    "basis": "commit-and-rule"
+    "support": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 records the mapping decision: semantic-light-page, -ink, -card, -strand and semantic-dark-page, -ink, -card, -strand replace fill-ffd400, fill-111111, fill-ffffff, fill-22242a, chosen by each frame's theme.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 37c98a85 (site: emit semantic light and dark tokens and theme the docs from them)"
   },
   "semantic.light.card": {
     "value": "{primitive.palette.paper}",
-    "source": "site/design/tokens.json at commit 37c98a85 (site: emit semantic light and dark tokens and theme the docs from them)",
+    "source": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190",
     "date": "2026-10-29",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 records the mapping decision: semantic-light-page, -ink, -card, -strand and semantic-dark-page, -ink, -card, -strand replace fill-ffd400, fill-111111, fill-ffffff, fill-22242a, chosen by each frame's theme.",
-    "basis": "commit-and-rule"
+    "support": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 records the mapping decision: semantic-light-page, -ink, -card, -strand and semantic-dark-page, -ink, -card, -strand replace fill-ffd400, fill-111111, fill-ffffff, fill-22242a, chosen by each frame's theme.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 37c98a85 (site: emit semantic light and dark tokens and theme the docs from them)"
   },
   "semantic.light.strand": {
     "value": "{primitive.palette.ink}",
-    "source": "site/design/tokens.json at commit 37c98a85 (site: emit semantic light and dark tokens and theme the docs from them)",
+    "source": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190",
     "date": "2026-10-29",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 records the mapping decision: semantic-light-page, -ink, -card, -strand and semantic-dark-page, -ink, -card, -strand replace fill-ffd400, fill-111111, fill-ffffff, fill-22242a, chosen by each frame's theme.",
-    "basis": "commit-and-rule"
+    "support": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 records the mapping decision: semantic-light-page, -ink, -card, -strand and semantic-dark-page, -ink, -card, -strand replace fill-ffd400, fill-111111, fill-ffffff, fill-22242a, chosen by each frame's theme.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 37c98a85 (site: emit semantic light and dark tokens and theme the docs from them)"
   },
   "semantic.dark.page": {
     "value": "{primitive.palette.ink}",
-    "source": "site/design/tokens.json at commit 37c98a85 (site: emit semantic light and dark tokens and theme the docs from them)",
+    "source": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190",
     "date": "2026-10-29",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 records the mapping decision: semantic-light-page, -ink, -card, -strand and semantic-dark-page, -ink, -card, -strand replace fill-ffd400, fill-111111, fill-ffffff, fill-22242a, chosen by each frame's theme.",
-    "basis": "commit-and-rule"
+    "support": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 records the mapping decision: semantic-light-page, -ink, -card, -strand and semantic-dark-page, -ink, -card, -strand replace fill-ffd400, fill-111111, fill-ffffff, fill-22242a, chosen by each frame's theme.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 37c98a85 (site: emit semantic light and dark tokens and theme the docs from them)"
   },
   "semantic.dark.ink": {
     "value": "{primitive.palette.caution-yellow}",
-    "source": "site/design/tokens.json at commit 37c98a85 (site: emit semantic light and dark tokens and theme the docs from them)",
+    "source": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190",
     "date": "2026-10-29",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 records the mapping decision: semantic-light-page, -ink, -card, -strand and semantic-dark-page, -ink, -card, -strand replace fill-ffd400, fill-111111, fill-ffffff, fill-22242a, chosen by each frame's theme.",
-    "basis": "commit-and-rule"
+    "support": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 records the mapping decision: semantic-light-page, -ink, -card, -strand and semantic-dark-page, -ink, -card, -strand replace fill-ffd400, fill-111111, fill-ffffff, fill-22242a, chosen by each frame's theme.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 37c98a85 (site: emit semantic light and dark tokens and theme the docs from them)"
   },
   "semantic.dark.card": {
     "value": "{primitive.palette.char}",
-    "source": "site/design/tokens.json at commit 37c98a85 (site: emit semantic light and dark tokens and theme the docs from them)",
+    "source": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190",
     "date": "2026-10-29",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 records the mapping decision: semantic-light-page, -ink, -card, -strand and semantic-dark-page, -ink, -card, -strand replace fill-ffd400, fill-111111, fill-ffffff, fill-22242a, chosen by each frame's theme.",
-    "basis": "commit-and-rule"
+    "support": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 records the mapping decision: semantic-light-page, -ink, -card, -strand and semantic-dark-page, -ink, -card, -strand replace fill-ffd400, fill-111111, fill-ffffff, fill-22242a, chosen by each frame's theme.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 37c98a85 (site: emit semantic light and dark tokens and theme the docs from them)"
   },
   "semantic.dark.strand": {
     "value": "{primitive.palette.caution-yellow}",
-    "source": "site/design/tokens.json at commit 37c98a85 (site: emit semantic light and dark tokens and theme the docs from them)",
+    "source": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190",
     "date": "2026-10-29",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 records the mapping decision: semantic-light-page, -ink, -card, -strand and semantic-dark-page, -ink, -card, -strand replace fill-ffd400, fill-111111, fill-ffffff, fill-22242a, chosen by each frame's theme.",
-    "basis": "commit-and-rule"
+    "support": "design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 records the mapping decision: semantic-light-page, -ink, -card, -strand and semantic-dark-page, -ink, -card, -strand replace fill-ffd400, fill-111111, fill-ffffff, fill-22242a, chosen by each frame's theme.",
+    "basis": "design-row",
+    "commit": "site/design/tokens.json at commit 37c98a85 (site: emit semantic light and dark tokens and theme the docs from them)"
   },
   "$extensions.dev.webular.grid.360.gutter": {
     "value": {
       "value": 16,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m3.material.io/foundations/layout/breakpoints/compact",
+    "date": "2026-10-29",
+    "support": "Material 3 gives compact windows (under 600 dp) 16 dp margins; this 360 px viewport gets 16 px, and design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds gutter 16 px. This grid row repeats breakpoint.360.gutter.",
+    "basis": "guideline",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.360.content": {
     "value": {
       "value": 328,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m3.material.io/foundations/layout/breakpoints/compact",
+    "date": "2026-10-29",
+    "support": "328 px is the 360 px viewport minus two 16 px gutters, and that gutter is the Material margin for this width. This grid row repeats breakpoint.360.content.",
+    "basis": "derived",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.360.h1": {
     "value": {
       "value": 30,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "status": "unsourced",
+    "reason": "No read type scale has a 30 px h1 step (Material: Body 1 16, Body 2 14, H3 48, H4 34; Apple: Body 17, Subhead 15, Title 1 28, Large Title 34), and 30 is off the Material 4 dp type grid. This grid row repeats breakpoint.360.h1.",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.360.body": {
     "value": {
       "value": 16,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/typography/the-type-system.html",
+    "date": "2026-10-29",
+    "support": "The Material type scale sets Body 1 at 16; design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds body-size 16 px. This grid row repeats breakpoint.360.body.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.360.mono": {
     "value": {
       "value": 14,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/typography/the-type-system.html",
+    "date": "2026-10-29",
+    "support": "The Material type scale sets Body 2 at 14; design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds code-size 14 px. This grid row repeats breakpoint.360.mono.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.360.section-gap": {
     "value": {
       "value": 64,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 64 px is 8 steps of 8. No read source names 64 px as a section gap. This grid row repeats breakpoint.360.section-gap.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.375.gutter": {
     "value": {
       "value": 16,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m3.material.io/foundations/layout/breakpoints/compact",
+    "date": "2026-10-29",
+    "support": "Material 3 gives compact windows (under 600 dp) 16 dp margins; this 375 px viewport gets 16 px, and design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds gutter 16 px. This grid row repeats breakpoint.375.gutter.",
+    "basis": "guideline",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.375.content": {
     "value": {
       "value": 343,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m3.material.io/foundations/layout/breakpoints/compact",
+    "date": "2026-10-29",
+    "support": "343 px is the 375 px viewport minus two 16 px gutters, and that gutter is the Material margin for this width. This grid row repeats breakpoint.375.content.",
+    "basis": "derived",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.375.h1": {
     "value": {
       "value": 32,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says type can align to a 4 dp grid; 32 px is 8 steps of 4. No read type scale names 32 as a step. This grid row repeats breakpoint.375.h1.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.375.body": {
     "value": {
       "value": 16,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/typography/the-type-system.html",
+    "date": "2026-10-29",
+    "support": "The Material type scale sets Body 1 at 16; design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds body-size 16 px. This grid row repeats breakpoint.375.body.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.375.mono": {
     "value": {
       "value": 14,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/typography/the-type-system.html",
+    "date": "2026-10-29",
+    "support": "The Material type scale sets Body 2 at 14; design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds code-size 14 px. This grid row repeats breakpoint.375.mono.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.375.section-gap": {
     "value": {
       "value": 64,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 64 px is 8 steps of 8. No read source names 64 px as a section gap. This grid row repeats breakpoint.375.section-gap.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.390.gutter": {
     "value": {
       "value": 16,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m3.material.io/foundations/layout/breakpoints/compact",
+    "date": "2026-10-29",
+    "support": "Material 3 gives compact windows (under 600 dp) 16 dp margins; this 390 px viewport gets 16 px, and design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds gutter 16 px. This grid row repeats breakpoint.390.gutter.",
+    "basis": "guideline",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.390.content": {
     "value": {
       "value": 358,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m3.material.io/foundations/layout/breakpoints/compact",
+    "date": "2026-10-29",
+    "support": "358 px is the 390 px viewport minus two 16 px gutters, and that gutter is the Material margin for this width. This grid row repeats breakpoint.390.content.",
+    "basis": "derived",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.390.h1": {
     "value": {
       "value": 32,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says type can align to a 4 dp grid; 32 px is 8 steps of 4. No read type scale names 32 as a step. This grid row repeats breakpoint.390.h1.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.390.body": {
     "value": {
       "value": 16,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/typography/the-type-system.html",
+    "date": "2026-10-29",
+    "support": "The Material type scale sets Body 1 at 16; design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds body-size 16 px. This grid row repeats breakpoint.390.body.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.390.mono": {
     "value": {
       "value": 14,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/typography/the-type-system.html",
+    "date": "2026-10-29",
+    "support": "The Material type scale sets Body 2 at 14; design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds code-size 14 px. This grid row repeats breakpoint.390.mono.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.390.section-gap": {
     "value": {
       "value": 64,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 64 px is 8 steps of 8. No read source names 64 px as a section gap. This grid row repeats breakpoint.390.section-gap.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.414.gutter": {
     "value": {
       "value": 16,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m3.material.io/foundations/layout/breakpoints/compact",
+    "date": "2026-10-29",
+    "support": "Material 3 gives compact windows (under 600 dp) 16 dp margins; this 414 px viewport gets 16 px, and design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds gutter 16 px. This grid row repeats breakpoint.414.gutter.",
+    "basis": "guideline",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.414.content": {
     "value": {
       "value": 382,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m3.material.io/foundations/layout/breakpoints/compact",
+    "date": "2026-10-29",
+    "support": "382 px is the 414 px viewport minus two 16 px gutters, and that gutter is the Material margin for this width. This grid row repeats breakpoint.414.content.",
+    "basis": "derived",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.414.h1": {
     "value": {
       "value": 34,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Large Title at 34 pt at the default Large size; the Material type scale sets Headline 4 at 34. This grid row repeats breakpoint.414.h1.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.414.body": {
     "value": {
       "value": 16,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/typography/the-type-system.html",
+    "date": "2026-10-29",
+    "support": "The Material type scale sets Body 1 at 16; design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds body-size 16 px. This grid row repeats breakpoint.414.body.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.414.mono": {
     "value": {
       "value": 14,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/typography/the-type-system.html",
+    "date": "2026-10-29",
+    "support": "The Material type scale sets Body 2 at 14; design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds code-size 14 px. This grid row repeats breakpoint.414.mono.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.414.section-gap": {
     "value": {
       "value": 64,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 64 px is 8 steps of 8. No read source names 64 px as a section gap. This grid row repeats breakpoint.414.section-gap.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.430.gutter": {
     "value": {
       "value": 16,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m3.material.io/foundations/layout/breakpoints/compact",
+    "date": "2026-10-29",
+    "support": "Material 3 gives compact windows (under 600 dp) 16 dp margins; this 430 px viewport gets 16 px, and design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds gutter 16 px. This grid row repeats breakpoint.430.gutter.",
+    "basis": "guideline",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.430.content": {
     "value": {
       "value": 398,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m3.material.io/foundations/layout/breakpoints/compact",
+    "date": "2026-10-29",
+    "support": "398 px is the 430 px viewport minus two 16 px gutters, and that gutter is the Material margin for this width. This grid row repeats breakpoint.430.content.",
+    "basis": "derived",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.430.h1": {
     "value": {
       "value": 36,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says type can align to a 4 dp grid; 36 px is 9 steps of 4. No read type scale names 36 as a step. This grid row repeats breakpoint.430.h1.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.430.body": {
     "value": {
       "value": 16,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/typography/the-type-system.html",
+    "date": "2026-10-29",
+    "support": "The Material type scale sets Body 1 at 16; design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds body-size 16 px. This grid row repeats breakpoint.430.body.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.430.mono": {
     "value": {
       "value": 14,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/typography/the-type-system.html",
+    "date": "2026-10-29",
+    "support": "The Material type scale sets Body 2 at 14; design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds code-size 14 px. This grid row repeats breakpoint.430.mono.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.430.section-gap": {
     "value": {
       "value": 64,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 64 px is 8 steps of 8. No read source names 64 px as a section gap. This grid row repeats breakpoint.430.section-gap.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.600.gutter": {
     "value": {
       "value": 24,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m3.material.io/foundations/layout/breakpoints/medium",
+    "date": "2026-10-29",
+    "support": "Material 3 gives medium layouts (600 dp and up) 24 dp margins; this 600 px viewport gets 24 px. This grid row repeats breakpoint.600.gutter.",
+    "basis": "guideline",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.600.content": {
     "value": {
       "value": 552,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m3.material.io/foundations/layout/breakpoints/medium",
+    "date": "2026-10-29",
+    "support": "552 px is the 600 px viewport minus two 24 px gutters, and that gutter is the Material margin for this width. This grid row repeats breakpoint.600.content.",
+    "basis": "derived",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.600.h1": {
     "value": {
       "value": 36,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says type can align to a 4 dp grid; 36 px is 9 steps of 4. No read type scale names 36 as a step. This grid row repeats breakpoint.600.h1.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.600.body": {
     "value": {
       "value": 16,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/typography/the-type-system.html",
+    "date": "2026-10-29",
+    "support": "The Material type scale sets Body 1 at 16; design/webular-dev-2026-10-28/handoff/tokens/tokens.json at afdad190 holds body-size 16 px. This grid row repeats breakpoint.600.body.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.600.mono": {
     "value": {
       "value": 15,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Subhead at 15 pt at the default Large size. This grid row repeats breakpoint.600.mono.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.600.section-gap": {
     "value": {
       "value": 64,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 64 px is 8 steps of 8. No read source names 64 px as a section gap. This grid row repeats breakpoint.600.section-gap.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.768.gutter": {
     "value": {
       "value": 32,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/responsive-layout-grid.html",
+    "date": "2026-10-29",
+    "support": "The Material 2 responsive layout grid gives 600 to 904 dp screens 32 dp margins; this 768 px viewport gets 32 px. This grid row repeats breakpoint.768.gutter.",
+    "basis": "guideline",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.768.content": {
     "value": {
       "value": 704,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/responsive-layout-grid.html",
+    "date": "2026-10-29",
+    "support": "704 px is the 768 px viewport minus two 32 px gutters, and that gutter is the Material margin for this width. This grid row repeats breakpoint.768.content.",
+    "basis": "derived",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.768.h1": {
     "value": {
       "value": 40,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says type can align to a 4 dp grid; 40 px is 10 steps of 4. No read type scale names 40 as a step. This grid row repeats breakpoint.768.h1.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.768.body": {
     "value": {
       "value": 17,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Body at 17 pt at the default Large size and calls 17 pt the default text size. This grid row repeats breakpoint.768.body.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.768.mono": {
     "value": {
       "value": 15,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Subhead at 15 pt at the default Large size. This grid row repeats breakpoint.768.mono.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.768.section-gap": {
     "value": {
       "value": 64,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 64 px is 8 steps of 8. No read source names 64 px as a section gap. This grid row repeats breakpoint.768.section-gap.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.820.gutter": {
     "value": {
       "value": 32,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/responsive-layout-grid.html",
+    "date": "2026-10-29",
+    "support": "The Material 2 responsive layout grid gives 600 to 904 dp screens 32 dp margins; this 820 px viewport gets 32 px. This grid row repeats breakpoint.820.gutter.",
+    "basis": "guideline",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.820.content": {
     "value": {
       "value": 756,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/responsive-layout-grid.html",
+    "date": "2026-10-29",
+    "support": "756 px is the 820 px viewport minus two 32 px gutters, and that gutter is the Material margin for this width. This grid row repeats breakpoint.820.content.",
+    "basis": "derived",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.820.h1": {
     "value": {
       "value": 40,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says type can align to a 4 dp grid; 40 px is 10 steps of 4. No read type scale names 40 as a step. This grid row repeats breakpoint.820.h1.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.820.body": {
     "value": {
       "value": 17,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Body at 17 pt at the default Large size and calls 17 pt the default text size. This grid row repeats breakpoint.820.body.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.820.mono": {
     "value": {
       "value": 15,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Subhead at 15 pt at the default Large size. This grid row repeats breakpoint.820.mono.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.820.section-gap": {
     "value": {
       "value": 64,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 64 px is 8 steps of 8. No read source names 64 px as a section gap. This grid row repeats breakpoint.820.section-gap.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.1024.gutter": {
     "value": {
       "value": 32,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 32 px is 4 steps of 8. No read source names 32 px as the gutter at 1024 px (the Material 2 grid lets margins scale above 904 dp). This grid row repeats breakpoint.1024.gutter.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.1024.content": {
     "value": {
       "value": 960,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/responsive-layout-grid.html",
+    "date": "2026-10-29",
+    "support": "960 px is the 1024 px viewport minus two 32 px gutters, and that gutter is the Material margin for this width. This grid row repeats breakpoint.1024.content.",
+    "basis": "derived",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.1024.h1": {
     "value": {
       "value": 44,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says type can align to a 4 dp grid; 44 px is 11 steps of 4. No read type scale names 44 as a step. This grid row repeats breakpoint.1024.h1.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.1024.body": {
     "value": {
       "value": 17,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Body at 17 pt at the default Large size and calls 17 pt the default text size. This grid row repeats breakpoint.1024.body.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.1024.mono": {
     "value": {
       "value": 15,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Subhead at 15 pt at the default Large size. This grid row repeats breakpoint.1024.mono.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.1024.section-gap": {
     "value": {
       "value": 64,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 64 px is 8 steps of 8. No read source names 64 px as a section gap. This grid row repeats breakpoint.1024.section-gap.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.1280.gutter": {
     "value": {
       "value": 32,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 32 px is 4 steps of 8. No read source names 32 px as the gutter at 1280 px (the Material 2 grid lets margins scale above 904 dp). This grid row repeats breakpoint.1280.gutter.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.1280.content": {
     "value": {
       "value": 1120,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 1120 px is 140 steps of 8. No read source names 1120 px as the content cap at 1280 px. This grid row repeats breakpoint.1280.content.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.1280.h1": {
     "value": {
       "value": 44,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says type can align to a 4 dp grid; 44 px is 11 steps of 4. No read type scale names 44 as a step. This grid row repeats breakpoint.1280.h1.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.1280.body": {
     "value": {
       "value": 17,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Body at 17 pt at the default Large size and calls 17 pt the default text size. This grid row repeats breakpoint.1280.body.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.1280.mono": {
     "value": {
       "value": 15,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Subhead at 15 pt at the default Large size. This grid row repeats breakpoint.1280.mono.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.1280.section-gap": {
     "value": {
       "value": 64,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 64 px is 8 steps of 8. No read source names 64 px as a section gap. This grid row repeats breakpoint.1280.section-gap.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.1440.gutter": {
     "value": {
       "value": 32,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 32 px is 4 steps of 8. No read source names 32 px as the gutter at 1440 px (the Material 2 grid lets margins scale above 904 dp). This grid row repeats breakpoint.1440.gutter.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.1440.content": {
     "value": {
       "value": 1200,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 1200 px is 150 steps of 8. No read source names 1200 px as the content cap at 1440 px. This grid row repeats breakpoint.1440.content.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.1440.h1": {
     "value": {
       "value": 52,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says type can align to a 4 dp grid; 52 px is 13 steps of 4. No read type scale names 52 as a step.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.1440.body": {
     "value": {
       "value": 17,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Body at 17 pt at the default Large size and calls 17 pt the default text size. This grid row repeats breakpoint.1440.body.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.1440.mono": {
     "value": {
       "value": 15,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Subhead at 15 pt at the default Large size. This grid row repeats breakpoint.1440.mono.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.1440.section-gap": {
     "value": {
       "value": 64,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 64 px is 8 steps of 8. No read source names 64 px as a section gap. This grid row repeats breakpoint.1440.section-gap.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.1920.gutter": {
     "value": {
       "value": 32,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 32 px is 4 steps of 8. No read source names 32 px as the gutter at 1920 px (the Material 2 grid lets margins scale above 904 dp). This grid row repeats breakpoint.1920.gutter.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.1920.content": {
     "value": {
       "value": 1200,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 1200 px is 150 steps of 8. No read source names 1200 px as the content cap at 1920 px. This grid row repeats breakpoint.1920.content.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.1920.h1": {
     "value": {
       "value": 52,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says type can align to a 4 dp grid; 52 px is 13 steps of 4. No read type scale names 52 as a step.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.1920.body": {
     "value": {
       "value": 17,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Body at 17 pt at the default Large size and calls 17 pt the default text size. This grid row repeats breakpoint.1920.body.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.1920.mono": {
     "value": {
       "value": 15,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Subhead at 15 pt at the default Large size. This grid row repeats breakpoint.1920.mono.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.1920.section-gap": {
     "value": {
       "value": 96,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 96 px is 12 steps of 8. No read source names 96 px as a section gap. This grid row repeats breakpoint.1920.section-gap.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.2560.gutter": {
     "value": {
       "value": 32,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 32 px is 4 steps of 8. No read source names 32 px as the gutter at 2560 px (the Material 2 grid lets margins scale above 904 dp). This grid row repeats breakpoint.2560.gutter.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.2560.content": {
     "value": {
       "value": 1320,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 1320 px is 165 steps of 8. No read source names 1320 px as the content cap at 2560 px. This grid row repeats breakpoint.2560.content.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.2560.h1": {
     "value": {
       "value": 56,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says type can align to a 4 dp grid; 56 px is 14 steps of 4. No read type scale names 56 as a step. This grid row repeats breakpoint.2560.h1.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.2560.body": {
     "value": {
       "value": 18,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "status": "unsourced",
+    "reason": "No read type scale has a 18 px body step (Material: Body 1 16, Body 2 14, H3 48, H4 34; Apple: Body 17, Subhead 15, Title 1 28, Large Title 34), and 18 is off the Material 4 dp type grid. This grid row repeats breakpoint.2560.body.",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.2560.mono": {
     "value": {
       "value": 15,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://developer.apple.com/design/human-interface-guidelines/typography",
+    "date": "2026-10-29",
+    "support": "Apple HIG Dynamic Type sets Subhead at 15 pt at the default Large size. This grid row repeats breakpoint.2560.mono.",
+    "basis": "type-scale",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   },
   "$extensions.dev.webular.grid.2560.section-gap": {
     "value": {
       "value": 96,
       "unit": "px"
     },
-    "source": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)",
-    "date": "2026-10-28",
-    "support": "The value first appears in this commit. design/webular-dev-2026-10-28/handoff/handoff.txt at afdad190 says this grid block was copied from the ship-promote worktree's tokens.json so site:build can decode it.",
-    "basis": "commit-and-rule"
+    "source": "https://m2.material.io/design/layout/spacing-methods.html",
+    "date": "2026-10-29",
+    "support": "Material says all components align to an 8 dp square grid; 96 px is 12 steps of 8. No read source names 96 px as a section gap. This grid row repeats breakpoint.2560.section-gap.",
+    "basis": "grid",
+    "commit": "site/design/tokens.json at commit 17b5afb2 (Ship the Catch Of The Day token set to the site and docs)"
   }
 }

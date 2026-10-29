@@ -1,15 +1,20 @@
 // Guard: every token in site/design/tokens.json, the dev.webular.grid rows included,
 // names a dated source in site/design/token-sources.json, so the token set can be
-// checked. A token with no source must say so as `unsourced` and give a reason.
+// checked. The source is research: a URL (a standard, guideline, or license page) or a
+// design-loop row on the design branch at a commit. The commit that set the value may
+// sit beside it as `commit`, but it never counts as the source. A token with no research
+// source must say so as `unsourced` and give a reason.
 
 import { expect, test } from 'bun:test'
 import { Effect, Schema } from 'effect'
 import { read } from '../_support/repo-files.ts'
 import { eff } from '../_support/run.ts'
 
+const research = /^(https:\/\/\S+|design\/webular-dev-2026-10-28\/\S+ at [0-9a-f]{7,40})$/
+
 const Sourced = Schema.Struct({
   value: Schema.Unknown,
-  source: Schema.NonEmptyString,
+  source: Schema.String.check(Schema.isPattern(research)),
   date: Schema.String.check(Schema.isPattern(/^\d{4}-\d{2}-\d{2}$/)),
   support: Schema.NonEmptyString,
 })
