@@ -97,7 +97,7 @@
   padding-right: var(--space-8);
   background: var(--semantic-card);
   border: var(--border-width) solid var(--semantic-strand);
-  border-radius: var(--radius-box);
+  border-radius: var(--radius-panel);
 }
 .code-row pre {
   flex: 1;

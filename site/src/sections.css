@@ -45,7 +45,7 @@ details.group {
   padding: var(--space-16);
   background: var(--semantic-card);
   border: var(--border-width) solid var(--semantic-strand);
-  border-radius: var(--radius-box);
+  border-radius: var(--radius-panel);
 }
 .card {
   display: grid;
@@ -169,7 +169,7 @@ td {
   padding: var(--space-16);
   background: var(--semantic-card);
   border: var(--border-width) solid var(--semantic-strand);
-  border-radius: var(--radius-box);
+  border-radius: var(--radius-panel);
 }
 .cards-table th[scope="row"] {
   display: block;
@@ -251,7 +251,7 @@ td {
   background: var(--semantic-card);
   color: var(--semantic-ink);
   border: var(--border-width) solid var(--semantic-edge);
-  border-radius: var(--radius-box);
+  border-radius: var(--radius-panel);
 }
 .copy-failed[hidden] {
   display: none;
@@ -314,11 +314,11 @@ td {
   color: var(--semantic-on-band);
   text-decoration: none;
   border: calc(var(--border-width) * 2) solid var(--semantic-page-edge);
-  border-radius: var(--space-4);
+  border-radius: var(--radius-panel);
 }
 .tile-grid .tile-lead a {
   padding: var(--space-24);
-  background: var(--semantic-page);
+  background: var(--semantic-page-panel);
   color: var(--semantic-ink);
 }
 /* The band runs straight into the home footer, which carries the band's colors. */
@@ -415,7 +415,7 @@ td {
   text-decoration: none;
   background: var(--semantic-card);
   border: calc(var(--border-width) * 2) solid var(--semantic-strand);
-  border-radius: var(--space-4);
+  border-radius: var(--radius-panel);
 }
 .page-cards strong {
   font-family: var(--font-display);

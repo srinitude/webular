@@ -2,7 +2,7 @@
    design/tokens.json) and grid.css (the grid per width). Section and
    width rules live in sections.css and widths.css. */
 :root {
-  --h3-size: var(--lead-size);
+  --h3-size: var(--title-size, var(--lead-size));
   --header-min: var(--size-header);
   --fade: color-mix(in srgb, var(--semantic-ink) 22%, transparent);
 }
@@ -89,7 +89,7 @@ pre {
   padding: var(--space-12) var(--space-16);
   line-height: var(--line-height-code);
   border: var(--border-width) solid var(--semantic-strand);
-  border-radius: var(--radius-box);
+  border-radius: var(--radius-panel);
   tab-size: 2;
 }
 .wrap {

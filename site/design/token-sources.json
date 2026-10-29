@@ -2342,5 +2342,12 @@
     "date": "2026-10-29",
     "support": "The design file binds titles on the 390 phone layout, page and section headings, nearest-page links, and the wordmark, to the variable breakpoint-390-title, and site/design/tokens.json on that design branch at ec2da355 defines it as an alias of breakpoint.390.body (16 px). The site gets the same name and the same size.",
     "basis": "design-row"
+  },
+  "semantic.dark.band": {
+    "value": "{semantic.dark.ink}",
+    "source": "design/webular-dev-2026-10-28/webular-dev-pages.pen at ec2da355",
+    "date": "2026-10-29",
+    "support": "The design file binds the fill of the ink band, run lines, result badges, and the section index, to the variable semantic-dark-band, and site/design/tokens.json on that design branch at ec2da355 defines it as an alias of semantic.dark.ink (#FFD400). The site gets the same name and the same color.",
+    "basis": "design-row"
   }
 }

@@ -1,7 +1,9 @@
 // Writes src/grid.css, the per-width grid, from the dev.webular.grid rows in
 // design/tokens.json, and src/semantic.css, the semantic light and dark colors
-// with their primitive aliases resolved. src/tokens.css (every other token, both
-// themes) comes from the design-loop build_platform_tokens builder.
+// with their primitive aliases resolved. grid.css also carries radius.panel, which
+// the builder's tokens.css lacks, and the phone title size (breakpoint.<width>.title).
+// src/tokens.css (every other token, both themes) comes from the design-loop
+// build_platform_tokens builder.
 // Run: bun scripts/tokens-css.ts
 import { BunFileSystem, BunRuntime } from '@effect/platform-bun'
 import { Console, Effect, FileSystem, Schema } from 'effect'
@@ -35,22 +37,20 @@ const grid = (row: Row): ReadonlyArray<string> => [
 const widthLine = (width: string, row: Row) =>
   `@media (min-width: ${width}px) { :root { ${grid(row).join(' ')} } }`
 
-const render = (rows: Record<string, unknown>): string =>
-  [
-    HEADER,
-    ...Object.entries(rows)
-      .filter(([width]) => /^\d+$/.test(width))
-      .sort(([a], [b]) => Number(a) - Number(b))
-      .map(([width, row]) => widthLine(width, row as Row)),
-    '',
-  ].join('\n\n')
-
 const Colors = Schema.Record(Schema.String, Schema.Struct({ $value: Schema.String }))
+const Sized = Schema.Struct({
+  $value: Schema.Union([
+    Schema.Struct({ value: Schema.Number, unit: Schema.String }),
+    Schema.String,
+  ]),
+})
 
 const Tokens = Schema.fromJsonString(
   Schema.Struct({
     primitive: Schema.Struct({ palette: Colors }),
     semantic: Schema.Struct({ light: Colors, dark: Colors }),
+    radius: Schema.Record(Schema.String, Sized),
+    breakpoint: Schema.Record(Schema.String, Schema.Record(Schema.String, Sized)),
     $extensions: Schema.Struct({
       'dev.webular.grid': Schema.Record(Schema.String, Schema.Unknown),
     }),
@@ -69,6 +69,44 @@ const resolve = (tokens: Tokens, raw: string): string | undefined => {
       ? tokens.primitive.palette[name]
       : tokens.semantic[group === 'semantic.light' ? 'light' : 'dark'][name]
   return target === undefined ? undefined : resolve(tokens, target.$value)
+}
+
+// A dimension, or a {radius.<name>} / {breakpoint.<width>.<name>} alias followed to it.
+// ponytail: an alias loop would recurse forever; the token-sources test catches one.
+const dimension = (tokens: Tokens, raw: Dimension | string): Dimension | undefined => {
+  if (typeof raw !== 'string') return raw
+  const [tier, first = '', second = ''] = raw.slice(1, -1).split('.')
+  const leaf = tier === 'radius' ? tokens.radius[first] : tokens.breakpoint[first]?.[second]
+  return leaf === undefined ? undefined : dimension(tokens, leaf.$value)
+}
+
+const dimensionCss = (size: Dimension) => `${size.value}${size.unit}`
+
+// The phone title size holds from its width up to the next breakpoint, so wider layouts keep their heading steps.
+const titleLines = (tokens: Tokens): ReadonlyArray<string> => {
+  const widths = Object.keys(tokens.breakpoint).sort((a, b) => Number(a) - Number(b))
+  return widths.flatMap((width, i) => {
+    const leaf = tokens.breakpoint[width]?.title
+    const size = leaf === undefined ? undefined : dimension(tokens, leaf.$value)
+    if (size === undefined) return []
+    const next = widths[i + 1]
+    const range = `(min-width: ${width}px)${next === undefined ? '' : ` and (max-width: ${Number(next) - 1}px)`}`
+    return [`@media ${range} { :root { --title-size: ${dimensionCss(size)}; } }`]
+  })
+}
+
+const render = (tokens: Tokens): string => {
+  const panel = dimension(tokens, tokens.radius.panel?.$value ?? '')
+  return [
+    HEADER,
+    ...(panel === undefined ? [] : [`:root { --radius-panel: ${dimensionCss(panel)}; }`]),
+    ...Object.entries(tokens.$extensions['dev.webular.grid'])
+      .filter(([width]) => /^\d+$/.test(width))
+      .sort(([a], [b]) => Number(a) - Number(b))
+      .map(([width, row]) => widthLine(width, row as Row)),
+    ...titleLines(tokens),
+    '',
+  ].join('\n\n')
 }
 
 // Lowercase hex matches what Biome writes, so a rebuild leaves no diff.
@@ -101,7 +139,7 @@ const renderSemantic = Effect.fn('renderSemantic')(function* (tokens: Tokens) {
 const program = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem
   const tokens = yield* Schema.decodeUnknownEffect(Tokens)(yield* fs.readFileString(SRC))
-  const out = render(tokens.$extensions['dev.webular.grid'])
+  const out = render(tokens)
   yield* fs.writeFileString(OUT, out)
   yield* Console.log(`tokens-css: wrote ${OUT} (${out.split('\n').length} lines)`)
   const semantic = yield* renderSemantic(tokens)

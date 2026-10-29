@@ -22,6 +22,7 @@
     --semantic-on-band: #111111;
     --semantic-miss-card: #22242a;
     --semantic-page-edge: #111111;
+    --semantic-band: #ffd400;
     --semantic-page-panel: #111111;
   }
 }
@@ -35,5 +36,6 @@
   --semantic-on-band: #111111;
   --semantic-miss-card: #22242a;
   --semantic-page-edge: #111111;
+  --semantic-band: #ffd400;
   --semantic-page-panel: #111111;
 }
