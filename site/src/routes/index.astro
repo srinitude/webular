@@ -1,9 +1,12 @@
 ---
+import doctorRun from '../../design/doctor-output.json'
 import AgentClients from '../AgentClients.astro'
 import Base from '../Base.astro'
 import CommandGroups from '../CommandGroups.astro'
 import InstallBlock from '../InstallBlock.astro'
+import RunLine from '../RunLine.astro'
 import Tabs from '../Tabs.astro'
+import WebArt from '../WebArt.astro'
 
 const release = import.meta.env.PUBLIC_RELEASE_VERSION ?? '0.3.0'
 const description =
@@ -64,6 +67,7 @@ const rivals = [
     'No scored calls; its calls were unsupported or had no recorded answers',
   ],
 ]
+const doctor = doctorRun.lines.join('\n')
 const docCards = [
   ['Install', '/install'],
   ['Commands', '/commands'],
@@ -75,12 +79,17 @@ const docCards = [
 <Base title="webular: search, scrape, crawl, and answer with sources" description={description} home>
   <script is:inline type="application/ld+json" slot="head" set:html={jsonLd} />
 
-  <section class="hero">
-    <div>
-      <h1>Search, scrape, crawl, and answer with sources.</h1>
-      <p>From your own machine. A CLI and MCP server with one optional key: <a href="/keys">Jev</a>.</p>
+  <section class="hero run-hero" aria-labelledby="hero-title">
+    <div class="run-block">
+      <h1 id="hero-title">webular does web research from your own machine with no paid API.</h1>
+      <p>You can see it work in under 90 seconds, with no key and no sign-up.</p>
+      <RunLine command="npx webular@0.3.2 doctor" id="hero-command" label="Run this first" />
+      <pre class="doctor-output" tabindex="0" aria-label="What doctor prints"><code>{doctor}</code></pre>
+      <h2 class="next">Next: add webular to your agent.</h2>
+      <RunLine command="webular mcp" label="Add to your agent" />
+      <p>Add <code>--json</code> to any command for the same JSON shape every time. One optional key: <a href="/keys">Jev</a>.</p>
     </div>
-    <InstallBlock firstId="hero-command" />
+    <WebArt />
   </section>
 
   <div class="demo-data">

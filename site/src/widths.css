@@ -84,7 +84,7 @@
     display: none;
   }
   .hero {
-    grid-template-columns: 5fr 7fr;
+    grid-template-columns: 7fr 5fr;
     gap: var(--space-48);
     align-items: start;
   }

@@ -1,0 +1,13 @@
+{
+  "$description": "the hero output, as a fresh `bun bin/webular.ts doctor` run printed it; each line starts with ok or fail",
+  "lines": [
+    "ok   bun 1.4.4",
+    "ok   mise 2026.10.18 macos-arm64 (2026-10-23)",
+    "ok   node v26.10.0",
+    "ok   network HTTP 200",
+    "ok   upgrade https://github.com/srinitude/webular/releases/latest",
+    "fail agent-browser not found (PATH or bundled)",
+    "fail deepsec not found (PATH or bundled)",
+    "ok   jev typesafe at https://api.typesafe.ai, model jev-1.14.0: GET /v1/models HTTP 200"
+  ]
+}

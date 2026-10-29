@@ -14,12 +14,13 @@ type Row = { [key: string]: Leaf }
 const css = (leaf: Leaf) => `${leaf.$value.value}${leaf.$value.unit}`
 const px = (leaf: Leaf) => leaf.$value.value
 
-// One grid row per width: h2 is 0.7 x h1 rounded; the lead is body + 2 px.
+// One grid row per width: h2 is 0.7 x h1 rounded; the run line is 1.25 x h1; the lead is body + 2 px.
 const grid = (row: Row): ReadonlyArray<string> => [
   `--gutter: ${css(row.gutter)};`,
   `--content-max: ${px(row.content) + 2 * px(row.gutter)}px;`,
   `--h1-size: ${css(row.h1)};`,
   `--h2-size: ${Math.round(px(row.h1) * 0.7)}px;`,
+  `--run-line-size: ${px(row.h1) * 1.25}px;`,
   `--body-size: ${css(row.body)};`,
   `--lead-size: ${px(row.body) + 2}px;`,
   `--code-size: ${css(row.mono)};`,

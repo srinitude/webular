@@ -151,10 +151,11 @@ const footerLinks = [
       }
       for (const button of document.querySelectorAll<HTMLButtonElement>('[data-copy]')) {
         button.addEventListener('click', async () => {
-          const status = button.closest('[data-tabs]')?.querySelector('[data-copy-status]')
-          await navigator.clipboard.writeText(button.dataset.copy ?? '')
-          button.textContent = 'Copied'
-          if (status) status.textContent = 'Copied to clipboard'
+          const status = button.closest('[data-tabs], [data-copy-region]')?.querySelector('[data-copy-status]')
+          // Three states: idle (Copy), Copied, and Copy failed when the clipboard says no.
+          const said = await navigator.clipboard.writeText(button.dataset.copy ?? '').then(() => 'Copied', () => 'Copy failed')
+          button.textContent = said
+          if (status) status.textContent = said
           setTimeout(() => { button.textContent = 'Copy'; if (status) status.textContent = '' }, 2000)
         })
       }

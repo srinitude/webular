@@ -1,0 +1,18 @@
+---
+// One run line: the command as printed, a real Copy button, and a polite live
+// region that says "Copied". The Copy script lives in Base.astro.
+interface Props {
+  command: string
+  id?: string
+  label?: string
+}
+const { command, id, label = 'Command to run' } = Astro.props
+---
+
+<div class="run-line" data-copy-region>
+  <div class="code-row">
+    <pre id={id} tabindex="0" aria-label={label}><code>$ {command}</code></pre>
+    <button type="button" class="copy" data-copy={command}>Copy</button>
+  </div>
+  <p class="visually-hidden" aria-live="polite" data-copy-status></p>
+</div>

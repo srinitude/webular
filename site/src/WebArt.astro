@@ -1,0 +1,28 @@
+---
+// The web art: one inline SVG path, a tilted orb web with 12 spokes and 6
+// sagging rings, drawn at build time. `torn` drops one wedge for the 404 page.
+// Decorative only: hidden from assistive tech, and it never sits over text.
+interface Props {
+  torn?: boolean
+}
+const { torn = false } = Astro.props
+const c = 340
+const tilt = 0.86
+const turn = (i: number) => ((i * 30 + 8) * Math.PI) / 180
+const at = (i: number, r: number) =>
+  `${(c + r * Math.cos(turn(i))).toFixed(1)} ${(c + r * Math.sin(turn(i)) * tilt).toFixed(1)}`
+const gone = (i: number) => torn && (i === 1 || i === 2)
+const spokes = [...Array(12).keys()].map((i) => `M${c} ${c}L${at(i, torn && i === 2 ? 60 : 330)}`)
+const rings = [1, 2, 3, 4, 5, 6].map((k) => {
+  const r = k * 50
+  const legs = [...Array(12).keys()].map((i) =>
+    gone(i) ? `M${at(i + 1, r)}` : `Q${at(i + 0.5, r * 0.86)} ${at(i + 1, r)}`,
+  )
+  return `M${at(0, r)}${legs.join('')}`
+})
+const d = [...spokes, ...rings].join('')
+---
+
+<svg class:list={['web-art', { torn }]} viewBox="0 0 680 600" aria-hidden="true" focusable="false">
+  <path d={d} fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+</svg>

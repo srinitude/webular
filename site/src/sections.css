@@ -199,3 +199,69 @@ td {
   color: var(--theme-text);
   text-decoration: none;
 }
+
+/* The run hero: run line, Copy, and doctor output lead; the web art never covers them. */
+.run-block {
+  display: grid;
+  gap: var(--space-16);
+  min-width: 0;
+}
+.run-block p {
+  margin-top: 0;
+}
+.run-line pre,
+.run-line code {
+  font-size: var(--run-line-size);
+  line-height: var(--line-height-heading);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.run-hero .next {
+  margin-top: var(--space-16);
+}
+.doctor-output {
+  font-size: var(--code-size);
+  white-space: pre;
+  overflow-x: auto;
+}
+.web-art {
+  display: block;
+  width: 100%;
+  max-width: var(--content-max);
+  height: auto;
+  color: var(--theme-text);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .web-art path {
+    transform-origin: 50% 0;
+    animation: web-sway 9s ease-in-out infinite alternate;
+  }
+}
+@keyframes web-sway {
+  from {
+    transform: rotate(-1deg);
+  }
+  to {
+    transform: rotate(1deg);
+  }
+}
+/* Install: the h1 and lead first, then the run line, then the rest of the doc. */
+.run-first {
+  display: flex;
+  flex-direction: column;
+}
+.run-first > .doc-body {
+  display: contents;
+}
+.run-first > .doc-body > *,
+.run-first > :not(.doc-body, .run-line) {
+  order: 2;
+}
+.run-first > .doc-body > h1,
+.run-first > .doc-body > h1 + p {
+  order: 0;
+}
+.run-first > .run-line {
+  order: 1;
+  margin-block: var(--space-16);
+}

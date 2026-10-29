@@ -10,6 +10,8 @@ The Astro layout, components, and styles, under [site/AGENTS.md](../AGENTS.md).
 - [InstallBlock.astro](InstallBlock.astro): the install commands for each host.
 - [Tabs.astro](Tabs.astro): the one tab row that every tab set uses: install, demo, and agent clients.
 - [AgentClients.astro](AgentClients.astro): the home page's agent client tabs, each with a setup block to copy.
+- [RunLine.astro](RunLine.astro): one command to run, its Copy button, and a polite live region that says "Copied".
+- [WebArt.astro](WebArt.astro): the web art, one inline SVG path drawn at build time; `torn` drops a wedge for the 404 page.
 - [site.css](site.css): the page styles.
 - [sections.css](sections.css): page sections, cards, doc pages, and the comparison table.
 - [widths.css](widths.css): the layout changes at each width from the layout spec.

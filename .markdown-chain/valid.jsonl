@@ -446,3 +446,5 @@
 {"path": "site-docs/AGENTS.md", "sha": "329e3945bf2eb4e82f623431bd22cae53113b8543d3c07d632ae716aa4f0e1ad", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "site-docs/app/AGENTS.md", "sha": "afddb913532ec2d18d1b7c3fe44eca5b6d54f65035f1869c5aba66521c22a3a5", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "site/design/AGENTS.md", "sha": "3b688df2c40fd9bd37e4f824f644aa2aa7a58022ace9a40fec70b29022919575", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/AGENTS.md", "sha": "55776b3a7a9869222cd0b237f707e815a724e76c2f8b37da4dd173746a590230", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/design/AGENTS.md", "sha": "1b384b0c98be906e8603afeae31715516d8d830f3c44641450532149a4fdfa2a", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}

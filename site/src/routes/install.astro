@@ -2,11 +2,13 @@
 import Base from '../Base.astro'
 import { Content } from '../content/install.md'
 import DocMeta from '../DocMeta.astro'
+import RunLine from '../RunLine.astro'
 ---
 
 <Base title="Install webular" description="Run one command. It gets the build that matches your machine." doc>
-  <article class="doc">
+  <article class="doc run-first">
     <div class="doc-body"><Content /></div>
+    <RunLine command="npx webular@0.3.2 doctor" label="Check your machine first" />
     <DocMeta slug="install" />
   </article>
 </Base>

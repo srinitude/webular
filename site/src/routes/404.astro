@@ -1,10 +1,16 @@
 ---
 import Base from '../Base.astro'
+import WebArt from '../WebArt.astro'
 ---
 
 <Base title="Page not found" description="This page does not exist. Install webular or read the docs.">
-  <h1>Page not found</h1>
-  <p>This page does not exist. Install webular, or read the docs.</p>
-  <pre tabindex="0"><code>curl --proto '=https' --tlsv1.2 -fsSL https://webular.dev/install.sh | sh</code></pre>
-  <p><a href="/docs">Docs</a></p>
+  <section class="hero run-hero" aria-labelledby="missing-title">
+    <div class="run-block">
+      <h1 id="missing-title">Page not found</h1>
+      <p>This page does not exist. Install webular, or read the docs.</p>
+      <pre tabindex="0"><code>curl --proto '=https' --tlsv1.2 -fsSL https://webular.dev/install.sh | sh</code></pre>
+      <p><a href="/install">Install</a> <a href="/docs">Docs</a></p>
+    </div>
+    <WebArt torn />
+  </section>
 </Base>
