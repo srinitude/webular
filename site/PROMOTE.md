@@ -1,6 +1,6 @@
 # Promote webular.dev to production
 
-This page takes a checked preview of webular.dev and its docs live. Run it only after every design score passes.
+This page puts a checked preview of webular.dev and its docs into production. Run it only after every design score passes.
 
 ## Before you start
 
