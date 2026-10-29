@@ -5,14 +5,11 @@ import DocMeta from '../DocMeta.astro'
 import RunLine from '../RunLine.astro'
 import WebArt from '../WebArt.astro'
 
-// What a real `webular doctor` run printed (design provenance/doctor.txt).
-const checks = [
-  ['bun', '1.4.3'],
-  ['mise', '2026.10.18 macos-arm64'],
-  ['node', 'v26.10.0'],
-  ['network', 'HTTP 200'],
-]
-const rows = checks.map(([name, detail]) => `${name.padEnd(9)}ok   ${detail}`).join('\n')
+// What a real `webular doctor` run printed (design/doctor-output.json).
+import { lines } from '../../design/doctor-output.json'
+const passed = lines.filter((l) => l.startsWith('ok ')).length
+const total = lines.length
+const rows = lines.join('\n')
 const tags = ['bun 1.4.3', 'node v26.10.0', 'mise 2026.10.18', 'network HTTP 200', 'ok: true']
 const cards = [
   [
@@ -40,8 +37,8 @@ const cards = [
       <p class="kicker">Spin up webular</p>
       <h1 id="install-title">Install webular and spin web research on your own machine. No paid API, no key, no sign-up.</h1>
       <RunLine command="npx webular@0.3.2 doctor" id="hero-command" label="Check your machine first" />
-      <pre class="search-rows doctor-rows" tabindex="0" aria-label="What doctor prints">{rows}<span class="doctor-sum">{'\n'}ok: true, 4 of 4 checks passed{'\n'}Finished in 525.6ms</span></pre>
-      <p class="result-tag"><span>All set: 4 of 4 checks passed. Go spin some web!</span></p>
+      <pre class="search-rows doctor-rows" tabindex="0" aria-label="What doctor prints">{rows}<span class="doctor-sum">{'\n'}ok: {String(passed === total)}, {passed} of {total} checks passed</span></pre>
+      <p class="result-tag"><span>All set: {passed} of {total} checks passed. Go spin some web!</span></p>
     </div>
     <WebArt labeled={tags} />
   </section>
