@@ -219,6 +219,14 @@ td {
 .run-hero .next {
   margin-top: var(--space-16);
 }
+/* The second run line sits one type step below the hero run line. */
+.run-hero .next + .run-line :is(pre, code) {
+  font-size: var(--h1-size);
+}
+/* The docs index leads with its first step, "Start here", at the page title's size. */
+.docs-index .doc-body h2:first-of-type {
+  font-size: var(--h1-size);
+}
 .doctor-output {
   font-size: var(--code-size);
   white-space: pre;

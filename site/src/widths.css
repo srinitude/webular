@@ -20,9 +20,6 @@
   }
 }
 @media (min-width: 600px) {
-  .nav-600 {
-    display: inline-flex;
-  }
   .card-grid,
   .cards-table tbody {
     grid-template-columns: repeat(2, 1fr);
@@ -77,12 +74,6 @@
   }
 }
 @media (min-width: 1024px) {
-  .nav-1024 {
-    display: inline-flex;
-  }
-  .menu {
-    display: none;
-  }
   .hero {
     grid-template-columns: 7fr 5fr;
     gap: var(--space-48);

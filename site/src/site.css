@@ -115,7 +115,7 @@ pre {
   color: var(--theme-muted);
 }
 
-/* Header and menu: 56 px tall, 1 px bottom border. */
+/* Header: 56 px tall, 1 px bottom border. */
 .site-header {
   border-bottom: var(--border-width) solid var(--theme-border);
 }
@@ -138,8 +138,7 @@ pre {
   align-items: center;
   gap: var(--space-12);
 }
-.header-end :where(a),
-.menu summary {
+.header-end :where(a) {
   display: inline-flex;
   align-items: center;
   min-height: var(--size-tap-target);
@@ -147,31 +146,6 @@ pre {
   color: var(--theme-text);
   text-decoration: none;
   cursor: pointer;
-}
-.menu summary {
-  list-style: none;
-  border: var(--border-width) solid var(--theme-border);
-  border-radius: var(--radius-control);
-}
-.menu summary::-webkit-details-marker {
-  display: none;
-}
-.menu nav {
-  position: absolute;
-  right: max(var(--gutter), env(safe-area-inset-right, 0px));
-  top: 100%;
-  z-index: 5;
-  display: flex;
-  flex-direction: column;
-  min-width: 12rem;
-  padding: var(--space-8);
-  background: var(--theme-surface);
-  border: var(--border-width) solid var(--theme-border);
-  border-radius: var(--radius-box);
-}
-.menu nav a {
-  display: block;
-  padding: var(--space-12) var(--space-8);
 }
 /* Every standalone link is a 44 px target, the WCAG target size. */
 .skip-link,
@@ -185,9 +159,7 @@ pre {
   min-width: var(--size-tap-target);
 }
 .nav-390,
-.nav-600,
 .nav-768,
-.nav-1024,
 .sidebar {
   display: none;
 }
