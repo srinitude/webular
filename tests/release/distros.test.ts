@@ -13,7 +13,7 @@ import { brewTargets, parseSums, releaseUrl } from '../../src/release/distributi
 import { distroFiles } from '../../src/release/distros.ts'
 import { nixDerivation } from '../../src/release/nix.ts'
 import { ROOT } from '../_support/root.ts'
-import { eff } from '../_support/run.ts'
+import { eff, io } from '../_support/run.ts'
 
 const VERSION = '9.8.7'
 const shaOf = (asset: string) =>
@@ -92,6 +92,23 @@ test(
         expect(named).toContain(assetName(t))
       expect(text).toContain('ARG TARGETARCH')
       expect(text).toContain('ENTRYPOINT ["webular"]')
+    }),
+  ),
+)
+
+// The committed webular.nix is exactly what the release generator writes for
+// the version and checksums it names, so a hand edit or a generator change
+// that skips the committed file fails here.
+test(
+  'the committed webular.nix is the generator output for the release it names',
+  eff(
+    Effect.gen(function* () {
+      const text = yield* io(() => Bun.file(join(ROOT, 'webular.nix')).text())
+      const version = /version = "([^"]+)";/.exec(text)?.[1] ?? ''
+      const named = [...text.matchAll(/url = "[^"]+\/([^"/]+)";\n\s+sha256 = "([0-9a-f]{64})";/g)]
+      const committed = new Map(named.map(([, asset = '', sha = '']) => [asset, sha]))
+      expect(committed.size).toBe(brewTargets.length)
+      expect(yield* nixDerivation(version, committed)).toBe(text)
     }),
   ),
 )

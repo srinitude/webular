@@ -57,6 +57,7 @@ test(
         'alpine',
         'ci',
         'executable',
+        'nix',
         'push-covered-by-pr',
         'site',
       ])
@@ -71,6 +72,9 @@ test(
       expect(runs(ci.jobs['alpine'])).toMatch(/mise run ci[\s\S]*mise run e2e/)
       expect(runs(ci.jobs['executable'])).toContain('mise run build')
       expect(runs(ci.jobs['executable'])).toContain('./dist/bin/webular --version')
+      expect(runs(ci.jobs['nix'])).toMatch(
+        /nix build \.#webular[\s\S]*\.\/result\/bin\/webular --version/,
+      )
     }),
   ),
 )

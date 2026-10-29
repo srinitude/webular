@@ -262,3 +262,29 @@ jobs:
           name: site-home-screenshots
           path: site/dist-shots/
           if-no-files-found: error
+
+  # Nix flake: `nix build .#webular` fetches the release binary webular.nix
+  # names for this runner's system, and the built bin/webular must report the
+  # version in package.json. Runs on Linux (autoPatchelfHook path) and macOS.
+  nix:
+    needs: push-covered-by-pr
+    if: ${{ !cancelled() && needs.push-covered-by-pr.outputs.covered != 'true' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: cachix/install-nix-action@75c75c31ebece974e48ebc36b4ad125bd97bd97b # v31.11.3
+      - name: Build the flake package
+        run: nix build .#webular --print-build-logs
+      - name: Run the built executable
+        run: |
+          out=$(./result/bin/webular --version)
+          echo "$out"
+          want=$(jq -r .version package.json)
+          case "$out" in *"$want"*) ;; *) echo "::error::expected $want, got $out"; exit 1 ;; esac

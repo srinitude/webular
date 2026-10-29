@@ -17,6 +17,7 @@ const PINS: Record<string, string> = {
   'actions/setup-node@v7.1.0': '949feb2413d6458794dcd2491c4babbbce0c15c1',
   'actions/upload-artifact@v7.0.2': 'cf430e030ddbb5b0abf93d22962f4752f3646cd9',
   'anchore/sbom-action@v0.24.3': '66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c',
+  'cachix/install-nix-action@v31.11.3': '75c75c31ebece974e48ebc36b4ad125bd97bd97b',
   'docker/setup-buildx-action@v4.4.1': 'f87e5991a6d7451dcb8d9637bfbc97413f497069',
   'docker/setup-qemu-action@v4.4.0': '99012661954931238ded8c8b007157a8430204e1',
   'github/codeql-action@v4.39.1': '9b3254085494b55a0f7c4c2b3d2d52cc712ce370',
