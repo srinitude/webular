@@ -183,15 +183,12 @@ const publish = Effect.gen(function* () {
     `# webular docs\n\n${intro}\n\n## Pages\n\n${index.join('\n')}\n`,
   )
   yield* fs.writeFileString(`${DIST}llms-full.txt`, full.join('\n\n'))
-  yield* fs.writeFileString(
-    `${DIST}sitemap.xml`,
-    `${SITEMAP_HEAD}\n${urls.join('\n')}\n</urlset>\n`,
-  )
+  yield* fs.writeFileString(`${DIST}sitemap.xml`, `${SITEMAP_HEAD}${urls.join('\n')}\n</urlset>\n`)
   yield* Effect.log(`docs published: ${urls.length} pages with .md twins, llms files, sitemap`)
 })
 
 const SITEMAP_HEAD =
-  '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+  '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
 
 if (import.meta.main)
   (Bun.argv.includes('--publish') ? publish : program).pipe(
