@@ -297,6 +297,42 @@ td {
   background: var(--theme-bg);
   color: var(--theme-text);
 }
+/* The band runs straight into the home footer, which carries the band's colors. */
+.home-main {
+  padding-bottom: 0;
+}
+.home-footer {
+  background: var(--theme-text);
+  color: var(--theme-bg);
+  border-top-color: var(--theme-bg);
+  font-size: var(--code-size);
+}
+.home-footer .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-16);
+}
+.home-footer ul {
+  display: flex;
+  gap: var(--space-16);
+  margin: 0;
+}
+.home-footer .wrap a {
+  color: var(--theme-bg);
+}
+/* The domain labels caught in the home web art. */
+.web-label rect {
+  fill: var(--theme-surface);
+  stroke: currentColor;
+  stroke-width: calc(var(--border-width) * 2);
+}
+.web-label text {
+  fill: currentColor;
+  font-family: var(--font-mono);
+  font-size: var(--code-size);
+}
 /* The docs index leads with its first step, "Start here", at the page title's size. */
 .docs-index .doc-body h2:first-of-type {
   font-size: var(--h1-size);

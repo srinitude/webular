@@ -4,8 +4,9 @@
 // Decorative only: hidden from assistive tech, and it never sits over text.
 interface Props {
   torn?: boolean
+  labeled?: boolean
 }
-const { torn = false } = Astro.props
+const { torn = false, labeled = false } = Astro.props
 const c = 340
 const tilt = 0.86
 const turn = (i: number) => ((i * 30 + 8) * Math.PI) / 180
@@ -21,8 +22,25 @@ const rings = [1, 2, 3, 4, 5, 6].map((k) => {
   return `M${at(0, r)}${legs.join('')}`
 })
 const d = [...spokes, ...rings].join('')
+// The domains the hero search hit, caught in the web: [name, x, y, tilt in degrees].
+// Only the home page shows them; narrow widths keep the first three.
+const catches: ReadonlyArray<readonly [string, number, number, number]> = labeled
+  ? [
+      ['sqlite.org', 120, 150, 4],
+      ['en.wikipedia.org', 330, 243, -3],
+      ['github.com', 58, 431, 2],
+      ['doi.org', 250, 515, -3],
+      ['philipotoole.com', 12, 556, 3],
+    ]
+  : []
 ---
 
 <svg class:list={['web-art', { torn }]} viewBox="0 0 680 600" aria-hidden="true" focusable="false">
   <path d={d} fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+  {catches.map(([name, x, y, tilt]) => (
+    <g class="web-label" transform={`rotate(${tilt} ${x} ${y})`}>
+      <rect x={x} y={y} width={name.length * 9 + 20} height="32" rx="4" />
+      <text x={x + 10} y={y + 21}>{name}</text>
+    </g>
+  ))}
 </svg>

@@ -14,10 +14,14 @@
   flex-basis: 100%;
 }
 .search-rows li:nth-child(3),
-.result-tag .tag-wide {
+.result-tag .tag-wide,
+.web-label:nth-of-type(n + 4) {
   display: none;
 }
 @media (min-width: 600px) {
+  .web-label:nth-of-type(n + 4) {
+    display: inline;
+  }
   .run-hero .code-row {
     flex-wrap: nowrap;
     padding-bottom: 0;

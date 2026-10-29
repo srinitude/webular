@@ -67,7 +67,7 @@ if (home)
         </div>
       </div>
     </header>
-    <main id="content">
+    <main id="content" class:list={[{ "home-main": home }]}>
       <div class:list={["wrap", { "has-sidebar": doc }]}>
         {doc && (
           <aside class="sidebar">
@@ -91,13 +91,14 @@ if (home)
         )}
       </div>
     </main>
-    <footer class="site-footer">
+    <footer class:list={["site-footer", { "home-footer": home }]}>
       <div class="wrap">
+        {home && <a class="footer-mark" href="/">webular</a>}
         <ul>
           {footerLinks.map(([label, href]) => <li><a href={href}>{label}</a></li>)}
         </ul>
-        <p>Open source under Apache-2.0. © Kiren Srinivasan. This site sets no cookies and runs no tracking.</p>
-        <p class="muted">Built from commit <code>{sha}</code> on <code>{date}</code></p>
+        {!home && <p>Open source under Apache-2.0. © Kiren Srinivasan. This site sets no cookies and runs no tracking.</p>}
+        {!home && <p class="muted">Built from commit <code>{sha}</code> on <code>{date}</code></p>}
       </div>
     </footer>
     <script>
