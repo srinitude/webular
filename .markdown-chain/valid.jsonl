@@ -461,3 +461,5 @@
 {"path": "site/public/fonts/AGENTS.md", "sha": "620057677ed4861407035be46d6b3fdb88e6063e922624e6ae2eb1756d0f93ae", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "site/public/fonts/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "site/public/AGENTS.md", "sha": "08cb633d9ebba9f5afa2159316aa76647be49adb3c59cd676c6a09047d8baf40", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/scripts/AGENTS.md", "sha": "82ec504cac028824fccbd4e49293769075c2f3a9e14c98461a12679fb3799a37", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/AGENTS.md", "sha": "32c5dc6e0b8e2c0b85e2ad3ea3f3528253a8bf22f27e7908fc613649d67db25b", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}

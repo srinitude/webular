@@ -1,9 +1,12 @@
-/* The docs theme: Catch Of The Day, caution yellow and ink, read from
- * site/src/tokens.css (built from site/design/tokens.json), the file home
- * reads too. Every Fumadocs color, font, radius, and spacing step maps to a
- * token, so one token change restyles the docs. */
+/* The docs theme: Catch Of The Day, caution yellow and ink. Type, spacing,
+ * radius, and motion come from site/src/tokens.css; colors come from the
+ * semantic light and dark tokens in site/src/semantic.css. Both are built
+ * from site/design/tokens.json, the source home reads too. Every Fumadocs
+ * color, font, radius, and spacing step maps to a token, so one token change
+ * restyles the docs. */
 @import "tailwindcss";
 @import "../../site/src/tokens.css";
+@import "../../site/src/semantic.css";
 @import "../../site/src/fonts.css";
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";
@@ -32,38 +35,40 @@
   --default-transition-duration: var(--motion-quick);
 }
 
-/* tokens.css switches light and dark on data-theme and
+/* semantic.css switches light and dark on data-theme and
  * prefers-color-scheme, so one mapping covers both modes. It also replaces the
- * stock Fumadocs dark palette, which sits on .dark and .dark #nd-sidebar. */
+ * stock Fumadocs dark palette, which sits on .dark and .dark #nd-sidebar.
+ * page is the page color, ink the text and accent, card the raised surface,
+ * and strand the border. */
 :root,
 .dark,
 .dark #nd-sidebar {
-  --color-fd-background: var(--theme-bg);
-  --color-fd-foreground: var(--theme-text);
-  --color-fd-muted: var(--theme-surface);
-  --color-fd-muted-foreground: var(--theme-muted);
-  --color-fd-popover: var(--theme-surface);
-  --color-fd-popover-foreground: var(--theme-text);
-  --color-fd-card: var(--theme-surface);
-  --color-fd-card-foreground: var(--theme-text);
-  --color-fd-border: var(--theme-border);
-  --color-fd-primary: var(--theme-accent);
-  --color-fd-primary-foreground: var(--theme-on-accent);
+  --color-fd-background: var(--semantic-page);
+  --color-fd-foreground: var(--semantic-ink);
+  --color-fd-muted: var(--semantic-card);
+  --color-fd-muted-foreground: var(--semantic-ink);
+  --color-fd-popover: var(--semantic-card);
+  --color-fd-popover-foreground: var(--semantic-ink);
+  --color-fd-card: var(--semantic-card);
+  --color-fd-card-foreground: var(--semantic-ink);
+  --color-fd-border: var(--semantic-strand);
+  --color-fd-primary: var(--semantic-ink);
+  --color-fd-primary-foreground: var(--semantic-page);
   /* Fumadocs draws secondary and accent at 50% alpha under muted or accent
-   * text (search field, sidebar hover), so both stay a light tint of the text
-   * color on the page, which keeps that text above 4.5:1. */
-  --color-fd-secondary: color-mix(in srgb, var(--theme-text) 6%, var(--theme-bg));
-  --color-fd-secondary-foreground: var(--theme-text);
-  --color-fd-accent: color-mix(in srgb, var(--theme-text) 8%, var(--theme-bg));
-  --color-fd-accent-foreground: var(--theme-text);
-  --color-fd-ring: var(--theme-focus);
-  --color-fd-overlay: color-mix(in srgb, var(--theme-brand) 60%, transparent);
+   * text (search field, sidebar hover), so both stay a light tint of the ink
+   * on the page, which keeps that text above 4.5:1. */
+  --color-fd-secondary: color-mix(in srgb, var(--semantic-ink) 6%, var(--semantic-page));
+  --color-fd-secondary-foreground: var(--semantic-ink);
+  --color-fd-accent: color-mix(in srgb, var(--semantic-ink) 8%, var(--semantic-page));
+  --color-fd-accent-foreground: var(--semantic-ink);
+  --color-fd-ring: var(--semantic-ink);
+  --color-fd-overlay: color-mix(in srgb, var(--semantic-ink) 60%, transparent);
 }
 
 html,
 body {
-  background: var(--theme-bg);
-  color: var(--theme-text);
+  background: var(--semantic-page);
+  color: var(--semantic-ink);
 }
 body {
   font-family: var(--font-sans);
@@ -75,7 +80,7 @@ kbd {
   font-family: var(--font-mono);
 }
 :focus-visible {
-  outline: var(--focus-width) solid var(--theme-focus);
+  outline: var(--focus-width) solid var(--semantic-ink);
   outline-offset: 2px;
 }
 
@@ -90,8 +95,8 @@ kbd {
   font-weight: var(--font-weight-bold);
 }
 .prose :where(a) {
-  color: var(--theme-accent);
-  text-decoration-color: var(--theme-accent);
+  color: var(--semantic-ink);
+  text-decoration-color: var(--semantic-ink);
 }
 
 /* Sidebar group labels: mono caps. */
@@ -101,20 +106,20 @@ kbd {
   letter-spacing: 2px;
 }
 
-/* The active page and code blocks sit on the brand block, the run line's
+/* The active page and code blocks sit on an ink block, the run line's
  * ink on yellow turned over. */
 #nd-sidebar a[data-active="true"] {
-  background: var(--theme-brand);
-  color: var(--theme-on-brand);
+  background: var(--semantic-ink);
+  color: var(--semantic-page);
 }
 .prose :where(pre) {
-  background: var(--theme-brand);
-  color: var(--theme-on-brand);
-  border-color: var(--theme-border);
+  background: var(--semantic-ink);
+  color: var(--semantic-page);
+  border-color: var(--semantic-strand);
 }
 .prose :where(:not(pre) > code) {
-  background: var(--theme-surface);
-  border: var(--border-width) solid var(--theme-border);
+  background: var(--semantic-card);
+  border: var(--border-width) solid var(--semantic-strand);
 }
 a,
 button {

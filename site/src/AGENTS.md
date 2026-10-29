@@ -16,6 +16,7 @@ The Astro layout, components, and styles, under [site/AGENTS.md](../AGENTS.md).
 - [fonts.css](fonts.css): the `@font-face` rules for Archivo Black and Space Mono, the faces that `--font-display` and `--font-mono` name, with `font-display: swap`. The docs import it too.
 - [tokens.css](tokens.css): the style tokens in both themes. The design-loop `build_platform_tokens` builder writes it from [tokens.json](../design/tokens.json).
 - [grid.css](grid.css): the grid for each width. [tokens-css.ts](../scripts/tokens-css.ts) writes it from the same tokens.json.
+- [semantic.css](semantic.css): the semantic light and dark colors (page, ink, card, strand). [tokens-css.ts](../scripts/tokens-css.ts) writes it from the same tokens.json, and the docs theme reads it.
 
 ## Rules
 

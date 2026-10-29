@@ -3,7 +3,7 @@
 // two never drift apart.
 
 import { expect, test } from 'bun:test'
-import { Effect } from 'effect'
+import { Effect, Schema } from 'effect'
 import { read } from '../_support/repo-files.ts'
 import { eff } from '../_support/run.ts'
 
@@ -49,6 +49,52 @@ test(
         expect(docs).toContain(`${theme}: var(${token});`)
         expect(tokens).toContain(`${token}:`)
       }
+    }),
+  ),
+)
+
+const Colors = Schema.Record(Schema.String, Schema.Struct({ $value: Schema.String }))
+const Semantic = Schema.fromJsonString(
+  Schema.Struct({
+    primitive: Schema.Struct({ palette: Colors }),
+    semantic: Schema.Struct({ light: Colors, dark: Colors }),
+  }),
+)
+type Semantic = typeof Semantic.Type
+
+// The declaration each semantic token should build to, with its palette alias resolved
+// and its hex in lowercase, as Biome writes it.
+const expected = (tokens: Semantic, mode: 'light' | 'dark') =>
+  Object.entries(tokens.semantic[mode]).map(([name, leaf]) => {
+    const alias = /^\{primitive\.palette\.(.+)\}$/.exec(leaf.$value)?.[1] ?? ''
+    const value = tokens.primitive.palette[alias]?.$value ?? leaf.$value
+    return `--semantic-${name}: ${value.toLowerCase()};`
+  })
+
+test(
+  'home and docs get every semantic light and dark color from tokens.json',
+  eff(
+    Effect.gen(function* () {
+      const tokens = yield* Schema.decodeUnknownEffect(Semantic)(
+        yield* read('site/design/tokens.json'),
+      )
+      const built = yield* read('site/src/semantic.css')
+      const docs = yield* read('site-docs/app/global.css')
+      // Light sits on :root; dark sits under the system query and under the toggle's data-theme.
+      const [light = '', systemDark = '', toggleDark = ''] = built.split(
+        /@media \(prefers-color-scheme: dark\)|:root\[data-theme="dark"\]/,
+      )
+      expect(systemDark).toContain(':root:not([data-theme="light"])')
+      for (const line of expected(tokens, 'light')) expect(light).toContain(line)
+      for (const line of expected(tokens, 'dark')) {
+        expect(systemDark).toContain(line)
+        expect(toggleDark).toContain(line)
+      }
+      // Every Fumadocs color reads a semantic token, so the docs follow both themes.
+      expect(docs).toContain('@import "../../site/src/semantic.css";')
+      const fd = docs.match(/--color-fd-[\w-]+: [^;]+;/g) ?? []
+      expect(fd.length).toBeGreaterThan(10)
+      expect(fd.filter((line) => !line.includes('var(--semantic-'))).toEqual([])
     }),
   ),
 )
