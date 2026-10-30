@@ -228,7 +228,7 @@
 {"path": "tests/jev/learn/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/jev/replay/AGENTS.md", "sha": "be099efd59494e3a8c21ebb3014f5e7ab7dd9cae72bdb2703cb06d20f4f95538", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/jev/replay/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
-{"path": "tests/lib/AGENTS.md", "sha": "37aa6e1693de29e58332fe6ab7d2d9243c8e581732fbb8c40d49ec3b79ee64d1", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "tests/lib/AGENTS.md", "sha": "9250fbd21abcd6b0aa9b4c5d3aa015fb1328b6cfb68132a03ac0dd6e68028d1b", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/lib/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/lib/sources/AGENTS.md", "sha": "7de358b067d6a0d1107c3d2d16c7f54d208c1cb9f3bbd0f7917394435da11952", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/lib/sources/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
