@@ -10,7 +10,10 @@ import { lines } from '../../design/doctor-output.json'
 const passed = lines.filter((l) => l.startsWith('ok ')).length
 const total = lines.length
 const rows = lines.join('\n')
-const tags = ['bun 1.4.3', 'node v26.10.0', 'mise 2026.10.18', 'network HTTP 200', 'ok: true']
+const tags = [...['bun 2', 'mise 2', 'network 3'].map((k) => {
+  const [name, n] = k.split(' ')
+  return lines.find((l) => l.startsWith(`ok   ${name}`))?.slice(5).split(' ').slice(0, Number(n)).join(' ')
+}).filter((t): t is string => Boolean(t)), `ok: ${passed === total}`]
 const cards = [
   [
     'One-line install',
@@ -38,7 +41,7 @@ const cards = [
       <h1 id="install-title">Install webular and spin web research on your own machine. No paid API, no key, no sign-up.</h1>
       <RunLine command="npx webular@0.3.2 doctor" id="hero-command" label="Check your machine first" />
       <pre class="search-rows doctor-rows" tabindex="0" aria-label="What doctor prints">{rows}<span class="doctor-sum">{'\n'}ok: {String(passed === total)}, {passed} of {total} checks passed</span></pre>
-      <p class="result-tag"><span>All set: {passed} of {total} checks passed. Go spin some web!</span></p>
+      <p class="result-tag"><span>{passed === total ? `All set: ${passed} of ${total} checks passed. Go spin some web!` : `${passed} of ${total} checks passed. The fail rows show what to fix.`}</span></p>
     </div>
     <WebArt labeled={tags} />
   </section>
