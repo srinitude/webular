@@ -1,6 +1,76 @@
 /* Layout changes by width, per the layout spec. The grid values (gutter,
    content, type sizes, section gap) change in tokens.css; media queries
    cannot read custom properties, so widths here are literal. */
+/* Home hero, narrow first: Copy drops below the command, 2 of the 10 rows show. */
+.tagline {
+  margin: 0;
+  font-size: var(--code-size);
+}
+.run-hero .code-row {
+  flex-wrap: wrap;
+  padding-bottom: var(--space-8);
+}
+.run-hero .code-row pre {
+  flex-basis: 100%;
+}
+.search-rows li:nth-child(3),
+.result-tag .tag-wide,
+.web-label:nth-of-type(n + 4),
+.doctor-sum,
+.art-wide {
+  display: none;
+}
+/* Narrow nav: the brand on top, the links in a row under it. */
+.site-header .wrap {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-8);
+  padding-block: var(--space-8);
+}
+.header-end {
+  margin-left: calc(var(--space-8) * -1);
+}
+/* The install command stays on one line at 390 px: 26 cells at 6cqi. */
+.page-hero .run-line code {
+  font-size: min(var(--h1-size), 6cqi);
+}
+@media (min-width: 600px) {
+  .web-label:nth-of-type(n + 4) {
+    display: inline;
+  }
+  .run-hero .code-row {
+    flex-wrap: nowrap;
+    padding-bottom: 0;
+  }
+  .run-hero .code-row pre {
+    flex-basis: auto;
+  }
+  .search-rows li:nth-child(3) {
+    display: list-item;
+  }
+  .result-tag .tag-wide {
+    display: inline-block;
+  }
+  .result-tag .tag-narrow,
+  .art-narrow {
+    display: none;
+  }
+  .doctor-sum {
+    display: inline;
+  }
+  .art-wide {
+    display: block;
+  }
+  .install-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .tile-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .tile-grid .tile-lead {
+    grid-column: 1 / -1;
+  }
+}
 @media (orientation: landscape) and (max-height: 500px) {
   :root {
     --header-min: var(--size-header-landscape);
@@ -20,9 +90,6 @@
   }
 }
 @media (min-width: 600px) {
-  .nav-600 {
-    display: inline-flex;
-  }
   .card-grid,
   .cards-table tbody {
     grid-template-columns: repeat(2, 1fr);
@@ -33,8 +100,13 @@
   }
 }
 @media (min-width: 768px) {
-  .nav-768 {
-    display: inline-flex;
+  .site-header .wrap {
+    flex-direction: row;
+    align-items: center;
+    padding-block: 0;
+  }
+  .header-end {
+    margin-left: auto;
   }
   .site-footer ul {
     grid-template-columns: repeat(3, 1fr);
@@ -67,24 +139,18 @@
   .cards-table th,
   .cards-table td {
     padding: var(--space-12) var(--space-16);
-    border: var(--border-width) solid var(--color-border);
+    border: var(--border-width) solid var(--semantic-strand);
   }
   .cards-table thead th {
-    background: var(--color-surface);
+    background: var(--semantic-card);
   }
   .cards-table td::before {
     content: none;
   }
 }
 @media (min-width: 1024px) {
-  .nav-1024 {
-    display: inline-flex;
-  }
-  .menu {
-    display: none;
-  }
   .hero {
-    grid-template-columns: 5fr 7fr;
+    grid-template-columns: 7fr 5fr;
     gap: var(--space-48);
     align-items: start;
   }
@@ -123,11 +189,11 @@
   }
   .sidebar a {
     padding: var(--space-4) 0;
-    color: var(--color-text);
+    color: var(--semantic-ink);
   }
   /* The current page shows in the accent color. */
   .sidebar a[aria-current="page"] {
-    color: var(--color-accent);
+    color: var(--semantic-ink);
     font-weight: var(--font-weight-bold);
   }
 }

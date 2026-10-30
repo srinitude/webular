@@ -28,7 +28,7 @@ ci: CI entry — single default dependency path (local + remote) [after validate
 clean: Delete build output (dist/) on every OS; never touches bench results, recordings, or caches
 compile:all: Cross-compile the webular executable for every Bun target into dist/bin (release path, off the check-only spine) [after build]
 default: Default path: a bare `mise run` runs the repo CI spine, the plugin chain, then the end-to-end run [after ci, plugin:ci, e2e]
-docs:build: Docs: build the Fumadocs site for webular.dev/docs into site-docs/out: pages from docs/*.md, then a static Next export with its search index [after setup]
+docs:build: Docs: build webular.dev, then the Fumadocs docs (pages from docs/*.md, a static Next export with its search index) into site-docs/out, publish them into site/dist/docs beside the site, with the designed docs page as the /docs index, then check every internal link in site/dist [after setup, site:build]
 docs:chain:check: Docs: the readability-chain ledger rows, AGENTS.md rules, Markdown links, and the plugin's timeless wording all hold. A focused subset of `mise run test` [after setup]
 docs:dev: Docs: serve the Fumadocs site at localhost:3000/docs with live reload (pages from docs/*.md) [after setup]
 docs:facts: Docs: the facts in README.md and docs/install.md, and the repo and plugin descriptions, match the code. A focused subset of `mise run test` [after setup]
@@ -42,6 +42,8 @@ jev:check: Jev framework checks (off the linear spine; the test task runs them t
 jev:docs: Refresh and verify the Jev docs snapshot: conditional GET of docs.typesafe.ai/llms-full.txt (a 304 when unchanged), proof (sha256, line count, chunk boundaries) written to src/lib/jev/docs-snapshot.json; pass --replay to re-prove the committed recording offline [after setup]
 jev:latest-check: Fails when docs.typesafe.ai lists a Jev release above JEV_LATEST_RELEASED in src/lib/jev/model.ts. No other task depends on it [after setup]
 lint: Lint + format-verify with Biome (check-only CI gate) [after setup]
+nix:check: Read-only: fails when webular.nix pins a version other than the tag of the release at `releases/latest`. Off the linear spine [after setup]
+nix:refresh: Rewrite the repo-root webular.nix from a published release's SHA256SUMS (default: the release at `releases/latest`); run after each publish, then commit it to the open PR branch. Off the linear spine [after setup]
 os:check: Every OS, locally: shell completions parse, the e2e parity list, the CLI gateway, and the Jev key lookup on each platform. Linux, macOS, and Windows each run the full suite only in CI (.github/workflows/ci.yml) [after setup]
 package:completions: Write shell completions (bash, zsh, fish, PowerShell) into dist/completions from the command and flag tables (release path, after compile:all) [after compile:all]
 package:distros: Write the AUR PKGBUILD, .SRCINFO, and webular.nix into dist/packaging from dist/bin/SHA256SUMS (release path, after compile:all) [after compile:all]
@@ -91,7 +93,7 @@ run:tasks: TASKS — introspect the mise task graph this CLI routes through [aft
 run:upgrade: UPGRADE — print (or with --yes, run) the command that upgrades this install [after setup]
 setup: Install pinned dependencies (frozen lockfile) — root of the universal task graph
 site:build: Site: build webular.dev into site/dist: tools.json from the live `webular mcp` tools/list, the Astro pages, then every .md twin and machine file [after setup]
-site:deploy: Site: deploy site/dist to Cloudflare Workers static assets for webular.dev and www.webular.dev (needs a signed-in wrangler; never in CI) [after site:build]
+site:deploy: Site: deploy site/dist to Cloudflare Workers static assets for webular.dev and www.webular.dev (needs a signed-in wrangler; never in CI) [after docs:build]
 site:dev: Site: serve webular.dev from site/src with live reload (writes tools.json first) [after setup]
 site:test: Site: on site/dist, no sideways scroll at 320 to 2560 px with the hero command on screen, zero serious or critical axe issues, and a home page under 100 KB gzip with no third-party script [after site:build]
 sync:check: Drift: every generated or mirrored file matches its source (dispatch table, bench docs, practices and rule files, skills and plugin tools, docs/tasks.md). A focused subset of `mise run test` [after build, plugin:bundle]

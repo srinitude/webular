@@ -1,0 +1,29 @@
+---
+// One run line: the command as printed, a real Copy button, and a polite live
+// region that says "Copied". The Copy script lives in Base.astro.
+// `lines` sets the designed break as a shell continuation: each line but the last
+// ends in " \", and each later line is indented two spaces. Copy always copies
+// the one-line command.
+interface Props {
+  command?: string
+  lines?: string[]
+  id?: string
+  label?: string
+}
+const { lines, id, label = 'Command to run' } = Astro.props
+const parts = lines ?? [Astro.props.command ?? '']
+const command = parts.join(' ')
+---
+
+<div class="run-line" data-copy-region>
+  <div class="copy-failed" data-copy-failed hidden>
+    <strong>Copy did not work</strong>
+    <p>Select the line by hand and copy it:</p>
+    <code>$ {command}</code>
+  </div>
+  <div class="code-row">
+    <pre id={id} tabindex="0" aria-label={label}><code>$ {parts.map((part, i) => <span class={i ? 'run-part' : undefined}>{i ? '  ' : ''}{part}{i < parts.length - 1 ? ' \\' : ''}</span>)}</code></pre>
+    <button type="button" class="copy" data-copy={command}>Copy</button>
+  </div>
+  <p class="visually-hidden" aria-live="polite" data-copy-status></p>
+</div>

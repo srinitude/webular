@@ -36,7 +36,7 @@
     "xstate"
   ],
   "bin": {
-    "webular": "./dist/webular.js"
+    "webular": "dist/webular.js"
   },
   "exports": {
     ".": "./src/cli/route.ts",

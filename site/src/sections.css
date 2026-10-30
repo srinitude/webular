@@ -43,9 +43,9 @@ main {
 .card,
 details.group {
   padding: var(--space-16);
-  background: var(--color-surface);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-box);
+  background: var(--semantic-card);
+  border: var(--border-width) solid var(--semantic-strand);
+  border-radius: var(--radius-panel);
 }
 .card {
   display: grid;
@@ -115,7 +115,7 @@ th,
 td {
   text-align: left;
   padding: var(--space-8) var(--space-12);
-  border: var(--border-width) solid var(--color-border);
+  border: var(--border-width) solid var(--semantic-strand);
   vertical-align: top;
 }
 .actions {
@@ -130,7 +130,7 @@ td {
   align-items: center;
   min-height: var(--size-tap-target);
   padding-inline: var(--space-16);
-  border: var(--border-width) solid var(--color-border);
+  border: var(--border-width) solid var(--semantic-strand);
   border-radius: var(--radius-control);
 }
 
@@ -167,9 +167,9 @@ td {
 }
 .cards-table tr {
   padding: var(--space-16);
-  background: var(--color-surface);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-box);
+  background: var(--semantic-card);
+  border: var(--border-width) solid var(--semantic-strand);
+  border-radius: var(--radius-panel);
 }
 .cards-table th[scope="row"] {
   display: block;
@@ -183,7 +183,7 @@ td {
 
 /* Footer: 48 px top padding, 1 px top border. */
 .site-footer {
-  border-top: var(--border-width) solid var(--color-border);
+  border-top: var(--border-width) solid var(--semantic-strand);
   padding-block: var(--space-48) var(--space-32);
 }
 .site-footer ul {
@@ -196,6 +196,263 @@ td {
 .site-footer a {
   display: inline-block;
   padding-block: var(--space-4);
-  color: var(--color-text);
+  color: var(--semantic-ink);
+  text-decoration: none;
+}
+
+/* The run hero: run line, Copy, and doctor output lead; the web art never covers them. */
+.run-block {
+  display: grid;
+  gap: var(--space-16);
+  min-width: 0;
+}
+.run-block p {
+  margin-top: 0;
+}
+.run-line pre,
+.run-line code {
+  font-size: var(--run-line-size);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-heading);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+/* Both home run lines: inverted block, the largest and heaviest text on the page. */
+.run-hero .code-row,
+.run-hero .code-row pre {
+  background: var(--semantic-ink);
+  color: var(--semantic-on-band);
+}
+.run-hero .copy {
+  background: var(--semantic-page);
+  color: var(--semantic-ink);
+  border-color: var(--semantic-page-edge);
+}
+/* The designed break: the subcommand starts its own line. */
+.run-part {
+  display: block;
+}
+/* In the hero column the run line steps down to the page-title size so each
+   part fits one line; the headings step down further, so it stays the largest. */
+.run-hero .run-line pre {
+  container-type: inline-size;
+}
+/* 6.5cqi keeps "$ npx webular@0.3.2 mcp" (23 monospace cells) on one line,
+   so both run lines share one size. */
+.run-hero .run-line code {
+  font-size: min(var(--h1-size), 6.5cqi);
+}
+/* copy_failed: a card above the run line that says to copy by hand. */
+.copy-failed {
+  display: grid;
+  gap: var(--space-8);
+  margin-bottom: var(--space-16);
+  padding: var(--space-16);
+  background: var(--semantic-card);
+  color: var(--semantic-ink);
+  border: var(--border-width) solid var(--semantic-edge);
+  border-radius: var(--radius-panel);
+}
+.copy-failed[hidden] {
+  display: none;
+}
+.copy-failed strong {
+  font-size: var(--h3-size);
+}
+.copy-failed p {
+  margin: 0;
+}
+.run-line .copy-failed code {
+  font-size: var(--code-size);
+  font-weight: inherit;
+}
+.run-hero h1,
+.run-hero .next {
+  font-size: var(--h3-size);
+}
+.run-hero .next {
+  margin-top: var(--space-16);
+}
+.search-rows {
+  margin: 0;
+  padding: var(--space-16) var(--space-16) var(--space-16) var(--space-48);
+  font-size: var(--code-size);
+  background: var(--semantic-card);
+  border: var(--border-width) solid var(--semantic-strand);
+  overflow-wrap: anywhere;
+}
+.result-tag,
+.json-note {
+  font-size: var(--code-size);
+}
+.result-tag span {
+  display: inline-block;
+  padding: var(--space-4) var(--space-12);
+  background: var(--semantic-ink);
+  color: var(--semantic-on-band);
+}
+/* The 7-tile band: inverted, with the lead tile inverted again. */
+.tile-band {
+  padding-block: var(--section-gap);
+  background: var(--semantic-ink);
+  box-shadow: 0 0 0 100vmax var(--semantic-ink);
+  clip-path: inset(0 -100vmax);
+}
+.tile-grid {
+  display: grid;
+  gap: var(--space-16);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tile-grid a {
+  display: block;
+  padding: var(--space-16);
+  font-family: var(--font-display);
+  font-size: var(--h3-size);
+  font-weight: var(--font-weight-bold);
+  color: var(--semantic-on-band);
+  text-decoration: none;
+  border: calc(var(--border-width) * 2) solid var(--semantic-page-edge);
+  border-radius: var(--radius-panel);
+}
+.tile-grid .tile-lead a {
+  padding: var(--space-24);
+  background: var(--semantic-page-panel);
+  color: var(--semantic-ink);
+}
+/* The band runs straight into the home footer, which carries the band's colors. */
+.home-main {
+  padding-bottom: 0;
+}
+.home-footer {
+  background: var(--semantic-ink);
+  color: var(--semantic-on-band);
+  border-top-color: var(--semantic-page-edge);
+  font-size: var(--code-size);
+}
+.home-footer .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-16);
+}
+.home-footer ul {
+  display: flex;
+  gap: var(--space-16);
+  margin: 0;
+}
+.home-footer .wrap a {
+  color: var(--semantic-on-band);
+}
+/* The domain labels caught in the home web art. */
+.web-label rect {
+  fill: var(--semantic-card);
+  stroke: currentColor;
+  stroke-width: calc(var(--border-width) * 2);
+}
+.web-label text {
+  fill: currentColor;
+  font-family: var(--font-mono);
+  font-size: var(--code-size);
+}
+.web-art {
+  display: block;
+  width: 100%;
+  max-width: var(--content-max);
+  height: auto;
+  color: var(--semantic-ink);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .web-art path {
+    transform-origin: 50% 0;
+    animation: web-sway 9s ease-in-out infinite alternate;
+  }
+}
+@keyframes web-sway {
+  from {
+    transform: rotate(-1deg);
+  }
+  to {
+    transform: rotate(1deg);
+  }
+}
+/* Install, docs index, and 404: the landing's run hero with the page title one
+   step up, then cards with a title and one summary line, then the doc. */
+.page-hero h1 {
+  font-size: var(--h2-size);
+}
+.run-block .kicker {
+  margin-bottom: 0;
+  font-family: var(--font-display);
+  font-size: var(--h3-size);
+  font-weight: var(--font-weight-bold);
+}
+.doctor-rows {
+  padding-left: var(--space-16);
+  line-height: var(--line-height-code);
+  white-space: pre;
+  overflow-x: auto;
+}
+.page-cards {
+  display: grid;
+  gap: var(--space-24);
+  margin: var(--section-gap) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.page-cards li {
+  display: grid;
+  gap: var(--space-24);
+}
+.page-cards a {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-24);
+  font-size: var(--body-size);
+  color: var(--semantic-ink);
+  text-decoration: none;
+  background: var(--semantic-card);
+  border: calc(var(--border-width) * 2) solid var(--semantic-strand);
+  border-radius: var(--radius-panel);
+}
+.page-cards strong {
+  font-family: var(--font-display);
+  font-size: var(--h3-size);
+}
+.page-cards .card-lead strong {
+  font-size: var(--h2-size);
+}
+.page-cards .card-lead span {
+  font-weight: var(--font-weight-bold);
+}
+.page-doc {
+  margin-top: var(--section-gap);
+}
+/* The hero already carries the page title and lead. */
+.page-doc .doc-body > h1,
+.page-doc .doc-body > h1 + p {
+  display: none;
+}
+.missing-hero h1 {
+  font-size: var(--text-3xl);
+}
+.run-block .missing-lead {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--h2-size);
+  line-height: var(--line-height-heading);
+}
+.home-link {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--size-tap-target);
+  padding: var(--space-12) var(--space-16);
+  font-family: var(--font-mono);
+  font-size: var(--body-size);
+  color: var(--semantic-on-band);
+  background: var(--semantic-ink);
   text-decoration: none;
 }

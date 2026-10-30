@@ -12,7 +12,7 @@ The build and maintenance scripts that `mise` tasks run. The root [AGENTS.md](..
 - [bugs-check.ts](bugs-check.ts) runs the static bug-class guards for `mise run bugs:static`. [bugs-hunt.ts](bugs-hunt.ts) runs one class from [bugs-hunts.json](bugs-hunts.json) per `bugs:<class>` task, and every class for `mise run bugs:check`. A file in a rule's `known` list is a hit a fix still owes; remove it once fixed.
 - [docs-content.ts](docs-content.ts) writes the webular.dev/docs pages into `site-docs/content/docs` from [docs/](../docs/) for `mise run docs:build`. Its `--publish` step copies the export into `site/dist/docs`, with [docs-inline.ts](docs-inline.ts) moving each inline script to its own file.
 - [docs-commands.ts](docs-commands.ts) builds one page per command from its `--help`. [docs-outputs.ts](docs-outputs.ts) records each URL command's real output against the contract fixture site for `mise run docs:outputs`.
-- [docs-links.ts](docs-links.ts) fails `mise run site:build` on any `/docs` link with no built file.
+- [docs-links.ts](docs-links.ts) runs last in `mise run docs:build`. It fails on any internal link in `site/dist` that the static host cannot serve: no file, no `.html` or `index.html` page, and no `_redirects` rule.
 - [install.sh](install.sh) and [install.ps1](install.ps1) install a release binary.
 
 ## Rules

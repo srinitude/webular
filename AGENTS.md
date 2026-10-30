@@ -62,7 +62,7 @@ Ask first:
 
 Never:
 
-- Edit `dist/`, [bench/recordings](bench/recordings/), or [tests/jev/replay](tests/jev/replay/) by hand. Tasks write them.
+- Edit `dist/`, [bench/recordings](bench/recordings/), [tests/jev/replay](tests/jev/replay/), or [webular.nix](webular.nix) (the package flake.nix and default.nix build) by hand. Tasks write them.
 - Add mocks or stubs. Tests use real code on a local `Bun.serve` fixture.
 - Commit secrets or keys. Keys come only from the environment or OS keychain, read through Effect `Config.Redacted`.
 - Commit [bench/results](bench/results/), [bench/recordings](bench/recordings/), or the git-ignored .land/ folder (landing scratch).
@@ -86,8 +86,7 @@ Never:
 - Bun does not type-check, so keep `bun node_modules/typescript/bin/tsc --noEmit` on the CI spine ([Bun](https://bun.com/docs/runtime/typescript), tag `bun-v1.4.3`).
 - Bundle with `--target=bun`; the default is the browser. ESM bytecode needs `--compile`, so keep `--compile --bytecode --format=esm --minify` together ([Bun](https://bun.com/docs/bundler/bytecode), tag `bun-v1.4.3`).
 - List every Worker entry file on the `--compile` command when the binary starts that Worker. One left off loads from disk and fails ([Bun](https://bun.com/docs/bundler/executables), tag `bun-v1.4.3`).
-- Install with `bun install --frozen-lockfile` and keep [bun.lock](bun.lock) tracked. A frozen install with no lockfile writes none ([Bun](https://bun.com/docs/pm/cli/install), tag `bun-v1.4.3`).
-- Keep `install.minimumReleaseAge` in seconds and allow lifecycle scripts only through `trustedDependencies` ([Bun](https://bun.com/docs/pm/cli/install), tag `bun-v1.4.3`).
+- Install with `bun install --frozen-lockfile` and keep [bun.lock](bun.lock) tracked. A frozen install with no lockfile writes none. Keep `install.minimumReleaseAge` in seconds and allow lifecycle scripts only through `trustedDependencies` ([Bun](https://bun.com/docs/pm/cli/install), tag `bun-v1.4.3`).
 - Keep `effect` and every `@effect/*` package on one exact version ([Effect-TS/effect@effect@4.0.5](https://github.com/Effect-TS/effect/blob/effect%404.0.5/packages/effect/package.json)).
 - Bun has no V8 heap flags. To cut memory, lower concurrency first, then measure RSS with and without `--smol`, the only memory flag ([Bun](https://bun.com/docs/runtime), tag `bun-v1.4.3`).
 - `BUN_CONFIG_MAX_HTTP_REQUESTS` caps fetch sockets (default 256) and install requests per process. Keep our own caps below it ([Bun](https://bun.com/docs/runtime/environment-variables), tag `bun-v1.4.3`).

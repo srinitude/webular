@@ -1,5 +1,8 @@
 ---
+import './fonts.css'
 import './tokens.css'
+import './semantic.css'
+import './grid.css'
 import './site.css'
 import './sections.css'
 import './widths.css'
@@ -10,8 +13,9 @@ interface Props {
   description: string
   home?: boolean
   doc?: boolean
+  short?: boolean
 }
-const { title, description, home = false, doc = false } = Astro.props
+const { title, description, home = false, doc = false, short = false } = Astro.props
 
 const sha = import.meta.env.PUBLIC_BUILD_SHA ?? 'dev'
 const date = import.meta.env.PUBLIC_BUILD_DATE ?? 'dev'
@@ -38,6 +42,17 @@ const footerLinks = [
   ['GitHub', github],
   ['llms.txt', '/llms.txt'],
 ]
+// The home page footer keeps only the two outside links; its tiles reach the rest.
+if (home)
+  footerLinks.splice(0, footerLinks.length, ['GitHub', github], ['Releases', `${github}/releases`])
+// A short page (install, docs, 404) gets the home footer look with the three nav links.
+if (short)
+  footerLinks.splice(
+    0,
+    footerLinks.length,
+    ...pages.filter(([label]) => ['Install', 'Commands', 'Docs'].includes(label)),
+  )
+const darkFooter = home || short
 ---
 
 <!doctype html>
@@ -45,6 +60,8 @@ const footerLinks = [
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preload" href="/fonts/archivo-black-400.latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/space-mono-400.latin.woff2" as="font" type="font/woff2" crossorigin />
     <title>{title}</title>
     <meta name="description" content={description} />
     <script is:inline>try{const t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch{}</script>
@@ -54,27 +71,16 @@ const footerLinks = [
     <a class="skip-link" href={home ? "#hero-command" : "#content"}>{home ? "Skip to install" : "Skip to content"}</a>
     <header class="site-header">
       <div class="wrap">
-        <a class="wordmark" href="/">webular</a>
+        <div class="brand"><a class="wordmark" href="/">webular</a><p class="tagline">Search, scrape, crawl, and answer with sources. Your own web, spun on your own machine.</p></div>
         <div class="header-end">
-          <a class="nav-768" href="/install">Install</a>
-          <a class="nav-768" href="/agents">Agents</a>
-          <a class="nav-1024" href="/tools">Tools</a>
-          <a class="nav-1024" href="/commands">Commands</a>
-          <a class="nav-1024" href="/benchmarks">Benchmarks</a>
+          <a class="nav-390" href="/install">Install</a>
+          <a class="nav-390" href="/commands">Commands</a>
           <a class="nav-390" href="/docs">Docs</a>
-          <a class="nav-600" href={github}>GitHub</a>
           <button type="button" class="theme-toggle" data-theme-toggle aria-label="Dark theme" aria-pressed="false">◐</button>
-          <details class="menu">
-            <summary>Menu</summary>
-            <nav aria-label="Menu">
-              {pages.map(([label, href]) => <a href={href}>{label}</a>)}
-              <a href={github}>GitHub</a>
-            </nav>
-          </details>
         </div>
       </div>
     </header>
-    <main id="content">
+    <main id="content" class:list={[{ "home-main": home }]}>
       <div class:list={["wrap", { "has-sidebar": doc }]}>
         {doc && (
           <aside class="sidebar">
@@ -98,13 +104,14 @@ const footerLinks = [
         )}
       </div>
     </main>
-    <footer class="site-footer">
+    <footer class:list={["site-footer", { "home-footer": darkFooter }]}>
       <div class="wrap">
+        {darkFooter && <a class="footer-mark" href="/">webular</a>}
         <ul>
           {footerLinks.map(([label, href]) => <li><a href={href}>{label}</a></li>)}
         </ul>
-        <p>Open source under Apache-2.0. © Kiren Srinivasan. This site sets no cookies and runs no tracking.</p>
-        <p class="muted">Built from commit <code>{sha}</code> on <code>{date}</code></p>
+        {!darkFooter && <p>Open source under Apache-2.0. © Kiren Srinivasan. This site sets no cookies and runs no tracking.</p>}
+        {!darkFooter && <p class="muted">Built from commit <code>{sha}</code> on <code>{date}</code></p>}
       </div>
     </footer>
     <script>
@@ -150,11 +157,24 @@ const footerLinks = [
       }
       for (const button of document.querySelectorAll<HTMLButtonElement>('[data-copy]')) {
         button.addEventListener('click', async () => {
-          const status = button.closest('[data-tabs]')?.querySelector('[data-copy-status]')
-          await navigator.clipboard.writeText(button.dataset.copy ?? '')
-          button.textContent = 'Copied'
-          if (status) status.textContent = 'Copied to clipboard'
-          setTimeout(() => { button.textContent = 'Copy'; if (status) status.textContent = '' }, 2000)
+          const status = button.closest('[data-tabs], [data-copy-region]')?.querySelector('[data-copy-status]')
+          // Three states: idle (Copy), Copied, and copy_failed. Copy fails when the clipboard
+          // says no, and throws before any promise on an insecure page or an older browser
+          // (no navigator.clipboard), so the try covers both. The run line stays selectable.
+          let said = 'Copied'
+          let heard = said
+          try {
+            await navigator.clipboard.writeText(button.dataset.copy ?? '')
+          } catch {
+            said = 'Copy did not work'
+            heard = `${said}. Select the line by hand and copy it.`
+          }
+          // copy_failed also shows the design's visible panel above the run line.
+          const panel = button.closest('[data-copy-region]')?.querySelector<HTMLElement>('[data-copy-failed]')
+          button.textContent = said
+          if (status) status.textContent = heard
+          if (panel) panel.hidden = said === 'Copied'
+          setTimeout(() => { button.textContent = 'Copy'; if (status) status.textContent = ''; if (panel) panel.hidden = true }, said === 'Copied' ? 2000 : 6000)
         })
       }
       const toc = document.querySelector('[data-toc]')

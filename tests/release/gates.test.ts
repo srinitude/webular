@@ -106,8 +106,14 @@ test('without the native package or Bun, the launcher names the missing package'
   ))
 
 test('the npm bin is the generated Node launcher and ships in the package', () => {
-  expect(pkg.bin.webular).toBe('./dist/webular.js')
+  expect(pkg.bin.webular).toBe('dist/webular.js')
   expect(pkg.files).toContain('dist/webular.js')
+})
+
+test('docker follows github-release, not npm', () => {
+  const needs = [(jobs['docker'] as { needs?: string | string[] })?.needs ?? []].flat()
+  expect(needs).toContain('github-release')
+  for (const npm of ['publish', 'publish-github-packages']) expect(needs).not.toContain(npm)
 })
 
 test('publish builds before packing and runs no lifecycle scripts', () => {

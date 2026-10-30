@@ -1,6 +1,6 @@
 # More ways to install, verify, and upgrade
 
-This page covers the channels beyond the [install script](install-script.md) and the packages on the [install channels page](install.md): mise, eget, and the release files themselves. It ends with completions, upgrade, and uninstall.
+This page covers the channels beyond the [install script](install-script.md) and the packages on the [install channels page](install.md): mise, eget, Nix, Docker, and the release files themselves. It ends with completions, upgrade, and uninstall.
 
 ## mise
 
@@ -22,6 +22,36 @@ On Alpine, take the musl build:
 
 ```bash
 eget srinitude/webular --asset musl
+```
+
+## Nix
+
+The repo is a Nix flake. It installs the prebuilt release binary for your system: x86_64 or aarch64, on Linux or macOS.
+
+```bash
+nix profile install github:srinitude/webular
+```
+
+To run it once without installing:
+
+```bash
+nix run github:srinitude/webular -- --version
+```
+
+Without flakes, run `nix-build` in a checkout. The binary lands in `./result/bin/webular`. Upgrade a profile install with `nix profile upgrade webular`.
+
+## Docker
+
+Each release pushes a Linux image for amd64 and arm64 to the GitHub Container Registry. The image is Alpine with the musl build. Each version has its own tag, and the `latest` tag points at the stable release that npm marks `latest`.
+
+```bash
+docker run --rm ghcr.io/srinitude/webular:latest --version
+```
+
+To pin a release, use `ghcr.io/srinitude/webular:<x.y.z>`. To keep the page cache between runs, mount a folder and point `WEBULAR_CACHE_DIR` at it:
+
+```bash
+docker run --rm -v "$HOME/.cache/webular:/cache" -e WEBULAR_CACHE_DIR=/cache ghcr.io/srinitude/webular:latest scrape https://example.com
 ```
 
 ## GitHub release binaries

@@ -79,7 +79,7 @@ Install webular first. The server runs on your machine over stdio: `webular mcp`
 
 If the app says it cannot find `webular`, put the full path in `command`: your home folder plus `/.webular/bin/webular`, or `\.webular\bin\webular.exe` on Windows.
 
-## Platforms
+## Supported platforms
 
 webular ships twelve native builds. Every install channel picks the one that fits your machine. Each x64 build has a `-baseline` sibling for x64 CPUs without AVX2.
 

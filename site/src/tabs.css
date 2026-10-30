@@ -26,7 +26,7 @@
   min-width: 0;
 }
 .tab-label {
-  color: var(--color-muted);
+  color: var(--semantic-ink);
   font-size: var(--code-size);
 }
 /* A row that does not fit scrolls inside itself, with the scroll-row fade. */
@@ -36,10 +36,10 @@
   border: 0;
   scrollbar-width: none;
   background:
-    linear-gradient(to left, var(--color-bg) var(--space-16), transparent) right / var(--space-32)
-    100% no-repeat local,
+    linear-gradient(to left, var(--semantic-page) var(--space-16), transparent) right /
+    var(--space-32) 100% no-repeat local,
     linear-gradient(to left, var(--fade), transparent) right / var(--space-16) 100% no-repeat scroll,
-    var(--color-bg);
+    var(--semantic-page);
 }
 [role="tab"],
 .tab-link,
@@ -51,7 +51,7 @@
   padding: 0 var(--space-12);
   font: inherit;
   font-size: var(--code-size);
-  color: var(--color-muted);
+  color: var(--semantic-ink);
   background: none;
   border: var(--border-width) solid transparent;
   border-radius: var(--radius-control);
@@ -64,16 +64,16 @@
 }
 /* The selected tab: a surface fill and a neutral border, never amber. */
 [role="tab"][aria-selected="true"] {
-  color: var(--color-text);
-  background: var(--color-surface);
-  border-color: var(--color-border);
+  color: var(--semantic-ink);
+  background: var(--semantic-card);
+  border-color: var(--semantic-strand);
   font-weight: var(--font-weight-bold);
 }
 [role="tab"]:focus-visible,
 .tab-link:focus-visible,
 .copy:focus-visible,
 .theme-toggle:focus-visible {
-  outline: var(--focus-width) solid var(--color-focus);
+  outline: var(--focus-width) solid var(--semantic-ink);
   outline-offset: -3px;
 }
 .tab-panel {
@@ -86,7 +86,7 @@
 }
 .path-note,
 .tab-panel p {
-  color: var(--color-muted);
+  color: var(--semantic-ink);
 }
 /* Copy sits inside the code box, outside its scrolling area, 8 px from it. */
 .code-row {
@@ -95,9 +95,9 @@
   gap: var(--space-8);
   min-width: 0;
   padding-right: var(--space-8);
-  background: var(--color-surface);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-box);
+  background: var(--semantic-card);
+  border: var(--border-width) solid var(--semantic-strand);
+  border-radius: var(--radius-panel);
 }
 .code-row pre {
   flex: 1;
@@ -105,12 +105,12 @@
 }
 .copy {
   width: var(--size-copy-button);
-  color: var(--color-accent);
-  border-color: var(--color-accent);
+  color: var(--semantic-ink);
+  border-color: var(--semantic-ink);
 }
 .theme-toggle {
-  color: var(--color-text);
-  border-color: var(--color-border);
+  color: var(--semantic-ink);
+  border-color: var(--semantic-strand);
 }
 /* The curl line: below 600 it breaks before "| sh"; from 600 to 767 after
    "-fsSL" with a "\"; from 768 it is one line. */
@@ -156,7 +156,7 @@
   gap: var(--space-4);
 }
 .group-grid summary code {
-  color: var(--color-muted);
+  color: var(--semantic-ink);
   font-weight: normal;
 }
 .group-grid > details.group[open] {
@@ -180,7 +180,7 @@
   }
   .toc h2 {
     font-size: var(--code-size);
-    color: var(--color-muted);
+    color: var(--semantic-ink);
     margin-bottom: var(--space-8);
   }
   .toc a {

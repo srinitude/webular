@@ -4,13 +4,15 @@ interface Props {
   slug: string
 }
 const { slug } = Astro.props
-const prompt = encodeURIComponent(`Read https://webular.dev/${slug}.md and help me use webular.`)
+// The agents twin is agents/index.md (see scripts/machine-files.ts).
+const twin = slug === 'agents' ? 'agents/index.md' : `${slug}.md`
+const prompt = encodeURIComponent(`Read https://webular.dev/${twin} and help me use webular.`)
 ---
 
 <div class="doc-meta">
   <p class="muted">For agents: <a href="/llms.txt">llms.txt</a> indexes every page.</p>
   <ul class="actions">
-    <li><a href={`/${slug}.md`}>Copy page as Markdown</a></li>
+    <li><a href={`/${twin}`}>Copy page as Markdown</a></li>
     <li><a href={`https://chatgpt.com/?q=${prompt}`}>Open in ChatGPT</a></li>
     <li><a href={`https://claude.ai/new?q=${prompt}`}>Open in Claude</a></li>
   </ul>

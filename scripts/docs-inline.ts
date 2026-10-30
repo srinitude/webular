@@ -32,3 +32,12 @@ export const copyExport = (fs: FileSystem.FileSystem, out: string, dist: string)
       for (const [name, js] of files) yield* fs.writeFileString(`${dist}_inline/${name}`, js)
     }
   })
+
+// The designed Astro page becomes the docs index at /docs/; Fumadocs keeps every /docs/<page>.
+// The index RSC payloads go too, so a sidebar link to /docs/ loads the designed page in full.
+export const designedIndex = (fs: FileSystem.FileSystem, page: string, dist: string) =>
+  Effect.gen(function* () {
+    yield* fs.copyFile(page, `${dist}index.html`)
+    for (const name of yield* fs.readDirectory(dist))
+      if (name === 'index.txt' || /^__next\..+\.txt$/.test(name)) yield* fs.remove(`${dist}${name}`)
+  })

@@ -184,7 +184,7 @@ Copy a folder from [`plugins/webular/skills`](../plugins/webular/skills) into yo
 
 ## More ways to install
 
-mise, eget, the GitHub CLI, release files with manual checks, shell completions, upgrade, and uninstall are on the [more ways to install](install-more.md) page.
+mise, eget, Nix, Docker, the GitHub CLI, release files with manual checks, shell completions, upgrade, and uninstall are on the [more ways to install](install-more.md) page.
 
 ## Run from source instead
 

@@ -1,6 +1,6 @@
 # Commands
 
-webular has 20 commands. Each one has its line and an example you can run. `webular <command> --help` lists every flag.
+webular has 22 commands. Each one has its line and an example you can run. `webular <command> --help` lists every flag.
 
 ## Find
 
@@ -171,6 +171,14 @@ Learns from recorded Jev calls, or labels one as an eval case.
 ```sh
 webular jev --help
 ```
+
+### `upgrade`
+
+Prints the command that upgrades this install. `--yes` runs it. Try `webular upgrade`.
+
+### `completions`
+
+Prints the shell completion script for `bash`, `zsh`, `fish`, or `powershell`. Try `webular completions zsh`.
 
 ## Global options
 

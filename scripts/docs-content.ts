@@ -6,7 +6,7 @@ import * as BunServices from '@effect/platform-bun/BunServices'
 import { Effect, FileSystem, Option } from 'effect'
 import { ChildProcess, ChildProcessSpawner } from 'effect/process'
 import { commandPages, ROOT } from './docs-commands.ts'
-import { copyExport } from './docs-inline.ts'
+import { copyExport, designedIndex } from './docs-inline.ts'
 
 const SITE = `${ROOT}docs/site/`
 const OUT = `${ROOT}site-docs/content/docs/`
@@ -162,6 +162,7 @@ const entry = (text: string, path: string) => {
 const publish = Effect.gen(function* () {
   const fs = yield* FileSystem.FileSystem
   yield* copyExport(fs, `${ROOT}site-docs/out`, DIST)
+  yield* designedIndex(fs, `${ROOT}site/dist/docs.html`, DIST)
   const index: string[] = []
   const full: string[] = []
   const urls: string[] = []
@@ -181,15 +182,12 @@ const publish = Effect.gen(function* () {
     `# webular docs\n\n${intro}\n\n## Pages\n\n${index.join('\n')}\n`,
   )
   yield* fs.writeFileString(`${DIST}llms-full.txt`, full.join('\n\n'))
-  yield* fs.writeFileString(
-    `${DIST}sitemap.xml`,
-    `${SITEMAP_HEAD}\n${urls.join('\n')}\n</urlset>\n`,
-  )
+  yield* fs.writeFileString(`${DIST}sitemap.xml`, `${SITEMAP_HEAD}${urls.join('\n')}\n</urlset>\n`)
   yield* Effect.log(`docs published: ${urls.length} pages with .md twins, llms files, sitemap`)
 })
 
 const SITEMAP_HEAD =
-  '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+  '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
 
 if (import.meta.main)
   (Bun.argv.includes('--publish') ? publish : program).pipe(

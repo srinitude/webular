@@ -208,6 +208,17 @@ description = "Write the AUR PKGBUILD, .SRCINFO, and webular.nix into dist/packa
 depends = ["compile:all"]
 run = 'bun "{{config_root}}/src/release/distros.ts"'
 
+[tasks."nix:refresh"]
+description = "Rewrite the repo-root webular.nix from a published release's SHA256SUMS (default: the release at `releases/latest`); run after each publish, then commit it to the open PR branch. Off the linear spine"
+depends = ["setup"]
+usage = 'arg "[version]" help="Published version, like 0.3.2 or v0.3.2"'
+run = 'bun "{{config_root}}/src/release/nix-refresh.ts" refresh{% if usage.version %} "{{ usage.version }}"{% endif %}'
+
+[tasks."nix:check"]
+description = "Read-only: fails when webular.nix pins a version other than the tag of the release at `releases/latest`. Off the linear spine"
+depends = ["setup"]
+run = 'bun "{{config_root}}/src/release/nix-refresh.ts" check'
+
 [tasks."test:file"]
 description = "Run the named test files only (targeted check while editing)"
 depends = ["setup"]
@@ -497,20 +508,22 @@ dir = "{{config_root}}/site"
 run = [
   "bun install --frozen-lockfile 1>&2",
   'bun "{{config_root}}/site/scripts/tokens-css.ts" 1>&2',
-  'bunx biome format --write "{{config_root}}/site/src/tokens.css" 1>&2',
+  'bunx biome format --write "{{config_root}}/site/src/grid.css" "{{config_root}}/site/src/semantic.css" 1>&2',
   'bun "{{config_root}}/site/scripts/tools-json.ts"',
   'PUBLIC_BUILD_SHA="$(git rev-parse --short HEAD)" PUBLIC_BUILD_DATE="$(git log -1 --format=%cs)" bun --bun "{{config_root}}/site/node_modules/astro/bin/astro.mjs" build',
   'bun "{{config_root}}/site/scripts/machine-files.ts"',
 ]
 
 [tasks."docs:build"]
-description = "Docs: build the Fumadocs site for webular.dev/docs into site-docs/out: pages from docs/*.md, then a static Next export with its search index"
-depends = ["setup"]
+description = "Docs: build webular.dev, then the Fumadocs docs (pages from docs/*.md, a static Next export with its search index) into site-docs/out, publish them into site/dist/docs beside the site, with the designed docs page as the /docs index, then check every internal link in site/dist"
+depends = ["setup", "site:build"]
 dir = "{{config_root}}/site-docs"
 run = [
   "bun install --frozen-lockfile 1>&2",
   'bun "{{config_root}}/scripts/docs-content.ts"',
   'bun --bun "{{config_root}}/site-docs/node_modules/next/dist/bin/next" build 1>&2',
+  'bun "{{config_root}}/scripts/docs-content.ts" --publish',
+  'bun "{{config_root}}/scripts/docs-links.ts"',
 ]
 
 [tasks."docs:outputs"]
@@ -536,7 +549,11 @@ run = [
   'bun "{{config_root}}/site/node_modules/playwright/cli.js" install chromium-headless-shell 1>&2',
   'bun "{{config_root}}/site/scripts/check-site.ts"',
   'bun "{{config_root}}/site/scripts/home-shots.ts"',
-  'cd "{{config_root}}" && bun test --timeout 60000 tests/quality/site-routes.test.ts',
+  # site:build installs the site's packages first, so the file the root
+  # typecheck and bunfig.toml leave out gets its typecheck and run here; the
+  # flag replaces bunfig.toml's ignore list.
+  'bun "{{config_root}}/node_modules/typescript/bin/tsc" --noEmit -p tsconfig.check.json',
+  'cd "{{config_root}}" && bun test --timeout 60000 --path-ignore-patterns "node_modules/**" tests/quality/site-routes.test.ts tests/quality/site-copy-failed.test.ts',
 ]
 
 [tasks."site:dev"]
@@ -551,7 +568,7 @@ run = [
 
 [tasks."site:deploy"]
 description = "Site: deploy site/dist to Cloudflare Workers static assets for webular.dev and www.webular.dev (needs a signed-in wrangler; never in CI)"
-depends = ["site:build"]
+depends = ["docs:build"]
 dir = "{{config_root}}/site"
 run = 'bun "{{config_root}}/site/node_modules/wrangler/bin/wrangler.js" deploy'
 

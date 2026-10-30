@@ -5,3 +5,6 @@ minimumReleaseAge = 86400
 
 [test]
 preload = ["./tests/_support/no-cache.ts", "./tests/_support/first-spawn.ts"]
+# This test imports the site's own packages, which only `mise run site:build`
+# installs; `mise run site:test` runs it by name, after that install.
+pathIgnorePatterns = ["tests/quality/site-copy-failed.test.ts"]

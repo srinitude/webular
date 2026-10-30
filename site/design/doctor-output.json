@@ -1,0 +1,13 @@
+{
+  "$description": "the hero output, as a fresh `bun bin/webular.ts doctor` run printed it; each line starts with ok or fail",
+  "lines": [
+    "ok   bun 1.4.3",
+    "ok   mise 2026.10.17 macos-arm64 (2026-10-20)",
+    "ok   node v26.10.0",
+    "ok   network HTTP 200",
+    "ok   upgrade https://github.com/srinitude/webular/releases/latest",
+    "ok   agent-browser agent-browser 0.39.1",
+    "ok   deepsec 2.3.10",
+    "ok   jev no key: each decision uses its baseline"
+  ]
+}

@@ -30,6 +30,10 @@
 # guard the npm publish. -> homebrew, scoop: push webular.rb and webular.json
 # to srinitude/homebrew-webular and srinitude/scoop-webular for a `latest`
 # release; each skips with a notice while the TAP_TOKEN secret is unset.
+# -> docker: build the Dockerfile from the attested musl executables for
+# linux/amd64 and linux/arm64 and push ghcr.io/srinitude/webular:<version>,
+# plus :latest for a `latest` release. docker also follows github-release, not
+# npm.
 # tests/core/platform-parity.test.ts keeps this file, mise.toml, and the
 # resolver table in step; tests/release/gates.test.ts checks the gates.
 # npm auth is trusted publishing (OIDC): no NPM_TOKEN. Before the first run, add
@@ -636,3 +640,40 @@ jobs:
             -f message="webular ${GITHUB_REF_NAME#v}" \
             -f content="$(base64 -w0 webular.json)" \
             ${sha:+-f "sha=$sha"}
+
+  # Builds the Dockerfile from the attested musl executables in release-files
+  # and pushes ghcr.io/srinitude/webular:<version>; a `latest` release also
+  # moves :latest. QEMU runs the arm64 `apk add` step; the docker-container
+  # builder from setup-buildx makes the two-platform push possible.
+  docker:
+    needs: github-release
+    runs-on: ubuntu-latest
+    timeout-minutes: 15 # two-platform build, the arm64 half under QEMU
+    permissions:
+      contents: read
+      packages: write # push to ghcr.io with GITHUB_TOKEN
+      actions: read # gh run download of the release-files artifact
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Download the attested executables
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" -n release-files -D dist/bin
+      - name: Check the downloads against the release SHA256SUMS
+        run: (cd dist/bin && sha256sum --check --strict SHA256SUMS)
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - name: Log in to ghcr.io
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: printf '%s' "$GH_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+      - name: Build and push ghcr.io/srinitude/webular for linux/amd64 and linux/arm64
+        env:
+          DIST_TAG: ${{ needs.github-release.outputs.dist-tag }}
+        run: |
+          image=ghcr.io/srinitude/webular
+          set -- -t "$image:${GITHUB_REF_NAME#v}"
+          if [ "$DIST_TAG" = latest ]; then set -- "$@" -t "$image:latest"; fi
+          docker buildx build --platform linux/amd64,linux/arm64 --push "$@" .

@@ -20,7 +20,10 @@ concurrency:
 jobs:
   # One commit, one plugin run: a push to a branch with an open pull request
   # into main is already checked by that pull request's run (same head
-  # commit). Any lookup failure leaves `covered` false, so the matrix runs.
+  # commit). A pull request with merge conflicts gets no pull_request run, so
+  # it covers nothing; while GitHub still reports UNKNOWN, the lookup waits up
+  # to 30 seconds. Any lookup failure or other state leaves `covered` false,
+  # so the matrix runs.
   push-covered-by-pr:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
@@ -34,8 +37,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          n=$(gh pr list -R "$GITHUB_REPOSITORY" --head "$GITHUB_REF_NAME" --base main --state open --json number --jq length || echo 0)
-          echo "covered=$([ "${n:-0}" -gt 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          for _ in 1 2 3 4 5 6; do
+            s=$(gh pr list -R "$GITHUB_REPOSITORY" --head "$GITHUB_REF_NAME" --base main --state open --json mergeable --jq '.[0].mergeable // "NONE"' || echo NONE)
+            [ "$s" = UNKNOWN ] || break
+            sleep 5
+          done
+          echo "covered=$([ "$s" = MERGEABLE ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
   plugin:
     needs: push-covered-by-pr

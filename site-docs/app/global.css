@@ -1,120 +1,137 @@
-/* The docs theme: the webular hero's paper, oxblood, and rose, read from the
- * hero tokens in webular-tokens.css. Every Fumadocs color, font, radius, and
- * spacing step maps to a token, so one token change restyles the docs. */
+/* The docs theme: Catch Of The Day, caution yellow and ink. Type, spacing,
+ * radius, and motion come from site/src/tokens.css; colors come from the
+ * semantic light and dark tokens in site/src/semantic.css. Both are built
+ * from site/design/tokens.json, the source home reads too. Every Fumadocs
+ * color, font, radius, and spacing step maps to a token, so one token change
+ * restyles the docs. */
 @import "tailwindcss";
-@import "./webular-tokens.css";
+@import "../../site/src/tokens.css";
+@import "../../site/src/semantic.css";
+@import "../../site/src/fonts.css";
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";
 
-/* The hero type: Georgia for text, the system mono for code. Both are system
- * fonts, so the docs load no font files. Spacing: every Tailwind step is a
- * multiple of the hero's 4 px space step. */
+/* tokens.css sets --font-sans, --font-mono, --text-xs, --text-sm, --text-lg,
+ * --font-weight-medium, and --font-weight-bold under the same names Tailwind
+ * reads, unlayered, so they beat Tailwind's theme layer. This block maps only
+ * the steps whose names differ. Spacing: every Tailwind step is a multiple of
+ * the 4 px space step. */
 @theme {
-  --spacing: var(--semantic-space-1);
-  --font-sans: var(--primitive-font-family-serif);
-  --font-serif: var(--primitive-font-family-serif);
-  --font-mono: var(--primitive-font-family-mono);
-  --radius-sm: var(--primitive-radius-hair);
-  --radius-md: var(--primitive-radius-hair);
-  --radius-lg: var(--primitive-radius-hair);
-  --radius-xl: var(--primitive-radius-hair);
-  --radius-2xl: var(--primitive-radius-hair);
+  --spacing: var(--space-4);
+  --font-serif: var(--font-sans);
+  --radius-sm: var(--radius-control);
+  --radius-md: var(--radius-control);
+  --radius-lg: var(--radius-control);
+  --radius-xl: var(--radius-control);
+  --radius-2xl: var(--radius-control);
+  /* Tailwind's base, 2xl, and 6xl land on the token steps md, xl, and 3xl.
+   * Space Mono has regular and bold faces, so semibold takes bold. */
+  --text-base: var(--text-md);
+  --text-2xl: var(--text-xl);
+  --text-6xl: var(--text-3xl);
+  --font-weight-semibold: var(--font-weight-bold);
+  /* Motion: every transition utility takes the quick step, which drops to
+   * 0ms under prefers-reduced-motion. */
+  --default-transition-duration: var(--motion-quick);
 }
 
-/* webular-tokens.css switches light and dark on data-theme and
+/* semantic.css switches light and dark on data-theme and
  * prefers-color-scheme, so one mapping covers both modes. It also replaces the
- * stock Fumadocs dark palette, which sits on .dark and .dark #nd-sidebar. */
+ * stock Fumadocs dark palette, which sits on .dark and .dark #nd-sidebar.
+ * page is the page color, ink the text and accent, card the raised surface,
+ * and strand the border. */
 :root,
 .dark,
 .dark #nd-sidebar {
-  --color-fd-background: var(--semantic-color-surface-page);
-  --color-fd-foreground: var(--semantic-color-text-primary);
-  --color-fd-muted: var(--semantic-color-surface-sunken);
-  --color-fd-muted-foreground: var(--semantic-color-text-secondary);
-  --color-fd-popover: var(--semantic-color-surface-page);
-  --color-fd-popover-foreground: var(--semantic-color-text-primary);
-  --color-fd-card: var(--semantic-color-surface-page);
-  --color-fd-card-foreground: var(--semantic-color-text-primary);
-  --color-fd-border: var(--semantic-color-plot-ink-strong);
-  --color-fd-primary: var(--semantic-color-text-accent);
-  --color-fd-primary-foreground: var(--semantic-color-surface-page);
+  --color-fd-background: var(--semantic-page);
+  --color-fd-foreground: var(--semantic-ink);
+  --color-fd-muted: var(--semantic-card);
+  --color-fd-muted-foreground: var(--semantic-ink);
+  --color-fd-popover: var(--semantic-card);
+  --color-fd-popover-foreground: var(--semantic-ink);
+  --color-fd-card: var(--semantic-card);
+  --color-fd-card-foreground: var(--semantic-ink);
+  --color-fd-border: var(--semantic-strand);
+  --color-fd-primary: var(--semantic-ink);
+  --color-fd-primary-foreground: var(--semantic-page);
   /* Fumadocs draws secondary and accent at 50% alpha under muted or accent
-   * text (search field, sidebar hover), so both stay a light tint of the text
-   * color on the page, which keeps that text above 4.5:1. */
-  --color-fd-secondary: color-mix(
-    in srgb,
-    var(--semantic-color-text-primary) 6%,
-    var(--semantic-color-surface-page)
-  );
-  --color-fd-secondary-foreground: var(--semantic-color-text-primary);
-  --color-fd-accent: color-mix(
-    in srgb,
-    var(--semantic-color-text-primary) 8%,
-    var(--semantic-color-surface-page)
-  );
-  --color-fd-accent-foreground: var(--semantic-color-text-primary);
-  --color-fd-ring: var(--semantic-color-focus-ring);
-  --color-fd-overlay: color-mix(in srgb, var(--semantic-color-surface-brand) 60%, transparent);
+   * text (search field, sidebar hover), so both stay a light tint of the ink
+   * on the page, which keeps that text above 4.5:1. */
+  --color-fd-secondary: color-mix(in srgb, var(--semantic-ink) 6%, var(--semantic-page));
+  --color-fd-secondary-foreground: var(--semantic-ink);
+  --color-fd-accent: color-mix(in srgb, var(--semantic-ink) 8%, var(--semantic-page));
+  --color-fd-accent-foreground: var(--semantic-ink);
+  --color-fd-ring: var(--semantic-edge);
+  --color-fd-overlay: color-mix(in srgb, var(--semantic-ink) 60%, transparent);
 }
 
 html,
 body {
-  background: var(--semantic-color-surface-page);
-  color: var(--semantic-color-text-primary);
+  background: var(--semantic-page);
+  color: var(--semantic-ink);
 }
 body {
-  font-family: var(--primitive-font-family-serif);
-  line-height: var(--primitive-font-line-height-body);
+  font-family: var(--font-sans);
+  line-height: var(--line-height-body);
 }
 code,
 pre,
 kbd {
-  font-family: var(--primitive-font-family-mono);
+  font-family: var(--font-mono);
 }
 :focus-visible {
-  outline: 2px solid var(--semantic-color-focus-ring);
+  outline: var(--focus-width) solid var(--semantic-edge);
   outline-offset: 2px;
 }
 
-/* Headings: the hero headline's heavy serif at a tight line height. */
-#nd-page h1 {
-  font-weight: var(--primitive-font-weight-heavy);
-  line-height: var(--primitive-font-line-height-tight);
-}
-.prose :where(h2, h3) {
-  font-weight: var(--primitive-font-weight-heavy);
-}
-.prose :where(a) {
-  color: var(--semantic-color-text-accent);
-  text-decoration-color: var(--semantic-color-text-accent);
+/* The theme switch marks its selected item with a fill only. The stock 8% accent
+ * fill sits near 1:1 on the page, so the selected item takes the edge color, which
+ * keeps the 3:1 that WCAG `2.2` SC `1.4.11` asks of a state. */
+[data-theme-toggle] .bg-fd-accent {
+  background: var(--semantic-edge);
+  color: var(--semantic-page);
 }
 
-/* Sidebar group labels read like plot labels: mono caps. */
+/* Headings: Archivo Black at the heading line height. */
+#nd-page h1 {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-heading);
+}
+.prose :where(h2, h3) {
+  font-family: var(--font-display);
+  font-weight: var(--font-weight-bold);
+}
+.prose :where(a) {
+  color: var(--semantic-ink);
+  text-decoration-color: var(--semantic-ink);
+}
+
+/* Sidebar group labels: mono caps. */
 #nd-sidebar p {
-  font-family: var(--primitive-font-family-mono);
+  font-family: var(--font-mono);
   text-transform: uppercase;
   letter-spacing: 2px;
 }
 
-/* The active page and code blocks sit on the brand oxblood, as the hero's
- * brand section does. */
+/* The active page and code blocks sit on an ink block, the run line's
+ * ink on yellow turned over. */
 #nd-sidebar a[data-active="true"] {
-  background: var(--semantic-color-surface-brand);
-  color: var(--semantic-color-text-on-brand);
+  background: var(--semantic-ink);
+  color: var(--semantic-page);
 }
 .prose :where(pre) {
-  background: var(--semantic-color-surface-brand);
-  color: var(--semantic-color-text-on-brand);
-  border-color: var(--semantic-color-plot-ink-strong);
+  background: var(--semantic-ink);
+  color: var(--semantic-page);
+  border-color: var(--semantic-strand);
 }
 .prose :where(:not(pre) > code) {
-  background: var(--semantic-color-surface-sunken);
-  border: 1px solid var(--semantic-color-plot-ink-strong);
+  background: var(--semantic-card);
+  border: var(--border-width) solid var(--semantic-strand);
 }
 a,
 button {
-  transition-duration: var(--semantic-motion-quick);
-  transition-timing-function: var(--semantic-motion-ease);
+  transition-duration: var(--motion-quick);
 }
 
 /* Line length: prose text stops at 38em, at most 76 characters a line at

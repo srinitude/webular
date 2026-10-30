@@ -34,11 +34,9 @@ const DATA = [
   ':!tests/quality/host-neutral.test.ts',
 ]
 
-// The install page, its content, and the home page show one setup line per agent host.
+// The install page and its content show one setup line per agent host.
 const SITE_ADAPTERS: Readonly<Record<string, string>> = {
-  'site/src/InstallBlock.astro': 'install block names each agent host',
   'site/src/content/install.md': 'one setup line per MCP client',
-  'site/src/routes/index.astro': 'home page shows the Claude Code install line',
   'docs/site/agents/index.mdx': 'one setup tab per MCP client',
 }
 

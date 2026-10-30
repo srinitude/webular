@@ -1,14 +1,10 @@
 /* Mobile first. Design values come from tokens.css (generated from
-   design/tokens.json); the grid per width is set there too. Section and
+   design/tokens.json) and grid.css (the grid per width). Section and
    width rules live in sections.css and widths.css. */
 :root {
-  --border-width: 1px;
-  --focus-width: 3px;
-  --font-weight-bold: 700;
-  --measure: 72ch;
-  --h3-size: var(--lead-size);
+  --h3-size: var(--title-size, var(--lead-size));
   --header-min: var(--size-header);
-  --fade: color-mix(in srgb, var(--color-text) 22%, transparent);
+  --fade: color-mix(in srgb, var(--semantic-ink) 22%, transparent);
 }
 *,
 *::before,
@@ -20,22 +16,27 @@ html {
 }
 body {
   margin: 0;
-  background: var(--color-bg);
-  color: var(--color-text);
+  background: var(--semantic-page);
+  color: var(--semantic-ink);
   font: var(--body-size) / var(--line-height-body) var(--font-sans);
   overflow-wrap: break-word;
 }
-/* Amber marks actions and links only. */
+/* The accent marks actions and links only. */
 a {
-  color: var(--color-accent);
+  color: var(--semantic-ink);
   text-underline-offset: 0.15em;
 }
 a:focus-visible,
 summary:focus-visible,
 pre:focus-visible,
 .scroll-row:focus-visible {
-  outline: var(--focus-width) solid var(--color-focus);
+  outline: var(--focus-width) solid var(--semantic-ink);
   outline-offset: 2px;
+}
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
 }
 h1 {
   font-size: var(--h1-size);
@@ -64,7 +65,7 @@ pre {
   font-size: var(--code-size);
 }
 :not(pre) > code {
-  background: var(--color-surface);
+  background: var(--semantic-card);
   padding: 0 var(--space-4);
   border-radius: var(--radius-control);
 }
@@ -78,17 +79,17 @@ pre,
   overflow-x: auto;
   white-space: pre;
   background:
-    linear-gradient(to left, transparent, var(--color-surface) var(--space-24)) right /
+    linear-gradient(to left, transparent, var(--semantic-card) var(--space-24)) right /
     var(--space-32) 100% no-repeat local,
     linear-gradient(to left, var(--fade), transparent) right / var(--space-16) 100% no-repeat scroll,
-    var(--color-surface);
+    var(--semantic-card);
 }
 pre {
   margin: 0;
   padding: var(--space-12) var(--space-16);
   line-height: var(--line-height-code);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-box);
+  border: var(--border-width) solid var(--semantic-strand);
+  border-radius: var(--radius-panel);
   tab-size: 2;
 }
 .wrap {
@@ -104,19 +105,19 @@ pre {
   top: -10rem;
   z-index: 10;
   padding: var(--space-8) var(--space-16);
-  background: var(--color-bg);
-  border: var(--border-width) solid var(--color-border);
+  background: var(--semantic-page);
+  border: var(--border-width) solid var(--semantic-strand);
 }
 .skip-link:focus {
   top: var(--space-8);
 }
 .muted {
-  color: var(--color-muted);
+  color: var(--semantic-ink);
 }
 
-/* Header and menu: 56 px tall, 1 px bottom border. */
+/* Header: 56 px tall, 1 px bottom border. */
 .site-header {
-  border-bottom: var(--border-width) solid var(--color-border);
+  border-bottom: var(--border-width) solid var(--semantic-strand);
 }
 .site-header .wrap {
   display: flex;
@@ -128,7 +129,7 @@ pre {
 .wordmark {
   font-weight: var(--font-weight-bold);
   font-size: var(--h3-size);
-  color: var(--color-text);
+  color: var(--semantic-ink);
   text-decoration: none;
 }
 .header-end {
@@ -137,40 +138,14 @@ pre {
   align-items: center;
   gap: var(--space-12);
 }
-.header-end :where(a),
-.menu summary {
+.header-end :where(a) {
   display: inline-flex;
   align-items: center;
   min-height: var(--size-tap-target);
   padding-inline: var(--space-8);
-  color: var(--color-text);
+  color: var(--semantic-ink);
   text-decoration: none;
   cursor: pointer;
-}
-.menu summary {
-  list-style: none;
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-control);
-}
-.menu summary::-webkit-details-marker {
-  display: none;
-}
-.menu nav {
-  position: absolute;
-  right: max(var(--gutter), env(safe-area-inset-right, 0px));
-  top: 100%;
-  z-index: 5;
-  display: flex;
-  flex-direction: column;
-  min-width: 12rem;
-  padding: var(--space-8);
-  background: var(--color-surface);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-box);
-}
-.menu nav a {
-  display: block;
-  padding: var(--space-12) var(--space-8);
 }
 /* Every standalone link is a 44 px target, the WCAG target size. */
 .skip-link,
@@ -184,9 +159,6 @@ pre {
   min-width: var(--size-tap-target);
 }
 .nav-390,
-.nav-600,
-.nav-768,
-.nav-1024,
 .sidebar {
   display: none;
 }

@@ -23,8 +23,10 @@ concurrency:
 jobs:
   # One commit, one CI run: a push to a branch with an open pull request into
   # main is already checked by that pull request's run (same head commit,
-  # merged onto main). Every other push runs the full matrix. Any lookup
-  # failure leaves `covered` false, so the matrix runs.
+  # merged onto main). Every other push runs the full matrix. A pull request
+  # with merge conflicts gets no pull_request run, so it covers nothing; while
+  # GitHub still reports UNKNOWN, the lookup waits up to 30 seconds. Any lookup
+  # failure or other state leaves `covered` false, so the matrix runs.
   push-covered-by-pr:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
@@ -38,8 +40,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          n=$(gh pr list -R "$GITHUB_REPOSITORY" --head "$GITHUB_REF_NAME" --base main --state open --json number --jq length || echo 0)
-          echo "covered=$([ "${n:-0}" -gt 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          for _ in 1 2 3 4 5 6; do
+            s=$(gh pr list -R "$GITHUB_REPOSITORY" --head "$GITHUB_REF_NAME" --base main --state open --json mergeable --jq '.[0].mergeable // "NONE"' || echo NONE)
+            [ "$s" = UNKNOWN ] || break
+            sleep 5
+          done
+          echo "covered=$([ "$s" = MERGEABLE ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
   ci:
     needs: push-covered-by-pr
@@ -262,3 +268,29 @@ jobs:
           name: site-home-screenshots
           path: site/dist-shots/
           if-no-files-found: error
+
+  # Nix flake: `nix build .#webular` fetches the release binary webular.nix
+  # names for this runner's system, and the built bin/webular must report the
+  # version in package.json. Runs on Linux (autoPatchelfHook path) and macOS.
+  nix:
+    needs: push-covered-by-pr
+    if: ${{ !cancelled() && needs.push-covered-by-pr.outputs.covered != 'true' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: cachix/install-nix-action@75c75c31ebece974e48ebc36b4ad125bd97bd97b # v31.11.3
+      - name: Build the flake package
+        run: nix build .#webular --print-build-logs
+      - name: Run the built executable
+        run: |
+          out=$(./result/bin/webular --version)
+          echo "$out"
+          want=$(jq -r .version package.json)
+          case "$out" in *"$want"*) ;; *) echo "::error::expected $want, got $out"; exit 1 ;; esac

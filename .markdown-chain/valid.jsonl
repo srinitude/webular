@@ -228,7 +228,7 @@
 {"path": "tests/jev/learn/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/jev/replay/AGENTS.md", "sha": "be099efd59494e3a8c21ebb3014f5e7ab7dd9cae72bdb2703cb06d20f4f95538", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/jev/replay/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
-{"path": "tests/lib/AGENTS.md", "sha": "37aa6e1693de29e58332fe6ab7d2d9243c8e581732fbb8c40d49ec3b79ee64d1", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "tests/lib/AGENTS.md", "sha": "9250fbd21abcd6b0aa9b4c5d3aa015fb1328b6cfb68132a03ac0dd6e68028d1b", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/lib/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/lib/sources/AGENTS.md", "sha": "7de358b067d6a0d1107c3d2d16c7f54d208c1cb9f3bbd0f7917394435da11952", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/lib/sources/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
@@ -396,7 +396,7 @@
 {"path": "site-docs/app/api/search/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/tasks.md", "sha": "9f6f582950fa3870df759e1fd5a054672a06af67172fdffe5118ca5e8b341f10", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "scripts/AGENTS.md", "sha": "5c5002e4b059d8afd46a85dd3ac589047991d725976ad1cd618de750e90da383", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
-{"path": "AGENTS.md", "sha": "90ab51adde5522ce7e205584630ae7c701302dca8fd0e6d251cb386bf0da276d", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "AGENTS.md", "sha": "e6da5c91c43a0005fbe0b8acc43c7615e55529ffdcbcae9ae3a191d395e9787b", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/AGENTS.md", "sha": "7ab2ddf3856743cdf75c0741b685c4457c3eeeb02ecbd362011a872831eae222", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/quality/AGENTS.md", "sha": "c3b28efcd24c194850fafabde2a1702f7e16030cb06269490376776497383edf", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "docs/site/AGENTS.md", "sha": "65c8ca6b45e77ca4ad1dd38c465677fa38413836beded6f70dc0303e9968e624", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
@@ -424,3 +424,58 @@
 {"path": "docs/commands.md", "sha": "52f78413664d91632ded00c3fff88a14e66202bf8343446ff7c8967bfc6a2c7d", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "src/lib/AGENTS.md", "sha": "55b39d6e5a980989e4fdc7cb8a67fc92cb172bb4fd1be3c5546f072609dde187", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
 {"path": "tests/cli/AGENTS.md", "sha": "daa28a3b999903e12ff37156bee4282d6997cd0872ccfba49f4f8e3647eee863", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/design/AGENTS.md", "sha": "efefcb9eb72e101ea0126ec329138a006ff91d35e40a5d602f5a001b03577a62", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site-docs/AGENTS.md", "sha": "73a07489a9e77c7be98db7b44230f3f7356ed484fd907933689575c254a8a99e", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site-docs/app/AGENTS.md", "sha": "48d574b3fd8fc6768bffed036b68b52c4ed1471e7681370061b0212031061de2", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/PROMOTE.md", "sha": "ab7d9f5c52fa537e96086db5d2aa7b118c00376f1b6652d9f69f114205f0ad94"}
+{"path": "site/PROMOTE.md", "sha": "ab7d9f5c52fa537e96086db5d2aa7b118c00376f1b6652d9f69f114205f0ad94", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/AGENTS.md", "sha": "5aabb87b9bd04574e2c317967fca6d2d10621a78335d0f5c482189f27442191b"}
+{"path": "site/AGENTS.md", "sha": "5aabb87b9bd04574e2c317967fca6d2d10621a78335d0f5c482189f27442191b", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "tests/quality/AGENTS.md", "sha": "9930534440fcb04bc50dad28db700a6767cd160d8d8013a2895e9e9b220a76c0", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/PROMOTE.md", "sha": "d5448b8a4cac1c05e4266f149af149ab3a8d7312dfefea2fadd9e919cd1a50a6", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/install-more.md", "sha": "a8abab32d0653050dc069371dfac1dfda4b774dbcde61cc866435dea2648a033", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/install.md", "sha": "6315855480b2b7460b92197dff0a1ab77736b5525644210e1b65d2f662d3e9eb", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "tests/release/AGENTS.md", "sha": "4db7e565a563f8477bb6c05a9f4631673a6c17f9d701b475e6f6891559de3f85", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/tasks.md", "sha": "25bd2bd1ae331cfba4e386b47530a07e3c413c60f35d8884938d1c7d3e509ecc", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "src/release/AGENTS.md", "sha": "bb95f4d1f542c0c74283bdcc01b8d645d9969e9e62b7ddf1eb771cd48fdc165c", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/tasks.md", "sha": "b4525bd6a2a878bcea026ec666370d1c1812db6fb78f1ef6ac250482d048e526", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/design/AGENTS.md", "sha": "49b3f0cbb87e6d0b591b1792c0158ad7b280b69d34e1f9b3b473a5dd052d9782"}
+{"path": "site/src/AGENTS.md", "sha": "df06226e40d7aa8c73f72f26a4bf129881e1dcf45e34b0277c434781dc953740", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/AGENTS.md", "sha": "46014352a9fb260c3764772b71e04a58c2681523124207c42cf461834b5a8b44", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/scripts/AGENTS.md", "sha": "4cfb9c0259c2bf617e975656a7fe23f53c5be7e195345ab19dd0ad476816e953", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site-docs/AGENTS.md", "sha": "329e3945bf2eb4e82f623431bd22cae53113b8543d3c07d632ae716aa4f0e1ad", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site-docs/app/AGENTS.md", "sha": "afddb913532ec2d18d1b7c3fe44eca5b6d54f65035f1869c5aba66521c22a3a5", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/design/AGENTS.md", "sha": "3b688df2c40fd9bd37e4f824f644aa2aa7a58022ace9a40fec70b29022919575", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/AGENTS.md", "sha": "55776b3a7a9869222cd0b237f707e815a724e76c2f8b37da4dd173746a590230", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/design/AGENTS.md", "sha": "1b384b0c98be906e8603afeae31715516d8d830f3c44641450532149a4fdfa2a", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/AGENTS.md", "sha": "63f9c278a9f25e9aedcb3515343b21ce4b57d3778756a13fc9208c38846051c7", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/AGENTS.md", "sha": "fa848b94ffa553efc3034dcf7bc12ac1f5e32938de346f85e3d58bc10a6ba074", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/AGENTS.md", "sha": "aff075b0fa7ef704d071abdc9f21c981385a2af3bf757393a665898eec6578ac", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/scripts/AGENTS.md", "sha": "63275b97b318e760304a3d394dc35aa68fa5a0631db1c7fc229299b3d291ed72", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/AGENTS.md", "sha": "821106abfc0cbf8c961e0a1c9d96ecd931643593730f1a164f56f288852033ec", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/public/AGENTS.md", "sha": "30f2d5fd0a9e9282ed053af5f37b39779fcdc5a46a50621c3cfc3d3955655cb7", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site-docs/AGENTS.md", "sha": "4b661e7f874b54c12787eca526c3c817177c32a757fccc29490cf923a9122574", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "scripts/AGENTS.md", "sha": "87afcb9d944942a2daf0a3b42bca26c8883f98a04669deb45e388c543eef0de6", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "docs/tasks.md", "sha": "87d2a490cdfc7c8d9e58738b863d50a50a1d8f7b0b02c7a12a933edc5e517f68", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/public/fonts/AGENTS.md", "sha": "620057677ed4861407035be46d6b3fdb88e6063e922624e6ae2eb1756d0f93ae"}
+{"path": "site/public/fonts/AGENTS.md", "sha": "620057677ed4861407035be46d6b3fdb88e6063e922624e6ae2eb1756d0f93ae", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/public/fonts/CLAUDE.md", "sha": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/public/AGENTS.md", "sha": "08cb633d9ebba9f5afa2159316aa76647be49adb3c59cd676c6a09047d8baf40", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/scripts/AGENTS.md", "sha": "82ec504cac028824fccbd4e49293769075c2f3a9e14c98461a12679fb3799a37", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/AGENTS.md", "sha": "32c5dc6e0b8e2c0b85e2ad3ea3f3528253a8bf22f27e7908fc613649d67db25b", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site-docs/AGENTS.md", "sha": "4f52d32934c69438c16f03079267d34e6706bca466547951e58aad07a7f563a9", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site-docs/app/AGENTS.md", "sha": "85b3ef51a0940a497145974c38a8fafcc0d3bfd8d38ecc09c2c4b3c48d0dd8df", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "tests/quality/AGENTS.md", "sha": "9b4b2b06fa42fa804e4e7dd5ba54d73629605fceb4cd018628b50e2126c4ecf1", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site-docs/AGENTS.md", "sha": "9954f0aad1cb74d37c3940343d181b2837aff5afc38f52649fcbf19a1bbda878", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "tests/quality/AGENTS.md", "sha": "e7ff31121c2b9afe2b9bf8d411676a0a3316f3f0cb28259e5df575b6bd4cf6ff", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/design/AGENTS.md", "sha": "8e0e38923a3235a3f0c349b4951da3ee6a0e357b0fbbe2e033f9db80dbf5d8eb", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "tests/quality/AGENTS.md", "sha": "f90562ce49b38604bd859b0ca16cc1ec4c0b565e73f8e829ffa110b749703678", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "tests/quality/AGENTS.md", "sha": "c6ed6022c82b5a5c983427ba175009f350fd620710c36494205980522268faba", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "tests/quality/AGENTS.md", "sha": "8e4dfb06c6d126d3333ef5c665b263bf2d74dd74cb6fb2b409d02c6dccc6a171"}
+{"path": "tests/quality/AGENTS.md", "sha": "7e2f0fa4ce08300d2440c1d2b688af0b922780b472c40a637c3032cbf18c4b7a", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "tests/ci/AGENTS.md", "sha": "27cae9323f45bcb3362ee3bf17273b31ff36053c61117cf7cfe2c9d5a8145306", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/AGENTS.md", "sha": "6d5b680315e98616be161fbab67ee02e8d925d84a845c5fcffdca0136c8737cf"}
+{"path": "site/AGENTS.md", "sha": "8db6f7a7256893107db17b0034964e7531d8eda9963e2047fc81467e2003cf14", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/scripts/AGENTS.md", "sha": "267c75219a41264d3aa77e5552945fbc02bec42d23cb88a957e856c49892b290", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/content/commands.md", "sha": "e706c529c5261e8bf84b599f9c87872274438b9106dc8a900003ffae52596114", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}
+{"path": "site/src/content/install.md", "sha": "d3041f7d8c64d78551a771a3469f3c1e31c2c72e6680b0ba674571172a66b4c2", "stages": ["readability:rich-and-native-markdown", "readability:human-language"]}

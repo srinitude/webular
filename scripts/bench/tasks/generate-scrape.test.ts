@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test'
-import { Effect } from 'effect'
+import { Effect, FileSystem } from 'effect'
 import { leaksFixtureUrl, startBenchFixture } from '../../../bench/fixtures/server'
 import { httpGet } from '../../../src/core/http.ts'
 import { eff } from '../../../tests/_support/run.ts'
@@ -54,7 +54,9 @@ test(
   'server serves a page, 404, 301, and robots.txt',
   eff(
     Effect.gen(function* () {
-      yield* generate()
+      // A scratch root: rewriting the tracked fixtures races tests that read them in parallel.
+      const fs = yield* FileSystem.FileSystem
+      yield* generate(yield* fs.makeTempDirectoryScoped({ prefix: 'webular-scrape-gen-' }))
       const fx = yield* startBenchFixture
       const path = pages[0]?.path ?? ''
       const page = yield* httpGet(`${fx.origin}${path}`)

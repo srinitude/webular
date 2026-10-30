@@ -2,10 +2,53 @@
 import Base from '../Base.astro'
 import { Content } from '../content/install.md'
 import DocMeta from '../DocMeta.astro'
+import RunLine from '../RunLine.astro'
+import WebArt from '../WebArt.astro'
+
+// What a real `webular doctor` run printed (design/doctor-output.json).
+import { lines } from '../../design/doctor-output.json'
+const passed = lines.filter((l) => l.startsWith('ok ')).length
+const total = lines.length
+const rows = lines.join('\n')
+const tags = [...['bun 2', 'mise 2', 'network 3'].map((k) => {
+  const [name, n] = k.split(' ')
+  return lines.find((l) => l.startsWith(`ok   ${name}`))?.slice(5).split(' ').slice(0, Number(n)).join(' ')
+}).filter((t): t is string => Boolean(t)), `ok: ${passed === total}`]
+const cards = [
+  [
+    'One-line install',
+    'Paste one npx line and you are off. Nothing to set up, no key.',
+    '#one-line-install',
+  ],
+  [
+    'npm, Bun, and pnpm',
+    'Use the tool you already love to add webular to a project.',
+    '#npm-bun-and-pnpm',
+  ],
+  ['From source', 'Clone the repo, run mise, and build your own copy.', '#from-source'],
+  [
+    'Supported platforms',
+    'Runs where Bun runs. doctor checks bun, node, and mise for you.',
+    '#supported-platforms',
+  ],
+]
 ---
 
-<Base title="Install webular" description="Run one command. It gets the build that matches your machine." doc>
-  <article class="doc">
+<Base title="Install webular" description="Run one command. It gets the build that matches your machine." short>
+  <section class="hero run-hero page-hero" aria-labelledby="install-title">
+    <div class="run-block">
+      <p class="kicker">Spin up webular</p>
+      <h1 id="install-title">Install webular and spin web research on your own machine. No paid API, no key, no sign-up.</h1>
+      <RunLine command="npx webular@0.3.2 doctor" id="hero-command" label="Check your machine first" />
+      <pre class="search-rows doctor-rows" tabindex="0" aria-label="What doctor prints">{rows}<span class="doctor-sum">{'\n'}ok: {String(passed === total)}, {passed} of {total} checks passed</span></pre>
+      <p class="result-tag"><span>{passed === total ? `All set: ${passed} of ${total} checks passed. Go spin some web!` : `${passed} of ${total} checks passed. The fail rows show what to fix.`}</span></p>
+    </div>
+    <WebArt labeled={tags} />
+  </section>
+  <ul class="page-cards install-cards" aria-label="Ways to install">
+    {cards.map(([title, line, href]) => <li><a href={href}><strong>{title} →</strong><span>{line}</span></a></li>)}
+  </ul>
+  <article class="doc page-doc">
     <div class="doc-body"><Content /></div>
     <DocMeta slug="install" />
   </article>

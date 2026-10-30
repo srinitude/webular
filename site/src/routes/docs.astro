@@ -2,10 +2,33 @@
 import Base from '../Base.astro'
 import { Content } from '../content/docs.md'
 import DocMeta from '../DocMeta.astro'
+import RunLine from '../RunLine.astro'
+import SearchRows from '../SearchRows.astro'
+import WebArt from '../WebArt.astro'
+
+const cards = [
+  ['Use the commands', '22 commands in one tidy CLI. Pick one and give it a spin!', '/commands'],
+  ['Work on the code', 'Build and test webular, and help spin a bigger web.', '#build-on-it'],
+]
 ---
 
-<Base title="Docs" description="Every webular doc, grouped as Start here, Use it, and Build on it." doc>
-  <article class="doc">
+<Base title="Docs" description="Every webular doc, grouped as Start here, Use it, and Build on it." short>
+  <section class="hero run-hero page-hero" aria-labelledby="docs-title">
+    <div class="run-block">
+      <h1 id="docs-title">Learn how to use webular for web research from your own machine with no paid API.</h1>
+      <RunLine lines={['npx webular@0.3.2', 'search "sqlite wal"']} id="hero-command" label="Run this first" />
+      <SearchRows />
+    </div>
+    <div class="art-wide"><WebArt labeled /></div>
+  </section>
+  <ul class="page-cards" aria-label="Where to go next">
+    <li class="card-lead">
+      <a href="/install"><strong>Install webular →</strong><span>Copy one line and watch it spin up. doctor gives you the all clear.</span></a>
+      <div class="art-narrow"><WebArt labeled /></div>
+    </li>
+    {cards.map(([title, line, href]) => <li><a href={href}><strong>{title} →</strong><span>{line}</span></a></li>)}
+  </ul>
+  <article class="doc page-doc">
     <div class="doc-body"><Content /></div>
     <DocMeta slug="docs" />
   </article>

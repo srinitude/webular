@@ -18,7 +18,8 @@
       "!!tests/jev/replay",
       "!tests/jev/candidates/research.sentences.segmenter.json",
       "!tests/jev/evals/research.sentences.json",
-      "!plugins/webular/dist/server.js"
+      "!plugins/webular/dist/server.js",
+      "!site/src/tokens.css"
     ]
   },
   "formatter": {

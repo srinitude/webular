@@ -1,0 +1,17 @@
+---
+// The first 3 of the 10 rows a real keyless `search "sqlite wal"` printed, and
+// the Nice catch tag under them. Narrow widths show 2 rows.
+const rows = [
+  ['SQLite WAL-reset database corruption bug', 'https://sqlite.org/wal.html#walresetbug'],
+  ['SQLite', 'https://en.wikipedia.org/wiki/SQLite'],
+  [
+    'agentscope-ai-java/sqlite-wal-doctor',
+    'https://github.com/agentscope-ai-java/sqlite-wal-doctor',
+  ],
+]
+---
+
+<ol class="search-rows" tabindex="0" aria-label="What search prints">
+  {rows.map(([title, url]) => <li>{title}<br />{url}</li>)}
+</ol>
+<p class="result-tag"><span class="tag-wide">Nice catch: 10 results in one go, 3 shown. No key, no sign-up.</span><span class="tag-narrow">Nice catch: 10 results, 2 shown. No key, no sign-up.</span></p>
