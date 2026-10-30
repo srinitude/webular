@@ -3,11 +3,11 @@
   "lines": [
     "ok   bun 1.4.3",
     "ok   mise 2026.10.17 macos-arm64 (2026-10-20)",
-    "fail node not found (PATH or bundled)",
+    "ok   node v26.10.0",
     "ok   network HTTP 200",
     "ok   upgrade https://github.com/srinitude/webular/releases/latest",
-    "fail agent-browser env: node: No such file or directory",
-    "fail deepsec env: node: No such file or directory",
+    "ok   agent-browser agent-browser 0.39.1",
+    "ok   deepsec 2.3.10",
     "ok   jev no key: each decision uses its baseline"
   ]
 }
