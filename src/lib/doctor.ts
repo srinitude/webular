@@ -20,13 +20,26 @@ interface Check {
 
 const TOLERATED = new Set(['network', 'agent-browser', 'deepsec', 'jev'])
 
-function versionCheck(
+// A cold first start (empty HOME, 8 probes at once) measured 4.3 s for deepsec,
+// so 5 s was too tight; 20 s keeps the margin without hanging a real fault.
+const VERSION_TIMEOUT_MS = 20_000
+
+export function versionCheck(
   name: string,
   bin: string | null,
+  timeoutMs = VERSION_TIMEOUT_MS,
 ): Effect.Effect<Check, never, ChildProcessSpawner.ChildProcessSpawner> {
   if (!bin) return Effect.succeed({ name, ok: false, detail: 'not found (PATH or bundled)' })
-  return runProc([bin, '--version'], { timeoutMs: 5_000 }).pipe(
-    Effect.map(({ code, stdout, stderr }): Check => {
+  return runProc([bin, '--version'], { timeoutMs }).pipe(
+    Effect.map(({ code, stdout, stderr, timedOut }): Check => {
+      // runProc reports a timeout kill as code 143; name it, never print the bare code.
+      if (timedOut) {
+        return {
+          name,
+          ok: false,
+          detail: `timed out after ${timeoutMs / 1000}s (slow first start)`,
+        }
+      }
       if (code !== 0) return { name, ok: false, detail: stderr.trim() || `exit ${code}` }
       return { name, ok: true, detail: stdout.trim().split('\n')[0] ?? '' }
     }),
